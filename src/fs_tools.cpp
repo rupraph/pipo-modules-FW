@@ -1,6 +1,4 @@
-#include "FS.h"
-#include <LittleFS.h>
-#include <time.h>
+#include <fs_tools.h>
 
 /* You only need to format LittleFS the first time you run a
    test or else use the LITTLEFS plugin to create a partition

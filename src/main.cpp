@@ -1,11 +1,20 @@
 #include <Arduino.h>
-#include <fs_tools.h>
 #include <WiFiManager.h> 
+#include "fs_tools.h"
+#include "midiUSB.h"
+#include "midiBLE.h"
+
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
+// unsigned long t0 = millis();
+// bool isConnected = false;
+
 void setup(){
+    midiUSBSetup();
+
     Serial.begin(115200);
+
     if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
         Serial.println("LittleFS Mount Failed");
         return;
@@ -14,21 +23,10 @@ void setup(){
 
 
     WiFiManager wm;
-
     // reset settings - wipe stored credentials for testing
-    // these are stored by the esp library
     // wm.resetSettings();
-
-    // Automatically connect using saved credentials,
-    // if connection fails, it starts an access point with the specified name ( "AutoConnectAP"),
-    // if empty will auto generate SSID, if password is blank it will be anonymous AP (wm.autoConnect())
-    // then goes into a blocking loop awaiting configuration and will return success result
-
     bool res;
-    // res = wm.autoConnect(); // auto generated AP name from chipid
-    // res = wm.autoConnect("AutoConnectAP"); // anonymous ap
     res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-
     if(!res) {
         Serial.println("Failed to connect");
         // ESP.restart();
@@ -37,12 +35,21 @@ void setup(){
         //if you get here you have connected to the WiFi    
         Serial.println("connected...yeey :)");
     }
-    // init wifi
-  // init webserver
-  // init BLE
+
+    
+    midiBLESetup();
+
+
+// Load config
+// enable OSC if needed 
+// enable BLE
+// enable rtp midi
+// init webserver
+
 }
 
 void loop() {
+    midiUSBLoop();
   // read/update from sensor
   // poll webserver for config change
   // convert sensor to midi
