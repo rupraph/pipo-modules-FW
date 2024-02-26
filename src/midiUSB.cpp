@@ -17,6 +17,6 @@ void midiUSBLoop() {
     MidiUsb.read();
     MidiUsb.sendNoteOn(69, 127, 1);
     // delay(100);
-    Serial.println("Note on");
+    //Serial.println("Note on");
     delay(1000);
 }

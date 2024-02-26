@@ -4,5 +4,8 @@
 
 
 void midiBLESetup();
+void midiBLELoop();
+void OnConnected();
+void OnDisconnected();
 
 #endif //MIDIBLE_H
