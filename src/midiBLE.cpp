@@ -23,6 +23,7 @@ void midiBLELoop() {
     delay(1000);
 }
 
+
 void OnConnected() {
     Serial.println("Ble Connected!");
 }

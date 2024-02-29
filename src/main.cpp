@@ -5,8 +5,10 @@
 #include "midiBLE.h"
 #include "midiRtp.h"
 #include <ESPAsyncWebServer.h>
+#include "dist_sensor.h"
 
 AsyncWebServer server(80);
+dist_Sensor dist(14,13);
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -51,19 +53,25 @@ void setup(){
 
     //server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
     //server.begin();
-    
+    dist.init();
 
 // Load config
 // enable OSC if needed 
 // enable rtp midi
 
+// setup sensor
+    
+
 
 }
 
+
 void loop() {
-    midiUSBLoop();
-    midiRtpLoop();
-    midiBLELoop();
+    //midiUSBLoop();
+    //midiRtpLoop();
+    //midiBLELoop();
+    dist.update();
+    dist.print_last();
   // read/update from sensor
   // poll webserver for config change
   // convert sensor to midi

@@ -2,6 +2,9 @@
 
 #include <Adafruit_TinyUSB.h>
 #include <MIDI.h>
+
+BEGIN_MIDI_NAMESPACE
+
 Adafruit_USBD_MIDI usb_midi;
 
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
@@ -19,4 +22,9 @@ void midiUSBLoop() {
     // delay(100);
     //Serial.println("Note on");
     delay(1000);
+}
+
+
+void midiUSBsend(Message msg){
+    MidiUsb.send(msg);
 }
