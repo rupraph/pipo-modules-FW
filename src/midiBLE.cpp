@@ -9,7 +9,6 @@ BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
 
 
 void midiBLESetup() {
-
     BLEMidiBle.setHandleConnected(OnConnected);
     BLEMidiBle.setHandleDisconnected(OnDisconnected);
     MidiBle.begin();

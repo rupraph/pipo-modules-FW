@@ -6,9 +6,11 @@
 #include "midiRtp.h"
 #include <ESPAsyncWebServer.h>
 #include "dist_sensor.h"
+#include "osc_handler.h"
 
 AsyncWebServer server(80);
 dist_Sensor dist(14,13);
+OSC_handler osc;
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -54,16 +56,22 @@ void setup(){
     //server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
     //server.begin();
     dist.init();
+    delay(1000);
+
+    osc.setDestIp(IPAddress(192,168,1,71));
+    osc.setoutPort(8000);
+    osc.start();
 
 // Load config
 // enable OSC if needed 
 // enable rtp midi
 
 // setup sensor
-    
 
 
 }
+
+int distValue=0;
 
 
 void loop() {
@@ -71,7 +79,17 @@ void loop() {
     //midiRtpLoop();
     //midiBLELoop();
     dist.update();
-    dist.print_last();
+
+    //dist.print_last();
+    distValue= dist.get_moving_average(5);
+
+    sendHiResCC(distValue);
+
+
+    
+    osc.sendOscMessage(distValue);
+    
+    
   // read/update from sensor
   // poll webserver for config change
   // convert sensor to midi

@@ -1,1 +1,4 @@
-- Check how to change UDP port (restarts UDP ?)
+
+
+- check if adding midi RPN might be added value
+- potentially add OSC over USB (slip in OSC library ?) 

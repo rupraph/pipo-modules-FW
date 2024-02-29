@@ -3,14 +3,17 @@
 #include <OSCMessage.h>
 #include <WiFiUDP.h>
 
-WiFiUDP Udp;
-
 class OSC_handler {
     public:
+        WiFiUDP Udp;
         IPAddress dest_ip;
         int out_port;
-        void setup(int port);
-        void sendOscMessage(OSCMessage msg);
+        bool isStarted = false;
+        void start();
+        void stop();
+        void sendOscMessage(int value);
+        void setDestIp(IPAddress ip);
+        void setoutPort(int port);
 };
 
 #endif //OSC_HANDLER_H

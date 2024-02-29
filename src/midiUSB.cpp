@@ -1,9 +1,7 @@
 #include "midiUSB.h"
-
+#include <Arduino.h>
 #include <Adafruit_TinyUSB.h>
 #include <MIDI.h>
-
-BEGIN_MIDI_NAMESPACE
 
 Adafruit_USBD_MIDI usb_midi;
 
@@ -24,7 +22,18 @@ void midiUSBLoop() {
     delay(1000);
 }
 
+void sendCC(int value){
+    MidiUsb.sendControlChange(1, value, 1);
+}
 
-void midiUSBsend(Message msg){
-    MidiUsb.send(msg);
+void sendHiResCC(int value){
+    int sizeddata=value & 0x3FFF;
+    int msb=(sizeddata>>7) & 0x7F;
+    int lsb=sizeddata & 0x7F;
+    // float hsb = value >> 7;
+    // float lsb = value & 127;
+
+    MidiUsb.sendControlChange(21, msb,1);//round(floor(hsb)), 1);
+    MidiUsb.sendControlChange(21+32, lsb,1);//round(ceil(lsb)), 1);
+
 }
