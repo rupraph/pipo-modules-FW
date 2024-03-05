@@ -66,7 +66,7 @@ void setup(){
     osc.setoutPort(8000);
     osc.start();
 
-
+    midi_translator.set_Scale_Type("minor");
     midi_translator.printScale(midi_translator.current_scale);
 // Load config
 
@@ -90,7 +90,7 @@ void loop() {
 
 
 
-    midi_note=midi_translator.get_note(map(distValue,0,500,0,1));
+    midi_note=midi_translator.get_note(distValue/400.0);
     Serial.print("Dist: ");
     Serial.print(distValue);
     Serial.print(" Midi: ");

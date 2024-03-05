@@ -2,7 +2,7 @@
 
 
 MidiTranslator::MidiTranslator() {
-    current_scale = generate_full_Scale(minimum_note, maximumNote, scaleType, rootNote);
+    current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     printScale(current_scale);
 }
 
@@ -19,9 +19,10 @@ void MidiTranslator::printScale(vector<int> scale) {
         Serial.print(scale[i]);
         Serial.print("-");
     }
+    Serial.println();
 }
 
-void MidiTranslator::setScale(string scaleType) {
+void MidiTranslator::set_Scale_Type(string scaleType) {
     auto it = scales.find(scaleType);
     if (it != scales.end()) {
         scaleType = scaleType;
@@ -29,7 +30,28 @@ void MidiTranslator::setScale(string scaleType) {
         cout << "Invalid scale type." << endl;
     }
 
-    current_scale = generate_full_Scale(minimum_note, maximumNote, scaleType, rootNote);
+    current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+}
+/// @brief This function can be used to set manually a scale
+/// @param scale 
+void MidiTranslator::set_every_note(vector<string> scale) {
+    current_scale.clear();
+    for (int i = 0; i < scale.size(); i++) {
+        current_scale.push_back(convertNoteNameToNumber(scale[i]));
+    }
+}
+
+void MidiTranslator::set_new_scale(string newscaleType,vector<string> newscale) {
+    //convert newscale to int vector
+    vector<int> newscalenb;
+
+    for (const string& noteName : newscale) {
+        int noteNumber = convertNoteNameToNumber(noteName);
+        newscalenb.push_back(noteNumber);
+    }
+    scales.insert({newscaleType, newscalenb});
+
+    set_Scale_Type(newscaleType);
 }
 
 void MidiTranslator::set_root_note(string rootNote) {
@@ -40,21 +62,18 @@ void MidiTranslator::set_root_note(string rootNote) {
     }
     else {
         rootNotenb = rootNotenb;
-        current_scale = generate_full_Scale(minimum_note, maximumNote, scaleType, rootNotenb);
+        current_scale = generate_full_Scale(rootNotenb, numberOfNotes, scaleType);
     }
 }
 
-void MidiTranslator::set_with_min_and_max(string first_note, string last_note) {
-    int firstNotenb = convertNoteNameToNumber(first_note);
-    int lastNotenb = convertNoteNameToNumber(last_note);
-    if (firstNotenb < 0 || firstNotenb > 127 || lastNotenb < 0 || lastNotenb > 127) {
-        cout << "Invalid note range." << endl;
+void MidiTranslator::set_number_of_notes(int numberOfNotes) {
+    if (numberOfNotes < 0 || numberOfNotes > 127) {
+        cout << "Invalid number of notes." << endl;
         return;
     }
     else {
-        firstNotenb = firstNotenb;
-        lastNotenb = lastNotenb;
-        current_scale = generate_full_Scale(firstNotenb, lastNotenb, scaleType, rootNote);
+        numberOfNotes = numberOfNotes;
+        current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     }
 }
 
@@ -93,20 +112,29 @@ bool MidiTranslator::is_a_note(string noteName) {
     }
 }
 
-vector<int> MidiTranslator::generate_full_Scale(int minNote, int maxNote, string scaleType, int rootNote) {
+vector<int> MidiTranslator::generate_full_Scale(int rootNote,int nb_notes, string scaleType) {
     //int minNote = convertNoteNameToNumber(minimum_note);
     //int maxNote = convertNoteNameToNumber(maximumNote);
 
     vector<int> scale = generate_base_Scale(rootNote, scaleType);
+    printScale(scale);
     vector<int> expandedScale;
 
     int baseScaleSize = scale.size();
+    int baseNoteIndex = 0;
+    int expandedNote = scale[baseNoteIndex];
 
-    for (int i = minNote; i <= maxNote; i++) {
-        int baseNoteIndex = (i - minNote) % baseScaleSize;
-        int expandedNote = scale[baseNoteIndex] + (i / baseScaleSize) * 12;
+    for (int i = 0; i < nb_notes; i++) {
         expandedScale.push_back(expandedNote);
+        baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
+        expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
     }
+
+    // for (int i = rootNote; i <= maxNote; i++) {
+    //     int baseNoteIndex = (i - rootNote) % baseScaleSize;
+    //     int expandedNote = scale[baseNoteIndex] + (i / baseScaleSize) * 12;
+    //     expandedScale.push_back(expandedNote);
+    // }
 
     return expandedScale;
 }

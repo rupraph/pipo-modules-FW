@@ -35,24 +35,21 @@ class MidiTranslator
         };
 
         string scaleType="major";
-        int rootNote = 60;
-        int minimum_note = 45;
-        int maximumNote = 69;
+        int rootNote = 45;
+        int numberOfNotes = 15;
 
         vector<int> current_scale;
-
-        //int first_note = 40;
-        //int total_note_number = 15;
-        //string mode = "with_start_and_number";
-
 
         MidiTranslator();
         int get_note(float value);
         void printScale(vector<int> scale);
-        void setScale(string scaleType);
+        void set_Scale_Type(string scaleType);
         void set_root_note(string rootNote);
+        void set_number_of_notes(int numberOfNotes);
         //void set_with_start_and_number(string first_note, int total_note_number);
-        void set_with_min_and_max(string first_note, string last_note);
+
+        void set_every_note(vector<string> scale);
+        void set_new_scale(string newscaleType,vector<string> newscale);
 
         int convertNoteNameToNumber(string noteName);
         string convertNumberToNoteName(int noteNumber); 
@@ -62,7 +59,7 @@ class MidiTranslator
         vector<string> get_scale_names();
 
     private:
-        vector<int> generate_full_Scale(int minNote, int maxNote, string scaleType, int rootNote);
+        vector<int> generate_full_Scale(int rootNote,int nb_notes, string scaleType);
         vector<int> generate_base_Scale(int rootNote, string scaleType);
 
 };
