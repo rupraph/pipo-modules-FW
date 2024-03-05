@@ -1,16 +1,19 @@
 #include <Arduino.h>
 #include "fs_tools.h"
 #include <WiFiManager.h> 
-#include "midiUSB.h"
 #include "midiBLE.h"
 #include "midiRtp.h"
 #include <ESPAsyncWebServer.h>
 #include "dist_sensor.h"
 #include "osc_handler.h"
+#include "midi_translator.h"
+#include "midi_io.h"
 
 AsyncWebServer server(80);
 dist_Sensor dist(14,13);
 OSC_handler osc;
+MidiTranslator midi_translator;
+midi_io midiio;
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
@@ -18,7 +21,8 @@ OSC_handler osc;
 // bool isConnected = false;
 
 void setup(){
-    midiUSBSetup();
+
+    midiio.setup_usb_midi();
 
     Serial.begin(115200);
 
@@ -53,8 +57,8 @@ void setup(){
     midiBLESetup();
     midiRtpSetup(); //-> not working. can't see the device from mac or windows
 
-    //server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
-    //server.begin();
+    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
+    server.begin();
     dist.init();
     delay(1000);
 
@@ -62,17 +66,16 @@ void setup(){
     osc.setoutPort(8000);
     osc.start();
 
+
+    midi_translator.printScale(midi_translator.current_scale);
 // Load config
-// enable OSC if needed 
-// enable rtp midi
 
 // setup sensor
-
 
 }
 
 int distValue=0;
-
+int midi_note=0;
 
 void loop() {
     //midiUSBLoop();
@@ -83,9 +86,16 @@ void loop() {
     //dist.print_last();
     distValue= dist.get_moving_average(5);
 
-    sendHiResCC(distValue);
+    //sendHiResCC(distValue);
 
 
+
+    midi_note=midi_translator.get_note(map(distValue,0,500,0,1));
+    Serial.print("Dist: ");
+    Serial.print(distValue);
+    Serial.print(" Midi: ");
+    Serial.println(midi_note);
+    midiio.sendNoteOn(midi_note,127,1);
     
     osc.sendOscMessage(distValue);
     
