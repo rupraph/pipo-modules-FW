@@ -1,11 +1,13 @@
-// #ifndef MIDIUSB_H
-// #define MIDIUSB_H
+#ifndef MIDIUSB_H
+#define MIDIUSB_H
 
+#include <Adafruit_TinyUSB.h>
+#include <MIDI.h>
 
+void MidiUSBSetup();
+void MidiUSBsendCC(int value, int channel, int control);
+void MidiUSBsendHiResCC(int value);
+void MidiUSBsendNoteOn(int note, int velocity, int channel);
+void MidiUSBsendNoteOff(int note, int velocity, int channel);
 
-// void midiUSBSetup();
-// void midiUSBLoop();
-// void sendCC(int value);
-// void sendHiResCC(int value);
-
-// #endif //MIDIUSB_H
+#endif //MIDIUSB_H

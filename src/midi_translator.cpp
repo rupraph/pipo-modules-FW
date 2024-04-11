@@ -1,12 +1,12 @@
 #include "midi_translator.h"
 
 
-MidiTranslator::MidiTranslator(bool translator_mode) {
+MidiTranslator::MidiTranslator(bool mode) {
+    translator_mode = mode;
     if (translator_mode ==1) {
         current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     printScale(current_scale);
     }
-
 }
 
 int MidiTranslator::get_note(float value) {
@@ -177,7 +177,7 @@ vector<int> MidiTranslator::generate_base_Scale(int rootNote, string scaleType) 
 }
 
 int MidiTranslator::map_linear(float value){
-    return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output));
+    return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output);
 }
 
 

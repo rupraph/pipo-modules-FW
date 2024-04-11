@@ -2,10 +2,9 @@
 #define MIDI_IO_H
 
 #include <Arduino.h>
-#include <Adafruit_TinyUSB.h>
-
 #include "midiBLE.h"
 #include "midiRtp.h"
+#include "midiUSB.h"
 
 
 class midi_io
@@ -15,8 +14,10 @@ private:
     
 public:
     midi_io();
-    void setup_usb_midi();
 
+    bool midi_usb_enabled = true;
+    bool midi_ble_connected = false;
+    bool midi_rtp_connected = false;
 
     void sendNoteOn(int note, int velocity, int channel);
     void sendNoteOff(int note, int velocity, int channel);

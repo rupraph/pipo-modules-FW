@@ -12,7 +12,7 @@ using namespace std;
 class MidiTranslator 
 {
     public:
-        MidiTranslator(bool translator_mode);
+        MidiTranslator(bool mode);
 
         bool translator_mode = 0; //0=cc, 1 note
 
@@ -66,6 +66,7 @@ class MidiTranslator
 
         // To cc variables
         int get_cc_val(float value);
+        int map_linear(float x);
         float max_input = 1023;
         float min_input = 0;
         int max_output = 127;

@@ -6,8 +6,6 @@
 
 BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
 
-
-
 void midiBLESetup() {
     BLEMidiBle.setHandleConnected(OnConnected);
     BLEMidiBle.setHandleDisconnected(OnDisconnected);
@@ -21,7 +19,6 @@ void midiBLELoop() {
     //Serial.println("Note on");
     delay(1000);
 }
-
 
 void OnConnected() {
     Serial.println("Ble Connected!");
