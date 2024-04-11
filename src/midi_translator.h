@@ -12,6 +12,12 @@ using namespace std;
 class MidiTranslator 
 {
     public:
+        MidiTranslator(bool translator_mode);
+
+        bool translator_mode = 0; //0=cc, 1 note
+
+        // Notes scale variables
+
         unordered_map<string, vector<int>> scales = {
             {"major", {0, 2, 4, 5, 7, 9, 11}},
             {"minor", {0, 2, 3, 5, 7, 8, 10}},
@@ -40,7 +46,7 @@ class MidiTranslator
 
         vector<int> current_scale;
 
-        MidiTranslator();
+        
         int get_note(float value);
         void printScale(vector<int> scale);
         void set_Scale_Type(string scaleType);
@@ -57,6 +63,17 @@ class MidiTranslator
         bool is_a_note(string noteName);
 
         vector<string> get_scale_names();
+
+        // To cc variables
+        int get_cc_val(float value);
+        float max_input = 1023;
+        float min_input = 0;
+        int max_output = 127;
+        int min_output = 0;
+        bool cc_resolution = 0; //0=7bit, 1=14bit
+        int interpolation_type = 0; //0=linear, 1=step, 2=log
+
+
 
     private:
         vector<int> generate_full_Scale(int rootNote,int nb_notes, string scaleType);
