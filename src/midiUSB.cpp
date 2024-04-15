@@ -3,7 +3,6 @@
 Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 
-
 void MidiUSBSetup() {
     TinyUSBDevice.setManufacturerDescriptor("Rup");
     TinyUSBDevice.setProductDescriptor("PipoUSB");
@@ -11,8 +10,8 @@ void MidiUSBSetup() {
     
 }
 
-void MidiUSBsendCC(int value, int control, int channel){
-    MidiUsb.sendControlChange(value, control, channel);
+void MidiUSBsendCC(int control, int value, int channel){
+    MidiUsb.sendControlChange(control, value, channel);
 }
 
 void MidiUSBsendHiResCC(int value){

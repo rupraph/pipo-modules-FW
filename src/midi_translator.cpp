@@ -180,4 +180,22 @@ int MidiTranslator::map_linear(float value){
     return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output);
 }
 
+void MidiTransaltor::set_min_input(float min) {
+    min_input = min;
+}
+
+void MidiTransaltor::set_max_input(float max) {
+    max_input = max;
+}
+
+void MidiTransaltor::set_min_output(int min) {
+    min_output = min;
+}
+
+void MidiTransaltor::set_max_output(int max) {
+    max_output = max;
+}
+
+
+
 

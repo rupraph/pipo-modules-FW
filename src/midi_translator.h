@@ -67,6 +67,7 @@ class MidiTranslator
         // To cc variables
         int get_cc_val(float value);
         int map_linear(float x);
+
         float max_input = 1023;
         float min_input = 0;
         int max_output = 127;

@@ -3,24 +3,34 @@
 
 midi_io::midi_io()
 {
+    //MidiUSBSetup();
+    // midiBLESetup();
+    // midiRtpSetup();
+}
+
+void midi_io::setup()
+{
     MidiUSBSetup();
     midiBLESetup();
-    midiRtpSetup();
+    //midiRtpSetup();
 }
 
 void midi_io::sendNoteOn(int note, int velocity, int channel)
 {
     MidiUSBsendNoteOn(note, velocity, channel);   
+    MidiBLEsendNoteOn(note, velocity, channel);
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
 {
     MidiUSBsendNoteOff(note, velocity, channel);
+    MidiBLEsendNoteOff(note, velocity, channel);
 }
 
 void midi_io::sendControlChange(int control, int value, int channel)
 {
-    MidiUSBsendCC(value, control, channel);
+    MidiUSBsendCC(control, value, channel);
+    MidiBLEsendCC(control, value, channel);
 }
 
 void midi_io::sendHiResControlChange(int control, int value, int channel)

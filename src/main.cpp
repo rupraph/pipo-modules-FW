@@ -11,7 +11,7 @@ AsyncWebServer server(80);
 sensor acc_sensor;
 OSC_handler osc;
 MidiTranslator midi_translator(true);
-//midi_io midiio; causes crashes as of now
+midi_io midiio; //causes crashes as of now
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -21,7 +21,8 @@ MidiTranslator midi_translator(true);
 
 void setup(){
 
-    //midiio.setup_usb_midi();
+    //MidiUSBSetup();
+    midiio.setup();
 
     Serial.begin(115200);
 
@@ -32,23 +33,35 @@ void setup(){
     // Serial.println("LittleFS Mount Success");
     //listDir(LittleFS, "/", 2);
 
-    
-    WiFiManager wm;
-    // reset settings - wipe stored credentials for testing
-    // wm.resetSettings();
-    bool res;
-    res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-    delay(2000);
+    //////////// Wifi 
+    // WiFiManager wm;
+    // // reset settings - wipe stored credentials for testing
+    // // wm.resetSettings();
+    // bool res;
+    // //wm.setDebugOutput(true);
+    // res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+    // delay(2000);
+    //     if(!res) {
+    //     Serial.println("Failed to connect");
+    //     // ESP.restart();
+    // } 
+    // else {
+    //     //if you get here you have connected to the WiFi    
+    //     Serial.println("connected...yeey :)");
+    // }
+
+    //connect to wifi manually
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin("freebox_RZWVFD", "AZERTYUIOP");
+    // while (WiFi.status() != WL_CONNECTED) {
+    //     delay(500);
+    //     Serial.print(".");
+    // }
+    // Serial.println("Connected to WiFi");
+    // Serial.println(WiFi.localIP());
 
     
-    if(!res) {
-        Serial.println("Failed to connect");
-        // ESP.restart();
-    } 
-    else {
-        //if you get here you have connected to the WiFi    
-        Serial.println("connected...yeey :)");
-    }
+
     
 
     Wire.begin(2, 1, 400000);
@@ -60,9 +73,9 @@ void setup(){
     // server.begin();
     //delay(1000);
 
-    osc.setDestIp(IPAddress(172,20,10,14));
-    osc.setoutPort(8000);
-    osc.start();
+    // osc.setDestIp(IPAddress(172,20,10,14));
+    // osc.setoutPort(8000);
+    // osc.start();
 
     // midi_translator.set_Scale_Type("minor");
     // midi_translator.printScale(midi_translator.current_scale);
@@ -78,13 +91,12 @@ void loop() {
     //midiBLELoop();
     acc_sensor.update();
 
-    Serial.print("Roll: ");
-    Serial.println(acc_sensor.roll);
+    midiio.sendControlChange(1, acc_sensor.roll, 1);
 
     
-    osc.sendOscMessage(acc_sensor.roll);
-    osc.sendOscMessage(acc_sensor.pitch);
-    osc.sendOscMessage(acc_sensor.yaw);
+    // osc.sendOscMessage(acc_sensor.roll);
+    // osc.sendOscMessage(acc_sensor.pitch);
+    // osc.sendOscMessage(acc_sensor.yaw);
     
     
   // read/update from sensor
