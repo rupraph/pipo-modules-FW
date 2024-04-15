@@ -3,9 +3,7 @@
 
 midi_io::midi_io()
 {
-    //MidiUSBSetup();
-    // midiBLESetup();
-    // midiRtpSetup();
+
 }
 
 void midi_io::setup()

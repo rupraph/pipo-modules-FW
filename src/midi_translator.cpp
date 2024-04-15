@@ -35,6 +35,8 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
 
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
 }
+
+
 /// @brief This function can be used to set manually a scale
 /// @param scale 
 void MidiTranslator::set_every_note(vector<string> scale) {
@@ -158,15 +160,15 @@ vector<int> MidiTranslator::generate_base_Scale(int rootNote, string scaleType) 
     }
 }
 
- vector<string> MidiTranslator::get_scale_names() {
+vector<string> MidiTranslator::get_scale_names() {
             vector<string> scale_names;
             for (auto it : scales) {
                 scale_names.push_back(it.first);
             }
             return scale_names;
-        }
+}
 
- int MidiTranslator::get_cc_val(float value) {
+int MidiTranslator::get_cc_val(float value) {
     // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)
     if (interpolation_type == 0) {
         return map_linear(value);
@@ -180,21 +182,6 @@ int MidiTranslator::map_linear(float value){
     return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output);
 }
 
-void MidiTransaltor::set_min_input(float min) {
-    min_input = min;
-}
-
-void MidiTransaltor::set_max_input(float max) {
-    max_input = max;
-}
-
-void MidiTransaltor::set_min_output(int min) {
-    min_output = min;
-}
-
-void MidiTransaltor::set_max_output(int max) {
-    max_output = max;
-}
 
 
 

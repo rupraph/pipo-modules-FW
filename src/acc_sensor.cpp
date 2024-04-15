@@ -2,11 +2,6 @@
 
 // review with exemples setup and acquisition structure.
 
-sensor::sensor()
-{
-    
-}
-
 void sensor::init()
 {
 
