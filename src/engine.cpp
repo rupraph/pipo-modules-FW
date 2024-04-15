@@ -1,28 +1,53 @@
 #include "engine.h"
-#include "midi_translator.h"
+#include "midi_io.h"
+
 
 sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
+unordered_map<string, MidiTranslator> Miditranslators ={
+    {"roll",MidiTranslator()},
+    {"pitch",MidiTranslator()},
+    {"yaw",MidiTranslator()},
+    {"accX",MidiTranslator()},
+    {"accY",MidiTranslator()},
+    {"accZ",MidiTranslator()}
+};
 
 void engine_setup()
 {
 
 }
 
-void engine_update(sensor mySensor)
+void engine_update()
 {
 
     
 }
 
 
-void midi_processsor(sensor mySensor)
+void midi_processsor(midi_io midiio)
 {
-    for (auto const& x : mySensor.data_map)
+    for (auto const& pair : mySensor.data_map)
     {
-        if (x.second)
+        if (pair.second)
         {
-            
+            string name=pair.first;
+            if (Miditranslators[name].translator_mode==0)
+            {
+                midiio.sendControlChange(1, Miditranslators[name].get_cc_val(mySensor.data_map[name]), 1);
+            }
+
+
+            // find way in architecture to deal with sustain and note offs modes
+            // find way to:
+            //- max freq
+            //- send on change
+            //- play / pause
+
+            // else
+            // {
+            //     midiio.sendNoteOn(Miditranslators[name].get_note(mySensor.),127,1)
+            // }
         }
     }
 }

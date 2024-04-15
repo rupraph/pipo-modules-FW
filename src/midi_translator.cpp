@@ -1,8 +1,7 @@
 #include "midi_translator.h"
 
 
-MidiTranslator::MidiTranslator(bool mode) {
-    translator_mode = mode;
+MidiTranslator::MidiTranslator() {
     if (translator_mode ==1) {
         current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     printScale(current_scale);

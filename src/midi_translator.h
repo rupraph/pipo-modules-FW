@@ -12,9 +12,23 @@ using namespace std;
 class MidiTranslator 
 {
     public:
-        MidiTranslator(bool mode);
+        MidiTranslator();
 
-        bool translator_mode = 0; //0=cc, 1 note
+        //notes variables
+        int translator_mode = 0; //0=cc, 1 note
+        string scaleType="major";
+        int rootNote = 45;
+        int numberOfNotes = 15;
+        vector<int> current_scale;
+
+
+        //CC variables
+        float max_input = 1023;
+        float min_input = 0;
+        int max_output = 127;
+        int min_output = 0;
+        bool cc_resolution = 0; //0=7bit, 1=14bit
+        int interpolation_type = 0; //0=linear, 1=step, 2=log
 
         // Notes scale variables
 
@@ -40,13 +54,8 @@ class MidiTranslator
             {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
         };
 
-        string scaleType="major";
-        int rootNote = 45;
-        int numberOfNotes = 15;
 
-        vector<int> current_scale;
 
-        
         int get_note(float value);
         void printScale(vector<int> scale);
         void set_Scale_Type(string scaleType);
@@ -67,14 +76,6 @@ class MidiTranslator
         // To cc variables
         int get_cc_val(float value);
         int map_linear(float x);
-
-        float max_input = 1023;
-        float min_input = 0;
-        int max_output = 127;
-        int min_output = 0;
-        bool cc_resolution = 0; //0=7bit, 1=14bit
-        int interpolation_type = 0; //0=linear, 1=step, 2=log
-
 
 
     private:

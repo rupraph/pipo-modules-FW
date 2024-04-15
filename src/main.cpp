@@ -2,14 +2,13 @@
 #include "fs_tools.h"
 #include <WiFiManager.h> 
 #include "osc_handler.h"
-#include "midi_translator.h"
 #include "midi_io.h"
 #include "acc_sensor.h"
 #include "server_manager.h"
+#include "engine.h"
 
-//sensor acc_sensor;
 OSC_handler osc;
-MidiTranslator midi_translator(true);
+MidiTranslator midi_translator;
 midi_io midiio; //causes crashes as of now
 
 
@@ -83,7 +82,7 @@ void loop() {
     sensor& acc_sensor = sensor::getInstance();
     acc_sensor.update();
 
-    midiio.sendControlChange(1, acc_sensor.roll, 1);
+    midiio.sendControlChange(1, acc_sensor.data_map["roll"], 1);
 
     
     // osc.sendOscMessage(acc_sensor.roll);
