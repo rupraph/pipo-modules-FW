@@ -82,8 +82,8 @@ void loop() {
     sensor& acc_sensor = sensor::getInstance();
     acc_sensor.update();
 
-    midiio.sendControlChange(1, acc_sensor.data_map["roll"], 1);
-
+    //midiio.sendControlChange(1, acc_sensor.data_map["roll"], 1);
+    midiio.update();
     
     // osc.sendOscMessage(acc_sensor.roll);
     // osc.sendOscMessage(acc_sensor.pitch);

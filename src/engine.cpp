@@ -37,16 +37,14 @@ void midi_processsor(midi_io midiio)
                 midiio.sendControlChange(1, Miditranslators[name].get_cc_val(mySensor.data_map[name]), 1);
             }
 
-
-            // find way in architecture to deal with sustain and note offs modes
             // find way to:
-            //- max freq
+            //- limit max sending freq
             //- send on change
             //- play / pause
 
             // else
             // {
-            //     midiio.sendNoteOn(Miditranslators[name].get_note(mySensor.),127,1)
+            //     midiio.sendNoteOn(Miditranslators[name].get_note(mySensor.),127,1) 
             // }
         }
     }
