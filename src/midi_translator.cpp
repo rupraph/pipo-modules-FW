@@ -167,8 +167,15 @@ vector<string> MidiTranslator::get_scale_names() {
             return scale_names;
 }
 
-int MidiTranslator::get_cc_val(float value) {
-    // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)
+int MidiTranslator::get_cc_val(float value,bool hires) {
+    // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)    
+    if (hires) {
+        max_output = 16383;
+    }
+    else {
+        max_output = 127;
+    }
+    
     if (interpolation_type == 0) {
         return map_linear(value);
     }

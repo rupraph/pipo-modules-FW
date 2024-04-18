@@ -23,8 +23,8 @@ class MidiTranslator
 
 
         //CC variables
-        float max_input = 1023;
-        float min_input = 0;
+        float max_input = 180;
+        float min_input = -180;
         int max_output = 127;
         int min_output = 0;
         bool cc_resolution = 0; //0=7bit, 1=14bit
@@ -74,7 +74,7 @@ class MidiTranslator
         vector<string> get_scale_names();
 
         // To cc variables
-        int get_cc_val(float value);
+        int get_cc_val(float value, bool hires=false);
         int map_linear(float x);
 
 

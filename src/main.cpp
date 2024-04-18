@@ -9,7 +9,7 @@
 
 OSC_handler osc;
 MidiTranslator midi_translator;
-midi_io midiio; //causes crashes as of now
+midi_io midiio;
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -83,6 +83,7 @@ void loop() {
     acc_sensor.update();
 
     //midiio.sendControlChange(1, acc_sensor.data_map["roll"], 1);
+    engine_update(midiio);
     midiio.update();
     
     // osc.sendOscMessage(acc_sensor.roll);

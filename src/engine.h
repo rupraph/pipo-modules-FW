@@ -4,6 +4,7 @@
 #include "acc_sensor.h"
 #include <unordered_map>
 #include "midi_translator.h"
+#include "midi_io.h"
 
 using namespace std;
 
@@ -16,11 +17,12 @@ using namespace std;
 //     {"roll", midi_translator(0, 0, 0)},
 
 extern unordered_map<string, MidiTranslator> Miditranslators;
+extern unordered_map<string, int> cc_map;
 
 
 void engine_setup();
-void engine_update();
-void midi_processsor();
+void engine_update(midi_io midiio);
+void midi_processsor(midi_io midiio);
 
 
 

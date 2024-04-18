@@ -27,15 +27,15 @@ public:
     void setup();
     void sendNoteOn(int note, int velocity, int channel,int sustainmil=0);
     void sendNoteOff(int note, int velocity, int channel);
-    void sendControlChange(int control, int value, int channel);
-    void sendHiResControlChange(int control, int value, int channel);
+    void sendControlChange(int control, int value, int channel, bool hires=false);
     void sendProgramChange(int program, int channel);
     void sendPitchBend(int value, int channel);
     void sendAfterTouch(int pressure, int channel);
     void update();
     void manage_sustain();
 
-    // add high resoltution CC
+    private:
+    void sendHiResControlChange(int control, int value, int channel);
 
 };
 

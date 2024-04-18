@@ -128,6 +128,9 @@ void sensor::update()
 
     }
 
+// When flipping the sensor, the roll and pitch values are inverted. 
+
+
 void sensor::calc_euler_angles()
 {      // Convert the quaternions to Euler angles (roll, pitch, yaw)
       // https://en.wikipedia.org/w/index.php?title=Conversion_between_quaternions_and_Euler_angles&section=8#Source_code_2

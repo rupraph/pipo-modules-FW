@@ -37,8 +37,8 @@ class sensor
 
         unordered_map<string, bool> enable_map= {
             {"roll", true},
-            {"pitch", false},
-            {"yaw",false},
+            {"pitch", true},
+            {"yaw",true},
             {"accX",false},
             {"accY",false},
             {"accZ",false}
