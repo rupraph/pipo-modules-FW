@@ -21,8 +21,8 @@ extern unordered_map<string, int> cc_map;
 
 
 void engine_setup();
-void engine_update(midi_io midiio);
-void midi_processsor(midi_io midiio);
+void engine_update(midi_io& midiio);
+void midi_processsor(midi_io& midiio);
 
 
 

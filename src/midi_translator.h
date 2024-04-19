@@ -18,13 +18,16 @@ class MidiTranslator
         int translator_mode = 0; //0=cc, 1 note
         string scaleType="major";
         int rootNote = 45;
-        int numberOfNotes = 15;
+        int numberOfNotes = 25;
         vector<int> current_scale;
+
+        // common for note and cc
+        float max_input = 180;
+        float min_input = -180;
 
 
         //CC variables
-        float max_input = 180;
-        float min_input = -180;
+        
         int max_output = 127;
         int min_output = 0;
         bool cc_resolution = 0; //0=7bit, 1=14bit
@@ -72,6 +75,8 @@ class MidiTranslator
         bool is_a_note(string noteName);
 
         vector<string> get_scale_names();
+
+        void update_scale();
 
         // To cc variables
         int get_cc_val(float value, bool hires=false);

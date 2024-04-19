@@ -2,16 +2,16 @@
 
 
 MidiTranslator::MidiTranslator() {
-    if (translator_mode ==1) {
-        current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+    current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     printScale(current_scale);
-    }
+
 }
 
 int MidiTranslator::get_note(float value) {
     // scale value from 0 to 1 to the range of the current scale
-    float scaledValue = value * (current_scale.size() - 1);
-    int index = round(scaledValue);
+    // map value from input range to 0-1
+    float scaledValue = (value - min_input) / (max_input - min_input);
+    int index = round(scaledValue*(current_scale.size()-1));
     return current_scale[index];
 }
 
@@ -165,6 +165,11 @@ vector<string> MidiTranslator::get_scale_names() {
                 scale_names.push_back(it.first);
             }
             return scale_names;
+}
+
+void MidiTranslator::update_scale() {
+    this->current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
+    printScale(this->current_scale);
 }
 
 int MidiTranslator::get_cc_val(float value,bool hires) {

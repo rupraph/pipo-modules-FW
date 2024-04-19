@@ -15,13 +15,19 @@ void midi_io::setup()
 // if sustainmil is 0 it will not send a note off
 void midi_io::sendNoteOn(int note, int velocity, int channel,int sustainmil)
 {
-    MidiUSBsendNoteOn(note, velocity, channel);   
-    MidiBLEsendNoteOn(note, velocity, channel);
-
-    if (sustainmil>0)
+    if (lastnote[channel]!=note)
     {
+        MidiUSBsendNoteOn(note, velocity, channel);   
+        MidiBLEsendNoteOn(note, velocity, channel);
+       
+        if (sustainmil>0)
+        {
         active_notes.push_back(make_pair(millis()+sustainmil,note));
+        }
+        lastnote[channel]=note;
     }
+
+    
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
@@ -32,14 +38,18 @@ void midi_io::sendNoteOff(int note, int velocity, int channel)
 
 void midi_io::sendControlChange(int control, int value, int channel, bool hires)
 {
-    if (hires)
+    if (lastcc[channel][control]!=value)
     {
-        sendHiResControlChange(control, value, channel);
-    }
-    else
-    {
-        MidiUSBsendCC(control, value, channel);
-        MidiBLEsendCC(control, value, channel);
+        if (hires)
+        {
+            sendHiResControlChange(control, value, channel);
+        }
+        else
+        {
+            MidiUSBsendCC(control, value, channel);
+            MidiBLEsendCC(control, value, channel);
+        }
+        lastcc[channel][control]=value;
     }
         
 

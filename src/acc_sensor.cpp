@@ -151,4 +151,16 @@ void sensor::calc_euler_angles()
       // yaw (z-axis rotation)
       double t3 = +2.0 * (q0 * q3 + q1 * q2);
       double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
-      data_map["yaw"] = atan2(t3, t4) * 180.0 / PI;}
+      data_map["yaw"] = atan2(t3, t4) * 180.0 / PI;
+
+
+    //   adafruit style visualizer  
+    //   Serial.print("Orientation: ");
+    //   Serial.print(data_map["yaw"]);
+    //   Serial.print(", ");
+    //   Serial.print(data_map["pitch"]);
+    //   Serial.print(", ");
+    //   Serial.println(data_map["roll"]);
+      
+    
+}

@@ -58,31 +58,26 @@ void setup(){
     // Serial.println("Connected to WiFi");
     // Serial.println(WiFi.localIP());
 
-    
-
-    
-
+    // Initialize the ICM-20948
     Wire.begin(2, 1, 400000);
     acc_sensor.init();
     acc_sensor.setup();
 
+
+
+    engine_setup();
+}
+
+    // Initialize OSC
     // osc.setDestIp(IPAddress(172,20,10,14));
     // osc.setoutPort(8000);
     // osc.start();
-
-    // midi_translator.set_Scale_Type("minor");
-    // midi_translator.printScale(midi_translator.current_scale);
-
-
-}
-
-
 
 void loop() {
     sensor& acc_sensor = sensor::getInstance();
     acc_sensor.update();
 
-    //midiio.sendControlChange(1, acc_sensor.data_map["roll"], 1);
+
     engine_update(midiio);
     midiio.update();
     

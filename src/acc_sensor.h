@@ -26,7 +26,7 @@ class sensor
         bool initialized = false;
         bool enable_send_vizualizer = false;
 
-        unordered_map<string, double> data_map= {
+        unordered_map<string, float> data_map= {
             {"roll",0},
             {"pitch",0},
             {"yaw",0},
@@ -38,7 +38,7 @@ class sensor
         unordered_map<string, bool> enable_map= {
             {"roll", true},
             {"pitch", true},
-            {"yaw",true},
+            {"yaw",false},
             {"accX",false},
             {"accY",false},
             {"accZ",false}
