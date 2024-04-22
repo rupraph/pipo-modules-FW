@@ -8,6 +8,12 @@
 
 using namespace std;
 
+
+
+
+
+
+
 // this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
 
 //decide if miditranslator holds its config per voice, and get the input name for structure

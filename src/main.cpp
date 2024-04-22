@@ -12,11 +12,6 @@ MidiTranslator midi_translator;
 midi_io midiio;
 
 
-uint8_t const desc_hid_report[] = {
-  TUD_HID_REPORT_DESC_GAMEPAD()
-};
-Adafruit_USBD_HID usb_hid;
-
 #define FORMAT_LITTLEFS_IF_FAILED true
 
 // unsigned long t0 = millis();
@@ -25,12 +20,11 @@ Adafruit_USBD_HID usb_hid;
 void setup(){
     sensor& acc_sensor = sensor::getInstance();
     //MidiUSBSetup();
-    usb_hid.setPollInterval(2);
-    usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
-
-    usb_hid.begin();
+    
 
     midiio.setup();
+    engine_setup();
+
 
     Serial.begin(115200);
 
@@ -73,9 +67,7 @@ void setup(){
     acc_sensor.init();
     acc_sensor.setup();
 
-
-
-    engine_setup();
+    
 }
 
     // Initialize OSC

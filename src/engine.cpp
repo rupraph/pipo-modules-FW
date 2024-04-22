@@ -1,7 +1,5 @@
 #include "engine.h"
 
-
-
 sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 unordered_map<string, MidiTranslator> Miditranslators ={
@@ -38,11 +36,16 @@ void engine_setup()
 
     Miditranslators["yaw"].max_input=180;
     Miditranslators["yaw"].min_input=-180;
+
+
+
 }
 
 void engine_update(midi_io& midiio)
 {
     midi_processsor(midiio);
+
+
 }
 
 
