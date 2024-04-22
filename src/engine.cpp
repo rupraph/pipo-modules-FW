@@ -83,7 +83,7 @@ void midi_processsor(midi_io& midiio)
                 Serial.print("sensor_val:");
                 Serial.println(note_val);
                 // should probably move the value check in the io class. to be discussed
-                midiio.sendNoteOn(note_val,127,1,500); 
+                midiio.sendNoteOn(note_val,127,1,800); 
             }
         }
     }

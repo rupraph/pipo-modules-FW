@@ -13,10 +13,14 @@ void midi_io::setup()
     //midiRtpSetup();
 }
 // if sustainmil is 0 it will not send a note off
-void midi_io::sendNoteOn(int note, int velocity, int channel,int sustainmil)
+void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil)
 {
     if (lastnote[channel]!=note)
     {
+        if (off_before_next_note)
+        {
+            sendNoteOff(lastnote[channel], 127, channel);
+        }
         MidiUSBsendNoteOn(note, velocity, channel);   
         MidiBLEsendNoteOn(note, velocity, channel);
        
@@ -76,7 +80,7 @@ void midi_io::manage_sustain()
 {
     for (int i=0;i<active_notes.size();i++)
     {
-        if (active_notes[i].first>millis())
+        if (active_notes[i].first<millis())
         {
             sendNoteOff(active_notes[i].second, 127, 1);
             active_notes.erase(active_notes.begin()+i);

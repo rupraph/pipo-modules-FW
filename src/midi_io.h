@@ -29,8 +29,10 @@ public:
     // this should be replaced by dynamic allocation since this takes a significant amount of memory
     uint8_t lastcc[16][128];
 
+    bool off_before_next_note = false; // sends off previous note before sending note
+
     void setup();
-    void sendNoteOn(int note, int velocity, int channel,int sustainmil=0);
+    void sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil=0);
     void sendNoteOff(int note, int velocity, int channel);
     void sendControlChange(int control, int value, int channel, bool hires=false);
     void sendProgramChange(int program, int channel);
