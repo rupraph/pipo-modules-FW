@@ -7,6 +7,7 @@
 #include "server_manager.h"
 #include "engine.h"
 
+
 OSC_handler osc;
 MidiTranslator midi_translator;
 midi_io midiio;
@@ -25,6 +26,7 @@ void setup(){
     midiio.setup();
     engine_setup();
 
+    
 
     Serial.begin(115200);
 

@@ -5,14 +5,9 @@
 #include <unordered_map>
 #include "midi_translator.h"
 #include "midi_io.h"
+#include "usb_hid.h"
 
 using namespace std;
-
-
-
-
-
-
 
 // this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
 
@@ -26,9 +21,11 @@ extern unordered_map<string, MidiTranslator> Miditranslators;
 extern unordered_map<string, int> cc_map;
 
 
+
 void engine_setup();
 void engine_update(midi_io& midiio);
 void midi_processsor(midi_io& midiio);
+void hid_processor();
 
 
 
