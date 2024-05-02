@@ -30,45 +30,46 @@ void setup(){
 
     Serial.begin(115200);
 
-    // if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
-    //     Serial.println("LittleFS Mount Failed");
-    //     return;
-    // }
-    // Serial.println("LittleFS Mount Success");
-    //listDir(LittleFS, "/", 2);
 
-    //////////// Wifi 
-    // WiFiManager wm;
-    // // reset settings - wipe stored credentials for testing
-    // // wm.resetSettings();
-    // bool res;
-    // //wm.setDebugOutput(true);
-    // res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-    // delay(2000);
-    //     if(!res) {
-    //     Serial.println("Failed to connect");
-    //     // ESP.restart();
-    // } 
-    // else {
-    //     //if you get here you have connected to the WiFi    
-    //     Serial.println("connected...yeey :)");
-    // }
+    ////////// Wifi 
+    WiFiManager wm;
+    // reset settings - wipe stored credentials for testing
+    if(digitalRead(35)==HIGH)
+    {
+        wm.resetSettings();
+        Serial.println("Settings reset");}
+    bool res;
+    wm.setDebugOutput(true);
+    res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+    delay(2000);
+        if(!res) {
+        Serial.println("Failed to connect");
+        ESP.restart();
+    } 
+    else {
+        //if you get here you have connected to the WiFi    
+        Serial.println("connected...yeey :)");
+    }
 
-    //connect to wifi manually
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin("freebox_RZWVFD", "AZERTYUIOP");
-    // while (WiFi.status() != WL_CONNECTED) {
-    //     delay(500);
-    //     Serial.print(".");
-    // }
-    // Serial.println("Connected to WiFi");
-    // Serial.println(WiFi.localIP());
+    // LittleFS
+    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
+    Serial.println("LittleFS Mount Failed");
+    return;
+    }
+    Serial.println("LittleFS Mount Success");
+    listDir(LittleFS, "/", 2);
+
+
 
     // Initialize the ICM-20948
     Wire.begin(2, 1, 400000);
     acc_sensor.init();
     acc_sensor.setup();
 
+
+    webserver_setup();
+
+    delay(5000);
     
 }
 
