@@ -21,8 +21,8 @@ midi_io midiio;
 void setup(){
     sensor& acc_sensor = sensor::getInstance();
 
-    //Init Serial
     
+    Serial.begin(115200);
 
     // Init LittleFS
     if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
@@ -33,14 +33,11 @@ void setup(){
     // listDir(LittleFS, "/config", 2);
     // listDir(LittleFS, "/webpage", 2);
 
-
-    delay(2000);
-
-    // Init 
+    // Init midi
     midiio.setup();
-    engine_setup();
 
-    Serial.begin(115200);
+
+    
 
     //Init Wifi 
     WiFiManager wm;
@@ -63,7 +60,7 @@ void setup(){
     }
 
     
-
+    engine_setup();
 
 
     // Initialize the ICM-20948
@@ -73,8 +70,6 @@ void setup(){
 
 
     webserver_setup();
-
-    delay(5000);
     
 }
 

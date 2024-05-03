@@ -42,10 +42,10 @@ void engine_setup()
 {
     usb_hid_setup();
 
-    set_default_config();
-    //load_config("/config/current_config.json");
+    //set_default_config();
+    load_config("/config/current_config.json");
     
-    //Serial.println(get_config().c_str());
+    Serial.println(get_config().c_str());
 
 
 }
