@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <MIDI.h>
+#include "json.hpp"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ class MidiTranslator
         MidiTranslator();
 
         //notes variables
-        int translator_mode = 0; //0=cc, 1 note
+        int translator_mode = 0; //0=cc, 1 note, 2 both
         string scaleType="major";
         int rootNote = 45;
         int numberOfNotes = 25;
@@ -81,6 +82,13 @@ class MidiTranslator
         // To cc variables
         int get_cc_val(float value, bool hires=false);
         int map_linear(float x);
+
+
+        // save/load
+        void to_json(nlohmann::json& j,const MidiTranslator& t);
+        string serialize() const;
+        void from_json(const nlohmann::json& j, MidiTranslator& t);
+        void deserialize(const string& data);
 
 
     private:

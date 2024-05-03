@@ -20,18 +20,29 @@ midi_io midiio;
 
 void setup(){
     sensor& acc_sensor = sensor::getInstance();
-    //MidiUSBSetup();
+
+    //Init Serial
     
 
+    // Init LittleFS
+    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
+    Serial.println("LittleFS Mount Failed");
+    return;
+    }
+    Serial.println("LittleFS Mount Success");
+    // listDir(LittleFS, "/config", 2);
+    // listDir(LittleFS, "/webpage", 2);
+
+
+    delay(2000);
+
+    // Init 
     midiio.setup();
     engine_setup();
 
-    
-
     Serial.begin(115200);
 
-
-    ////////// Wifi 
+    //Init Wifi 
     WiFiManager wm;
     // reset settings - wipe stored credentials for testing
     if(digitalRead(35)==HIGH)
@@ -51,13 +62,7 @@ void setup(){
         Serial.println("connected...yeey :)");
     }
 
-    // LittleFS
-    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
-    Serial.println("LittleFS Mount Failed");
-    return;
-    }
-    Serial.println("LittleFS Mount Success");
-    listDir(LittleFS, "/", 2);
+    
 
 
 

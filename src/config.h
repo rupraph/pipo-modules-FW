@@ -8,32 +8,20 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
-#include "toml.hpp"
+
 using namespace std;
 
 // the config file wil define the data structure and methods to save and load the configuration of the device
 // the configuration will be saved in the preferences of the ESP32
 
-
-typedef struct
-{
-    unordered_map<string, bool> connectivity_power_status;
-} configuration;
-
-configuration default_CONFIG = {
-    {
-        {"ble_enabled", true},
-        {"wifi_enabled", true}
-    }
-};
-
 class Config
 {
     public:
-    configuration current_CONFIG;
-    void load_config();
-    void save_config();
-    void print_config();
+        std::string current_config;
+        Config();
+        void load_config();
+        void save_config();
+        void print_config();
 };
 
 
@@ -67,3 +55,4 @@ class Config
 // };
 
 
+#endif //CONFIG_H

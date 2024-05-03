@@ -7,7 +7,7 @@ AsyncWebServer server(80);
 void webserver_setup(){
 
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-    server.serveStatic("/", LittleFS, "").setDefaultFile("index.html");
+    server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
     
     server.onNotFound(notFound);
 

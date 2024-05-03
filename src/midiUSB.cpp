@@ -8,6 +8,8 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 void MidiUSBSetup() {
     TinyUSBDevice.setManufacturerDescriptor("Rup");
     TinyUSBDevice.setProductDescriptor("PipoUSB");
+    // while (!TinyUSBDevice.mounted())
+    //     delay(1);
     MidiUsb.begin(MIDI_CHANNEL_OMNI);
     
 }

@@ -1,9 +1,12 @@
 #include "midi_translator.h"
 
 
+// for convenience
+using json = nlohmann::json;
+
 MidiTranslator::MidiTranslator() {
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
-    printScale(current_scale);
+    //printScale(current_scale);
 
 }
 
@@ -121,7 +124,7 @@ vector<int> MidiTranslator::generate_full_Scale(int rootNote,int nb_notes, strin
     //int maxNote = convertNoteNameToNumber(maximumNote);
 
     vector<int> scale = generate_base_Scale(rootNote, scaleType);
-    printScale(scale);
+    //printScale(scale);
     vector<int> expandedScale;
 
     int baseScaleSize = scale.size();
@@ -169,7 +172,7 @@ vector<string> MidiTranslator::get_scale_names() {
 
 void MidiTranslator::update_scale() {
     this->current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
-    printScale(this->current_scale);
+    //printScale(this->current_scale);
 }
 
 int MidiTranslator::get_cc_val(float value,bool hires) {
@@ -193,7 +196,42 @@ int MidiTranslator::map_linear(float value){
     return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output);
 }
 
+void to_json(json& j, const MidiTranslator& t) {
+    j = json{
+        {"translator_mode", t.translator_mode},
+        {"scaleType", t.scaleType},
+        {"rootNote", t.rootNote},
+        {"numberOfNotes", t.numberOfNotes},
+        {"current_scale", t.current_scale},
+        {"max_input", t.max_input},
+        {"min_input", t.min_input},
+        {"max_output", t.max_output},
+        {"min_output", t.min_output},
+        {"cc_resolution", t.cc_resolution},
+        {"interpolation_type", t.interpolation_type},
+    };
+}
 
+string MidiTranslator::serialize() const {
+    json j = *this;
+    return j.dump();
+}
 
+void from_json(const json& j, MidiTranslator& t) {
+    j.at("translator_mode").get_to(t.translator_mode);
+    j.at("scaleType").get_to(t.scaleType);
+    j.at("rootNote").get_to(t.rootNote);
+    j.at("numberOfNotes").get_to(t.numberOfNotes);
+    j.at("current_scale").get_to(t.current_scale);
+    j.at("max_input").get_to(t.max_input);
+    j.at("min_input").get_to(t.min_input);
+    j.at("max_output").get_to(t.max_output);
+    j.at("min_output").get_to(t.min_output);
+    j.at("cc_resolution").get_to(t.cc_resolution);
+    j.at("interpolation_type").get_to(t.interpolation_type);
+}
 
-
+void MidiTranslator::deserialize(const string& data) {
+    json j = json::parse(data);
+    *this = j.get<MidiTranslator>();
+}

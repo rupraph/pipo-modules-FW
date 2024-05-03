@@ -62,20 +62,23 @@ void removeDir(fs::FS &fs, const char * path){
     }
 }
 
-void readFile(fs::FS &fs, const char * path){
+std::string readFile(fs::FS &fs, const char * path){
     Serial.printf("Reading file: %s\r\n", path);
 
-    File file = fs.open(path);
+    File file = fs.open(path,"r");
     if(!file || file.isDirectory()){
         Serial.println("- failed to open file for reading");
-        return;
+        return std::string();
     }
 
     Serial.println("- read from file:");
+    std::string fileContents;
     while(file.available()){
-        Serial.write(file.read());
+        fileContents += (char)file.read();
     }
     file.close();
+
+    return fileContents;
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){

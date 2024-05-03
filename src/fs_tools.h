@@ -11,7 +11,7 @@ void writeFile2(fs::FS &fs, const char *path, const char *message);
 void deleteFile(fs::FS &fs, const char *path);
 void deleteFile2(fs::FS &fs, const char *path);
 void removeDir(fs::FS &fs, const char *path);
-void readFile(fs::FS &fs, const char *path);
+std::string readFile(fs::FS &fs, const char *path);
 void appendFile(fs::FS &fs, const char *path, const char *message);
 void renameFile(fs::FS &fs, const char *path1, const char *path2);
 void testFileIO(fs::FS &fs, const char * path);

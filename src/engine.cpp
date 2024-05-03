@@ -1,5 +1,10 @@
 #include "engine.h"
 
+
+
+// for convenience
+using json = nlohmann::json;
+
 sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 unordered_map<string, MidiTranslator> Miditranslators ={
@@ -29,11 +34,24 @@ hid_mouse_report_t       mouse;
 std::unordered_map<std::string, std::function<int8_t&(hid_gamepad_report_t&)>> gp_axis_map;
 std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> gp_button_map;
 
+// will have to add error catching: -> when config could not load for eg. 
+
+
 
 void engine_setup()
 {
     usb_hid_setup();
 
+    set_default_config();
+    //load_config("/config/current_config.json");
+    
+    //Serial.println(get_config().c_str());
+
+
+}
+
+void set_default_config()
+{
     // Hid mapping config
     gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
     gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
@@ -43,7 +61,7 @@ void engine_setup()
     Miditranslators["roll"].min_input=-180;
     Miditranslators["roll"].translator_mode=1;
     Miditranslators["roll"].rootNote=40;
-    Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
+    //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
     Miditranslators["roll"].update_scale();
 
 
@@ -53,13 +71,40 @@ void engine_setup()
     Miditranslators["yaw"].max_input=180;
     Miditranslators["yaw"].min_input=-180;
 
+    // ADD SAVE CONFIG
 }
+
+string get_config()
+{   
+    json j;
+    for (auto const& pair : Miditranslators)
+    {
+        j[pair.first]=pair.second.serialize();
+    }
+    return j.dump();
+}
+
+void set_config(string config)
+{
+    json j = json::parse(config);
+    for (auto const& pair : j.items())
+    {
+        Miditranslators[pair.key()].deserialize(pair.value());
+    }
+}
+
+void load_config(String filename)
+{
+    string config = readFile(LittleFS,filename.c_str());
+    //Serial.println(config.c_str());
+    set_config(config);
+}
+
 
 void engine_update(midi_io& midiio)
 {
     midi_processsor(midiio);
-    hid_processor();
-    
+    //hid_processor();
 }
 
 
@@ -120,7 +165,7 @@ void hid_processor()
             {
                 // Serial.print("hid ");
                 // Serial.println(map(sensor_val, -180, 180, -127, 127));
-                gp_axis_map[name](gp)= map(sensor_val, -180, 180, -127, 127);
+                gp_axis_map[name](gp)= ::map(sensor_val, -180, 180, -127, 127);
             }
         }
     }
