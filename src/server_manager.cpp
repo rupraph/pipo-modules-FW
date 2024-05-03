@@ -21,6 +21,22 @@ void setup_requests(){
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(200, "text/plain", "Hello, world");
     });
+
+    server.on("/config/general", HTTP_POST, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+    });
+
+    server.on("/config/midi", HTTP_POST, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+    });
+
+    server.on("/config/osc", HTTP_POST, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+    });
+
+    server.on("/config/hid", HTTP_POST, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+    });
 }
 
 void notFound(AsyncWebServerRequest *request) {

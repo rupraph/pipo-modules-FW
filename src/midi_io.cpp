@@ -71,8 +71,7 @@ void midi_io::sendHiResControlChange(int control, int value, int channel)
 }
 
 void midi_io::update()
-{
-    
+{  
     manage_sustain();
 }
 

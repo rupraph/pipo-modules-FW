@@ -6,11 +6,13 @@
 #include "acc_sensor.h"
 #include "server_manager.h"
 #include "engine.h"
+#include "config.h"
 
 
 OSC_handler osc;
 MidiTranslator midi_translator;
 midi_io midiio;
+usb_hid hidio;
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -33,11 +35,11 @@ void setup(){
     // listDir(LittleFS, "/config", 2);
     // listDir(LittleFS, "/webpage", 2);
 
+
+
     // Init midi
     midiio.setup();
-
-
-    
+    hidio.usb_hid_setup();
 
     //Init Wifi 
     WiFiManager wm;
@@ -83,7 +85,7 @@ void loop() {
     acc_sensor.update();
 
 
-    engine_update(midiio);
+    engine_update(midiio, hidio);
     midiio.update();
     
     // osc.sendOscMessage(acc_sensor.roll);

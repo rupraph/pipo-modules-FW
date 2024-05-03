@@ -40,7 +40,9 @@ std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> 
 
 void engine_setup()
 {
-    usb_hid_setup();
+    // Hid mapping config
+    gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
+    gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
 
     //set_default_config();
     load_config("/config/current_config.json");
@@ -101,10 +103,10 @@ void load_config(String filename)
 }
 
 
-void engine_update(midi_io& midiio)
+void engine_update(midi_io& midiio,usb_hid& hidio)
 {
     midi_processsor(midiio);
-    //hid_processor();
+    hid_processor(hidio);
 }
 
 
@@ -152,7 +154,7 @@ void midi_processsor(midi_io& midiio)
     
 }
 
-void hid_processor()
+void hid_processor(usb_hid& hidio)
 {
     for (auto const& pair : mySensor.enable_map)
     {
@@ -170,8 +172,8 @@ void hid_processor()
         }
     }
 
-    //gp.x = 125;
-    usb_hid_update(&gp);
+    // should move report in engine.
+    hidio.usb_hid_update(&gp);
 
 }
 

@@ -29,9 +29,9 @@ void set_default_config();
 string get_config();
 void load_config(String path);
 void set_config(string data);
-void engine_update(midi_io& midiio);
+void engine_update(midi_io& midiio,usb_hid& hidio);
 void midi_processsor(midi_io& midiio);
-void hid_processor();
+void hid_processor(usb_hid& hidio);
 
 
 
