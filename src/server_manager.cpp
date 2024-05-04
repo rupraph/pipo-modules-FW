@@ -2,6 +2,11 @@
 #include "fs_tools.h"
 
 
+// is using buildflag for regex
+// ASYNCWEBSERVER_REGEX to enable the regex support
+// For platformio: platformio.ini:
+//  build_flags = 
+//      -DASYNCWEBSERVER_REGEX
 
 
 void ServerManager::setup(){
@@ -39,6 +44,11 @@ void ServerManager::setup_requests(){
     server.on("/config/midi", HTTP_POST, [this](AsyncWebServerRequest *request){
         request->send(200, "text/plain", "Hello, world");
         this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
+    });
+
+    server.on("^\\/config/midi\\/([a-zA-Z0-9]+)\\/([0-9]+)$", HTTP_GET, [this](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", "Midi"+request->pathArg(0)+"value"+request->pathArg(1));
+    //this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
     });
 
     server.on("/config/osc", HTTP_POST, [](AsyncWebServerRequest *request){
