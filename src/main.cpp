@@ -66,7 +66,7 @@ void setup(){
     }
 
     engine.set_config(config);
-    
+    engine.Miditranslators["roll"].set_param("translator_mode", 0);
 
 
     // Initialize the ICM-20948

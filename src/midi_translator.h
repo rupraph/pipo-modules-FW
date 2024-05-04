@@ -94,6 +94,44 @@ class MidiTranslator
 
         string serialize() const;
         void deserialize(const string& data);
+
+        template <typename T>
+        void set_param(const string& param_name, const T& value) {
+            if (param_name == "translator_mode") {
+                translator_mode = value;
+            }
+            else if (param_name == "scaleType") {
+                scaleType = value;
+            }
+            else if (param_name == "rootNote") {
+                rootNote = value;
+            }
+            else if (param_name == "numberOfNotes") {
+                numberOfNotes = value;
+            }
+            else if (param_name == "max_input") {
+                max_input = value;
+            }
+            else if (param_name == "min_input") {
+                min_input = value;
+            }
+            else if (param_name == "max_output") {
+                max_output = value;
+            }
+            else if (param_name == "min_output") {
+                min_output = value;
+            }
+            else if (param_name == "cc_resolution") {
+                cc_resolution = value;
+            }
+            else if (param_name == "interpolation_type") {
+                interpolation_type = value;
+            }
+            else {
+                cout << "Invalid parameter name." << endl;
+            }
+        }
+
         
         
 
