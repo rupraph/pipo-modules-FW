@@ -8,8 +8,11 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
+#include "fs_tools.h"
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
 // the config file wil define the data structure and methods to save and load the configuration of the device
 // the configuration will be saved in the preferences of the ESP32
@@ -17,10 +20,13 @@ using namespace std;
 class Config
 {
     public:
-        std::string current_config;
+        //std::string current_config;
         Config();
-        void load_config();
-        void save_config();
+        json current_config;
+        void load_config(String filename);
+        void save_config(String filename);
+        json get_config_for_key(string key);
+        void save_config_for_key(string key, json data);
         void print_config();
 };
 

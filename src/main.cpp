@@ -13,6 +13,7 @@ OSC_handler osc;
 MidiTranslator midi_translator;
 midi_io midiio;
 usb_hid hidio;
+Config config;
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -35,6 +36,8 @@ void setup(){
     // listDir(LittleFS, "/config", 2);
     // listDir(LittleFS, "/webpage", 2);
 
+    // Load config
+    config.load_config("/config/current_config.json");
 
 
     // Init midi
@@ -61,8 +64,9 @@ void setup(){
         Serial.println("connected...yeey :)");
     }
 
-    
+    engine_set_config(config);
     engine_setup();
+    
 
 
     // Initialize the ICM-20948

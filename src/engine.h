@@ -4,10 +4,12 @@
 #include "acc_sensor.h"
 #include <unordered_map>
 #include "midi_translator.h"
+#include "hid_translator.h"
 #include "midi_io.h"
 #include "usb_hid.h"
 #include "json.hpp"
 #include "fs_tools.h"
+#include "config.h"
 
 using namespace std;
 
@@ -20,15 +22,15 @@ using namespace std;
 //     {"roll", midi_translator(0, 0, 0)},
 
 extern unordered_map<string, MidiTranslator> Miditranslators;
+extern unordered_map<string, HidTranslator> hid_map;
 extern unordered_map<string, int> cc_map;
 
 
 
 void engine_setup();
 void set_default_config();
-string get_config();
-void load_config(String path);
-void set_config(string data);
+json engine_get_config();
+void engine_set_config(Config& config);
 void engine_update(midi_io& midiio,usb_hid& hidio);
 void midi_processsor(midi_io& midiio);
 void hid_processor(usb_hid& hidio);

@@ -217,6 +217,10 @@ string MidiTranslator::serialize() const {
     return j.dump();
 }
 
+json MidiTranslator::get_json() const {
+    return json(*this);
+}
+
 void from_json(const json& j, MidiTranslator& t) {
     j.at("translator_mode").get_to(t.translator_mode);
     j.at("scaleType").get_to(t.scaleType);
@@ -233,5 +237,9 @@ void from_json(const json& j, MidiTranslator& t) {
 
 void MidiTranslator::deserialize(const string& data) {
     json j = json::parse(data);
+    *this = j.get<MidiTranslator>();
+}
+
+void MidiTranslator::set_from_json(const json& j) {
     *this = j.get<MidiTranslator>();
 }

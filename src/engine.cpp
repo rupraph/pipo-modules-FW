@@ -7,6 +7,10 @@ using json = nlohmann::json;
 
 sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
+
+// should create a table for axis config. min max, etc, since this is shared for both hid and midi
+
+
 unordered_map<string, MidiTranslator> Miditranslators ={
     {"roll",MidiTranslator()},
     {"pitch",MidiTranslator()},
@@ -16,6 +20,7 @@ unordered_map<string, MidiTranslator> Miditranslators ={
     {"accZ",MidiTranslator()}
 };
 
+// Have to move this to midi translator
 unordered_map<string, int> cc_map= {
     {"roll",1},
     {"pitch",2},
@@ -26,13 +31,24 @@ unordered_map<string, int> cc_map= {
 };
 
 
+
+
 hid_gamepad_report_t    gp;
 hid_keyboard_report_t    kb;
 hid_mouse_report_t       mouse;
 
-// Define a map from strings to functions that take a hid_gamepad_report_t& and return a reference to an int
-std::unordered_map<std::string, std::function<int8_t&(hid_gamepad_report_t&)>> gp_axis_map;
-std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> gp_button_map;
+// Define a map from strings and functions that take a hid_gamepad_report_t& and return a reference to an int
+// std::unordered_map<std::string, std::function<int8_t&(hid_gamepad_report_t&)>> gp_axis_map;
+// std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> gp_button_map;
+
+unordered_map<string, HidTranslator> hid_map ={
+    {"roll",HidTranslator()},
+    {"pitch",HidTranslator()},
+    {"yaw",HidTranslator()},
+    {"accX",HidTranslator()},
+    {"accY",HidTranslator()},
+    {"accZ",HidTranslator()}
+};
 
 // will have to add error catching: -> when config could not load for eg. 
 
@@ -40,23 +56,25 @@ std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> 
 
 void engine_setup()
 {
-    // Hid mapping config
-    gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
-    gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
-
-    //set_default_config();
-    load_config("/config/current_config.json");
+    // load config
     
-    Serial.println(get_config().c_str());
-
+    
+    //set_default_config();
+    
+    //test config
+    json test = engine_get_config();
+    //Serial.println(get_config().c_str());
 
 }
 
 void set_default_config()
 {
     // Hid mapping config
-    gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
-    gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
+    // gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
+    // gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
+    hid_map["roll"].mapto = "x";
+    hid_map["pitch"].mapto = "y";
+
 
     // Midi mapping config
     Miditranslators["roll"].max_input=180;
@@ -76,30 +94,51 @@ void set_default_config()
     // ADD SAVE CONFIG
 }
 
-string get_config()
+json engine_get_config()
 {   
-    json j;
-    for (auto const& pair : Miditranslators)
-    {
-        j[pair.first]=pair.second.serialize();
-    }
-    return j.dump();
+        json jengine;
+        json j;
+        for (auto const& pair : Miditranslators)
+        {
+            jengine["engine-midi"][pair.first] = pair.second.get_json();
+        }
+        for (auto const& pair : hid_map)
+        {
+            jengine["engine-hid"][pair.first] = pair.second.get_json();
+        }
+        j["engine"] = jengine;
+        Serial.println(j.dump().c_str());
+        return j;
 }
 
-void set_config(string config)
+void engine_set_config(Config& config)
 {
-    json j = json::parse(config);
-    for (auto const& pair : j.items())
+    json jengine = config.get_config_for_key("engine");
+    json jmidi = jengine["engine-midi"];
+    // set midi config from general config
+    for (auto const& pair : Miditranslators)
     {
-        Miditranslators[pair.key()].deserialize(pair.value());
+        if (jmidi.find(pair.first) != jmidi.end())
+        {
+            Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
+        }
+    }
+    // set hid config from general config
+    json jhid = jengine["engine-hid"];
+    for (auto const& pair : hid_map)
+    {
+        if (jhid.find(pair.first) != jhid.end())
+        {
+            hid_map[pair.first].set_from_json(jhid[pair.first]);
+        }
     }
 }
 
 void load_config(String filename)
 {
-    string config = readFile(LittleFS,filename.c_str());
-    //Serial.println(config.c_str());
-    set_config(config);
+    // string config = readFile(LittleFS,filename.c_str());
+    // //Serial.println(config.c_str());
+    // set_config(config);
 }
 
 
@@ -155,7 +194,8 @@ void midi_processsor(midi_io& midiio)
 }
 
 void hid_processor(usb_hid& hidio)
-{
+{ // not dealing with buttons yet
+
     for (auto const& pair : mySensor.enable_map)
     {
         if (pair.second)
@@ -163,17 +203,70 @@ void hid_processor(usb_hid& hidio)
             string name=pair.first;
             float sensor_val=mySensor.data_map[name];
 
-            if (gp_axis_map.find(name) != gp_axis_map.end())
+            if (hid_map.find(name) != hid_map.end())
             {
-                // Serial.print("hid ");
-                // Serial.println(map(sensor_val, -180, 180, -127, 127));
-                gp_axis_map[name](gp)= ::map(sensor_val, -180, 180, -127, 127);
+                string map_name=hid_map[name].mapto;
+                int hid_val=hid_map[name].get_current_int(sensor_val);
+                if (hidio.hid_mode==0)
+                {
+                    if (map_name=="x")
+                    {
+                        gp.x=hid_val;
+                    }
+                    else if (map_name=="y")
+                    {
+                        gp.y=hid_val;
+                    }
+                    else if (map_name=="z")
+                    {
+                        gp.z=hid_val;
+                    }
+                    else if (map_name=="rx")
+                    {
+                        gp.rx=hid_val;
+                    }
+                    else if (map_name=="ry")
+                    {
+                        gp.ry=hid_val;
+                    }
+                    else if (map_name=="rz")
+                    {
+                        gp.rz=hid_val;
+                    }
+                }
+                else if (hidio.hid_mode==1)
+                {
+                    if (map_name=="x")
+                    {
+                        mouse.x=hid_val;
+                    }
+                    else if (map_name=="y")
+                    {
+                        mouse.y=hid_val;
+                    }
+                    else if (map_name=="wheel")
+                    {
+                        mouse.wheel=hid_val;
+                    }
+                }
             }
         }
     }
 
     // should move report in engine.
-    hidio.usb_hid_update(&gp);
-
+    switch (hidio.hid_mode)
+    {
+    case 0:
+        hidio.usb_hid_update(&gp);
+        break;
+    case 1:
+        hidio.usb_hid_update(&mouse);
+        break;
+    case 2:
+        hidio.usb_hid_update(&kb);
+        break;
+    }
 }
+
+
 

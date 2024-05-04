@@ -56,6 +56,7 @@ class MidiTranslator
             {"locrian", {0, 1, 3, 5, 6, 8, 10}},
             {"ionian", {0, 2, 4, 5, 7, 9, 11}},
             {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
+            //Turkish ??
         };
 
 
@@ -86,9 +87,15 @@ class MidiTranslator
 
         // save/load
         void to_json(nlohmann::json& j,const MidiTranslator& t);
-        string serialize() const;
         void from_json(const nlohmann::json& j, MidiTranslator& t);
+
+        nlohmann::json get_json() const;
+        void set_from_json(const nlohmann::json& j);
+
+        string serialize() const;
         void deserialize(const string& data);
+        
+        
 
 
     private:
