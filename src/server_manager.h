@@ -2,12 +2,23 @@
 #define SERVER_MANAGER_H
 
 #include <Arduino.h>
-
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPmDNS.h>
+#include "engine.h"
 
-void webserver_setup();
-void setup_requests();
-void notFound(AsyncWebServerRequest *request);
+
+class ServerManager
+{
+    public:
+        ServerManager(Engine& engine): server(80), engine(engine) {}
+        void setup();
+        void setup_requests();
+        static void notFound(AsyncWebServerRequest *request);
+
+    private:
+        AsyncWebServer server;
+        Engine& engine;
+};
 
 #endif //WEBSERVER_H

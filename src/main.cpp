@@ -15,6 +15,7 @@ midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine;
+ServerManager server_manager(engine);
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -74,8 +75,9 @@ void setup(){
     acc_sensor.init();
     acc_sensor.setup();
 
-
-    webserver_setup();
+    // check that wifi is connected
+    server_manager.setup();
+    server_manager.setup_requests();
     
 }
 
