@@ -14,6 +14,7 @@ MidiTranslator midi_translator;
 midi_io midiio;
 usb_hid hidio;
 Config config;
+Engine engine;
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -64,8 +65,7 @@ void setup(){
         Serial.println("connected...yeey :)");
     }
 
-    engine_set_config(config);
-    engine_setup();
+    engine.set_config(config);
     
 
 
@@ -89,7 +89,7 @@ void loop() {
     acc_sensor.update();
 
 
-    engine_update(midiio, hidio);
+    engine.update(midiio, hidio);
     midiio.update();
     
     // osc.sendOscMessage(acc_sensor.roll);

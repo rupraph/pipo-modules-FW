@@ -15,28 +15,52 @@ using namespace std;
 
 // this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
 
-//decide if miditranslator holds its config per voice, and get the input name for structure
-// or if we do the opposite, and we fetch settings... 
+class Engine
+{
+    public:
+        Engine();
 
-// unordered_map<string, midi_translator> midi_map = {
-//     {"roll", midi_translator(0, 0, 0)},
+        unordered_map<string, MidiTranslator> Miditranslators ={
+            {"roll",MidiTranslator()},
+            {"pitch",MidiTranslator()},
+            {"yaw",MidiTranslator()},
+            {"accX",MidiTranslator()},
+            {"accY",MidiTranslator()},
+            {"accZ",MidiTranslator()}
+        };
 
-extern unordered_map<string, MidiTranslator> Miditranslators;
-extern unordered_map<string, HidTranslator> hid_map;
-extern unordered_map<string, int> cc_map;
+        unordered_map<string, HidTranslator> hid_map ={
+            {"roll",HidTranslator()},
+            {"pitch",HidTranslator()},
+            {"yaw",HidTranslator()},
+            {"accX",HidTranslator()},
+            {"accY",HidTranslator()},
+            {"accZ",HidTranslator()}
+        };
+
+        // Have to move this into midi translator
+        unordered_map<string, int> cc_map= {
+            {"roll",1},
+            {"pitch",2},
+            {"yaw",3},
+            {"accX",4},
+            {"accY",5},
+            {"accZ",6}
+        };
+
+        hid_gamepad_report_t    gp;
+        hid_keyboard_report_t    kb;
+        hid_mouse_report_t       mouse;
 
 
+        void update(midi_io& midiio,usb_hid& hidio);
+        void midi_processsor(midi_io& midiio);
+        void hid_processor(usb_hid& hidio);
+        void set_default_config();
+        json get_config();
+        void set_config(Config& config);
 
-void engine_setup();
-void set_default_config();
-json engine_get_config();
-void engine_set_config(Config& config);
-void engine_update(midi_io& midiio,usb_hid& hidio);
-void midi_processsor(midi_io& midiio);
-void hid_processor(usb_hid& hidio);
-
-
-
+};
 
 
 #endif //ENGINE_H

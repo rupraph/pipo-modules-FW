@@ -1,7 +1,6 @@
 #include "engine.h"
 
 
-
 // for convenience
 using json = nlohmann::json;
 
@@ -10,146 +9,23 @@ sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 // should create a table for axis config. min max, etc, since this is shared for both hid and midi
 
-
-unordered_map<string, MidiTranslator> Miditranslators ={
-    {"roll",MidiTranslator()},
-    {"pitch",MidiTranslator()},
-    {"yaw",MidiTranslator()},
-    {"accX",MidiTranslator()},
-    {"accY",MidiTranslator()},
-    {"accZ",MidiTranslator()}
-};
-
-// Have to move this to midi translator
-unordered_map<string, int> cc_map= {
-    {"roll",1},
-    {"pitch",2},
-    {"yaw",3},
-    {"accX",4},
-    {"accY",5},
-    {"accZ",6}
-};
-
-
-
-
-hid_gamepad_report_t    gp;
-hid_keyboard_report_t    kb;
-hid_mouse_report_t       mouse;
-
-// Define a map from strings and functions that take a hid_gamepad_report_t& and return a reference to an int
-// std::unordered_map<std::string, std::function<int8_t&(hid_gamepad_report_t&)>> gp_axis_map;
-// std::unordered_map<std::string, std::function<int32_t&(hid_gamepad_report_t&)>> gp_button_map;
-
-unordered_map<string, HidTranslator> hid_map ={
-    {"roll",HidTranslator()},
-    {"pitch",HidTranslator()},
-    {"yaw",HidTranslator()},
-    {"accX",HidTranslator()},
-    {"accY",HidTranslator()},
-    {"accZ",HidTranslator()}
-};
+// should push axis enabling in here instead of in the sensor class
 
 // will have to add error catching: -> when config could not load for eg. 
 
-
-
-void engine_setup()
+Engine::Engine()
 {
-    // load config
-    
-    
-    //set_default_config();
-    
-    //test config
-    json test = engine_get_config();
-    //Serial.println(get_config().c_str());
 
 }
 
-void set_default_config()
-{
-    // Hid mapping config
-    // gp_axis_map["roll"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.x; };
-    // gp_axis_map["pitch"] = [](hid_gamepad_report_t& gp) -> int8_t& { return gp.y; };
-    hid_map["roll"].mapto = "x";
-    hid_map["pitch"].mapto = "y";
-
-
-    // Midi mapping config
-    Miditranslators["roll"].max_input=180;
-    Miditranslators["roll"].min_input=-180;
-    Miditranslators["roll"].translator_mode=1;
-    Miditranslators["roll"].rootNote=40;
-    //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
-    Miditranslators["roll"].update_scale();
-
-
-    Miditranslators["pitch"].max_input=90;
-    Miditranslators["pitch"].min_input=-90;
-
-    Miditranslators["yaw"].max_input=180;
-    Miditranslators["yaw"].min_input=-180;
-
-    // ADD SAVE CONFIG
-}
-
-json engine_get_config()
-{   
-        json jengine;
-        json j;
-        for (auto const& pair : Miditranslators)
-        {
-            jengine["engine-midi"][pair.first] = pair.second.get_json();
-        }
-        for (auto const& pair : hid_map)
-        {
-            jengine["engine-hid"][pair.first] = pair.second.get_json();
-        }
-        j["engine"] = jengine;
-        Serial.println(j.dump().c_str());
-        return j;
-}
-
-void engine_set_config(Config& config)
-{
-    json jengine = config.get_config_for_key("engine");
-    json jmidi = jengine["engine-midi"];
-    // set midi config from general config
-    for (auto const& pair : Miditranslators)
-    {
-        if (jmidi.find(pair.first) != jmidi.end())
-        {
-            Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
-        }
-    }
-    // set hid config from general config
-    json jhid = jengine["engine-hid"];
-    for (auto const& pair : hid_map)
-    {
-        if (jhid.find(pair.first) != jhid.end())
-        {
-            hid_map[pair.first].set_from_json(jhid[pair.first]);
-        }
-    }
-}
-
-void load_config(String filename)
-{
-    // string config = readFile(LittleFS,filename.c_str());
-    // //Serial.println(config.c_str());
-    // set_config(config);
-}
-
-
-void engine_update(midi_io& midiio,usb_hid& hidio)
+void Engine::update(midi_io& midiio,usb_hid& hidio)
 {
     midi_processsor(midiio);
     hid_processor(hidio);
 }
 
 
-void midi_processsor(midi_io& midiio)
+void Engine::midi_processsor(midi_io& midiio)
 {
     for (auto const& pair : mySensor.enable_map)
     {
@@ -193,7 +69,7 @@ void midi_processsor(midi_io& midiio)
     
 }
 
-void hid_processor(usb_hid& hidio)
+void Engine::hid_processor(usb_hid& hidio)
 { // not dealing with buttons yet
 
     for (auto const& pair : mySensor.enable_map)
@@ -253,7 +129,6 @@ void hid_processor(usb_hid& hidio)
         }
     }
 
-    // should move report in engine.
     switch (hidio.hid_mode)
     {
     case 0:
@@ -268,5 +143,67 @@ void hid_processor(usb_hid& hidio)
     }
 }
 
+void Engine::set_default_config()
+{
+    // Hid mapping config
+    hid_map["roll"].mapto = "x";
+    hid_map["pitch"].mapto = "y";
 
 
+    // Midi mapping config
+    Miditranslators["roll"].max_input=180;
+    Miditranslators["roll"].min_input=-180;
+    Miditranslators["roll"].translator_mode=1;
+    Miditranslators["roll"].rootNote=40;
+    //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
+    Miditranslators["roll"].update_scale();
+
+
+    Miditranslators["pitch"].max_input=90;
+    Miditranslators["pitch"].min_input=-90;
+
+    Miditranslators["yaw"].max_input=180;
+    Miditranslators["yaw"].min_input=-180;
+
+    // ADD SAVE CONFIG
+}
+
+json Engine::get_config()
+{   
+        json jengine;
+        json j;
+        for (auto const& pair : Miditranslators)
+        {
+            jengine["engine-midi"][pair.first] = pair.second.get_json();
+        }
+        for (auto const& pair : hid_map)
+        {
+            jengine["engine-hid"][pair.first] = pair.second.get_json();
+        }
+        j["engine"] = jengine;
+        Serial.println(j.dump().c_str());
+        return j;
+}
+
+void Engine::set_config(Config& config)
+{
+    json jengine = config.get_config_for_key("engine");
+    json jmidi = jengine["engine-midi"];
+    // set midi config from general config
+    for (auto const& pair : Miditranslators)
+    {
+        if (jmidi.find(pair.first) != jmidi.end())
+        {
+            Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
+        }
+    }
+    // set hid config from general config
+    json jhid = jengine["engine-hid"];
+    for (auto const& pair : hid_map)
+    {
+        if (jhid.find(pair.first) != jhid.end())
+        {
+            hid_map[pair.first].set_from_json(jhid[pair.first]);
+        }
+    }
+}
