@@ -74,7 +74,6 @@ void setup(){
 
 
     engine.get_config(false);
-
     engine.set_config(config);
     // engine.Miditranslators["roll"].set_param("translator_mode", 0);
 

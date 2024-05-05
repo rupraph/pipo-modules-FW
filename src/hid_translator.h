@@ -12,6 +12,7 @@ private:
     /* data */
 public:
 
+    //Todo: link to usb hid mode or use only one of the 2
     int out_type=0; //0=axis, 1=button
     string mapto="x"; //Gamepad: x,y,z,rz,rx,ry,buttons, hat //Mouse: x,y,wheel,buttons,pan //Keyboard: keycodes
 
@@ -22,7 +23,7 @@ public:
     int input_max=180;
     int input_min=-180;
 
-    int use_threshold=1;
+    int use_threshold=0;
     int threshold=0;
 
     int output_max=255;

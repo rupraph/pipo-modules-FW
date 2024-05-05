@@ -27,26 +27,27 @@ void Engine::update(midi_io& midiio,usb_hid& hidio)
 
 void Engine::midi_processsor(midi_io& midiio)
 {
-    for (auto const& pair : mySensor.enable_map)
+    const auto& sensor_dat = mySensor.get_sensor_dat_map();
+    for (auto const& pair : sensor_dat)
     {
-        if (pair.second)
+        string axis_name=pair.first;
+        if (mySensor.get_enabled(axis_name))
         {
-            string name=pair.first;
-            float sensor_val=mySensor.data_map[name];
+            float sensor_val=mySensor.get_value(axis_name);
 
-            if (Miditranslators[name].translator_mode==0)
+            if (Miditranslators[axis_name].translator_mode==0)
             {   
                 //Todo: hires not tested
-                int cc_number=Miditranslators[name].cc_number;
-                if (Miditranslators[name].getHires())
+                int cc_number=Miditranslators[axis_name].cc_number;
+                if (Miditranslators[axis_name].getHires())
                 {
-                    uint16_t cc_val=max(0,min(Miditranslators[name].get_cc_val(sensor_val,1),16383));
+                    uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,1),16383));
                     midiio.sendControlChange(cc_number, cc_val, 1,true);
                 }
                 else
                 {
 
-                uint8_t cc_val=max(0,min(Miditranslators[name].get_cc_val(sensor_val,0),127));
+                uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
                 // for midi find way to limit rotation to max 180° to avoid overflow to 0
                 midiio.sendControlChange(cc_number, cc_val, 1,false);
                 }
@@ -69,7 +70,7 @@ void Engine::midi_processsor(midi_io& midiio)
             else
             {   
                 
-                uint8_t note_val=max(0,min(Miditranslators[name].get_note(sensor_val),127));
+                uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
                 // Serial.print("sensor_val:");
                 // Serial.println(note_val);
                 // should probably move the value check in the io class. to be discussed
@@ -83,17 +84,18 @@ void Engine::midi_processsor(midi_io& midiio)
 void Engine::hid_processor(usb_hid& hidio)
 { // not dealing with buttons yet
 
-    for (auto const& pair : mySensor.enable_map)
+    const auto& sensor_dat = mySensor.get_sensor_dat_map();
+    for (auto const& pair : sensor_dat)
     {
-        if (pair.second)
+        string axis_name=pair.first;
+        if (mySensor.get_enabled(axis_name))
         {
-            string name=pair.first;
-            float sensor_val=mySensor.data_map[name];
+            float sensor_val=mySensor.get_value(axis_name);
 
-            if (hid_map.find(name) != hid_map.end())
+            if (hid_map.find(axis_name) != hid_map.end())
             {
-                string map_name=hid_map[name].mapto;
-                int hid_val=hid_map[name].get_current_int(sensor_val);
+                string map_name=hid_map[axis_name].mapto;
+                int hid_val=hid_map[axis_name].get_current_int(sensor_val);
                 if (hidio.hid_mode==0)
                 {
                     if (map_name=="x")

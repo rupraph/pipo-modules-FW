@@ -140,18 +140,18 @@ void sensor::calc_euler_angles()
       // roll (x-axis rotation)
       double t0 = +2.0 * (q0 * q1 + q2 * q3);
       double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-      data_map["roll"] = atan2(t0, t1) * 180.0 / PI;
+      sensor_dat["roll"].value = atan2(t0, t1) * 180.0 / PI;
 
       // pitch (y-axis rotation)
       double t2 = +2.0 * (q0 * q2 - q3 * q1);
       t2 = t2 > 1.0 ? 1.0 : t2;
       t2 = t2 < -1.0 ? -1.0 : t2;
-      data_map["pitch"] = asin(t2) * 180.0 / PI;
+      sensor_dat["pitch"].value = asin(t2) * 180.0 / PI;
 
       // yaw (z-axis rotation)
       double t3 = +2.0 * (q0 * q3 + q1 * q2);
       double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
-      data_map["yaw"] = atan2(t3, t4) * 180.0 / PI;
+      sensor_dat["yaw"].value = atan2(t3, t4) * 180.0 / PI;
 
 
     //   adafruit style visualizer  
@@ -163,4 +163,78 @@ void sensor::calc_euler_angles()
     //   Serial.println(data_map["roll"]);
       
     
+}
+
+unordered_map<string, sensor::SensorDat> sensor::get_sensor_dat_map() {
+    return sensor_dat;
+}
+
+bool sensor::get_enabled(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].enabled;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+bool sensor::get_inverted(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].inverted;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+int sensor::get_deadZone(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].deadZone;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+float sensor::get_value(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+float sensor::get_offset(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].offset;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void sensor::set_enabled(const std::string& axis, bool value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].enabled = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void sensor::set_inverted(const std::string& axis, bool value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].inverted = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void sensor::set_deadZone(const std::string& axis, int value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].deadZone = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void sensor::set_value(const std::string& axis, float value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].value = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void sensor::set_offset(const std::string& axis, float value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].offset = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
 }

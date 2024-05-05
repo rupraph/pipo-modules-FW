@@ -19,32 +19,54 @@ class sensor
         sensor(sensor const&) = delete;// This deletes the copy constructor. This means you can't create a new Sensor object by copying an existing one.
         void operator=(sensor const&) = delete;// This deletes the assignment operator. This means you can't assign one Sensor object to another.
 
+        
+        bool initialized = false;
+        bool enable_send_vizualizer = false;
+
+
+        // might want to move this structure outside of the class
+        struct SensorDat {
+            bool enabled;
+            bool inverted; 
+            int deadZone; // % of the total range
+            float value;
+            float offset;
+        };
+
+        unordered_map<string, SensorDat> sensor_dat = {
+            {"roll", {true, false, 0, 0, 0}},
+            {"pitch", {false, false, 0, 0, 0}},
+            {"yaw", {false, false, 0, 0, 0}},
+            {"accX", {false, false, 0, 0, 0}},
+            {"accY", {false, false, 0, 0, 0}},
+            {"accZ", {false, false, 0, 0, 0}}
+        };
+
+
         void init();
         void setup();
         void update();
         void calc_euler_angles();
-        bool initialized = false;
-        bool enable_send_vizualizer = false;
 
-        unordered_map<string, float> data_map= {
-            {"roll",0},
-            {"pitch",0},
-            {"yaw",0},
-            {"accX",0},
-            {"accY",0},
-            {"accZ",0}
-        };
 
-        unordered_map<string, bool> enable_map= {
-            {"roll", true},
-            {"pitch", true},
-            {"yaw",false},
-            {"accX",false},
-            {"accY",false},
-            {"accZ",false}
-            };
+        //Getter setters
 
-        // add selection for mode (addel only, oriantation, ...)
+        unordered_map<string, SensorDat> get_sensor_dat_map();
+
+        bool get_enabled(const std::string& axis);
+        void set_enabled(const std::string& axis, bool value);
+
+        bool get_inverted(const std::string& axis);
+        void set_inverted(const std::string& axis, bool value);
+
+        int get_deadZone(const std::string& axis);
+        void set_deadZone(const std::string& axis, int value);
+
+        float get_value(const std::string& axis);
+        void set_value(const std::string& axis, float value);
+
+        float get_offset(const std::string& axis);
+        void set_offset(const std::string& axis, float value);
 
 
     private:

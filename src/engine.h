@@ -20,6 +20,8 @@ class Engine
     public:
         Engine();
 
+
+
         unordered_map<string, MidiTranslator> Miditranslators ={
             {"roll",MidiTranslator()},
             {"pitch",MidiTranslator()},
@@ -36,16 +38,6 @@ class Engine
             {"accX",HidTranslator()},
             {"accY",HidTranslator()},
             {"accZ",HidTranslator()}
-        };
-
-        // Have to move this into midi translator
-        unordered_map<string, int> cc_map= {
-            {"roll",1},
-            {"pitch",2},
-            {"yaw",3},
-            {"accX",4},
-            {"accY",5},
-            {"accZ",6}
         };
 
         hid_gamepad_report_t    gp;
