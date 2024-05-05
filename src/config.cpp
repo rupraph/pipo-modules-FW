@@ -21,13 +21,9 @@ json Config::get_config_for_key(string key) {
     return current_config.at(key);
 }
 
-void Config::save_config_for_key(string key, json data) {
-    current_config[key] = data;
-}
-
-void Config::print_config() {
-
-}
+// void Config::save_config_for_key(string key, json data) {
+//     current_config[key] = data;
+// }
 
 void Config::gather_current_config(sensor& sensor,Engine& engine,bool debug) {
     current_config["sensor"] = sensor.get_config(debug);

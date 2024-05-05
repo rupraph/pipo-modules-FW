@@ -14,7 +14,7 @@ midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine;
-ServerManager server_manager(engine);
+ServerManager server_manager(engine,config);
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true

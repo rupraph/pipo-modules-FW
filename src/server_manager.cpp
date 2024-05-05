@@ -46,6 +46,12 @@ void ServerManager::setup_requests(){
         this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
     });
 
+    server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", "Hello, world");
+        this->config.gather_current_config(this->acc_sensor,this->engine,true);
+        this->config.save_config("/config/current_config.json");
+    });
+
     server.on("^\\/config/midi\\/([a-zA-Z0-9]+)\\/([0-9]+)$", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "Midi"+request->pathArg(0)+"value"+request->pathArg(1));
     //this->engine.Miditranslators["roll"].set_param("translator_mode", 1);

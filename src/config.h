@@ -29,7 +29,7 @@ class Config
         void load_config_from_file(String filename);
         void save_config(String filename);
         json get_config_for_key(string key);
-        void save_config_for_key(string key, json data);
+        // void save_config_for_key(string key, json data);
         void print_config();
 
         void gather_current_config(sensor& sensor,Engine& engine,bool debug=false);
