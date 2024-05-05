@@ -26,13 +26,9 @@ void setup(){
     sensor& acc_sensor = sensor::getInstance();
 
     Serial.begin(115200);
-    // while(!Serial)
-    // {
-    //     delay(100);
-    // }
-    // while(!Serial.available()){
-    //     delay(100);
-    // }
+    //while(!Serial) // while prevent usb to setup properly
+
+
 
     // Init LittleFS
     if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
@@ -44,9 +40,11 @@ void setup(){
     // listDir(LittleFS, "/webpage", 2);
 
     // Load config
-    config.load_config("/config/current_config.json");
+    config.load_config_from_file("/config/current_config.json");
+    config.set_current_config(acc_sensor,engine,true);
 
-
+    //config.gather_current_config(acc_sensor,engine,true);
+    //config.save_config("/config/current_config.json");
 
     // Init midi
     midiio.setup();
@@ -73,8 +71,6 @@ void setup(){
     }
 
 
-    engine.get_config(false);
-    engine.set_config(config);
     // engine.Miditranslators["roll"].set_param("translator_mode", 0);
 
 

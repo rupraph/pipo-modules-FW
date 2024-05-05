@@ -165,6 +165,54 @@ void sensor::calc_euler_angles()
     
 }
 
+
+//config
+
+json sensor::get_config(bool debug)
+{
+    json config;
+    for (auto const& pair : sensor_dat)
+    {
+        string axis_name = pair.first;
+        config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
+        config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
+        config[axis_name]["deadZone"] = sensor_dat[axis_name].deadZone;
+        config[axis_name]["value"] = sensor_dat[axis_name].value;
+        config[axis_name]["offset"] = sensor_dat[axis_name].offset;
+    }
+    if (debug)
+    {
+        Serial.println("returned_sensor_get_config");
+        Serial.println(config.dump(4).c_str());
+        Serial.println("returned_sensor_get_config_end");
+    }
+    return config;
+}
+
+void sensor::set_config(json& config, bool debug)
+{
+    for (auto const& pair : config.items())
+    {
+        string axis_name = pair.key();
+        sensor_dat[axis_name].enabled = config[axis_name]["enabled"];
+        sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
+        sensor_dat[axis_name].deadZone = config[axis_name]["deadZone"];
+        sensor_dat[axis_name].value = config[axis_name]["value"];
+        sensor_dat[axis_name].offset = config[axis_name]["offset"];
+    }
+    if (debug)
+    {
+        Serial.println("set_sensor_config");
+        Serial.println(config.dump(4).c_str());
+        Serial.println("set_sensor_config_end");
+    }
+}
+
+
+
+
+//gett setters
+
 unordered_map<string, sensor::SensorDat> sensor::get_sensor_dat_map() {
     return sensor_dat;
 }

@@ -18,6 +18,7 @@ class ServerManager
 
     private:
         AsyncWebServer server;
+        sensor& acc_sensor = sensor::getInstance();
         Engine& engine;
 };
 

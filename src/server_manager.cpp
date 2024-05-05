@@ -58,6 +58,42 @@ void ServerManager::setup_requests(){
     server.on("/config/hid", HTTP_POST, [](AsyncWebServerRequest *request){
         request->send(200, "text/plain", "Hello, world");
     });
+
+
+    /// download Config file interface
+
+    server.on("/list", HTTP_GET, [](AsyncWebServerRequest *request){
+    String html = "<html><body><ul>";
+    File root = LittleFS.open("/config");
+    File file = root.openNextFile();
+    while(file){
+        html += "<li><a href=\"/download?file=";
+        html += file.name();
+        html += "\">";
+        html += file.name();
+        html += "</a> - Last modified: ";
+        // Get the last write time and format it as a string:
+        time_t t = file.getLastWrite();
+        struct tm *tmstruct = localtime(&t);
+        char timeStr[20];
+        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tmstruct);
+        html += timeStr;
+        html += "</li>";
+        file = root.openNextFile();
+    }
+    html += "</ul></body></html>";
+    request->send(200, "text/html", html);
+    });
+
+    server.on("/download", HTTP_GET, [](AsyncWebServerRequest *request){
+    if (request->hasParam("file")) {
+        String filename = "/config/"+request->getParam("file")->value();
+        Serial.println("Download request: " + filename);
+        request->send(LittleFS, filename, "application/octet-stream",true);
+    } else {
+        request->send(400, "text/plain", "Bad request");
+    }
+});
 }
 
 void ServerManager::notFound(AsyncWebServerRequest *request) {

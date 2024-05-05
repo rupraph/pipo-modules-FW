@@ -10,6 +10,8 @@
 #include <sstream>
 #include "fs_tools.h"
 #include "json.hpp"
+#include "acc_sensor.h"
+#include "engine.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -23,13 +25,16 @@ class Config
         //std::string current_config;
         Config();
         json current_config;
-        void load_config(String filename);
+        json test_config;
+        void load_config_from_file(String filename);
         void save_config(String filename);
         json get_config_for_key(string key);
         void save_config_for_key(string key, json data);
         void print_config();
-};
 
+        void gather_current_config(sensor& sensor,Engine& engine,bool debug=false);
+        void set_current_config(sensor& sensor,Engine& engine,bool debug=false);
+};
 
 //     // hardware and connectivity settings
 //     vector<string> usb_modes = {"usb_midi", "usb_serial"}; 

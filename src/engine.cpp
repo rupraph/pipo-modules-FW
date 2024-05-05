@@ -183,34 +183,38 @@ void Engine::set_default_config()
 
 json Engine::get_config(bool debug)
 {   
-        json jengine;
         json j;
         for (auto const& pair : Miditranslators)
         {
-            jengine["engine-midi"][pair.first] = pair.second.get_json();
+            j["engine-midi"][pair.first] = pair.second.get_json();
         }
         for (auto const& pair : hid_map)
         {
-            jengine["engine-hid"][pair.first] = pair.second.get_json();
+            j["engine-hid"][pair.first] = pair.second.get_json();
         }
-        j["engine"] = jengine;
-        if (debug) Serial.println(j.dump().c_str());
+        if (debug)
+        {
+            Serial.println("engine_get_config");
+            Serial.println(j.dump(4).c_str());
+            Serial.println("engine_get_config_end");
+        } 
+            
         return j;
 }
 
 
 
-void Engine::set_config(Config& config, bool debug)
+
+
+void Engine::set_config(json& config, bool debug)
 {   
     if (debug){
         Serial.println("will set config");
-        Serial.println(config.current_config.dump().c_str());
+        Serial.println(config.dump().c_str());
         Serial.println();
     }
-
-    json jengine = config.get_config_for_key("engine");
     
-    json jmidi = jengine["engine-midi"];
+    json jmidi = config["engine-midi"];
     
     // set midi config from general config
     for (auto const& pair : Miditranslators)
@@ -224,7 +228,7 @@ void Engine::set_config(Config& config, bool debug)
     }
     Serial.println("midi config set");
     // set hid config from general config
-    json jhid = jengine["engine-hid"];
+    json jhid = config["engine-hid"];
     for (auto const& pair : hid_map)
     {
         if (jhid.find(pair.first) != jhid.end())

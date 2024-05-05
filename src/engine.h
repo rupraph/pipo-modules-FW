@@ -9,7 +9,6 @@
 #include "usb_hid.h"
 #include "json.hpp"
 #include "fs_tools.h"
-#include "config.h"
 
 using namespace std;
 
@@ -50,7 +49,7 @@ class Engine
         void hid_processor(usb_hid& hidio);
         void set_default_config();
         json get_config(bool debug=false);
-        void set_config(Config& config,bool debug=false);
+        void set_config(json& config,bool debug=false);
         friend void to_json(json& j, const Engine& t);
 
 };

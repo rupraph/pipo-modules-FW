@@ -4,9 +4,12 @@
 #include <ICM_20948.h>
 #include <vector>
 #include <unordered_map>
+#include "json.hpp"
 
 using namespace std;
+using json = nlohmann::json;
 
+//todo missing capital at sensor
 class sensor
 {   
 
@@ -48,6 +51,9 @@ class sensor
         void update();
         void calc_euler_angles();
 
+        //config 
+        json get_config(bool debug=false);
+        void set_config(json& config,bool debug=false);
 
         //Getter setters
 
