@@ -57,8 +57,9 @@ class Engine
         void midi_processsor(midi_io& midiio);
         void hid_processor(usb_hid& hidio);
         void set_default_config();
-        json get_config();
-        void set_config(Config& config);
+        json get_config(bool debug=false);
+        void set_config(Config& config,bool debug=false);
+        friend void to_json(json& j, const Engine& t);
 
 };
 

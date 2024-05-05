@@ -11,12 +11,19 @@
 using namespace std;
 
 class MidiTranslator 
+
+    //Todo move all members to private and right methods to public
+    //change all set/get in engine
 {
     public:
         MidiTranslator();
 
+        //midi 
+        int channel = 1;
+
         //notes variables
         int translator_mode = 0; //0=cc, 1 note, 2 both
+
         string scaleType="major";
         int rootNote = 45;
         int numberOfNotes = 25;
@@ -29,9 +36,9 @@ class MidiTranslator
 
         //CC variables
         
-        int max_output = 127;
+        int cc_number = 1;
+        int max_output;// shoudl be private
         int min_output = 0;
-        bool cc_resolution = 0; //0=7bit, 1=14bit
         int interpolation_type = 0; //0=linear, 1=step, 2=log
 
         // Notes scale variables
@@ -86,8 +93,8 @@ class MidiTranslator
 
 
         // save/load
-        void to_json(nlohmann::json& j,const MidiTranslator& t);
-        void from_json(const nlohmann::json& j, MidiTranslator& t);
+        friend void to_json(nlohmann::json& j,const MidiTranslator& t);
+        friend void from_json(const nlohmann::json& j, MidiTranslator& t);
 
         nlohmann::json get_json() const;
         void set_from_json(const nlohmann::json& j);
@@ -95,10 +102,17 @@ class MidiTranslator
         string serialize() const;
         void deserialize(const string& data);
 
+        // Todo: add in save param that is also send config to the current config
         template <typename T>
         void set_param(const string& param_name, const T& value) {
             if (param_name == "translator_mode") {
                 translator_mode = value;
+            }
+            else if (param_name == "channel") {
+                channel = value;
+            }
+            else if (param_name == "cc_number") {
+                cc_number = value;
             }
             else if (param_name == "scaleType") {
                 scaleType = value;
@@ -121,22 +135,25 @@ class MidiTranslator
             else if (param_name == "min_output") {
                 min_output = value;
             }
-            else if (param_name == "cc_resolution") {
-                cc_resolution = value;
-            }
             else if (param_name == "interpolation_type") {
                 interpolation_type = value;
             }
+            else if (param_name == "hires") {
+                hires = value;
+            }
             else {
-                cout << "Invalid parameter name." << endl;
+                Serial.println("Error: unknown parameter name");
             }
         }
 
+    bool getHires() const;
+    void setHires(bool h);
         
-        
-
+    bool hires = false;
 
     private:
+        
+        
         vector<int> generate_full_Scale(int rootNote,int nb_notes, string scaleType);
         vector<int> generate_base_Scale(int rootNote, string scaleType);
 

@@ -6,6 +6,12 @@ using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+    if (hires) {
+        max_output = 16383;
+    }
+    else {
+        max_output = 127;
+    }
     //printScale(current_scale);
 
 }
@@ -207,8 +213,10 @@ void to_json(json& j, const MidiTranslator& t) {
         {"min_input", t.min_input},
         {"max_output", t.max_output},
         {"min_output", t.min_output},
-        {"cc_resolution", t.cc_resolution},
         {"interpolation_type", t.interpolation_type},
+        {"hires", t.hires},
+        {"channel", t.channel},
+        {"cc_number", t.cc_number}
     };
 }
 
@@ -231,8 +239,10 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("min_input").get_to(t.min_input);
     j.at("max_output").get_to(t.max_output);
     j.at("min_output").get_to(t.min_output);
-    j.at("cc_resolution").get_to(t.cc_resolution);
     j.at("interpolation_type").get_to(t.interpolation_type);
+    j.at("hires").get_to(t.hires);
+    j.at("channel").get_to(t.channel);
+    j.at("cc_number").get_to(t.cc_number);
 }
 
 void MidiTranslator::deserialize(const string& data) {
@@ -241,5 +251,29 @@ void MidiTranslator::deserialize(const string& data) {
 }
 
 void MidiTranslator::set_from_json(const json& j) {
+    try {
     *this = j.get<MidiTranslator>();
+    } catch (const std::exception& e) {
+    Serial.print("Error: ");
+    Serial.println(e.what());
+    }
+
+
+    // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
+    //     Serial.println(it.key().c_str());
+    //     Serial.println(it.value());
+    //     set_param(it.key(), it.value());
+    // }
+}
+
+bool MidiTranslator::getHires() const{ return hires; }
+
+void MidiTranslator::setHires(bool h) {
+    hires = h;
+    if (hires) {
+        max_output = 16383;
+    }
+    else {
+        max_output = 127;
+    }
 }

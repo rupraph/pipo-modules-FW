@@ -9,8 +9,7 @@
 #include "config.h"
 
 
-OSC_handler osc;
-MidiTranslator midi_translator;
+//OSC_handler osc;
 midi_io midiio;
 usb_hid hidio;
 Config config;
@@ -26,8 +25,14 @@ ServerManager server_manager(engine);
 void setup(){
     sensor& acc_sensor = sensor::getInstance();
 
-    
     Serial.begin(115200);
+    // while(!Serial)
+    // {
+    //     delay(100);
+    // }
+    // while(!Serial.available()){
+    //     delay(100);
+    // }
 
     // Init LittleFS
     if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
@@ -40,6 +45,7 @@ void setup(){
 
     // Load config
     config.load_config("/config/current_config.json");
+
 
 
     // Init midi
@@ -66,8 +72,11 @@ void setup(){
         Serial.println("connected...yeey :)");
     }
 
+
+    engine.get_config(false);
+
     engine.set_config(config);
-    engine.Miditranslators["roll"].set_param("translator_mode", 0);
+    // engine.Miditranslators["roll"].set_param("translator_mode", 0);
 
 
     // Initialize the ICM-20948
