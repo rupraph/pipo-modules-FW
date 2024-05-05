@@ -21,6 +21,21 @@ json Config::get_config_for_key(string key) {
     return current_config.at(key);
 }
 
+void Config::set_current_config(json config) {
+    try
+    {
+        current_config = config;
+
+    }
+    catch(const std::exception& e)
+    {
+        Serial.println("error setting current_config from a json object") ;
+        Serial.println(e.what());
+    }
+    
+    
+}
+
 // void Config::save_config_for_key(string key, json data) {
 //     current_config[key] = data;
 // }
@@ -35,7 +50,7 @@ void Config::gather_current_config(sensor& sensor,Engine& engine,bool debug) {
     }
 }
 
-void Config::set_current_config(sensor& sensor,Engine& engine,bool debug) {
+void Config::apply_current_config(sensor& sensor,Engine& engine,bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
 }

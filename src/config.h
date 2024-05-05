@@ -28,12 +28,13 @@ class Config
         json test_config;
         void load_config_from_file(String filename);
         void save_config(String filename);
+        void set_current_config(json config);
         json get_config_for_key(string key);
         // void save_config_for_key(string key, json data);
         void print_config();
 
         void gather_current_config(sensor& sensor,Engine& engine,bool debug=false);
-        void set_current_config(sensor& sensor,Engine& engine,bool debug=false);
+        void apply_current_config(sensor& sensor,Engine& engine,bool debug=false);
 };
 
 //     // hardware and connectivity settings

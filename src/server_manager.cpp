@@ -48,11 +48,11 @@ void ServerManager::setup_requests(){
         this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
     });
 
-    server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
-        this->config.gather_current_config(this->acc_sensor,this->engine,true);
-        this->config.save_config("/config/current_config.json");
-    });
+    // server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
+    //     request->send(200, "text/plain", "Hello, world");
+    //     this->config.gather_current_config(this->acc_sensor,this->engine,true);
+    //     this->config.save_config("/config/current_config.json");
+    // });
 
     server.on("^\\/config/midi\\/([a-zA-Z0-9]+)\\/([0-9]+)$", HTTP_GET, [this](AsyncWebServerRequest *request){
     request->send(200, "text/plain", "Midi"+request->pathArg(0)+"value"+request->pathArg(1));
@@ -67,21 +67,42 @@ void ServerManager::setup_requests(){
         request->send(200, "text/plain", "Hello, world");
     });
 
-    //attemp to create a draft config page
-    server.on("/configdraft", HTTP_GET, [this](AsyncWebServerRequest *request){
-    json configJson = this->engine.get_config();  // Get the current config
-    try
-    {
-        String html = String(generateHtmlForm(configJson).c_str());  // Generate the HTML form
-        request->send(200, "text/html", html);  // Send the HTML form
-    }
-    catch(const std::exception& e)
-    {
-        Serial.println("error");
-        Serial.println(e.what());
-    }
     
-     // Send the HTML form
+    
+    ////////// CONFIG FORM 
+    // attemp to create a draft config page
+    server.on("/configdraft", HTTP_GET, [this](AsyncWebServerRequest *request){
+        json configJson = this->engine.get_config();  // Get the current config
+        try
+        {
+            String html = String(generateHtmlForm(configJson).c_str());  // Generate the HTML form
+            request->send(200, "text/html", html);  // Send the HTML form
+        }
+        catch(const std::exception& e)
+        {
+            Serial.println("error");
+            Serial.println(e.what());
+        }
+        
+        // Send the HTML form
+    });
+
+    // aplly  config
+    server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
+        json newConfig;
+        for (int i=0; i<request->params(); i++) {
+            AsyncWebParameter* p = request->getParam(i);
+            newConfig[p->name().c_str()] = p->value().c_str();
+        }
+
+        // Update the engine config
+        this->config.set_current_config(newConfig);
+        this->config.apply_current_config(this->acc_sensor,this->engine,true);
+
+        // Save the new config to disk
+        //this->config.save_config_to_file("/config/current_config.json", newConfig);
+
+        request->send(200, "text/plain", "Config updated successfully");
     });
 
 
@@ -126,6 +147,8 @@ void ServerManager::notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
 }
 
+
+// this is missing sensor settings
 void ServerManager::generateHtmlForm(json& configJson, string& html, string prefix) {
     for (json::iterator it=configJson.begin(); it!=configJson.end(); ++it) {
         string key = prefix + it.key();
