@@ -1,5 +1,6 @@
 #include "server_manager.h"
 #include "fs_tools.h"
+//#include <ArduinoJson.h>
 
 
 // is using buildflag for regex
@@ -8,6 +9,7 @@
 //  build_flags = 
 //      -DASYNCWEBSERVER_REGEX
 
+using json = nlohmann::json;
 
 void ServerManager::setup(){
 
@@ -65,6 +67,24 @@ void ServerManager::setup_requests(){
         request->send(200, "text/plain", "Hello, world");
     });
 
+    //attemp to create a draft config page
+    server.on("/configdraft", HTTP_GET, [this](AsyncWebServerRequest *request){
+    json configJson = this->engine.get_config();  // Get the current config
+    try
+    {
+        String html = String(generateHtmlForm(configJson).c_str());  // Generate the HTML form
+        request->send(200, "text/html", html);  // Send the HTML form
+    }
+    catch(const std::exception& e)
+    {
+        Serial.println("error");
+        Serial.println(e.what());
+    }
+    
+     // Send the HTML form
+    });
+
+
 
     /// download Config file interface
 
@@ -106,3 +126,30 @@ void ServerManager::notFound(AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
 }
 
+void ServerManager::generateHtmlForm(json& configJson, string& html, string prefix) {
+    for (json::iterator it=configJson.begin(); it!=configJson.end(); ++it) {
+        string key = prefix + it.key();
+        if (it.value().is_object()) {
+            // If the value is a JSON object, recurse into it
+            generateHtmlForm(it.value(), html, key + ".");
+        } else {
+            // Otherwise, generate an input field for the value
+            html += "<label for=\"" + key + "\">" + key + ":</label><br>";
+            if (it.value().is_string()) {
+                html += "<input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + it.value().get<string>() + "\"><br>";
+            } else if (it.value().is_number()) {
+                html += "<input type=\"number\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + to_string(it.value().get<int>()) + "\"><br>";
+            } else if (it.value().is_boolean()) {
+                html += "<input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (it.value().get<bool>() ? "checked" : "") + "><br>";
+            }
+        }
+    }
+}
+
+string ServerManager::generateHtmlForm(json& configJson) {
+    string html = "<html><body><form action=\"/config/save\" method=\"post\">";
+    generateHtmlForm(configJson, html);
+    html += "<input type=\"submit\" value=\"Submit\">";
+    html += "</form></body></html>";
+    return html;
+}

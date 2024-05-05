@@ -7,6 +7,9 @@
 #include <ESPmDNS.h>
 #include "engine.h"
 #include "config.h"
+#include "json.hpp"
+
+using namespace std;
 
 class ServerManager
 {
@@ -15,6 +18,8 @@ class ServerManager
         void setup();
         void setup_requests();
         static void notFound(AsyncWebServerRequest *request);
+        void generateHtmlForm(json& configJson,string& html,string prefix="");
+        string generateHtmlForm(json& configJson);
 
     private:
         AsyncWebServer server;
