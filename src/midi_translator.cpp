@@ -199,6 +199,9 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
 }
 
 int MidiTranslator::map_linear(float value){
+    if (min_input == max_input || min_output == max_output) {
+        Serial.println("min and max values cannot be equal");
+    }
     return round((value - min_input) / (max_input - min_input) * (max_output - min_output) + min_output);
 }
 

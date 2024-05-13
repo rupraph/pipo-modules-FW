@@ -74,6 +74,8 @@ class sensor
         float get_offset(const std::string& axis);
         void set_offset(const std::string& axis, float value);
 
+        void teleplot_data(string axis);
+
 
     private:
         sensor(){}; // This is the constructor. It's private, which means it can only be called from within the class.
@@ -83,6 +85,10 @@ class sensor
         double q2;
         double q3;
         double q0;
+
+        float raw_accX;
+        float raw_accY;
+        float raw_accZ;
 
 };
 

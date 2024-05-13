@@ -40,11 +40,12 @@ void setup(){
     // listDir(LittleFS, "/webpage", 2);
 
     // Load config
-    config.load_config_from_file("/config/current_config.json");
-    config.apply_current_config(acc_sensor,engine,true);
+    //config.load_config_from_file("/config/current_config.json");
+    //config.apply_current_config(acc_sensor,engine,true);
 
-    //config.gather_current_config(acc_sensor,engine,true);
-    //config.save_config("/config/current_config.json");
+    config.gather_current_config(acc_sensor,engine,true);
+    config.save_config("/config/current_config.json");
+    config.print_config();
 
     // Init midi
     midiio.setup();

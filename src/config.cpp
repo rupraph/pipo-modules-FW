@@ -36,6 +36,10 @@ void Config::set_current_config(json config) {
     
 }
 
+void Config::print_config() {
+    Serial.println(current_config.dump(4).c_str());
+}
+
 // void Config::save_config_for_key(string key, json data) {
 //     current_config[key] = data;
 // }

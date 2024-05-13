@@ -2,6 +2,19 @@
 
 // review with exemples setup and acquisition structure.
 
+
+// review with exemples setup and acquisition structure.
+
+// todo: improve where the bias is applied. 
+// computation of spatial position not finished. not working yet. have to check bias and calculations
+
+// UPDATE ON STUFF TO DO
+// + could not find how to easily access linear accelerations indepednant from gravity (seem difficult through dmp. best option is likely to get orientation and correct for it. )
+// should check with https://github.com/UT2UH/Arduino_ICM20948_DMP_Full-Function and https://github.com/isouriadakis/Arduino_ICM20948_DMP_Full-Function see if those managed....
+// see also https://github.com/ZaneL/Teensy-ICM-20948/issues/2
+// otherwise likely go for a manual correction -> check maybe this, not sure https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-ii 
+
+
 void sensor::init()
 {
 
@@ -31,6 +44,9 @@ void sensor::setup()
     
     success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ORIENTATION) == ICM_20948_Stat_Ok);
+    success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_LINEAR_ACCELERATION) == ICM_20948_Stat_Ok);
+
+
     success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok); // Set to the maximum
     // Enable the FIFO
     success &= (myICM.enableFIFO() == ICM_20948_Stat_Ok);
@@ -117,6 +133,14 @@ void sensor::update()
             // Serial.println(F("}"));
             }
         }
+        if ((data.header & DMP_header_bitmap_Accel) > 0) // We have asked for raw accel data
+        {
+            raw_accX = (float)data.Raw_Accel.Data.X; // Extract the raw accel data
+            raw_accY = (float)data.Raw_Accel.Data.Y;
+            raw_accZ = (float)data.Raw_Accel.Data.Z;
+            Serial.print(">raw_accX:");
+            Serial.println(raw_accX);
+        }
     // if  (myICM.status != ICM_20948_Stat_FIFOMoreDataAvail) // If more data is available then we should read it right away - and not delay
     // {
     //     delay(10);
@@ -163,6 +187,14 @@ void sensor::calc_euler_angles()
     //   Serial.println(data_map["roll"]);
       
     
+}
+
+void sensor::teleplot_data(string axis)
+{
+    Serial.print(">");
+    Serial.print(axis.c_str());
+    Serial.print(": ");
+    Serial.println(sensor_dat[axis].value);
 }
 
 
