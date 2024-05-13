@@ -1,5 +1,6 @@
 #include "acc_sensor.h"
 
+
 // review with exemples setup and acquisition structure.
 
 
@@ -13,6 +14,8 @@
 // should check with https://github.com/UT2UH/Arduino_ICM20948_DMP_Full-Function and https://github.com/isouriadakis/Arduino_ICM20948_DMP_Full-Function see if those managed....
 // see also https://github.com/ZaneL/Teensy-ICM-20948/issues/2
 // otherwise likely go for a manual correction -> check maybe this, not sure https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-ii 
+
+// with current setup, seems like acquisition rate is 20ms. enabling or disabling some sensor data does not seem to change things
 
 
 void sensor::init()
@@ -35,6 +38,8 @@ void sensor::init()
         }
     }
     Serial.println(F("Device connected!"));
+
+
 }
 
 // DMP sensor options are defined in ICM_20948_DMP.h
@@ -63,11 +68,23 @@ void sensor::setup()
     
     success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ORIENTATION) == ICM_20948_Stat_Ok);
+
+
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ACCELEROMETER) == ICM_20948_Stat_Ok);
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_RAW_GYROSCOPE) == ICM_20948_Stat_Ok);
 
+    // ICM_20948_fss_t myFSS; // This uses a "Full Scale Settings" structure that can contain values for all configurable sensors
+    // myFSS.a = gpm8; //2 to 16
+    // //myFSS.g = dps250; // 250 to 2000
+    // success &= (myICM.setFullScale(ICM_20948_Internal_Acc,myFSS) == ICM_20948_Stat_Ok); // Set to the maximum
+
 
     success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok); // Set to the maximum
+    success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Gyro, 0) == ICM_20948_Stat_Ok); // Set to the maximum
+    success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Accel, 0) == ICM_20948_Stat_Ok); 
+    
+
+    
     // Enable the FIFO
     success &= (myICM.enableFIFO() == ICM_20948_Stat_Ok);
     // Enable the DMP
@@ -95,6 +112,9 @@ void sensor::setup()
 
 void sensor::update()
 {
+    // measure update rate
+    
+
     // Read any DMP data waiting in the FIFO
     // Note:
     //    readDMPdataFromFIFO will return ICM_20948_Stat_FIFONoDataAvail if no data is available.
@@ -107,6 +127,13 @@ void sensor::update()
 
     if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) // Was valid data available?
     {
+        // unsigned long currentMillis = millis();
+        // unsigned long interval = currentMillis - last_time;
+        // last_time = currentMillis;
+        // Serial.print(">interval:");
+        // Serial.println(interval);
+
+        
         //SERIAL_PORT.print(F("Received data! Header: 0x")); // Print the header in HEX so we can see what data is arriving in the FIFO
         //if ( data.header < 0x1000) SERIAL_PORT.print( "0" ); // Pad the zeros
         //if ( data.header < 0x100) SERIAL_PORT.print( "0" );
@@ -158,16 +185,25 @@ void sensor::update()
             raw_accX = (float)data.Raw_Accel.Data.X; // Extract the raw accel data
             raw_accY = (float)data.Raw_Accel.Data.Y;
             raw_accZ = (float)data.Raw_Accel.Data.Z;
+
+            unsigned long currentMillis = millis();
+            unsigned long interval = currentMillis - last_time;
+            last_time = currentMillis;
+
+            hp_accX=hp_filter_accX.process(raw_accX,interval/1000.0);
             Serial.print(">raw_accX:");
             Serial.println(raw_accX);
+            Serial.print(">hp_accX:");
+            Serial.println(hp_accX);
         }
         if ((data.header & DMP_header_bitmap_Gyro) > 0) // We have asked for raw gyro data
         {
             raw_gyroX = (float)data.Raw_Gyro.Data.X; // Extract the raw gyro data
             raw_gyroY = (float)data.Raw_Gyro.Data.Y;
             raw_gyroZ = (float)data.Raw_Gyro.Data.Z;
-            Serial.print(">raw_gyroX:");
-            Serial.println(raw_gyroX);
+            // Serial.print(">raw_gyroX:");
+            // Serial.println(raw_gyroX);
+
         }
     // if  (myICM.status != ICM_20948_Stat_FIFOMoreDataAvail) // If more data is available then we should read it right away - and not delay
     // {

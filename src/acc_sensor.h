@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include "json.hpp"
+#include "hp_filter.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -78,7 +79,8 @@ class sensor
 
 
     private:
-        sensor(){}; // This is the constructor. It's private, which means it can only be called from within the class.
+        HighPassFilter hp_filter_accX;
+        sensor():hp_filter_accX(1){}; // This is the constructor. It's private, which means it can only be called from within the class.
         ICM_20948_I2C myICM;
         icm_20948_DMP_data_t data;
         double q1;
@@ -90,10 +92,15 @@ class sensor
         float raw_accY;
         float raw_accZ;
 
+        
+        float hp_accX;
+
         float raw_gyroX;
         float raw_gyroY;
         float raw_gyroZ;
 
+        unsigned long last_time;
+        
 };
 
 #endif //ACC_SENSOR_H

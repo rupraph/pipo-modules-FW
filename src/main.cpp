@@ -92,6 +92,9 @@ void setup(){
     // osc.start();
 
 void loop() {
+
+    // should create a task to trigger sensor and engine computation at regular interval
+
     sensor& acc_sensor = sensor::getInstance();
     acc_sensor.update();
 

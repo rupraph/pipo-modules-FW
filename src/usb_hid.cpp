@@ -47,8 +47,8 @@ void usb_hid::usb_hid_update(const void *report)
         hid_gamepad_report_t* gp = (hid_gamepad_report_t*)report;
 
         // Print the value of gp->x
-        Serial.print("gp.x: ");
-        Serial.println(gp->x);
+        // Serial.print("gp.x: ");
+        // Serial.println(gp->x);
         usb_hid_port.sendReport(0, gp, sizeof(*gp));
         break;
     // case 1:
