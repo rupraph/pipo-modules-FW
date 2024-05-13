@@ -108,6 +108,8 @@ void sensor::setup()
         { // Loop forever
         }
     }
+
+
 }
 
 void sensor::update()
@@ -198,10 +200,10 @@ void sensor::update()
 
             //hp_accX=hp_filter_accX.process(raw_accX,interval/1000.0);
 
-            Serial.print(">raw_accX:");
-            Serial.println(raw_accX);
-            Serial.print(">lp_accX:");
-            Serial.println(sensor_dat["accX"].value);
+            // Serial.print(">raw_accX:");
+            // Serial.println(raw_accX);
+            // Serial.print(">lp_accX:");
+            // Serial.println(sensor_dat["accX"].value);
 
         }
         if ((data.header & DMP_header_bitmap_Gyro) > 0) // We have asked for raw gyro data
@@ -222,6 +224,8 @@ void sensor::update()
     // Convert the quaternions to Euler angles (roll, pitch, yaw)
     calc_euler_angles();
 
+    
+
     }
 
 // When flipping the sensor, the roll and pitch values are inverted. 
@@ -233,30 +237,61 @@ void sensor::calc_euler_angles()
 
       double q2sqr = q2 * q2;
 
-      // roll (x-axis rotation)
-      double t0 = +2.0 * (q0 * q1 + q2 * q3);
-      double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-      sensor_dat["roll"].value = atan2(t0, t1) * 180.0 / PI;
-
-      // pitch (y-axis rotation)
-      double t2 = +2.0 * (q0 * q2 - q3 * q1);
-      t2 = t2 > 1.0 ? 1.0 : t2;
-      t2 = t2 < -1.0 ? -1.0 : t2;
-      sensor_dat["pitch"].value = asin(t2) * 180.0 / PI;
-
-      // yaw (z-axis rotation)
-      double t3 = +2.0 * (q0 * q3 + q1 * q2);
-      double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
-      sensor_dat["yaw"].value = atan2(t3, t4) * 180.0 / PI;
+    // attempt change order
+    // sensor_dat["yaw"].value = atan2(2.0*(q0*q1 + q2*q3), 1.0 - 2.0*(q1*q1 - q3*q3))* 180.0 / PI;
+    // sensor_dat["pitch"].value = asin(2.0*(q0*q2 + q1*q3))* 180.0 / PI;
+    // sensor_dat["roll"].value = atan2(2.0*(q0*q3 + q2*q1), 1.0 - 2.0*(q1*q1 + q2*q2))* 180.0 / PI;
 
 
-    //   adafruit style visualizer  
+
+    // //original order 
+    //   // roll (x-axis rotation)
+    //   double t0 = +2.0 * (q0 * q1 + q2 * q3);
+    //   double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+    //   sensor_dat["roll"].value = atan2(t0, t1) * 180.0 / PI;
+
+    //   // pitch (y-axis rotation)
+    //   double t2 = +2.0 * (q0 * q2 - q3 * q1);
+    //   t2 = t2 > 1.0 ? 1.0 : t2;
+    //   t2 = t2 < -1.0 ? -1.0 : t2;
+    //   sensor_dat["pitch"].value = asin(t2) * 180.0 / PI;
+
+    //   // yaw (z-axis rotation)
+    //   double t3 = +2.0 * (q0 * q3 + q1 * q2);
+    //   double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
+    //   sensor_dat["yaw"].value = atan2(t3, t4) * 180.0 / PI;
+
+
+
+    
+        // attempt with option to measure change from initial position
+        // Calculate the roll and pitch angles
+        double roll = atan2(2.0 * (q0 * q1 + q2 * q3), 1.0 - 2.0 * (q1 * q1 + q2 * q2)) * 180.0 / PI;
+        double pitch = asin(2.0 * (q0 * q2 - q3 * q1)) * 180.0 / PI;
+
+        if (firstCall)
+        {
+            // Store the initial orientation
+            initialRoll = roll;
+            initialPitch = pitch;
+            firstCall = false;
+        }
+
+        // Calculate the relative orientation
+        sensor_dat["roll"].value = roll - initialRoll;
+        sensor_dat["pitch"].value = pitch - initialPitch;
+
+
+
+
+
+    //   //adafruit style visualizer  
     //   Serial.print("Orientation: ");
-    //   Serial.print(data_map["yaw"]);
+    //   Serial.print(sensor_dat["roll"].value);
     //   Serial.print(", ");
-    //   Serial.print(data_map["pitch"]);
+    //   Serial.print(sensor_dat["pitch"].value);
     //   Serial.print(", ");
-    //   Serial.println(data_map["roll"]);
+    //   Serial.println(sensor_dat["yaw"].value);
       
     
 }

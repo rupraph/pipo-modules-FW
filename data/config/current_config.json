@@ -54,8 +54,8 @@
               "disabled": true
           },
           "roll": {
-              "input_max": 180,
-              "input_min": -180,
+              "input_max": 90,
+              "input_min": -90,
               "mapto": "y",
               "out_type": 0,
               "output_max": 255,

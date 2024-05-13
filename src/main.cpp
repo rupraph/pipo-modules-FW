@@ -103,8 +103,11 @@ void loop() {
     // should create a task to trigger sensor and engine computation at regular interval
 
     sensor& acc_sensor = sensor::getInstance();
+    //acc_sensor.enable_send_vizualizer = true;
     acc_sensor.update();
-
+    acc_sensor.teleplot_data("roll");
+    // acc_sensor.teleplot_data("pitch");
+    // acc_sensor.teleplot_data("yaw");
 
     engine.update(midiio, hidio);
     midiio.update();

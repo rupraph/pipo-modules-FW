@@ -83,6 +83,8 @@ class sensor
 
 
     private:
+        bool firstCall = true;
+        double initialRoll, initialPitch;
 
         //HighPassFilter hp_filter_accX; // seems like substracting lowpass is slightly better
 
