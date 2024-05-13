@@ -190,11 +190,14 @@ void sensor::update()
             unsigned long interval = currentMillis - last_time;
             last_time = currentMillis;
 
-            hp_accX=hp_filter_accX.process(raw_accX,interval/1000.0);
+            //hp_accX=hp_filter_accX.process(raw_accX,interval/1000.0);
+            lp_accX=lp_filter_accX.process(raw_accX,interval/1000.0);
             Serial.print(">raw_accX:");
             Serial.println(raw_accX);
+            Serial.print(">lp_accX:");
+            Serial.println(lp_accX);
             Serial.print(">hp_accX:");
-            Serial.println(hp_accX);
+            Serial.println(raw_accX-lp_accX);
         }
         if ((data.header & DMP_header_bitmap_Gyro) > 0) // We have asked for raw gyro data
         {

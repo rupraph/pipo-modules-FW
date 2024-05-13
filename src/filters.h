@@ -1,5 +1,5 @@
-#ifndef HP_FILTER_H
-#define HP_FILTER_H
+#ifndef FILTERS_H
+#define FILTERS_H
 
 #include <math.h>
 
@@ -23,6 +23,27 @@ class HighPassFilter {
             prevHighPassValue = highPassValue;
             return highPassValue;
         }
+};
+
+
+class LowPassFilter {
+private:
+    float prevValue;
+    float alpha;
+    float cutoffFrequency;
+
+public:
+    LowPassFilter(float cutoffFrequency) {
+        this->cutoffFrequency = cutoffFrequency;
+        prevValue = 0;
+    }
+
+    float process(float rawValue, float deltaTime) {
+        alpha = deltaTime / (deltaTime + 1/(2 * M_PI * cutoffFrequency));
+        float lowPassValue = (1 - alpha) * prevValue + alpha * rawValue;
+        prevValue = lowPassValue;
+        return lowPassValue;
+    }
 };
 
 #endif //hp_filter_h
