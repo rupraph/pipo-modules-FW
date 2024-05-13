@@ -7,10 +7,10 @@ class HighPassFilter {
     private:
         float prevRawValue, prevHighPassValue;
         float alpha;
-        float cutoffFrequency;
+        float cutoffFrequency=1.0;
 
     public:
-        HighPassFilter(float cutoffFrequency) {
+        HighPassFilter() {
             this->cutoffFrequency = cutoffFrequency;
             prevRawValue = 0;
             prevHighPassValue = 0;
@@ -30,10 +30,10 @@ class LowPassFilter {
 private:
     float prevValue;
     float alpha;
-    float cutoffFrequency;
+    float cutoffFrequency=1.0;
 
 public:
-    LowPassFilter(float cutoffFrequency) {
+    LowPassFilter() {
         this->cutoffFrequency = cutoffFrequency;
         prevValue = 0;
     }

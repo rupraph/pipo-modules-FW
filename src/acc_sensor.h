@@ -38,10 +38,10 @@ class sensor
         };
 
         unordered_map<string, SensorDat> sensor_dat = {
-            {"roll", {true, false, 0, 0, 0}},
+            {"roll", {false, false, 0, 0, 0}},
             {"pitch", {false, false, 0, 0, 0}},
             {"yaw", {false, false, 0, 0, 0}},
-            {"accX", {false, false, 0, 0, 0}},
+            {"accX", {true, false, 0, 0, 0}},
             {"accY", {false, false, 0, 0, 0}},
             {"accZ", {false, false, 0, 0, 0}}
         };
@@ -75,13 +75,32 @@ class sensor
         float get_offset(const std::string& axis);
         void set_offset(const std::string& axis, float value);
 
+        void convert_accell();
+
         void teleplot_data(string axis);
 
 
+
     private:
-        HighPassFilter hp_filter_accX;
+
+        //HighPassFilter hp_filter_accX; // seems like substracting lowpass is slightly better
+
+        // use lowpass substraction to remove gravity. not optimal, but ok for basic processing.
         LowPassFilter lp_filter_accX;
-        sensor():hp_filter_accX(1),lp_filter_accX(5){}; // This is the constructor. It's private, which means it can only be called from within the class.
+        LowPassFilter lp_filter_accY;
+        LowPassFilter lp_filter_accZ;
+
+
+        const float acc_range=8.0; // carefull scale change is not miplemented in the sensor setup.
+        float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
+
+
+        sensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
+        {
+
+        }; // This is the constructor. It's private, which means it can only be called from within the class.
+
+
         ICM_20948_I2C myICM;
         icm_20948_DMP_data_t data;
         double q1;
@@ -89,13 +108,19 @@ class sensor
         double q3;
         double q0;
 
+        // holds raw data from sensor
         float raw_accX;
         float raw_accY;
         float raw_accZ;
 
-        
-        float hp_accX;
-        float lp_accX;
+        //holds intermediate acceleration data
+        float accX_t;
+        float accY_t;
+        float accZ_t;
+
+        float speedX;
+
+        //float hp_accX;
 
         float raw_gyroX;
         float raw_gyroY;

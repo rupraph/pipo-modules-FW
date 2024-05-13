@@ -13,6 +13,9 @@ sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 // will have to add error catching: -> when config could not load for eg. 
 
+// could use combination mode to have note from orientation, and trigger from acceleration
+
+
 Engine::Engine()
 {
 
@@ -158,27 +161,27 @@ void Engine::hid_processor(usb_hid& hidio)
 
 void Engine::set_default_config()
 {
-    // Hid mapping config
-    hid_map["roll"].mapto = "x";
-    hid_map["pitch"].mapto = "y";
+    // // Hid mapping config
+    // hid_map["roll"].mapto = "x";
+    // hid_map["pitch"].mapto = "y";
 
 
-    // Midi mapping config
-    Miditranslators["roll"].max_input=180;
-    Miditranslators["roll"].min_input=-180;
-    Miditranslators["roll"].translator_mode=1;
-    Miditranslators["roll"].rootNote=40;
-    //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
-    Miditranslators["roll"].update_scale();
+    // // Midi mapping config
+    // Miditranslators["roll"].max_input=180;
+    // Miditranslators["roll"].min_input=-180;
+    // Miditranslators["roll"].translator_mode=1;
+    // Miditranslators["roll"].rootNote=40;
+    // //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
+    // Miditranslators["roll"].update_scale();
 
 
-    Miditranslators["pitch"].max_input=90;
-    Miditranslators["pitch"].min_input=-90;
+    // Miditranslators["pitch"].max_input=90;
+    // Miditranslators["pitch"].min_input=-90;
 
-    Miditranslators["yaw"].max_input=180;
-    Miditranslators["yaw"].min_input=-180;
+    // Miditranslators["yaw"].max_input=180;
+    // Miditranslators["yaw"].min_input=-180;
 
-    // ADD SAVE CONFIG
+    // // ADD SAVE CONFIG
 }
 
 json Engine::get_config(bool debug)

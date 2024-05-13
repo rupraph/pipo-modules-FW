@@ -73,10 +73,10 @@ void sensor::setup()
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ACCELEROMETER) == ICM_20948_Stat_Ok);
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_RAW_GYROSCOPE) == ICM_20948_Stat_Ok);
 
-    // ICM_20948_fss_t myFSS; // This uses a "Full Scale Settings" structure that can contain values for all configurable sensors
-    // myFSS.a = gpm8; //2 to 16
-    // //myFSS.g = dps250; // 250 to 2000
-    // success &= (myICM.setFullScale(ICM_20948_Internal_Acc,myFSS) == ICM_20948_Stat_Ok); // Set to the maximum
+    ICM_20948_fss_t myFSS; // This uses a "Full Scale Settings" structure that can contain values for all configurable sensors
+    myFSS.a = gpm8; //2 to 16
+    //myFSS.g = dps250; // 250 to 2000
+    success &= (myICM.setFullScale(ICM_20948_Internal_Acc,myFSS) == ICM_20948_Stat_Ok); // Set to the maximum
 
 
     success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok); // Set to the maximum
@@ -190,14 +190,19 @@ void sensor::update()
             unsigned long interval = currentMillis - last_time;
             last_time = currentMillis;
 
+            // temporary solution to remove gravity and get linear acceleration
+            accX_t=raw_accX-lp_filter_accX.process(raw_accX,interval/1000.0);
+            accY_t=raw_accY-lp_filter_accY.process(raw_accY,interval/1000.0);
+            accZ_t=raw_accZ-lp_filter_accZ.process(raw_accZ,interval/1000.0);
+            convert_accell();
+
             //hp_accX=hp_filter_accX.process(raw_accX,interval/1000.0);
-            lp_accX=lp_filter_accX.process(raw_accX,interval/1000.0);
+
             Serial.print(">raw_accX:");
             Serial.println(raw_accX);
             Serial.print(">lp_accX:");
-            Serial.println(lp_accX);
-            Serial.print(">hp_accX:");
-            Serial.println(raw_accX-lp_accX);
+            Serial.println(sensor_dat["accX"].value);
+
         }
         if ((data.header & DMP_header_bitmap_Gyro) > 0) // We have asked for raw gyro data
         {
@@ -308,6 +313,13 @@ void sensor::set_config(json& config, bool debug)
 }
 
 
+
+void sensor::convert_accell()
+{    
+    sensor_dat["accX"].value = accX_t * accel_scale_coef;
+    sensor_dat["accY"].value = accY_t * accel_scale_coef; 
+    sensor_dat["accZ"].value = accY_t * accel_scale_coef; 
+}
 
 
 //gett setters

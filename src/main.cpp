@@ -43,9 +43,7 @@ void setup(){
     //config.load_config_from_file("/config/current_config.json");
     //config.apply_current_config(acc_sensor,engine,true);
 
-    config.gather_current_config(acc_sensor,engine,true);
-    config.save_config("/config/current_config.json");
-    config.print_config();
+    
 
     // Init midi
     midiio.setup();
@@ -72,7 +70,14 @@ void setup(){
     }
 
 
-    // engine.Miditranslators["roll"].set_param("translator_mode", 0);
+    // Load config
+    config.load_config_from_file("/config/current_config.json");
+    config.apply_current_config(acc_sensor,engine,true);
+
+    // save config
+    // config.gather_current_config(acc_sensor,engine,true);
+    // config.save_config("/config/current_config.json");
+    // config.print_config();
 
 
     // Initialize the ICM-20948
