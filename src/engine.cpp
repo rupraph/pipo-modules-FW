@@ -36,7 +36,7 @@ void Engine::midi_processsor(midi_io& midiio)
     {
         string axis_name=pair.first;
 
-        if (mySensor.get_enabled(axis_name) && mySensor.test_outside_deadzone(axis_name))
+        if (mySensor.get_enabled(axis_name) && mySensor.test_outside_deadzone(axis_name) && Miditranslators[axis_name].disabled==false)
         {
             float sensor_val=mySensor.get_value(axis_name);
 

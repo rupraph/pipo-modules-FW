@@ -29,6 +29,8 @@ public:
     int output_max=255;
     int output_min=0;
 
+    bool disabled=false;
+
     HidTranslator();
 
     int map_linear(float value);

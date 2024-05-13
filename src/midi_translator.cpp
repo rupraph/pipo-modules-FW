@@ -219,7 +219,8 @@ void to_json(json& j, const MidiTranslator& t) {
         {"interpolation_type", t.interpolation_type},
         {"hires", t.hires},
         {"channel", t.channel},
-        {"cc_number", t.cc_number}
+        {"cc_number", t.cc_number},
+        {"disabled", t.disabled}
     };
 }
 
@@ -246,6 +247,7 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("hires").get_to(t.hires);
     j.at("channel").get_to(t.channel);
     j.at("cc_number").get_to(t.cc_number);
+    j.at("disabled").get_to(t.disabled);
 }
 
 void MidiTranslator::deserialize(const string& data) {

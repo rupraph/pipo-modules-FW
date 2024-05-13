@@ -71,8 +71,10 @@ void setup(){
 
 
     // Load config
+    config.gather_current_config(acc_sensor,engine,false);
+    config.print_config();
     config.load_config_from_file("/config/current_config.json");
-    config.apply_current_config(acc_sensor,engine,true);
+    config.apply_current_config(acc_sensor,engine,false);
 
     // save config
     // config.gather_current_config(acc_sensor,engine,true);

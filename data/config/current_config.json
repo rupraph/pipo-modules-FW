@@ -2,8 +2,8 @@
   "engine": {
       "engine-hid": {
           "accX": {
-              "input_max": 180,
-              "input_min": -180,
+              "input_max": 8.0,
+              "input_min": -8.0,
               "mapto": "x",
               "out_type": 0,
               "output_max": 255,
@@ -11,7 +11,8 @@
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": true
           },
           "accY": {
               "input_max": 180,
@@ -23,7 +24,8 @@
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": true
           },
           "accZ": {
               "input_max": 180,
@@ -35,7 +37,8 @@
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": true
           },
           "pitch": {
               "input_max": 180,
@@ -47,31 +50,34 @@
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": true
           },
           "roll": {
               "input_max": 180,
               "input_min": -180,
-              "mapto": "x",
+              "mapto": "y",
               "out_type": 0,
               "output_max": 255,
               "output_min": 0,
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": false
           },
           "yaw": {
               "input_max": 180,
               "input_min": -180,
-              "mapto": "x",
+              "mapto": "z",
               "out_type": 0,
               "output_max": 255,
               "output_min": 0,
               "quantize": false,
               "quantize_steps": 5,
               "threshold": 0,
-              "use_threshold": 0
+              "use_threshold": 0,
+              "disabled": true
           }
       },
       "engine-midi": {
@@ -105,6 +111,7 @@
                   85,
                   86
               ],
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 8.0,
@@ -146,6 +153,7 @@
                   85,
                   86
               ],
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
@@ -187,6 +195,7 @@
                   85,
                   86
               ],
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
@@ -228,6 +237,7 @@
                   85,
                   86
               ],
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
@@ -269,6 +279,7 @@
                   85,
                   86
               ],
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
@@ -310,6 +321,7 @@
                   85,
                   86
               ],
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
@@ -333,35 +345,35 @@
       },
       "accY": {
           "deadZone": 0,
-          "enabled": false,
+          "enabled": true,
           "inverted": false,
           "offset": 0.0,
           "value": 0.0
       },
       "accZ": {
           "deadZone": 0,
-          "enabled": false,
+          "enabled": true,
           "inverted": false,
           "offset": 0.0,
           "value": 0.0
       },
       "pitch": {
           "deadZone": 0,
-          "enabled": false,
+          "enabled": true,
           "inverted": false,
           "offset": 0.0,
           "value": 0.0
       },
       "roll": {
           "deadZone": 0,
-          "enabled": false,
+          "enabled": true,
           "inverted": false,
           "offset": 0.0,
           "value": 0.0
       },
       "yaw": {
           "deadZone": 0,
-          "enabled": false,
+          "enabled": true,
           "inverted": false,
           "offset": 0.0,
           "value": 0.0

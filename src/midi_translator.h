@@ -21,6 +21,8 @@ class MidiTranslator
         //midi 
         int channel = 1;
 
+        bool disabled = false;
+
         //notes variables
         int translator_mode = 0; //0=cc, 1 note, 2 both
 
