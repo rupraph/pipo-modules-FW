@@ -37,6 +37,25 @@ void sensor::init()
     Serial.println(F("Device connected!"));
 }
 
+// DMP sensor options are defined in ICM_20948_DMP.h
+  //    INV_ICM20948_SENSOR_ACCELEROMETER               (16-bit accel)
+  //    INV_ICM20948_SENSOR_GYROSCOPE                   (16-bit gyro + 32-bit calibrated gyro)
+  //    INV_ICM20948_SENSOR_RAW_ACCELEROMETER           (16-bit accel)
+  //    INV_ICM20948_SENSOR_RAW_GYROSCOPE               (16-bit gyro + 32-bit calibrated gyro)
+  //    INV_ICM20948_SENSOR_MAGNETIC_FIELD_UNCALIBRATED (16-bit compass)
+  //    INV_ICM20948_SENSOR_GYROSCOPE_UNCALIBRATED      (16-bit gyro)
+  //    INV_ICM20948_SENSOR_STEP_DETECTOR               (Pedometer Step Detector)
+  //    INV_ICM20948_SENSOR_STEP_COUNTER                (Pedometer Step Detector)
+  //    INV_ICM20948_SENSOR_GAME_ROTATION_VECTOR        (32-bit 6-axis quaternion)
+  //    INV_ICM20948_SENSOR_ROTATION_VECTOR             (32-bit 9-axis quaternion + heading accuracy)
+  //    INV_ICM20948_SENSOR_GEOMAGNETIC_ROTATION_VECTOR (32-bit Geomag RV + heading accuracy)
+  //    INV_ICM20948_SENSOR_GEOMAGNETIC_FIELD           (32-bit calibrated compass)
+  //    INV_ICM20948_SENSOR_GRAVITY                     (32-bit 6-axis quaternion)
+  //    INV_ICM20948_SENSOR_LINEAR_ACCELERATION         (16-bit accel + 32-bit 6-axis quaternion)
+  //    INV_ICM20948_SENSOR_ORIENTATION                 (32-bit 9-axis quaternion + heading accuracy)
+
+
+
 void sensor::setup()
 {
     bool success = true; // Use success to show if the DMP configuration was successful
@@ -44,7 +63,8 @@ void sensor::setup()
     
     success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
     success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ORIENTATION) == ICM_20948_Stat_Ok);
-    success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_LINEAR_ACCELERATION) == ICM_20948_Stat_Ok);
+    success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ACCELEROMETER) == ICM_20948_Stat_Ok);
+    success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_RAW_GYROSCOPE) == ICM_20948_Stat_Ok);
 
 
     success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok); // Set to the maximum
@@ -140,6 +160,14 @@ void sensor::update()
             raw_accZ = (float)data.Raw_Accel.Data.Z;
             Serial.print(">raw_accX:");
             Serial.println(raw_accX);
+        }
+        if ((data.header & DMP_header_bitmap_Gyro) > 0) // We have asked for raw gyro data
+        {
+            raw_gyroX = (float)data.Raw_Gyro.Data.X; // Extract the raw gyro data
+            raw_gyroY = (float)data.Raw_Gyro.Data.Y;
+            raw_gyroZ = (float)data.Raw_Gyro.Data.Z;
+            Serial.print(">raw_gyroX:");
+            Serial.println(raw_gyroX);
         }
     // if  (myICM.status != ICM_20948_Stat_FIFOMoreDataAvail) // If more data is available then we should read it right away - and not delay
     // {

@@ -90,6 +90,10 @@ class sensor
         float raw_accY;
         float raw_accZ;
 
+        float raw_gyroX;
+        float raw_gyroY;
+        float raw_gyroZ;
+
 };
 
 #endif //ACC_SENSOR_H
