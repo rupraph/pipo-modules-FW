@@ -397,3 +397,24 @@ void sensor::set_offset(const std::string& axis, float value) {
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
+
+bool sensor::test_outside_deadzone(const std::string& axis)
+{   
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+
+        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadZone)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        Serial.println("error: Axis not found");
+    }
+}

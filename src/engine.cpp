@@ -30,11 +30,13 @@ void Engine::update(midi_io& midiio,usb_hid& hidio)
 
 void Engine::midi_processsor(midi_io& midiio)
 {
+    // loop through sensor data
     const auto& sensor_dat = mySensor.get_sensor_dat_map();
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
-        if (mySensor.get_enabled(axis_name))
+
+        if (mySensor.get_enabled(axis_name) && mySensor.test_outside_deadzone(axis_name))
         {
             float sensor_val=mySensor.get_value(axis_name);
 
@@ -49,7 +51,6 @@ void Engine::midi_processsor(midi_io& midiio)
                 }
                 else
                 {
-
                 uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
                 // for midi find way to limit rotation to max 180° to avoid overflow to 0
                 midiio.sendControlChange(cc_number, cc_val, 1,false);

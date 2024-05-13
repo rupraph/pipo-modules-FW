@@ -32,7 +32,7 @@ class sensor
         struct SensorDat {
             bool enabled;
             bool inverted; 
-            int deadZone; // % of the total range
+            float deadZone; // supposed to be % of the total range. value for now
             float value;
             float offset;
         };
@@ -41,7 +41,7 @@ class sensor
             {"roll", {false, false, 0, 0, 0}},
             {"pitch", {false, false, 0, 0, 0}},
             {"yaw", {false, false, 0, 0, 0}},
-            {"accX", {true, false, 0, 0, 0}},
+            {"accX", {true, false, 0.1, 0, 0}},
             {"accY", {false, false, 0, 0, 0}},
             {"accZ", {false, false, 0, 0, 0}}
         };
@@ -79,6 +79,7 @@ class sensor
 
         void teleplot_data(string axis);
 
+        bool test_outside_deadzone(const std::string& axis);
 
 
     private:
