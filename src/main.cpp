@@ -1,9 +1,20 @@
+
+
+#define PIPO_MOTION
+#if defined(PIPO_MOTION)
+#include "acc_sensor.h"
+#elif defined(PIPO_RANGE)
+#include "range_sensor.h"
+#elif defined(PIPO_ANALOG)
+#include "analog.h"
+#endif
+
+
 #include <Arduino.h>
 #include "fs_tools.h"
 #include <WiFiManager.h> 
 #include "osc_handler.h"
 #include "midi_io.h"
-#include "acc_sensor.h"
 #include "server_manager.h"
 #include "engine.h"
 #include "config.h"
@@ -19,15 +30,12 @@ ServerManager server_manager(engine,config);
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
-// unsigned long t0 = millis();
-// bool isConnected = false;
 
 void setup(){
-    sensor& acc_sensor = sensor::getInstance();
+    sensor& input_sens = sensor::getInstance();
 
     Serial.begin(115200);
-    //while(!Serial) // while prevent usb to setup properly
-
+    //while(!Serial) // "while" prevents usb to setup properly
 
 
     // Init LittleFS
@@ -41,51 +49,55 @@ void setup(){
 
     // Load config
     //config.load_config_from_file("/config/current_config.json");
-    //config.apply_current_config(acc_sensor,engine,true);
+    //config.apply_current_config(input_sens,engine,true);
 
     
-
-    // Init midi
+    // Init midi and hid
     midiio.setup();
     hidio.usb_hid_setup();
 
     //Init Wifi 
     WiFiManager wm;
     // reset settings - wipe stored credentials for testing
-    if(digitalRead(35)==HIGH)
-    {
+    if(digitalRead(35)==HIGH){
         wm.resetSettings();
         Serial.println("Settings reset");}
-    bool res;
-    wm.setDebugOutput(true);
-    res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-    delay(2000);
+        bool res;
+        wm.setDebugOutput(true);
+        res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
+        delay(2000);
         if(!res) {
-        Serial.println("Failed to connect");
-        ESP.restart();
-    } 
-    else {
-        //if you get here you have connected to the WiFi    
+            Serial.println("Failed to connect");
+            ESP.restart();
+        } 
+    else {   
         Serial.println("connected...yeey :)");
     }
 
 
     // Load config
-    config.gather_current_config(acc_sensor,engine,false);
+    config.gather_current_config(input_sens,engine,false);
     config.print_config();
-    config.load_config_from_file("/config/current_config.json");
-    config.apply_current_config(acc_sensor,engine,false);
+    
+    #if defined(PIPO_MOTION)
+        config.load_config_from_file("/config/motion_config.json");
+    #elif defined(PIPO_RANGE)
+        config.load_config_from_file("/config/range_config.json");
+    #elif defined(PIPO_ANALOG)
+        config.load_config_from_file("/config/analog_config.json");
+    #endif
+    config.apply_current_config(input_sens,engine,false);
 
     // save config
-    // config.gather_current_config(acc_sensor,engine,true);
+    // config.gather_current_config(input_sens,engine,true);
     // config.save_config("/config/current_config.json");
     // config.print_config();
 
 
     // Initialize the ICM-20948
     Wire.begin(2, 1, 400000);
-    acc_sensor.init();
-    acc_sensor.setup();
+    input_sens.init();
+    input_sens.setup();
 
     // check that wifi is connected
     server_manager.setup();
@@ -102,19 +114,19 @@ void loop() {
 
     // should create a task to trigger sensor and engine computation at regular interval
 
-    sensor& acc_sensor = sensor::getInstance();
-    //acc_sensor.enable_send_vizualizer = true;
-    acc_sensor.update();
-    acc_sensor.teleplot_data("roll");
-    // acc_sensor.teleplot_data("pitch");
-    // acc_sensor.teleplot_data("yaw");
+    sensor& input_sens = sensor::getInstance();
+    //input_sens.enable_send_vizualizer = true;
+    input_sens.update();
+    input_sens.teleplot_data("roll");
+    // input_sens.teleplot_data("pitch");
+    // input_sens.teleplot_data("yaw");
 
     engine.update(midiio, hidio);
     midiio.update();
     
-    // osc.sendOscMessage(acc_sensor.roll);
-    // osc.sendOscMessage(acc_sensor.pitch);
-    // osc.sendOscMessage(acc_sensor.yaw);
+    // osc.sendOscMessage(input_sens.roll);
+    // osc.sendOscMessage(input_sens.pitch);
+    // osc.sendOscMessage(input_sens.yaw);
     
     
   // read/update from sensor

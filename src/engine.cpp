@@ -16,11 +16,6 @@ sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 // could use combination mode to have note from orientation, and trigger from acceleration
 
 
-Engine::Engine()
-{
-
-}
-
 void Engine::update(midi_io& midiio,usb_hid& hidio)
 {
     midi_processsor(midiio);

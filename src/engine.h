@@ -14,30 +14,55 @@ using namespace std;
 
 // this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
 
+// maps should not be declare per axis, but per function since some output might rely on 2 inputs
+
 class Engine
 {
     public:
-        Engine();
-
-
-
-        unordered_map<string, MidiTranslator> Miditranslators ={
-            {"roll",MidiTranslator()},
-            {"pitch",MidiTranslator()},
-            {"yaw",MidiTranslator()},
-            {"accX",MidiTranslator()},
-            {"accY",MidiTranslator()},
-            {"accZ",MidiTranslator()}
-        };
-
-        unordered_map<string, HidTranslator> hid_map ={
-            {"roll",HidTranslator()},
-            {"pitch",HidTranslator()},
-            {"yaw",HidTranslator()},
-            {"accX",HidTranslator()},
-            {"accY",HidTranslator()},
-            {"accZ",HidTranslator()}
-        };
+        Engine()
+        {
+             #if defined(PIPO_MOTION)
+                Miditranslators ={
+                    {"roll",MidiTranslator()},
+                    {"pitch",MidiTranslator()},
+                    {"yaw",MidiTranslator()},
+                    {"accX",MidiTranslator()},
+                    {"accY",MidiTranslator()},
+                    {"accZ",MidiTranslator()}
+                };
+                hid_map ={
+                    {"roll",HidTranslator()},
+                    {"pitch",HidTranslator()},
+                    {"yaw",HidTranslator()},
+                    {"accX",HidTranslator()},
+                    {"accY",HidTranslator()},
+                    {"accZ",HidTranslator()}
+                };
+            #elif defined(PIPO_RANGE)
+                Miditranslators ={
+                    {"range",MidiTranslator()}
+                };
+                hid_map ={
+                    {"range",HidTranslator()}
+                };
+            #elif defined(PIPO_ANALOG)
+                Miditranslators ={
+                    {"analog1",MidiTranslator()},
+                    {"analog2",MidiTranslator()},
+                    {"analog3",MidiTranslator()},
+                    {"analog4",MidiTranslator()}
+                };
+                hid_map ={
+                    {"analog",HidTranslator()},
+                    {"analog2",HidTranslator()},
+                    {"analog3",HidTranslator()},
+                    {"analog4",HidTranslator()}
+                };
+            #endif
+        }
+       
+        unordered_map<string, MidiTranslator> Miditranslators;
+        unordered_map<string, HidTranslator> hid_map;
 
         hid_gamepad_report_t    gp;
         hid_keyboard_report_t    kb;
