@@ -1,6 +1,7 @@
 #ifndef INPUT_SENSOR_H
 #define INPUT_SENSOR_H
 
+#include <Arduino.h>
 #include <vector>
 #include <unordered_map>
 #include "json.hpp"

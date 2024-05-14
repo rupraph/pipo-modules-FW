@@ -1,6 +1,6 @@
 
 
-#define PIPO_RANGE
+#define PIPO_ANALOG
 
 #include <Arduino.h>
 #include "fs_tools.h"
@@ -18,8 +18,9 @@
 #elif defined(PIPO_RANGE)
     #include "range_sensor.h"
     RangeSensor input_sens;
-// #elif defined(PIPO_ANALOG)
-//     analog_sensor input_sens;
+#elif defined(PIPO_ANALOG)
+    #include "analog_sensor.h"
+    AnalogSensor input_sens;
 #endif
 
 //OSC_handler osc;

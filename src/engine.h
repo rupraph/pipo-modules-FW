@@ -47,16 +47,32 @@ class Engine
                 };
             #elif defined(PIPO_ANALOG)
                 Miditranslators ={
-                    {"analog1",MidiTranslator()},
-                    {"analog2",MidiTranslator()},
-                    {"analog3",MidiTranslator()},
-                    {"analog4",MidiTranslator()}
+                    {"A1",MidiTranslator()},
+                    {"A2",MidiTranslator()},
+                    {"A3",MidiTranslator()},
+                    {"A4",MidiTranslator()},
+                    {"A5",MidiTranslator()},
+                    {"A6",MidiTranslator()},
+                    {"T1",MidiTranslator()},
+                    {"T2",MidiTranslator()},
+                    {"T3",MidiTranslator()},
+                    {"T4",MidiTranslator()},
+                    {"T5",MidiTranslator()},
+                    {"T6",MidiTranslator()}
                 };
                 hid_map ={
-                    {"analog",HidTranslator()},
-                    {"analog2",HidTranslator()},
-                    {"analog3",HidTranslator()},
-                    {"analog4",HidTranslator()}
+                    {"A1",HidTranslator()},
+                    {"A2",HidTranslator()},
+                    {"A3",HidTranslator()},
+                    {"A4",HidTranslator()},
+                    {"A5",HidTranslator()},
+                    {"A6",HidTranslator()},
+                    {"T1",HidTranslator()},
+                    {"T2",HidTranslator()},
+                    {"T3",HidTranslator()},
+                    {"T4",HidTranslator()},
+                    {"T5",HidTranslator()},
+                    {"T6",HidTranslator()}
                 };
             #endif
         }
