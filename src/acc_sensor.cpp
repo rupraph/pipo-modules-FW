@@ -18,9 +18,9 @@
 // with current setup, seems like acquisition rate is 20ms. enabling or disabling some sensor data does not seem to change things
 
 
-void sensor::init()
+void MotionSensor::init()
 {
-
+    Serial.println("init motion sensor");
     myICM.enableDebugging();
     initialized = false;
     while (!initialized)
@@ -61,7 +61,7 @@ void sensor::init()
 
 
 
-void sensor::setup()
+void MotionSensor::setup()
 {
     bool success = true; // Use success to show if the DMP configuration was successful
     // Initialize the DMP. initializeDMP is a weak function. You can overwrite it if you want to e.g. to change the sample rate
@@ -112,7 +112,7 @@ void sensor::setup()
 
 }
 
-void sensor::update()
+void MotionSensor::update()
 {
     // measure update rate
     
@@ -231,7 +231,7 @@ void sensor::update()
 // When flipping the sensor, the roll and pitch values are inverted. 
 
 
-void sensor::calc_euler_angles()
+void MotionSensor::calc_euler_angles()
 {      // Convert the quaternions to Euler angles (roll, pitch, yaw)
       // https://en.wikipedia.org/w/index.php?title=Conversion_between_quaternions_and_Euler_angles&section=8#Source_code_2
 
@@ -286,8 +286,8 @@ void sensor::calc_euler_angles()
 
 
     //   //adafruit style visualizer  
-    //   Serial.print("Orientation: ");
-    //   Serial.print(sensor_dat["roll"].value);
+       Serial.print("Orientation: ");
+       Serial.print(sensor_dat["roll"].value);
     //   Serial.print(", ");
     //   Serial.print(sensor_dat["pitch"].value);
     //   Serial.print(", ");
@@ -296,160 +296,9 @@ void sensor::calc_euler_angles()
     
 }
 
-void sensor::teleplot_data(string axis)
-{
-    Serial.print(">");
-    Serial.print(axis.c_str());
-    Serial.print(": ");
-    Serial.println(sensor_dat[axis].value);
-}
-
-
-//config
-
-json sensor::get_config(bool debug)
-{
-    json config;
-    for (auto const& pair : sensor_dat)
-    {
-        string axis_name = pair.first;
-        config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
-        config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
-        config[axis_name]["deadZone"] = sensor_dat[axis_name].deadZone;
-        config[axis_name]["value"] = sensor_dat[axis_name].value;
-        config[axis_name]["offset"] = sensor_dat[axis_name].offset;
-    }
-    if (debug)
-    {
-        Serial.println("returned_sensor_get_config");
-        Serial.println(config.dump(4).c_str());
-        Serial.println("returned_sensor_get_config_end");
-    }
-    return config;
-}
-
-void sensor::set_config(json& config, bool debug)
-{
-    for (auto const& pair : config.items())
-    {
-        string axis_name = pair.key();
-        sensor_dat[axis_name].enabled = config[axis_name]["enabled"];
-        sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
-        sensor_dat[axis_name].deadZone = config[axis_name]["deadZone"];
-        sensor_dat[axis_name].value = config[axis_name]["value"];
-        sensor_dat[axis_name].offset = config[axis_name]["offset"];
-    }
-    if (debug)
-    {
-        Serial.println("set_sensor_config");
-        Serial.println(config.dump(4).c_str());
-        Serial.println("set_sensor_config_end");
-    }
-}
-
-
-
-void sensor::convert_accell()
+void MotionSensor::convert_accell()
 {    
     sensor_dat["accX"].value = accX_t * accel_scale_coef;
     sensor_dat["accY"].value = accY_t * accel_scale_coef; 
     sensor_dat["accZ"].value = accY_t * accel_scale_coef; 
-}
-
-
-//gett setters
-
-unordered_map<string, sensor::SensorDat> sensor::get_sensor_dat_map() {
-    return sensor_dat;
-}
-
-bool sensor::get_enabled(const std::string& axis) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].enabled;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-bool sensor::get_inverted(const std::string& axis) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].inverted;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-int sensor::get_deadZone(const std::string& axis) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].deadZone;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-float sensor::get_value(const std::string& axis) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-float sensor::get_offset(const std::string& axis) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].offset;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void sensor::set_enabled(const std::string& axis, bool value) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].enabled = value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void sensor::set_inverted(const std::string& axis, bool value) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].inverted = value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void sensor::set_deadZone(const std::string& axis, int value) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].deadZone = value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void sensor::set_value(const std::string& axis, float value) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].value = value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void sensor::set_offset(const std::string& axis, float value) {
-    if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].offset = value;
-    else
-        throw std::invalid_argument("Axis not found: " + axis);
-}
-
-bool sensor::test_outside_deadzone(const std::string& axis)
-{   
-    if(sensor_dat.find(axis) != sensor_dat.end())
-    {
-
-        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadZone)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-
-    }
-    else
-    {
-        Serial.println("error: Axis not found");
-    }
 }

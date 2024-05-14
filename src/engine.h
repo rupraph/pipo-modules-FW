@@ -1,7 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "acc_sensor.h"
 #include <unordered_map>
 #include "midi_translator.h"
 #include "hid_translator.h"
@@ -9,6 +8,7 @@
 #include "usb_hid.h"
 #include "json.hpp"
 #include "fs_tools.h"
+#include "input_sensor.h"
 
 using namespace std;
 
@@ -69,9 +69,9 @@ class Engine
         hid_mouse_report_t       mouse;
 
 
-        void update(midi_io& midiio,usb_hid& hidio);
-        void midi_processsor(midi_io& midiio);
-        void hid_processor(usb_hid& hidio);
+        void update(Sensor& sensor, midi_io& midiio,usb_hid& hidio);
+        void midi_processsor(Sensor& sensor,midi_io& midiio);
+        void hid_processor(Sensor& sensor,usb_hid& hidio);
         void set_default_config();
         json get_config(bool debug=false);
         void set_config(json& config,bool debug=false);

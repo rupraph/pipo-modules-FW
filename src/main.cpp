@@ -1,14 +1,6 @@
 
 
 #define PIPO_MOTION
-#if defined(PIPO_MOTION)
-#include "acc_sensor.h"
-#elif defined(PIPO_RANGE)
-#include "range_sensor.h"
-#elif defined(PIPO_ANALOG)
-#include "analog.h"
-#endif
-
 
 #include <Arduino.h>
 #include "fs_tools.h"
@@ -18,6 +10,7 @@
 #include "server_manager.h"
 #include "engine.h"
 #include "config.h"
+#include "input_sensor.h"
 
 
 //OSC_handler osc;
@@ -25,14 +18,22 @@ midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine;
-ServerManager server_manager(engine,config);
+#ifdef PIPO_MOTION
+    #include "acc_sensor.h"
+    MotionSensor input_sens;
+#elif PIPO_RANGE
+    #include "range_sensor.h"
+    range_sensor input_sens;
+// #elif defined(PIPO_ANALOG)
+//     analog_sensor input_sens;
+#endif
+ServerManager server_manager(input_sens,engine,config);
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
 
 void setup(){
-    sensor& input_sens = sensor::getInstance();
 
     Serial.begin(115200);
     //while(!Serial) // "while" prevents usb to setup properly
@@ -76,8 +77,8 @@ void setup(){
 
 
     // Load config
-    config.gather_current_config(input_sens,engine,false);
-    config.print_config();
+    // config.gather_current_config(input_sens, engine, false);//,
+    // config.print_config();
     
     #if defined(PIPO_MOTION)
         config.load_config_from_file("/config/motion_config.json");
@@ -86,7 +87,9 @@ void setup(){
     #elif defined(PIPO_ANALOG)
         config.load_config_from_file("/config/analog_config.json");
     #endif
-    config.apply_current_config(input_sens,engine,false);
+    config.apply_current_config(input_sens, engine,false);//input_sens,
+    config.gather_current_config(input_sens,engine,false);
+    config.print_config();
 
     // save config
     // config.gather_current_config(input_sens,engine,true);
@@ -96,6 +99,7 @@ void setup(){
 
     // Initialize the ICM-20948
     Wire.begin(2, 1, 400000);
+    
     input_sens.init();
     input_sens.setup();
 
@@ -114,14 +118,14 @@ void loop() {
 
     // should create a task to trigger sensor and engine computation at regular interval
 
-    sensor& input_sens = sensor::getInstance();
+
     //input_sens.enable_send_vizualizer = true;
     input_sens.update();
     input_sens.teleplot_data("roll");
     // input_sens.teleplot_data("pitch");
     // input_sens.teleplot_data("yaw");
 
-    engine.update(midiio, hidio);
+    engine.update(input_sens, midiio, hidio);
     midiio.update();
     
     // osc.sendOscMessage(input_sens.roll);

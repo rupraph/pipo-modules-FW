@@ -1,43 +1,18 @@
 #ifndef ACC_SENSOR_H
 #define ACC_SENSOR_H
 
+#include "input_sensor.h"
 #include <ICM_20948.h>
-#include <vector>
-#include <unordered_map>
-#include "json.hpp"
-#include "filters.h"
-
-using namespace std;
-using json = nlohmann::json;
 
 //todo missing capital at sensor
-class sensor
-{   
-
+class MotionSensor: public Sensor{   
     public:
+        // motion_sensor(const motion_sensor&) = delete;
+        // void operator=(const motion_sensor&) = delete;
 
-        static sensor& getInstance() {
-            static sensor instance; // This is the single instance of Sensor. It's static, which means it's shared by all instances of the class.
-            return instance;
-        }
-        sensor(sensor const&) = delete;// This deletes the copy constructor. This means you can't create a new Sensor object by copying an existing one.
-        void operator=(sensor const&) = delete;// This deletes the assignment operator. This means you can't assign one Sensor object to another.
-
-        
-        bool initialized = false;
-        bool enable_send_vizualizer = false;
-
-
-        // might want to move this structure outside of the class
-        struct SensorDat {
-            bool enabled;
-            bool inverted; 
-            float deadZone; // supposed to be % of the total range. value for now
-            float value;
-            float offset;
-        };
-
-        unordered_map<string, SensorDat> sensor_dat = {
+        MotionSensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
+        {
+            sensor_dat = {
             {"roll", {false, false, 0, 0, 0}},
             {"pitch", {false, false, 0, 0, 0}},
             {"yaw", {false, false, 0, 0, 0}},
@@ -46,62 +21,36 @@ class sensor
             {"accZ", {false, false, 0, 0, 0}}
         };
 
+        }; 
 
-        void init();
-        void setup();
-        void update();
+        void init() override;
+        void setup() override;
+        void update() override;
+
+        bool initialized = false;
+        bool enable_send_vizualizer = false;
+
         void calc_euler_angles();
-
-        //config 
-        json get_config(bool debug=false);
-        void set_config(json& config,bool debug=false);
-
-        //Getter setters
-
-        unordered_map<string, SensorDat> get_sensor_dat_map();
-
-        bool get_enabled(const std::string& axis);
-        void set_enabled(const std::string& axis, bool value);
-
-        bool get_inverted(const std::string& axis);
-        void set_inverted(const std::string& axis, bool value);
-
-        int get_deadZone(const std::string& axis);
-        void set_deadZone(const std::string& axis, int value);
-
-        float get_value(const std::string& axis);
-        void set_value(const std::string& axis, float value);
-
-        float get_offset(const std::string& axis);
-        void set_offset(const std::string& axis, float value);
 
         void convert_accell();
 
-        void teleplot_data(string axis);
-
-        bool test_outside_deadzone(const std::string& axis);
-
 
     private:
+
+        // for taking orientation reference. test for now, might not keep this solution
         bool firstCall = true;
         double initialRoll, initialPitch;
 
         //HighPassFilter hp_filter_accX; // seems like substracting lowpass is slightly better
 
-        // use lowpass substraction to remove gravity. not optimal, but ok for basic processing.
+        // use lowpass substraction to remove gravity from accel. not optimal, but ok for basic processing.
         LowPassFilter lp_filter_accX;
         LowPassFilter lp_filter_accY;
         LowPassFilter lp_filter_accZ;
 
-
-        const float acc_range=8.0; // carefull scale change is not miplemented in the sensor setup.
+        // acellerometer value convertion
+        const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
         float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
-
-
-        sensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
-        {
-
-        }; // This is the constructor. It's private, which means it can only be called from within the class.
 
 
         ICM_20948_I2C myICM;

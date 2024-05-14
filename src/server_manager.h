@@ -14,7 +14,7 @@ using namespace std;
 class ServerManager
 {
     public:
-        ServerManager(Engine& engine,Config& config): server(80), engine(engine),config(config) {}
+        ServerManager(Sensor& sensor, Engine& engine,Config& config): server(80), input_sens(sensor),engine(engine),config(config) {}
         void setup();
         void setup_requests();
         static void notFound(AsyncWebServerRequest *request);
@@ -23,7 +23,8 @@ class ServerManager
 
     private:
         AsyncWebServer server;
-        sensor& acc_sensor = sensor::getInstance();
+        // sensor& acc_sensor = sensor::getInstance();
+        Sensor& input_sens;
         Engine& engine;
         Config& config;
 

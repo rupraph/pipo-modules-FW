@@ -4,7 +4,7 @@
 // for convenience
 using json = nlohmann::json;
 
-sensor& mySensor = sensor::getInstance(); // Get the singleton instance
+//sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 
 // should create a table for axis config. min max, etc, since this is shared for both hid and midi
@@ -16,24 +16,24 @@ sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 // could use combination mode to have note from orientation, and trigger from acceleration
 
 
-void Engine::update(midi_io& midiio,usb_hid& hidio)
+void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
 {
-    midi_processsor(midiio);
-    hid_processor(hidio);
+    midi_processsor(sensor, midiio);
+    hid_processor(sensor, hidio);
 }
 
 
-void Engine::midi_processsor(midi_io& midiio)
+void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
 {
     // loop through sensor data
-    const auto& sensor_dat = mySensor.get_sensor_dat_map();
+    const auto& sensor_dat = sensor.get_sensor_dat_map();
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
 
-        if (mySensor.get_enabled(axis_name) && mySensor.test_outside_deadzone(axis_name) && Miditranslators[axis_name].disabled==false)
+        if (sensor.get_enabled(axis_name) && sensor.test_outside_deadzone(axis_name) && Miditranslators[axis_name].disabled==false)
         {
-            float sensor_val=mySensor.get_value(axis_name);
+            float sensor_val=sensor.get_value(axis_name);
 
             if (Miditranslators[axis_name].translator_mode==0)
             {   
@@ -80,16 +80,16 @@ void Engine::midi_processsor(midi_io& midiio)
     
 }
 
-void Engine::hid_processor(usb_hid& hidio)
+void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
 { // not dealing with buttons yet
-
-    const auto& sensor_dat = mySensor.get_sensor_dat_map();
+    
+    const auto& sensor_dat = sensor.get_sensor_dat_map();
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
-        if (mySensor.get_enabled(axis_name))
+        if (sensor.get_enabled(axis_name))
         {
-            float sensor_val=mySensor.get_value(axis_name);
+            float sensor_val=sensor.get_value(axis_name);
 
             if (hid_map.find(axis_name) != hid_map.end())
             {

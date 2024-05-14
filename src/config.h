@@ -10,7 +10,6 @@
 #include <sstream>
 #include "fs_tools.h"
 #include "json.hpp"
-#include "acc_sensor.h"
 #include "engine.h"
 
 using namespace std;
@@ -33,8 +32,11 @@ class Config
         // void save_config_for_key(string key, json data);
         void print_config();
 
-        void gather_current_config(sensor& sensor,Engine& engine,bool debug=false);
-        void apply_current_config(sensor& sensor,Engine& engine,bool debug=false);
+        void gather_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
+        void apply_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
+
+    // private:
+    //     Sensor& mySensor = Sensor::getInstance();
 };
 
 //     // hardware and connectivity settings

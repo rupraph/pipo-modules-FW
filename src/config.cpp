@@ -3,7 +3,7 @@
 
 #include "config.h"
 
-
+//sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 Config::Config() {
     
@@ -44,8 +44,10 @@ void Config::print_config() {
 //     current_config[key] = data;
 // }
 
-void Config::gather_current_config(sensor& sensor,Engine& engine,bool debug) {
+void Config::gather_current_config(Sensor& sensor,Engine& engine,bool debug) {
+    Serial.print("gatherconfig sensor");
     current_config["sensor"] = sensor.get_config(debug);
+    Serial.print("gatherconfig engine");
     current_config["engine"] = engine.get_config(debug);
     if (debug) {
         Serial.println("gathered_config");
@@ -54,7 +56,8 @@ void Config::gather_current_config(sensor& sensor,Engine& engine,bool debug) {
     }
 }
 
-void Config::apply_current_config(sensor& sensor,Engine& engine,bool debug) {
+//sensor& sensor,
+void Config::apply_current_config(Sensor& sensor,Engine& engine,bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
 }

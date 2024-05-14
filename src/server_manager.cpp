@@ -97,7 +97,7 @@ void ServerManager::setup_requests(){
 
         // Update the engine config
         this->config.set_current_config(newConfig);
-        this->config.apply_current_config(this->acc_sensor,this->engine,true);
+        this->config.apply_current_config(this->input_sens,this->engine,true);//this->acc_sensor,
 
         // Save the new config to disk
         //this->config.save_config_to_file("/config/current_config.json", newConfig);
