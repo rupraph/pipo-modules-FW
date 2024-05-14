@@ -5,11 +5,9 @@
 #include <vl53l4cx_class.h>
 
 
-//todo missing capital at sensor
+
 class RangeSensor : public Sensor{   
     public:
-        // range_sensor(const range_sensor&) = delete;
-        // void operator=(const range_sensor&) = delete;
         RangeSensor(){
             sensor_dat = {
             {"dist", {true, false, 0, 0, 0}}
