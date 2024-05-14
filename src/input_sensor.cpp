@@ -4,11 +4,19 @@
 //#include "analog_sensor.h"
 
 void Sensor::teleplot_data(string axis)
-{
-    Serial.print(">");
-    Serial.print(axis.c_str());
-    Serial.print(": ");
-    Serial.println(sensor_dat[axis].value);
+{   
+    if (sensor_dat.find(axis) == sensor_dat.end())
+    {
+        Serial.println("error: Axis not found");
+        return;
+    }
+    else
+    {
+        Serial.print(">");
+        Serial.print(axis.c_str());
+        Serial.print(": ");
+        Serial.println(sensor_dat[axis].value);
+    }
 }
 
 

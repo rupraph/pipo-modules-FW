@@ -7,7 +7,11 @@ void RangeSensor::init()
     //vl53l4cx.setXShutPin(4); Todo
     vl53l4cx.begin();
     vl53l4cx.VL53L4CX_Off();
-    vl53l4cx.InitSensor(0x12);
+    if(vl53l4cx.InitSensor(0x12)==VL53L4CX_ERROR_NONE){
+        Serial.println("VL53L4CX sensor found and initialized");
+    }else{
+        Serial.println("VL53L4CX sensor not found or not initialized");
+    }
 }
 
 void RangeSensor::setup()

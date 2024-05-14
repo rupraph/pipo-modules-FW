@@ -12,7 +12,7 @@ class RangeSensor : public Sensor{
         // void operator=(const range_sensor&) = delete;
         RangeSensor(){
             sensor_dat = {
-            {"dist", {false, false, 0, 0, 0}}
+            {"dist", {true, false, 0, 0, 0}}
         };
         };
 

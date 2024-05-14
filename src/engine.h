@@ -40,10 +40,10 @@ class Engine
                 };
             #elif defined(PIPO_RANGE)
                 Miditranslators ={
-                    {"range",MidiTranslator()}
+                    {"dist",MidiTranslator()}
                 };
                 hid_map ={
-                    {"range",HidTranslator()}
+                    {"dist",HidTranslator()}
                 };
             #elif defined(PIPO_ANALOG)
                 Miditranslators ={

@@ -1,6 +1,6 @@
 
 
-#define PIPO_MOTION
+#define PIPO_RANGE
 
 #include <Arduino.h>
 #include "fs_tools.h"
@@ -12,21 +12,21 @@
 #include "config.h"
 #include "input_sensor.h"
 
+#ifdef PIPO_MOTION
+    #include "acc_sensor.h"
+    MotionSensor input_sens;
+#elif defined(PIPO_RANGE)
+    #include "range_sensor.h"
+    RangeSensor input_sens;
+// #elif defined(PIPO_ANALOG)
+//     analog_sensor input_sens;
+#endif
 
 //OSC_handler osc;
 midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine;
-#ifdef PIPO_MOTION
-    #include "acc_sensor.h"
-    MotionSensor input_sens;
-#elif PIPO_RANGE
-    #include "range_sensor.h"
-    range_sensor input_sens;
-// #elif defined(PIPO_ANALOG)
-//     analog_sensor input_sens;
-#endif
 ServerManager server_manager(input_sens,engine,config);
 
 
@@ -48,9 +48,6 @@ void setup(){
     // listDir(LittleFS, "/config", 2);
     // listDir(LittleFS, "/webpage", 2);
 
-    // Load config
-    //config.load_config_from_file("/config/current_config.json");
-    //config.apply_current_config(input_sens,engine,true);
 
     
     // Init midi and hid
@@ -77,8 +74,8 @@ void setup(){
 
 
     // Load config
-    // config.gather_current_config(input_sens, engine, false);//,
-    // config.print_config();
+    config.gather_current_config(input_sens, engine, false);//,
+    config.print_config();
     
     #if defined(PIPO_MOTION)
         config.load_config_from_file("/config/motion_config.json");
@@ -87,8 +84,9 @@ void setup(){
     #elif defined(PIPO_ANALOG)
         config.load_config_from_file("/config/analog_config.json");
     #endif
+
     config.apply_current_config(input_sens, engine,false);//input_sens,
-    config.gather_current_config(input_sens,engine,false);
+    // config.gather_current_config(input_sens,engine,false);
     config.print_config();
 
     // save config
@@ -106,6 +104,8 @@ void setup(){
     // check that wifi is connected
     server_manager.setup();
     server_manager.setup_requests();
+
+    Serial.println("Setup done");
     
 }
 
@@ -118,11 +118,12 @@ void loop() {
 
     // should create a task to trigger sensor and engine computation at regular interval
 
+    Serial.println("loop");
 
     //input_sens.enable_send_vizualizer = true;
     input_sens.update();
-    input_sens.teleplot_data("roll");
-    // input_sens.teleplot_data("pitch");
+    //input_sens.teleplot_data("roll");
+    //input_sens.teleplot_data("dist");
     // input_sens.teleplot_data("yaw");
 
     engine.update(input_sens, midiio, hidio);
