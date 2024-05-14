@@ -33,8 +33,8 @@ class MidiTranslator
         vector<int> current_scale;
 
         // common for note and cc
-        float max_input = 180;
-        float min_input = -180;
+        float max_input = 100;
+        float min_input = 0;
 
 
         //CC variables

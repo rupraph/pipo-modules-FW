@@ -1,6 +1,7 @@
 
 
-#define PIPO_ANALOG
+#define PIPO_RANGE
+// could put it as build flag ! like -D PIPO_RANGE
 
 #include <Arduino.h>
 #include "fs_tools.h"
@@ -15,12 +16,15 @@
 #ifdef PIPO_MOTION
     #include "acc_sensor.h"
     MotionSensor input_sens;
+    string sensor_type = "motion";
 #elif defined(PIPO_RANGE)
     #include "range_sensor.h"
     RangeSensor input_sens;
+    string sensor_type = "range";
 #elif defined(PIPO_ANALOG)
     #include "analog_sensor.h"
     AnalogSensor input_sens;
+    string sensor_type = "analog";
 #endif
 
 //OSC_handler osc;
@@ -33,31 +37,89 @@ ServerManager server_manager(input_sens,engine,config);
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
+// quick declaration of functions
+void init_filesystem();
+void setup_wifi();
 
 void setup(){
 
     Serial.begin(115200);
     //while(!Serial) // "while" prevents usb to setup properly
 
-
-    // Init LittleFS
-    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
-    Serial.println("LittleFS Mount Failed");
-    return;
-    }
-    Serial.println("LittleFS Mount Success");
-    // listDir(LittleFS, "/config", 2);
-    // listDir(LittleFS, "/webpage", 2);
-
-
+    init_filesystem();
     
     // Init midi and hid
     midiio.setup();
     hidio.usb_hid_setup();
 
-    //Init Wifi 
+    setup_wifi();
+
+    // Load config
+    //config.gather_current_config(input_sens, engine, false);//,
+    //config.print_config();
+    config.load_config(sensor_type);
+    config.apply_current_config(input_sens, engine,false);//input_sens,
+    //config.print_config();
+    
+    // initialize sensor/inputs
+    input_sens.init();
+    input_sens.setup();
+
+    //Start server
+    // Todo: add check that wifi is connected before running server...
+    server_manager.setup();
+    server_manager.setup_requests();
+
+    Serial.println("Setup done");
+}
+
+    // Initialize OSC
+    // osc.setDestIp(IPAddress(172,20,10,14));
+    // osc.setoutPort(8000);
+    // osc.start();
+
+void loop() {
+
+    // should create a task to trigger sensor and engine computation at regular interval
+
+
+
+    input_sens.update();
+    input_sens.teleplot_data("T1");
+    //input_sens.teleplot_data("roll");
+    //input_sens.teleplot_data("dist");
+
+    engine.update(input_sens, midiio, hidio);
+    midiio.update();
+    
+    // osc.sendOscMessage(input_sens.roll);
+    // osc.sendOscMessage(input_sens.pitch);
+    // osc.sendOscMessage(input_sens.yaw);
+    
+    
+  // read/update from sensor
+  // poll webserver for config change
+  // convert sensor to midi
+  // send midi
+}
+
+
+void init_filesystem(){
+        // Init LittleFS
+        if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
+        Serial.println("LittleFS Mount Failed");
+        return;
+        }
+        Serial.println("LittleFS Mount Success");
+        // listDir(LittleFS, "/config", 2);
+        // listDir(LittleFS, "/webpage", 2);
+}
+
+void setup_wifi(){
+    // setup wifi through wifi manager
+
     WiFiManager wm;
-    // reset settings - wipe stored credentials for testing
+
     if(digitalRead(35)==HIGH){
         wm.resetSettings();
         Serial.println("Settings reset");}
@@ -72,73 +134,6 @@ void setup(){
     else {   
         Serial.println("connected...yeey :)");
     }
-
-
-    // Load config
-    config.gather_current_config(input_sens, engine, false);//,
-    config.print_config();
-    
-    #if defined(PIPO_MOTION)
-        config.load_config_from_file("/config/motion_config.json");
-    #elif defined(PIPO_RANGE)
-        config.load_config_from_file("/config/range_config.json");
-    #elif defined(PIPO_ANALOG)
-        config.load_config_from_file("/config/analog_config.json");
-    #endif
-
-    config.apply_current_config(input_sens, engine,false);//input_sens,
-    // config.gather_current_config(input_sens,engine,false);
-    config.print_config();
-
-    // save config
-    // config.gather_current_config(input_sens,engine,true);
-    // config.save_config("/config/current_config.json");
-    // config.print_config();
-
-
-    // Initialize the ICM-20948
-    Wire.begin(2, 1, 400000);
-    
-    input_sens.init();
-    input_sens.setup();
-
-    // check that wifi is connected
-    server_manager.setup();
-    server_manager.setup_requests();
-
-    Serial.println("Setup done");
-    
-}
-
-    // Initialize OSC
-    // osc.setDestIp(IPAddress(172,20,10,14));
-    // osc.setoutPort(8000);
-    // osc.start();
-
-void loop() {
-
-    // should create a task to trigger sensor and engine computation at regular interval
-
-    Serial.println("loop");
-
-    //input_sens.enable_send_vizualizer = true;
-    input_sens.update();
-    //input_sens.teleplot_data("roll");
-    //input_sens.teleplot_data("dist");
-    // input_sens.teleplot_data("yaw");
-
-    engine.update(input_sens, midiio, hidio);
-    midiio.update();
-    
-    // osc.sendOscMessage(input_sens.roll);
-    // osc.sendOscMessage(input_sens.pitch);
-    // osc.sendOscMessage(input_sens.yaw);
-    
-    
-  // read/update from sensor
-  // poll webserver for config change
-  // convert sensor to midi
-  // send midi
 }
 
 

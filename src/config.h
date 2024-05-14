@@ -11,6 +11,7 @@
 #include "fs_tools.h"
 #include "json.hpp"
 #include "engine.h"
+#include "input_sensor.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -26,6 +27,7 @@ class Config
         json current_config;
         json test_config;
         void load_config_from_file(String filename);
+        void load_config(string sensor_type);
         void save_config(String filename);
         void set_current_config(json config);
         json get_config_for_key(string key);

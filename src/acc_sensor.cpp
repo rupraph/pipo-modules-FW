@@ -17,6 +17,7 @@
 
 void MotionSensor::init()
 {
+    Wire.begin(2, 1, 400000);
     Serial.println("init motion sensor");
     myICM.enableDebugging();
     initialized = false;

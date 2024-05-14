@@ -3,6 +3,8 @@
 
 #include "config.h"
 
+// todo should be able to save different config and retrieve them (from webpage)
+// should be able to report wherther config is succefully loade, saved,etc..
 
 Config::Config() {
     
@@ -10,6 +12,18 @@ Config::Config() {
 
 void Config::load_config_from_file(String filename) {
     current_config = json::parse(readFile(LittleFS,filename.c_str()));
+}
+
+void Config::load_config(string sensor_type) {
+    if (sensor_type == "motion") {
+        load_config_from_file("/config/motion_config.json");
+    }
+    else if (sensor_type == "range") {
+        load_config_from_file("/config/range_config.json");
+    }
+    else if (sensor_type == "analog") {
+        load_config_from_file("/config/analog_config.json");
+    }
 }
 
 void Config::save_config(String filename) {
