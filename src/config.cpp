@@ -3,7 +3,6 @@
 
 #include "config.h"
 
-//sensor& mySensor = sensor::getInstance(); // Get the singleton instance
 
 Config::Config() {
     

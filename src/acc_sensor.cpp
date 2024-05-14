@@ -3,9 +3,6 @@
 
 // review with exemples setup and acquisition structure.
 
-
-// review with exemples setup and acquisition structure.
-
 // todo: improve where the bias is applied. 
 // computation of spatial position not finished. not working yet. have to check bias and calculations
 

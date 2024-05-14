@@ -4,8 +4,6 @@
 // for convenience
 using json = nlohmann::json;
 
-//sensor& mySensor = sensor::getInstance(); // Get the singleton instance
-
 
 // should create a table for axis config. min max, etc, since this is shared for both hid and midi
 

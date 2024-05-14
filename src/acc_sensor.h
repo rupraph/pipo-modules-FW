@@ -4,12 +4,9 @@
 #include "input_sensor.h"
 #include <ICM_20948.h>
 
-//todo missing capital at sensor
+
 class MotionSensor: public Sensor{   
     public:
-        // motion_sensor(const motion_sensor&) = delete;
-        // void operator=(const motion_sensor&) = delete;
-
         MotionSensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
         {
             sensor_dat = {

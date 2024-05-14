@@ -11,18 +11,11 @@ using json = nlohmann::json;
 
 class Sensor {
 public:
-    // static sensor& getInstance();
-    
-    // sensor(const sensor&) = delete;
-    // void operator=(const sensor&) = delete;
-
-    //Sensor() {}  // Constructor is protected to prevent direct instantiation
     
     virtual void init()=0;
     virtual void setup()=0;
     virtual void update()=0;
 
-     // might want to move this structure outside of the class
     struct SensorDat {
         bool enabled;
         bool inverted; 
@@ -30,8 +23,6 @@ public:
         float value;
         float offset;
     };
-
-    
 
     //config 
     json get_config(bool debug=false);
@@ -62,10 +53,7 @@ public:
 
 protected:
     unordered_map<string, SensorDat> sensor_dat;
-    
 
-// private:
-//     static sensor* instance;
 };
 
 #endif // INPUT_SENSOR_H

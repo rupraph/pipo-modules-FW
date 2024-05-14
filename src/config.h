@@ -21,7 +21,7 @@ using json = nlohmann::json;
 class Config
 {
     public:
-        //std::string current_config;
+
         Config();
         json current_config;
         json test_config;
@@ -34,39 +34,6 @@ class Config
 
         void gather_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
         void apply_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
-
-    // private:
-    //     Sensor& mySensor = Sensor::getInstance();
 };
-
-//     // hardware and connectivity settings
-//     vector<string> usb_modes = {"usb_midi", "usb_serial"}; 
-//     vector<string> ble_modes = {"ble_midi", "ble_serial"};
-//     bool enable_ble;
-//     bool enable_wifi;
-
-//     // output protocol(s) selection
-//     bool osc_enabled;
-//     bool midi_enabled;
-
-//     // settings for the chosen protocols
-//     // midi settings
-
-//     //sensor specific settings
-//     bool enable_r_axis[3];
-//     bool enable_t_axis[3];
-
-//     //osc settings
-//     String osc_ip;
-//     int osc_port;
-
-    
-
-//     // methods
-//     void save_config();
-//     void load_config();
-//     void print_config();
-// };
-
 
 #endif //CONFIG_H
