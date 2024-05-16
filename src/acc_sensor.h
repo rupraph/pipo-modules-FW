@@ -3,6 +3,7 @@
 
 #include "input_sensor.h"
 #include <ICM_20948.h>
+#include "HW_CONFIG.h"
 
 
 class MotionSensor: public Sensor{   

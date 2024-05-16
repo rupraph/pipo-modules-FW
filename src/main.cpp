@@ -1,10 +1,10 @@
 
 
-#define PIPO_MOTION
-// could put it as build flag ! like -D PIPO_RANGE
-//#define PROTO_ATOM
+
+
 
 #include <Arduino.h>
+#include "HW_CONFIG.h"
 #include "fs_tools.h"
 #include <WiFiManager.h> 
 #include "osc_handler.h"
@@ -13,6 +13,7 @@
 #include "engine.h"
 #include "config.h"
 #include "input_sensor.h"
+#include "hw_ui.h"
 
 #ifdef PIPO_MOTION
     #include "acc_sensor.h"
@@ -30,11 +31,13 @@
 
 
 
+
 //OSC_handler osc;
 midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine;
+HwUi hwui;
 ServerManager server_manager(input_sens,engine,config);
 
 
@@ -49,8 +52,10 @@ void setup(){
     Serial.begin(115200);
     //while(!Serial) // "while" prevents usb to setup properly
 
-    setCpuFrequencyMhz(80);
+    //setCpuFrequencyMhz(80);
     
+    hwui.init();
+
 
     init_filesystem();
     
@@ -152,6 +157,10 @@ void setup_wifi(){
         } 
     else {   
         Serial.println("connected...yeey :)");
+        hwui.set_led(0,122);
+        hwui.set_led(1,255);
+
+
     }
 }
 

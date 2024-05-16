@@ -2,6 +2,7 @@
 #define RANGE_SENSOR_H
 
 #include "input_sensor.h"
+#include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
 
 
