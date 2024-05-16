@@ -55,7 +55,7 @@ void setup(){
     //setCpuFrequencyMhz(80);
     
     hwui.init();
-
+    hwui.setup();
 
     init_filesystem();
     
@@ -95,6 +95,13 @@ void setup(){
     // Serial.println(" Hz");
 
     Serial.println("Setup done");
+
+    hwui.start_blink(BT_LED, 1000, 0.5);
+    delay(100);
+    hwui.start_blink(LOW_BAT_LED, 800, 0.2);
+    delay(300);
+    hwui.start_blink(SEND_LED, 400, 0.7);
+
 }
 
     // Initialize OSC
@@ -109,12 +116,14 @@ void loop() {
 
 
     input_sens.update();
-    input_sens.teleplot_data("T1");
+    //input_sens.teleplot_data("T1");
     //input_sens.teleplot_data("roll");
-    //input_sens.teleplot_data("dist");
+    input_sens.teleplot_data("dist");
 
     engine.update(input_sens, midiio, hidio);
     midiio.update();
+
+    hwui.update();
     
     // osc.sendOscMessage(input_sens.roll);
     // osc.sendOscMessage(input_sens.pitch);
@@ -157,10 +166,8 @@ void setup_wifi(){
         } 
     else {   
         Serial.println("connected...yeey :)");
-        hwui.set_led(0,122);
-        hwui.set_led(1,255);
-
-
+        //hwui.set_led(WIFI_LED,60);
+        hwui.start_blink(WIFI_LED, 1000, 0.5);
     }
 }
 

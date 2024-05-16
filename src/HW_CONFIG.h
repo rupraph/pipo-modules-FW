@@ -1,4 +1,4 @@
-#define PIPO_MOTION
+#define PIPO_RANGE
 // could put it as build flag ! like -D PIPO_RANGE
 //#define PROTO_ATOM
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
@@ -10,6 +10,7 @@
     #define MODE_SW 3
     #define BAT_VOLTAGE 5
     #define PP_SW 8
+    
 #elif defined(PIPO_ANALOG)
     #define WIFI_LED 8
     #define BT_LED 9

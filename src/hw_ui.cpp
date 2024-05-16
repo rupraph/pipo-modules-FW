@@ -17,30 +17,101 @@ void HwUi::init()
     pinMode(BAT_VOLTAGE, INPUT);
     pinMode(PP_SW, INPUT);
 
+    led_channel_map = {
+        {WIFI_LED, 0},
+        {BT_LED, 1},
+        {SEND_LED, 2},
+        {LOW_BAT_LED, 3}
+    };
+
+    led_blink_table = {
+        {WIFI_LED, {false, 500, 0.5, 0,0, false,50}},
+        {BT_LED, {false, 500, 0.5, 0,0, false,50}},
+        {SEND_LED, {false, 500, 0.5, 0,0, false,200}},
+        {LOW_BAT_LED, {false, 500, 0.5, 0,0, false,200}}
+    };
+
 }
 
 void HwUi::setup()
 {
     //led setup
     ledcSetup(0, PWM_FREQ, PWM_Resolution);
-    ledcAttachPin(WIFI_LED, 0);
+    ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
     ledcSetup(1, PWM_FREQ, PWM_Resolution);
-    ledcAttachPin(BT_LED, 1);
+    ledcAttachPin(BT_LED, led_channel_map[BT_LED]);
     ledcSetup(2, PWM_FREQ, PWM_Resolution);
-    ledcAttachPin(SEND_LED, 2);
+    ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
     ledcSetup(3, PWM_FREQ, PWM_Resolution);
-    ledcAttachPin(LOW_BAT_LED, 3);
+    ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
 
 }
 
 void HwUi::update()
 {
+    blinker();
 }
 
 void HwUi::set_led(int led, int value)
 {
-    ledcWrite(led, value);
+    ledcWrite(led_channel_map[led], value);
 }
 
+void HwUi::start_blink(int led, int blink_time, float duty_cycle)
+{
+    led_blink_table[led].enabled = true;
+    led_blink_table[led].blink_period = blink_time;
+    led_blink_table[led].duty_cycle = duty_cycle;
+    led_blink_table[led].state = true;
+    led_blink_table[led].start_cycle = millis();
+    led_blink_table[led].toggle_time = led_blink_table[led].start_cycle + int(led_blink_table[led].duty_cycle*led_blink_table[led].blink_period);
+    Serial.println(led_blink_table[led].toggle_time);
+    set_led(led, led_blink_table[led].brightness);
+}
 
+void HwUi::stop_blink(int led)
+{
+    led_blink_table[led].enabled = false;
+    set_led(led, 0);
+    
+}
+
+void HwUi::blinker()
+{
+    Serial.println("blinker");
+    unsigned long current_millis = millis();
+ 
+    //loop through led_blink_table
+    for (auto& pair : led_blink_table)
+    {
+        int led_pin = pair.first;
+        led_blink& led=led_blink_table[pair.first];
+
+        Serial.println(led.enabled);
+        if (led.enabled)
+        {
+            Serial.println("enabled");
+            if (led.state)
+            {
+                if (current_millis > led.toggle_time)
+                {
+                    led.state = false;
+                    set_led(led_pin, 0);
+                }
+            }
+            else
+            {
+                Serial.println("switchon");
+                if (current_millis > led.start_cycle + led.blink_period)
+                {
+                    Serial.println("toggle");
+                    led.state = true;
+                    led.start_cycle = current_millis;
+                    led.toggle_time = current_millis + int(led.duty_cycle*led.blink_period);
+                    set_led(led_pin, led.brightness);
+                }
+            }
+        }
+    }
+}
      
