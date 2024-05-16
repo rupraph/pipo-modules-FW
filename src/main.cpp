@@ -1,7 +1,8 @@
 
 
-#define PIPO_RANGE
+#define PIPO_MOTION
 // could put it as build flag ! like -D PIPO_RANGE
+//#define PROTO_ATOM
 
 #include <Arduino.h>
 #include "fs_tools.h"
@@ -27,6 +28,8 @@
     string sensor_type = "analog";
 #endif
 
+
+
 //OSC_handler osc;
 midi_io midiio;
 usb_hid hidio;
@@ -45,6 +48,9 @@ void setup(){
 
     Serial.begin(115200);
     //while(!Serial) // "while" prevents usb to setup properly
+
+    setCpuFrequencyMhz(80);
+    
 
     init_filesystem();
     
@@ -69,6 +75,19 @@ void setup(){
     // Todo: add check that wifi is connected before running server...
     server_manager.setup();
     server_manager.setup_requests();
+
+    // uint32_t Freq = getCpuFrequencyMhz();
+    // Serial.print("CPU Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" MHz");
+    // Freq = getXtalFrequencyMhz();
+    // Serial.print("XTAL Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" MHz");
+    // Freq = getApbFrequency();
+    // Serial.print("APB Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" Hz");
 
     Serial.println("Setup done");
 }

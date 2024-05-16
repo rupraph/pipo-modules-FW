@@ -3,7 +3,12 @@
 
 void RangeSensor::init()
 {
-    Wire.begin(2, 1, 400000);
+    #if defined(PROTO_ATOM)
+        Wire.begin(2, 1, 400000);
+    #else
+        Wire.begin(17, 18, 400000);
+    #endif
+    
     vl53l4cx.setI2cDevice(&Wire);
     //vl53l4cx.setXShutPin(4); Todo
     vl53l4cx.begin();

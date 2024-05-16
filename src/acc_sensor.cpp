@@ -17,7 +17,12 @@
 
 void MotionSensor::init()
 {
-    Wire.begin(2, 1, 400000);
+    #if defined(PROTO_ATOM)
+        Wire.begin(2, 1, 400000);
+    #else
+        Wire.begin(17, 18, 400000);
+    #endif
+    
     Serial.println("init motion sensor");
     myICM.enableDebugging();
     initialized = false;
