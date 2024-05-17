@@ -444,7 +444,7 @@
                 "disabled": false,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -486,7 +486,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -528,7 +528,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -570,7 +570,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -612,7 +612,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -654,7 +654,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 300000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -671,84 +671,96 @@
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "A2": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "A3": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "A4": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "A5": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "A6": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 4096.0
         },
         "T1": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         },
         "T2": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         },
         "T3": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         },
         "T4": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         },
         "T5": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         },
         "T6": {
             "deadZone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 300000
         }
     }
 }

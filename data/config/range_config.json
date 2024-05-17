@@ -49,14 +49,14 @@
                 "disabled": false,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4000.0,
+                "max_input": 2000,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
                 "numberOfNotes": 25,
                 "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
+                "scaleType": "chromatic",
+                "translator_mode": 1
             }
         }
     },
@@ -66,7 +66,8 @@
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
-            "value": 0.0
+            "value": 0.0,
+            "limit_max": 2000
         }
     }
 }

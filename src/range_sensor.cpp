@@ -10,7 +10,7 @@ void RangeSensor::init()
     #endif
     
     vl53l4cx.setI2cDevice(&Wire);
-    //vl53l4cx.setXShutPin(4); Todo
+    vl53l4cx.setXShutPin(15);
     vl53l4cx.begin();
     vl53l4cx.VL53L4CX_Off();
     VL53L4CX_Error initstatus=vl53l4cx.InitSensor(0x12);
@@ -25,7 +25,7 @@ void RangeSensor::init()
 void RangeSensor::setup()
 {
     vl53l4cx.VL53L4CX_StartMeasurement();
-    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(20000);
+    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(33000);
     NewDataReady = 0;
     no_of_object_found = 0;
 }
@@ -39,14 +39,26 @@ void RangeSensor::update()
 
     if ((!status) && (NewDataReady != 0)) {
         status = vl53l4cx.VL53L4CX_GetMultiRangingData(pMultiRangingData);
+
+        // TODO ADD ambient light
+        // float ambiant = pMultiRangingData->AmbiantPerSpad;
+
         no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
+        Serial.print(no_of_object_found);
 
         // get first object distance
-        sensor_dat["dist"].value = pMultiRangingData->RangeData[0].RangeMilliMeter;
+        // ignore negative values
+        float dist = pMultiRangingData->RangeData[0].RangeMilliMeter;
+        if (dist < 0 || dist > sensor_dat["dist"].limit_max || !pMultiRangingData->RangeData[0].RangeStatus == VL53L4CX_RANGESTATUS_RANGE_VALID) {
 
-        Serial.print(">VL53L4CX-0:");
-        Serial.print(sensor_dat["dist"].value);
-        Serial.println();
+        }
+        else {
+            sensor_dat["dist"].value = dist;
+        }
+
+        // Serial.print(">VL53L4CX-0:");
+        // Serial.print(sensor_dat["dist"].value);
+        // Serial.println();
 
         // check for other detected objects
         // for (j = 0; j < no_of_object_found; j++) {

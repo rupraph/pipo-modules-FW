@@ -10,6 +10,13 @@ int HidTranslator::map_linear(float value) {
     if (input_min == input_max || output_min == output_max) {
         Serial.println("min and max values cannot be equal");
     }
+    // cap value to input range
+    if (value < input_min) {
+        value = input_min;
+    }
+    else if (value > input_max) {
+        value = input_max;
+    }
     return round((value - input_min) / (input_max - input_min) * (output_max - output_min) + output_min);
 }
 

@@ -23,6 +23,7 @@ public:
         float deadZone; // supposed to be % of the total range. value for now
         float value;
         float offset;
+        float limit_max;
     };
 
     //config 

@@ -11,7 +11,7 @@ class RangeSensor : public Sensor{
     public:
         RangeSensor(){
             sensor_dat = {
-            {"dist", {true, false, 0, 0, 0}}
+            {"dist", {true, false, 0, 0, 0,1000.0}}
         };
         };
 

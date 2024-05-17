@@ -15,9 +15,12 @@ class MidiTranslator
     //Todo move all members to private and right methods to public
     //change all set/get in engine
     // add option to accomodate full turn ie back to beginning at end of range to avoid sawtooth
+    // replace limit_max by a range. propagate to Hid ? 
+
 {
     public:
-        MidiTranslator();
+        MidiTranslator() = default;
+        MidiTranslator(float limit_max);
 
         //midi 
         int channel = 1;

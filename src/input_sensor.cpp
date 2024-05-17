@@ -33,6 +33,7 @@ json Sensor::get_config(bool debug)
         config[axis_name]["deadZone"] = sensor_dat[axis_name].deadZone;
         config[axis_name]["value"] = sensor_dat[axis_name].value;
         config[axis_name]["offset"] = sensor_dat[axis_name].offset;
+        config[axis_name]["limit_max"] = sensor_dat[axis_name].limit_max;
     }
     if (debug)
     {
@@ -53,6 +54,7 @@ void Sensor::set_config(json& config, bool debug)
         sensor_dat[axis_name].deadZone = config[axis_name]["deadZone"];
         sensor_dat[axis_name].value = config[axis_name]["value"];
         sensor_dat[axis_name].offset = config[axis_name]["offset"];
+        sensor_dat[axis_name].limit_max = config[axis_name]["limit_max"];
     }
     if (debug)
     {

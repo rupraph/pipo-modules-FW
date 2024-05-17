@@ -6,6 +6,8 @@
 // todo should be able to save different config and retrieve them (from webpage)
 // should be able to report wherther config is succefully loade, saved,etc..
 
+//todo. when changing sensor range for eg, this should trigger an update of miditranslator max ???? 
+
 Config::Config() {
     
 }

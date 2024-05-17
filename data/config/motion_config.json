@@ -341,42 +341,48 @@
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+          "limit_max": 8.0
       },
       "accY": {
           "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+          "limit_max": 8.0
       },
       "accZ": {
           "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+            "limit_max": 8.0
       },
       "pitch": {
           "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+            "limit_max": 180
       },
       "roll": {
           "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+            "limit_max": 90
       },
       "yaw": {
           "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
-          "value": 0.0
+          "value": 0.0,
+            "limit_max": 180
       }
   }
 }

@@ -4,7 +4,7 @@
 // for convenience
 using json = nlohmann::json;
 
-MidiTranslator::MidiTranslator() {
+MidiTranslator::MidiTranslator(float limit_max) {
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     if (hires) {
         max_output = 16383;
@@ -12,11 +12,21 @@ MidiTranslator::MidiTranslator() {
     else {
         max_output = 127;
     }
+    this->max_input = limit_max;
+
     //printScale(current_scale);
 
 }
 
 int MidiTranslator::get_note(float value) {
+    //cap value to input range
+    if (value < min_input) {
+        value = min_input;
+    }
+    else if (value > max_input) {
+        value = max_input;
+    }
+
     // scale value from 0 to 1 to the range of the current scale
     // map value from input range to 0-1
     float scaledValue = (value - min_input) / (max_input - min_input);
@@ -182,7 +192,15 @@ void MidiTranslator::update_scale() {
 }
 
 int MidiTranslator::get_cc_val(float value,bool hires) {
-    // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)    
+    // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)  
+
+    //cap value to input range
+    if (value < min_input) {
+        value = min_input;
+    }
+    else if (value > max_input) {
+        value = max_input;
+    }  
     if (hires) {
         max_output = 16383;
     }

@@ -20,7 +20,7 @@ public:
 
     bool quantize=0;
     int quantize_steps=5;
-    int input_max=180;
+    int input_max;
     int input_min=-180;
 
     int use_threshold=0;

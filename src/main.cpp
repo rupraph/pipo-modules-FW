@@ -36,7 +36,7 @@
 midi_io midiio;
 usb_hid hidio;
 Config config;
-Engine engine;
+Engine engine(input_sens);
 HwUi hwui;
 ServerManager server_manager(input_sens,engine,config);
 

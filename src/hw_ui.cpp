@@ -25,10 +25,10 @@ void HwUi::init()
     };
 
     led_blink_table = {
-        {WIFI_LED, {false, 500, 0.5, 0,0, false,50}},
-        {BT_LED, {false, 500, 0.5, 0,0, false,50}},
-        {SEND_LED, {false, 500, 0.5, 0,0, false,200}},
-        {LOW_BAT_LED, {false, 500, 0.5, 0,0, false,200}}
+        {WIFI_LED, {false, 500, 0.5, 0,0, false,30}},
+        {BT_LED, {false, 500, 0.5, 0,0, false,30}},
+        {SEND_LED, {false, 500, 0.5, 0,0, false,100}},
+        {LOW_BAT_LED, {false, 500, 0.5, 0,0, false,100}}
     };
 
 }
@@ -78,7 +78,6 @@ void HwUi::stop_blink(int led)
 
 void HwUi::blinker()
 {
-    Serial.println("blinker");
     unsigned long current_millis = millis();
  
     //loop through led_blink_table
@@ -90,7 +89,6 @@ void HwUi::blinker()
         Serial.println(led.enabled);
         if (led.enabled)
         {
-            Serial.println("enabled");
             if (led.state)
             {
                 if (current_millis > led.toggle_time)
@@ -101,10 +99,8 @@ void HwUi::blinker()
             }
             else
             {
-                Serial.println("switchon");
                 if (current_millis > led.start_cycle + led.blink_period)
                 {
-                    Serial.println("toggle");
                     led.state = true;
                     led.start_cycle = current_millis;
                     led.toggle_time = current_millis + int(led.duty_cycle*led.blink_period);
