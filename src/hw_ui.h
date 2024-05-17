@@ -25,9 +25,22 @@ class HwUi {
             bool state;
             int brightness;
         };
+
+        struct led_pulse
+        {
+            bool enabled;
+            int pulse_period; // in ms
+            unsigned long start_cycle;
+            int min_brightness;
+            int max_brightness;
+        };
     
-        static const int NUM_LEDS = 4;
+        static const int NUM_LEDS = 4;  
+
+        //Todo: avoid assigning both blink and pulse to same led
+
         std::unordered_map<int,led_blink> led_blink_table;
+        std::unordered_map<int,led_pulse> led_pulse_table;
 
         void init();
         void setup();
@@ -39,6 +52,9 @@ class HwUi {
         void stop_blink(int led);
     
         void blinker();
+        void pulse();
+
+        void start_pulse(int led, int pulse_period, int min_brightness, int max_brightness);
 
         // led_blink led_blink_table[NUM_LEDS]= {
         // {false, WIFI_LED, 500, 0.5, 0,0, false,255},

@@ -50,6 +50,7 @@ void HwUi::setup()
 void HwUi::update()
 {
     blinker();
+    pulse();
 }
 
 void HwUi::set_led(int led, int value)
@@ -67,6 +68,16 @@ void HwUi::start_blink(int led, int blink_time, float duty_cycle)
     led_blink_table[led].toggle_time = led_blink_table[led].start_cycle + int(led_blink_table[led].duty_cycle*led_blink_table[led].blink_period);
     Serial.println(led_blink_table[led].toggle_time);
     set_led(led, led_blink_table[led].brightness);
+}
+
+void HwUi::start_pulse(int led, int pulse_period, int min_brightness, int max_brightness)
+{
+    led_pulse_table[led].enabled = true;
+    led_pulse_table[led].pulse_period = pulse_period;
+    led_pulse_table[led].min_brightness = min_brightness;
+    led_pulse_table[led].max_brightness = max_brightness;
+    led_pulse_table[led].start_cycle = millis();
+    set_led(led, led_pulse_table[led].min_brightness);
 }
 
 void HwUi::stop_blink(int led)
@@ -110,4 +121,22 @@ void HwUi::blinker()
         }
     }
 }
+
+void HwUi::pulse()
+{ //this should oscillate the led brightness between min and max brightness
+    unsigned long current_millis = millis();
+    //loop through led_pulse_table
+    for (auto& pair : led_pulse_table)
+    {
+        int led_pin = pair.first;
+        led_pulse& led=led_pulse_table[pair.first];
+
+        if (led.enabled)
+        {
+            int brightness = int(0.5*(led.max_brightness - led.min_brightness)*sin(2*PI*(current_millis-led.start_cycle)/led.pulse_period) + 0.5*(led.max_brightness + led.min_brightness));
+            set_led(led_pin, brightness);
+        }
+    }
+}
+
      

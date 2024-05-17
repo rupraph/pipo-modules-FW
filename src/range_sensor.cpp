@@ -40,12 +40,15 @@ void RangeSensor::update()
     if ((!status) && (NewDataReady != 0)) {
         status = vl53l4cx.VL53L4CX_GetMultiRangingData(pMultiRangingData);
 
-        // TODO ADD ambient light
+        // Todo
+        // ADD ambient light
         // float ambiant = pMultiRangingData->AmbiantPerSpad;
 
         no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
         Serial.print(no_of_object_found);
 
+
+        //Todo: deal with second object detected causing wrong distance report. 
         // get first object distance
         // ignore negative values
         float dist = pMultiRangingData->RangeData[0].RangeMilliMeter;

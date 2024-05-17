@@ -56,6 +56,7 @@ void setup(){
     
     hwui.init();
     hwui.setup();
+    hwui.start_pulse(WIFI_LED, 1000, 3, 50);
 
     init_filesystem();
     
@@ -96,11 +97,7 @@ void setup(){
 
     Serial.println("Setup done");
 
-    hwui.start_blink(BT_LED, 1000, 0.5);
-    delay(100);
-    hwui.start_blink(LOW_BAT_LED, 800, 0.2);
-    delay(300);
-    hwui.start_blink(SEND_LED, 400, 0.7);
+    
 
 }
 
