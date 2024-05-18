@@ -28,11 +28,17 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
+        float sensor_val=sensor.get_value(axis_name);
+        int channel=Miditranslators[axis_name].channel;
 
-        if (sensor.get_enabled(axis_name) && sensor.test_outside_deadzone(axis_name) && Miditranslators[axis_name].disabled==false)
+        //check if axis is enabled, outside deadzone and not disabled
+        if (sensor.get_enabled(axis_name) 
+        && sensor.test_outside_deadzone(axis_name) 
+        && Miditranslators[axis_name].disabled==false) //Todo: temporary. should likely have "in_use" to trigger note on/off
         {
-            float sensor_val=sensor.get_value(axis_name);
-
+            
+            
+        // if CC MODE
             if (Miditranslators[axis_name].translator_mode==0)
             {   
                 //Todo: hires not tested
@@ -64,14 +70,36 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
             //- send on change only -> in midi io ? 
             //- play / pause
 
+        // if Note mode
             else
             {   
                 
                 uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
-                // Serial.print("sensor_val:");
-                // Serial.println(note_val);
-                // should probably move the value check in the io class. to be discussed
-                midiio.sendNoteOn(note_val,127,1,800); 
+
+                //deal with NoteOn
+                Serial.print("trig");
+                Serial.println(sensor.get_triggered(axis_name));
+                if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
+                {
+                    // Serial.print("sensor_val:");
+                    // Serial.println(note_val);
+                    // should probably move the value check in the io class. to be discussed
+                    midiio.sendNoteOn(note_val,127,channel,800); 
+                    //sensor.set_triggered(axis_name,false);
+                }
+                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.lastnote_on[channel]!=note_val)
+                {
+                    midiio.sendNoteOn(note_val,127,channel,800); 
+                }
+
+                //deal with NoteOff
+                if (sensor_val>sensor.get_limit_max(axis_name))
+                {
+                    
+                    // Todo: should be all Noteoff ?
+                    midiio.sendNoteOff(midiio.lastnote_on[channel],127,channel);
+                }
+                
             }
         }
     }

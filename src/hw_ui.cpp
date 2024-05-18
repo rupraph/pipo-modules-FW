@@ -66,7 +66,6 @@ void HwUi::start_blink(int led, int blink_time, float duty_cycle)
     led_blink_table[led].state = true;
     led_blink_table[led].start_cycle = millis();
     led_blink_table[led].toggle_time = led_blink_table[led].start_cycle + int(led_blink_table[led].duty_cycle*led_blink_table[led].blink_period);
-    Serial.println(led_blink_table[led].toggle_time);
     set_led(led, led_blink_table[led].brightness);
 }
 
@@ -97,7 +96,6 @@ void HwUi::blinker()
         int led_pin = pair.first;
         led_blink& led=led_blink_table[pair.first];
 
-        Serial.println(led.enabled);
         if (led.enabled)
         {
             if (led.state)

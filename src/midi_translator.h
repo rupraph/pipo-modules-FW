@@ -23,7 +23,8 @@ class MidiTranslator
         MidiTranslator(float limit_max);
 
         //midi 
-        int channel = 1;
+        int channel = 1; // should be in engine.
+        int cc_number = 1;
 
         bool disabled = false;
 
@@ -42,7 +43,7 @@ class MidiTranslator
 
         //CC variables
         
-        int cc_number = 1;
+        
         int max_output;// shoudl be private
         int min_output = 0;
         int interpolation_type = 0; //0=linear, 1=step, 2=log

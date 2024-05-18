@@ -56,7 +56,7 @@ void setup(){
     
     hwui.init();
     hwui.setup();
-    hwui.start_pulse(WIFI_LED, 1000, 3, 50);
+    
 
     init_filesystem();
     
@@ -164,7 +164,7 @@ void setup_wifi(){
     else {   
         Serial.println("connected...yeey :)");
         //hwui.set_led(WIFI_LED,60);
-        hwui.start_blink(WIFI_LED, 1000, 0.5);
+        hwui.start_pulse(WIFI_LED, 3000, 3, 30);
     }
 }
 

@@ -23,12 +23,13 @@ class Engine
         {
              #if defined(PIPO_MOTION)
                 Miditranslators ={
-                    {"roll",MidiTranslator(sensor.get_sensor_dat_map()["roll"].limit_max)},
-                    {"pitch",MidiTranslator(sensor.get_sensor_dat_map()["pitch"].limit_max)},
-                    {"yaw",MidiTranslator(sensor.get_sensor_dat_map()["yaw"].limit_max)},
-                    {"accX",MidiTranslator(sensor.get_sensor_dat_map()["accX"].limit_max)},
-                    {"accY",MidiTranslator(sensor.get_sensor_dat_map()["accY"].limit_max)},
-                    {"accZ",MidiTranslator(sensor.get_sensor_dat_map()["accZ"].limit_max)}
+                    {"roll",MidiTranslator(sensor.get_limit_max("roll"))},
+                    {"pitch",MidiTranslator(sensor.get_limit_max("pitch"))},
+                    {"yaw",MidiTranslator(sensor.get_limit_max("yaw"))},
+                    {"accX",MidiTranslator(sensor.get_limit_max("accX"))},
+                    {"accY",MidiTranslator(sensor.get_limit_max("accY"))},
+                    {"accZ",MidiTranslator(sensor.get_limit_max("accZ"))}   
+
                 };
                 hid_map ={
                     {"roll",HidTranslator()},
@@ -40,25 +41,25 @@ class Engine
                 };
             #elif defined(PIPO_RANGE)
                 Miditranslators ={
-                    {"dist",MidiTranslator(sensor.get_sensor_dat_map()["dist"].limit_max)}
+                    {"dist",MidiTranslator(sensor.get_limit_max("dist"))}
                 };
                 hid_map ={
                     {"dist",HidTranslator()}
                 };
             #elif defined(PIPO_ANALOG)
                 Miditranslators ={
-                    {"A1",MidiTranslator(sensor.get_sensor_dat_map()["A1"].limit_max)},
-                    {"A2",MidiTranslator(sensor.get_sensor_dat_map()["A2"].limit_max)},
-                    {"A3",MidiTranslator(sensor.get_sensor_dat_map()["A3"].limit_max)},
-                    {"A4",MidiTranslator(sensor.get_sensor_dat_map()["A4"].limit_max)},
-                    {"A5",MidiTranslator(sensor.get_sensor_dat_map()["A5"].limit_max)},
-                    {"A6",MidiTranslator(sensor.get_sensor_dat_map()["A6"].limit_max)},
-                    {"T1",MidiTranslator(sensor.get_sensor_dat_map()["T1"].limit_max)},
-                    {"T2",MidiTranslator(sensor.get_sensor_dat_map()["T2"].limit_max)},
-                    {"T3",MidiTranslator(sensor.get_sensor_dat_map()["T3"].limit_max)},
-                    {"T4",MidiTranslator(sensor.get_sensor_dat_map()["T4"].limit_max)},
-                    {"T5",MidiTranslator(sensor.get_sensor_dat_map()["T5"].limit_max)},
-                    {"T6",MidiTranslator(sensor.get_sensor_dat_map()["T6"].limit_max)}
+                    {"A1",MidiTranslator(sensor.get_limit_max("A1"))},
+                    {"A2",MidiTranslator(sensor.get_limit_max("A2"))},
+                    {"A3",MidiTranslator(sensor.get_limit_max("A3"))},
+                    {"A4",MidiTranslator(sensor.get_limit_max("A4"))},
+                    {"A5",MidiTranslator(sensor.get_limit_max("A5"))},
+                    {"A6",MidiTranslator(sensor.get_limit_max("A6"))},
+                    {"T1",MidiTranslator(sensor.get_limit_max("T1"))},
+                    {"T2",MidiTranslator(sensor.get_limit_max("T2"))},
+                    {"T3",MidiTranslator(sensor.get_limit_max("T3"))},
+                    {"T4",MidiTranslator(sensor.get_limit_max("T4"))},
+                    {"T5",MidiTranslator(sensor.get_limit_max("T5"))},
+                    {"T6",MidiTranslator(sensor.get_limit_max("T6"))}
                 };
                 hid_map ={
                     {"A1",HidTranslator()},
@@ -92,6 +93,8 @@ class Engine
         json get_config(bool debug=false);
         void set_config(json& config,bool debug=false);
         friend void to_json(json& j, const Engine& t);
+
+    
 
 };
 

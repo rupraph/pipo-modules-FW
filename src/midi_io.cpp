@@ -15,11 +15,11 @@ void midi_io::setup()
 // if sustainmil is 0 it will not send a note off
 void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil)
 {
-    if (lastnote[channel]!=note)
-    {
+    // if (lastnote_on[channel]!=note)
+    // {
         if (off_before_next_note)
         {
-            sendNoteOff(lastnote[channel], 127, channel);
+            sendNoteOff(lastnote_on[channel], 127, channel);
         }
         MidiUSBsendNoteOn(note, velocity, channel);   
         MidiBLEsendNoteOn(note, velocity, channel);
@@ -28,16 +28,29 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
         {
         active_notes.push_back(make_pair(millis()+sustainmil,note));
         }
-        lastnote[channel]=note;
-    }
+        lastnote_on[channel]=note;
+    // }
 
     
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
 {
-    MidiUSBsendNoteOff(note, velocity, channel);
-    MidiBLEsendNoteOff(note, velocity, channel);
+    
+    if (lastnote_off[channel]!=note)
+    {Serial.println("noteoff");
+        MidiUSBsendNoteOff(note, velocity, channel);
+        MidiBLEsendNoteOff(note, velocity, channel);
+        lastnote_off[channel]=note;
+    }
+}
+
+void midi_io::all_notes_off()
+{
+    for (int i=0;i<16;i++)
+    {
+        sendNoteOff(0, 127, i);
+    }
 }
 
 void midi_io::sendControlChange(int control, int value, int channel, bool hires)

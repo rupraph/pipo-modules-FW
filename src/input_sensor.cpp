@@ -3,6 +3,8 @@
 #include "range_sensor.h"
 //#include "analog_sensor.h"
 
+//Todo: replace throw with Serial
+
 void Sensor::teleplot_data(string axis)
 {   
     if (sensor_dat.find(axis) == sensor_dat.end())
@@ -98,12 +100,29 @@ float Sensor::get_value(const std::string& axis) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
+float Sensor::get_limit_max(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].limit_max;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
 float Sensor::get_offset(const std::string& axis) {
     if(sensor_dat.find(axis) != sensor_dat.end())
         return sensor_dat[axis].offset;
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
+
+float Sensor::get_triggered(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].triggered;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+
+//Setters
 
 void Sensor::set_enabled(const std::string& axis, bool value) {
     if(sensor_dat.find(axis) != sensor_dat.end())
@@ -139,6 +158,24 @@ void Sensor::set_offset(const std::string& axis, float value) {
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
+
+void Sensor::set_limit_max(const std::string& axis, float value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].limit_max = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_triggered(const std::string& axis, bool value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].triggered = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+
+
+
 
 bool Sensor::test_outside_deadzone(const std::string& axis)
 {   

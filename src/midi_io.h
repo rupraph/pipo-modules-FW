@@ -24,7 +24,8 @@ public:
    
     // should have as many active notes vector as channels
     vector<pair<unsigned long,int>> active_notes; //sustained endtime, note
-    uint8_t lastnote[16];
+    uint8_t lastnote_on[16];
+    uint8_t lastnote_off[16];
     
     // this should be replaced by dynamic allocation since this takes a significant amount of memory
     uint8_t lastcc[16][128];
@@ -34,6 +35,7 @@ public:
     void setup();
     void sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil=0);
     void sendNoteOff(int note, int velocity, int channel);
+    void all_notes_off();
     void sendControlChange(int control, int value, int channel, bool hires=false);
     void sendProgramChange(int program, int channel);
     void sendPitchBend(int value, int channel);

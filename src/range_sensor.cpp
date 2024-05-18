@@ -45,19 +45,42 @@ void RangeSensor::update()
         // float ambiant = pMultiRangingData->AmbiantPerSpad;
 
         no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
-        Serial.print(no_of_object_found);
 
 
         //Todo: deal with second object detected causing wrong distance report. 
         // get first object distance
         // ignore negative values
         float dist = pMultiRangingData->RangeData[0].RangeMilliMeter;
-        if (dist < 0 || dist > sensor_dat["dist"].limit_max || !pMultiRangingData->RangeData[0].RangeStatus == VL53L4CX_RANGESTATUS_RANGE_VALID) {
+        
+        if (dist < 0 || !pMultiRangingData->RangeData[0].RangeStatus == VL53L4CX_RANGESTATUS_RANGE_VALID) {
 
         }
-        else {
+        // not sure if capping is optimal to be there in sensor or better in engine/translators
+        else
+        {
+            if (dist > sensor_dat["dist"].limit_max) {
+
+                within_range=false;
+            //sensor_dat["dist"].value = sensor_dat["dist"].limit_max;
+            }
+            else {
+                within_range=true;
+            }
+            if (within_range_prev==false && within_range==true)
+            {
+                sensor_dat["dist"].triggered = true;
+            }
+            else
+            {
+                //move reset when sending the note ???
+                sensor_dat["dist"].triggered = false;
+            }
+            within_range_prev = within_range;
+
             sensor_dat["dist"].value = dist;
         }
+
+        
 
         // Serial.print(">VL53L4CX-0:");
         // Serial.print(sensor_dat["dist"].value);

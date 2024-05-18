@@ -24,7 +24,11 @@ public:
         float value;
         float offset;
         float limit_max;
+        bool triggered; // for now means actively used
     };
+
+    void teleplot_data(string axis);
+    bool test_outside_deadzone(const std::string& axis);
 
     //config 
     json get_config(bool debug=false);
@@ -49,9 +53,13 @@ public:
     float get_offset(const std::string& axis);
     void set_offset(const std::string& axis, float value);
 
-    void teleplot_data(string axis);
+    float get_limit_max(const std::string& axis);
+    void set_limit_max(const std::string& axis, float value);
 
-    bool test_outside_deadzone(const std::string& axis);
+    float get_triggered(const std::string& axis);
+    void set_triggered(const std::string& axis, bool value);
+
+    
 
 protected:
     unordered_map<string, SensorDat> sensor_dat;
