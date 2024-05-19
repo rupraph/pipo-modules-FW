@@ -55,8 +55,6 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
 }
 
 
-/// @brief This function can be used to set manually a scale
-/// @param scale 
 void MidiTranslator::set_every_note(vector<string> scale) {
     current_scale.clear();
     for (int i = 0; i < scale.size(); i++) {
@@ -64,18 +62,21 @@ void MidiTranslator::set_every_note(vector<string> scale) {
     }
 }
 
-void MidiTranslator::set_new_scale(string newscaleType,vector<string> newscale) {
-    //convert newscale to int vector
-    vector<int> newscalenb;
 
-    for (const string& noteName : newscale) {
-        int noteNumber = convertNoteNameToNumber(noteName);
-        newscalenb.push_back(noteNumber);
-    }
-    scales.insert({newscaleType, newscalenb});
+// not ready yet. dealing with custom scale or additional scale is not ready to be savec/loaded correctly 
 
-    set_Scale_Type(newscaleType);
-}
+// void MidiTranslator::set_new_scale(string newscaleType,vector<string> newscale) {
+//     //convert newscale to int vector
+//     vector<int> newscalenb;
+
+//     for (const string& noteName : newscale) {
+//         int noteNumber = convertNoteNameToNumber(noteName);
+//         newscalenb.push_back(noteNumber);
+//     }
+//     scales.insert({newscaleType, newscalenb});
+
+//     set_Scale_Type(newscaleType);
+// }
 
 void MidiTranslator::set_root_note(string rootNote) {
     int rootNotenb = convertNoteNameToNumber(rootNote);
@@ -281,6 +282,7 @@ void MidiTranslator::set_from_json(const json& j) {
     Serial.println(e.what());
     }
 
+    update_scale();
 
     // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
     //     Serial.println(it.key().c_str());
