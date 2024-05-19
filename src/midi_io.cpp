@@ -13,43 +13,41 @@ void midi_io::setup()
     //midiRtpSetup();
 }
 // if sustainmil is 0 it will not send a note off
-void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil)
+void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustain_mil)
 {
-    // if (lastnote_on[channel]!=note)
-    // {
-        if (off_before_next_note)
-        {
-            sendNoteOff(lastnote_on[channel], 127, channel);
-        }
         MidiUSBsendNoteOn(note, velocity, channel);   
         MidiBLEsendNoteOn(note, velocity, channel);
-       
-        if (sustainmil>0)
-        {
-        active_notes.push_back(make_pair(millis()+sustainmil,note));
-        }
-        lastnote_on[channel]=note;
-    // }
-
-    
+        // insert or update note to channel_note_list
+        channel_note_list[channel][note]={true, millis()+sustain_mil};
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
 {
-    
-    if (lastnote_off[channel]!=note)
-    {Serial.println("noteoff");
-        MidiUSBsendNoteOff(note, velocity, channel);
-        MidiBLEsendNoteOff(note, velocity, channel);
-        lastnote_off[channel]=note;
-    }
+        Serial.println("noteoff");
+        if (channel_note_list[channel].find(note) != channel_note_list[channel].end())
+        {
+            MidiUSBsendNoteOff(note, velocity, channel);
+            MidiBLEsendNoteOff(note, velocity, channel);
+            channel_note_list[channel].erase(note);
+        }
+        
 }
 
-void midi_io::all_notes_off()
+void midi_io::sendAllNotesOff(int channel)
 {
-    for (int i=0;i<16;i++)
+    Serial.println("AllNotesOff");
+    //loop through channel_note_list[channel] and send note off for all notes
+   // Create a copy of the keys (notes)
+    std::vector<int> notes;
+    for (auto const& pair : channel_note_list[channel])
     {
-        sendNoteOff(0, 127, i);
+        notes.push_back(pair.first);
+    }
+
+    // Loop through the notes and send note off for all notes
+    for (int note : notes)
+    {
+        this->sendNoteOff(note, 127, channel);
     }
 }
 
@@ -83,19 +81,29 @@ void midi_io::sendHiResControlChange(int control, int value, int channel)
     //MidiUsb.sendControlChange(control, value, channel);
 }
 
-void midi_io::update()
-{  
-    manage_sustain();
-}
+// void midi_io::update()
+// {  
+//     manage_sustain();
+// }
 
 void midi_io::manage_sustain()
 {
-    for (int i=0;i<active_notes.size();i++)
+    for (int i=0; i<16; i++)
     {
-        if (active_notes[i].first<millis())
+        // Create a copy of the keys (notes)
+        std::vector<int> notes;
+        for (auto const& pair : channel_note_list[i])
         {
-            sendNoteOff(active_notes[i].second, 127, 1);
-            active_notes.erase(active_notes.begin()+i);
+            notes.push_back(pair.first);
+        }
+
+        // Loop through the notes and send note off for all notes
+        for (int note : notes)
+        {
+            if (channel_note_list[i][note].sustain_endtime < millis())
+            {
+                sendNoteOff(note, 127, i);
+            }
         }
     }
 

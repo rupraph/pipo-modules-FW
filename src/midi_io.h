@@ -5,6 +5,7 @@
 #include "midiRtp.h"
 #include "midiUSB.h"
 #include <vector>
+#include <unordered_map>
 using namespace std;
 
 // midiio will deal with sending the midi messages to the various output interfaces
@@ -22,12 +23,16 @@ public:
     bool midi_ble_connected = false;
     bool midi_rtp_connected = false;
    
-    // should have as many active notes vector as channels
-    vector<pair<unsigned long,int>> active_notes; //sustained endtime, note
-    uint8_t lastnote_on[16];
-    uint8_t lastnote_off[16];
-    
+    struct NoteSatus
+    {
+        bool on;
+        unsigned long sustain_endtime;
+    };
+    typedef unordered_map<int, NoteSatus> Notelist;
+    Notelist channel_note_list[16]; 
+
     // this should be replaced by dynamic allocation since this takes a significant amount of memory
+    //should likley be in engine
     uint8_t lastcc[16][128];
 
     bool off_before_next_note = false; // sends off previous note before sending note
@@ -35,16 +40,18 @@ public:
     void setup();
     void sendNoteOn(int note, int velocity, int channel,unsigned long sustainmil=0);
     void sendNoteOff(int note, int velocity, int channel);
-    void all_notes_off();
+    void sendAllNotesOff(int channel);
     void sendControlChange(int control, int value, int channel, bool hires=false);
     void sendProgramChange(int program, int channel);
     void sendPitchBend(int value, int channel);
     void sendAfterTouch(int pressure, int channel);
-    void update();
+    //void update();
+    void manage_sustain();
+    void sendHiResControlChange(int control, int value, int channel);
     
     private:
-    void sendHiResControlChange(int control, int value, int channel);
-    void manage_sustain();
+    
+    
 };
 
 

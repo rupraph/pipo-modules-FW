@@ -94,7 +94,6 @@ class Engine
         void set_config(json& config,bool debug=false);
         friend void to_json(json& j, const Engine& t);
 
-    
 
 };
 

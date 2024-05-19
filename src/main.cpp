@@ -118,7 +118,7 @@ void loop() {
     input_sens.teleplot_data("dist");
 
     engine.update(input_sens, midiio, hidio);
-    midiio.update();
+    //midiio.update();
 
     hwui.update();
     

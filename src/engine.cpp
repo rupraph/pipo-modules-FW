@@ -73,7 +73,10 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
         // if Note mode
             else
             {   
-                
+                // check for sustain
+                midiio.manage_sustain();
+
+
                 uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
 
                 //deal with NoteOn
@@ -87,17 +90,19 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                     midiio.sendNoteOn(note_val,127,channel,800); 
                     //sensor.set_triggered(axis_name,false);
                 }
-                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.lastnote_on[channel]!=note_val)
+                //Serial.print("moving");
+                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val) == midiio.channel_note_list[channel].end())
                 {
-                    midiio.sendNoteOn(note_val,127,channel,800); 
+                    Serial.print("moving");
+                    midiio.sendNoteOn(note_val,127,channel,800);    
                 }
 
                 //deal with NoteOff
                 if (sensor_val>sensor.get_limit_max(axis_name))
                 {
-                    
+
                     // Todo: should be all Noteoff ?
-                    midiio.sendNoteOff(midiio.lastnote_on[channel],127,channel);
+                    midiio.sendAllNotesOff(channel);
                 }
                 
             }

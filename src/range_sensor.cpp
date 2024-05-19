@@ -25,7 +25,7 @@ void RangeSensor::init()
 void RangeSensor::setup()
 {
     vl53l4cx.VL53L4CX_StartMeasurement();
-    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(33000);
+    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(20000);
     NewDataReady = 0;
     no_of_object_found = 0;
 }
