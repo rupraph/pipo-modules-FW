@@ -21,6 +21,23 @@ void Sensor::teleplot_data(string axis)
     }
 }
 
+unsigned long Sensor::measured_loop_duration()
+{
+    measured_loop = millis() - last_update;
+    last_update = millis();
+    return measured_loop;
+}
+
+void Sensor::start_duration()
+{
+    start_time = millis();
+}
+
+unsigned long Sensor::end_duration()
+{
+    measured_interval_duration = millis() - start_time;
+    return measured_interval_duration;
+}
 
 //config
 

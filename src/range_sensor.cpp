@@ -25,17 +25,20 @@ void RangeSensor::init()
 void RangeSensor::setup()
 {
     vl53l4cx.VL53L4CX_StartMeasurement();
-    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(20000);
+    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(10000);
     NewDataReady = 0;
     no_of_object_found = 0;
+    lp_filter.set_cutoffFrequency(20.0);
 }
 
 void RangeSensor::update()
 {
+    start_duration();
     int j;
-    do {
-        status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
-    } while (!NewDataReady);
+
+    // do {
+    status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+    // } while (!NewDataReady);
 
     if ((!status) && (NewDataReady != 0)) {
         status = vl53l4cx.VL53L4CX_GetMultiRangingData(pMultiRangingData);
@@ -61,10 +64,12 @@ void RangeSensor::update()
             if (dist > sensor_dat["dist"].limit_max) {
 
                 within_range=false;
-            //sensor_dat["dist"].value = sensor_dat["dist"].limit_max;
+                sensor_dat["dist"].value = sensor_dat["dist"].limit_max;
             }
             else {
                 within_range=true;
+                //sensor_dat["dist"].value = lp_filter.process(dist); //Todo: Not working good
+                sensor_dat["dist"].value = dist;
             }
             if (within_range_prev==false && within_range==true)
             {
@@ -77,7 +82,8 @@ void RangeSensor::update()
             }
             within_range_prev = within_range;
 
-            sensor_dat["dist"].value = dist;
+            
+
         }
 
         
@@ -98,6 +104,8 @@ void RangeSensor::update()
         status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
         }
     }
+    end_duration();
+    measured_loop_duration();
 }
 
 

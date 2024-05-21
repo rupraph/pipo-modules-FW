@@ -27,8 +27,22 @@ public:
         bool triggered; // for now means actively used
     };
 
+    
+    
+
     void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
+
+    // function to measure time between 2 calls
+    unsigned long measured_loop_duration();
+    unsigned long last_update = 0;
+    unsigned long measured_loop = 0; //ms
+
+    //function to measure time between to points in the code
+    void start_duration();
+    unsigned long end_duration();
+    unsigned long start_time = 0; //ms
+    unsigned long measured_interval_duration = 0; //ms
 
     //config 
     json get_config(bool debug=false);

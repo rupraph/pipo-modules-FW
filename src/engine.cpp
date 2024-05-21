@@ -80,25 +80,24 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
 
                 //deal with NoteOn
-                Serial.print("trig");
-                Serial.println(sensor.get_triggered(axis_name));
+                //Serial.println(sensor.get_triggered(axis_name));
                 if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
                 {
                     // Serial.print("sensor_val:");
                     // Serial.println(note_val);
                     // should probably move the value check in the io class. to be discussed
                     midiio.sendNoteOn(note_val,127,channel,800); 
-                    //sensor.set_triggered(axis_name,false);
+                    sensor.set_triggered(axis_name,false);
                 }
                 //Serial.print("moving");
                 if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val) == midiio.channel_note_list[channel].end())
                 {
-                    Serial.print("moving");
+                    //Serial.print("moving");
                     midiio.sendNoteOn(note_val,127,channel,800);    
                 }
 
                 //deal with NoteOff
-                if (sensor_val>sensor.get_limit_max(axis_name))
+                if (sensor_val==sensor.get_limit_max(axis_name))
                 {
 
                     // Todo: should be all Noteoff ?

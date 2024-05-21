@@ -4,6 +4,7 @@
 #include "input_sensor.h"
 #include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
+#include "filters.h"
 
 
 
@@ -33,6 +34,8 @@ class RangeSensor : public Sensor{
         int status;
 
         SensorDat prev_sensor_dat;
+
+        LowPassFilter lp_filter;
         
 };
 

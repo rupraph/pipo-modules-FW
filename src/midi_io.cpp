@@ -23,7 +23,7 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
 {
-        Serial.println("noteoff");
+
         if (channel_note_list[channel].find(note) != channel_note_list[channel].end())
         {
             MidiUSBsendNoteOff(note, velocity, channel);
@@ -35,7 +35,7 @@ void midi_io::sendNoteOff(int note, int velocity, int channel)
 
 void midi_io::sendAllNotesOff(int channel)
 {
-    Serial.println("AllNotesOff");
+
     //loop through channel_note_list[channel] and send note off for all notes
    // Create a copy of the keys (notes)
     std::vector<int> notes;
