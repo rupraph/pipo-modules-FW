@@ -2,26 +2,29 @@
 #define ANALOG_SENSOR_H
 
 #include "sensor/input_sensor.h"
+#include "utils/filters.h"
 #include "HW_CONFIG.h"
 
 // find way to add/change mode
+
+using namespace std;
 
 class AnalogSensor : public Sensor{   
     public:
         AnalogSensor(){
             sensor_dat = {
-            {"A1", {true, false, 0, 0, 0}},
-            {"A2", {true, false, 0, 0, 0}},
-            {"A3", {true, false, 0, 0, 0}},
-            {"A4", {true, false, 0, 0, 0}},
-            {"A5", {true, false, 0, 0, 0}},
-            {"A6", {true, false, 0, 0, 0}},
-            {"T1", {true, false, 0, 0, 0}},
-            {"T2", {true, false, 0, 0, 0}},
-            {"T3", {true, false, 0, 0, 0}},
-            {"T4", {true, false, 0, 0, 0}},
-            {"T5", {true, false, 0, 0, 0}},
-            {"T6", {true, false, 0, 0, 0}}
+            {"A1", {true, false, 0, 0, 0, 4095, false}},
+            {"A2", {true, false, 0, 0, 0, 4095, false}},
+            {"A3", {true, false, 0, 0, 0, 4095, false}},
+            {"A4", {true, false, 0, 0, 0, 4095, false}},
+            {"A5", {true, false, 0, 0, 0, 4095, false}},
+            {"A6", {true, false, 0, 0, 0, 4095, false}},
+            {"T1", {true, false, 0, 0, 0, 50000, false}},
+            {"T2", {true, false, 0, 0, 0, 50000, false}},
+            {"T3", {true, false, 0, 0, 0, 50000, false}},
+            {"T4", {true, false, 0, 0, 0, 50000, false}},
+            {"T5", {true, false, 0, 0, 0, 50000, false}},
+            {"T6", {true, false, 0, 0, 0, 50000, false}}
             };
         };
 
@@ -46,6 +49,24 @@ class AnalogSensor : public Sensor{
         void init() override;
         void setup() override;
         void update() override;
+
+    private:
+            unordered_map<string, LowPassFilter> lp_filter_map = {
+            {"A1", LowPassFilter(10)},
+            {"A2", LowPassFilter(10)},
+            {"A3", LowPassFilter(10)},
+            {"A4", LowPassFilter(10)},
+            {"A5", LowPassFilter(10)},
+            {"A6", LowPassFilter(10)},
+            {"T1", LowPassFilter(10)},
+            {"T2", LowPassFilter(10)},
+            {"T3", LowPassFilter(10)},
+            {"T4", LowPassFilter(10)},
+            {"T5", LowPassFilter(10)},
+            {"T6", LowPassFilter(10)}
+        };
+
+        bool touch_adaptative_max;
 
         
 };

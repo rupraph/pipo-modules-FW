@@ -28,6 +28,8 @@ void RangeSensor::setup()
     vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(10000);
     NewDataReady = 0;
     no_of_object_found = 0;
+
+    // use of filter should likely a t one point be configurable
     lp_filter.set_cutoffFrequency(20.0);
 }
 

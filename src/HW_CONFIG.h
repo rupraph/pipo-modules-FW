@@ -1,4 +1,4 @@
-#define PIPO_RANGE
+#define PIPO_ANALOG
 // could put it as build flag ! like -D PIPO_RANGE
 //#define PROTO_ATOM
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)

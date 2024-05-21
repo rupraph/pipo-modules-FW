@@ -35,7 +35,7 @@ private:
     float deltaTime = 0;
 
 public:
-    LowPassFilter() {
+    LowPassFilter(float cutoffFrequency=1.0) {
         // this->cutoffFrequency = cutoffFrequency;
         prevValue = 0;
     }

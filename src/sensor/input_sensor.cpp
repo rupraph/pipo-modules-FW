@@ -179,6 +179,7 @@ void Sensor::set_offset(const std::string& axis, float value) {
 void Sensor::set_limit_max(const std::string& axis, float value) {
     if(sensor_dat.find(axis) != sensor_dat.end())
         sensor_dat[axis].limit_max = value;
+
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }

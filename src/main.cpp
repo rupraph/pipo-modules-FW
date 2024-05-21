@@ -16,7 +16,7 @@
 #include "hw_ui.h"
 
 #ifdef PIPO_MOTION
-    #include "acc_sensor.h"
+    #include "sensor/acc_sensor.h"
     MotionSensor input_sens;
     string sensor_type = "motion";
 #elif defined(PIPO_RANGE)
@@ -24,7 +24,7 @@
     RangeSensor input_sens;
     string sensor_type = "range";
 #elif defined(PIPO_ANALOG)
-    #include "analog_sensor.h"
+    #include "sensor/analog_sensor.h"
     AnalogSensor input_sens;
     string sensor_type = "analog";
 #endif
@@ -119,7 +119,7 @@ void loop() {
     // Serial.println(input_sens.measured_interval_duration);
 
 
-    //input_sens.teleplot_data("T1");
+    input_sens.teleplot_data("T1");
     //input_sens.teleplot_data("roll");
     input_sens.teleplot_data("dist");
 

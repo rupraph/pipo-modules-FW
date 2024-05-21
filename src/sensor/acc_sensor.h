@@ -11,12 +11,12 @@ class MotionSensor: public Sensor{
         MotionSensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
         {
             sensor_dat = {
-            {"roll", {false, false, 0, 0, 0,90}},
-            {"pitch", {false, false, 0, 0, 180}},
-            {"yaw", {false, false, 0, 0, 0,180}},
-            {"accX", {true, false, 0.1, 0, 0,8.0}},
-            {"accY", {false, false, 0, 0, 0,8.0}},
-            {"accZ", {false, false, 0, 0, 0,8.0}}
+            {"roll", {false, false, 0, 0, 0,90, false}},
+            {"pitch", {false, false, 0, 0, 180, false}},
+            {"yaw", {false, false, 0, 0, 0,180, false}},
+            {"accX", {true, false, 0.1, 0, 0,8.0, false}},
+            {"accY", {false, false, 0, 0, 0,8.0, false}},
+            {"accZ", {false, false, 0, 0, 0,8.0, false}}
         };
 
         }; 
