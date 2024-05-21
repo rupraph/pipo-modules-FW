@@ -1,7 +1,7 @@
 #ifndef ACC_SENSOR_H
 #define ACC_SENSOR_H
 
-#include "input_sensor.h"
+#include "sensor/input_sensor.h"
 #include <ICM_20948.h>
 #include "HW_CONFIG.h"
 

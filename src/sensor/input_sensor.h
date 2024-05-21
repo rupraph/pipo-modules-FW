@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <vector>
 #include <unordered_map>
-#include "json.hpp"
-#include "filters.h"
+#include "utils/json.hpp"
+#include "utils/filters.h"
 
 using namespace std;
 using json = nlohmann::json;

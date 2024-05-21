@@ -2,13 +2,13 @@
 #define ENGINE_H
 
 #include <unordered_map>
-#include "midi_translator.h"
-#include "hid_translator.h"
-#include "midi_io.h"
-#include "usb_hid.h"
-#include "json.hpp"
-#include "fs_tools.h"
-#include "input_sensor.h"
+#include "midi/midi_translator.h"
+#include "hid/hid_translator.h"
+#include "midi/midi_io.h"
+#include "hid/usb_hid.h"
+#include "utils/json.hpp"
+#include "utils/fs_tools.h"
+#include "sensor/input_sensor.h"
 
 using namespace std;
 

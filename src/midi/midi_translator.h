@@ -6,7 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <MIDI.h>
-#include "json.hpp"
+#include "utils/json.hpp"
 
 using namespace std;
 

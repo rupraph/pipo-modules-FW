@@ -1,7 +1,7 @@
 #ifndef ANALOG_SENSOR_H
 #define ANALOG_SENSOR_H
 
-#include "input_sensor.h"
+#include "sensor/input_sensor.h"
 #include "HW_CONFIG.h"
 
 // find way to add/change mode

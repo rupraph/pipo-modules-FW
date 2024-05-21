@@ -9,9 +9,9 @@
 #include <unordered_map>
 #include <sstream>
 #include "fs_tools.h"
-#include "json.hpp"
+#include "utils/json.hpp"
 #include "engine.h"
-#include "input_sensor.h"
+#include "sensor/input_sensor.h"
 
 using namespace std;
 using json = nlohmann::json;

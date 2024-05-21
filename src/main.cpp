@@ -5,14 +5,14 @@
 
 #include <Arduino.h>
 #include "HW_CONFIG.h"
-#include "fs_tools.h"
+#include "utils/fs_tools.h"
 #include <WiFiManager.h> 
 #include "osc_handler.h"
-#include "midi_io.h"
+#include "midi/midi_io.h"
 #include "server_manager.h"
 #include "engine.h"
 #include "config.h"
-#include "input_sensor.h"
+#include "sensor/input_sensor.h"
 #include "hw_ui.h"
 
 #ifdef PIPO_MOTION
@@ -20,7 +20,7 @@
     MotionSensor input_sens;
     string sensor_type = "motion";
 #elif defined(PIPO_RANGE)
-    #include "range_sensor.h"
+    #include "sensor/range_sensor.h"
     RangeSensor input_sens;
     string sensor_type = "range";
 #elif defined(PIPO_ANALOG)

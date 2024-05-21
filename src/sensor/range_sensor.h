@@ -1,10 +1,10 @@
 #ifndef RANGE_SENSOR_H
 #define RANGE_SENSOR_H
 
-#include "input_sensor.h"
+#include "sensor/input_sensor.h"
 #include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
-#include "filters.h"
+#include "utils/filters.h"
 
 
 

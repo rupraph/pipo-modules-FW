@@ -1,9 +1,9 @@
 #ifndef MIDI_IO_H
 #define MIDI_IO_H
 
-#include "midiBLE.h"
-#include "midiRtp.h"
-#include "midiUSB.h"
+#include "midi/midiBLE.h"
+#include "midi/midiRtp.h"
+#include "midi/midiUSB.h"
 #include <vector>
 #include <unordered_map>
 using namespace std;

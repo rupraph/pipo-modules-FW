@@ -6,8 +6,8 @@
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
 #include "engine.h"
-#include "config.h"
-#include "json.hpp"
+#include "utils/config.h"
+#include "utils/json.hpp"
 
 using namespace std;
 

@@ -2,7 +2,7 @@
 #define HID_TRANSLATOR_H
 
 #include <Arduino.h>
-#include "json.hpp"
+#include "utils/json.hpp"
 
 using namespace std;
 
