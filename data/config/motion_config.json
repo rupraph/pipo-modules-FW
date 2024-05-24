@@ -228,5 +228,8 @@
           "value": 0.0,
             "limit_max": 180
       }
-  }
+  },
+  "general": {
+    "Wifi_mode": "AP"
+}
 }

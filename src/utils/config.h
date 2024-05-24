@@ -23,9 +23,22 @@ class Config
 {
     public:
 
-        Config();
+        Config(){
+                general_config = {
+                    {"Wifi_mode", "AP"},
+        };
+        }
         json current_config;
         json test_config;
+
+
+        // only config element not comming from external classes. 
+        // placed here for now.
+        json general_config= {
+        {"Wifi_mode", "AP"}, //can be AP, STA, OR AP_STA
+        };
+
+
         void load_config_from_file(String filename);
         void load_config(string sensor_type);
         void save_config(String filename);

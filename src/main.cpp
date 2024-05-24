@@ -69,7 +69,7 @@ void setup(){
     midiio.setup();
     hidio.usb_hid_setup();
 
-    setup_wifi();
+    
 
 
     // Load config
@@ -79,12 +79,14 @@ void setup(){
     config.apply_current_config(input_sens, engine,false);//input_sens,
     //config.print_config();
     
+    setup_wifi();
+
     // initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
 
-    //Start server
-    if(WiFi.status() == WL_CONNECTED){
+    //Start server if TA connected or AP mode
+    if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
         Serial.println("Wifi connected, starting config page");
         server_manager.setup();
         server_manager.setup_requests();
@@ -166,6 +168,12 @@ void init_filesystem(){
 
 void setup_wifi(){
     // setup wifi through wifi manager
+    if (config.general_config["Wifi_mode"] == "AP")
+    {
+        Serial.println("Starting AP mode");
+        WiFi.softAP("Pipo", "pipo1234");
+    }
+    else{
 
     WiFi.mode(WIFI_STA);
 
@@ -199,6 +207,7 @@ void setup_wifi(){
         else {
             Serial.println("Could not connect automatically, Configportal running");
         }
+    }
     }
 }
 

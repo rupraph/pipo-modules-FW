@@ -8,9 +8,6 @@
 
 //todo. when changing sensor range for eg, this should trigger an update of miditranslator max ???? 
 
-Config::Config() {
-    
-}
 
 void Config::load_config_from_file(String filename) {
     current_config = json::parse(readFile(LittleFS,filename.c_str()));
@@ -64,6 +61,9 @@ void Config::gather_current_config(Sensor& sensor,Engine& engine,bool debug) {
     current_config["sensor"] = sensor.get_config(debug);
     Serial.print("gatherconfig engine");
     current_config["engine"] = engine.get_config(debug);
+
+    current_config["general"] = general_config;
+
     if (debug) {
         Serial.println("gathered_config");
         Serial.println(current_config.dump(4).c_str());
@@ -75,4 +75,6 @@ void Config::gather_current_config(Sensor& sensor,Engine& engine,bool debug) {
 void Config::apply_current_config(Sensor& sensor,Engine& engine,bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
+
+    general_config = current_config["general"];
 }
