@@ -55,6 +55,7 @@ class HwUi {
         void pulse();
 
         void start_pulse(int led, int pulse_period, int min_brightness, int max_brightness);
+        void stop_pulse(int led);
 
         // led_blink led_blink_table[NUM_LEDS]= {
         // {false, WIFI_LED, 500, 0.5, 0,0, false,255},

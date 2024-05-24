@@ -39,6 +39,10 @@ Config config;
 Engine engine(input_sens);
 HwUi hwui;
 ServerManager server_manager(input_sens,engine,config);
+WiFiManager wm;
+
+//Todo add with wifi reconnecting attemps.
+// deal with multiple identical pipo.
 
 
 #define FORMAT_LITTLEFS_IF_FAILED true
@@ -46,6 +50,7 @@ ServerManager server_manager(input_sens,engine,config);
 // quick declaration of functions
 void init_filesystem();
 void setup_wifi();
+void monitor_wifi();
 
 void setup(){
 
@@ -66,6 +71,7 @@ void setup(){
 
     setup_wifi();
 
+
     // Load config
     //config.gather_current_config(input_sens, engine, false);//,
     //config.print_config();
@@ -78,9 +84,15 @@ void setup(){
     input_sens.setup();
 
     //Start server
-    // Todo: add check that wifi is connected before running server...
-    server_manager.setup();
-    server_manager.setup_requests();
+    if(WiFi.status() == WL_CONNECTED){
+        Serial.println("Wifi connected, starting config page");
+        server_manager.setup();
+        server_manager.setup_requests();
+    }
+    else{
+        Serial.println("Wifi not connected, no config page for now");
+    }
+    
 
     // uint32_t Freq = getCpuFrequencyMhz();
     // Serial.print("CPU Freq = ");
@@ -110,7 +122,8 @@ void loop() {
 
     // should create a task to trigger sensor and engine computation at regular interval
 
-
+    wm.process();
+    monitor_wifi();
 
     input_sens.update();
     // Serial.print("loop");
@@ -119,9 +132,9 @@ void loop() {
     // Serial.println(input_sens.measured_interval_duration);
 
 
-    input_sens.teleplot_data("T1");
+    //input_sens.teleplot_data("T1");
     //input_sens.teleplot_data("roll");
-    input_sens.teleplot_data("dist");
+    //input_sens.teleplot_data("dist");
 
     engine.update(input_sens, midiio, hidio);
     //midiio.update();
@@ -154,30 +167,68 @@ void init_filesystem(){
 void setup_wifi(){
     // setup wifi through wifi manager
 
-    WiFiManager wm;
+    WiFi.mode(WIFI_STA);
 
-    if(digitalRead(35)==HIGH){
+    // WiFiManager wm;
+    wm.setDarkMode(true);
+    wm.setConfigPortalBlocking(false);
+    wm.setDebugOutput(true);
+    wm.setWiFiAutoReconnect(true);
+    wm.setCleanConnect(true);
+
+    if(digitalRead(MODE_SW)==LOW){
+        delay(3000);
+    }
+    // keep pressing to reset
+    if (digitalRead(MODE_SW)==LOW && digitalRead(PP_SW)==LOW)
+    {
+        Serial.println("Settings reset");
         wm.resetSettings();
-        Serial.println("Settings reset");}
-        bool res;
-        wm.setDebugOutput(true);
-        res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-        delay(2000);
-        if(!res) {
-            Serial.println("Failed to connect");
-            ESP.restart();
-        } 
-    else {   
-        Serial.println("connected...yeey :)");
-        //hwui.set_led(WIFI_LED,60);
+        //Setting reset should be mover somewhere else
+        // Serial.println("Launching config portal");
+        // wm.setConfigPortalBlocking(true);
+        // wm.autoConnect("Pipo");
+        ESP.restart();
+    }
+    else{
+        if(wm.autoConnect("Pipo")){
+            Serial.println("connected...yeey :)");
+            //hwui.set_led(WIFI_LED,60);
+            hwui.start_pulse(WIFI_LED, 3000, 3, 30);
+        }
+        else {
+            Serial.println("Could not connect automatically, Configportal running");
+        }
+    }
+}
+
+void monitor_wifi(){
+    // monitor wifi status
+    if (WiFi.status() == WL_CONNECTED && !server_manager.is_running)
+    {
+        Serial.println("Wifi connected");
         hwui.start_pulse(WIFI_LED, 3000, 3, 30);
+
+        //Todo: Starting the server here does not seem to work.
+        // for now, when setting wifi for first time, then reset and server works.
+        //server cannot be setup in the loop ?
+
+        // Serial.println("Wifi connected, starting config page");
+        // server_manager.setup();
+        // server_manager.setup_requests();
+        // wm.setDisableConfigPortal(true);
+    }
+    else if(WiFi.status() != WL_CONNECTED){
+        //Serial.println("Wifi disconnected");
+        hwui.stop_pulse(WIFI_LED);
+        //server_manager.stop();
     }
 }
 
 
     // connect to wifi manually
     // WiFi.mode(WIFI_STA);
-    // WiFi.begin("Klurp", "plokplokplok");
+    // WiFi.begin("AFC Ajax", "plompverloren567");
     // while (WiFi.status() != WL_CONNECTED) {
     //     delay(500);
     //     Serial.print(".");

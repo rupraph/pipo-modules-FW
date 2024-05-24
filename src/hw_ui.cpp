@@ -86,6 +86,12 @@ void HwUi::stop_blink(int led)
     
 }
 
+void HwUi::stop_pulse(int led)
+{
+    led_pulse_table[led].enabled = false;
+    set_led(led, 0);
+}
+
 void HwUi::blinker()
 {
     unsigned long current_millis = millis();

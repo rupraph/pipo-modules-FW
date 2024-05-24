@@ -17,9 +17,11 @@ class ServerManager
         ServerManager(Sensor& sensor, Engine& engine,Config& config): server(80), input_sens(sensor),engine(engine),config(config) {}
         void setup();
         void setup_requests();
+        void stop(); // Todo: start stop not much tested yet
         static void notFound(AsyncWebServerRequest *request);
         void generateHtmlForm(json& configJson,string& html,string prefix="");
         string generateHtmlForm(json& configJson);
+        bool is_running = false;
 
     private:
         AsyncWebServer server;

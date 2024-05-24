@@ -31,7 +31,13 @@ void ServerManager::setup(){
     setup_requests();
 
     server.begin();
+    is_running = true;
 
+}
+
+void ServerManager::stop(){
+    server.end();
+    is_running = false;
 }
 
 void ServerManager::setup_requests(){
@@ -176,3 +182,4 @@ string ServerManager::generateHtmlForm(json& configJson) {
     html += "</form></body></html>";
     return html;
 }
+
