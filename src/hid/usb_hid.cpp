@@ -31,9 +31,26 @@ void usb_hid::usb_hid_setup()
     }
     usb_hid_port.setStringDescriptor("PiPo HID");
     usb_hid_port.begin();
-    // wait until device mounted
-    while (!TinyUSBDevice.mounted())
+
+
+    // wait until device mounted. then timeout after 5 seconds and report not mounted
+    unsigned long timeout = millis() + 3000;
+
+
+    while (!TinyUSBDevice.mounted() && millis()<=timeout)
+    {
         delay(1);
+    }
+    if (!TinyUSBDevice.mounted())
+    {
+        Serial.println("USB HID not mounted");
+    }
+    else
+    {
+        Serial.println("USB HID mounted");
+    }
+
+
 }
  /// Find way on assigning sensor axis to game or mouse axis. this mapping should likely be in engine or a seperate calss than here.
 
