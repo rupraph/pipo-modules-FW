@@ -186,7 +186,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-          "limit_max": 8.0
+          "limit_max": 8.0,
+          "limit_min": 0.0
       },
       "accY": {
           "deadZone": 0,
@@ -194,7 +195,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-          "limit_max": 8.0
+          "limit_max": 8.0,
+          "limit_min": 0.0
       },
       "accZ": {
           "deadZone": 0,
@@ -202,7 +204,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 8.0
+            "limit_max": 8.0,
+            "limit_min": 0.0
       },
       "pitch": {
           "deadZone": 0,
@@ -218,7 +221,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 90
+            "limit_max": 90,
+            "limit_min": 0.0
       },
       "yaw": {
           "deadZone": 0,
@@ -226,7 +230,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 180
+            "limit_max": 180,
+            "limit_min": 0.0
       }
   },
   "general": {

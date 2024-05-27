@@ -49,22 +49,25 @@ class AnalogSensor : public Sensor{
         void init() override;
         void setup() override;
         void update() override;
+        void measure_offset_all();
 
     private:
             unordered_map<string, LowPassFilter> lp_filter_map = {
-            {"A1", LowPassFilter(10)},
-            {"A2", LowPassFilter(10)},
-            {"A3", LowPassFilter(10)},
-            {"A4", LowPassFilter(10)},
-            {"A5", LowPassFilter(10)},
-            {"A6", LowPassFilter(10)},
-            {"T1", LowPassFilter(10)},
-            {"T2", LowPassFilter(10)},
-            {"T3", LowPassFilter(10)},
-            {"T4", LowPassFilter(10)},
-            {"T5", LowPassFilter(10)},
-            {"T6", LowPassFilter(10)}
+            {"A1", LowPassFilter(5)},
+            {"A2", LowPassFilter(5)},
+            {"A3", LowPassFilter(5)},
+            {"A4", LowPassFilter(5)},
+            {"A5", LowPassFilter(5)},
+            {"A6", LowPassFilter(5)},
+            {"T1", LowPassFilter(5)},
+            {"T2", LowPassFilter(5)},
+            {"T3", LowPassFilter(5)},
+            {"T4", LowPassFilter(5)},
+            {"T5", LowPassFilter(5)},
+            {"T6", LowPassFilter(5)}
         };
+
+        
 
         bool touch_adaptative_max;
 

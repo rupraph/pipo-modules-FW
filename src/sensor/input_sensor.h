@@ -22,9 +22,13 @@ public:
         bool inverted; 
         float deadZone; // supposed to be % of the total range. value for now
         float value;
+        float value_prev;
         float offset;
         float limit_max;
-        bool triggered; // for now means actively used
+        float limit_min;
+        bool triggered; // for now for range, it means entered within range), for touch, trigger threshold)
+        bool untriggered; 
+        // float threshold;
     };
 
     
@@ -64,14 +68,23 @@ public:
     float get_value(const std::string& axis);
     void set_value(const std::string& axis, float value);
 
+    float get_value_prev(const std::string& axis);
+    void set_value_prev(const std::string& axis, float value);
+
     float get_offset(const std::string& axis);
     void set_offset(const std::string& axis, float value);
 
     float get_limit_max(const std::string& axis);
     void set_limit_max(const std::string& axis, float value);
 
+    float get_limit_min(const std::string& axis);
+    void set_limit_min(const std::string& axis, float value);
+
     float get_triggered(const std::string& axis);
     void set_triggered(const std::string& axis, bool value);
+
+    float get_untriggered(const std::string& axis);
+    void set_untriggered(const std::string& axis, bool value);
 
     
 

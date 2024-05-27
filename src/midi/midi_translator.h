@@ -28,6 +28,9 @@ class MidiTranslator
 
         bool disabled = false;
 
+        // int use_threshold = 0;
+        // int threshold = 0;
+
         //notes variables
         int translator_mode = 0; //0=cc, 1 note, 2 both
 
@@ -149,6 +152,15 @@ class MidiTranslator
             }
             else if (param_name == "hires") {
                 hires = value;
+            }
+            // else if (param_name == "use_threshold") {
+            //     use_threshold = value;
+            // }
+            // else if (param_name == "threshold") {
+            //     threshold = value;
+            // }
+            else if (param_name == "disabled") {
+                disabled = value;
             }
             else {
                 Serial.println("Error: unknown parameter name");

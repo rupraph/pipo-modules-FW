@@ -1,5 +1,5 @@
 #include "engine.h"
-
+#include "HW_CONFIG.h"
 
 // for convenience
 using json = nlohmann::json;
@@ -13,6 +13,10 @@ using json = nlohmann::json;
 
 // could use combination mode to have note from orientation, and trigger from acceleration
 
+// find way to map scales/arpegio over axis (for analog when touch is a note)
+
+
+// should use callback to trigger events and notes
 
 void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
 {
@@ -36,8 +40,6 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
         && sensor.test_outside_deadzone(axis_name) 
         && Miditranslators[axis_name].disabled==false) //Todo: temporary. should likely have "in_use" to trigger note on/off
         {
-            
-            
         // if CC MODE
             if (Miditranslators[axis_name].translator_mode==0)
             {   
@@ -73,16 +75,41 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
         // if Note mode
             else
             {   
+                // 
+                
                 // check for sustain
                 midiio.manage_sustain();
 
+                Serial.print(axis_name.c_str());
 
                 uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
+                Serial.print("note_val:");
+                Serial.println(note_val);
 
+                #if defined(PIPO_ANALOG)
+
+                if (sensor.get_triggered(axis_name))
+                {
+                    Serial.print("triggered");
+                    midiio.sendNoteOn(note_val,127,channel,800); 
+                    // reset trigger when note is sent
+                    sensor.set_triggered(axis_name,false);
+                }
+                else if (sensor.get_untriggered(axis_name))
+                {
+                    midiio.sendNoteOff(note_val,127,channel);
+                    sensor.set_untriggered(axis_name,false);
+                }
+
+                #endif
+
+                #if defined(PIPO_RANGE)
+                //Part of this logic migth have to move to sensor ?
                 //deal with NoteOn
                 //Serial.println(sensor.get_triggered(axis_name));
                 if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
                 {
+                    Serial.print("triggered");
                     // Serial.print("sensor_val:");
                     // Serial.println(note_val);
                     // should probably move the value check in the io class. to be discussed
@@ -96,13 +123,14 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                     midiio.sendNoteOn(note_val,127,channel,800);    
                 }
 
-                //deal with NoteOff
+                //deal with NoteOff for range (== to max) 
                 if (sensor_val==sensor.get_limit_max(axis_name))
                 {
-
                     // Todo: should be all Noteoff ?
                     midiio.sendAllNotesOff(channel);
                 }
+
+                #endif
                 
             }
         }

@@ -41,7 +41,8 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 600
+            "limit_max": 600,
+            "limit_min": 0.0
         }
     },
     "general": {

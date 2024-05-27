@@ -53,6 +53,7 @@ json Sensor::get_config(bool debug)
         config[axis_name]["value"] = sensor_dat[axis_name].value;
         config[axis_name]["offset"] = sensor_dat[axis_name].offset;
         config[axis_name]["limit_max"] = sensor_dat[axis_name].limit_max;
+        config[axis_name]["limit_min"] = sensor_dat[axis_name].limit_min;
     }
     if (debug)
     {
@@ -74,6 +75,7 @@ void Sensor::set_config(json& config, bool debug)
         sensor_dat[axis_name].value = config[axis_name]["value"];
         sensor_dat[axis_name].offset = config[axis_name]["offset"];
         sensor_dat[axis_name].limit_max = config[axis_name]["limit_max"];
+        sensor_dat[axis_name].limit_min = config[axis_name]["limit_min"];
     }
     if (debug)
     {
@@ -117,9 +119,23 @@ float Sensor::get_value(const std::string& axis) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
+float Sensor::get_value_prev(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].value_prev;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
 float Sensor::get_limit_max(const std::string& axis) {
     if(sensor_dat.find(axis) != sensor_dat.end())
         return sensor_dat[axis].limit_max;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+float Sensor::get_limit_min(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].limit_min;
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -137,6 +153,15 @@ float Sensor::get_triggered(const std::string& axis) {
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
+
+float Sensor::get_untriggered(const std::string& axis) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        return sensor_dat[axis].untriggered;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
+
 
 
 //Setters
@@ -169,6 +194,13 @@ void Sensor::set_value(const std::string& axis, float value) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
+void Sensor::set_value_prev(const std::string& axis, float value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].value_prev = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
 void Sensor::set_offset(const std::string& axis, float value) {
     if(sensor_dat.find(axis) != sensor_dat.end())
         sensor_dat[axis].offset = value;
@@ -184,6 +216,13 @@ void Sensor::set_limit_max(const std::string& axis, float value) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
+void Sensor::set_limit_min(const std::string& axis, float value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].limit_min = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
+
 void Sensor::set_triggered(const std::string& axis, bool value) {
     if(sensor_dat.find(axis) != sensor_dat.end())
         sensor_dat[axis].triggered = value;
@@ -191,9 +230,12 @@ void Sensor::set_triggered(const std::string& axis, bool value) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
-
-
-
+void Sensor::set_untriggered(const std::string& axis, bool value) {
+    if(sensor_dat.find(axis) != sensor_dat.end())
+        sensor_dat[axis].untriggered = value;
+    else
+        throw std::invalid_argument("Axis not found: " + axis);
+}
 
 bool Sensor::test_outside_deadzone(const std::string& axis)
 {   

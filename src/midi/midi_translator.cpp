@@ -209,12 +209,27 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
         max_output = 127;
     }
     
-    if (interpolation_type == 0) {
+    // maybe the threshold system will haev to move on sensor side
+    // if (use_threshold){
+    //     if (value > threshold)
+    //     {
+    //         return max_output;
+    //     }
+    //     else
+    //     {
+    //         return min_output;
+    //     }
+    // }
+    // else 
+    // {
+        if (interpolation_type == 0) {
         return map_linear(value);
-    }
-    else {
+        }
+        else {
+        // not implemented yet
         return 0;
-    }
+        }
+    // }
 }
 
 int MidiTranslator::map_linear(float value){

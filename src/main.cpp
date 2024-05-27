@@ -109,6 +109,8 @@ void setup(){
     // Serial.print(Freq);
     // Serial.println(" Hz");
 
+
+
     Serial.println("Setup done");
 
     
@@ -134,7 +136,9 @@ void loop() {
     // Serial.println(input_sens.measured_interval_duration);
 
 
-    //input_sens.teleplot_data("T1");
+    input_sens.teleplot_data("T1");
+    input_sens.teleplot_data("T2");
+    input_sens.teleplot_data("T3");
     //input_sens.teleplot_data("roll");
     //input_sens.teleplot_data("dist");
 
@@ -188,7 +192,9 @@ void setup_wifi(){
         delay(3000);
     }
     // keep pressing to reset
-    if (digitalRead(MODE_SW)==LOW && digitalRead(PP_SW)==LOW)
+
+    ///////// HIGH here should be low. temp patch to cope with switch not wired corectly)
+    if (digitalRead(MODE_SW)==HIGH && digitalRead(PP_SW)==LOW)
     {
         Serial.println("Settings reset");
         wm.resetSettings();

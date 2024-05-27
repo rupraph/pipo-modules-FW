@@ -17,22 +17,43 @@ void AnalogSensor::setup()
         pinMode(pair.second, INPUT);
     }
 
+    measure_offset_all();
+
+}
+
+
+//Todo: add function to perform individual offset or of provided list
+
+void AnalogSensor::measure_offset_all()
+{
     // perform intial baseline calibration
+    int num_samples = 50;
     unordered_map<string,float> offset;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < num_samples; i++)
     {
-        update();
+        
+        // measure values without corretcing for offset
+        for (auto const& pair : analog_map)
+        {
+            sensor_dat[pair.first].value = analogRead(pair.second);
+        }
+        for (auto const& pair : touch_map)
+        {
+            sensor_dat[pair.first].value = touchRead(pair.second);
+        }
+
+
+        // save measurement
         for (auto const& pair : sensor_dat)
         {
             offset[pair.first] += sensor_dat[pair.first].value;
         }
-        delay(10);
+        delay(20);
     }
     for (auto const& pair : sensor_dat)
     {
-        sensor_dat[pair.first].offset = offset[pair.first] / 10;
+        sensor_dat[pair.first].offset = offset[pair.first] / num_samples;
     }
-
 }
 
 void AnalogSensor::update()
@@ -43,8 +64,8 @@ void AnalogSensor::update()
     }
     for (auto const& pair : touch_map)
     {
-        float value = lp_filter_map[pair.first].process(touchRead(pair.second)-sensor_dat[pair.first].offset);
-        
+        float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
+
         // if (value>sensor_dat[pair.first].limit_max && touch_adaptative_max)
         // {
         //     sensor_dat[pair.first].value = value;
@@ -52,14 +73,42 @@ void AnalogSensor::update()
             // Todo: should find a way that changing the sensor limit also propagates to the connected midi translator
         // }
         // else
-        if (value>sensor_dat[pair.first].limit_max && !touch_adaptative_max)
+        // if (val>sensor_dat[pair.first].limit_max)// && !touch_adaptative_max)
+        // {
+        //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_max;
+        // }
+        // else if (val<sensor_dat[pair.first].limit_min)
+        // {
+        //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_min;
+        // }
+        // else
+        // {
+        sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+        sensor_dat[pair.first].value = val;
+        
+        
+        if (val>sensor_dat[pair.first].limit_min  
+        && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
         {
-            sensor_dat[pair.first].value = sensor_dat[pair.first].limit_max;
+            if (!sensor_dat[pair.first].triggered)
+            {
+                sensor_dat[pair.first].triggered = true;
+            }
+        }
+        else if (val<sensor_dat[pair.first].limit_min
+        && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+        {
+            if (!sensor_dat[pair.first].untriggered)
+            {
+                sensor_dat[pair.first].untriggered = true;
+            }
         }
         else
         {
-            sensor_dat[pair.first].value = value;
+            sensor_dat[pair.first].triggered = false;
+            sensor_dat[pair.first].untriggered = false;
         }
+        // }
 
     }
 }
