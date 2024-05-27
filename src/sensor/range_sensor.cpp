@@ -25,12 +25,15 @@ void RangeSensor::init()
 void RangeSensor::setup()
 {
     vl53l4cx.VL53L4CX_StartMeasurement();
-    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(10000);
+    vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(20000);
     NewDataReady = 0;
     no_of_object_found = 0;
 
     // use of filter should likely a t one point be configurable
-    lp_filter.set_cutoffFrequency(20.0);
+    lp_filter.set_cutoffFrequency(5.0);
+    ma_filter = MovingAverageFilter(3);
+    km_filter = KalmanFilter(1,1);
+
 }
 
 void RangeSensor::update()
@@ -70,8 +73,9 @@ void RangeSensor::update()
             }
             else {
                 within_range=true;
-                //sensor_dat["dist"].value = lp_filter.process(dist); //Todo: Not working good
-                sensor_dat["dist"].value = dist;
+                sensor_dat["dist"].value = ma_filter.process(lp_filter.process(dist)); //Todo: Not working good with notes yet need fo cc
+                //sensor_dat["dist"].value = km_filter.process(dist);
+                //sensor_dat["dist"].value = dist;
             }
             if (within_range_prev==false && within_range==true)
             {

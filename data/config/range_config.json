@@ -23,14 +23,14 @@
                 "disabled": false,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 2000,
+                "max_input": 600,
                 "max_output": 127,
-                "min_input": 0.0,
+                "min_input": 50.0,
                 "min_output": 0,
                 "numberOfNotes": 15,
                 "rootNote": 55,
                 "scaleType": "major pentatonic",
-                "translator_mode": 1
+                "translator_mode": 0
             }
         }
     },
@@ -41,7 +41,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 2000
+            "limit_max": 600
         }
     },
     "general": {

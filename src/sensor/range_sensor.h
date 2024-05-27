@@ -36,7 +36,8 @@ class RangeSensor : public Sensor{
         SensorDat prev_sensor_dat;
 
         LowPassFilter lp_filter;
-        
+        MovingAverageFilter ma_filter;
+        KalmanFilter km_filter;
 };
 
 #endif //RANGE_SENSOR_H
