@@ -83,15 +83,15 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 Serial.print(axis_name.c_str());
 
                 uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
-                Serial.print("note_val:");
-                Serial.println(note_val);
+                // Serial.print("note_val:");
+                // Serial.println(note_val);
 
                 #if defined(PIPO_ANALOG)
 
                 if (sensor.get_triggered(axis_name))
                 {
                     Serial.print("triggered");
-                    midiio.sendNoteOn(note_val,127,channel,800); 
+                    midiio.sendNoteOn(note_val,127,channel,3000); 
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }

@@ -213,7 +213,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 180
+          "limit_max": 180,
+          "limit_min": -180
       },
       "roll": {
           "deadZone": 0,
@@ -222,7 +223,7 @@
           "offset": 0.0,
           "value": 0.0,
             "limit_max": 90,
-            "limit_min": 0.0
+            "limit_min": -90.0
       },
       "yaw": {
           "deadZone": 0,
@@ -231,7 +232,7 @@
           "offset": 0.0,
           "value": 0.0,
             "limit_max": 180,
-            "limit_min": 0.0
+            "limit_min": -180
       }
   },
   "general": {

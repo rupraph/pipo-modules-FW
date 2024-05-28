@@ -283,7 +283,7 @@
                 "min_input": 0.0,
                 "min_output": 0,
                 "numberOfNotes": 1,
-                "rootNote": 48,
+                "rootNote": 79,
                 "scaleType": "major",
                 "translator_mode": 1
             },
@@ -299,7 +299,7 @@
                 "min_input": 0.0,
                 "min_output": 0,
                 "numberOfNotes": 1,
-                "rootNote": 45,
+                "rootNote": 75,
                 "scaleType": "major",
                 "translator_mode": 1
             },
@@ -424,7 +424,7 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 300000.0,
-            "limit_min": 1000.0
+            "limit_min": 700.0
         },
         "T3": {
             "deadZone": 0.0,
@@ -433,7 +433,7 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 300000.0,
-            "limit_min": 1000.0
+            "limit_min": 700.0
         },
         "T4": {
             "deadZone": 0.0,

@@ -53,15 +53,15 @@ class AnalogSensor : public Sensor{
 
     private:
             unordered_map<string, LowPassFilter> lp_filter_map = {
-            {"A1", LowPassFilter(5)},
-            {"A2", LowPassFilter(5)},
-            {"A3", LowPassFilter(5)},
-            {"A4", LowPassFilter(5)},
-            {"A5", LowPassFilter(5)},
-            {"A6", LowPassFilter(5)},
-            {"T1", LowPassFilter(5)},
-            {"T2", LowPassFilter(5)},
-            {"T3", LowPassFilter(5)},
+            {"A1", LowPassFilter(10)},
+            {"A2", LowPassFilter(10)},
+            {"A3", LowPassFilter(10)},
+            {"A4", LowPassFilter(10)},
+            {"A5", LowPassFilter(10)},
+            {"A6", LowPassFilter(10)},
+            {"T1", LowPassFilter(10)},
+            {"T2", LowPassFilter(20)},
+            {"T3", LowPassFilter(30)},
             {"T4", LowPassFilter(5)},
             {"T5", LowPassFilter(5)},
             {"T6", LowPassFilter(5)}

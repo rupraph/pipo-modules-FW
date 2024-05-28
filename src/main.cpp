@@ -84,6 +84,9 @@ void setup(){
     // initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
+    
+
+    input_sens.enable_send_vizualizer=true;
 
     //Start server if TA connected or AP mode
     if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
@@ -136,9 +139,9 @@ void loop() {
     // Serial.println(input_sens.measured_interval_duration);
 
 
-    input_sens.teleplot_data("T1");
-    input_sens.teleplot_data("T2");
-    input_sens.teleplot_data("T3");
+    // input_sens.teleplot_data("T1");
+    // input_sens.teleplot_data("T2");
+    // input_sens.teleplot_data("T3");
     //input_sens.teleplot_data("roll");
     //input_sens.teleplot_data("dist");
 
