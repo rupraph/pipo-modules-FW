@@ -154,11 +154,12 @@ void MotionSensor::update()
       //SERIAL_PORT.printf("Quat6 data is: Q1:%ld Q2:%ld Q3:%ld\r\n", data.Quat6.Data.Q1, data.Quat6.Data.Q2, data.Quat6.Data.Q3);
 
       // Scale to +/- 1
-      double q1 = ((double)data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
-      double q2 = ((double)data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
-      double q3 = ((double)data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
+      q1 = ((double)data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
+      q2 = ((double)data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
+      q3 = ((double)data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
+      q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
 
-    double q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
+
             // send to adafruit visualizer 
             if (enable_send_vizualizer)
             {
@@ -240,10 +241,30 @@ void MotionSensor::calc_euler_angles()
 
       double q2sqr = q2 * q2;
 
-    // attempt change order
+    // attempt change order (seems like 1st in code is inner axis...?) )
     // sensor_dat["yaw"].value = atan2(2.0*(q0*q1 + q2*q3), 1.0 - 2.0*(q1*q1 - q3*q3))* 180.0 / PI;
     // sensor_dat["pitch"].value = asin(2.0*(q0*q2 + q1*q3))* 180.0 / PI;
     // sensor_dat["roll"].value = atan2(2.0*(q0*q3 + q2*q1), 1.0 - 2.0*(q1*q1 + q2*q2))* 180.0 / PI;
+
+
+    // opposite order
+        // roll (x-axis rotation)
+    double sinr_cosp = +2.0 * (q0 * q1 + q2 * q3);
+    double cosr_cosp = +1.0 - 2.0 * (q1 * q1 + q2 * q2);
+    sensor_dat["roll"].value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+
+    // pitch (y-axis rotation)
+    double sinp = +2.0 * (q0 * q2 - q3 * q1);
+    if (fabs(sinp) >= 1)
+        sensor_dat["pitch"].value = copysign(PI / 2, sinp) * 180.0 / PI; // use 90 degrees if out of range
+    else
+        sensor_dat["pitch"].value = asin(sinp) * 180.0 / PI;
+
+    // yaw (z-axis rotation)
+    double siny_cosp = +2.0 * (q0 * q3 + q1 * q2);
+    double cosy_cosp = +1.0 - 2.0 * (q2 * q2 + q3 * q3);
+    sensor_dat["yaw"].value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+
 
 
 
@@ -267,34 +288,34 @@ void MotionSensor::calc_euler_angles()
 
 
     
-        // attempt with option to measure change from initial position
-        // Calculate the roll and pitch angles
-        double roll = atan2(2.0 * (q0 * q1 + q2 * q3), 1.0 - 2.0 * (q1 * q1 + q2 * q2)) * 180.0 / PI;
-        double pitch = asin(2.0 * (q0 * q2 - q3 * q1)) * 180.0 / PI;
+        // // attempt with option to measure change from initial position
+        // // Calculate the roll and pitch angles
+        // double roll = atan2(2.0 * (q0 * q1 + q2 * q3), 1.0 - 2.0 * (q1 * q1 + q2 * q2)) * 180.0 / PI;
+        // double pitch = asin(2.0 * (q0 * q2 - q3 * q1)) * 180.0 / PI;
 
-        if (firstCall)
-        {
-            // Store the initial orientation
-            initialRoll = roll;
-            initialPitch = pitch;
-            firstCall = false;
-        }
+        // if (firstCall)
+        // {
+        //     // Store the initial orientation
+        //     initialRoll = roll;
+        //     initialPitch = pitch;
+        //     firstCall = false;
+        // }
 
-        // Calculate the relative orientation
-        sensor_dat["roll"].value = roll - initialRoll;
-        sensor_dat["pitch"].value = pitch - initialPitch;
-
-
+        // // Calculate the relative orientation
+        // sensor_dat["roll"].value = roll - initialRoll;
+        // sensor_dat["pitch"].value = pitch - initialPitch;
 
 
 
-    //   //adafruit style visualizer  
-    //  Serial.print("Orientation: ");
-    //  Serial.print(sensor_dat["roll"].value);
-    //   Serial.print(", ");
-    //   Serial.print(sensor_dat["pitch"].value);
-    //   Serial.print(", ");
-    //   Serial.println(sensor_dat["yaw"].value);
+
+
+    //   //adafruit style visualizer  // carefull with the order that the viewer expect... !!
+    Serial.print("Orientation: ");
+    Serial.print(sensor_dat["roll"].value);
+    Serial.print(", ");
+    Serial.print(sensor_dat["pitch"].value);
+    Serial.print(", ");
+    Serial.println(sensor_dat["yaw"].value);
       
     
 }

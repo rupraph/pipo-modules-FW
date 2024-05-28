@@ -86,8 +86,6 @@ void setup(){
     input_sens.setup();
     
 
-    input_sens.enable_send_vizualizer=true;
-
     //Start server if TA connected or AP mode
     if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
         Serial.println("Wifi connected, starting config page");
