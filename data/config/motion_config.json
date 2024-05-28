@@ -133,12 +133,12 @@
               "cc_number": 1,
               "channel": 1,
               "current_scale": [],
-              "disabled": true,
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
-              "max_input": 180.0,
+              "max_input": 90.0,
               "max_output": 127,
-              "min_input": -180.0,
+              "min_input": -90,
               "min_output": 0,
               "numberOfNotes": 25,
               "rootNote": 45,
@@ -146,7 +146,7 @@
               "translator_mode": 0
           },
           "roll": {
-              "cc_number": 1,
+              "cc_number": 2,
               "channel": 1,
               "current_scale": [],
               "disabled": false,
@@ -154,7 +154,7 @@
               "interpolation_type": 0,
               "max_input": 180.0,
               "max_output": 127,
-              "min_input": -180.0,
+              "min_input": -180,
               "min_output": 0,
               "numberOfNotes": 25,
               "rootNote": 45,
@@ -162,15 +162,15 @@
               "translator_mode": 0
           },
           "yaw": {
-              "cc_number": 1,
+              "cc_number": 3,
               "channel": 1,
               "current_scale": [],
-              "disabled": true,
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 180.0,
               "max_output": 127,
-              "min_input": -180.0,
+              "min_input": -180,
               "min_output": 0,
               "numberOfNotes": 25,
               "rootNote": 45,
@@ -213,8 +213,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-          "limit_max": 180,
-          "limit_min": -180
+          "limit_max": 90,
+          "limit_min": -90
       },
       "roll": {
           "deadZone": 0,
@@ -222,8 +222,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 90,
-            "limit_min": -90.0
+            "limit_max": 180,
+            "limit_min": -180
       },
       "yaw": {
           "deadZone": 0,

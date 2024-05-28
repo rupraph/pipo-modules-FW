@@ -46,6 +46,12 @@ class MotionSensor: public Sensor{
         LowPassFilter lp_filter_accY;
         LowPassFilter lp_filter_accZ;
 
+        unordered_map<string, LowPassFilter> lp_filter_map = {
+            {"roll", LowPassFilter(10)},
+            {"pitch", LowPassFilter(10)},
+            {"yaw", LowPassFilter(10)},
+        };
+
         // acellerometer value convertion
         const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
         float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2

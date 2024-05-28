@@ -111,7 +111,7 @@ void MotionSensor::setup()
         { // Loop forever
         }
     }
-
+    
 
 }
 
@@ -146,18 +146,18 @@ void MotionSensor::update()
         //SERIAL_PORT.println( data.header, HEX );
 
         if ((data.header & DMP_header_bitmap_Quat6) > 0) 
-    {
-      // Q0 value is computed from this equation: Q0^2 + Q1^2 + Q2^2 + Q3^2 = 1.
-      // In case of drift, the sum will not add to 1, therefore, quaternion data need to be corrected with right bias values.
-      // The quaternion data is scaled by 2^30.
+        {
+            // Q0 value is computed from this equation: Q0^2 + Q1^2 + Q2^2 + Q3^2 = 1.
+            // In case of drift, the sum will not add to 1, therefore, quaternion data need to be corrected with right bias values.
+            // The quaternion data is scaled by 2^30.
 
-      //SERIAL_PORT.printf("Quat6 data is: Q1:%ld Q2:%ld Q3:%ld\r\n", data.Quat6.Data.Q1, data.Quat6.Data.Q2, data.Quat6.Data.Q3);
+            //SERIAL_PORT.printf("Quat6 data is: Q1:%ld Q2:%ld Q3:%ld\r\n", data.Quat6.Data.Q1, data.Quat6.Data.Q2, data.Quat6.Data.Q3);
 
-      // Scale to +/- 1
-      q1 = ((double)data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
-      q2 = ((double)data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
-      q3 = ((double)data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
-      q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
+            // Scale to +/- 1
+            q1 = ((double)data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
+            q2 = ((double)data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
+            q3 = ((double)data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
+            q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
 
 
             // send to adafruit visualizer 
@@ -185,6 +185,8 @@ void MotionSensor::update()
             // Serial.print(q3, 3);
             // Serial.println(F("}"));
             }
+            // Convert the quaternions to Euler angles (roll, pitch, yaw)
+            calc_euler_angles();
         }
         if ((data.header & DMP_header_bitmap_Accel) > 0) // We have asked for raw accel data
         {
@@ -225,12 +227,11 @@ void MotionSensor::update()
     // }
     }
 
-    // Convert the quaternions to Euler angles (roll, pitch, yaw)
-    calc_euler_angles();
+    
 
     
 
-    }
+}
 
 // When flipping the sensor, the roll and pitch values are inverted. 
 
@@ -247,11 +248,29 @@ void MotionSensor::calc_euler_angles()
     // sensor_dat["roll"].value = atan2(2.0*(q0*q3 + q2*q1), 1.0 - 2.0*(q1*q1 + q2*q2))* 180.0 / PI;
 
 
-    // opposite order
-        // roll (x-axis rotation)
-    double sinr_cosp = +2.0 * (q0 * q1 + q2 * q3);
-    double cosr_cosp = +1.0 - 2.0 * (q1 * q1 + q2 * q2);
-    sensor_dat["roll"].value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+    // // opposite order roll pitch yaw
+    // // roll (x-axis rotation)
+    // double sinr_cosp = +2.0 * (q0 * q1 + q2 * q3);
+    // double cosr_cosp = +1.0 - 2.0 * (q1 * q1 + q2 * q2);
+    // sensor_dat["roll"].value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+    // // pitch (y-axis rotation)
+    // double sinp = +2.0 * (q0 * q2 - q3 * q1);
+    // if (fabs(sinp) >= 1)
+    //     sensor_dat["pitch"].value = copysign(PI / 2, sinp) * 180.0 / PI; // use 90 degrees if out of range
+    // else
+    //     sensor_dat["pitch"].value = asin(sinp) * 180.0 / PI;
+    // // yaw (z-axis rotation)
+    // double siny_cosp = +2.0 * (q0 * q3 + q1 * q2);
+    // double cosy_cosp = +1.0 - 2.0 * (q2 * q2 + q3 * q3);
+    // sensor_dat["yaw"].value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+
+
+    // attempt to get roll as outer axis, and yaw as inner.
+    // Yaw, Pitch, Roll (ZYX): (copilot says first is inner)
+    // yaw (z-axis rotation)
+    double siny_cosp = +2.0 * (q0 * q3 + q1 * q2);
+    double cosy_cosp = +1.0 - 2.0 * (q2 * q2 + q3 * q3);
+    sensor_dat["yaw"].value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
 
     // pitch (y-axis rotation)
     double sinp = +2.0 * (q0 * q2 - q3 * q1);
@@ -260,10 +279,10 @@ void MotionSensor::calc_euler_angles()
     else
         sensor_dat["pitch"].value = asin(sinp) * 180.0 / PI;
 
-    // yaw (z-axis rotation)
-    double siny_cosp = +2.0 * (q0 * q3 + q1 * q2);
-    double cosy_cosp = +1.0 - 2.0 * (q2 * q2 + q3 * q3);
-    sensor_dat["yaw"].value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+    // roll (x-axis rotation)
+    double sinr_cosp = +2.0 * (q0 * q1 + q2 * q3);
+    double cosr_cosp = +1.0 - 2.0 * (q1 * q1 + q2 * q2);
+    sensor_dat["roll"].value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
 
 
 
