@@ -91,7 +91,7 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 if (sensor.get_triggered(axis_name))
                 {
                     Serial.print("triggered");
-                    midiio.sendNoteOn(note_val,127,channel,3000); 
+                    midiio.sendNoteOn(note_val,127,channel,20000); 
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }

@@ -137,9 +137,10 @@ void loop() {
     // Serial.println(input_sens.measured_interval_duration);
 
 
-    // input_sens.teleplot_data("T1");
-    // input_sens.teleplot_data("T2");
-    // input_sens.teleplot_data("T3");
+    input_sens.teleplot_data("T1");
+    input_sens.teleplot_data("T2");
+    input_sens.teleplot_data("T3");
+    input_sens.teleplot_data("T4");
     //input_sens.teleplot_data("roll");
     //input_sens.teleplot_data("dist");
 

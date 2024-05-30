@@ -17,15 +17,15 @@
         },
         "engine-midi": {
             "dist": {
-                "cc_number": 1,
+                "cc_number": 2,
                 "channel": 1,
                 "current_scale": [],
                 "disabled": false,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 600,
+                "max_input": 300,
                 "max_output": 127,
-                "min_input": 50.0,
+                "min_input": 20.0,
                 "min_output": 0,
                 "numberOfNotes": 15,
                 "rootNote": 55,
@@ -41,8 +41,8 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 600,
-            "limit_min": 0.0
+            "limit_max": 300,
+            "limit_min": 20.0
         }
     },
     "general": {
