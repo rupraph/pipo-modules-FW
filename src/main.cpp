@@ -36,8 +36,8 @@
 midi_io midiio;
 usb_hid hidio;
 Config config;
-Engine engine(input_sens);
 HwUi hwui;
+Engine engine(input_sens);
 ServerManager server_manager(input_sens,engine,config);
 WiFiManager wm;
 
@@ -144,7 +144,7 @@ void loop() {
     //input_sens.teleplot_data("roll");
     //input_sens.teleplot_data("dist");
 
-    engine.update(input_sens, midiio, hidio);
+    engine.update(input_sens, midiio, hidio, hwui);
     //midiio.update();
 
     hwui.update();

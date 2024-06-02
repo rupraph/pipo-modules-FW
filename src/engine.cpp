@@ -18,14 +18,14 @@ using json = nlohmann::json;
 
 // should use callback to trigger events and notes
 
-void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
+void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio, HwUi& hwui)
 {
-    midi_processsor(sensor, midiio);
+    midi_processsor(sensor, midiio, hwui);
     hid_processor(sensor, hidio);
 }
 
 
-void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
+void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
 {
     // loop through sensor data
     const auto& sensor_dat = sensor.get_sensor_dat_map();
@@ -55,6 +55,7 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
                 // for midi find way to limit rotation to max 180° to avoid overflow to 0
                 midiio.sendControlChange(cc_number, cc_val, 1,false);
+                hwui.set_led(SEND_LED,::map(0,127,30,255,cc_val*2));
                 }
 
                 // if debug ? 
@@ -92,6 +93,7 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 {
                     Serial.print("triggered");
                     midiio.sendNoteOn(note_val,127,channel,20000); 
+                    hwui.init_blink_once(SEND_LED, 100, 255);
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }

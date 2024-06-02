@@ -51,6 +51,7 @@ void HwUi::update()
 {
     blinker();
     pulse();
+    stop_blink_once();
 }
 
 void HwUi::set_led(int led, int value)
@@ -143,4 +144,23 @@ void HwUi::pulse()
     }
 }
 
-     
+// carefull the led identification relies on the led_channels numbering
+void HwUi::init_blink_once(int led, int blink_time, int brightness)
+{
+    int led_pos=led_channel_map[led];
+    set_led(led, brightness);
+    blink_once[led_pos]=millis()+blink_time;
+}
+
+void HwUi::stop_blink_once()
+{
+    for (auto& pair : led_channel_map)
+    {
+        int i = pair.second;
+        if (millis()>blink_once[i])
+        {
+            set_led(pair.first, 0);
+            blink_once[i]=0;
+        }
+    }
+}
