@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <unordered_map>
+#include <Wire.h>
 #include "utils/json.hpp"
 #include "utils/filters.h"
 

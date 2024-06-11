@@ -2,14 +2,13 @@
 #define ACC_SENSOR_H
 
 #include "sensor/input_sensor.h"
-#include <ICM_20948.h>
 #include "HW_CONFIG.h"
-
+#include "Arduino-ICM20948.h"
+#include "utils/filters.h"
 
 class MotionSensor: public Sensor{   
     public:
-        MotionSensor():lp_filter_accX(),lp_filter_accY(),lp_filter_accZ()
-        {
+        MotionSensor(){
             sensor_dat = {
             {"roll", {false, false,     0,  0,  0,  90.0,   false}},
             {"pitch", {false, false,    0,  0,  0,  180.0,  false}},
@@ -18,14 +17,12 @@ class MotionSensor: public Sensor{
             {"accY", {false, false,     0,  0,  0,  8.0,    false}},
             {"accZ", {false, false,     0,  0,  0,  8.0,    false}}
         };
-
         }; 
 
         void init() override;
         void setup() override;
         void update() override;
 
-        bool initialized = false;
         bool enable_send_vizualizer = false;
 
         void calc_euler_angles();
@@ -35,16 +32,6 @@ class MotionSensor: public Sensor{
 
     private:
 
-        // for taking orientation reference. test for now, might not keep this solution
-        bool firstCall = true;
-        double initialRoll, initialPitch;
-
-        //HighPassFilter hp_filter_accX; // seems like substracting lowpass is slightly better
-
-        // use lowpass substraction to remove gravity from accel. not optimal, but ok for basic processing.
-        LowPassFilter lp_filter_accX;
-        LowPassFilter lp_filter_accY;
-        LowPassFilter lp_filter_accZ;
 
         unordered_map<string, LowPassFilter> lp_filter_map = {
             {"roll", LowPassFilter(10)},
@@ -52,38 +39,55 @@ class MotionSensor: public Sensor{
             {"yaw", LowPassFilter(10)},
         };
 
-        // acellerometer value convertion
-        const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
-        float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
 
 
-        ICM_20948_I2C myICM;
-        icm_20948_DMP_data_t data;
-        double q1;
-        double q2;
-        double q3;
-        double q0;
+        ArduinoICM20948 icm20948;
+        ArduinoICM20948Settings icmSettings =
+        {
+        .i2c_speed = 400000,                // i2c clock speed
+        .is_SPI = false,                    // Enable SPI, if disable use i2c
+        .cs_pin = 10,                       // SPI chip select pin
+        .spi_speed = 7000000,               // SPI clock speed in Hz, max speed is 7MHz
+        .mode = 1,                          // 0 = low power mode, 1 = high performance mode
+        .enable_gyroscope = false,           // Enables gyroscope output
+        .enable_accelerometer = true,       // Enables accelerometer output
+        .enable_magnetometer = false,        // Enables magnetometer output // Enables quaternion output
+        .enable_gravity = false,             // Enables gravity vector output
+        .enable_linearAcceleration = true,  // Enables linear acceleration output
+        .enable_quaternion6 = true,         // Enables quaternion 6DOF output
+        .enable_quaternion9 = false,         // Enables quaternion 9DOF output
+        .enable_har = false,                 // Enables activity recognition
+        .enable_steps = false,               // Enables step counter
+        .gyroscope_frequency = 1,           // Max frequency = 225, min frequency = 1
+        .accelerometer_frequency = 1,       // Max frequency = 225, min frequency = 1
+        .magnetometer_frequency = 1,        // Max frequency = 70, min frequency = 1 
+        .gravity_frequency = 1,             // Max frequency = 225, min frequency = 1
+        .linearAcceleration_frequency = 225,  // Max frequency = 225, min frequency = 1
+        .quaternion6_frequency = 100,        // Max frequency = 225, min frequency = 50
+        .quaternion9_frequency = 50,        // Max frequency = 225, min frequency = 50
+        .har_frequency = 50,                // Max frequency = 225, min frequency = 50
+        .steps_frequency = 50               // Max frequency = 225, min frequency = 50
+        
+        };
+
+
+
+        float quat_w;
+        float quat_x;
+        float quat_y;
+        float quat_z;
 
         // holds raw data from sensor
         float raw_accX;
         float raw_accY;
         float raw_accZ;
 
-        //holds intermediate acceleration data
-        float accX_t;
-        float accY_t;
-        float accZ_t;
 
-        float speedX;
+        // // acellerometer value convertion (from before library change)
+        // const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
+        // float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
 
-        //float hp_accX;
 
-        float raw_gyroX;
-        float raw_gyroY;
-        float raw_gyroZ;
-
-        unsigned long last_time;
-        
 };
 
 #endif //ACC_SENSOR_H

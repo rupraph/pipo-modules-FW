@@ -82,7 +82,7 @@
       },
       "engine-midi": {
           "accX": {
-              "cc_number": 2,
+              "cc_number": 5,
               "channel": 1,
               "current_scale": [],
               "disabled": false,
@@ -114,7 +114,7 @@
               "translator_mode": 0
           },
           "accZ": {
-              "cc_number": 1,
+              "cc_number": 6,
               "channel": 1,
               "current_scale": [],
               "disabled": true,
