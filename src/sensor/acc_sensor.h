@@ -13,7 +13,7 @@ class MotionSensor: public Sensor{
             {"roll", {false, false,     0,  0,  0,  90.0,   false}},
             {"pitch", {false, false,    0,  0,  0,  180.0,  false}},
             {"yaw", {false, false,      0,  0,  0,  180.0,  false}},
-            {"accX", {true, false,      0.1,0,  0,  8.0,    false}},
+            {"accX", {true, false,      0,  0,  0,  8.0,    false}},
             {"accY", {false, false,     0,  0,  0,  8.0,    false}},
             {"accZ", {false, false,     0,  0,  0,  8.0,    false}}
         };

@@ -12,20 +12,14 @@ void midiBLESetup() {
     MidiBle.begin();
 }
 
-// void midiBLELoop() {
-//     MidiBle.read();
-//     MidiBle.sendNoteOn(69, 127, 1);
-//     // delay(100);
-//     //Serial.println("Note on");
-//     delay(1000);
-// }
-
 void OnConnected() {
     Serial.println("Ble Connected!");
+    hwui.set_led(BT_LED, 80);
 }
 
 void OnDisconnected() {
     Serial.println("Ble Disconnected!");
+    hwui.set_led(BT_LED, 0);
 }
 
 void MidiBLEsendCC(int control, int value, int channel){

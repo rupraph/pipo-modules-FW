@@ -1,7 +1,7 @@
 #ifndef MIDIBLE_H
 #define MIDIBLE_H
 
-
+#include "hw_ui.h"
 
 void midiBLESetup();
 //void midiBLELoop();

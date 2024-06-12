@@ -88,13 +88,17 @@ class Engine
         hid_mouse_report_t       mouse;
 
 
-        void update(Sensor& sensor, midi_io& midiio,usb_hid& hidio, HwUi& hwui);
-        void midi_processsor(Sensor& sensor,midi_io& midiio, HwUi& hwui);
+        void update(Sensor& sensor, midi_io& midiio,usb_hid& hidio);
+        void midi_processsor(Sensor& sensor,midi_io& midiio);
         void hid_processor(Sensor& sensor,usb_hid& hidio);
         void set_default_config();
         json get_config(bool debug=false);
         void set_config(json& config,bool debug=false);
         friend void to_json(json& j, const Engine& t);
+
+    private:
+        uint8_t note_val[128];
+        uint8_t note_val_prev[128];
 
 
 };

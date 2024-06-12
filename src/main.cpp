@@ -1,8 +1,4 @@
 
-
-
-
-
 #include <Arduino.h>
 #include "HW_CONFIG.h"
 #include "utils/fs_tools.h"
@@ -33,8 +29,7 @@
 
 
 //OSC_handler osc;
-HwUi hwui;
-midi_io midiio(hwui);
+midi_io midiio;
 usb_hid hidio;
 Config config;
 Engine engine(input_sens);
@@ -57,10 +52,11 @@ void setup(){
     Serial.begin(115200);
     //while(!Serial) // "while" prevents usb to setup properly
 
-    //setCpuFrequencyMhz(80);
+    //setCpuFrequencyMhz(80); will be usefull to save power on battery
     
     hwui.init();
     hwui.setup();
+
     
 
     init_filesystem();
@@ -111,7 +107,8 @@ void setup(){
     // Serial.println(" Hz");
 
 
-
+    //hwui2.set_led(BT_LED,150);
+    //hwui.set_led(BT_LED,255);
     Serial.println("Setup done");
 
     
@@ -143,9 +140,9 @@ void loop() {
     // input_sens.teleplot_data("T4");
     //input_sens.teleplot_data("roll");
     //input_sens.teleplot_data("dist");
-    input_sens.teleplot_data("accX");
+    input_sens.teleplot_data("accZ");
 
-    engine.update(input_sens, midiio, hidio, hwui);
+    engine.update(input_sens, midiio, hidio);
     //midiio.update();
 
     hwui.update();

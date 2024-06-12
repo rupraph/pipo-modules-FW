@@ -79,10 +79,6 @@ void midi_io::sendHiResControlChange(int control, int value, int channel)
     //MidiUsb.sendControlChange(control, value, channel);
 }
 
-// void midi_io::update()
-// {  
-//     manage_sustain();
-// }
 
 void midi_io::manage_sustain()
 {

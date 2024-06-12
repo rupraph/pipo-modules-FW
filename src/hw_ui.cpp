@@ -1,5 +1,6 @@
 #include "hw_ui.h"
 
+HwUi hwui;
 
 void HwUi::init()
 {
@@ -44,6 +45,10 @@ void HwUi::setup()
     ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
     ledcSetup(3, PWM_FREQ, PWM_Resolution);
     ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+    set_led(WIFI_LED, 0);
+    set_led(BT_LED, 0);
+    set_led(SEND_LED, 0);
+    set_led(LOW_BAT_LED, 0);
 
 }
 
@@ -54,43 +59,43 @@ void HwUi::update()
     stop_blink_once();
 }
 
-void HwUi::set_led(int led, int value)
+void HwUi::set_led(int led_name, int value)
 {
-    ledcWrite(led_channel_map[led], value);
+    ledcWrite(led_channel_map[led_name], value);
 }
 
-void HwUi::start_blink(int led, int blink_time, float duty_cycle)
+void HwUi::start_blink(int led_name, int blink_time, float duty_cycle)
 {
-    led_blink_table[led].enabled = true;
-    led_blink_table[led].blink_period = blink_time;
-    led_blink_table[led].duty_cycle = duty_cycle;
-    led_blink_table[led].state = true;
-    led_blink_table[led].start_cycle = millis();
-    led_blink_table[led].toggle_time = led_blink_table[led].start_cycle + int(led_blink_table[led].duty_cycle*led_blink_table[led].blink_period);
-    set_led(led, led_blink_table[led].brightness);
+    led_blink_table[led_name].enabled = true;
+    led_blink_table[led_name].blink_period = blink_time;
+    led_blink_table[led_name].duty_cycle = duty_cycle;
+    led_blink_table[led_name].state = true;
+    led_blink_table[led_name].start_cycle = millis();
+    led_blink_table[led_name].toggle_time = led_blink_table[led_name].start_cycle + int(led_blink_table[led_name].duty_cycle*led_blink_table[led_name].blink_period);
+    set_led(led_name, led_blink_table[led_name].brightness);
 }
 
-void HwUi::start_pulse(int led, int pulse_period, int min_brightness, int max_brightness)
+void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness, int max_brightness)
 {
-    led_pulse_table[led].enabled = true;
-    led_pulse_table[led].pulse_period = pulse_period;
-    led_pulse_table[led].min_brightness = min_brightness;
-    led_pulse_table[led].max_brightness = max_brightness;
-    led_pulse_table[led].start_cycle = millis();
-    set_led(led, led_pulse_table[led].min_brightness);
+    led_pulse_table[led_name].enabled = true;
+    led_pulse_table[led_name].pulse_period = pulse_period;
+    led_pulse_table[led_name].min_brightness = min_brightness;
+    led_pulse_table[led_name].max_brightness = max_brightness;
+    led_pulse_table[led_name].start_cycle = millis();
+    set_led(led_name, led_pulse_table[led_name].min_brightness);
 }
 
-void HwUi::stop_blink(int led)
+void HwUi::stop_blink(int led_name)
 {
-    led_blink_table[led].enabled = false;
-    set_led(led, 0);
+    led_blink_table[led_name].enabled = false;
+    set_led(led_name, 0);
     
 }
 
-void HwUi::stop_pulse(int led)
+void HwUi::stop_pulse(int led_name)
 {
-    led_pulse_table[led].enabled = false;
-    set_led(led, 0);
+    led_pulse_table[led_name].enabled = false;
+    set_led(led_name, 0);
 }
 
 void HwUi::blinker()
@@ -144,11 +149,12 @@ void HwUi::pulse()
     }
 }
 
-// carefull the led identification relies on the led_channels numbering
-void HwUi::init_blink_once(int led, int blink_time, int brightness)
+
+void HwUi::init_blink_once(int led_name, int blink_time, int brightness)
 {
-    int led_pos=led_channel_map[led];
-    set_led(led, brightness);
+    // carfull led_pos used for index in blink_once but comes from channel number
+    int led_pos=led_channel_map[led_name];
+    set_led(led_name, brightness);
     blink_once[led_pos]=millis()+blink_time;
 }
 
@@ -157,7 +163,7 @@ void HwUi::stop_blink_once()
     for (auto& pair : led_channel_map)
     {
         int i = pair.second;
-        if (millis()>blink_once[i])
+        if (millis()>blink_once[i] && blink_once[i]!=0)
         {
             set_led(pair.first, 0);
             blink_once[i]=0;

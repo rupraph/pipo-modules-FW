@@ -85,7 +85,7 @@
               "cc_number": 4,
               "channel": 2,
               "current_scale": [],
-              "disabled": false,
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 8.0,
@@ -101,7 +101,7 @@
               "cc_number": 5,
               "channel": 2,
               "current_scale": [],
-              "disabled": false,
+              "disabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 8.0,
@@ -117,14 +117,14 @@
               "cc_number": 6,
               "channel": 2,
               "current_scale": [],
-              "disabled": true,
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_input": 8.0,
               "max_output": 127,
               "min_input": -8.0,
               "min_output": 0,
-              "numberOfNotes": 25,
+              "numberOfNotes": 10,
               "rootNote": 45,
               "scaleType": "major",
               "translator_mode": 1
@@ -156,10 +156,10 @@
               "max_output": 127,
               "min_input": -180,
               "min_output": 0,
-              "numberOfNotes": 25,
-              "rootNote": 45,
-              "scaleType": "major",
-              "translator_mode": 0
+              "numberOfNotes": 15,
+              "rootNote": 55,
+              "scaleType": "blues minor",
+              "translator_mode": 1
           },
           "yaw": {
               "cc_number": 3,
@@ -181,7 +181,7 @@
   },
   "sensor": {
       "accX": {
-          "deadZone": 0.1,
+          "deadZone": 0,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -199,7 +199,7 @@
           "limit_min": -8.0
       },
       "accZ": {
-          "deadZone": 0,
+          "deadZone": 0.2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -208,7 +208,7 @@
             "limit_min": -8.0
       },
       "pitch": {
-          "deadZone": 0,
+          "deadZone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -217,7 +217,7 @@
           "limit_min": -90
       },
       "roll": {
-          "deadZone": 0,
+          "deadZone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -226,7 +226,7 @@
             "limit_min": -180
       },
       "yaw": {
-          "deadZone": 0,
+          "deadZone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,

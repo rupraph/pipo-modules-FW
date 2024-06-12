@@ -18,14 +18,14 @@ using json = nlohmann::json;
 
 // should use callback to trigger events and notes
 
-void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio, HwUi& hwui)
+void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
 {
-    midi_processsor(sensor, midiio, hwui);
+    midi_processsor(sensor, midiio);
     hid_processor(sensor, hidio);
 }
 
 
-void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
+void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
 {
     // loop through sensor data
     const auto& sensor_dat = sensor.get_sensor_dat_map();
@@ -49,14 +49,14 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
                 {
                     uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,1),16383));
                     midiio.sendControlChange(cc_number, cc_val, channel,true);
-                    //hwui.init_blink_once(SEND_LED, 30, 255);
+
                 }
                 else
                 {
                     uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
                     // for midi find way to limit rotation to max 180° to avoid overflow to 0
                     midiio.sendControlChange(cc_number, cc_val, channel,false);
-                   //hwui.init_blink_once(SEND_LED, 30, 255);
+
                 }
 
                 // if debug ? 
@@ -79,22 +79,25 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
             {   
                 // 
                 
-                // check for sustain
+                // check for sustain.
                 midiio.manage_sustain();
 
-                Serial.print(axis_name.c_str());
-
-                uint8_t note_val=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
+                //Serial.print(axis_name.c_str());
+                note_val_prev[channel]=note_val[channel];
+                note_val[channel]=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
+                
                 // Serial.print("note_val:");
                 // Serial.println(note_val);
 
-                #if defined(PIPO_ANALOG)
 
+                // probaly get triggered should be something linked to the deadzone
+                #if defined(PIPO_ANALOG)
+                // was this written only for sending single notes ? 
                 if (sensor.get_triggered(axis_name))
                 {
                     Serial.print("triggered");
                     midiio.sendNoteOn(note_val,127,channel,20000); 
-                    hwui.init_blink_once(SEND_LED, 100, 255);
+
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }
@@ -106,6 +109,15 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
 
                 #endif
 
+                # if defined(PIPO_MOTION)
+                if (note_val[channel]!=note_val_prev[channel])
+                {
+                    midiio.sendNoteOn(note_val[channel],127,channel,20000); 
+                }
+
+                #endif
+
+
                 #if defined(PIPO_RANGE)
                 //Part of this logic migth have to move to sensor ?
                 //deal with NoteOn
@@ -114,18 +126,18 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
                 {
                     Serial.print("triggered");
                     // Serial.print("sensor_val:");
-                    // Serial.println(note_val);
+                    // Serial.println(note_val[channel]);
                     // should probably move the value check in the io class. to be discussed
-                    midiio.sendNoteOn(note_val,127,channel,800); 
+                    midiio.sendNoteOn(note_val[channel],127,channel,800); 
                     sensor.set_triggered(axis_name,false);
-                    hwui.init_blink_once(SEND_LED, 30, 255);
+
                 }
                 //Serial.print("moving");
-                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val) == midiio.channel_note_list[channel].end())
+                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
                 {
                     //Serial.print("moving");
-                    midiio.sendNoteOn(note_val,127,channel,800);    
-                    hwui.init_blink_once(SEND_LED, 30, 255);
+                    midiio.sendNoteOn(note_val[channel],127,channel,800);    
+
                 }
 
                 //deal with NoteOff for range (== to max) 

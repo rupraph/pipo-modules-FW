@@ -83,6 +83,8 @@ void AnalogSensor::update()
         // }
         // else
         // {
+
+        // should be generic for both or any sensor type ? 
         sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
         sensor_dat[pair.first].value = val;
         

@@ -18,7 +18,7 @@ private:
 
     
 public:
-    midi_io(HwUi& hwui):hwui(hwui){}
+    //midi_io();
 
     bool midi_usb_enabled = true;
     bool midi_ble_connected = false;
@@ -51,7 +51,6 @@ public:
     void sendHiResControlChange(int control, int value, int channel);
     
     private:
-        HwUi& hwui; 
     
     
 };
