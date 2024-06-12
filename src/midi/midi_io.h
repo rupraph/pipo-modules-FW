@@ -6,6 +6,7 @@
 #include "midi/midiUSB.h"
 #include <vector>
 #include <unordered_map>
+#include "hw_ui.h"
 using namespace std;
 
 // midiio will deal with sending the midi messages to the various output interfaces
@@ -17,7 +18,7 @@ private:
 
     
 public:
-    midi_io();
+    midi_io(HwUi& hwui):hwui(hwui){}
 
     bool midi_usb_enabled = true;
     bool midi_ble_connected = false;
@@ -50,6 +51,7 @@ public:
     void sendHiResControlChange(int control, int value, int channel);
     
     private:
+        HwUi& hwui; 
     
     
 };

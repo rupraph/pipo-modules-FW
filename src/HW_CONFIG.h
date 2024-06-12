@@ -21,3 +21,7 @@
     #define BAT_VOLTAGE 17
     #define PP_SW 7
 #endif
+
+// general constants definitions
+#define NOTE_BLINK_TIME 20
+#define NOTE_BLINK_BRIGHTNESS 80

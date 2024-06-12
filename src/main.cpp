@@ -33,10 +33,10 @@
 
 
 //OSC_handler osc;
-midi_io midiio;
+HwUi hwui;
+midi_io midiio(hwui);
 usb_hid hidio;
 Config config;
-HwUi hwui;
 Engine engine(input_sens);
 ServerManager server_manager(input_sens,engine,config);
 WiFiManager wm;

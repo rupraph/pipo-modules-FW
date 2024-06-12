@@ -1,10 +1,6 @@
 #include "midi_io.h"
 
 
-midi_io::midi_io()
-{
-
-}
 
 void midi_io::setup()
 {
@@ -17,6 +13,7 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
 {
         MidiUSBsendNoteOn(note, velocity, channel);   
         MidiBLEsendNoteOn(note, velocity, channel);
+        hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
         // insert or update note to channel_note_list
         channel_note_list[channel][note]={true, millis()+sustain_mil};
 }
@@ -65,6 +62,7 @@ void midi_io::sendControlChange(int control, int value, int channel, bool hires)
             MidiBLEsendCC(control, value, channel);
         }
         lastcc[channel][control]=value;
+        hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
     }
         
 

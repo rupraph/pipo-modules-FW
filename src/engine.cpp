@@ -48,14 +48,15 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
                 if (Miditranslators[axis_name].getHires())
                 {
                     uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,1),16383));
-                    midiio.sendControlChange(cc_number, cc_val, 1,true);
+                    midiio.sendControlChange(cc_number, cc_val, channel,true);
+                    //hwui.init_blink_once(SEND_LED, 30, 255);
                 }
                 else
                 {
-                uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
-                // for midi find way to limit rotation to max 180° to avoid overflow to 0
-                midiio.sendControlChange(cc_number, cc_val, 1,false);
-                hwui.set_led(SEND_LED,::map(0,127,30,255,cc_val*2));
+                    uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
+                    // for midi find way to limit rotation to max 180° to avoid overflow to 0
+                    midiio.sendControlChange(cc_number, cc_val, channel,false);
+                   //hwui.init_blink_once(SEND_LED, 30, 255);
                 }
 
                 // if debug ? 
@@ -117,12 +118,14 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio, HwUi& hwui)
                     // should probably move the value check in the io class. to be discussed
                     midiio.sendNoteOn(note_val,127,channel,800); 
                     sensor.set_triggered(axis_name,false);
+                    hwui.init_blink_once(SEND_LED, 30, 255);
                 }
                 //Serial.print("moving");
                 if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val) == midiio.channel_note_list[channel].end())
                 {
                     //Serial.print("moving");
                     midiio.sendNoteOn(note_val,127,channel,800);    
+                    hwui.init_blink_once(SEND_LED, 30, 255);
                 }
 
                 //deal with NoteOff for range (== to max) 

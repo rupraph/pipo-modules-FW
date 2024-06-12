@@ -82,8 +82,8 @@
       },
       "engine-midi": {
           "accX": {
-              "cc_number": 5,
-              "channel": 1,
+              "cc_number": 4,
+              "channel": 2,
               "current_scale": [],
               "disabled": false,
               "hires": false,
@@ -98,15 +98,15 @@
               "translator_mode": 0
           },
           "accY": {
-              "cc_number": 1,
-              "channel": 1,
+              "cc_number": 5,
+              "channel": 2,
               "current_scale": [],
-              "disabled": true,
+              "disabled": false,
               "hires": false,
               "interpolation_type": 0,
-              "max_input": 180.0,
+              "max_input": 8.0,
               "max_output": 127,
-              "min_input": -180.0,
+              "min_input": -8.0,
               "min_output": 0,
               "numberOfNotes": 18,
               "rootNote": 45,
@@ -115,19 +115,19 @@
           },
           "accZ": {
               "cc_number": 6,
-              "channel": 1,
+              "channel": 2,
               "current_scale": [],
               "disabled": true,
               "hires": false,
               "interpolation_type": 0,
-              "max_input": 180.0,
+              "max_input": 8.0,
               "max_output": 127,
-              "min_input": -180.0,
+              "min_input": -8.0,
               "min_output": 0,
               "numberOfNotes": 25,
               "rootNote": 45,
               "scaleType": "major",
-              "translator_mode": 0
+              "translator_mode": 1
           },
           "pitch": {
               "cc_number": 1,
@@ -187,7 +187,7 @@
           "offset": 0.0,
           "value": 0.0,
           "limit_max": 8.0,
-          "limit_min": 0.0
+          "limit_min": -8.0
       },
       "accY": {
           "deadZone": 0,
@@ -196,7 +196,7 @@
           "offset": 0.0,
           "value": 0.0,
           "limit_max": 8.0,
-          "limit_min": 0.0
+          "limit_min": -8.0
       },
       "accZ": {
           "deadZone": 0,
@@ -205,7 +205,7 @@
           "offset": 0.0,
           "value": 0.0,
             "limit_max": 8.0,
-            "limit_min": 0.0
+            "limit_min": -8.0
       },
       "pitch": {
           "deadZone": 0,
