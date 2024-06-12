@@ -14,7 +14,7 @@ using namespace std;
 class ServerManager
 {
     public:
-        ServerManager(Sensor& sensor, Engine& engine,Config& config): server(80), input_sens(sensor),engine(engine),config(config) {}
+        ServerManager(Sensor& sensor, Engine& engine): server(80), input_sens(sensor),engine(engine){}
         void setup();
         void setup_requests();
         void stop(); // Todo: start stop not much tested yet
@@ -27,7 +27,6 @@ class ServerManager
         AsyncWebServer server;
         Sensor& input_sens;
         Engine& engine;
-        Config& config;
 
 };
 

@@ -25,3 +25,6 @@
 // general constants definitions
 #define NOTE_BLINK_TIME 20
 #define NOTE_BLINK_BRIGHTNESS 80
+
+// other global definitions
+#define FORMAT_LITTLEFS_IF_FAILED true

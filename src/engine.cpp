@@ -4,22 +4,21 @@
 // for convenience
 using json = nlohmann::json;
 
-
+// Todo engine. 
 // should create a table for axis config. min max, etc, since this is shared for both hid and midi
-
 // should push axis enabling in here instead of in the sensor class
-
 // will have to add error catching: -> when config could not load for eg. 
-
 // could use combination mode to have note from orientation, and trigger from acceleration
-
 // find way to map scales/arpegio over axis (for analog when touch is a note)
-
-
 // should use callback to trigger events and notes
+// find way to:
+            //- limit max sending freq
+            //- send on change only -> in midi io ? 
+            //- play / pause
 
 void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
 {
+    midiio.manage_sustain();
     midi_processsor(sensor, midiio);
     hid_processor(sensor, hidio);
 }
@@ -58,46 +57,23 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                     midiio.sendControlChange(cc_number, cc_val, channel,false);
 
                 }
-
-                // if debug ? 
-                // Serial.print("cc ");
-                // Serial.print(name.c_str());
-                // Serial.print(": ");
-                // Serial.println(mySensor.data_map[name]);
-                //Serial.print(" :");
-                //Serial.print(Miditranslators[name].get_cc_val(mySensor.data_map[name]));
          
             }
 
-            // find way to:
-            //- limit max sending freq
-            //- send on change only -> in midi io ? 
-            //- play / pause
+            
 
         // if Note mode
             else
             {   
-                // 
-                
-                // check for sustain.
-                midiio.manage_sustain();
-
-                //Serial.print(axis_name.c_str());
                 note_val_prev[channel]=note_val[channel];
                 note_val[channel]=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
                 
-                // Serial.print("note_val:");
-                // Serial.println(note_val);
-
-
                 // probaly get triggered should be something linked to the deadzone
                 #if defined(PIPO_ANALOG)
                 // was this written only for sending single notes ? 
                 if (sensor.get_triggered(axis_name))
                 {
-                    Serial.print("triggered");
                     midiio.sendNoteOn(note_val,127,channel,20000); 
-
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }
@@ -106,7 +82,6 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                     midiio.sendNoteOff(note_val,127,channel);
                     sensor.set_untriggered(axis_name,false);
                 }
-
                 #endif
 
                 # if defined(PIPO_MOTION)
@@ -114,36 +89,24 @@ void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
                 {
                     midiio.sendNoteOn(note_val[channel],127,channel,20000); 
                 }
-
                 #endif
 
 
                 #if defined(PIPO_RANGE)
                 //Part of this logic migth have to move to sensor ?
-                //deal with NoteOn
-                //Serial.println(sensor.get_triggered(axis_name));
                 if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
                 {
-                    Serial.print("triggered");
-                    // Serial.print("sensor_val:");
-                    // Serial.println(note_val[channel]);
                     // should probably move the value check in the io class. to be discussed
                     midiio.sendNoteOn(note_val[channel],127,channel,800); 
                     sensor.set_triggered(axis_name,false);
-
                 }
-                //Serial.print("moving");
                 if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
                 {
-                    //Serial.print("moving");
                     midiio.sendNoteOn(note_val[channel],127,channel,800);    
-
                 }
-
                 //deal with NoteOff for range (== to max) 
                 if (sensor_val==sensor.get_limit_max(axis_name))
                 {
-                    // Todo: should be all Noteoff ?
                     midiio.sendAllNotesOff(channel);
                 }
 

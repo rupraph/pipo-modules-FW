@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include "FS.h"
 #include <LittleFS.h>
+#include "HW_CONFIG.h"
 
+
+void init_filesystem();
 void createDir(fs::FS &fs, const char *path);
 void writeFile(fs::FS &fs, const char *path, const char *message);
 void writeFile2(fs::FS &fs, const char *path, const char *message);

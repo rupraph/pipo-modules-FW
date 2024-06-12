@@ -2,3 +2,9 @@
 
 - check if adding midi RPN might be added value
 - potentially add OSC over USB (slip in OSC library ?) 
+
+//Todo deal with wifi reconnecting attemps.
+// deal with multiple identical pipo.
+
+- add OSC 
+- use freertos // should create a task to trigger sensor and engine computation at regular interval

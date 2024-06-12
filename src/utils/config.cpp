@@ -7,7 +7,7 @@
 // should be able to report wherther config is succefully loade, saved,etc..
 
 //todo. when changing sensor range for eg, this should trigger an update of miditranslator max ???? 
-
+Config config;
 
 void Config::load_config_from_file(String filename) {
     current_config = json::parse(readFile(LittleFS,filename.c_str()));

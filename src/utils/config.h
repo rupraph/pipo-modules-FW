@@ -51,4 +51,6 @@ class Config
         void apply_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
 };
 
+extern Config config;
+
 #endif //CONFIG_H
