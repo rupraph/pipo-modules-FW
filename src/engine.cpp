@@ -122,13 +122,14 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
 { // not dealing with buttons yet
     
     const auto& sensor_dat = sensor.get_sensor_dat_map();
+    
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
-        if (sensor.get_enabled(axis_name))
-        {
-            float sensor_val=sensor.get_value(axis_name);
+        float sensor_val=sensor.get_value(axis_name);
 
+        if (sensor.get_enabled(axis_name) && hid_map[axis_name].disabled==false)
+        {
             if (hid_map.find(axis_name) != hid_map.end())
             {
                 string map_name=hid_map[axis_name].mapto;

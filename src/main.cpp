@@ -116,7 +116,7 @@ void loop() {
 
     // Plot some sensor values
     //input_sens.teleplot_data("dist");
-    input_sens.teleplot_data("accZ");
+    input_sens.teleplot_data("roll");
 
     engine.update(input_sens, midiio, hidio);
 
