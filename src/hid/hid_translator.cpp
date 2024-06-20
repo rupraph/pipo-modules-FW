@@ -45,9 +45,9 @@ int HidTranslator::get_current_bool(float value) {
 
 int HidTranslator::get_current_int(float value) {
   int mapped_value = map_linear(value);
-    if (quantize) {
-        mapped_value = round(mapped_value / quantize_steps) * quantize_steps;
-    }
+    // if (quantize) {
+    //     mapped_value = round(mapped_value / quantize_steps) * quantize_steps;
+    // }
     return mapped_value;
 }
 
