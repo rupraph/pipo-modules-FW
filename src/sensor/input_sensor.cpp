@@ -9,7 +9,7 @@ void Sensor::teleplot_data(string axis)
 {   
     if (sensor_dat.find(axis) == sensor_dat.end())
     {
-        Serial.println("error: Axis not found");
+        // Serial.println("error: Axis not found");
         return;
     }
     else
@@ -256,7 +256,7 @@ bool Sensor::test_outside_deadzone(const std::string& axis)
     }
     else
     {
-        Serial.println("error: Axis not found");
+        // Serial.println("error: Axis not found");
         return false;
     }
 }

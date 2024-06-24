@@ -8,6 +8,7 @@
 #include "engine.h"
 #include "utils/config.h"
 #include "utils/json.hpp"
+#include "utils/logs.h"
 
 using namespace std;
 
@@ -18,9 +19,6 @@ class ServerManager
         void setup();
         void setup_requests();
         void stop(); // Todo: start stop not much tested yet
-        static void notFound(AsyncWebServerRequest *request);
-        void generateHtmlForm(json& configJson,string& html,string prefix="");
-        string generateHtmlForm(json& configJson);
         bool is_running = false;
 
     private:

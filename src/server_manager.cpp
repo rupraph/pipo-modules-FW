@@ -1,20 +1,19 @@
 #include "server_manager.h"
+
 #include "utils/fs_tools.h"
 //#include <ArduinoJson.h>
-
 
 // is using buildflag for regex
 // ASYNCWEBSERVER_REGEX to enable the regex support
 // For platformio: platformio.ini:
-//  build_flags = 
+//  build_flags =
 //      -DASYNCWEBSERVER_REGEX
 
 using json = nlohmann::json;
 
-void ServerManager::setup(){
-
+void ServerManager::setup() {
     // not sure this is the best way to do this. see exemples
-    if (!MDNS.begin("Pipo-Motion")) { // Start the mDNS responder for esp.local
+    if (!MDNS.begin("Pipo-Motion")) {  // Start the mDNS responder for esp.local
         Serial.println("Error setting up MDNS responder!");
     } else {
         Serial.println("mDNS responder started");
@@ -22,164 +21,80 @@ void ServerManager::setup(){
         MDNS.addService("http", "tcp", 80);
     }
 
-
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers",
+                                         "Origin, X-Requested-With, Content-Type, Accept");
+    server.onNotFound([](AsyncWebServerRequest* request) {
+        if (request->method() == HTTP_OPTIONS) {
+            request->send(200);
+        } else {
+            request->send(404);
+        }
+    });
     server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
-    
-    server.onNotFound(notFound);
 
     setup_requests();
 
     server.begin();
     is_running = true;
-
 }
 
-void ServerManager::stop(){
+void ServerManager::stop() {
     server.end();
     is_running = false;
 }
 
-void ServerManager::setup_requests(){
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
+void ServerManager::setup_requests() {
+    server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
+        String type;
+
+#if defined(PIPO_MOTION)
+        type = "PIPO_MOTION";
+#elif defined(PIPO_RANGE)
+     type = "PIPO_RANGE";
+#elif defined(PIPO_ANALOG)
+    type = "PIPO_ANALOG";
+#endif
+        json info = {
+            {"name", "unnamed Pipo"},          
+            {"version", "0.1"},         
+            {"type", type.c_str()},
+            {"ip", WiFi.localIP().toString().c_str()}, 
+            {"mac", WiFi.macAddress().c_str()},
+        };
+        request->send(200, "text/json", info.dump().c_str());
     });
 
-    server.on("/config/general", HTTP_POST, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
-    });
-
-    server.on("/config/midi", HTTP_POST, [this](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
-        this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
-    });
-
-    // server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
-    //     request->send(200, "text/plain", "Hello, world");
-    //     this->config.gather_current_config(this->acc_sensor,this->engine,true);
-    //     this->config.save_config("/config/current_config.json");
-    // });
-
-    server.on("^\\/config/midi\\/([a-zA-Z0-9]+)\\/([0-9]+)$", HTTP_GET, [this](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", "Midi"+request->pathArg(0)+"value"+request->pathArg(1));
-    //this->engine.Miditranslators["roll"].set_param("translator_mode", 1);
-    });
-
-    server.on("/config/osc", HTTP_POST, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
-    });
-
-    server.on("/config/hid", HTTP_POST, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", "Hello, world");
-    });
-
-    
-    
-    ////////// CONFIG FORM 
-    // attemp to create a draft config page
-    server.on("/configdraft", HTTP_GET, [this](AsyncWebServerRequest *request){
-        json configJson = this->engine.get_config();  // Get the current config
-        try
-        {
-            String html = String(generateHtmlForm(configJson).c_str());  // Generate the HTML form
-            request->send(200, "text/html", html);  // Send the HTML form
-        }
-        catch(const std::exception& e)
-        {
-            Serial.println("error");
-            Serial.println(e.what());
-        }
-        
-        // Send the HTML form
-    });
-
-    // aplly  config
-    server.on("/config/save", HTTP_POST, [this](AsyncWebServerRequest *request){
-        json newConfig;
-        for (int i=0; i<request->params(); i++) {
-            AsyncWebParameter* p = request->getParam(i);
-            newConfig[p->name().c_str()] = p->value().c_str();
-        }
-
-        // Update the engine config
-        config.set_current_config(newConfig);
-        config.apply_current_config(this->input_sens,this->engine,true);//this->acc_sensor,
-
-        // Save the new config to disk
-        //this->config.save_config_to_file("/config/current_config.json", newConfig);
-
-        request->send(200, "text/plain", "Config updated successfully");
-    });
-
-
-
-    /// download Config file interface
-
-    server.on("/list", HTTP_GET, [](AsyncWebServerRequest *request){
-    String html = "<html><body><ul>";
-    File root = LittleFS.open("/config");
-    File file = root.openNextFile();
-    while(file){
-        html += "<li><a href=\"/download?file=";
-        html += file.name();
-        html += "\">";
-        html += file.name();
-        html += "</a> - Last modified: ";
-        // Get the last write time and format it as a string:
-        time_t t = file.getLastWrite();
-        struct tm *tmstruct = localtime(&t);
-        char timeStr[20];
-        strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tmstruct);
-        html += timeStr;
-        html += "</li>";
-        file = root.openNextFile();
-    }
-    html += "</ul></body></html>";
-    request->send(200, "text/html", html);
-    });
-
-    server.on("/download", HTTP_GET, [](AsyncWebServerRequest *request){
-    if (request->hasParam("file")) {
-        String filename = "/config/"+request->getParam("file")->value();
-        Serial.println("Download request: " + filename);
-        request->send(LittleFS, filename, "application/octet-stream",true);
-    } else {
-        request->send(400, "text/plain", "Bad request");
-    }
-});
-}
-
-void ServerManager::notFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Not found");
-}
-
-
-// this is missing sensor settings
-void ServerManager::generateHtmlForm(json& configJson, string& html, string prefix) {
-    for (json::iterator it=configJson.begin(); it!=configJson.end(); ++it) {
-        string key = prefix + it.key();
-        if (it.value().is_object()) {
-            // If the value is a JSON object, recurse into it
-            generateHtmlForm(it.value(), html, key + ".");
+    server.on("/config", HTTP_GET,
+              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.get().dump().c_str()); });
+    server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (request->hasParam("config")) {
+            Serial.print("Received config ");
+            Serial.println(request->getParam("config")->value());
+            config.set(json::parse(request->getParam("config")->value()));
+            config.apply(input_sens, engine, true);
         } else {
-            // Otherwise, generate an input field for the value
-            html += "<label for=\"" + key + "\">" + key + ":</label><br>";
-            if (it.value().is_string()) {
-                html += "<input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + it.value().get<string>() + "\"><br>";
-            } else if (it.value().is_number()) {
-                html += "<input type=\"number\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + to_string(it.value().get<int>()) + "\"><br>";
-            } else if (it.value().is_boolean()) {
-                html += "<input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (it.value().get<bool>() ? "checked" : "") + "><br>";
-            }
+            Serial.print("No config received");
         }
-    }
-}
+        request->send(200, "text/plain", "Config set");
+    });
 
-string ServerManager::generateHtmlForm(json& configJson) {
-    string html = "<html><body><form action=\"/config/save\" method=\"post\">";
-    generateHtmlForm(configJson, html);
-    html += "<input type=\"submit\" value=\"Submit\">";
-    html += "</form></body></html>";
-    return html;
-}
+    server.on("/config-save", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (request->hasParam("config")) {
+            Serial.print("Received config ");
+            Serial.println(request->getParam("config")->value());
+            config.set(json::parse(request->getParam("config")->value()));
+            config.apply(input_sens, engine, true);
+            config.save();
+        } else {
+            Serial.print("No config received");
+        }
+        request->send(200, "text/plain", "Config set");
+    });
 
+    server.on("/logs", HTTP_GET,
+              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
+
+    server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(200, "text/plain", "Pong"); });
+}
