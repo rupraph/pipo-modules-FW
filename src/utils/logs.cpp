@@ -1,7 +1,7 @@
 #include "logs.h"
 
 LittleLogs logs;
-void LittleLogs::writeLog(String log, int type = 0) {
+void LittleLogs::writeLog(String log, int type) {
     int date = millis();
     allLogs += String(date) + ":" +"(" + type + ")" + log + "\n";
     if (allLogs.length() > 1000) {
