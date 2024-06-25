@@ -12,6 +12,8 @@
 #include "sensor/input_sensor.h"
 #include "hw_ui.h"
 
+#include "rgb_output.h"
+
 #ifdef PIPO_MOTION
     #include "sensor/acc_sensor.h"
     MotionSensor input_sens;
@@ -49,6 +51,8 @@ void setup(){
     /////// Init hardware user interface (leds and switches)    
     hwui.init();
     hwui.setup();
+
+    rgb_output.setup();
 
     /////// Init filesystem
     init_filesystem();
@@ -97,6 +101,7 @@ void setup(){
     // Serial.println(" Hz");
 
     Serial.println("Setup done");
+    rgb_output.setup();
 
 }
 
@@ -119,6 +124,8 @@ void loop() {
     input_sens.teleplot_data("roll");
 
     engine.update(input_sens, midiio, hidio);
+
+    rgb_output.update(input_sens);
 
     hwui.update();
 

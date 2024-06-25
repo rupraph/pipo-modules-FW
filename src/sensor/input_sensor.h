@@ -33,8 +33,6 @@ public:
     };
 
     
-    
-
     void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
 

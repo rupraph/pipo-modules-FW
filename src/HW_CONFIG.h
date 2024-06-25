@@ -2,14 +2,21 @@
 // could put it as build flag ! like -D PIPO_RANGE
 //#define PROTO_ATOM
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+
     #define WIFI_LED 9
     #define BT_LED 10
     #define SEND_LED 11
-    #define LOW_BAT_LED 34
+    #define LOW_BAT_LED 34 // lowbat is temporarily used as external rgb led data pin
+
+    #define NB_RGB_LEDS 2
+    #define RGB_BRIGHNESS 50
 
     #define MODE_SW 3
     #define BAT_VOLTAGE 5
     #define PP_SW 8
+
+    #define TP_7 4
+    #define TP_8 6 
     
 #elif defined(PIPO_ANALOG)
     #define WIFI_LED 8
