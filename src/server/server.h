@@ -1,5 +1,5 @@
-#ifndef SERVER_MANAGER_H
-#define SERVER_MANAGER_H
+#ifndef PIPOSERVER_H
+#define PIPOSERVER_H
 
 #include <Arduino.h>
 #include <AsyncTCP.h>
@@ -9,13 +9,12 @@
 #include "utils/config.h"
 #include "utils/json.hpp"
 #include "utils/logs.h"
-
 using namespace std;
 
-class ServerManager
+class PipoServer
 {
     public:
-        ServerManager(Sensor& sensor, Engine& engine): server(80), input_sens(sensor),engine(engine){}
+        PipoServer(Sensor& sensor, Engine& engine): server(80), input_sens(sensor),engine(engine){}
         void setup();
         void setup_requests();
         void stop(); // Todo: start stop not much tested yet
@@ -27,5 +26,4 @@ class ServerManager
         Engine& engine;
 
 };
-
-#endif //WEBSERVER_H
+#endif  // WEBSERVER_H

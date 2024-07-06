@@ -276,4 +276,3 @@ void Engine::set_config(json& config, bool debug)
     }
     Serial.println("hid config set");
 }
-

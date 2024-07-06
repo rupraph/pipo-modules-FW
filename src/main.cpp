@@ -7,8 +7,7 @@
 #include "hw_ui.h"
 #include "midi/midi_io.h"
 #include "osc_handler.h"
-#include "sensor/input_sensor.h"
-#include "server_manager.h"
+#include "server/server.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
@@ -31,7 +30,7 @@ string sensor_type = "analog";
 midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
-ServerManager server_manager(input_sens, engine);
+PipoServer server(input_sens, engine);
 
 // quick declaration of functions
 void init_filesystem();
@@ -60,7 +59,6 @@ void setup() {
     config.load_config();
     config.apply(input_sens, engine, false);  // input_sens,
     // config.print();
-
     /////// Init wifi
     setup_wifi();
 
@@ -71,7 +69,7 @@ void setup() {
     // Start server if TA connected or AP mode
     // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
     Serial.println("Wifi connected, starting config page");
-    server_manager.setup();
+    server.setup();
     // }
     // else{
     //     Serial.println("Wifi not connected, no config page for now");
@@ -97,7 +95,7 @@ void setup() {
 void loop() {
     try {
         wm.process();
-        monitor_wifi(server_manager);
+        monitor_wifi(server.is_running);
 
         input_sens.update();
 

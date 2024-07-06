@@ -1,17 +1,9 @@
-#include "server_manager.h"
-
+#include "server/server.h"
 #include "utils/fs_tools.h"
-//#include <ArduinoJson.h>
-
-// is using buildflag for regex
-// ASYNCWEBSERVER_REGEX to enable the regex support
-// For platformio: platformio.ini:
-//  build_flags =
-//      -DASYNCWEBSERVER_REGEX
 
 using json = nlohmann::json;
 
-void ServerManager::setup() {
+void PipoServer::setup(){
     // not sure this is the best way to do this. see exemples
     if (!MDNS.begin("Pipo-Motion")) {  // Start the mDNS responder for esp.local
         Serial.println("Error setting up MDNS responder!");
@@ -20,6 +12,7 @@ void ServerManager::setup() {
         // Add service to MDNS-SD
         MDNS.addService("http", "tcp", 80);
     }
+
 
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
     DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS");
@@ -40,12 +33,12 @@ void ServerManager::setup() {
     is_running = true;
 }
 
-void ServerManager::stop() {
+void PipoServer::stop() {
     server.end();
     is_running = false;
 }
 
-void ServerManager::setup_requests() {
+void PipoServer::setup_requests() {
     server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
         String type;
 
