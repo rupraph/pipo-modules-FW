@@ -9,6 +9,7 @@
 #include "utils/config.h"
 #include "utils/json.hpp"
 #include "utils/logs.h"
+#include "utils/midi_logs.h"
 using namespace std;
 
 class PipoServer

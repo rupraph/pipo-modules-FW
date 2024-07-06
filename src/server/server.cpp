@@ -89,5 +89,9 @@ void PipoServer::setup_requests() {
     server.on("/logs", HTTP_GET,
               [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
 
+
+    server.on("/midi", HTTP_GET,
+              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", midilogs.read().c_str()); });
+
     server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(200, "text/plain", "Pong"); });
 }

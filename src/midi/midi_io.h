@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include "hw_ui.h"
+#include "utils/midi_logs.h"
 using namespace std;
 
 // midiio will deal with sending the midi messages to the various output interfaces
