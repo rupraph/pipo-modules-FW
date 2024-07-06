@@ -1,0 +1,23 @@
+{
+  "name": "pipo-single",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "preinstall": "scripts/install.sh",
+    "postinstall": "rm -rf node_modules package-lock.json",
+    "build": "pio run",
+    "build:fs": "pio run -t buildfs --environment esp32-s3-devkitc-1",
+    "upload": "pio run -t upload",
+    "upload:fs": "pio run -t uploadfs --environment esp32-s3-devkitc-1",
+    "build:all": "npm run build && npm run build:fs",
+    "upload:all": "npm run upload && npm run upload:fs",
+    "all": "npm run build:fs && npm run upload:all"
+  },
+  "author": "",
+  "license": "ISC"
+}
