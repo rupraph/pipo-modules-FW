@@ -4,13 +4,13 @@ WiFiManager wm;
 
 void setup_wifi(){
     // setup wifi through wifi manager
-    if (config.general_config["Wifi_mode"] == "AP")
+    if (false && config.general_config["Wifi_mode"] == "AP")
     {
         Serial.println("Starting AP mode");
         WiFi.softAP("Pipo", "pipo1234");
     }
     else{
-
+    return debug_connect();
     WiFi.mode(WIFI_STA);
 
     // WiFiManager wm;
@@ -49,9 +49,9 @@ void setup_wifi(){
     }
 }
 
-void monitor_wifi(ServerManager& server_manager){
+void monitor_wifi(bool is_server_runing){
     // monitor wifi status
-    if (WiFi.status() == WL_CONNECTED && !server_manager.is_running)
+    if (WiFi.status() == WL_CONNECTED && !is_server_runing)
     {
         Serial.println("Wifi connected");
         hwui.start_pulse(WIFI_LED, 3000, 3, 30);
@@ -61,22 +61,19 @@ void monitor_wifi(ServerManager& server_manager){
         //server cannot be setup in the loop ?
 
         // Serial.println("Wifi connected, starting config page");
-        // server_manager.setup();
-        // server_manager.setup_requests();
         // wm.setDisableConfigPortal(true);
     }
     else if(WiFi.status() != WL_CONNECTED){
         //Serial.println("Wifi disconnected");
         hwui.stop_pulse(WIFI_LED);
-        //server_manager.stop();
     }
 }
 
-void connect_this_wifi(){
+void debug_connect(){
     //temp function for debug
     //connect to wifi manually
     WiFi.mode(WIFI_STA);
-    WiFi.begin("AFC Ajax", "plompverloren567");
+    WiFi.begin("YOUR_SSID", "YOUR_WIFI_PASSWORD");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");

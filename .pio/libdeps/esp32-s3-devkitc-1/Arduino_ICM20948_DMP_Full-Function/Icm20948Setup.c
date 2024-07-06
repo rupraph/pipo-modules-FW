@@ -31,7 +31,7 @@
 #include "Icm20948LoadFirmware.h"
 #include "Icm20948Dmp3Driver.h"
 
-#include "DataConverter.h"
+#include "dataconverter.h"
 #include "Message.h"
 
 #include <assert.h>
