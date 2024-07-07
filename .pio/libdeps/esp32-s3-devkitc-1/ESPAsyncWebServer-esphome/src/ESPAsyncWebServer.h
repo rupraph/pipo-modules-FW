@@ -20,7 +20,7 @@
 */
 #ifndef _ESPAsyncWebServer_H_
 #define _ESPAsyncWebServer_H_
-
+#include <WebServer.h>
 #include "Arduino.h"
 
 #include <functional>
@@ -58,14 +58,15 @@ class AsyncCallbackWebHandler;
 class AsyncResponseStream;
 
 #ifndef WEBSERVER_H
+#define WEBSERVER_H
 typedef enum {
-  HTTP_GET     = 0b00000001,
-  HTTP_POST    = 0b00000010,
-  HTTP_DELETE  = 0b00000100,
-  HTTP_PUT     = 0b00001000,
-  HTTP_PATCH   = 0b00010000,
-  HTTP_HEAD    = 0b00100000,
-  HTTP_OPTIONS = 0b01000000,
+  HTTP_GET     = HTTP_GET,
+  HTTP_POST    = HTTP_POST,
+  HTTP_DELETE  = HTTP_DELETE,
+  HTTP_PUT     = HTTP_PUT,
+  HTTP_PATCH   = HTTP_PATCH,
+  HTTP_HEAD    = HTTP_HEAD,
+  HTTP_OPTIONS = HTTP_OPTIONS,
   HTTP_ANY     = 0b01111111,
 } WebRequestMethod;
 #endif

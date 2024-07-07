@@ -73,7 +73,7 @@ void debug_connect(){
     //temp function for debug
     //connect to wifi manually
     WiFi.mode(WIFI_STA);
-    WiFi.begin("YOUR_SSID", "YOUR_WIFI_PASSWORD");
+    WiFi.begin("4G-Gateway-1B52", "9NG4AT1NARF");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");

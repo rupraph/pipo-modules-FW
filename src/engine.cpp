@@ -240,10 +240,6 @@ json Engine::get_config(bool debug)
         return j;
 }
 
-
-
-
-
 void Engine::set_config(json& config, bool debug)
 {   
     if (debug){
