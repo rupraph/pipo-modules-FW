@@ -26,7 +26,7 @@ class Config
 
         Config(){
                 general_config = {
-                    {"Wifi_mode", "AP"},
+                    {"Wifi_mode", "STA"},
         };
         }
         json current_config;
@@ -36,7 +36,7 @@ class Config
         // only config element not comming from external classes. 
         // placed here for now.
         json general_config= {
-        {"Wifi_mode", "AP"}, //can be AP, STA, OR AP_STA
+        //{"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
         };
 
 

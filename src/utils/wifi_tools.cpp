@@ -4,13 +4,15 @@ WiFiManager wm;
 
 void setup_wifi(){
     // setup wifi through wifi manager
-    if (false && config.general_config["Wifi_mode"] == "AP")
+    if (/*false &&*/ config.general_config["Wifi_mode"] == "AP")
     {
+        delay(1000);
         Serial.println("Starting AP mode");
         WiFi.softAP("Pipo", "pipo1234");
     }
     else{
-    return debug_connect();
+    //return debug_connect();
+    Serial.println("Starting STA mode");
     WiFi.mode(WIFI_STA);
 
     // WiFiManager wm;
@@ -25,7 +27,7 @@ void setup_wifi(){
     }
     // keep pressing to reset
 
-    ///////// HIGH here should be low. temp patch to cope with switch not wired corectly)
+    ///////// HIGH here should be low. temporary patch to cope with switch not wired corectly)
     if (digitalRead(MODE_SW)==HIGH && digitalRead(PP_SW)==LOW)
     {
         Serial.println("Settings reset");
@@ -63,6 +65,19 @@ void monitor_wifi(bool is_server_runing){
         // Serial.println("Wifi connected, starting config page");
         // wm.setDisableConfigPortal(true);
     }
+
+    if (Serial.available() > 0)
+    {
+        char c = Serial.read();
+        if (c == 'r')
+        {
+            Serial.println("Resetting wifi");
+            wm.resetSettings();
+            ESP.restart();
+        }
+    }
+
+
     else if(WiFi.status() != WL_CONNECTED){
         //Serial.println("Wifi disconnected");
         hwui.stop_pulse(WIFI_LED);
@@ -76,7 +91,7 @@ void debug_connect(){
     WiFi.begin("4G-Gateway-1B52", "9NG4AT1NARF");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print(".");
+        Serial.print("try connect to hardcoded wifi");
     }
     Serial.println("Connected to WiFi");
     Serial.println(WiFi.localIP());
