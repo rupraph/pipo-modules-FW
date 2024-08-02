@@ -10,6 +10,7 @@
 #include <sstream>
 #include "fs_tools.h"
 #include "utils/json.hpp"
+#include "utils/logs.h"
 #include "engine.h"
 #include "sensor/input_sensor.h"
 
@@ -39,16 +40,18 @@ class Config
         };
 
 
-        void load_config_from_file(String filename);
-        void load_config(string sensor_type);
-        void save_config(String filename);
-        void set_current_config(json config);
-        json get_config_for_key(string key);
-        // void save_config_for_key(string key, json data);
-        void print_config();
+        void load_config(String filename);
+        void load_config();
+        void save(String filename);
+        void save();
+        void set(json config);
+        json get();
+        json get(string key);
+        // void save_for_key(string key, json data);
+        void print();
 
-        void gather_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
-        void apply_current_config(Sensor& sensor,Engine& engine,bool debug=false); 
+        void gather(Sensor& sensor,Engine& engine,bool debug=false); 
+        void apply(Sensor& sensor,Engine& engine,bool debug=false); 
 };
 
 extern Config config;

@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include "hw_ui.h"
+#include "server/midi_socket.h"
 using namespace std;
 
 // midiio will deal with sending the midi messages to the various output interfaces
@@ -19,7 +20,6 @@ private:
     
 public:
     //midi_io();
-
     bool midi_usb_enabled = true;
     bool midi_ble_connected = false;
     bool midi_rtp_connected = false;

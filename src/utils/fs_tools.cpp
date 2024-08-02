@@ -72,7 +72,6 @@ void removeDir(fs::FS &fs, const char * path){
         Serial.println("rmdir failed");
     }
 }
-
 std::string readFile(fs::FS &fs, const char * path){
     Serial.printf("Reading file: %s\r\n", path);
 

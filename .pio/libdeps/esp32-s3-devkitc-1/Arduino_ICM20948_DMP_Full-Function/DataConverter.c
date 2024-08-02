@@ -21,7 +21,7 @@
  * ________________________________________________________________________________________________________
  */
 
-#include "DataConverter.h"
+#include "dataconverter.h"
 
 uint8_t * inv_dc_int32_to_little8(int32_t x, uint8_t * little8)
 {
