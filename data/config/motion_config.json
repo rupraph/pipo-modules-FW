@@ -236,6 +236,8 @@
       }
   },
   "general": {
-    "Wifi_mode": "AP"
+    "Wifi_mode": "STA"
 }
 }
+
+AZERTYUIOP

@@ -94,7 +94,7 @@ void setup() {
 
 void loop() {
     try {
-        wm.process();
+        //wm.process();
         monitor_wifi(server.is_running);
 
         input_sens.update();

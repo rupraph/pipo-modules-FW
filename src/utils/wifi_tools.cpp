@@ -13,7 +13,12 @@ void setup_wifi(){
     else{
     //return debug_connect();
     Serial.println("Starting STA mode");
+
+   
+
+
     WiFi.mode(WIFI_STA);
+
 
     // WiFiManager wm;
     wm.setDarkMode(true);
@@ -53,6 +58,8 @@ void setup_wifi(){
 
 void monitor_wifi(bool is_server_runing){
     // monitor wifi status
+    wm.process();
+
     if (WiFi.status() == WL_CONNECTED && !is_server_runing)
     {
         Serial.println("Wifi connected");

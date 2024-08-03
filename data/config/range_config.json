@@ -46,6 +46,6 @@
         }
     },
     "general": {
-        "Wifi_mode": "STA"
+        "Wifi_mode": "AP"
     }
 }
