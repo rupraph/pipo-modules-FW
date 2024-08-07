@@ -26,6 +26,7 @@ void setup_wifi(){
     wm.setDebugOutput(true);
     wm.setWiFiAutoReconnect(true);
     wm.setCleanConnect(true);
+    
 
     if(digitalRead(MODE_SW)==LOW){
         delay(3000);
