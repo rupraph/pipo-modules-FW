@@ -20,7 +20,7 @@ void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& 
 {
     midiio.manage_sustain();
     midi_processor(sensor, midiio);
-    //osc_processor(sensor,osc);
+    osc_processor(sensor,osc);
     hid_processor(sensor, hidio);
 }
 

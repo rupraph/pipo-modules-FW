@@ -38,8 +38,9 @@ string sensor_type = "analog";
 midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
-PipoServer server(input_sens, engine);
 OSC_handler osc(config);
+PipoServer server(input_sens, engine, osc);
+
 
 // quick declaration of functions
 void init_filesystem();
@@ -66,7 +67,7 @@ void setup() {
     // config.gather(input_sens, engine, false);//,
     // config.print();
     config.load_config();
-    config.apply(input_sens, engine, false);  // input_sens,
+    config.apply(input_sens, engine, osc, false);  // input_sens,
     config.print();
     /////// Init wifi
     setup_wifi();

@@ -13,6 +13,7 @@
 #include "utils/logs.h"
 #include "../engine.h"
 #include "sensor/input_sensor.h"
+#include "../osc_handler.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -21,6 +22,7 @@ using json = nlohmann::json;
 // the configuration will be saved in the preferences of the ESP32
 
 class Engine;
+class OSC_handler;
 
 class Config
 {
@@ -60,7 +62,7 @@ class Config
         void print();
 
         void gather(Sensor& sensor,Engine& engine,bool debug=false); 
-        void apply(Sensor& sensor,Engine& engine,bool debug=false); 
+        void apply(Sensor& sensor,Engine& engine,OSC_handler& osc, bool debug=false); 
 };
 
 extern Config config;

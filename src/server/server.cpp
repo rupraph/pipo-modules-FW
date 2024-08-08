@@ -70,7 +70,7 @@ void PipoServer::setup_requests() {
             Serial.print("Received config ");
             Serial.println(request->getParam("config")->value());
             config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine, osc, true);
         } else {
             Serial.print("No config received");
         }
@@ -82,7 +82,7 @@ void PipoServer::setup_requests() {
             Serial.print("Received config ");
             Serial.println(request->getParam("config")->value());
             config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine, osc, true);
             config.save();
         } else {
             Serial.print("No config received");

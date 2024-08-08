@@ -2,6 +2,7 @@
 #define OSC_HANDLER_H
 
 #include <OSCMessage.h>
+#include <WiFi.h>
 #include <WiFiUdp.h>
 #include "utils/config.h"
 
@@ -13,18 +14,22 @@ class OSC_handler
         OSC_handler(Config& config): config(config) {}
         
         void setup();
-        void start();
-        void stop();
+        void set_config();
         void sendOscMessage(const char* address, int value);
-        void setDestIp(IPAddress ip);
-        void setoutPort(int port);
+        
         
     private:
         Config& config;
         IPAddress dest_ip;
         int out_port;
         bool isStarted = false;
+        bool enabled = false;
         WiFiUDP Udp;
+        void start();
+        void stop();
+        void setDestIp(string ip);
+        void setOutPort(int port);
+        void setEnabled(bool ena);
 
 };
 

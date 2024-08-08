@@ -14,8 +14,8 @@ using namespace std;
 class PipoServer
 {
     public:
-        PipoServer(Sensor& sensor, Engine& engine): server(80), ws("/ws"),
-        events("/events"), input_sens(sensor),engine(engine){}
+        PipoServer(Sensor& sensor, Engine& engine, OSC_handler& osc): server(80), ws("/ws"),
+        events("/events"), input_sens(sensor),engine(engine),osc(osc){}
         void setup();
         void setup_ws();
         void onMessage(AsyncWebSocketClient* client, String message);
@@ -29,6 +29,7 @@ class PipoServer
         AsyncEventSource events;
         Sensor& input_sens;
         Engine& engine;
+        OSC_handler& osc;
 
 };
 #endif  // WEBSERVER_H
