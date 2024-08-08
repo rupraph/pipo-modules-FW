@@ -20,7 +20,7 @@ class OscTranslator
         float output_max=1;
         float output_min=0;
 
-        int get_value(float value);
+        float get_value(float value);
         int get_current_bool(float value);
 
         void to_json(nlohmann::json& j, const OscTranslator& t);
@@ -33,7 +33,7 @@ class OscTranslator
         void deserialize(const string& data);
 
     
-    private:
+    //private:
         float input_min;
         float input_max;
 

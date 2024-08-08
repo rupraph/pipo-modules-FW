@@ -4,7 +4,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-int OscTranslator::get_value(float value)
+float OscTranslator::get_value(float value)
 {
     if (mode_raw)
     {
@@ -22,7 +22,9 @@ void to_json(json& j, const OscTranslator& t) {
         {"enabled", t.enabled},
         {"mode_raw", t.mode_raw},
         {"output_max", t.output_max},
-        {"output_min", t.output_min}
+        {"output_min", t.output_min},
+        {"input_min", t.input_min},
+        {"input_max", t.input_max}
     };
 }
 
@@ -31,6 +33,8 @@ void from_json(const json& j, OscTranslator& t) {
     j.at("mode_raw").get_to(t.mode_raw);
     j.at("output_max").get_to(t.output_max);
     j.at("output_min").get_to(t.output_min);
+    j.at("input_min").get_to(t.input_min);
+    j.at("input_max").get_to(t.input_max);
 }
 
 string OscTranslator::serialize() const {

@@ -183,37 +183,49 @@
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 8.0,
+                "input_min": -8.0
             },
             "accY": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 8.0,
+                "input_min": -8.0
             },
             "accZ": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 8.0,
+                "input_min": -8.0
             },
             "pitch": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 90.0,
+                "input_min": -90.0
             },
             "roll": {
                 "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 180.0,
+                "input_min": -180.0
             },
             "yaw": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0
+                "output_min":0,
+                "input_max": 180.0,
+                "input_min": -180.0
             }
       }
   },

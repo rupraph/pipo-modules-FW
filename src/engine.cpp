@@ -210,7 +210,9 @@ void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
         && Osctranslators[axis_name].enabled
         && sensor.test_outside_deadzone(axis_name))
         {
-            osc.sendOscMessage(axis_name.c_str(),Osctranslators[axis_name].get_value(sensor_val));
+            float osc_val=Osctranslators[axis_name].get_value(sensor_val);
+            //Serial.println(osc_val);
+            osc.sendOscMessage(axis_name.c_str(),osc_val);
         }
     }
         

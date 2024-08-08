@@ -90,7 +90,7 @@ void OSC_handler::setEnabled(bool ena) {
     }
 }
 
-void OSC_handler::sendOscMessage(const char* address,int value) {
+void OSC_handler::sendOscMessage(const char* address,float value) {
     if (dest_ip != IPAddress(0,0,0,0) && out_port != 0){
         OSCMessage msg(address);
         msg.add(value);

@@ -351,7 +351,104 @@
                 "scaleType": "major",
                 "translator_mode": 0
             }
-        }
+        },
+        "engine-osc": {
+            "A1": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "A2": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "A3": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "A4": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "A5": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "A6": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":4096,
+                "input_min":0
+            },
+            "T1": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":10000,
+                "input_min":0
+            },
+            "T2": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":300000,
+                "input_min":500
+            },
+            "T3": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":300000,
+                "input_min":500
+            },
+            "T4": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":300000,
+                "input_min":500
+            },
+            "T5": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":300000,
+                "input_min":0
+            },
+            "T6": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":300000,
+                "input_min":0
+            }
     },
     "sensor": {
         "A1": {
