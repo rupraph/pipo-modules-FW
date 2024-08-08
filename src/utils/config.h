@@ -11,7 +11,7 @@
 #include "fs_tools.h"
 #include "utils/json.hpp"
 #include "utils/logs.h"
-#include "engine.h"
+#include "../engine.h"
 #include "sensor/input_sensor.h"
 
 using namespace std;
@@ -20,6 +20,8 @@ using json = nlohmann::json;
 // the config file wil define the data structure and methods to save and load the configuration of the device
 // the configuration will be saved in the preferences of the ESP32
 
+class Engine;
+
 class Config
 {
     public:
@@ -27,6 +29,9 @@ class Config
         Config(){
                 general_config = {
                     {"Wifi_mode", "STA"},
+                    {"OSC_ENA", true},
+                    {"OSC_PORT", 8000},
+                    {"OSC_IP", "0.0.0.0"},
         };
         }
         json current_config;
@@ -36,8 +41,12 @@ class Config
         // only config element not comming from external classes. 
         // placed here for now.
         json general_config= {
-        //{"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
+        // {"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
+        // {"OSC_ENA", true},
+        // {"OSC_PORT", 5000},
+        // {"OSC_IP", IPAddress(0,0,0,0)},
         };
+    
 
 
         void load_config(String filename);

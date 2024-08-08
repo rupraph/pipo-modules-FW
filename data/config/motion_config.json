@@ -177,6 +177,44 @@
               "scaleType": "major",
               "translator_mode": 0
           }
+      },
+      "engine-osc": {
+            "accX": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            },
+            "accY": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            },
+            "accZ": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            },
+            "pitch": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            },
+            "roll": {
+                "enabled":true,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            },
+            "yaw": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0
+            }
       }
   },
   "sensor": {
@@ -236,6 +274,9 @@
       }
   },
   "general": {
-    "Wifi_mode": "STA"
+    "Wifi_mode": "STA",
+    "OSC_ENA": true,
+    "OSC_IP": "192.168.1.71",
+    "OSC_PORT": 8000
 }
 }

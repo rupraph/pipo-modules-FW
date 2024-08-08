@@ -464,6 +464,9 @@
         }
     },
     "general": {
-        "Wifi_mode": "AP"
+        "Wifi_mode": "AP",
+        "OSC_ENA": true,
+        "OSC_IP": "192.168.1.71",
+        "OSC_PORT": 8000
     }
 }

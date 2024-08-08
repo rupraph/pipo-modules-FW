@@ -61,7 +61,7 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
     current_config["sensor"] = sensor.get_config(debug);
     Serial.print("gatherconfig engine");
     current_config["engine"] = engine.get_config(debug);
-
+    Serial.print("gatherconfig general");
     current_config["general"] = general_config;
 
     if (debug) {
@@ -75,8 +75,10 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 void Config::apply(Sensor& sensor, Engine& engine, bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
-
+    
+    Serial.print(current_config["general"].dump(4).c_str());
     general_config = current_config["general"];
+
     logs.writeLog("config apply");
 
 }

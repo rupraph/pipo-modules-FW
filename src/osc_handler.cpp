@@ -2,7 +2,18 @@
 
 
 
-/// @brief start the UDP connection. previouls
+/// @brief setup the OSC handler
+void OSC_handler::setup() {
+    //dest_ip = config.general_config["OSC_IP"];
+    out_port = config.general_config["OSC_PORT"];
+    //Serial.println("OSC IP: " + dest_ip.toString());
+    Serial.println("OSC PORT: " + String(out_port));
+    if (config.general_config["OSC_ENA"]){
+        //start();
+    }
+}
+
+/// @brief start the UDP connection. 
 void OSC_handler::start() {
     if (dest_ip == IPAddress(0,0,0,0) || out_port == 0){
         Serial.println("Can't start OSC, No destination IP or port set");
@@ -11,6 +22,7 @@ void OSC_handler::start() {
     else {
         Udp.begin(out_port);
         isStarted = true;
+        Serial.println("OSC started");
     }
 }
 
@@ -43,9 +55,9 @@ void OSC_handler::setoutPort(int port) {
     }
 }
 
-void OSC_handler::sendOscMessage(int value) {
+void OSC_handler::sendOscMessage(const char* address,int value) {
     if (dest_ip != IPAddress(0,0,0,0) && out_port != 0){
-        OSCMessage msg("/test");
+        OSCMessage msg(address);
         msg.add(value);
         Udp.beginPacket(dest_ip, out_port);
         msg.send(Udp);
