@@ -78,7 +78,11 @@ void OSC_handler::setOutPort(int port) {
 void OSC_handler::setEnabled(bool ena) {
     if (ena){
         enabled = true;
-        start();
+        if (!isStarted)
+        {
+            start();
+        }
+            
     }
     else {
         enabled = false;
