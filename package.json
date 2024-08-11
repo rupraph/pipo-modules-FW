@@ -8,12 +8,15 @@
     "test": "test"
   },
   "scripts": {
-    "build": "./scripts/pio.sh run",
-    "build:fs": "./scripts/pio.sh run -t buildfs --environment esp32-s3-devkitc-1",
+    "build:motion": "./scripts/pio.sh run -e motion",
+    "build:analog": "./scripts/pio.sh run -e analog",
+    "build:range": "./scripts/pio.sh run -e range",
+    "fs:motion": "./scripts/pio.sh run -t buildfs -e motion",
+    "fs:analog": "./scripts/pio.sh run -t buildfs -e analog",
+    "fs:range": "./scripts/pio.sh run -t buildfs -e range",
+    "fs": "./scripts/pio.sh run -t buildfs",
     "upload": "./scripts/pio.sh run -t upload",
-    "upload:fs": "./scripts/pio.sh run -t uploadfs --environment esp32-s3-devkitc-1",
-    "build:all": "npm run build && npm run build:fs",
-    "upload:all": "npm run upload && npm run upload:fs",
+    "upload:fs": "./scripts/pio.sh run -t uploadfs",
     "update-web": "./scripts/update-web && npm run upload:fs",
     "all": "npm run build:fs && npm run upload:all"
   },
