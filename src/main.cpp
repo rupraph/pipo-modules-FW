@@ -53,14 +53,8 @@ void setup() {
     hidio.usb_hid_setup();
 
     /////// Load config
-    // config.gather(input_sens, engine, false);//,
-    // config.print();
-    Serial.println("Loading config");
     config.load_config();
-    Serial.println("Config loaded");
     config.apply(input_sens, engine, false);  // input_sens,
-    Serial.println("Config applied");
-    // config.print();
     /////// Init wifi
     setup_wifi();
 
@@ -95,7 +89,6 @@ void setup() {
 }
 
 void loop() {
-    return;
     try {
         wm.process();
         monitor_wifi(server.is_running);

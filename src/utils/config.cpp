@@ -21,7 +21,7 @@ void Config::load_config() {
     if (LittleFS.exists(last_config_path)) {
         String name = String(readFile(LittleFS, last_config_path).c_str());
         if(LittleFS.exists(get_path(name).c_str())){
-            return load_config(name.c_str());
+            return load_config(name);
         }
     }
     load_config("default");
