@@ -29,10 +29,9 @@ class Config
                     {"Wifi_mode", "AP"},
         };
         }
+        String filename;
         json current_config;
         json test_config;
-
-
         // only config element not comming from external classes. 
         // placed here for now.
         json general_config= {
@@ -42,16 +41,26 @@ class Config
 
         void load_config(String filename);
         void load_config();
-        void save(String filename);
         void save();
+        void save(String filename);
+        void save(String filename, String config);
+        void delete_config(String filename);
         void set(json config);
+        void rename(String old_name, String new_name);
+        void new_config(String name);
+        json get_configs();
         json get();
         json get(string key);
         // void save_for_key(string key, json data);
         void print();
-
         void gather(Sensor& sensor,Engine& engine,bool debug=false); 
         void apply(Sensor& sensor,Engine& engine,bool debug=false); 
+
+    private:
+      String get_path(String filename, bool add_extension=true);
+      const char* last_config_path = "/last_config.txt";
+      const char* config_model_path = "/default.json";
+      const char* configs_root = "/configs";
 };
 
 extern Config config;

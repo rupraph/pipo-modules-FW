@@ -41,7 +41,6 @@ void setup() {
     Serial.begin(115200);
     // while(!Serial) // "while" prevents usb to setup properly
     // setCpuFrequencyMhz(80); will be usefull to save power on battery
-
     /////// Init hardware user interface (leds and switches)
     hwui.init();
     hwui.setup();
@@ -56,8 +55,11 @@ void setup() {
     /////// Load config
     // config.gather(input_sens, engine, false);//,
     // config.print();
+    Serial.println("Loading config");
     config.load_config();
+    Serial.println("Config loaded");
     config.apply(input_sens, engine, false);  // input_sens,
+    Serial.println("Config applied");
     // config.print();
     /////// Init wifi
     setup_wifi();
@@ -93,6 +95,7 @@ void setup() {
 }
 
 void loop() {
+    return;
     try {
         wm.process();
         monitor_wifi(server.is_running);

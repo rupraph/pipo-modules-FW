@@ -61,28 +61,70 @@ void PipoServer::setup_requests() {
     server.on("/config", HTTP_GET,
               [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.get().dump().c_str()); });
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
-        if (request->hasParam("config")) {
-            Serial.print("Received config ");
-            Serial.println(request->getParam("config")->value());
+        if (!request->hasParam("config")) {
+            return request->send(400, "text/plain", "No config received");
+        }
+        try {
             config.set(json::parse(request->getParam("config")->value()));
             config.apply(input_sens, engine, true);
-        } else {
-            Serial.print("No config received");
+            return request->send(200, "text/plain", "Config set");
+        } catch (std::exception e) {
+            return request->send(500, "text/plain", "Error while setting config: " + String(e.what()));
         }
-        request->send(200, "text/plain", "Config set");
     });
 
-    server.on("/config-save", HTTP_POST, [&](AsyncWebServerRequest* request) {
-        if (request->hasParam("config")) {
-            Serial.print("Received config ");
-            Serial.println(request->getParam("config")->value());
-            config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, true);
-            config.save();
-        } else {
-            Serial.print("No config received");
+    server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
+        request->send(200, "text/plain", config.get_configs().dump().c_str());
+    });
+
+    server.on("/config-active", HTTP_GET,
+              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.filename.c_str()); });
+
+    server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("name")) {
+            return request->send(400, "text/plain", "Error: no name parameter");
         }
-        request->send(200, "text/plain", "Config set");
+        try {
+            config.load_config(request->getParam("name")->value());
+            config.apply(input_sens, engine, true);
+            return request->send(200, "text/plain", "Active config set");
+        } catch (const std::exception e) {
+            return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
+        }
+    });
+    server.on("/config-new", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (request->hasParam("name")) {
+            return request->send(400, "text/plain", "Error: no name parameter");
+        }
+        try {
+            config.new_config(request->getParam("name")->value());
+            return request->send(200, "text/plain", "Config created");
+        } catch (const std::exception& e) {
+            return request->send(500, "text/plain", "Error creating config: " + String(e.what()));
+        }
+    });
+    server.on("/config-copy", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("name") || !request->hasParam("config")) {
+            return request->send(400, "text/plain", "Error: no name or config parameter");
+        }
+        try {
+            config.save(request->getParam("name")->value(), request->getParam("config")->value());
+            return request->send(200, "text/plain", "Config copied");
+        } catch (const std::exception e) {
+            return request->send(500, "text/plain", "Error copying config: " + String(e.what()));
+        }
+    });
+    server.on("/save", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("config")) {
+            return request->send(400, "text/plain", "No config received");
+        }
+        try {
+            config.set(json::parse(request->getParam("config")->value()));
+            config.save();
+            return request->send(200, "text/plain", "Config saved");
+        } catch (const std::exception e) {
+            return request->send(500, "text/plain", "Error saving config: " + String(e.what()));
+        }
     });
 
     server.on("/logs", HTTP_GET,
@@ -129,8 +171,7 @@ void PipoServer::setup_ws() {
                 }
                 Serial.printf("%s\n", msg.c_str());
 
-                if (info->opcode == WS_TEXT)
-                    onMessage(client, msg);
+                if (info->opcode == WS_TEXT) onMessage(client, msg);
             } else {
                 // message is sent as multiple frames or the frame is split into multiple packets
                 if (info->opcode == WS_TEXT) {
@@ -146,8 +187,7 @@ void PipoServer::setup_ws() {
                 }
                 if ((info->index + len) < info->len) return;
                 if (!info->final) return;
-                if (info->message_opcode == WS_TEXT)
-                    onMessage(client, msg);
+                if (info->message_opcode == WS_TEXT) onMessage(client, msg);
             }
         }
     });
