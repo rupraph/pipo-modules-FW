@@ -92,8 +92,20 @@ void PipoServer::setup_requests() {
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
         }
     });
+     server.on("/config-delete", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("name")) {
+            return request->send(400, "text/plain", "Error: no name parameter");
+        }
+        try {
+            config.delete_config(request->getParam("name")->value());
+            config.apply(input_sens, engine, true);
+            return request->send(200, "text/plain", "Config deleted");
+        } catch (const std::exception e) {
+            return request->send(500, "text/plain", "Error deleting config: " + String(e.what()));
+        }
+    });
     server.on("/config-new", HTTP_POST, [&](AsyncWebServerRequest* request) {
-        if (request->hasParam("name")) {
+        if (!request->hasParam("name")) {
             return request->send(400, "text/plain", "Error: no name parameter");
         }
         try {
@@ -112,6 +124,17 @@ void PipoServer::setup_requests() {
             return request->send(200, "text/plain", "Config copied");
         } catch (const std::exception e) {
             return request->send(500, "text/plain", "Error copying config: " + String(e.what()));
+        }
+    });
+     server.on("/config-rename", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("oldname") || !request->hasParam("newname")) {
+            return request->send(400, "text/plain", "Error: no old or new name parameter");
+        }
+        try {
+            config.rename(request->getParam("oldname")->value(), request->getParam("newname")->value());
+            return request->send(200, "text/plain", "Config renamed");
+        } catch (const std::exception e) {
+            return request->send(500, "text/plain", "Error renaming config: " + String(e.what()));
         }
     });
     server.on("/save", HTTP_POST, [&](AsyncWebServerRequest* request) {

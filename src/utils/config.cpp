@@ -12,7 +12,6 @@ void Config::load_config(String filename) {
     this->filename = filename;
     current_config = json::parse(readFile(LittleFS, get_path(filename).c_str()));
     logs.writeLog("load config: " + filename);
-
 }
 
 void Config::load_config() {
@@ -20,7 +19,10 @@ void Config::load_config() {
         new_config("default");
     }
     if (LittleFS.exists(last_config_path)) {
-        return load_config(String(readFile(LittleFS, last_config_path).c_str()));
+        String name = String(readFile(LittleFS, last_config_path).c_str());
+        if(LittleFS.exists(get_path(name).c_str())){
+            return load_config(name.c_str());
+        }
     }
     load_config("default");
 }
@@ -28,10 +30,29 @@ void Config::save() { save(filename); }
 void Config::save(String filename) { save(filename, current_config.dump().c_str()); }
 void Config::save(String filename, String config) {
     logs.writeLog("save config: " + filename);
-    writeFile(LittleFS, get_path(filename).c_str(), config.c_str()); 
+    writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
 }
 
-void Config::delete_config(String filename) { LittleFS.remove(get_path(filename).c_str()); }
+void Config::delete_config(String filename) {
+    if (filename == "default") {
+        return;
+    }
+    LittleFS.remove(get_path(filename).c_str());
+    logs.writeLog("delete config: " + filename);
+    if (filename == this->filename) {
+        File root = LittleFS.open(configs_root);
+        File file = root.openNextFile();
+        if (!file) {
+            load_config();
+            logs.writeLog("deleted last config, creating new default");
+        }else{
+            String name = String(file.name());
+            load_config(name.substring(0, name.length() - 5));
+        }
+        root.close();
+        file.close();
+    }
+}
 void Config::rename(String old_name, String new_name) {
     if (!LittleFS.exists(get_path(old_name).c_str())) {
         return;
@@ -57,6 +78,8 @@ json Config::get_configs() {
         res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
         file = root.openNextFile();
     }
+    root.close();
+    file.close();
     return res;
 }
 json Config::get(string key) { return current_config.at(key); }
