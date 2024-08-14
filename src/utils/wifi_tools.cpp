@@ -4,14 +4,13 @@ WiFiManager wm;
 
 void setup_wifi(){
     // setup wifi through wifi manager
-    if (/*false &&*/ config.general_config["Wifi_mode"] == "AP")
+    if (config.general_config["Wifi_mode"] == "AP")
     {
         delay(1000);
         Serial.println("Starting AP mode");
         WiFi.softAP("Pipo", "pipo1234");
     }
     else{
-    //return debug_connect();
     Serial.println("Starting STA mode");
 
    
@@ -19,14 +18,12 @@ void setup_wifi(){
 
     WiFi.mode(WIFI_STA);
 
-
     // WiFiManager wm;
     wm.setDarkMode(true);
     wm.setConfigPortalBlocking(false);
     wm.setDebugOutput(true);
     wm.setWiFiAutoReconnect(true);
     wm.setCleanConnect(true);
-    
 
     if(digitalRead(MODE_SW)==LOW){
         delay(3000);
@@ -96,7 +93,7 @@ void debug_connect(){
     //temp function for debug
     //connect to wifi manually
     WiFi.mode(WIFI_STA);
-    WiFi.begin("4G-Gateway-1B52", "9NG4AT1NARF");
+    WiFi.begin("ssid", "password");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print("try connect to hardcoded wifi");

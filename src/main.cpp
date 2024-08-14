@@ -2,13 +2,9 @@
 #include <Arduino.h>
 #include <WiFiManager.h>
 
-
-
 #include "HW_CONFIG.h"
 #include "engine.h"
-
 #include "utils/config.h"
-
 #include "hw_ui.h"
 #include "server/server.h"
 #include "midi/midi_io.h"
@@ -16,8 +12,6 @@
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
 #include "osc_handler.h"
-
-
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -33,14 +27,11 @@ AnalogSensor input_sens;
 string sensor_type = "analog";
 #endif
 
-//Config config;
-
 midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
 OSC_handler osc(config);
 PipoServer server(input_sens, engine, osc);
-
 
 // quick declaration of functions
 void init_filesystem();
@@ -69,9 +60,6 @@ void setup() {
     /////// Init wifi
     setup_wifi();
 
-    
-
-
     /////// initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
@@ -84,7 +72,6 @@ void setup() {
     // else{
     //     Serial.println("Wifi not connected, no config page for now");
     // }
-
     osc.setup(); // requires config to be loaded before. 
 
     // Memo on tracking frequency adjustements
