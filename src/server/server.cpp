@@ -92,7 +92,7 @@ void PipoServer::setup_requests() {
         }
         try {
             config.load_config(request->getParam("name")->value());
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Active config set");
         } catch (const std::exception e) {
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
@@ -104,7 +104,7 @@ void PipoServer::setup_requests() {
         }
         try {
             config.delete_config(request->getParam("name")->value());
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine,osc, true);
             return request->send(200, "text/plain", "Config deleted");
         } catch (const std::exception e) {
             return request->send(500, "text/plain", "Error deleting config: " + String(e.what()));
