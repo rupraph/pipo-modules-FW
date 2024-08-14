@@ -2,15 +2,22 @@
 #include <Arduino.h>
 #include <WiFiManager.h>
 
+
+
 #include "HW_CONFIG.h"
 #include "engine.h"
+
+#include "utils/config.h"
+
 #include "hw_ui.h"
 #include "server/server.h"
 #include "midi/midi_io.h"
-#include "osc_handler.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
+#include "osc_handler.h"
+
+
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -26,11 +33,14 @@ AnalogSensor input_sens;
 string sensor_type = "analog";
 #endif
 
-// OSC_handler osc;
+//Config config;
+
 midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
-PipoServer server(input_sens, engine);
+OSC_handler osc(config);
+PipoServer server(input_sens, engine, osc);
+
 
 // quick declaration of functions
 void init_filesystem();
@@ -57,10 +67,13 @@ void setup() {
     // config.gather(input_sens, engine, false);//,
     // config.print();
     config.load_config();
-    config.apply(input_sens, engine, false);  // input_sens,
-    // config.print();
+    config.apply(input_sens, engine, osc, false);  // input_sens,
+    config.print();
     /////// Init wifi
     setup_wifi();
+
+    
+
 
     /////// initialize sensor/inputs
     input_sens.init();
@@ -68,12 +81,14 @@ void setup() {
 
     // Start server if TA connected or AP mode
     // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
-    Serial.println("Wifi connected, starting config page");
+    Serial.println("starting config page");
     server.setup();
     // }
     // else{
     //     Serial.println("Wifi not connected, no config page for now");
     // }
+
+    osc.setup(); // requires config to be loaded before. 
 
     // Memo on tracking frequency adjustements
     // uint32_t Freq = getCpuFrequencyMhz();
@@ -109,7 +124,7 @@ void loop() {
         // input_sens.teleplot_data("dist");
         // input_sens.teleplot_data("roll");
 
-        engine.update(input_sens, midiio, hidio);
+        engine.update(input_sens, midiio, hidio, osc);
 
         hwui.update();
     } catch (const std::exception& e) {

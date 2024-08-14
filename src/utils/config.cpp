@@ -61,7 +61,7 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
     current_config["sensor"] = sensor.get_config(debug);
     Serial.print("gatherconfig engine");
     current_config["engine"] = engine.get_config(debug);
-
+    Serial.print("gatherconfig general");
     current_config["general"] = general_config;
 
     if (debug) {
@@ -72,11 +72,14 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 }
 
 // sensor& sensor,
-void Config::apply(Sensor& sensor, Engine& engine, bool debug) {
+void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
-
+    
     general_config = current_config["general"];
+    Serial.println("general_config");
+    osc.set_config(); // could likely be improved. either pass the json to apply and avoid passing cofig object to osc class, or follow the same config process than sensor and engine instead of being in the general config... 
+
     logs.writeLog("config apply");
 
 }
