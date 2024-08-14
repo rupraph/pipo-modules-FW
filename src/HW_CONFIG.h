@@ -11,6 +11,8 @@
     #define PIPO_TYPE "unknown"
 #endif
 
+#define PIPO_FW_VERSION "0.1" 
+
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
     #define WIFI_LED 9

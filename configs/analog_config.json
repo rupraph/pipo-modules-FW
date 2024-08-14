@@ -449,6 +449,7 @@
                 "input_max":300000,
                 "input_min":0
             }
+        }
     },
     "sensor": {
         "A1": {

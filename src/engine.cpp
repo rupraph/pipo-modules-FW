@@ -212,7 +212,7 @@ void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
         {
             float osc_val=Osctranslators[axis_name].get_value(sensor_val);
             //Serial.println(osc_val);
-            osc.sendOscMessage(axis_name.c_str(),osc_val);
+            osc.sendOscMessage(axis_name,osc_val);
         }
     }
         

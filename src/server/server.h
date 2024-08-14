@@ -9,6 +9,8 @@
 #include "utils/logs.h"
 #include "utils/fs_tools.h"
 #include "server/midi_socket.h"
+#include "HW_CONFIG.h"
+
 using namespace std;
 
 class PipoServer

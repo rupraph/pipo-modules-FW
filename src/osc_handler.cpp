@@ -90,9 +90,9 @@ void OSC_handler::setEnabled(bool ena) {
     }
 }
 
-void OSC_handler::sendOscMessage(const char* address,float value) {
+void OSC_handler::sendOscMessage(string address,float value) {
     if (dest_ip != IPAddress(0,0,0,0) && out_port != 0){
-        OSCMessage msg(address);
+        OSCMessage msg(("/"+string(PIPO_TYPE)+"/"+address).c_str());
         msg.add(value);
         Udp.beginPacket(dest_ip, out_port);
         msg.send(Udp);
