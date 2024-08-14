@@ -42,6 +42,7 @@
                 "input_max":600,
                 "input_min":20
             }
+        }
     },
     "sensor": {
         "dist": {
