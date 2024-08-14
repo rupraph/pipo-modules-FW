@@ -44,19 +44,10 @@ void PipoServer::stop() {
 void PipoServer::setup_requests() {
     server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
         String type;
-
-// SHOULD MERGE WITH PIPO_TYPE FROM HW_CONFIG
-#if defined(PIPO_MOTION)
-        type = "PIPO_MOTION";
-#elif defined(PIPO_RANGE)
-     type = "PIPO_RANGE";
-#elif defined(PIPO_ANALOG)
-    type = "PIPO_ANALOG";
-#endif
         json info = {
             {"name", "unnamed Pipo"},// should come from config file
             {"version", "0.1"}, // should come from HW_CONFIG
-            {"type", type.c_str()},
+            {"type", PIPO_TYPE},
             {"ip", WiFi.localIP().toString().c_str()},
             {"mac", WiFi.macAddress().c_str()},
         };
