@@ -86,6 +86,8 @@ std::string readFile(fs::FS &fs, const char * path){
     while(file.available()){
         fileContents += (char)file.read();
     }
+    //Serial.print("file length: ");
+    //Serial.println(sizeof(fileContents.c_str()));
     file.close();
 
     // Serial.println("raw file data");

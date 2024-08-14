@@ -75,6 +75,7 @@ void PipoServer::setup_requests() {
 
     server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
         request->send(200, "text/plain", config.get_configs().dump().c_str());
+        Serial.println("configs sent");
     });
 
     server.on("/config-active", HTTP_GET,
@@ -142,8 +143,11 @@ void PipoServer::setup_requests() {
             return request->send(400, "text/plain", "No config received");
         }
         try {
+            
             config.set(json::parse(request->getParam("config")->value()));
+            config.apply(input_sens, engine, true);
             config.save();
+            
             return request->send(200, "text/plain", "Config saved");
         } catch (const std::exception e) {
             return request->send(500, "text/plain", "Error saving config: " + String(e.what()));

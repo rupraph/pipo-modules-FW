@@ -10,7 +10,7 @@ void setup_wifi(){
         WiFi.softAP("Pipo", "pipo1234");
     }
     else{
-    return debug_connect();
+    //return debug_connect();
     WiFi.mode(WIFI_STA);
 
     // WiFiManager wm;

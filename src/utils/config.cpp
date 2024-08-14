@@ -15,21 +15,26 @@ void Config::load_config(String filename) {
 }
 
 void Config::load_config() {
+    // if no default config, create default
     if (!LittleFS.exists(get_path("default").c_str())) {
         new_config("default");
     }
+    // if last config exists, load it
     if (LittleFS.exists(last_config_path)) {
         String name = String(readFile(LittleFS, last_config_path).c_str());
         if(LittleFS.exists(get_path(name).c_str())){
             return load_config(name);
         }
     }
+    // if no last config, load default
     load_config("default");
+    print();
 }
 void Config::save() { save(filename); }
 void Config::save(String filename) { save(filename, current_config.dump().c_str()); }
 void Config::save(String filename, String config) {
     logs.writeLog("save config: " + filename);
+    Serial.println("save config: " + filename);
     writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
 }
 
@@ -74,6 +79,7 @@ json Config::get_configs() {
     File file = root.openNextFile();
     json res;
     std::map<std::string, std::string> map;
+    // while loop should be avoided in pipo !! 
     while (file) {
         res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
         file = root.openNextFile();
@@ -85,6 +91,7 @@ json Config::get_configs() {
 json Config::get(string key) { return current_config.at(key); }
 void Config::set(json config) {
     try {
+        Serial.println(config.dump().c_str());
         current_config = config;
         logs.writeLog("config set");
     } catch (const std::exception& e) {
