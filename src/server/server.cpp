@@ -2,9 +2,13 @@
 
 using json = nlohmann::json;
 
+
 void PipoServer::setup() {
     // not sure this is the best way to do this. see exemples
-    if (!MDNS.begin("Pipo-Motion")) {  // Start the mDNS responder for esp.local
+    
+    // name should depend on the type of pipo, but for now config page has no mean to retrive the right type to connect to it. 
+    std::string mdns_name=std::string("pipo-")+PIPO_TYPE;
+    if (!MDNS.begin(mdns_name.c_str())) {  // Start the mDNS responder for esp.local
         Serial.println("Error setting up MDNS responder!");
     } else {
         Serial.println("mDNS responder started");
@@ -41,6 +45,7 @@ void PipoServer::setup_requests() {
     server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
         String type;
 
+// SHOULD MERGE WITH PIPO_TYPE FROM HW_CONFIG
 #if defined(PIPO_MOTION)
         type = "PIPO_MOTION";
 #elif defined(PIPO_RANGE)
@@ -49,8 +54,8 @@ void PipoServer::setup_requests() {
     type = "PIPO_ANALOG";
 #endif
         json info = {
-            {"name", "unnamed Pipo"},
-            {"version", "0.1"},
+            {"name", "unnamed Pipo"},// should come from config file
+            {"version", "0.1"}, // should come from HW_CONFIG
             {"type", type.c_str()},
             {"ip", WiFi.localIP().toString().c_str()},
             {"mac", WiFi.macAddress().c_str()},
@@ -66,7 +71,7 @@ void PipoServer::setup_requests() {
         }
         try {
             config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Config set");
         } catch (std::exception e) {
             return request->send(500, "text/plain", "Error while setting config: " + String(e.what()));
@@ -145,7 +150,7 @@ void PipoServer::setup_requests() {
         try {
             
             config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, true);
+            config.apply(input_sens, engine, osc, true);
             config.save();
             
             return request->send(200, "text/plain", "Config saved");

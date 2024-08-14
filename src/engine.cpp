@@ -16,15 +16,19 @@ using json = nlohmann::json;
             //- send on change only -> in midi io ? 
             //- play / pause
 
-void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio)
+void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& osc)
 {
     midiio.manage_sustain();
-    midi_processsor(sensor, midiio);
+    midi_processor(sensor, midiio);
+    osc_processor(sensor,osc);
     hid_processor(sensor, hidio);
 }
 
 
-void Engine::midi_processsor(Sensor& sensor, midi_io& midiio)
+    
+
+
+void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
 {
     // loop through sensor data
     const auto& sensor_dat = sensor.get_sensor_dat_map();
@@ -194,6 +198,26 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
     }
 }
 
+void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
+{
+    // Todo: loop through sensor data -> indentical for 3 processor, should be factorized
+    const auto& sensor_dat = sensor.get_sensor_dat_map();
+    for (auto const& pair : sensor_dat)
+    {
+        string axis_name=pair.first;
+        float sensor_val=sensor.get_value(axis_name);
+        if (sensor.get_enabled(axis_name) 
+        && Osctranslators[axis_name].enabled
+        && sensor.test_outside_deadzone(axis_name))
+        {
+            float osc_val=Osctranslators[axis_name].get_value(sensor_val);
+            //Serial.println(osc_val);
+            osc.sendOscMessage(axis_name.c_str(),osc_val);
+        }
+    }
+        
+}
+
 void Engine::set_default_config()
 {
     // // Hid mapping config
@@ -229,6 +253,10 @@ json Engine::get_config(bool debug)
         for (auto const& pair : hid_map)
         {
             j["engine-hid"][pair.first] = pair.second.get_json();
+        }
+        for (auto const& pair : Osctranslators)
+        {
+            j["engine-osc"][pair.first] = pair.second.get_json();
         }
         if (debug)
         {
@@ -271,4 +299,14 @@ void Engine::set_config(json& config, bool debug)
         }
     }
     Serial.println("hid config set");
+
+    json josc = config["engine-osc"];
+    for (auto const& pair : Osctranslators)
+    {
+        if (josc.find(pair.first) != josc.end())
+        {
+            Osctranslators[pair.first].set_from_json(josc[pair.first]);
+        }
+    }
+    Serial.println("osc config set");
 }

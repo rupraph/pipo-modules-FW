@@ -32,7 +32,16 @@
                 "scaleType": "major pentatonic",
                 "translator_mode": 1
             }
-        }
+        },
+        "engine-osc": {
+            "dist": {
+                "enabled":false,
+                "mode_raw": true,
+                "output_max":1,
+                "output_min":0,
+                "input_max":600,
+                "input_min":20
+            }
     },
     "sensor": {
         "dist": {
@@ -46,6 +55,9 @@
         }
     },
     "general": {
-        "Wifi_mode": "AP"
+        "Wifi_mode": "STA",
+        "OSC_ENA": true,
+        "OSC_IP": "192.168.1.71",
+        "OSC_PORT": 8000
     }
 }
