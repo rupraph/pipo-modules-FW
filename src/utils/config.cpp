@@ -70,16 +70,20 @@ void Config::rename(String old_name, String new_name) {
     }
 }
 void Config::new_config(String name) {
+
     std::string input = readFile(LittleFS, config_model_path);
+    // should check if file already exists. rewrtiing on same filename can cause corruption ? 
     writeFile(LittleFS, get_path(name).c_str(), input.c_str());
     logs.writeLog("new config: " + name);
 }
+
 json Config::get_configs() {
     File root = LittleFS.open(configs_root);
     File file = root.openNextFile();
     json res;
     std::map<std::string, std::string> map;
-    // while loop should be avoided in pipo !! 
+    // while loop should be avoided because blocking
+    //  + this could return very big json object which might not fit the base ram and cause crash. return one file after the other to the client. 
     while (file) {
         res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
         file = root.openNextFile();
