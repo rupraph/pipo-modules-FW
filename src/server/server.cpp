@@ -150,6 +150,12 @@ void PipoServer::setup_requests() {
         }
     });
 
+    server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) {
+        request->send(200, "text/plain", "Rebooting");
+        delay(1000);
+        ESP.restart();
+    });
+
     server.on("/logs", HTTP_GET,
               [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
 
