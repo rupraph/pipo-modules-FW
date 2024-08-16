@@ -2,6 +2,8 @@
 
 WiFiManager wm;
 
+
+
 void setup_wifi(){
     // setup wifi through wifi manager
     if (config.general_config["Wifi_mode"] == "AP")
@@ -13,17 +15,21 @@ void setup_wifi(){
     else{
     Serial.println("Starting STA mode");
 
-   
-
 
     WiFi.mode(WIFI_STA);
 
     // WiFiManager wm;
     wm.setDarkMode(true);
+    wm.setHostname(string(PIPO_TYPE).c_str());
     wm.setConfigPortalBlocking(false);
+    wm.setBreakAfterConfig(true);
+    wm.setDebugOutput(true);
     wm.setDebugOutput(true);
     wm.setWiFiAutoReconnect(true);
     wm.setCleanConnect(true);
+    wm.setSaveConfigCallback([]() {
+        ESP.restart();
+    });
 
     if(digitalRead(MODE_SW)==LOW){
         delay(3000);
@@ -58,7 +64,7 @@ void monitor_wifi(bool is_server_runing){
     // monitor wifi status
     wm.process();
 
-    if (WiFi.status() == WL_CONNECTED && !is_server_runing)
+    if (WiFi.status() == WL_CONNECTED && !hwui.is_pulsing(WIFI_LED))
     {
         Serial.println("Wifi connected");
         hwui.start_pulse(WIFI_LED, 3000, 3, 30);
