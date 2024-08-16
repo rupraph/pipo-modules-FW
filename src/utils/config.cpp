@@ -78,15 +78,28 @@ void Config::new_config(String name) {
 }
 
 json Config::get_configs() {
+
     File root = LittleFS.open(configs_root);
+    if (!root || !root.isDirectory()) {
+        Serial.println("failed to open configs root");
+        return;
+    }
+
     File file = root.openNextFile();
     json res;
-    std::map<std::string, std::string> map;
     // while loop should be avoided because blocking
     //  + this could return very big json object which might not fit the base ram and cause crash. return one file after the other to the client. 
     while (file) {
-        res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
-        file = root.openNextFile();
+        if (!file.isDirectory()) {
+            Serial.println("is not dir");
+            return res;
+        }
+        else{
+            Serial.println("is dir");
+            res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
+            file = root.openNextFile();
+        }
+        
     }
     root.close();
     file.close();

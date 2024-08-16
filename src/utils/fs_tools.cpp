@@ -73,7 +73,7 @@ void removeDir(fs::FS &fs, const char * path){
     }
 }
 std::string readFile(fs::FS &fs, const char * path){
-    Serial.printf("Reading file: %s\r\n", path);
+    Serial.printf("Start reading file: %s\r\n", path);
 
     File file = fs.open(path,"r");
     if(!file || file.isDirectory()){
@@ -81,12 +81,19 @@ std::string readFile(fs::FS &fs, const char * path){
         return std::string();
     }
 
-    Serial.println("- read from file:");
+    Serial.println("- read file:");
+    Serial.print(ESP.getFreeHeap());
     std::string fileContents;
-    while(file.available()){
-        fileContents += (char)file.read();
+    const size_t bufferSize = 512; // Adjust buffer size as needed
+    char buffer[bufferSize];
+
+    while (file.available()) {
+        size_t bytesRead = file.readBytes(buffer, bufferSize);
+        Serial.print(buffer);
+        fileContents.append(buffer, bytesRead);
     }
     file.close();
+    Serial.println("- file read done");
 
     return fileContents;
 }

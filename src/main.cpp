@@ -49,6 +49,8 @@ void setup() {
     /////// Init filesystem
     init_filesystem();
 
+    
+
     /////// Init midi and hid
     midiio.setup();
     hidio.usb_hid_setup();
@@ -59,6 +61,8 @@ void setup() {
     config.print();
     /////// Init wifi
     setup_wifi();
+
+    listDir(LittleFS, "/", 0);
 
     /////// initialize sensor/inputs
     input_sens.init();
