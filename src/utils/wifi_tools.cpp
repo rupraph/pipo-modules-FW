@@ -86,6 +86,22 @@ void monitor_wifi(bool is_server_runing){
             wm.resetSettings();
             ESP.restart();
         }
+        // not tested yet
+        if (c=='a')
+        {
+            Serial.println("Switching to AP mode");
+            config.general_config["Wifi_mode"] = "AP";
+            config.save(config.filename);
+            ESP.restart();
+        }
+        if (c=='a')
+        {
+            Serial.println("Switching to STA mode");
+            config.general_config["Wifi_mode"] = "STA";
+            config.save(config.filename);
+            ESP.restart();
+        }
+
     }
 
 

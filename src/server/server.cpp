@@ -156,6 +156,19 @@ void PipoServer::setup_requests() {
         ESP.restart();
     });
 
+    server.on("wifimode", HTTP_GET, [](AsyncWebServerRequest* request) {
+        if (config.general_config["Wifi_mode"] == "AP") {
+            request->send(200, "text/plain", "switch to STA");
+            config.general_config["Wifi_mode"] = "STA";
+        } else {
+            request->send(200, "text/plain", "STA");
+            config.general_config["Wifi_mode"] = "switch to AP";
+        }
+        config.save(config.filename);
+        delay(1000);
+        ESP.restart();
+    });
+
     server.on("/logs", HTTP_GET,
               [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
 
