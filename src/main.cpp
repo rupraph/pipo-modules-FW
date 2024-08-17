@@ -49,18 +49,18 @@ void setup() {
     /////// Init filesystem
     init_filesystem();
 
-    
-
     /////// Init midi and hid
     midiio.setup();
     hidio.usb_hid_setup();
 
+    /////// Init wifi
+    setup_wifi();
+
     /////// Load config
     config.load_config();
     config.apply(input_sens, engine, osc, false);  // input_sens,
-    config.print();
-    /////// Init wifi
-    setup_wifi();
+    //config.print();
+    
 
     listDir(LittleFS, "/", 0);
 

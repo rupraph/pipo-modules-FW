@@ -10,10 +10,14 @@ Config config;
 
 void Config::load_config(String filename) {
     this->filename = filename;
+    Serial.print("load config: ");
+    Serial.println(get_path(filename).c_str());
     current_config = json::parse(readFile(LittleFS, get_path(filename).c_str()));
     logs.writeLog("load config: " + filename);
 }
 
+
+/// @brief Load the last config used, if it exists, otherwise load the default config.
 void Config::load_config() {
     // if no default config, create default
     if (!LittleFS.exists(get_path("default").c_str())) {
@@ -30,6 +34,52 @@ void Config::load_config() {
     load_config("default");
     print();
 }
+
+// void Config::load_all_configs() {
+//     File root = LittleFS.open(configs_root);
+//     if (!root || !root.isDirectory()) {
+//         Serial.println("failed to open configs root");
+//         return;
+//     }
+
+//     File file = root.openNextFile();
+//     while (file) {
+//         Serial.print("config file found: ");
+//         Serial.println(file.name());
+//         //res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
+//         res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
+
+//         file = root.openNextFile();
+//         // }
+//     }
+//     root.close();
+//     file.close();
+// }
+
+json Config::get_all_configs_filenames(){
+    File root = LittleFS.open(configs_root);
+    if (!root || !root.isDirectory()) {
+        Serial.println("failed to open configs root");
+        return;
+    }
+
+    json list;
+
+    File file = root.openNextFile();
+
+    while (file) {
+        Serial.print("config file found: ");
+        Serial.println(file.name());
+        list.push_back(file.name());
+        file = root.openNextFile();
+    }
+    
+    root.close();
+    file.close();
+    return list;
+}
+
+
 void Config::save() { save(filename); }
 void Config::save(String filename) { save(filename, current_config.dump().c_str()); }
 void Config::save(String filename, String config) {
@@ -77,35 +127,67 @@ void Config::new_config(String name) {
     logs.writeLog("new config: " + name);
 }
 
-json Config::get_configs() {
+// json Config::get_configs() {
 
-    File root = LittleFS.open(configs_root);
-    if (!root || !root.isDirectory()) {
-        Serial.println("failed to open configs root");
-        return;
-    }
+//     // File root = LittleFS.open(configs_root);
+//     // if (!root || !root.isDirectory()) {
+//     //     Serial.println("failed to open configs root");
+//     //     return;
+//     // }
 
-    File file = root.openNextFile();
-    json res;
-    // while loop should be avoided because blocking
-    //  + this could return very big json object which might not fit the base ram and cause crash. return one file after the other to the client. 
-    while (file) {
-        if (!file.isDirectory()) {
-            Serial.println("is not dir");
-            return res;
-        }
-        else{
-            Serial.println("is dir");
-            res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
-            file = root.openNextFile();
-        }
+//     // File file = root.openNextFile();
+//     // vector<string> filelist;
+    
+//     // // while loop should be avoided because blocking
+//     // //  + this could return very big json object which might not fit the base ram and cause crash. return one file after the other to the client. 
+    
+//     // while (file) {
         
-    }
-    root.close();
-    file.close();
-    return res;
-}
+//     //     filelist.push_back(file.name());
+//     //     Serial.print("config file found: ");
+//     //     Serial.println(file.name());
+//     //     //res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
+//     //     //res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
+
+//     //     file = root.openNextFile();
+//     //     // }
+        
+//     // }
+//     // //Serial.print("number of config files found");
+//     // Serial.println(filelist.size());
+
+
+//     // for (int i = 0; i < filelist.size(); i++) {
+//     //     Serial.println(filelist[i].c_str());
+//     //     Serial.println(get_path(filelist[i].c_str(), false).c_str());
+//     // }
+
+    
+
+//     // for (int i = 0; i < filelist.size(); i++) {
+//     //     Serial.println("parsing");
+//     //     res = json::parse(readFile(LittleFS, get_path(filelist[i].c_str(), false).c_str()));
+//     //     Serial.println("parsed");
+//     // }
+    
+    
+//     // Serial.println("filelist");
+//     // root.close();
+//     // file.close();
+//     return res;
+// }
+
+// json Config::get_config_from_file(String filename) {
+//     if (!LittleFS.exists(get_path(filename).c_str())) {
+//         Serial.println("config file not found");
+//         return json();
+//     }
+//     return json::parse(readFile(LittleFS, get_path(filename,false).c_str()));
+// }
+
 json Config::get(string key) { return current_config.at(key); }
+json Config::get() { return current_config; }
+
 void Config::set(json config) {
     try {
         Serial.println(config.dump().c_str());
@@ -117,7 +199,7 @@ void Config::set(json config) {
         logs.writeError("Error setting config: " + String(e.what()));
     }
 }
-json Config::get() { return current_config; }
+
 void Config::print() { Serial.println(current_config.dump(4).c_str()); }
 void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
     Serial.print("gatherconfig sensor");

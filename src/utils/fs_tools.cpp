@@ -13,6 +13,8 @@ void init_filesystem(){
         Serial.println("LittleFS Mount Success");
         // listDir(LittleFS, "/config", 2);
         // listDir(LittleFS, "/webpage", 2);
+
+        Serial.println(LittleFS.usedBytes());
 }
    
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
@@ -53,6 +55,8 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
         }
         file = root.openNextFile();
     }
+    file.close();
+    root.close();
 }
 
 void createDir(fs::FS &fs, const char * path){
@@ -72,8 +76,11 @@ void removeDir(fs::FS &fs, const char * path){
         Serial.println("rmdir failed");
     }
 }
+
+// issue with the pipo analog might also be related to the file itself. 
 std::string readFile(fs::FS &fs, const char * path){
-    Serial.printf("Start reading file: %s\r\n", path);
+    Serial.print("Start reading file: ");
+    Serial.println(path);
 
     File file = fs.open(path,"r");
     if(!file || file.isDirectory()){
@@ -82,15 +89,11 @@ std::string readFile(fs::FS &fs, const char * path){
     }
 
     Serial.println("- read file:");
-    Serial.print(ESP.getFreeHeap());
     std::string fileContents;
-    const size_t bufferSize = 512; // Adjust buffer size as needed
-    char buffer[bufferSize];
-
-    while (file.available()) {
-        size_t bytesRead = file.readBytes(buffer, bufferSize);
-        Serial.print(buffer);
-        fileContents.append(buffer, bytesRead);
+    char buffer[128];
+    while(file.available()){
+        size_t bytesRead=file.readBytes(buffer,128);
+        fileContents.append(buffer,bytesRead);
     }
     file.close();
     Serial.println("- file read done");

@@ -38,6 +38,7 @@ class Config
         }
         String filename;
         json current_config;
+        json res;
         json test_config;
         // only config element not comming from external classes. 
         // placed here for now.
@@ -49,19 +50,32 @@ class Config
         };
     
 
-
+        // load config from files into current_config
         void load_config(String filename);
         void load_config();
+
+        // set current_config from a json object
+        void set(json config);
+
+        //load all config into 
+        //void load_all_configs();
+
         void save();
         void save(String filename);
         void save(String filename, String config);
+        
         void delete_config(String filename);
-        void set(json config);
+        
         void rename(String old_name, String new_name);
         void new_config(String name);
-        json get_configs();
-        json get();
-        json get(string key);
+
+        //json get_config_from_file(String filename);
+        vector get_all_configs_filenames();
+        //json get_configs();
+
+        json get(); // return current_config
+        json get(string key); // return current_config[key]
+        
         // void save_for_key(string key, json data);
         void print();
         void gather(Sensor& sensor,Engine& engine,bool debug=false); 
@@ -72,6 +86,7 @@ class Config
       const char* last_config_path = "/last_config.txt";
       const char* config_model_path = "/default.json";
       const char* configs_root = "/configs";
+      
 };
 
 extern Config config;

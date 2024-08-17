@@ -54,8 +54,11 @@ void PipoServer::setup_requests() {
         request->send(200, "text/json", info.dump().c_str());
     });
 
-    server.on("/config", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.get().dump().c_str()); });
+    server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
+        request->send(200, "text/plain", config.get().dump().c_str()); 
+        });
+
+    
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("config")) {
             return request->send(400, "text/plain", "No config received");
@@ -69,10 +72,30 @@ void PipoServer::setup_requests() {
         }
     });
 
-    server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
-        request->send(200, "text/plain", config.get_configs().dump().c_str());
-        Serial.println("configs sent");
+        // sends config with filename
+        server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
+        if(!request->hasParam("filename")){
+            return request->send(400, "text/plain", "No key received");
+        }
+        try{
+            String filename = request->getParam("filename")->value(); 
+            String filePath= "/configs/"+filename;
+            request->send(LittleFS,filePath, "application/json");
+
+            }
+        catch(const std::exception e){
+            return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
+        }
     });
+
+    server.on("/configslist", HTTP_GET, [&](AsyncWebServerRequest* request) {
+        request->send(200, "text/plain", config.get_all_configs_filenames().dump().c_str());
+    });
+
+    // server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    //     config.load_all_configs();
+    //     //request->send(200, "text/plain", config.get_configs().dump().c_str())
+    //     ;});
 
     server.on("/config-active", HTTP_GET,
               [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.filename.c_str()); });
