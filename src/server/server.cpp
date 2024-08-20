@@ -54,8 +54,11 @@ void PipoServer::setup_requests() {
         request->send(200, "text/json", info.dump().c_str());
     });
 
-    server.on("/config", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.get().dump().c_str()); });
+    server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
+        request->send(200, "text/plain", config.get().dump().c_str()); 
+    });
+
+    
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("config")) {
             return request->send(400, "text/plain", "No config received");
@@ -69,9 +72,18 @@ void PipoServer::setup_requests() {
         }
     });
 
+        // sends config with filename
     server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
-        request->send(200, "text/plain", config.get_configs().dump().c_str());
-        Serial.println("configs sent");
+        if(!request->hasParam("name")){
+            return request->send(200, "text/plain", config.get_list());
+        }
+        try{
+            String name = request->getParam("name")->value(); 
+            request->send(LittleFS, config.get_path(name), "application/json");
+        }
+        catch(const std::exception e){
+            return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
+        }
     });
 
     server.on("/config-active", HTTP_GET,
