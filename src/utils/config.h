@@ -70,7 +70,7 @@ class Config
         void new_config(String name);
 
         //json get_config_from_file(String filename);
-        vector get_all_configs_filenames();
+        String get_list();
         //json get_configs();
 
         json get(); // return current_config
@@ -80,9 +80,9 @@ class Config
         void print();
         void gather(Sensor& sensor,Engine& engine,bool debug=false); 
         void apply(Sensor& sensor,Engine& engine,OSC_handler& osc, bool debug=false); 
+        String get_path(String filename, bool add_extension=true);
 
     private:
-      String get_path(String filename, bool add_extension=true);
       const char* last_config_path = "/last_config.txt";
       const char* config_model_path = "/default.json";
       const char* configs_root = "/configs";

@@ -35,50 +35,26 @@ void Config::load_config() {
     print();
 }
 
-// void Config::load_all_configs() {
-//     File root = LittleFS.open(configs_root);
-//     if (!root || !root.isDirectory()) {
-//         Serial.println("failed to open configs root");
-//         return;
-//     }
-
-//     File file = root.openNextFile();
-//     while (file) {
-//         Serial.print("config file found: ");
-//         Serial.println(file.name());
-//         //res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
-//         res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
-
-//         file = root.openNextFile();
-//         // }
-//     }
-//     root.close();
-//     file.close();
-// }
-
-json Config::get_all_configs_filenames(){
+String Config::get_list(){
     File root = LittleFS.open(configs_root);
     if (!root || !root.isDirectory()) {
-        Serial.println("failed to open configs root");
-        return;
+      throw std::runtime_error("failed to open configs root");
     }
-
-    json list;
-
+    String list;
     File file = root.openNextFile();
-
     while (file) {
-        Serial.print("config file found: ");
-        Serial.println(file.name());
-        list.push_back(file.name());
+        String name = String(file.name());
+        list += name.substring(0, name.length() - 5);
         file = root.openNextFile();
+        if(file){
+            list += ",";
+        }
     }
     
     root.close();
     file.close();
     return list;
 }
-
 
 void Config::save() { save(filename); }
 void Config::save(String filename) { save(filename, current_config.dump().c_str()); }
@@ -89,9 +65,6 @@ void Config::save(String filename, String config) {
 }
 
 void Config::delete_config(String filename) {
-    if (filename == "default") {
-        return;
-    }
     LittleFS.remove(get_path(filename).c_str());
     logs.writeLog("delete config: " + filename);
     if (filename == this->filename) {
@@ -126,64 +99,6 @@ void Config::new_config(String name) {
     writeFile(LittleFS, get_path(name).c_str(), input.c_str());
     logs.writeLog("new config: " + name);
 }
-
-// json Config::get_configs() {
-
-//     // File root = LittleFS.open(configs_root);
-//     // if (!root || !root.isDirectory()) {
-//     //     Serial.println("failed to open configs root");
-//     //     return;
-//     // }
-
-//     // File file = root.openNextFile();
-//     // vector<string> filelist;
-    
-//     // // while loop should be avoided because blocking
-//     // //  + this could return very big json object which might not fit the base ram and cause crash. return one file after the other to the client. 
-    
-//     // while (file) {
-        
-//     //     filelist.push_back(file.name());
-//     //     Serial.print("config file found: ");
-//     //     Serial.println(file.name());
-//     //     //res[file.name()] = readFile(LittleFS, get_path(file.name(), false).c_str());
-//     //     //res[file.name()] = json::parse(readFile(LittleFS, get_path(file.name(), false).c_str()));
-
-//     //     file = root.openNextFile();
-//     //     // }
-        
-//     // }
-//     // //Serial.print("number of config files found");
-//     // Serial.println(filelist.size());
-
-
-//     // for (int i = 0; i < filelist.size(); i++) {
-//     //     Serial.println(filelist[i].c_str());
-//     //     Serial.println(get_path(filelist[i].c_str(), false).c_str());
-//     // }
-
-    
-
-//     // for (int i = 0; i < filelist.size(); i++) {
-//     //     Serial.println("parsing");
-//     //     res = json::parse(readFile(LittleFS, get_path(filelist[i].c_str(), false).c_str()));
-//     //     Serial.println("parsed");
-//     // }
-    
-    
-//     // Serial.println("filelist");
-//     // root.close();
-//     // file.close();
-//     return res;
-// }
-
-// json Config::get_config_from_file(String filename) {
-//     if (!LittleFS.exists(get_path(filename).c_str())) {
-//         Serial.println("config file not found");
-//         return json();
-//     }
-//     return json::parse(readFile(LittleFS, get_path(filename,false).c_str()));
-// }
 
 json Config::get(string key) { return current_config.at(key); }
 json Config::get() { return current_config; }
