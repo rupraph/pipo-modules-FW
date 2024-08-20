@@ -1,3 +1,6 @@
+#ifndef HW_CONFIG
+#define HW_CONFIG
+
 //#define PIPO_RANGE
 // could put it as build flag ! like -D PIPO_RANGE
 
@@ -41,3 +44,12 @@
 
 // other global definitions
 #define FORMAT_LITTLEFS_IF_FAILED true
+
+
+// #if defined(BROADCAST_ADDRESS_DEFINED)
+// #else
+//     #define BROADCAST_ADDRESS_DEFINED
+//     uint8_t broadcastAddress[] = {0x64, 0xE8, 0x33, 0x60, 0x44, 0xF8}; // pipo range address 
+// #endif
+
+#endif //HW_CONFIG

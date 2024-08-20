@@ -12,6 +12,7 @@
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
 #include "osc_handler.h"
+#include "esp_now.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -32,6 +33,8 @@ usb_hid hidio;
 Engine engine(input_sens);
 OSC_handler osc(config);
 PipoServer server(input_sens, engine, osc);
+
+
 
 // quick declaration of functions
 void init_filesystem();
@@ -62,6 +65,8 @@ void setup() {
     /////// Init wifi
     setup_wifi();
 
+    setup_esp_now();
+
     listDir(LittleFS, "/", 0);
 
     /////// initialize sensor/inputs
@@ -91,9 +96,11 @@ void setup() {
     // Serial.print("APB Freq = ");
     // Serial.print(Freq);
     // Serial.println(" Hz");
+    
 
     Serial.println("Setup done");
 }
+
 
 void loop() {
     try {
@@ -111,9 +118,12 @@ void loop() {
         // Plot some sensor values
         // input_sens.teleplot_data("dist");
         // input_sens.teleplot_data("roll");
-
         engine.update(input_sens, midiio, hidio, osc);
 
+        #if defined(PIPO_MOTION)
+        esp_now_update(input_sens);
+        #elif defined(PIPO_RANGE)
+        #endif
         hwui.update();
     } catch (const std::exception& e) {
         Serial.println("Exception in main loop");
