@@ -55,7 +55,7 @@ class Config
         void load_config();
 
         // set current_config from a json object
-        void set(json config);
+        void set(const json& config);
 
         //load all config into 
         //void load_all_configs();

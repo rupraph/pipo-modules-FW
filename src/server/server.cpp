@@ -51,11 +51,11 @@ void PipoServer::setup_requests() {
             {"ip", WiFi.localIP().toString().c_str()},
             {"mac", WiFi.macAddress().c_str()},
         };
-        request->send(200, "text/json", info.dump().c_str());
+        return request->send(200, "text/json", info.dump().c_str());
     });
 
     server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
-        request->send(200, "text/plain", config.get().dump().c_str()); 
+        return request->send(200, "text/plain", config.get().dump().c_str()); 
     });
 
     
@@ -79,15 +79,17 @@ void PipoServer::setup_requests() {
         }
         try{
             String name = request->getParam("name")->value(); 
-            request->send(LittleFS, config.get_path(name), "application/json");
+            Serial.println(ESP.getFreeHeap());
+            return request->send(LittleFS, config.get_path(name), "application/json");
         }
         catch(const std::exception e){
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
         }
     });
 
-    server.on("/config-active", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.filename.c_str()); });
+    server.on("/config-active", HTTP_GET,[&](AsyncWebServerRequest* request) { 
+        return request->send(200, "text/plain", config.filename.c_str()); 
+        });
 
     server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("name")) {
@@ -146,45 +148,78 @@ void PipoServer::setup_requests() {
             return request->send(500, "text/plain", "Error renaming config: " + String(e.what()));
         }
     });
-    server.on("/save", HTTP_POST, [&](AsyncWebServerRequest* request) {
-        if (!request->hasParam("config")) {
-            return request->send(400, "text/plain", "No config received");
+
+
+    server.on("/save", HTTP_POST, 
+        [&](AsyncWebServerRequest* request) {
+        return request->send(200, "text/plain", "Config sending");
+        },
+        [&](AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+        //static String configData;
+            try {
+                if (index == 0) {
+                // This is the start of the file upload
+                // configData = "";
+                received_configData.clear();
+                }
+
+                // Append the received data to the configData string
+                // for (size_t i = 0; i < len; i++) {
+                //     configData += (char)data[i];
+                // }
+                received_configData.append((char*)data, len);
+
+                if (final) {
+                    // This is the end of the file upload
+                            Serial.println(ESP.getFreeHeap());  // 44k remaining
+                            //Serial.println(received_configData.c_str());
+                            //string received_config= configData.c_str();
+                            parsed_configData = json::parse(received_configData);
+                            Serial.println("parsed");
+                            Serial.println(ESP.getFreeHeap()); // 3.7k remaining
+                            received_configData.clear();
+                            Serial.println("received cleared");
+                            Serial.println(ESP.getFreeHeap()); // 3.7k remaining
+                            //Serial.println(parsed_configData.dump().c_str());
+                            // config.set(parsed_configData);
+                            Serial.println("ok");
+                            // Serial.println(json_config.dump().c_str());
+                            
+                            //config.apply(input_sens, engine, osc, true);
+                            return request->send(200, "text/plain", "Config saved");
+                }
+            }catch (const std::exception& e) {
+                Serial.println("error saving config");
+                return request->send(500, "text/plain", "Error saving config: " + String(e.what()));
+            }
         }
-        try {
-            
-            config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, osc, true);
-            config.save();
-            
-            return request->send(200, "text/plain", "Config saved");
-        } catch (const std::exception e) {
-            return request->send(500, "text/plain", "Error saving config: " + String(e.what()));
-        }
-    });
+    );
 
     server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) {
-        request->send(200, "text/plain", "Rebooting");
+        return request->send(200, "text/plain", "Rebooting");
         delay(1000);
         ESP.restart();
     });
 
-    server.on("wifimode", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
         if (config.general_config["Wifi_mode"] == "AP") {
-            request->send(200, "text/plain", "switch to STA");
             config.general_config["Wifi_mode"] = "STA";
+            return request->send(200, "text/plain", "switch to STA");
+            
         } else {
-            request->send(200, "text/plain", "STA");
             config.general_config["Wifi_mode"] = "switch to AP";
+            return request->send(200, "text/plain", "STA");
         }
         config.save(config.filename);
         delay(1000);
         ESP.restart();
     });
 
-    server.on("/logs", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
+    server.on("/logs", HTTP_GET,[&](AsyncWebServerRequest* request) { 
+        request->send(200, "text/plain", logs.readLogs().c_str()); });
 
-    server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(200, "text/plain", "Pong"); });
+    server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { 
+        request->send(200, "text/plain", "Pong"); });
 }
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
     Serial.println(message);

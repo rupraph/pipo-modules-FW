@@ -103,9 +103,9 @@ void Config::new_config(String name) {
 json Config::get(string key) { return current_config.at(key); }
 json Config::get() { return current_config; }
 
-void Config::set(json config) {
+void Config::set(const json& config) {
     try {
-        Serial.println(config.dump().c_str());
+        //Serial.println(config.dump().c_str());
         current_config = config;
         logs.writeLog("config set");
     } catch (const std::exception& e) {
