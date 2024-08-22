@@ -13,6 +13,9 @@ void OSC_handler::setup() {
         Serial.print("on port:");
         Serial.println(String(out_port));
     }
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 
 }
 

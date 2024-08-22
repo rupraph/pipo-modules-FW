@@ -91,8 +91,11 @@ void setup() {
     // Serial.print("APB Freq = ");
     // Serial.print(Freq);
     // Serial.println(" Hz");
-    Serial.println(ESP.getFreeHeap());
+    
     Serial.println("Setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void loop() {

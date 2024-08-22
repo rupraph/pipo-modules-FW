@@ -10,6 +10,10 @@ void midiBLESetup() {
     BLEMidiBle.setHandleConnected(OnConnected);
     BLEMidiBle.setHandleDisconnected(OnDisconnected);
     MidiBle.begin();
+    Serial.println("Midi BLE setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void OnConnected() {

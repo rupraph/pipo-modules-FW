@@ -13,8 +13,11 @@ void init_filesystem(){
         Serial.println("LittleFS Mount Success");
         // listDir(LittleFS, "/config", 2);
         // listDir(LittleFS, "/webpage", 2);
-
+        Serial.print("Used filesystem bytes: ");
         Serial.println(LittleFS.usedBytes());
+        #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+        #endif
 }
    
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){

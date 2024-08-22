@@ -12,10 +12,14 @@ void Config::load_config(String filename,bool addJsonExtension=true) {
     this->filename = filename;
     Serial.print("load config: ");
     Serial.println(get_path(filename,addJsonExtension).c_str());
-    Serial.println(ESP.getFreeHeap());
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
     current_config.clear();
     current_config = json::parse(readFile(LittleFS, get_path(filename,addJsonExtension).c_str()));
-    Serial.println(ESP.getFreeHeap());
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
     logs.writeLog("load config: " + filename);
 }
 

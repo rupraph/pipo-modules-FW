@@ -58,6 +58,9 @@ void setup_wifi(){
         }
     }
     }
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void monitor_wifi(bool is_server_runing){
