@@ -161,6 +161,7 @@ void PipoServer::setup_requests() {
                 // This is the start of the file upload
                 // configData = "";
                 received_configData.clear();
+                //parsed_configData.clear();
                 }
 
                 // Append the received data to the configData string
@@ -168,24 +169,38 @@ void PipoServer::setup_requests() {
                 //     configData += (char)data[i];
                 // }
                 received_configData.append((char*)data, len);
+                // Serial.println("before parsing chunk");
+                // Serial.println(ESP.getFreeHeap());
+                // json chunk = json::parse(received_configData, nullptr, false);
+                // Serial.println("after parsing chunk");
+                // Serial.println(ESP.getFreeHeap());
+                
+                
 
                 if (final) {
                     // This is the end of the file upload
                             Serial.println(ESP.getFreeHeap());  // 44k remaining
                             //Serial.println(received_configData.c_str());
                             //string received_config= configData.c_str();
-                            parsed_configData = json::parse(received_configData);
-                            Serial.println("parsed");
-                            Serial.println(ESP.getFreeHeap()); // 3.7k remaining
-                            received_configData.clear();
-                            Serial.println("received cleared");
-                            Serial.println(ESP.getFreeHeap()); // 3.7k remaining
+                            // parsed_configData = json::parse(received_configData);
+                            // Serial.println("parsed");
+                            // Serial.println(ESP.getFreeHeap()); // 3.7k remaining
+                            // received_configData.clear();
+                            // Serial.println("received cleared");
+                            // Serial.println(ESP.getFreeHeap()); // 3.7k remaining
                             //Serial.println(parsed_configData.dump().c_str());
                             // config.set(parsed_configData);
-                            Serial.println("ok");
+                            
                             // Serial.println(json_config.dump().c_str());
                             
                             //config.apply(input_sens, engine, osc, true);
+                            config.save(filename, received_configData.c_str());
+                            Serial.println(ESP.getFreeHeap());
+                            config.load_config(filename, false);
+                            Serial.println(ESP.getFreeHeap());
+                            Serial.println("ok");
+                            received_configData.clear();  
+                            config.apply(input_sens, engine, osc, true);
                             return request->send(200, "text/plain", "Config saved");
                 }
             }catch (const std::exception& e) {
@@ -203,10 +218,13 @@ void PipoServer::setup_requests() {
 
     server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
         if (config.general_config["Wifi_mode"] == "AP") {
+            // Todo: should use setter
+            config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "STA";
             return request->send(200, "text/plain", "switch to STA");
             
         } else {
+            config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "switch to AP";
             return request->send(200, "text/plain", "STA");
         }
