@@ -28,12 +28,14 @@ void Config::load_config(String filename,bool addJsonExtension=true) {
 void Config::load_config() {
     // if no default config, create default
     if (!LittleFS.exists(get_path("default").c_str())) {
+        Serial.println("no default config, creating one");
         new_config("default");
     }
     // if last config exists, load it
     if (LittleFS.exists(last_config_path)) {
         String name = String(readFile(LittleFS, last_config_path).c_str());
         if(LittleFS.exists(get_path(name).c_str())){
+            Serial.println("last config found: " + name);
             return load_config(name);
         }
     }
@@ -101,10 +103,11 @@ void Config::rename(String old_name, String new_name) {
     }
 }
 void Config::new_config(String name) {
-
-    std::string input = readFile(LittleFS, config_model_path);
     // should check if file already exists. rewrtiing on same filename can cause corruption ? 
-    writeFile(LittleFS, get_path(name).c_str(), input.c_str());
+    //std::string input = readFile(LittleFS, config_model_path);
+    copyFile(LittleFS, config_model_path, get_path(name).c_str());
+    this->filename = name;
+    //writeFile(LittleFS, get_path(name).c_str(), input.c_str());
     logs.writeLog("new config: " + name);
 }
 
@@ -147,6 +150,7 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug)
     engine.set_config(current_config["engine"]);
     general_config.clear();
     general_config = current_config["general"];
+    //log last config name
     writeFile(LittleFS, last_config_path, filename.c_str());
      /*TODO: improve: 
      either pass the json to apply and avoid passing cofig object

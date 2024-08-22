@@ -57,9 +57,9 @@ void PipoServer::setup_requests() {
         return request->send(200, "text/json", info.dump().c_str());
     });
 
-    server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
-        return request->send(200, "text/plain", config.get().dump().c_str()); 
-    });
+    // server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
+    //     return request->send(200, "text/plain", config.get().dump().c_str()); 
+    // });
 
     
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
@@ -158,53 +158,39 @@ void PipoServer::setup_requests() {
         return request->send(200, "text/plain", "Config sending");
         },
         [&](AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
-        //static String configData;
             try {
                 if (index == 0) {
                 // This is the start of the file upload
-                // configData = "";
                 received_configData.clear();
-                //parsed_configData.clear();
                 }
-
-                // Append the received data to the configData string
-                // for (size_t i = 0; i < len; i++) {
-                //     configData += (char)data[i];
-                // }
                 received_configData.append((char*)data, len);
-                // Serial.println("before parsing chunk");
-                // Serial.println(ESP.getFreeHeap());
-                // json chunk = json::parse(received_configData, nullptr, false);
-                // Serial.println("after parsing chunk");
-                // Serial.println(ESP.getFreeHeap());
-                
-                
 
                 if (final) {
                     // This is the end of the file upload
+
+                    // Here I am doing save first then load. so parsing happen with load function.
+                    // this avoids parsing in here and trying to pass the json to config.set().
+                    // after solving other issues, not sure if this has any value after all.
+
+                    #ifdef DEBUG_HEAP
                             Serial.println(ESP.getFreeHeap());  // 44k remaining
-                            //Serial.println(received_configData.c_str());
-                            //string received_config= configData.c_str();
-                            // parsed_configData = json::parse(received_configData);
-                            // Serial.println("parsed");
-                            // Serial.println(ESP.getFreeHeap()); // 3.7k remaining
-                            // received_configData.clear();
-                            // Serial.println("received cleared");
-                            // Serial.println(ESP.getFreeHeap()); // 3.7k remaining
-                            //Serial.println(parsed_configData.dump().c_str());
-                            // config.set(parsed_configData);
-                            
-                            // Serial.println(json_config.dump().c_str());
-                            
-                            //config.apply(input_sens, engine, osc, true);
-                            config.save(filename, received_configData.c_str());
+                    #endif
+                    
+                    config.save(config.filename+".json", received_configData.c_str());
+                    
+                    #ifdef DEBUG_HEAP
                             Serial.println(ESP.getFreeHeap());
-                            config.load_config(filename, false);
+                    #endif
+                    
+                    config.load_config(config.filename, true);
+                    
+                    #ifdef DEBUG_HEAP
                             Serial.println(ESP.getFreeHeap());
-                            Serial.println("ok");
-                            received_configData.clear();  
-                            config.apply(input_sens, engine, osc, true);
-                            return request->send(200, "text/plain", "Config saved");
+                    #endif
+                    
+                    received_configData.clear();  
+                    config.apply(input_sens, engine, osc, true);
+                    return request->send(200, "text/plain", "Config saved");
                 }
             }catch (const std::exception& e) {
                 Serial.println("error saving config");

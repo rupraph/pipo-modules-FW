@@ -154,6 +154,30 @@ void deleteFile(fs::FS &fs, const char * path){
     }
 }
 
+void copyFile(fs::FS &fs, const char * path1, const char * path2){
+    Serial.printf("Copying file %s to %s\r\n", path1, path2);
+
+    File file = fs.open(path1, "r");
+    if(!file || file.isDirectory()){
+        Serial.println("- failed to open file for reading");
+        return;
+    }
+
+    File file2 = fs.open(path2, "w");
+    if(!file2){
+        Serial.println("- failed to open file for writing");
+        return;
+    }
+
+    while(file.available()){
+        file2.write(file.read());
+    }
+
+    file.close();
+    file2.close();
+    Serial.println("- file copied");
+}
+
 // SPIFFS-like write and delete file
 
 // See: https://github.com/esp8266/Arduino/blob/master/libraries/LittleFS/src/LittleFS.cpp#L60

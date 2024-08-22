@@ -57,6 +57,7 @@ void setup() {
     setup_wifi();
 
     /////// Load config
+    Serial.println(config.get_list());
     config.load_config();
     config.apply(input_sens, engine, osc, false);  // input_sens,
     //config.print();
