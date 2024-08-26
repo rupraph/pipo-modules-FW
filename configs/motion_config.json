@@ -254,8 +254,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 8.0,
-            "limit_min": -8.0
+          "limit_max": 8.0,
+          "limit_min": -8.0
       },
       "pitch": {
           "deadZone": 2,
@@ -272,8 +272,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 180,
-            "limit_min": -180
+          "limit_max": 180,
+          "limit_min": -180
       },
       "yaw": {
           "deadZone": 2,
@@ -281,8 +281,8 @@
           "inverted": false,
           "offset": 0.0,
           "value": 0.0,
-            "limit_max": 180,
-            "limit_min": -180
+          "limit_max": 180,
+          "limit_min": -180
       }
   },
   "general": {

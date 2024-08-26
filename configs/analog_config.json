@@ -166,7 +166,7 @@
                 "disabled": false,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -182,7 +182,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -198,7 +198,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -214,7 +214,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -230,7 +230,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -246,7 +246,7 @@
                 "disabled": true,
                 "hires": false,
                 "interpolation_type": 0,
-                "max_input": 4096.0,
+                "max_input": 3.3,
                 "max_output": 127,
                 "min_input": 0.0,
                 "min_output": 0,
@@ -458,7 +458,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "A2": {
@@ -467,7 +467,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "A3": {
@@ -476,7 +476,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "A4": {
@@ -485,7 +485,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "A5": {
@@ -494,7 +494,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "A6": {
@@ -503,7 +503,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 4096.0,
+            "limit_max": 3.3,
             "limit_min": 0.0
         },
         "T1": {
@@ -566,6 +566,7 @@
         "OSC_ENA": true,
         "OSC_IP": "192.168.1.71",
         "OSC_PORT": 8000,
-        "MidiEnabled": true
+        "MidiEnabled": true,
+        "HidEnabled": true
     }
 }

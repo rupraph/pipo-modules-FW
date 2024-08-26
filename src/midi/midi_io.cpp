@@ -79,6 +79,7 @@ void midi_io::sendHiResControlChange(int control, int value, int channel)
     MidiUSBsendCC(control, msb, channel);
     MidiUSBsendCC(control+32, lsb, channel);
     //MidiUsb.sendControlChange(control, value, channel);
+    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 }
 
 

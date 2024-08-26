@@ -62,7 +62,7 @@ void AnalogSensor::update()
 {
     for (auto const& pair : analog_map)
     {
-        sensor_dat[pair.first].value = analogRead(pair.second);
+        sensor_dat[pair.first].value = analogRead(pair.second)*0.000806; //convert to volts
     }
     for (auto const& pair : touch_map)
     {

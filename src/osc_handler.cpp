@@ -108,6 +108,7 @@ void OSC_handler::sendOscMessage(string address,float value) {
         Udp.beginPacket(dest_ip, out_port);
         msg.send(Udp);
         Udp.endPacket();
+        hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
         msg.empty();
     }
     else {
