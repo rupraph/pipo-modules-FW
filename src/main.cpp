@@ -95,7 +95,13 @@ void setup() {
     
     Serial.println("Setup done");
     #ifdef DEBUG_HEAP
-        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+        Serial.print(F("Remaining Heap:"));
+        Serial.println(String(ESP.getFreeHeap()));
+        Serial.print(F("Min Free Heap:"));
+        Serial.println(String(ESP.getMinFreeHeap()));
+        Serial.print(F("Max Alloc Heap:"));
+        Serial.println(ESP.getMaxAllocHeap());
+        
     #endif
 }
 

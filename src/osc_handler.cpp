@@ -39,19 +39,19 @@ void OSC_handler::set_config() {
 /// @brief start the UDP connection. 
 void OSC_handler::start() {
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Can't start OSC, WiFi is not connected");
+        Serial.println(F("Can't start OSC, WiFi is not connected"));
         return;
     }
 
     if (dest_ip == IPAddress(0,0,0,0) || out_port == 0){
-        Serial.println("Can't start OSC, No destination IP or port set");
+        Serial.println(F("Can't start OSC, No destination IP or port set"));
         return;
     }
     else {
-        Serial.println("Starting OSC");
+        Serial.println(F("Starting OSC"));
         Udp.begin(out_port);
         isStarted = true;
-        Serial.println("OSC started");
+        Serial.println(F("OSC started"));
     }
 }
 
@@ -111,6 +111,6 @@ void OSC_handler::sendOscMessage(string address,float value) {
         msg.empty();
     }
     else {
-        Serial.println("No destination IP or port set");
+        Serial.println(F("No destination IP or port set"));
     }
 }

@@ -161,6 +161,8 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug)
 
     logs.writeLog("config applied: " + filename);
 }
+
+
 String Config::get_path(String filename, bool addExtension) {
     if (addExtension) {
         return String(configs_root) + "/" + filename + ".json";

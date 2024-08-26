@@ -9,11 +9,11 @@ void setup_wifi(){
     if (config.general_config["Wifi_mode"] == "AP")
     {
         delay(1000);
-        Serial.println("Starting AP mode");
+        Serial.println(F("Starting AP mode"));
         WiFi.softAP("Pipo", "pipo1234");
     }
     else{
-    Serial.println("Starting STA mode");
+    Serial.println(F("Starting STA mode"));
 
 
     WiFi.mode(WIFI_STA);
@@ -39,7 +39,7 @@ void setup_wifi(){
     ///////// HIGH here should be low. temporary patch to cope with switch not wired corectly)
     if (digitalRead(MODE_SW)==HIGH && digitalRead(PP_SW)==LOW)
     {
-        Serial.println("Settings reset");
+        Serial.println(F("Settings reset"));
         wm.resetSettings();
         //Setting reset should be mover somewhere else
         // Serial.println("Launching config portal");
@@ -49,17 +49,18 @@ void setup_wifi(){
     }
     else{
         if(wm.autoConnect("Pipo")){
-            Serial.println("connected...yeey :)");
+            Serial.println(F("connected...yeey :)"));
             //hwui.set_led(WIFI_LED,60);
             hwui.start_pulse(WIFI_LED, 3000, 3, 30);
         }
         else {
-            Serial.println("Could not connect automatically, Configportal running");
+            Serial.println(F("Could not connect automatically, Configportal running"));
         }
     }
     }
     #ifdef DEBUG_HEAP
-        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+        Serial.print(F("Remaining Heap:")); 
+        Serial.println(String(ESP.getFreeHeap()));
     #endif
 }
 
@@ -69,7 +70,7 @@ void monitor_wifi(bool is_server_runing){
 
     if (WiFi.status() == WL_CONNECTED && !hwui.is_pulsing(WIFI_LED))
     {
-        Serial.println("Wifi connected");
+        Serial.println(F("Wifi connected"));
         hwui.start_pulse(WIFI_LED, 3000, 3, 30);
 
         //Todo: Starting the server here does not seem to work.
@@ -85,21 +86,21 @@ void monitor_wifi(bool is_server_runing){
         char c = Serial.read();
         if (c == 'r')
         {
-            Serial.println("Resetting wifi");
+            Serial.println(F("Resetting wifi"));
             wm.resetSettings();
             ESP.restart();
         }
         // not tested yet
         if (c=='a')
         {
-            Serial.println("Switching to AP mode");
+            Serial.println(F("Switching to AP mode"));
             config.general_config["Wifi_mode"] = "AP";
             config.save(config.filename);
             ESP.restart();
         }
         if (c=='a')
         {
-            Serial.println("Switching to STA mode");
+            Serial.println(F("Switching to STA mode"));
             config.general_config["Wifi_mode"] = "STA";
             config.save(config.filename);
             ESP.restart();
@@ -121,8 +122,8 @@ void debug_connect(){
     WiFi.begin("ssid", "password");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print("try connect to hardcoded wifi");
+        Serial.print(F("try connect to hardcoded wifi"));
     }
-    Serial.println("Connected to WiFi");
+    Serial.println(F("Connected to WiFi"));
     Serial.println(WiFi.localIP());
 }

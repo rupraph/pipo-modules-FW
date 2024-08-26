@@ -4,6 +4,9 @@
    test or else use the LITTLEFS plugin to create a partition
    https://github.com/lorol/arduino-esp32littlefs-plugin */
 
+
+// please don't use printf in embedded systems
+
 void init_filesystem(){
         // Init LittleFS
         if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
@@ -21,7 +24,8 @@ void init_filesystem(){
 }
    
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-    Serial.printf("Listing directory: %s\r\n", dirname);
+    Serial.print("Listing directory:");
+    Serial.println(dirname);
 
     File root = fs.open(dirname);
     if(!root){
@@ -63,7 +67,8 @@ void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
 }
 
 void createDir(fs::FS &fs, const char * path){
-    Serial.printf("Creating Dir: %s\n", path);
+    Serial.print("Creating Dir:");
+    Serial.println(path);
     if(fs.mkdir(path)){
         Serial.println("Dir created");
     } else {
@@ -72,7 +77,9 @@ void createDir(fs::FS &fs, const char * path){
 }
 
 void removeDir(fs::FS &fs, const char * path){
-    Serial.printf("Removing Dir: %s\n", path);
+    //Serial.printf("Removing Dir: %s\n", path);
+    Serial.print("Removing Dir:");
+    Serial.println(path);
     if(fs.rmdir(path)){
         Serial.println("Dir removed");
     } else {
@@ -105,7 +112,8 @@ std::string readFile(fs::FS &fs, const char * path){
 }
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Writing file: %s\r\n", path);
+    Serial.print("Writing file: ");
+    Serial.println(path);
 
     File file = fs.open(path, FILE_WRITE);
     if(!file){
@@ -121,7 +129,8 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
 }
 
 void appendFile(fs::FS &fs, const char * path, const char * message){
-    Serial.printf("Appending to file: %s\r\n", path);
+    Serial.print("Appending to file:");
+    Serial.println(path);
 
     File file = fs.open(path, FILE_APPEND);
     if(!file){
@@ -137,7 +146,10 @@ void appendFile(fs::FS &fs, const char * path, const char * message){
 }
 
 void renameFile(fs::FS &fs, const char * path1, const char * path2){
-    Serial.printf("Renaming file %s to %s\r\n", path1, path2);
+    Serial.print("Renaming file");
+    Serial.print(path1);
+    Serial.print("to");
+    Serial.println(path2);
     if (fs.rename(path1, path2)) {
         Serial.println("- file renamed");
     } else {
@@ -146,7 +158,7 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
 }
 
 void deleteFile(fs::FS &fs, const char * path){
-    Serial.printf("Deleting file: %s\r\n", path);
+    Serial.println("Deleting file:"+String(path));
     if(fs.remove(path)){
         Serial.println("- file deleted");
     } else {
@@ -155,7 +167,7 @@ void deleteFile(fs::FS &fs, const char * path){
 }
 
 void copyFile(fs::FS &fs, const char * path1, const char * path2){
-    Serial.printf("Copying file %s to %s\r\n", path1, path2);
+    Serial.println("Copying file from:"+String(path1)+String(path2));
 
     File file = fs.open(path1, "r");
     if(!file || file.isDirectory()){
@@ -184,7 +196,7 @@ void copyFile(fs::FS &fs, const char * path1, const char * path2){
 void writeFile2(fs::FS &fs, const char * path, const char * message){
     if(!fs.exists(path)){
 		if (strchr(path, '/')) {
-            Serial.printf("Create missing folders of: %s\r\n", path);
+            //Serial.printf("Create missing folders of: %s\r\n", path);
 			char *pathStr = strdup(path);
 			if (pathStr) {
 				char *ptr = strchr(pathStr, '/');
@@ -199,7 +211,7 @@ void writeFile2(fs::FS &fs, const char * path, const char * message){
 		}
     }
 
-    Serial.printf("Writing file to: %s\r\n", path);
+    //Serial.printf("Writing file to: %s\r\n", path);
     File file = fs.open(path, FILE_WRITE);
     if(!file){
         Serial.println("- failed to open file for writing");
@@ -215,7 +227,7 @@ void writeFile2(fs::FS &fs, const char * path, const char * message){
 
 // See:  https://github.com/esp8266/Arduino/blob/master/libraries/LittleFS/src/LittleFS.h#L149
 void deleteFile2(fs::FS &fs, const char * path){
-    Serial.printf("Deleting file and empty folders on path: %s\r\n", path);
+    //Serial.printf("Deleting file and empty folders on path: %s\r\n", path);
 
     if(fs.remove(path)){
         Serial.println("- file deleted");
@@ -227,7 +239,7 @@ void deleteFile2(fs::FS &fs, const char * path){
     if (pathStr) {
         char *ptr = strrchr(pathStr, '/');
         if (ptr) {
-            Serial.printf("Removing all empty folders on path: %s\r\n", path);
+           //Serial.printf("Removing all empty folders on path: %s\r\n", path);
         }
         while (ptr) {
             *ptr = 0;
@@ -239,7 +251,7 @@ void deleteFile2(fs::FS &fs, const char * path){
 }
 
 void testFileIO(fs::FS &fs, const char * path){
-    Serial.printf("Testing file I/O with %s\r\n", path);
+    //Serial.printf("Testing file I/O with %s\r\n", path);
 
     static uint8_t buf[512];
     size_t len = 0;
@@ -260,7 +272,7 @@ void testFileIO(fs::FS &fs, const char * path){
     }
     Serial.println("");
     uint32_t end = millis() - start;
-    Serial.printf(" - %u bytes written in %u ms\r\n", 2048 * 512, end);
+    //Serial.printf(" - %u bytes written in %u ms\r\n", 2048 * 512, end);
     file.close();
 
     file = fs.open(path);
@@ -285,7 +297,7 @@ void testFileIO(fs::FS &fs, const char * path){
         }
         Serial.println("");
         end = millis() - start;
-        Serial.printf("- %u bytes read in %u ms\r\n", flen, end);
+        //Serial.printf("- %u bytes read in %u ms\r\n", flen, end);
         file.close();
     } else {
         Serial.println("- failed to open file for reading");
