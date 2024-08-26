@@ -10,7 +10,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": true
+              "enabled": true
           },
           "accY": {
               "mapto": "ry",
@@ -21,7 +21,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": true
+              "enabled": true
           },
           "accZ": {
               "mapto": "rz",
@@ -32,7 +32,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": true
+              "enabled": true
           },
           "pitch": {
               "mapto": "y",
@@ -43,7 +43,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": false
+              "enabled": false
           },
           "roll": {
               "mapto": "x",
@@ -54,7 +54,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": false
+              "enabled": false
           },
           "yaw": {
               "mapto": "z",
@@ -65,7 +65,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "disabled": true
+              "enabled": true
           }
       },
       "engine-midi": {
@@ -73,7 +73,7 @@
               "cc_number": 4,
               "channel": 2,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -87,7 +87,7 @@
               "cc_number": 5,
               "channel": 2,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -101,7 +101,7 @@
               "cc_number": 6,
               "channel": 2,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -115,7 +115,7 @@
               "cc_number": 1,
               "channel": 1,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -129,7 +129,7 @@
               "cc_number": 2,
               "channel": 1,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -143,7 +143,7 @@
               "cc_number": 3,
               "channel": 1,
               "current_scale": [],
-              "disabled": true,
+              "enabled": true,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,

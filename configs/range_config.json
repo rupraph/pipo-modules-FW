@@ -2,7 +2,7 @@
     "engine": {
         "engine-hid": {
             "dist": {
-                "disabled": false,
+                "enabled": false,
                 "mapto": "x",
                 "out_type": 0,
                 "output_max": 255,
@@ -18,7 +18,7 @@
                 "cc_number": 2,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,

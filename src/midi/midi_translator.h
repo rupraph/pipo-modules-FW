@@ -26,7 +26,7 @@ class MidiTranslator
         int channel = 1; // should be in engine.
         int cc_number = 1;
 
-        bool disabled = false;
+        bool enabled = false;
 
         // int use_threshold = 0;
         // int threshold = 0;
@@ -159,8 +159,8 @@ class MidiTranslator
             // else if (param_name == "threshold") {
             //     threshold = value;
             // }
-            else if (param_name == "disabled") {
-                disabled = value;
+            else if (param_name == "enabled") {
+                enabled = value;
             }
             else {
                 Serial.println("Error: unknown parameter name");

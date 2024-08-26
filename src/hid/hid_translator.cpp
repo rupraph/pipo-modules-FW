@@ -61,7 +61,7 @@ void to_json(json& j, const HidTranslator& t) {
         {"threshold", t.threshold},
         {"output_max", t.output_max},
         {"output_min", t.output_min},
-        {"disabled", t.disabled}
+        {"enabled", t.enabled}
     };
 }
 
@@ -76,7 +76,7 @@ void from_json(const json& j, HidTranslator& t) {
     j.at("threshold").get_to(t.threshold);
     j.at("output_max").get_to(t.output_max);
     j.at("output_min").get_to(t.output_min);
-    j.at("disabled").get_to(t.disabled);
+    j.at("enabled").get_to(t.enabled);
 }
 
 json HidTranslator::get_json() const {

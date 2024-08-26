@@ -28,7 +28,7 @@ public:
     int output_max=255;
     int output_min=0;
 
-    bool disabled=false;
+    bool enabled=false;
 
     HidTranslator();
 

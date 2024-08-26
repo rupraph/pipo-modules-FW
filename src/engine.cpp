@@ -52,7 +52,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
         //check if axis is enabled, outside deadzone and not disabled
         if (sensor.get_enabled(axis_name) 
         && sensor.test_outside_deadzone(axis_name) 
-        && Miditranslators[axis_name].disabled==false) //Todo: temporary. should likely have "in_use" to trigger note on/off
+        && Miditranslators[axis_name].enabled==true) //Todo: temporary. should likely have "in_use" to trigger note on/off
         {
         // if CC MODE
             if (Miditranslators[axis_name].translator_mode==0)
@@ -145,7 +145,7 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
         float sensor_min=sensor.get_limit_min(axis_name);
         float sensor_max=sensor.get_limit_max(axis_name);
 
-        if (sensor.get_enabled(axis_name) && hid_map[axis_name].disabled==false)
+        if (sensor.get_enabled(axis_name) && hid_map[axis_name].enabled==true)
         {
             if (hid_map.find(axis_name) != hid_map.end())
             {
