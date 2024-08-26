@@ -2,6 +2,7 @@
 #define MIDIBLE_H
 
 #include "hw_ui.h"
+#include "HW_CONFIG.h"
 
 void midiBLESetup();
 //void midiBLELoop();

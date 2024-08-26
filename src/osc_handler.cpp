@@ -6,6 +6,17 @@
 void OSC_handler::setup() {
 
     set_config();
+    if(config.general_config["OSC_ENA"])
+    {
+        Serial.print("OSC sending to IP: ");
+        Serial.println(dest_ip.toString());
+        Serial.print("on port:");
+        Serial.println(String(out_port));
+    }
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
+
 }
 
 
@@ -13,34 +24,34 @@ void OSC_handler::set_config() {
     if (config.general_config.find("OSC_IP") != config.general_config.end()){
         string ip = config.general_config["OSC_IP"];
         setDestIp(ip);
-        Serial.println("OSC IP set to: " + dest_ip.toString());
+        //Serial.println("OSC IP set to: " + dest_ip.toString());
     }
     if (config.general_config.find("OSC_PORT") != config.general_config.end()){
         setOutPort(config.general_config["OSC_PORT"]);
-        Serial.println("OSC port set to: " + String(out_port));
+        //Serial.println("OSC port set to: " + String(out_port));
     }
     if (config.general_config.find("OSC_ENA") != config.general_config.end()){
         setEnabled(config.general_config["OSC_ENA"]);
-        Serial.println("OSC enabled: " + String(enabled));
+        //Serial.println("OSC enabled: " + String(enabled));
     }
 }
 
 /// @brief start the UDP connection. 
 void OSC_handler::start() {
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Can't start OSC, WiFi is not connected");
+        Serial.println(F("Can't start OSC, WiFi is not connected"));
         return;
     }
 
     if (dest_ip == IPAddress(0,0,0,0) || out_port == 0){
-        Serial.println("Can't start OSC, No destination IP or port set");
+        Serial.println(F("Can't start OSC, No destination IP or port set"));
         return;
     }
     else {
-        Serial.println("Starting OSC");
+        Serial.println(F("Starting OSC"));
         Udp.begin(out_port);
         isStarted = true;
-        Serial.println("OSC started");
+        Serial.println(F("OSC started"));
     }
 }
 
@@ -100,6 +111,6 @@ void OSC_handler::sendOscMessage(string address,float value) {
         msg.empty();
     }
     else {
-        Serial.println("No destination IP or port set");
+        Serial.println(F("No destination IP or port set"));
     }
 }

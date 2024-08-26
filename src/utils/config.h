@@ -36,10 +36,10 @@ class Config
                     {"OSC_IP", "0.0.0.0"},
         };
         }
-        String filename;
+        String filename; // raw config file name (no extension)
         json current_config;
-        json res;
-        json test_config;
+        //json res;
+        //json test_config;
         // only config element not comming from external classes. 
         // placed here for now.
         json general_config= {
@@ -51,13 +51,14 @@ class Config
     
 
         // load config from files into current_config
-        void load_config(String filename);
+        void load_config(String filename,bool addJsonExtension=true);
         void load_config();
 
         // set current_config from a json object
-        void set(json config);
+        void set(const json& config);
 
         //load all config into 
+
         //void load_all_configs();
 
         void save();

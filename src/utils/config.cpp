@@ -8,11 +8,19 @@
 // todo. when changing sensor range for eg, this should trigger an update of miditranslator max ????
 Config config;
 
-void Config::load_config(String filename) {
+
+void Config::load_config(String filename,bool addJsonExtension=true) {
     this->filename = filename;
     Serial.print("load config: ");
-    Serial.println(get_path(filename).c_str());
-    current_config = json::parse(readFile(LittleFS, get_path(filename).c_str()));
+    Serial.println(get_path(filename,addJsonExtension).c_str());
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
+    current_config.clear();
+    current_config = json::parse(readFile(LittleFS, get_path(filename,addJsonExtension).c_str()));
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
     logs.writeLog("load config: " + filename);
 }
 
@@ -21,18 +29,21 @@ void Config::load_config(String filename) {
 void Config::load_config() {
     // if no default config, create default
     if (!LittleFS.exists(get_path("default").c_str())) {
+        Serial.println("no default config, creating one");
         new_config("default");
     }
     // if last config exists, load it
     if (LittleFS.exists(last_config_path)) {
         String name = String(readFile(LittleFS, last_config_path).c_str());
         if(LittleFS.exists(get_path(name).c_str())){
-            return load_config(name);
+            Serial.println("last config found: " + name);
+            load_config(name);
+            return;
         }
+        Serial.println(F("last config not found, loading default"));
     }
     // if no last config, load default
     load_config("default");
-    print();
 }
 
 String Config::get_list(){
@@ -58,10 +69,11 @@ String Config::get_list(){
 
 void Config::save() { save(filename); }
 void Config::save(String filename) { save(filename, current_config.dump().c_str()); }
+
 void Config::save(String filename, String config) {
     logs.writeLog("save config: " + filename);
     Serial.println("save config: " + filename);
-    writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
+    writeFile(LittleFS, get_path(filename,false).c_str(), config.c_str());
 }
 
 void Config::delete_config(String filename) {
@@ -93,19 +105,21 @@ void Config::rename(String old_name, String new_name) {
     }
 }
 void Config::new_config(String name) {
-
-    std::string input = readFile(LittleFS, config_model_path);
     // should check if file already exists. rewrtiing on same filename can cause corruption ? 
-    writeFile(LittleFS, get_path(name).c_str(), input.c_str());
+    //std::string input = readFile(LittleFS, config_model_path);
+    copyFile(LittleFS, config_model_path, get_path(name).c_str());
+    this->filename = name;
+    //writeFile(LittleFS, get_path(name).c_str(), input.c_str());
     logs.writeLog("new config: " + name);
 }
 
 json Config::get(string key) { return current_config.at(key); }
 json Config::get() { return current_config; }
 
-void Config::set(json config) {
+void Config::set(const json& config) {
     try {
-        Serial.println(config.dump().c_str());
+        //Serial.println(config.dump().c_str());
+        current_config.clear();
         current_config = config;
         logs.writeLog("config set");
     } catch (const std::exception& e) {
@@ -118,10 +132,13 @@ void Config::set(json config) {
 void Config::print() { Serial.println(current_config.dump(4).c_str()); }
 void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
     Serial.print("gatherconfig sensor");
+    current_config["sensor"].clear();
     current_config["sensor"] = sensor.get_config(debug);
     Serial.print("gatherconfig engine");
+    current_config["engine"].clear();
     current_config["engine"] = engine.get_config(debug);
     Serial.print("gatherconfig general");
+    current_config["general"].clear();
     current_config["general"] = general_config;
 
     if (debug) {
@@ -133,7 +150,9 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug) {
     sensor.set_config(current_config["sensor"]);
     engine.set_config(current_config["engine"]);
+    general_config.clear();
     general_config = current_config["general"];
+    //log last config name
     writeFile(LittleFS, last_config_path, filename.c_str());
      /*TODO: improve: 
      either pass the json to apply and avoid passing cofig object
@@ -144,6 +163,8 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug)
 
     logs.writeLog("config applied: " + filename);
 }
+
+
 String Config::get_path(String filename, bool addExtension) {
     if (addExtension) {
         return String(configs_root) + "/" + filename + ".json";

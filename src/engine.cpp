@@ -260,7 +260,7 @@ json Engine::get_config(bool debug)
         }
         if (debug)
         {
-            Serial.println("engine_get_config");
+            Serial.println(F("engine_get_config"));
             Serial.println(j.dump(4).c_str());
             Serial.println("engine_get_config_end");
         } 

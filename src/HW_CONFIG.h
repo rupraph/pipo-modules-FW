@@ -13,6 +13,7 @@
 
 #define PIPO_FW_VERSION "0.1" 
 
+#define DEBUG_HEAP true
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
     #define WIFI_LED 9

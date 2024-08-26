@@ -49,6 +49,10 @@ void HwUi::setup()
     set_led(BT_LED, 0);
     set_led(SEND_LED, 0);
     set_led(LOW_BAT_LED, 0);
+    Serial.println("HW UI setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 
 }
 

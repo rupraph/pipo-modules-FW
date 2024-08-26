@@ -33,7 +33,11 @@ void PipoServer::setup() {
     setup_ws();
 
     server.begin();
+    Serial.println("Server setup donce");
     is_running = true;
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void PipoServer::stop() {
@@ -51,12 +55,12 @@ void PipoServer::setup_requests() {
             {"ip", WiFi.localIP().toString().c_str()},
             {"mac", WiFi.macAddress().c_str()},
         };
-        request->send(200, "text/json", info.dump().c_str());
+        return request->send(200, "text/json", info.dump().c_str());
     });
 
-    server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
-        request->send(200, "text/plain", config.get().dump().c_str()); 
-    });
+    // server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
+    //     return request->send(200, "text/plain", config.get().dump().c_str()); 
+    // });
 
     
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
@@ -79,25 +83,28 @@ void PipoServer::setup_requests() {
         }
         try{
             String name = request->getParam("name")->value(); 
-            request->send(LittleFS, config.get_path(name), "application/json");
+            Serial.println(ESP.getFreeHeap());
+            return request->send(LittleFS, config.get_path(name), "application/json");
         }
         catch(const std::exception e){
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
         }
     });
 
-    server.on("/config-active", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", config.filename.c_str()); });
+    server.on("/config-active", HTTP_GET,[&](AsyncWebServerRequest* request) { 
+        return request->send(200, "text/plain", config.filename.c_str()); 
+        });
 
     server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("name")) {
             return request->send(400, "text/plain", "Error: no name parameter");
         }
         try {
-            config.load_config(request->getParam("name")->value());
+            config.load_config(request->getParam("name")->value().c_str(), true);
             config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Active config set");
         } catch (const std::exception e) {
+            Serial.println("error loading config");
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
         }
     });
@@ -146,45 +153,82 @@ void PipoServer::setup_requests() {
             return request->send(500, "text/plain", "Error renaming config: " + String(e.what()));
         }
     });
-    server.on("/save", HTTP_POST, [&](AsyncWebServerRequest* request) {
-        if (!request->hasParam("config")) {
-            return request->send(400, "text/plain", "No config received");
+
+
+    server.on("/save", HTTP_POST, 
+        [&](AsyncWebServerRequest* request) {
+        return request->send(200, "text/plain", "Config sending");
+        },
+        [&](AsyncWebServerRequest* request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+            try {
+                if (index == 0) {
+                // This is the start of the file upload
+                received_configData.clear();
+                }
+                received_configData.append((char*)data, len);
+
+                if (final) {
+                    // This is the end of the file upload
+
+                    // Here I am doing save first then load. so parsing happen with load function.
+                    // this avoids parsing in here and trying to pass the json to config.set().
+                    // after solving other issues, not sure if this has any value after all.
+
+                    #ifdef DEBUG_HEAP
+                            Serial.println(ESP.getFreeHeap());  // 44k remaining
+                    #endif
+                    
+                    config.save(config.filename+".json", received_configData.c_str());
+                    
+                    #ifdef DEBUG_HEAP
+                            Serial.println(ESP.getFreeHeap());
+                    #endif
+                    
+                    config.load_config(config.filename, true);
+                    
+                    #ifdef DEBUG_HEAP
+                            Serial.println(ESP.getFreeHeap());
+                    #endif
+                    
+                    received_configData.clear();  
+                    config.apply(input_sens, engine, osc, true);
+                    return request->send(200, "text/plain", "Config saved");
+                }
+            }catch (const std::exception& e) {
+                Serial.println("error saving config");
+                return request->send(500, "text/plain", "Error saving config: " + String(e.what()));
+            }
         }
-        try {
-            
-            config.set(json::parse(request->getParam("config")->value()));
-            config.apply(input_sens, engine, osc, true);
-            config.save();
-            
-            return request->send(200, "text/plain", "Config saved");
-        } catch (const std::exception e) {
-            return request->send(500, "text/plain", "Error saving config: " + String(e.what()));
-        }
-    });
+    );
 
     server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) {
-        request->send(200, "text/plain", "Rebooting");
+        return request->send(200, "text/plain", "Rebooting");
         delay(1000);
         ESP.restart();
     });
 
-    server.on("wifimode", HTTP_GET, [](AsyncWebServerRequest* request) {
+    server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
         if (config.general_config["Wifi_mode"] == "AP") {
-            request->send(200, "text/plain", "switch to STA");
+            // Todo: should use setter
+            config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "STA";
+            return request->send(200, "text/plain", "switch to STA");
+            
         } else {
-            request->send(200, "text/plain", "STA");
+            config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "switch to AP";
+            return request->send(200, "text/plain", "STA");
         }
         config.save(config.filename);
         delay(1000);
         ESP.restart();
     });
 
-    server.on("/logs", HTTP_GET,
-              [&](AsyncWebServerRequest* request) { request->send(200, "text/plain", logs.readLogs().c_str()); });
+    server.on("/logs", HTTP_GET,[&](AsyncWebServerRequest* request) { 
+        request->send(200, "text/plain", logs.readLogs().c_str()); });
 
-    server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { request->send(200, "text/plain", "Pong"); });
+    server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) { 
+        request->send(200, "text/plain", "Pong"); });
 }
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
     Serial.println(message);
@@ -198,15 +242,32 @@ void PipoServer::setup_ws() {
     ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data,
                    size_t len) {
         if (type == WS_EVT_CONNECT) {
-            Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
-            client->printf("Hello Client %u :)", client->id());
+            //Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
+            Serial.print("ws connect");
+            Serial.print(server->url());
+            Serial.print(client->id());
+            Serial.println();
+            //client->printf("Hello Client %u :)", client->id());
             client->ping();
         } else if (type == WS_EVT_DISCONNECT) {
-            Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
+            //Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
+            Serial.print("ws disconnect");
+            Serial.print(server->url());
+            Serial.print(client->id());
         } else if (type == WS_EVT_ERROR) {
-            Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
+            //Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
+            Serial.print("ws error");
+            Serial.print(server->url());
+            Serial.print(client->id());
+            Serial.print(*((uint16_t*)arg));
+            Serial.println((char*)data);
         } else if (type == WS_EVT_PONG) {
-            Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char*)data : "");
+            //Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char*)data : "");
+            Serial.print("ws pong");
+            Serial.print(server->url());
+            Serial.print(client->id());
+            Serial.print(len);
+            Serial.println((len) ? (char*)data : "");
         } else if (type == WS_EVT_DATA) {
             AwsFrameInfo* info = (AwsFrameInfo*)arg;
             String msg = "";
@@ -219,11 +280,16 @@ void PipoServer::setup_ws() {
                 } else {
                     char buff[3];
                     for (size_t i = 0; i < info->len; i++) {
-                        sprintf(buff, "%02x ", (uint8_t)data[i]);
-                        msg += buff;
+                        // sprintf(buff, "%02x ", (uint8_t)data[i]);
+                        // msg += buff;
+                        // removing sprintf to reduce memory usage
+                        if (data[i] < 16) msg += '0'; // Add leading zero for single hex digit
+                         msg += String((uint8_t)data[i], HEX);
+                        msg += ' ';
                     }
                 }
-                Serial.printf("%s\n", msg.c_str());
+                //Serial.printf("%s\n", msg.c_str());
+                Serial.print(msg);
 
                 if (info->opcode == WS_TEXT) onMessage(client, msg);
             } else {
@@ -235,8 +301,12 @@ void PipoServer::setup_ws() {
                 } else {
                     char buff[3];
                     for (size_t i = 0; i < len; i++) {
-                        sprintf(buff, "%02x ", (uint8_t)data[i]);
-                        msg += buff;
+                        // sprintf(buff, "%02x ", (uint8_t)data[i]);
+                        // msg += buff;
+                        // removing sprintf to reduce memory usage
+                        if (data[i] < 16) msg += '0'; // Add leading zero for single hex digit
+                        msg += String((uint8_t)data[i], HEX);
+                        msg += ' ';
                     }
                 }
                 if ((info->index + len) < info->len) return;

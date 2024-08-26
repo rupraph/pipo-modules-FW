@@ -17,6 +17,9 @@ void MotionSensor::init()
 
 void MotionSensor::setup()
 {
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
   
 }
 

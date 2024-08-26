@@ -13,7 +13,10 @@ void MidiUSBSetup() {
     // while (!TinyUSBDevice.mounted())
     //     delay(1);
     MidiUsb.begin(MIDI_CHANNEL_OMNI);
-    
+    Serial.println("Midi USB setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void MidiUSBsendCC(int control, int value, int channel){

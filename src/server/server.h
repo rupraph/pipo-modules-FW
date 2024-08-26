@@ -33,6 +33,8 @@ class PipoServer
         Sensor& input_sens;
         Engine& engine;
         OSC_handler& osc;
+        string received_configData;
+        //json parsed_configData;
 
 };
 #endif  // WEBSERVER_H
