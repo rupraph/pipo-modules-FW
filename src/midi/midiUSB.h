@@ -3,6 +3,7 @@
 
 #include <Adafruit_TinyUSB.h>
 #include <MIDI.h>
+#include "HW_CONFIG.h"
 
 
 

@@ -21,15 +21,19 @@ void setup_wifi(){
     // WiFiManager wm;
     wm.setDarkMode(true);
     wm.setHostname(string(PIPO_TYPE).c_str());
+    wm.setConnectTimeout(10);
     wm.setConfigPortalBlocking(false);
     wm.setBreakAfterConfig(true);
     wm.setDebugOutput(true);
     wm.setDebugOutput(true);
     wm.setWiFiAutoReconnect(true);
     wm.setCleanConnect(true);
+ 
     wm.setSaveConfigCallback([]() {
         ESP.restart();
     });
+
+
 
     if(digitalRead(MODE_SW)==LOW){
         delay(3000);

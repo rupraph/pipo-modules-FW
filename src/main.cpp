@@ -40,9 +40,11 @@ void monitor_wifi();
 
 void setup() {
     Serial.begin(115200);
+    delay(3000);
     // while(!Serial) // "while" prevents usb to setup properly
     // setCpuFrequencyMhz(80); will be usefull to save power on battery
     /////// Init hardware user interface (leds and switches)
+    Serial.println(ESP.getFreeHeap());
     hwui.init();
     hwui.setup();
 
@@ -53,14 +55,18 @@ void setup() {
     midiio.setup();
     hidio.usb_hid_setup();
 
-    /////// Init wifi
-    setup_wifi();
+    
 
     /////// Load config
+    Serial.print("config list:");
     Serial.println(config.get_list());
     config.load_config();
     config.apply(input_sens, engine, osc, false);  // input_sens,
     //config.print();
+
+    
+    /////// Init wifi
+    setup_wifi();
     
 
     listDir(LittleFS, "/", 0);
@@ -68,6 +74,8 @@ void setup() {
     /////// initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
+    Serial.print("after sensor setup");
+    Serial.println(ESP.getFreeHeap());
 
     // Start server if TA connected or AP mode
     // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
@@ -101,7 +109,7 @@ void setup() {
         Serial.println(String(ESP.getMinFreeHeap()));
         Serial.print(F("Max Alloc Heap:"));
         Serial.println(ESP.getMaxAllocHeap());
-        
+
     #endif
 }
 

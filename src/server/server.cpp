@@ -33,6 +33,7 @@ void PipoServer::setup() {
     setup_ws();
 
     server.begin();
+    Serial.println("Server setup donce");
     is_running = true;
     #ifdef DEBUG_HEAP
         Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));

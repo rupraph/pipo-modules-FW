@@ -2,6 +2,7 @@
 #define _USB_HID_H_
 
 #include <Adafruit_TinyUSB.h>
+#include "HW_CONFIG.h"
 
 // temporarily test hid here
 

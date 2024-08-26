@@ -8,6 +8,7 @@
 // todo. when changing sensor range for eg, this should trigger an update of miditranslator max ????
 Config config;
 
+
 void Config::load_config(String filename,bool addJsonExtension=true) {
     this->filename = filename;
     Serial.print("load config: ");
@@ -36,12 +37,13 @@ void Config::load_config() {
         String name = String(readFile(LittleFS, last_config_path).c_str());
         if(LittleFS.exists(get_path(name).c_str())){
             Serial.println("last config found: " + name);
-            return load_config(name);
+            load_config(name);
+            return;
         }
+        Serial.println(F("last config not found, loading default"));
     }
     // if no last config, load default
     load_config("default");
-    print();
 }
 
 String Config::get_list(){
