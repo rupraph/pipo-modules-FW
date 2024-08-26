@@ -142,13 +142,15 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
     {
         string axis_name=pair.first;
         float sensor_val=sensor.get_value(axis_name);
+        float sensor_min=sensor.get_limit_min(axis_name);
+        float sensor_max=sensor.get_limit_max(axis_name);
 
         if (sensor.get_enabled(axis_name) && hid_map[axis_name].disabled==false)
         {
             if (hid_map.find(axis_name) != hid_map.end())
             {
                 string map_name=hid_map[axis_name].mapto;
-                int hid_val=hid_map[axis_name].get_current_int(sensor_val);
+                int hid_val=hid_map[axis_name].get_current_int(sensor_val,sensor_min,sensor_max);
                 if (hidio.hid_mode==0)
                 {
                     if (map_name=="x")
@@ -218,11 +220,13 @@ void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
         {
             string axis_name=pair.first;
             float sensor_val=sensor.get_value(axis_name);
+            float sensor_min=sensor.get_limit_min(axis_name);
+            float sensor_max=sensor.get_limit_max(axis_name);
             if (sensor.get_enabled(axis_name) 
             && Osctranslators[axis_name].enabled
             && sensor.test_outside_deadzone(axis_name))
             {
-                float osc_val=Osctranslators[axis_name].get_value(sensor_val);
+                float osc_val=Osctranslators[axis_name].get_value(sensor_val,sensor_min,sensor_max);
                 //Serial.println(osc_val);
                 osc.sendOscMessage(axis_name,osc_val);
             }

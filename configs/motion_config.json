@@ -2,8 +2,6 @@
   "engine": {
       "engine-hid": {
           "accX": {
-              "input_max": 8.0,
-              "input_min": -8.0,
               "mapto": "rx",
               "out_type": 0,
               "output_max": 255,
@@ -15,8 +13,6 @@
               "disabled": true
           },
           "accY": {
-              "input_max": 8,
-              "input_min": -8,
               "mapto": "ry",
               "out_type": 0,
               "output_max": 255,
@@ -28,8 +24,6 @@
               "disabled": true
           },
           "accZ": {
-              "input_max": 180,
-              "input_min": -180,
               "mapto": "rz",
               "out_type": 0,
               "output_max": 255,
@@ -41,8 +35,6 @@
               "disabled": true
           },
           "pitch": {
-              "input_max": 90,
-              "input_min": -90,
               "mapto": "y",
               "out_type": 0,
               "output_max": 127,
@@ -54,8 +46,6 @@
               "disabled": false
           },
           "roll": {
-              "input_max": 180,
-              "input_min": -180,
               "mapto": "x",
               "out_type": 0,
               "output_max": 127,
@@ -67,8 +57,6 @@
               "disabled": false
           },
           "yaw": {
-              "input_max": 180,
-              "input_min": -180,
               "mapto": "z",
               "out_type": 0,
               "output_max": 255,
@@ -171,49 +159,37 @@
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 8.0,
-                "input_min": -8.0
+                "output_min":0
             },
             "accY": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 8.0,
-                "input_min": -8.0
+                "output_min":0
             },
             "accZ": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 8.0,
-                "input_min": -8.0
+                "output_min":0
             },
             "pitch": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 90.0,
-                "input_min": -90.0
+                "output_min":0
             },
             "roll": {
                 "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 180.0,
-                "input_min": -180.0
+                "output_min":0
             },
             "yaw": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max": 180.0,
-                "input_min": -180.0
+                "output_min":0
             }
       }
   },

@@ -40,12 +40,12 @@ class Engine
                 };
 
                 Osctranslators ={
-                    {"roll",OscTranslator(sensor.get_limit_min("roll"),sensor.get_limit_max("roll"))},
-                    {"pitch",OscTranslator(sensor.get_limit_min("pitch"),sensor.get_limit_max("pitch"))},
-                    {"yaw",OscTranslator(sensor.get_limit_min("yaw"),sensor.get_limit_max("yaw"))},
-                    {"accX",OscTranslator(sensor.get_limit_min("accX"),sensor.get_limit_max("accX"))},
-                    {"accY",OscTranslator(sensor.get_limit_min("accY"),sensor.get_limit_max("accY"))},
-                    {"accZ",OscTranslator(sensor.get_limit_min("accZ"),sensor.get_limit_max("accZ"))}
+                    {"roll",OscTranslator()},
+                    {"pitch",OscTranslator()},
+                    {"yaw",OscTranslator()},
+                    {"accX",OscTranslator()},
+                    {"accY",OscTranslator()},
+                    {"accZ",OscTranslator()}
                 };
 
 
@@ -62,7 +62,7 @@ class Engine
                     {"dist",MidiTranslator()}
                 };
                 Osctranslators ={
-                    {"dist",OscTranslator(sensor.get_limit_min("dist"),sensor.get_limit_max("dist"))}
+                    {"dist",OscTranslator()}
                 };
                 hid_map ={
                     {"dist",HidTranslator()}
@@ -84,18 +84,18 @@ class Engine
                 };
 
                 Osctranslators ={
-                    {"A1",OscTranslator(sensor.get_limit_min("A1"),sensor.get_limit_max("A1"))},
-                    {"A2",OscTranslator(sensor.get_limit_min("A2"),sensor.get_limit_max("A2"))},
-                    {"A3",OscTranslator(sensor.get_limit_min("A3"),sensor.get_limit_max("A3"))},
-                    {"A4",OscTranslator(sensor.get_limit_min("A4"),sensor.get_limit_max("A4"))},
-                    {"A5",OscTranslator(sensor.get_limit_min("A5"),sensor.get_limit_max("A5"))},
-                    {"A6",OscTranslator(sensor.get_limit_min("A6"),sensor.get_limit_max("A6"))},
-                    {"T1",OscTranslator(sensor.get_limit_min("T1"),sensor.get_limit_max("T1"))},
-                    {"T2",OscTranslator(sensor.get_limit_min("T2"),sensor.get_limit_max("T2"))},
-                    {"T3",OscTranslator(sensor.get_limit_min("T3"),sensor.get_limit_max("T3"))},
-                    {"T4",OscTranslator(sensor.get_limit_min("T4"),sensor.get_limit_max("T4"))},
-                    {"T5",OscTranslator(sensor.get_limit_min("T5"),sensor.get_limit_max("T5"))},
-                    {"T6",OscTranslator(sensor.get_limit_min("T6"),sensor.get_limit_max("T6"))}
+                    {"A1",OscTranslator()},
+                    {"A2",OscTranslator()},
+                    {"A3",OscTranslator()},
+                    {"A4",OscTranslator()},
+                    {"A5",OscTranslator()},
+                    {"A6",OscTranslator()},
+                    {"T1",OscTranslator()},
+                    {"T2",OscTranslator()},
+                    {"T3",OscTranslator()},
+                    {"T4",OscTranslator()},
+                    {"T5",OscTranslator()},
+                    {"T6",OscTranslator()}
                 };
 
                 hid_map ={
