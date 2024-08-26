@@ -4,7 +4,7 @@
 // for convenience
 using json = nlohmann::json;
 
-MidiTranslator::MidiTranslator(float limit_max) {
+MidiTranslator::MidiTranslator() {
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     if (hires) {
         max_output = 16383;
@@ -12,13 +12,12 @@ MidiTranslator::MidiTranslator(float limit_max) {
     else {
         max_output = 127;
     }
-    this->max_input = limit_max;
 
     //printScale(current_scale);
 
 }
 
-int MidiTranslator::get_note(float value) {
+int MidiTranslator::get_note(float value, float min_input, float max_input) {
     //cap value to input range
     if (value < min_input) {
         value = min_input;
@@ -192,7 +191,7 @@ void MidiTranslator::update_scale() {
     //printScale(this->current_scale);
 }
 
-int MidiTranslator::get_cc_val(float value,bool hires) {
+int MidiTranslator::get_cc_val(float value, float min_input, float max_input,bool hires=false) {
     // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)  
 
     //cap value to input range
@@ -223,7 +222,7 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
     // else 
     // {
         if (interpolation_type == 0) {
-        return map_linear(value);
+        return map_linear(value, min_input, max_input);
         }
         else {
         // not implemented yet
@@ -232,7 +231,7 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
     // }
 }
 
-int MidiTranslator::map_linear(float value){
+int MidiTranslator::map_linear(float value, float min_input, float max_input) {
     if (min_input == max_input || min_output == max_output) {
         Serial.println("min and max values cannot be equal");
     }
@@ -246,8 +245,8 @@ void to_json(json& j, const MidiTranslator& t) {
         {"rootNote", t.rootNote},
         {"numberOfNotes", t.numberOfNotes},
         {"current_scale", t.current_scale},
-        {"max_input", t.max_input},
-        {"min_input", t.min_input},
+        // {"max_input", t.max_input},
+        // {"min_input", t.min_input},
         {"max_output", t.max_output},
         {"min_output", t.min_output},
         {"interpolation_type", t.interpolation_type},
@@ -273,8 +272,8 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("rootNote").get_to(t.rootNote);
     j.at("numberOfNotes").get_to(t.numberOfNotes);
     j.at("current_scale").get_to(t.current_scale);
-    j.at("max_input").get_to(t.max_input);
-    j.at("min_input").get_to(t.min_input);
+    // j.at("max_input").get_to(t.max_input);
+    // j.at("min_input").get_to(t.min_input);
     j.at("max_output").get_to(t.max_output);
     j.at("min_output").get_to(t.min_output);
     j.at("interpolation_type").get_to(t.interpolation_type);

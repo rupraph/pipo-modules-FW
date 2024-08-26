@@ -19,8 +19,8 @@ class MidiTranslator
 
 {
     public:
-        MidiTranslator() = default;
-        MidiTranslator(float limit_max);
+        MidiTranslator();// = default;
+        // MidiTranslator(float limit_max);
 
         //midi 
         int channel = 1; // should be in engine.
@@ -40,8 +40,8 @@ class MidiTranslator
         vector<int> current_scale;
 
         // common for note and cc
-        float max_input = 100;
-        float min_input = 0;
+        // float max_input = 100;
+        // float min_input = 0;
 
 
         //CC variables
@@ -80,7 +80,7 @@ class MidiTranslator
 
 
 
-        int get_note(float value);
+        int get_note(float value,float min_input,float max_input);
         void printScale(vector<int> scale);
         void set_Scale_Type(string scaleType);
         void set_root_note(string rootNote);
@@ -100,8 +100,8 @@ class MidiTranslator
         void update_scale();
 
         // To cc variables
-        int get_cc_val(float value, bool hires=false);
-        int map_linear(float x);
+        int get_cc_val(float value, float min_input,float max_input, bool hires=false);
+        int map_linear(float x, float min_input, float max_input);
 
 
         // save/load
@@ -135,12 +135,12 @@ class MidiTranslator
             else if (param_name == "numberOfNotes") {
                 numberOfNotes = value;
             }
-            else if (param_name == "max_input") {
-                max_input = value;
-            }
-            else if (param_name == "min_input") {
-                min_input = value;
-            }
+            // else if (param_name == "max_input") {
+            //     max_input = value;
+            // }
+            // else if (param_name == "min_input") {
+            //     min_input = value;
+            // }
             else if (param_name == "max_output") {
                 max_output = value;
             }

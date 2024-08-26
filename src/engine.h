@@ -30,12 +30,12 @@ class Engine
         {
              #if defined(PIPO_MOTION)
                 Miditranslators ={
-                    {"roll",MidiTranslator(sensor.get_limit_max("roll"))},
-                    {"pitch",MidiTranslator(sensor.get_limit_max("pitch"))},
-                    {"yaw",MidiTranslator(sensor.get_limit_max("yaw"))},
-                    {"accX",MidiTranslator(sensor.get_limit_max("accX"))},
-                    {"accY",MidiTranslator(sensor.get_limit_max("accY"))},
-                    {"accZ",MidiTranslator(sensor.get_limit_max("accZ"))}   
+                    {"roll",MidiTranslator()},
+                    {"pitch",MidiTranslator()},
+                    {"yaw",MidiTranslator()},
+                    {"accX",MidiTranslator()},
+                    {"accY",MidiTranslator()},
+                    {"accZ",MidiTranslator()}   
 
                 };
 
@@ -59,7 +59,7 @@ class Engine
                 };
             #elif defined(PIPO_RANGE)
                 Miditranslators ={
-                    {"dist",MidiTranslator(sensor.get_limit_max("dist"))}
+                    {"dist",MidiTranslator()}
                 };
                 Osctranslators ={
                     {"dist",OscTranslator(sensor.get_limit_min("dist"),sensor.get_limit_max("dist"))}
@@ -69,18 +69,18 @@ class Engine
                 };
             #elif defined(PIPO_ANALOG)
                 Miditranslators ={
-                    {"A1",MidiTranslator(sensor.get_limit_max("A1"))},
-                    {"A2",MidiTranslator(sensor.get_limit_max("A2"))},
-                    {"A3",MidiTranslator(sensor.get_limit_max("A3"))},
-                    {"A4",MidiTranslator(sensor.get_limit_max("A4"))},
-                    {"A5",MidiTranslator(sensor.get_limit_max("A5"))},
-                    {"A6",MidiTranslator(sensor.get_limit_max("A6"))},
-                    {"T1",MidiTranslator(sensor.get_limit_max("T1"))},
-                    {"T2",MidiTranslator(sensor.get_limit_max("T2"))},
-                    {"T3",MidiTranslator(sensor.get_limit_max("T3"))},
-                    {"T4",MidiTranslator(sensor.get_limit_max("T4"))},
-                    {"T5",MidiTranslator(sensor.get_limit_max("T5"))},
-                    {"T6",MidiTranslator(sensor.get_limit_max("T6"))}
+                    {"A1",MidiTranslator()},
+                    {"A2",MidiTranslator()},
+                    {"A3",MidiTranslator()},
+                    {"A4",MidiTranslator()},
+                    {"A5",MidiTranslator()},
+                    {"A6",MidiTranslator()},
+                    {"T1",MidiTranslator()},
+                    {"T2",MidiTranslator()},
+                    {"T3",MidiTranslator()},
+                    {"T4",MidiTranslator()},
+                    {"T5",MidiTranslator()},
+                    {"T6",MidiTranslator()}
                 };
 
                 Osctranslators ={

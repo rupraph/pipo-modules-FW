@@ -45,6 +45,8 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
     {
         string axis_name=pair.first;
         float sensor_val=sensor.get_value(axis_name);
+        float sensor_min=sensor.get_limit_min(axis_name);
+        float sensor_max=sensor.get_limit_max(axis_name);
         int channel=Miditranslators[axis_name].channel;
 
         //check if axis is enabled, outside deadzone and not disabled
@@ -59,13 +61,13 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 int cc_number=Miditranslators[axis_name].cc_number;
                 if (Miditranslators[axis_name].getHires())
                 {
-                    uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,1),16383));
+                    uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,1),16383));
                     midiio.sendControlChange(cc_number, cc_val, channel,true);
 
                 }
                 else
                 {
-                    uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,0),127));
+                    uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,0),127));
                     // for midi find way to limit rotation to max 180° to avoid overflow to 0
                     midiio.sendControlChange(cc_number, cc_val, channel,false);
 
@@ -79,7 +81,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
             else
             {   
                 note_val_prev[channel]=note_val[channel];
-                note_val[channel]=max(0,min(Miditranslators[axis_name].get_note(sensor_val),127));
+                note_val[channel]=max(0,min(Miditranslators[axis_name].get_note(sensor_val,sensor_min,sensor_max),127));
                 
                 // probaly get triggered should be something linked to the deadzone
                 #if defined(PIPO_ANALOG)
