@@ -18,10 +18,19 @@ using json = nlohmann::json;
 
 void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& osc)
 {
-    midiio.manage_sustain();
-    midi_processor(sensor, midiio);
-    osc_processor(sensor,osc);
-    hid_processor(sensor, hidio);
+    if (config.general_config["MidiEnabled"]==true)
+    {
+        midiio.manage_sustain();
+        midi_processor(sensor, midiio);
+    }
+    if (config.general_config["OSC_ENA"]==true)
+    {
+        osc_processor(sensor,osc);
+    }
+    if (config.general_config["HidEnabled"]==true)
+    {
+        hid_processor(sensor, hidio);
+    }
 }
 
 
@@ -201,20 +210,21 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
 void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
 {
     // Todo: loop through sensor data -> indentical for 3 processor, should be factorized
-    const auto& sensor_dat = sensor.get_sensor_dat_map();
-    for (auto const& pair : sensor_dat)
-    {
-        string axis_name=pair.first;
-        float sensor_val=sensor.get_value(axis_name);
-        if (sensor.get_enabled(axis_name) 
-        && Osctranslators[axis_name].enabled
-        && sensor.test_outside_deadzone(axis_name))
+
+        const auto& sensor_dat = sensor.get_sensor_dat_map();
+        for (auto const& pair : sensor_dat)
         {
-            float osc_val=Osctranslators[axis_name].get_value(sensor_val);
-            //Serial.println(osc_val);
-            osc.sendOscMessage(axis_name,osc_val);
+            string axis_name=pair.first;
+            float sensor_val=sensor.get_value(axis_name);
+            if (sensor.get_enabled(axis_name) 
+            && Osctranslators[axis_name].enabled
+            && sensor.test_outside_deadzone(axis_name))
+            {
+                float osc_val=Osctranslators[axis_name].get_value(sensor_val);
+                //Serial.println(osc_val);
+                osc.sendOscMessage(axis_name,osc_val);
+            }
         }
-    }
         
 }
 

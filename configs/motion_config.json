@@ -289,6 +289,8 @@
     "Wifi_mode": "STA",
     "OSC_ENA": true,
     "OSC_IP": "192.168.1.71",
-    "OSC_PORT": 8000
+    "OSC_PORT": 8000,
+    "MidiEnabled": true,
+    "HidEnabled": true
 }
 }
