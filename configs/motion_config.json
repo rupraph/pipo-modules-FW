@@ -150,25 +150,25 @@
       },
       "engine-osc": {
             "accX": {
-                "enabled":false,
+                "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
                 "output_min":0
             },
             "accY": {
-                "enabled":false,
+                "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
                 "output_min":0
             },
             "accZ": {
-                "enabled":false,
+                "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
                 "output_min":0
             },
             "pitch": {
-                "enabled":false,
+                "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
                 "output_min":0
@@ -180,7 +180,7 @@
                 "output_min":0
             },
             "yaw": {
-                "enabled":false,
+                "enabled":true,
                 "mode_raw": true,
                 "output_max":1,
                 "output_min":0
