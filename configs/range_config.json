@@ -17,7 +17,6 @@
             "dist": {
                 "cc_number": 2,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,

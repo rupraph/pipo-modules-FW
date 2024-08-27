@@ -162,7 +162,6 @@
             "A1": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -176,7 +175,6 @@
             "A2": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -190,7 +188,6 @@
             "A3": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -204,7 +201,6 @@
             "A4": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -218,7 +214,6 @@
             "A5": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -232,7 +227,6 @@
             "A6": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -246,7 +240,6 @@
             "T1": {
                 "cc_number": 2,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -260,7 +253,6 @@
             "T2": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -274,7 +266,6 @@
             "T3": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -288,7 +279,6 @@
             "T4": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -302,7 +292,6 @@
             "T5": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -316,7 +305,6 @@
             "T6": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
