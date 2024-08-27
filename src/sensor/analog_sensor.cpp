@@ -37,13 +37,12 @@ void AnalogSensor::measure_offset_all()
         // measure values without corretcing for offset
         for (auto const& pair : analog_map)
         {
-            sensor_dat[pair.first].value = analogRead(pair.second);
+            sensor_dat[pair.first].value = analogRead(pair.second)*0.000806;
         }
         for (auto const& pair : touch_map)
         {
             sensor_dat[pair.first].value = touchRead(pair.second);
         }
-
 
         // save measurement
         for (auto const& pair : sensor_dat)
@@ -63,7 +62,34 @@ void AnalogSensor::update()
 {
     for (auto const& pair : analog_map)
     {
-        sensor_dat[pair.first].value = analogRead(pair.second)*0.000806; //convert to volts
+       float analog_val = analogRead(pair.second)*0.000806; //convert to volts
+
+        sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+        sensor_dat[pair.first].value =  analog_val;
+        
+        
+        if (analog_val>sensor_dat[pair.first].limit_min  
+        && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
+        {
+            if (!sensor_dat[pair.first].triggered)
+            {
+                sensor_dat[pair.first].triggered = true;
+            }
+        }
+        else if (analog_val<sensor_dat[pair.first].limit_min
+        && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+        {
+            if (!sensor_dat[pair.first].untriggered)
+            {
+                sensor_dat[pair.first].untriggered = true;
+            }
+        }
+        else
+        {
+            sensor_dat[pair.first].triggered = false;
+            sensor_dat[pair.first].untriggered = false;
+        }
+
     }
     for (auto const& pair : touch_map)
     {

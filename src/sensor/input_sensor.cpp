@@ -239,6 +239,7 @@ void Sensor::set_untriggered(const std::string& axis, bool value) {
 
 
 //Todo: deadzone should be in percentage or max or in value ?
+// true if outside deadzone
 bool Sensor::test_outside_deadzone(const std::string& axis)
 {   
     if(sensor_dat.find(axis) != sensor_dat.end())

@@ -162,7 +162,6 @@
             "A1": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -176,7 +175,6 @@
             "A2": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -190,7 +188,6 @@
             "A3": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -204,7 +201,6 @@
             "A4": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -218,7 +214,6 @@
             "A5": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -232,7 +227,6 @@
             "A6": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -246,7 +240,6 @@
             "T1": {
                 "cc_number": 2,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -260,7 +253,6 @@
             "T2": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -274,7 +266,6 @@
             "T3": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -288,7 +279,6 @@
             "T4": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
@@ -302,7 +292,6 @@
             "T5": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -316,7 +305,6 @@
             "T6": {
                 "cc_number": 1,
                 "channel": 1,
-                "current_scale": [],
                 "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
@@ -415,7 +403,7 @@
         },
         "A2": {
             "deadZone": 0.0,
-            "enabled": false,
+            "enabled": true,
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
@@ -424,7 +412,7 @@
         },
         "A3": {
             "deadZone": 0.0,
-            "enabled": false,
+            "enabled": true,
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
@@ -433,7 +421,7 @@
         },
         "A4": {
             "deadZone": 0.0,
-            "enabled": false,
+            "enabled": true,
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
@@ -442,7 +430,7 @@
         },
         "A5": {
             "deadZone": 0.0,
-            "enabled": false,
+            "enabled": true,
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
@@ -451,7 +439,7 @@
         },
         "A6": {
             "deadZone": 0.0,
-            "enabled": false,
+            "enabled": true,
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
