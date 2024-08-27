@@ -20,19 +20,25 @@ MidiTranslator::MidiTranslator() {
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
     //cap value to input range
-    int out_value=0;
+    float out_value=value;
     if (value < min_input) {
-        out_value = min_input+1; // not sure if 
+        out_value = min_input+1;
     }
     else if (value > max_input) {
         out_value = max_input;
+    }
+
+    float input_range = max_input - min_input;
+    if (input_range == 0) {
+        Serial.println("Error: Invalid input range");
+        return 0; // or handle the error as needed
     }
 
     // scale value from 0 to 1 to the range of the current scale
     // map value from input range to 0-1
     float scaledValue = (out_value - min_input) / (max_input - min_input);
     int index = round(scaledValue*(numberOfNotes-1));
-    index = constrain(index, 0, numberOfNotes-1);
+    index=constrain(index,0,numberOfNotes-1);
     return current_scale[index];
 }
 

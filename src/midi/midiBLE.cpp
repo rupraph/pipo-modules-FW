@@ -24,6 +24,9 @@ void OnConnected() {
 void OnDisconnected() {
     Serial.println("Ble Disconnected!");
     hwui.set_led(BT_LED, 0);
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void MidiBLEsendCC(int control, int value, int channel){
