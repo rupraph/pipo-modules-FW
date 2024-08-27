@@ -2,7 +2,7 @@
     "engine": {
         "engine-hid": {
             "A1": {
-                "disabled": false,
+                "enabled": false,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -15,7 +15,7 @@
                 "use_threshold": 0
             },
             "A2": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -28,7 +28,7 @@
                 "use_threshold": 0
             },
             "A3": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -41,7 +41,7 @@
                 "use_threshold": 0
             },
             "A4": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -54,7 +54,7 @@
                 "use_threshold": 0
             },
             "A5": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -67,7 +67,7 @@
                 "use_threshold": 0
             },
             "A6": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -80,7 +80,7 @@
                 "use_threshold": 0
             },
             "T1": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -93,7 +93,7 @@
                 "use_threshold": 0
             },
             "T2": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -106,7 +106,7 @@
                 "use_threshold": 0
             },
             "T3": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -119,7 +119,7 @@
                 "use_threshold": 0
             },
             "T4": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -132,7 +132,7 @@
                 "use_threshold": 0
             },
             "T5": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -145,7 +145,7 @@
                 "use_threshold": 0
             },
             "T6": {
-                "disabled": true,
+                "enabled": true,
                 "input_max": 4096,
                 "input_min": 0,
                 "mapto": "x",
@@ -163,7 +163,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -177,7 +177,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -191,7 +191,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -205,7 +205,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -219,7 +219,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -233,7 +233,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -247,7 +247,7 @@
                 "cc_number": 2,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -261,7 +261,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -275,7 +275,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -289,7 +289,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": false,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -303,7 +303,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -317,7 +317,7 @@
                 "cc_number": 1,
                 "channel": 1,
                 "current_scale": [],
-                "disabled": true,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -333,97 +333,73 @@
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "A2": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "A3": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "A4": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "A5": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "A6": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":4096,
-                "input_min":0
+                "output_min":0
             },
             "T1": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":10000,
-                "input_min":0
+                "output_min":0
             },
             "T2": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":300000,
-                "input_min":500
+                "output_min":0
             },
             "T3": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":300000,
-                "input_min":500
+                "output_min":0
             },
             "T4": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":300000,
-                "input_min":500
+                "output_min":0
             },
             "T5": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":300000,
-                "input_min":0
+                "output_min":0
             },
             "T6": {
                 "enabled":false,
                 "mode_raw": true,
                 "output_max":1,
-                "output_min":0,
-                "input_max":300000,
-                "input_min":0
+                "output_min":0
             }
         }
     },
@@ -488,7 +464,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 10000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         },
         "T2": {
@@ -497,7 +473,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T3": {
@@ -506,7 +482,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T4": {
@@ -515,7 +491,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T5": {
@@ -524,7 +500,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         },
         "T6": {
@@ -533,7 +509,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         }
     },

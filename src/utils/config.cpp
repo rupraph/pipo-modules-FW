@@ -55,10 +55,13 @@ String Config::get_list(){
     File file = root.openNextFile();
     while (file) {
         String name = String(file.name());
-        list += name.substring(0, name.length() - 5);
-        file = root.openNextFile();
-        if(file){
-            list += ",";
+        if (name.endsWith(".json"))
+        {
+            list += name.substring(0, name.length() - 5);
+            file = root.openNextFile();
+            if(file){
+                list += ",";
+            }
         }
     }
     
@@ -130,7 +133,8 @@ void Config::set(const json& config) {
 }
 
 void Config::print() { Serial.println(current_config.dump(4).c_str()); }
-void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
+
+void Config::gather(Sensor& sensor, Engine& engine, bool debug=false) {
     Serial.print("gatherconfig sensor");
     current_config["sensor"].clear();
     current_config["sensor"] = sensor.get_config(debug);

@@ -74,6 +74,10 @@ void setup() {
     /////// initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
+    // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
+    config.gather(input_sens, engine, true);
+    config.save(config.filename+".json");
+
     Serial.print("after sensor setup");
     Serial.println(ESP.getFreeHeap());
 

@@ -54,9 +54,10 @@ void AnalogSensor::measure_offset_all()
     }
     for (auto const& pair : sensor_dat)
     {
-        sensor_dat[pair.first].offset = offset[pair.first] / num_samples;
+        sensor_dat[pair.first].offset = round((offset[pair.first] / num_samples) * 1000.0) / 1000.0;
     }
 }
+
 
 void AnalogSensor::update()
 {

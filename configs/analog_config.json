@@ -464,7 +464,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 10000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         },
         "T2": {
@@ -473,7 +473,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T3": {
@@ -482,7 +482,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T4": {
@@ -491,7 +491,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 500.0
         },
         "T5": {
@@ -500,7 +500,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         },
         "T6": {
@@ -509,7 +509,7 @@
             "inverted": false,
             "offset": 0.0,
             "value": 0.0,
-            "limit_max": 300000.0,
+            "limit_max": 200000.0,
             "limit_min": 0.0
         }
     },

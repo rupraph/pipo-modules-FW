@@ -85,6 +85,7 @@ void MidiTranslator::set_root_note(string rootNote) {
     }
     else {
         rootNotenb = rootNotenb;
+        current_scale.clear();
         current_scale = generate_full_Scale(rootNotenb, numberOfNotes, scaleType);
     }
 }
@@ -244,7 +245,7 @@ void to_json(json& j, const MidiTranslator& t) {
         {"scaleType", t.scaleType},
         {"rootNote", t.rootNote},
         {"numberOfNotes", t.numberOfNotes},
-        {"current_scale", t.current_scale},
+        // {"current_scale", t.current_scale},
         // {"max_input", t.max_input},
         // {"min_input", t.min_input},
         {"max_output", t.max_output},
@@ -271,7 +272,7 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("scaleType").get_to(t.scaleType);
     j.at("rootNote").get_to(t.rootNote);
     j.at("numberOfNotes").get_to(t.numberOfNotes);
-    j.at("current_scale").get_to(t.current_scale);
+    //j.at("current_scale").get_to(t.current_scale);
     // j.at("max_input").get_to(t.max_input);
     // j.at("min_input").get_to(t.min_input);
     j.at("max_output").get_to(t.max_output);

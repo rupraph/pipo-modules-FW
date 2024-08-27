@@ -88,11 +88,15 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 // was this written only for sending single notes ? 
                 if (sensor.get_triggered(axis_name))
                 {
-                    midiio.sendNoteOn(note_val,127,channel,20000); 
+                    midiio.sendNoteOn(note_val,127,channel,3000); 
                     // reset trigger when note is sent
                     sensor.set_triggered(axis_name,false);
                 }
-                else if (sensor.get_untriggered(axis_name))
+                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+                {
+                    midiio.sendNoteOn(note_val[channel],127,channel,3000);    
+                }
+                if (sensor.get_untriggered(axis_name))
                 {
                     midiio.sendNoteOff(note_val,127,channel);
                     sensor.set_untriggered(axis_name,false);

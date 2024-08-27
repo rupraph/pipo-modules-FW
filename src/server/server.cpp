@@ -201,9 +201,9 @@ void PipoServer::setup_requests() {
         }
     );
 
-    server.on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) {
-        return request->send(200, "text/plain", "Rebooting");
-        delay(1000);
+    server.on("/reboot", HTTP_GET, [&](AsyncWebServerRequest* request) {
+        request->send(200, "text/plain", "Rebooting");
+        delay(3000);
         ESP.restart();
     });
 
@@ -213,15 +213,14 @@ void PipoServer::setup_requests() {
             config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "STA";
             return request->send(200, "text/plain", "switch to STA");
-            
         } else {
             config.general_config["Wifi_mode"].clear();
             config.general_config["Wifi_mode"] = "switch to AP";
             return request->send(200, "text/plain", "STA");
         }
-        config.save(config.filename);
-        delay(1000);
-        ESP.restart();
+        //config.save(config.filename);
+        //delay(1000);
+        //ESP.restart();
     });
 
     server.on("/logs", HTTP_GET,[&](AsyncWebServerRequest* request) { 
