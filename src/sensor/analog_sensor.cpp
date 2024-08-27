@@ -67,7 +67,9 @@ void AnalogSensor::update()
     }
     for (auto const& pair : touch_map)
     {
-        float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
+        //triel filtering values
+        //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
+        float val = touchRead(pair.second)-sensor_dat[pair.first].offset;
 
         // if (value>sensor_dat[pair.first].limit_max && touch_adaptative_max)
         // {

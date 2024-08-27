@@ -37,6 +37,7 @@ public:
 
     void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
+    bool is_within_range(const std::string& axis);
 
     // function to measure time between 2 calls
     unsigned long measured_loop_duration();

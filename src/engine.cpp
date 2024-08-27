@@ -81,24 +81,32 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
             else
             {   
                 note_val_prev[channel]=note_val[channel];
-                note_val[channel]=max(0,min(Miditranslators[axis_name].get_note(sensor_val,sensor_min,sensor_max),127));
+                int note=(Miditranslators[axis_name].get_note(sensor_val,sensor_min,sensor_max));
+                note_val[channel]=max(0,min(note,127)); //clip between 0 and 127
                 
                 // probaly get triggered should be something linked to the deadzone
                 #if defined(PIPO_ANALOG)
                 // was this written only for sending single notes ? 
+
+                // trigger new note if within range, not already playing, and new note is different from previous note
+                if (sensor.is_within_range(axis_name)
+                && note_val[channel]!=note_val_prev[channel]
+                && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+                {
+                    midiio.sendNoteOn(note_val[channel],127,channel,3000); 
+                }
+
+                //if entering range, send new note
                 if (sensor.get_triggered(axis_name))
                 {
-                    midiio.sendNoteOn(note_val,127,channel,3000); 
-                    // reset trigger when note is sent
+                    midiio.sendNoteOn(note_val[channel],127,channel);
                     sensor.set_triggered(axis_name,false);
                 }
-                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
-                {
-                    midiio.sendNoteOn(note_val[channel],127,channel,3000);    
-                }
+
+                //if exiting range, send note off
                 if (sensor.get_untriggered(axis_name))
                 {
-                    midiio.sendNoteOff(note_val,127,channel);
+                    midiio.sendAllNotesOff(channel);
                     sensor.set_untriggered(axis_name,false);
                 }
                 #endif
@@ -298,7 +306,7 @@ void Engine::set_config(json& config, bool debug)
     
     json jmidi = config["engine-midi"];
     
-    // set midi config from general config
+    // set midi config from main config
     for (auto const& pair : Miditranslators)
     {
         if (jmidi.find(pair.first) != jmidi.end())
@@ -307,6 +315,7 @@ void Engine::set_config(json& config, bool debug)
             // Serial.println(pair.first.c_str());
             Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
         }
+
     }
     Serial.println("midi config set");
     // set hid config from general config

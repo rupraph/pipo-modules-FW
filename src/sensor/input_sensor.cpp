@@ -260,3 +260,23 @@ bool Sensor::test_outside_deadzone(const std::string& axis)
         return false;
     }
 }
+
+bool Sensor::is_within_range(const std::string& axis)
+{
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+        if (sensor_dat[axis].value > sensor_dat[axis].limit_min && sensor_dat[axis].value < sensor_dat[axis].limit_max)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        Serial.println("error: Axis not found");
+        return false;
+    }
+}

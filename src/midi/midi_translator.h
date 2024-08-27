@@ -87,7 +87,7 @@ class MidiTranslator
         void set_number_of_notes(int numberOfNotes);
         //void set_with_start_and_number(string first_note, int total_note_number);
 
-        void set_every_note(vector<string> scale);
+        //void set_every_note(vector<string> scale);
         // void set_new_scale(string newscaleType,vector<string> newscale);
 
         int convertNoteNameToNumber(string noteName);

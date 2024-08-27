@@ -5,6 +5,7 @@
 using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
+    current_scale.clear();
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     if (hires) {
         max_output = 16383;
@@ -19,17 +20,19 @@ MidiTranslator::MidiTranslator() {
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
     //cap value to input range
+    int out_value=0;
     if (value < min_input) {
-        value = min_input;
+        out_value = min_input+1; // not sure if 
     }
     else if (value > max_input) {
-        value = max_input;
+        out_value = max_input;
     }
 
     // scale value from 0 to 1 to the range of the current scale
     // map value from input range to 0-1
-    float scaledValue = (value - min_input) / (max_input - min_input);
-    int index = round(scaledValue*(current_scale.size()-1));
+    float scaledValue = (out_value - min_input) / (max_input - min_input);
+    int index = round(scaledValue*(numberOfNotes-1));
+    index = constrain(index, 0, numberOfNotes-1);
     return current_scale[index];
 }
 
@@ -49,17 +52,17 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
     } else {
         cout << "Invalid scale type." << endl;
     }
-
+    current_scale.clear();
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
 }
 
 
-void MidiTranslator::set_every_note(vector<string> scale) {
-    current_scale.clear();
-    for (int i = 0; i < scale.size(); i++) {
-        current_scale.push_back(convertNoteNameToNumber(scale[i]));
-    }
-}
+// void MidiTranslator::set_every_note(vector<string> scale) {
+//     current_scale.clear();
+//     for (int i = 0; i < scale.size(); i++) {
+//         current_scale.push_back(convertNoteNameToNumber(scale[i]));
+//     }
+// }
 
 
 // not ready yet. dealing with custom scale or additional scale is not ready to be savec/loaded correctly 
@@ -97,6 +100,7 @@ void MidiTranslator::set_number_of_notes(int numberOfNotes) {
     }
     else {
         numberOfNotes = numberOfNotes;
+        current_scale.clear();
         current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     }
 }
@@ -188,7 +192,8 @@ vector<string> MidiTranslator::get_scale_names() {
 }
 
 void MidiTranslator::update_scale() {
-    this->current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
+    current_scale.clear();
+    current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
     //printScale(this->current_scale);
 }
 
@@ -297,7 +302,7 @@ void MidiTranslator::set_from_json(const json& j) {
     Serial.println(e.what());
     }
 
-    update_scale();
+    this->update_scale();
 
     // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
     //     Serial.println(it.key().c_str());
