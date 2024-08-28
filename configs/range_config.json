@@ -39,7 +39,7 @@
     },
     "sensor": {
         "dist": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,

@@ -49,7 +49,7 @@ json Sensor::get_config(bool debug)
         string axis_name = pair.first;
         config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
         config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
-        config[axis_name]["deadZone"] = sensor_dat[axis_name].deadZone;
+        config[axis_name]["deadzone"] = sensor_dat[axis_name].deadzone;
         config[axis_name]["value"] = sensor_dat[axis_name].value;
         config[axis_name]["offset"] = sensor_dat[axis_name].offset;
         config[axis_name]["limit_max"] = sensor_dat[axis_name].limit_max;
@@ -71,7 +71,7 @@ void Sensor::set_config(json& config, bool debug)
         string axis_name = pair.key();
         sensor_dat[axis_name].enabled = config[axis_name]["enabled"];
         sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
-        sensor_dat[axis_name].deadZone = config[axis_name]["deadZone"];
+        sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
         sensor_dat[axis_name].value = config[axis_name]["value"];
         sensor_dat[axis_name].offset = config[axis_name]["offset"];
         sensor_dat[axis_name].limit_max = config[axis_name]["limit_max"];
@@ -105,9 +105,9 @@ bool Sensor::get_inverted(const std::string& axis) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
-int Sensor::get_deadZone(const std::string& axis) {
+int Sensor::get_deadzone(const std::string& axis) {
     if(sensor_dat.find(axis) != sensor_dat.end())
-        return sensor_dat[axis].deadZone;
+        return sensor_dat[axis].deadzone;
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -180,9 +180,9 @@ void Sensor::set_inverted(const std::string& axis, bool value) {
         throw std::invalid_argument("Axis not found: " + axis);
 }
 
-void Sensor::set_deadZone(const std::string& axis, int value) {
+void Sensor::set_deadzone(const std::string& axis, int value) {
     if(sensor_dat.find(axis) != sensor_dat.end())
-        sensor_dat[axis].deadZone = value;
+        sensor_dat[axis].deadzone = value;
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -245,7 +245,7 @@ bool Sensor::test_outside_deadzone(const std::string& axis)
     if(sensor_dat.find(axis) != sensor_dat.end())
     {
 
-        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadZone)
+        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone)
         {
             return true;
         }

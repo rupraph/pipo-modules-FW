@@ -162,7 +162,7 @@
             "A1": {
                 "cc_number": 1,
                 "channel": 1,
-                "enabled": false,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -173,71 +173,6 @@
                 "translator_mode": 0
             },
             "A2": {
-                "cc_number": 1,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 25,
-                "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
-            },
-            "A3": {
-                "cc_number": 1,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 25,
-                "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
-            },
-            "A4": {
-                "cc_number": 1,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 25,
-                "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
-            },
-            "A5": {
-                "cc_number": 1,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 25,
-                "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
-            },
-            "A6": {
-                "cc_number": 1,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 25,
-                "rootNote": 45,
-                "scaleType": "major",
-                "translator_mode": 0
-            },
-            "T1": {
                 "cc_number": 2,
                 "channel": 1,
                 "enabled": false,
@@ -250,8 +185,73 @@
                 "scaleType": "major",
                 "translator_mode": 0
             },
+            "A3": {
+                "cc_number": 3,
+                "channel": 1,
+                "enabled": false,
+                "hires": false,
+                "interpolation_type": 0,
+                "max_output": 127,
+                "min_output": 0,
+                "numberOfNotes": 25,
+                "rootNote": 45,
+                "scaleType": "major",
+                "translator_mode": 0
+            },
+            "A4": {
+                "cc_number": 4,
+                "channel": 1,
+                "enabled": false,
+                "hires": false,
+                "interpolation_type": 0,
+                "max_output": 127,
+                "min_output": 0,
+                "numberOfNotes": 25,
+                "rootNote": 45,
+                "scaleType": "major",
+                "translator_mode": 0
+            },
+            "A5": {
+                "cc_number": 5,
+                "channel": 1,
+                "enabled": false,
+                "hires": false,
+                "interpolation_type": 0,
+                "max_output": 127,
+                "min_output": 0,
+                "numberOfNotes": 25,
+                "rootNote": 45,
+                "scaleType": "major",
+                "translator_mode": 0
+            },
+            "A6": {
+                "cc_number": 6,
+                "channel": 1,
+                "enabled": false,
+                "hires": false,
+                "interpolation_type": 0,
+                "max_output": 127,
+                "min_output": 0,
+                "numberOfNotes": 25,
+                "rootNote": 45,
+                "scaleType": "major",
+                "translator_mode": 0
+            },
+            "T1": {
+                "cc_number": 7,
+                "channel": 1,
+                "enabled": false,
+                "hires": false,
+                "interpolation_type": 0,
+                "max_output": 127,
+                "min_output": 0,
+                "numberOfNotes": 25,
+                "rootNote": 45,
+                "scaleType": "major",
+                "translator_mode": 0
+            },
             "T2": {
-                "cc_number": 1,
+                "cc_number": 8,
                 "channel": 1,
                 "enabled": false,
                 "hires": false,
@@ -264,7 +264,7 @@
                 "translator_mode": 1
             },
             "T3": {
-                "cc_number": 1,
+                "cc_number": 9,
                 "channel": 1,
                 "enabled": false,
                 "hires": false,
@@ -277,7 +277,7 @@
                 "translator_mode": 1
             },
             "T4": {
-                "cc_number": 1,
+                "cc_number": 10,
                 "channel": 1,
                 "enabled": false,
                 "hires": false,
@@ -290,9 +290,9 @@
                 "translator_mode": 1
             },
             "T5": {
-                "cc_number": 1,
+                "cc_number": 11,
                 "channel": 1,
-                "enabled": true,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -303,9 +303,9 @@
                 "translator_mode": 0
             },
             "T6": {
-                "cc_number": 1,
+                "cc_number": 12,
                 "channel": 1,
-                "enabled": true,
+                "enabled": false,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
@@ -319,73 +319,73 @@
         "engine-osc": {
             "A1": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "A2": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "A3": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "A4": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "A5": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "A6": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T1": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T2": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T3": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T4": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T5": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "T6": {
                 "enabled":false,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             }
@@ -393,7 +393,7 @@
     },
     "sensor": {
         "A1": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -402,7 +402,7 @@
             "limit_min": 0.0
         },
         "A2": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -411,7 +411,7 @@
             "limit_min": 0.0
         },
         "A3": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -420,7 +420,7 @@
             "limit_min": 0.0
         },
         "A4": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -429,7 +429,7 @@
             "limit_min": 0.0
         },
         "A5": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -438,7 +438,7 @@
             "limit_min": 0.0
         },
         "A6": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -447,7 +447,7 @@
             "limit_min": 0.0
         },
         "T1": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -456,7 +456,7 @@
             "limit_min": 0.0
         },
         "T2": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -465,7 +465,7 @@
             "limit_min": 500.0
         },
         "T3": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -474,7 +474,7 @@
             "limit_min": 500.0
         },
         "T4": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": true,
             "inverted": false,
             "offset": 0.0,
@@ -483,7 +483,7 @@
             "limit_min": 500.0
         },
         "T5": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": false,
             "inverted": false,
             "offset": 0.0,
@@ -492,7 +492,7 @@
             "limit_min": 0.0
         },
         "T6": {
-            "deadZone": 0.0,
+            "deadzone": 0.0,
             "enabled": false,
             "inverted": false,
             "offset": 0.0,
@@ -503,7 +503,7 @@
     },
     "general": {
         "Wifi_mode": "STA",
-        "OSC_ENA": true,
+        "OSC_ENA": false,
         "OSC_IP": "192.168.1.71",
         "OSC_PORT": 8000,
         "MidiEnabled": true,

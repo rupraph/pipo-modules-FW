@@ -10,7 +10,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": true
+              "enabled": false
           },
           "accY": {
               "mapto": "ry",
@@ -21,7 +21,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": true
+              "enabled": false
           },
           "accZ": {
               "mapto": "rz",
@@ -32,7 +32,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": true
+              "enabled": false
           },
           "pitch": {
               "mapto": "y",
@@ -43,7 +43,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": false
+              "enabled": true
           },
           "roll": {
               "mapto": "x",
@@ -54,7 +54,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": false
+              "enabled": true
           },
           "yaw": {
               "mapto": "z",
@@ -65,7 +65,7 @@
               "quantize_steps": 5,
               "threshold": 0,
               "use_threshold": 0,
-              "enabled": true
+              "enabled": false
           }
       },
       "engine-midi": {
@@ -85,7 +85,7 @@
           "accY": {
               "cc_number": 5,
               "channel": 2,
-              "enabled": true,
+              "enabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -98,7 +98,7 @@
           "accZ": {
               "cc_number": 6,
               "channel": 2,
-              "enabled": true,
+              "enabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -111,7 +111,7 @@
           "pitch": {
               "cc_number": 1,
               "channel": 1,
-              "enabled": true,
+              "enabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -137,7 +137,7 @@
           "yaw": {
               "cc_number": 3,
               "channel": 1,
-              "enabled": true,
+              "enabled": false,
               "hires": false,
               "interpolation_type": 0,
               "max_output": 127,
@@ -151,37 +151,37 @@
       "engine-osc": {
             "accX": {
                 "enabled":true,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "accY": {
-                "enabled":true,
-                "mode_raw": true,
+                "enabled":false,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "accZ": {
-                "enabled":true,
-                "mode_raw": true,
+                "enabled":false,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "pitch": {
-                "enabled":true,
-                "mode_raw": true,
+                "enabled":false,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "roll": {
                 "enabled":true,
-                "mode_raw": true,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             },
             "yaw": {
-                "enabled":true,
-                "mode_raw": true,
+                "enabled":false,
+                "mode_raw": false,
                 "output_max":1,
                 "output_min":0
             }
@@ -189,7 +189,7 @@
   },
   "sensor": {
       "accX": {
-          "deadZone": 0,
+          "deadzone": 0.05,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -198,7 +198,7 @@
           "limit_min": -8.0
       },
       "accY": {
-          "deadZone": 0,
+          "deadzone": 0.05,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -207,7 +207,7 @@
           "limit_min": -8.0
       },
       "accZ": {
-          "deadZone": 0.2,
+          "deadzone": 0.05,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -216,7 +216,7 @@
           "limit_min": -8.0
       },
       "pitch": {
-          "deadZone": 2,
+          "deadzone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -225,7 +225,7 @@
           "limit_min": -90
       },
       "roll": {
-          "deadZone": 2,
+          "deadzone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -234,7 +234,7 @@
           "limit_min": -180
       },
       "yaw": {
-          "deadZone": 2,
+          "deadzone": 2,
           "enabled": true,
           "inverted": false,
           "offset": 0.0,
@@ -245,7 +245,7 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
+    "OSC_ENA": false,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
