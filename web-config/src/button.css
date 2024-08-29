@@ -1,0 +1,29 @@
+button {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 500;
+  height: 34px;
+  justify-content: center;
+  letter-spacing: normal;
+  line-height: 14px;
+  margin: 0;
+  outline-style: none;
+  padding: 0 18px;
+  text-align: center;
+}
+button:hover {
+  filter: brightness(120%);
+}
+
+button.primary {
+  color: black;
+  background-color: var(--main);
+}
+button.error{
+  color: white;
+  background-color: var(--red);
+}
