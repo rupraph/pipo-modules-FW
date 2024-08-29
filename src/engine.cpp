@@ -63,7 +63,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 {
                     uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,1),16383));
                     midiio.sendControlChange(cc_number, cc_val, channel,true);
-
+                    
                 }
                 else
                 {
@@ -72,6 +72,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                     midiio.sendControlChange(cc_number, cc_val, channel,false);
 
                 }
+                vTaskDelay(pdTICKS_TO_MS(5)); // virtually space cc send. 
          
             }
 
@@ -127,7 +128,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                     midiio.sendNoteOn(note_val[channel],127,channel,800); 
                     sensor.set_triggered(axis_name,false);
                 }
-                if (sensor_val<sensor.get_limit_max(axis_name) && !midio.is_note_playing(note_val[channel],channel))//midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+                if (sensor_val<sensor.get_limit_max(axis_name) && !midiio.is_note_playing(note_val[channel],channel))//midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
                 {
                     midiio.sendNoteOn(note_val[channel],127,channel,800);    
                 }

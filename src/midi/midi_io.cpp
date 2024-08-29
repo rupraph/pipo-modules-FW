@@ -22,9 +22,6 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
     }
     MidiUSBsendNoteOn(note, velocity, channel);   
     MidiBLEsendNoteOn(note, velocity, channel);
-    Serial.print(note);
-    Serial.print(" ");
-    Serial.println(channel);
 
     //midisocket.sendNoteOn(note, velocity,channel);
     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
@@ -47,6 +44,7 @@ void midi_io::sendNoteOff(int note, int velocity, int channel)
 
 void midi_io::sendAllNotesOff(int channel)
 {
+    unsigned long time = millis();
 
     //loop through channel_note_list[channel] and send note off for all notes
    // Create a copy of the keys (notes)
@@ -60,6 +58,7 @@ void midi_io::sendAllNotesOff(int channel)
     for (int note : notes)
     {
         this->sendNoteOff(note, 127, channel);
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 

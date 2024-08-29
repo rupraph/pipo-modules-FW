@@ -7,9 +7,12 @@
 BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
 
 void midiBLESetup() {
+
+    MidiBle.begin();
+    
     BLEMidiBle.setHandleConnected(OnConnected);
     BLEMidiBle.setHandleDisconnected(OnDisconnected);
-    MidiBle.begin();
+    
     Serial.println("Midi BLE setup done");
     #ifdef DEBUG_HEAP
         Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
