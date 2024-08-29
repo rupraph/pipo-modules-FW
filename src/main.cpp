@@ -1,118 +1,145 @@
+
 #include <Arduino.h>
-#include "fs_tools.h"
-#include <WiFiManager.h> 
-#include "midiBLE.h"
-#include "midiRtp.h"
-#include <ESPAsyncWebServer.h>
-#include "dist_sensor.h"
+#include <WiFiManager.h>
+
+#include "HW_CONFIG.h"
+#include "engine.h"
+#include "utils/config.h"
+#include "hw_ui.h"
+#include "server/server.h"
+#include "midi/midi_io.h"
+#include "utils/fs_tools.h"
+#include "utils/logs.h"
+#include "utils/wifi_tools.h"
 #include "osc_handler.h"
-#include "midi_translator.h"
-#include "midi_io.h"
 
-AsyncWebServer server(80);
-dist_Sensor dist(14,13);
-OSC_handler osc;
-MidiTranslator midi_translator;
+#ifdef PIPO_MOTION
+#include "sensor/acc_sensor.h"
+MotionSensor input_sens;
+string sensor_type = "motion";
+#elif defined(PIPO_RANGE)
+#include "sensor/range_sensor.h"
+RangeSensor input_sens;
+string sensor_type = "range";
+#elif defined(PIPO_ANALOG)
+#include "sensor/analog_sensor.h"
+AnalogSensor input_sens;
+string sensor_type = "analog";
+#endif
+
 midi_io midiio;
+usb_hid hidio;
+Engine engine(input_sens);
+OSC_handler osc(config);
+PipoServer server(input_sens, engine, osc);
 
-#define FORMAT_LITTLEFS_IF_FAILED true
+// quick declaration of functions
+void init_filesystem();
+void setup_wifi();
+void monitor_wifi();
 
-// unsigned long t0 = millis();
-// bool isConnected = false;
-
-void setup(){
-
-    midiio.setup_usb_midi();
-
+void setup() {
     Serial.begin(115200);
+    //delay(3000);
+    // while(!Serial) // "while" prevents usb to setup properly
+    // setCpuFrequencyMhz(80); will be usefull to save power on battery
+    /////// Init hardware user interface (leds and switches)
+    Serial.println(ESP.getFreeHeap());
+    hwui.init();
+    hwui.setup();
 
-    if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
-        Serial.println("LittleFS Mount Failed");
-        return;
-    }
-    Serial.println("LittleFS Mount Success");
+    /////// Init filesystem
+    init_filesystem();
+
+    /////// Init midi and hid
+    midiio.setup();
+    hidio.usb_hid_setup();
 
     
-    WiFiManager wm;
-    // reset settings - wipe stored credentials for testing
-    // wm.resetSettings();
-    bool res;
-    res = wm.autoConnect("AutoConnectAP","password"); // password protected ap
-    delay(2000);
+
+    /////// Load config
+    Serial.print("config list:");
+    Serial.println(config.get_list());
+    config.load_config();
+    config.apply(input_sens, engine, osc, false);  // input_sens,
+    //config.print();
 
     
-    if(!res) {
-        Serial.println("Failed to connect");
-        // ESP.restart();
-    } 
-    else {
-        //if you get here you have connected to the WiFi    
-        Serial.println("connected...yeey :)");
-    }
-
-
-
-    listDir(LittleFS, "/", 2);
+    /////// Init wifi
+    setup_wifi();
     
-    midiBLESetup();
-    midiRtpSetup(); //-> not working. can't see the device from mac or windows
 
-    server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
-    server.begin();
-    dist.init();
-    delay(1000);
+    listDir(LittleFS, "/", 0);
 
-    osc.setDestIp(IPAddress(192,168,1,71));
-    osc.setoutPort(8000);
-    osc.start();
+    /////// initialize sensor/inputs
+    input_sens.init();
+    input_sens.setup();
+    // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
+    config.gather(input_sens, engine, true);
+    config.save(config.filename+".json");
 
-    midi_translator.set_Scale_Type("minor");
-    midi_translator.printScale(midi_translator.current_scale);
-// Load config
+    Serial.print("after sensor setup");
+    Serial.println(ESP.getFreeHeap());
 
-// setup sensor
+    // Start server if TA connected or AP mode
+    // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
+    Serial.println("starting config page");
+    server.setup();
+    // }
+    // else{
+    //     Serial.println("Wifi not connected, no config page for now");
+    // }
+    osc.setup(); // requires config to be loaded before. 
 
+    // Memo on tracking frequency adjustements
+    // uint32_t Freq = getCpuFrequencyMhz();
+    // Serial.print("CPU Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" MHz");
+    // Freq = getXtalFrequencyMhz();
+    // Serial.print("XTAL Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" MHz");
+    // Freq = getApbFrequency();
+    // Serial.print("APB Freq = ");
+    // Serial.print(Freq);
+    // Serial.println(" Hz");
+    
+    Serial.println("Setup done");
+    #ifdef DEBUG_HEAP
+        Serial.print(F("Remaining Heap:"));
+        Serial.println(String(ESP.getFreeHeap()));
+        Serial.print(F("Min Free Heap:"));
+        Serial.println(String(ESP.getMinFreeHeap()));
+        Serial.print(F("Max Alloc Heap:"));
+        Serial.println(ESP.getMaxAllocHeap());
+
+    #endif
 }
-
-int distValue=0;
-int midi_note=0;
 
 void loop() {
-    //midiUSBLoop();
-    //midiRtpLoop();
-    //midiBLELoop();
-    dist.update();
+    try {
+        //wm.process();
+        monitor_wifi(server.is_running);
 
-    //dist.print_last();
-    distValue= dist.get_moving_average(5);
+        input_sens.update();
 
-    //sendHiResCC(distValue);
+        // Measure loop time
+        // Serial.print("loop");
+        // Serial.println(input_sens.measured_loop);
+        // Serial.print("interval");
+        // Serial.println(input_sens.measured_interval_duration);
 
+        // Plot some sensor values
+        // input_sens.teleplot_data("dist");
+        // input_sens.teleplot_data("roll");
 
+        engine.update(input_sens, midiio, hidio, osc);
 
-    midi_note=midi_translator.get_note(distValue/400.0);
-    Serial.print("Dist: ");
-    Serial.print(distValue);
-    Serial.print(" Midi: ");
-    Serial.println(midi_note);
-    midiio.sendNoteOn(midi_note,127,1);
-    
-    osc.sendOscMessage(distValue);
-    
-    
-  // read/update from sensor
-  // poll webserver for config change
-  // convert sensor to midi
-  // send midi
+        hwui.update();
+    } catch (const std::exception& e) {
+        Serial.println("Exception in main loop");
+        logs.writeLog(e.what());
+        delay(50);
+    }
 }
-
-
-    // connect to wifi manually
-    // WiFi.mode(WIFI_STA);
-    // WiFi.begin("Klurp", "plokplokplok");
-    // while (WiFi.status() != WL_CONNECTED) {
-    //     delay(500);
-    //     Serial.print(".");
-    // }
-    // Serial.println("Connected to WiFi");
-    // Serial.println(WiFi.localIP());

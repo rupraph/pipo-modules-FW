@@ -51,6 +51,14 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "*.nonne": "c",
+        "any": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "forward_list": "cpp",
+        "ratio": "cpp",
+        "valarray": "cpp"
     }
 }
