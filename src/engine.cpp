@@ -91,7 +91,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 // trigger new note if within range, not already playing, and new note is different from previous note
                 if (sensor.is_within_range(axis_name)
                 && note_val[channel]!=note_val_prev[channel]
-                && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+                && !midiio.is_note_playing(note_val[channel],channel))
                 {
                     midiio.sendNoteOn(note_val[channel],127,channel,3000); 
                 }
@@ -114,7 +114,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 # if defined(PIPO_MOTION)
                 if (note_val[channel]!=note_val_prev[channel])
                 {
-                    midiio.sendNoteOn(note_val[channel],127,channel,20000); 
+                    midiio.sendNoteOn(note_val[channel],127,channel,5000); 
                 }
                 #endif
 
@@ -127,7 +127,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                     midiio.sendNoteOn(note_val[channel],127,channel,800); 
                     sensor.set_triggered(axis_name,false);
                 }
-                if (sensor_val<sensor.get_limit_max(axis_name) && midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+                if (sensor_val<sensor.get_limit_max(axis_name) && !midio.is_note_playing(note_val[channel],channel))//midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
                 {
                     midiio.sendNoteOn(note_val[channel],127,channel,800);    
                 }

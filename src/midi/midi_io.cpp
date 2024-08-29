@@ -11,12 +11,25 @@ void midi_io::setup()
 // if sustainmil is 0 it will not send a note off
 void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustain_mil)
 {
-        MidiUSBsendNoteOn(note, velocity, channel);   
-        MidiBLEsendNoteOn(note, velocity, channel);
-        //midisocket.sendNoteOn(note, velocity,channel);
-        hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-        // insert or update note to channel_note_list
-        channel_note_list[channel][note]={true, millis()+sustain_mil};
+    unsigned long time = millis();
+    if(is_note_playing(note, channel)) 
+    {
+        if(channel_note_list[channel][note].starttime+20>time)
+        {
+            // Serial.println("not playing");
+            return;
+        }
+    }
+    MidiUSBsendNoteOn(note, velocity, channel);   
+    MidiBLEsendNoteOn(note, velocity, channel);
+    Serial.print(note);
+    Serial.print(" ");
+    Serial.println(channel);
+
+    //midisocket.sendNoteOn(note, velocity,channel);
+    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+    // insert or update note to channel_note_list
+    channel_note_list[channel][note]={true, time+sustain_mil, time};
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
@@ -80,6 +93,12 @@ void midi_io::sendHiResControlChange(int control, int value, int channel)
     MidiUSBsendCC(control+32, lsb, channel);
     //MidiUsb.sendControlChange(control, value, channel);
     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+}
+
+bool midi_io::is_note_playing(int note, int channel)
+{
+    bool res= channel_note_list[channel].find(note) != channel_note_list[channel].end();
+    return res;
 }
 
 

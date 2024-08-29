@@ -28,6 +28,7 @@ public:
     {
         bool on;
         unsigned long sustain_endtime;
+        unsigned long starttime;
     };
     typedef unordered_map<int, NoteSatus> Notelist;
     Notelist channel_note_list[16]; 
@@ -49,6 +50,8 @@ public:
     //void update();
     void manage_sustain();
     void sendHiResControlChange(int control, int value, int channel);
+
+    bool is_note_playing(int note, int channel);
     
     private:
     
