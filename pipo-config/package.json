@@ -1,0 +1,36 @@
+{
+  "name": "pipo-config",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "build": "vite build",
+    "upload": "./scripts/upload.sh",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.2",
+    "@tsconfig/svelte": "^5.0.2",
+    "gh-pages": "^6.1.1",
+    "sass": "^1.77.6",
+    "svelte": "^4.2.12",
+    "svelte-check": "^3.6.7",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-mock-server": "^1.2.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "eventemitter3": "^5.0.1",
+    "gl-mat4": "^1.2.0",
+    "lodash.throttle": "^4.1.1",
+    "regl": "^2.1.0",
+    "resl": "^1.0.3",
+    "svelte-select": "^5.8.3",
+    "webmidi": "^3.1.9"
+  }
+}
