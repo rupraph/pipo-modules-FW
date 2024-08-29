@@ -4,7 +4,8 @@
 // for convenience
 using json = nlohmann::json;
 
-MidiTranslator::MidiTranslator(float limit_max) {
+MidiTranslator::MidiTranslator() {
+    current_scale.clear();
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     if (hires) {
         max_output = 16383;
@@ -12,25 +13,32 @@ MidiTranslator::MidiTranslator(float limit_max) {
     else {
         max_output = 127;
     }
-    this->max_input = limit_max;
 
     //printScale(current_scale);
 
 }
 
-int MidiTranslator::get_note(float value) {
+int MidiTranslator::get_note(float value, float min_input, float max_input) {
     //cap value to input range
+    float out_value=value;
     if (value < min_input) {
-        value = min_input;
+        out_value = min_input+1;
     }
     else if (value > max_input) {
-        value = max_input;
+        out_value = max_input;
+    }
+
+    float input_range = max_input - min_input;
+    if (input_range == 0) {
+        Serial.println("Error: Invalid input range");
+        return 0; // or handle the error as needed
     }
 
     // scale value from 0 to 1 to the range of the current scale
     // map value from input range to 0-1
-    float scaledValue = (value - min_input) / (max_input - min_input);
-    int index = round(scaledValue*(current_scale.size()-1));
+    float scaledValue = (out_value - min_input) / (max_input - min_input);
+    int index = round(scaledValue*(numberOfNotes-1));
+    index=constrain(index,0,numberOfNotes-1);
     return current_scale[index];
 }
 
@@ -50,17 +58,17 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
     } else {
         cout << "Invalid scale type." << endl;
     }
-
+    current_scale.clear();
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
 }
 
 
-void MidiTranslator::set_every_note(vector<string> scale) {
-    current_scale.clear();
-    for (int i = 0; i < scale.size(); i++) {
-        current_scale.push_back(convertNoteNameToNumber(scale[i]));
-    }
-}
+// void MidiTranslator::set_every_note(vector<string> scale) {
+//     current_scale.clear();
+//     for (int i = 0; i < scale.size(); i++) {
+//         current_scale.push_back(convertNoteNameToNumber(scale[i]));
+//     }
+// }
 
 
 // not ready yet. dealing with custom scale or additional scale is not ready to be savec/loaded correctly 
@@ -86,6 +94,7 @@ void MidiTranslator::set_root_note(string rootNote) {
     }
     else {
         rootNotenb = rootNotenb;
+        current_scale.clear();
         current_scale = generate_full_Scale(rootNotenb, numberOfNotes, scaleType);
     }
 }
@@ -97,6 +106,7 @@ void MidiTranslator::set_number_of_notes(int numberOfNotes) {
     }
     else {
         numberOfNotes = numberOfNotes;
+        current_scale.clear();
         current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
     }
 }
@@ -188,11 +198,12 @@ vector<string> MidiTranslator::get_scale_names() {
 }
 
 void MidiTranslator::update_scale() {
-    this->current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
+    current_scale.clear();
+    current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
     //printScale(this->current_scale);
 }
 
-int MidiTranslator::get_cc_val(float value,bool hires) {
+int MidiTranslator::get_cc_val(float value, float min_input, float max_input,bool hires=false) {
     // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)  
 
     //cap value to input range
@@ -223,7 +234,7 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
     // else 
     // {
         if (interpolation_type == 0) {
-        return map_linear(value);
+        return map_linear(value, min_input, max_input);
         }
         else {
         // not implemented yet
@@ -232,7 +243,7 @@ int MidiTranslator::get_cc_val(float value,bool hires) {
     // }
 }
 
-int MidiTranslator::map_linear(float value){
+int MidiTranslator::map_linear(float value, float min_input, float max_input) {
     if (min_input == max_input || min_output == max_output) {
         Serial.println("min and max values cannot be equal");
     }
@@ -245,16 +256,16 @@ void to_json(json& j, const MidiTranslator& t) {
         {"scaleType", t.scaleType},
         {"rootNote", t.rootNote},
         {"numberOfNotes", t.numberOfNotes},
-        {"current_scale", t.current_scale},
-        {"max_input", t.max_input},
-        {"min_input", t.min_input},
+        // {"current_scale", t.current_scale},
+        // {"max_input", t.max_input},
+        // {"min_input", t.min_input},
         {"max_output", t.max_output},
         {"min_output", t.min_output},
         {"interpolation_type", t.interpolation_type},
         {"hires", t.hires},
         {"channel", t.channel},
         {"cc_number", t.cc_number},
-        {"disabled", t.disabled}
+        {"enabled", t.enabled}
     };
 }
 
@@ -272,16 +283,16 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("scaleType").get_to(t.scaleType);
     j.at("rootNote").get_to(t.rootNote);
     j.at("numberOfNotes").get_to(t.numberOfNotes);
-    j.at("current_scale").get_to(t.current_scale);
-    j.at("max_input").get_to(t.max_input);
-    j.at("min_input").get_to(t.min_input);
+    //j.at("current_scale").get_to(t.current_scale);
+    // j.at("max_input").get_to(t.max_input);
+    // j.at("min_input").get_to(t.min_input);
     j.at("max_output").get_to(t.max_output);
     j.at("min_output").get_to(t.min_output);
     j.at("interpolation_type").get_to(t.interpolation_type);
     j.at("hires").get_to(t.hires);
     j.at("channel").get_to(t.channel);
     j.at("cc_number").get_to(t.cc_number);
-    j.at("disabled").get_to(t.disabled);
+    j.at("enabled").get_to(t.enabled);
 }
 
 void MidiTranslator::deserialize(const string& data) {
@@ -297,7 +308,7 @@ void MidiTranslator::set_from_json(const json& j) {
     Serial.println(e.what());
     }
 
-    update_scale();
+    this->update_scale();
 
     // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
     //     Serial.println(it.key().c_str());

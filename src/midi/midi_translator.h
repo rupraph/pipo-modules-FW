@@ -19,14 +19,14 @@ class MidiTranslator
 
 {
     public:
-        MidiTranslator() = default;
-        MidiTranslator(float limit_max);
+        MidiTranslator();// = default;
+        // MidiTranslator(float limit_max);
 
         //midi 
         int channel = 1; // should be in engine.
         int cc_number = 1;
 
-        bool disabled = false;
+        bool enabled = false;
 
         // int use_threshold = 0;
         // int threshold = 0;
@@ -40,8 +40,8 @@ class MidiTranslator
         vector<int> current_scale;
 
         // common for note and cc
-        float max_input = 100;
-        float min_input = 0;
+        // float max_input = 100;
+        // float min_input = 0;
 
 
         //CC variables
@@ -80,14 +80,14 @@ class MidiTranslator
 
 
 
-        int get_note(float value);
+        int get_note(float value,float min_input,float max_input);
         void printScale(vector<int> scale);
         void set_Scale_Type(string scaleType);
         void set_root_note(string rootNote);
         void set_number_of_notes(int numberOfNotes);
         //void set_with_start_and_number(string first_note, int total_note_number);
 
-        void set_every_note(vector<string> scale);
+        //void set_every_note(vector<string> scale);
         // void set_new_scale(string newscaleType,vector<string> newscale);
 
         int convertNoteNameToNumber(string noteName);
@@ -100,8 +100,8 @@ class MidiTranslator
         void update_scale();
 
         // To cc variables
-        int get_cc_val(float value, bool hires=false);
-        int map_linear(float x);
+        int get_cc_val(float value, float min_input,float max_input, bool hires=false);
+        int map_linear(float x, float min_input, float max_input);
 
 
         // save/load
@@ -135,12 +135,12 @@ class MidiTranslator
             else if (param_name == "numberOfNotes") {
                 numberOfNotes = value;
             }
-            else if (param_name == "max_input") {
-                max_input = value;
-            }
-            else if (param_name == "min_input") {
-                min_input = value;
-            }
+            // else if (param_name == "max_input") {
+            //     max_input = value;
+            // }
+            // else if (param_name == "min_input") {
+            //     min_input = value;
+            // }
             else if (param_name == "max_output") {
                 max_output = value;
             }
@@ -159,8 +159,8 @@ class MidiTranslator
             // else if (param_name == "threshold") {
             //     threshold = value;
             // }
-            else if (param_name == "disabled") {
-                disabled = value;
+            else if (param_name == "enabled") {
+                enabled = value;
             }
             else {
                 Serial.println("Error: unknown parameter name");

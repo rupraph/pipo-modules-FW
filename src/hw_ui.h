@@ -63,6 +63,8 @@ class HwUi {
 
         void start_pulse(int led_name, int pulse_period, int min_brightness, int max_brightness);
         void stop_pulse(int led_name);
+
+        bool is_pulsing(int led_name);
         
 };
 

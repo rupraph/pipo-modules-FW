@@ -9,6 +9,9 @@
 #include "utils/logs.h"
 #include "utils/fs_tools.h"
 #include "server/midi_socket.h"
+#include "HW_CONFIG.h"
+
+
 using namespace std;
 
 class PipoServer
@@ -30,6 +33,8 @@ class PipoServer
         Sensor& input_sens;
         Engine& engine;
         OSC_handler& osc;
+        string received_configData;
+        //json parsed_configData;
 
 };
 #endif  // WEBSERVER_H

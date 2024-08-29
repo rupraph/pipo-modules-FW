@@ -2,13 +2,9 @@
 #include <Arduino.h>
 #include <WiFiManager.h>
 
-
-
 #include "HW_CONFIG.h"
 #include "engine.h"
-
 #include "utils/config.h"
-
 #include "hw_ui.h"
 #include "server/server.h"
 #include "midi/midi_io.h"
@@ -16,8 +12,6 @@
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
 #include "osc_handler.h"
-
-
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -33,14 +27,11 @@ AnalogSensor input_sens;
 string sensor_type = "analog";
 #endif
 
-//Config config;
-
 midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
 OSC_handler osc(config);
 PipoServer server(input_sens, engine, osc);
-
 
 // quick declaration of functions
 void init_filesystem();
@@ -49,10 +40,11 @@ void monitor_wifi();
 
 void setup() {
     Serial.begin(115200);
+    //delay(3000);
     // while(!Serial) // "while" prevents usb to setup properly
     // setCpuFrequencyMhz(80); will be usefull to save power on battery
-
     /////// Init hardware user interface (leds and switches)
+    Serial.println(ESP.getFreeHeap());
     hwui.init();
     hwui.setup();
 
@@ -63,21 +55,31 @@ void setup() {
     midiio.setup();
     hidio.usb_hid_setup();
 
-    /////// Load config
-    // config.gather(input_sens, engine, false);//,
-    // config.print();
-    config.load_config();
-    config.apply(input_sens, engine, osc, false);  // input_sens,
-    config.print();
-    /////// Init wifi
-    setup_wifi();
-
     
 
+    /////// Load config
+    Serial.print("config list:");
+    Serial.println(config.get_list());
+    config.load_config();
+    config.apply(input_sens, engine, osc, false);  // input_sens,
+    //config.print();
+
+    
+    /////// Init wifi
+    setup_wifi();
+    
+
+    listDir(LittleFS, "/", 0);
 
     /////// initialize sensor/inputs
     input_sens.init();
     input_sens.setup();
+    // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
+    config.gather(input_sens, engine, true);
+    config.save(config.filename+".json");
+
+    Serial.print("after sensor setup");
+    Serial.println(ESP.getFreeHeap());
 
     // Start server if TA connected or AP mode
     // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
@@ -87,7 +89,6 @@ void setup() {
     // else{
     //     Serial.println("Wifi not connected, no config page for now");
     // }
-
     osc.setup(); // requires config to be loaded before. 
 
     // Memo on tracking frequency adjustements
@@ -103,8 +104,17 @@ void setup() {
     // Serial.print("APB Freq = ");
     // Serial.print(Freq);
     // Serial.println(" Hz");
-
+    
     Serial.println("Setup done");
+    #ifdef DEBUG_HEAP
+        Serial.print(F("Remaining Heap:"));
+        Serial.println(String(ESP.getFreeHeap()));
+        Serial.print(F("Min Free Heap:"));
+        Serial.println(String(ESP.getMinFreeHeap()));
+        Serial.print(F("Max Alloc Heap:"));
+        Serial.println(ESP.getMaxAllocHeap());
+
+    #endif
 }
 
 void loop() {

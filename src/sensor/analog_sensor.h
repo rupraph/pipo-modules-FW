@@ -3,6 +3,7 @@
 
 #include "sensor/input_sensor.h"
 #include "utils/filters.h"
+#include "utils/config.h"
 #include "HW_CONFIG.h"
 
 // find way to add/change mode
@@ -59,12 +60,12 @@ class AnalogSensor : public Sensor{
             {"A4", LowPassFilter(10)},
             {"A5", LowPassFilter(10)},
             {"A6", LowPassFilter(10)},
-            {"T1", LowPassFilter(10)},
-            {"T2", LowPassFilter(20)},
-            {"T3", LowPassFilter(30)},
-            {"T4", LowPassFilter(5)},
-            {"T5", LowPassFilter(5)},
-            {"T6", LowPassFilter(5)}
+            {"T1", LowPassFilter(100)},
+            {"T2", LowPassFilter(100)},
+            {"T3", LowPassFilter(100)},
+            {"T4", LowPassFilter(100)},
+            {"T5", LowPassFilter(100)},
+            {"T6", LowPassFilter(100)}
         };
 
         

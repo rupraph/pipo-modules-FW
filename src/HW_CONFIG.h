@@ -1,4 +1,4 @@
-#define PIPO_MOTION
+//#define PIPO_RANGE
 // could put it as build flag ! like -D PIPO_RANGE
 
 #if defined(PIPO_MOTION)
@@ -11,6 +11,9 @@
     #define PIPO_TYPE "unknown"
 #endif
 
+#define PIPO_FW_VERSION "0.1" 
+
+#define DEBUG_HEAP true
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
     #define WIFI_LED 9

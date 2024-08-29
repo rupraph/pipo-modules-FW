@@ -5,13 +5,18 @@ Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 
 
+//Todo. should be carefull not to send midi too fast
+
 void MidiUSBSetup() {
     TinyUSBDevice.setManufacturerDescriptor("Rup");
     TinyUSBDevice.setProductDescriptor("PipoUSB");
     // while (!TinyUSBDevice.mounted())
     //     delay(1);
     MidiUsb.begin(MIDI_CHANNEL_OMNI);
-    
+    Serial.println("Midi USB setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 }
 
 void MidiUSBsendCC(int control, int value, int channel){

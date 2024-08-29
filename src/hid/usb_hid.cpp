@@ -49,6 +49,9 @@ void usb_hid::usb_hid_setup()
     {
         Serial.println("USB HID mounted");
     }
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 
 
 }

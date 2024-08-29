@@ -11,8 +11,8 @@ using namespace std;
 class OscTranslator
 {
     public:
-        OscTranslator() = default;
-        OscTranslator(float input_min, float input_max): input_min(input_min), input_max(input_max) {}
+        //OscTranslator();// = default;
+        // OscTranslator(float input_min, float input_max): input_min(input_min), input_max(input_max) {}
 
         bool enabled=false;
         bool mode_raw=true; // sends raw sensor data
@@ -20,8 +20,8 @@ class OscTranslator
         float output_max=1;
         float output_min=0;
 
-        float get_value(float value);
-        int get_current_bool(float value);
+        float get_value(float value, float min_input, float max_input);
+        int get_current_bool(float value, float min_input, float max_input);
 
         void to_json(nlohmann::json& j, const OscTranslator& t);
         void from_json(const nlohmann::json& j, OscTranslator& t);
@@ -34,8 +34,8 @@ class OscTranslator
 
     
     //private:
-        float input_min;
-        float input_max;
+        // float input_min;
+        // float input_max;
 
 };
 

@@ -6,7 +6,7 @@ HidTranslator::HidTranslator() {
     
 }
 
-int HidTranslator::map_linear(float value) {
+int HidTranslator::map_linear(float value, float input_min, float input_max) {
     if (input_min == input_max || output_min == output_max) {
         Serial.println("min and max values cannot be equal");
     }
@@ -20,7 +20,7 @@ int HidTranslator::map_linear(float value) {
     return round((value - input_min) / (input_max - input_min) * (output_max - output_min) + output_min);
 }
 
-int HidTranslator::get_current_bool(float value) {
+int HidTranslator::get_current_bool(float value, float input_min, float input_max) {
     // if threshold is used, we will return 1 if the value is above the threshold, and 0 if it is below
     // if not, return 1 if value is above the half of the input range, defined by input_max and input_min
 
@@ -43,8 +43,8 @@ int HidTranslator::get_current_bool(float value) {
 
 }
 
-int HidTranslator::get_current_int(float value) {
-  int mapped_value = map_linear(value);
+int HidTranslator::get_current_int(float value, float input_min, float input_max) {
+  int mapped_value = map_linear(value, input_min, input_max);
     // if (quantize) {
     //     mapped_value = round(mapped_value / quantize_steps) * quantize_steps;
     // }
@@ -57,13 +57,11 @@ void to_json(json& j, const HidTranslator& t) {
         {"mapto", t.mapto},
         {"quantize", t.quantize},
         {"quantize_steps", t.quantize_steps},
-        {"input_max", t.input_max},
-        {"input_min", t.input_min},
         {"use_threshold", t.use_threshold},
         {"threshold", t.threshold},
         {"output_max", t.output_max},
         {"output_min", t.output_min},
-        {"disabled", t.disabled}
+        {"enabled", t.enabled}
     };
 }
 
@@ -74,13 +72,11 @@ void from_json(const json& j, HidTranslator& t) {
     j.at("mapto").get_to(t.mapto);
     j.at("quantize").get_to(t.quantize);
     j.at("quantize_steps").get_to(t.quantize_steps);
-    j.at("input_max").get_to(t.input_max);
-    j.at("input_min").get_to(t.input_min);
     j.at("use_threshold").get_to(t.use_threshold);
     j.at("threshold").get_to(t.threshold);
     j.at("output_max").get_to(t.output_max);
     j.at("output_min").get_to(t.output_min);
-    j.at("disabled").get_to(t.disabled);
+    j.at("enabled").get_to(t.enabled);
 }
 
 json HidTranslator::get_json() const {

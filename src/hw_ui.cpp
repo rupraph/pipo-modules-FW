@@ -49,6 +49,10 @@ void HwUi::setup()
     set_led(BT_LED, 0);
     set_led(SEND_LED, 0);
     set_led(LOW_BAT_LED, 0);
+    Serial.println("HW UI setup done");
+    #ifdef DEBUG_HEAP
+        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    #endif
 
 }
 
@@ -63,6 +67,12 @@ void HwUi::set_led(int led_name, int value)
 {
     ledcWrite(led_channel_map[led_name], value);
 }
+
+bool HwUi::is_pulsing(int led_name)
+{
+    return led_pulse_table[led_name].enabled;
+}
+    
 
 void HwUi::start_blink(int led_name, int blink_time, float duty_cycle)
 {

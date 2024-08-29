@@ -15,7 +15,7 @@ class OSC_handler
         
         void setup();
         void set_config();
-        void sendOscMessage(const char* address, float value);
+        void sendOscMessage(string address, float value);
         
         
     private:

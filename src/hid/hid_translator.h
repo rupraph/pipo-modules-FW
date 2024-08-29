@@ -20,8 +20,7 @@ public:
 
     bool quantize=0;
     int quantize_steps=5;
-    int input_max;
-    int input_min=-180;
+
 
     int use_threshold=0;
     int threshold=0;
@@ -29,13 +28,13 @@ public:
     int output_max=255;
     int output_min=0;
 
-    bool disabled=false;
+    bool enabled=false;
 
     HidTranslator();
 
-    int map_linear(float value);
-    int get_current_bool(float value);
-    int get_current_int(float value);
+    int map_linear(float value, float min_input, float max_input);
+    int get_current_bool(float valu, float min_input, float max_input);
+    int get_current_int(float value, float min_input, float max_input);
 
     void to_json(nlohmann::json& j, const HidTranslator& t);
     void from_json(const nlohmann::json& j, HidTranslator& t);
@@ -59,12 +58,6 @@ public:
         }
         else if (param_name == "quantize_steps") {
             quantize_steps = value;
-        }
-        else if (param_name == "input_max") {
-            input_max = value;
-        }
-        else if (param_name == "input_min") {
-            input_min = value;
         }
         else if (param_name == "use_threshold") {
             use_threshold = value;
