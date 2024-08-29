@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ../pipo-single
+cd ../
 npm run update-web
