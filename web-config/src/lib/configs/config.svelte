@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import MinMax from "../form/MinMax.svelte";
+
   import InputConfig from "./input-config.svelte";
 
   import { pipoType as type } from "../../services";
@@ -34,8 +36,10 @@
     }).then(() => console.log("DONE"));
   }
 
-  async function submit(){
-    const blob = new Blob([JSON.stringify(config)], { type: "application/json" });
+  async function submit() {
+    const blob = new Blob([JSON.stringify(config)], {
+      type: "application/json",
+    });
     const formData = new FormData();
     formData.append("file", blob, "thisconfig.json"); //maybe we could pass the right name here
 
@@ -46,7 +50,6 @@
       headers: { "Content-Type": "multipart/form-data" },
     }).then(() => console.log("DONE"));
   }
-
 
   function test() {
     const blob = new Blob([JSON.stringify(config)], {
@@ -117,6 +120,13 @@
       <Collapse title={axis}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
+        <MinMax
+          label="Sensor Range"
+          bind:low={sensorconf.limit_min}
+          bind:high={sensorconf.limit_max}
+          min={0}
+          max={1000}
+        />
         <Range label="limit_max" bind:value={sensorconf.limit_max} />
         <Range label="limit_min" bind:value={sensorconf.limit_min} />
       </Collapse>
@@ -172,22 +182,35 @@
   </Collapse>
   <Collapse title="Board Settings">
     <section class="board-settings">
-    <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-    <Select label="Wifi Mode" options={wifimodes} bind:value={config.general.Wifi_mode} />
-    <button class="primary" on:click={reboot} style="width: fit-content">Reboot</button>
+      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
+      <Select
+        label="Wifi Mode"
+        options={wifimodes}
+        bind:value={config.general.Wifi_mode}
+      />
+      <button class="primary" on:click={reboot} style="width: fit-content"
+        >Reboot</button
+      >
     </section>
   </Collapse>
 
   <section class="buttons">
-    <div class ="left-buttons">
+    <div class="left-buttons">
       <!-- <button class="primary" on:click={test} title="Aplly the config without saving it">Set</button> -->
-      <button class="primary" on:click={submit} title="Apply and save the config in pipo">Set & Save</button> 
+      <button
+        class="primary"
+        on:click={submit}
+        title="Apply and save the config in pipo">Set & Save</button
+      >
     </div>
     <div>
-      <button class="primary Download" on:click={download} title="Download the config file locally" >Download config</button>
+      <button
+        class="primary Download"
+        on:click={download}
+        title="Download the config file locally">Download config</button
+      >
     </div>
   </section>
-
 </article>
 
 <style>
@@ -222,7 +245,6 @@
     background-color: rgba(106, 106, 106, 0.263);
   }
   .Download:hover {
-    background-color: rgba(0.2,0.1,0.2,0.3);
+    background-color: rgba(0.2, 0.1, 0.2, 0.3);
   }
-
 </style>
