@@ -1,6 +1,5 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import InputConfig from "./input-config.svelte";
-
+  import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
@@ -11,6 +10,7 @@
     OscConfig,
     PipoConfig,
     PipoTypes,
+    PipoKeys,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -20,7 +20,6 @@
   import Text from "../form/Text.svelte";
   import Select from "../form/Select.svelte";
   export let config: PipoConfig<T>;
-
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
@@ -34,8 +33,10 @@
     }).then(() => console.log("DONE"));
   }
 
-  async function submit(){
-    const blob = new Blob([JSON.stringify(config)], { type: "application/json" });
+  async function submit() {
+    const blob = new Blob([JSON.stringify(config)], {
+      type: "application/json",
+    });
     const formData = new FormData();
     formData.append("file", blob, "thisconfig.json"); //maybe we could pass the right name here
 
@@ -46,7 +47,6 @@
       headers: { "Content-Type": "multipart/form-data" },
     }).then(() => console.log("DONE"));
   }
-
 
   function test() {
     const blob = new Blob([JSON.stringify(config)], {
@@ -74,7 +74,7 @@
 
   function getMidiConfigs() {
     return Object.entries(config.engine["engine-midi"]) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       MidiConfig,
     ][];
   }
@@ -87,16 +87,20 @@
 
   function getSensorConf() {
     return Object.entries(config.sensor) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       SensorConfig,
     ][];
   }
 
   function getOscConf() {
     return Object.entries(config.engine["engine-osc"]) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       OscConfig,
     ][];
+  }
+
+  function getSchema(axis: PipoKeys[T]) {
+    return schema[$type as T][axis];
   }
 
   const wifimodes = [
@@ -114,19 +118,31 @@
 <article class="config">
   <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
-      <Collapse title={axis}>
+      {@const { label, unit, min, max } = getSchema(axis)}
+      <Collapse title={label}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
-        <Range label="limit_max" bind:value={sensorconf.limit_max} />
-        <Range label="limit_min" bind:value={sensorconf.limit_min} />
+        <Range
+          label={`limit min (${unit})`}
+          bind:value={sensorconf.limit_min}
+          {min}
+          {max}
+        />
+        <Range
+          label={`limit max (${unit})`}
+          bind:value={sensorconf.limit_max}
+          {min}
+          {max}
+        />
       </Collapse>
     {/each}
   </Collapse>
   <Collapse title="Data Output settings" closed>
     <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
+        {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title="Axis {axis}" bind:value={midiconfig.enabled}>
+          <Collapse title={label} bind:value={midiconfig.enabled}>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"
@@ -157,8 +173,9 @@
       <Text label="OSC IP" bind:value={config.general.OSC_IP} />
       <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
       {#each getOscConf() as [axis, oscconf]}
+        {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title="Axis {axis}" bind:value={oscconf.enabled}>
+          <Collapse title={label} bind:value={oscconf.enabled}>
             <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
             <Checkbox label="Mode_raw" bind:value={oscconf.mode_raw} />
             {#if !oscconf.mode_raw}
@@ -172,22 +189,35 @@
   </Collapse>
   <Collapse title="Board Settings">
     <section class="board-settings">
-    <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-    <Select label="Wifi Mode" options={wifimodes} bind:value={config.general.Wifi_mode} />
-    <button class="primary" on:click={reboot} style="width: fit-content">Reboot</button>
+      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
+      <Select
+        label="Wifi Mode"
+        options={wifimodes}
+        bind:value={config.general.Wifi_mode}
+      />
+      <button class="primary" on:click={reboot} style="width: fit-content"
+        >Reboot</button
+      >
     </section>
   </Collapse>
 
   <section class="buttons">
-    <div class ="left-buttons">
+    <div class="left-buttons">
       <!-- <button class="primary" on:click={test} title="Aplly the config without saving it">Set</button> -->
-      <button class="primary" on:click={submit} title="Apply and save the config in pipo">Set & Save</button> 
+      <button
+        class="primary"
+        on:click={submit}
+        title="Apply and save the config in pipo">Set & Save</button
+      >
     </div>
     <div>
-      <button class="primary Download" on:click={download} title="Download the config file locally" >Download config</button>
+      <button
+        class="primary Download"
+        on:click={download}
+        title="Download the config file locally">Download config</button
+      >
     </div>
   </section>
-
 </article>
 
 <style>
@@ -222,7 +252,6 @@
     background-color: rgba(106, 106, 106, 0.263);
   }
   .Download:hover {
-    background-color: rgba(0.2,0.1,0.2,0.3);
+    background-color: rgba(0.2, 0.1, 0.2, 0.3);
   }
-
 </style>

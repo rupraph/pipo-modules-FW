@@ -48,6 +48,17 @@ export type PipoKeys = {
   analog: "A1" | "A2" | "A3" | "A4" | "A5" | "A6" | "T1" | "T2" | "T3" | "T4";
   unknown: "";
 };
+
+export type Schema = {
+  [T in PipoTypes]: {
+    [Key in PipoKeys[T]]: {
+      label: string;
+      unit: string;
+      min: number;
+      max: number;
+    };
+  };
+};
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {
