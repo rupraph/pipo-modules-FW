@@ -8,7 +8,7 @@
 #include "utils/json.hpp"
 #include "utils/logs.h"
 #include "utils/fs_tools.h"
-#include "server/midi_socket.h"
+#include "server/pipo_socket.h"
 #include "HW_CONFIG.h"
 
 

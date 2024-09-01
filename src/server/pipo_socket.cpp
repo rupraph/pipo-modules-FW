@@ -1,4 +1,4 @@
-#include <server/midi_socket.h>
+#include <server/pipo_socket.h>
 
 MidiSocket midisocket;
 MidiSocket::MidiSocket() { 
