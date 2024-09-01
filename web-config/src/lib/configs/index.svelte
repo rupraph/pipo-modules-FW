@@ -9,12 +9,11 @@
   let fetchError: string;
   let error: string;
 
-
   function formatNumbers(obj: any, decimals: number): any {
     if (typeof obj === "number") {
       return parseFloat(obj.toFixed(decimals));
     } else if (Array.isArray(obj)) {
-      return obj.map(item => formatNumbers(item, decimals));
+      return obj.map((item) => formatNumbers(item, decimals));
     } else if (typeof obj === "object" && obj !== null) {
       const formattedObj: any = {};
       for (const key in obj) {
@@ -26,7 +25,6 @@
     }
     return obj;
   }
-
 
   async function fetch() {
     try {
@@ -54,7 +52,6 @@
     }
   }
 
-  
   let state = fetch();
 
   function onClick(name: string) {
@@ -139,10 +136,10 @@
         {onRename}
       >
         {#if resp.config}
-          <button class="delete error" on:click={onDelete(resp.active)}
-            >Delete</button
-          >
-          <Config config={resp.config} />
+          <Config
+            config={resp.config}
+            on:delete={() => onDelete(resp.active)}
+          />
         {/if}
       </Tabs>
     {/await}

@@ -25,3 +25,6 @@ export function onError(e: AxiosError) {
   }
   return `Error during fetch: ${e}`;
 }
+export function uid() {
+  return Math.random().toString(36).substring(2);
+}
