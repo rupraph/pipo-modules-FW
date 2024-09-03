@@ -4,9 +4,8 @@ using json = nlohmann::json;
 
 
 void PipoServer::setup() {
-    // not sure this is the best way to do this. see exemples
-    
-    // name should depend on the type of pipo, but for now config page has no mean to retrive the right type to connect to it. 
+    //Todo: check lib exemple. can be improved
+
     std::string mdns_name=std::string("pipo-")+PIPO_TYPE;
     if (!MDNS.begin(mdns_name.c_str())) {  // Start the mDNS responder for esp.local
         Serial.println("Error setting up MDNS responder!");
@@ -46,11 +45,12 @@ void PipoServer::stop() {
 }
 
 void PipoServer::setup_requests() {
+
     server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
         String type;
         json info = {
-            {"name", "unnamed Pipo"},// should come from config file
-            {"version", string(PIPO_FW_VERSION)}, // should come from HW_CONFIG
+            {"name", "unnamed Pipo"},// Todo: should come from config file
+            {"version", string(PIPO_FW_VERSION)},
             {"type", string(PIPO_TYPE)},
             {"ip", WiFi.localIP().toString().c_str()},
             {"mac", WiFi.macAddress().c_str()},
@@ -58,11 +58,7 @@ void PipoServer::setup_requests() {
         return request->send(200, "text/json", info.dump().c_str());
     });
 
-    // server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
-    //     return request->send(200, "text/plain", config.get().dump().c_str()); 
-    // });
-
-    
+    // recevies and apply config
     server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("config")) {
             return request->send(400, "text/plain", "No config received");
@@ -76,7 +72,7 @@ void PipoServer::setup_requests() {
         }
     });
 
-        // sends config with filename
+    // sends config-list and config file based on provided filename
     server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
         if(!request->hasParam("name")){
             return request->send(200, "text/plain", config.get_list());
@@ -91,10 +87,12 @@ void PipoServer::setup_requests() {
         }
     });
 
+    // sends active config filename
     server.on("/config-active", HTTP_GET,[&](AsyncWebServerRequest* request) { 
         return request->send(200, "text/plain", config.filename.c_str()); 
         });
 
+    // set active config
     server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("name")) {
             return request->send(400, "text/plain", "Error: no name parameter");
@@ -108,6 +106,7 @@ void PipoServer::setup_requests() {
             return request->send(500, "text/plain", "Error loading config: " + String(e.what()));
         }
     });
+
      server.on("/config-delete", HTTP_POST, [&](AsyncWebServerRequest* request) {
         if (!request->hasParam("name")) {
             return request->send(400, "text/plain", "Error: no name parameter");
@@ -169,7 +168,6 @@ void PipoServer::setup_requests() {
 
                 if (final) {
                     // This is the end of the file upload
-
                     // Here I am doing save first then load. so parsing happen with load function.
                     // this avoids parsing in here and trying to pass the json to config.set().
                     // after solving other issues, not sure if this has any value after all.

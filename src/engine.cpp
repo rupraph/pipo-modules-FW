@@ -1,20 +1,13 @@
 #include "engine.h"
 #include "HW_CONFIG.h"
 
-// for convenience
+
 using json = nlohmann::json;
 
+//the engine takes the sensor data and outputs it to the selected interfaces based on the configuration
+
 // Todo engine. 
-// should create a table for axis config. min max, etc, since this is shared for both hid and midi
-// should push axis enabling in here instead of in the sensor class
-// will have to add error catching: -> when config could not load for eg. 
 // could use combination mode to have note from orientation, and trigger from acceleration
-// find way to map scales/arpegio over axis (for analog when touch is a note)
-// should use callback to trigger events and notes
-// find way to:
-            //- limit max sending freq
-            //- send on change only -> in midi io ? 
-            //- play / pause
 
 void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& osc)
 {
@@ -33,8 +26,6 @@ void Engine::update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& 
     }
 }
 
-
-    
 
 
 void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
@@ -68,15 +59,12 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 else
                 {
                     uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,0),127));
-                    // for midi find way to limit rotation to max 180° to avoid overflow to 0
                     midiio.sendControlChange(cc_number, cc_val, channel,false);
 
                 }
-                vTaskDelay(pdTICKS_TO_MS(5)); // virtually space cc send. 
+                vTaskDelay(pdTICKS_TO_MS(5)); // virtually delay cc send. will be solved with task management 
          
             }
-
-            
 
         // if Note mode
             else
@@ -87,8 +75,6 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 
                 // probaly get triggered should be something linked to the deadzone
                 #if defined(PIPO_ANALOG)
-                // was this written only for sending single notes ? 
-
                 // trigger new note if within range, not already playing, and new note is different from previous note
                 if (sensor.is_within_range(axis_name)
                 && note_val[channel]!=note_val_prev[channel]
@@ -120,7 +106,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 #endif
 
 
-                #if defined(PIPO_RANGE)
+                #if defined(PIPO_RANGE) // to be rewritten. not clear split between what shall be in sensor and what in engine
                 //Part of this logic migth have to move to sensor ?
                 if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
                 {
@@ -247,31 +233,6 @@ void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
             }
         }
         
-}
-
-void Engine::set_default_config()
-{
-    // // Hid mapping config
-    // hid_map["roll"].mapto = "x";
-    // hid_map["pitch"].mapto = "y";
-
-
-    // // Midi mapping config
-    // Miditranslators["roll"].max_input=180;
-    // Miditranslators["roll"].min_input=-180;
-    // Miditranslators["roll"].translator_mode=1;
-    // Miditranslators["roll"].rootNote=40;
-    // //Miditranslators["roll"].printScale(Miditranslators["roll"].current_scale);
-    // Miditranslators["roll"].update_scale();
-
-
-    // Miditranslators["pitch"].max_input=90;
-    // Miditranslators["pitch"].min_input=-90;
-
-    // Miditranslators["yaw"].max_input=180;
-    // Miditranslators["yaw"].min_input=-180;
-
-    // // ADD SAVE CONFIG
 }
 
 json Engine::get_config(bool debug)

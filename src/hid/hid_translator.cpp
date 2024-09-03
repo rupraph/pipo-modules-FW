@@ -2,6 +2,8 @@
 
 using json = nlohmann::json;
 
+// UNDER CONSTRUCTION
+
 HidTranslator::HidTranslator() {
     
 }

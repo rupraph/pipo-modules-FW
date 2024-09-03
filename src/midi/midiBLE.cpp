@@ -4,7 +4,13 @@
 #include <BLEMIDI_Transport.h>
 #include <hardware/BLEMIDI_ESP32_NimBLE.h>
 
-BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
+#ifdef PIPO_MOTION
+    BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
+#elif PIPO_RANGE
+    BLEMIDI_CREATE_INSTANCE("PipoRangeBLE", MidiBle);
+#elif PIPO_ANALOG
+    BLEMIDI_CREATE_INSTANCE("PipoAnalogBLE", MidiBle);
+#endif
 
 void midiBLESetup() {
 

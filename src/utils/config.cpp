@@ -1,13 +1,6 @@
-// this will implement the methods from config.h
-
 #include "config.h"
 
-// todo should be able to save different config and retrieve them (from webpage)
-// should be able to report wherther config is succefully loade, saved,etc..
-
-// todo. when changing sensor range for eg, this should trigger an update of miditranslator max ????
-Config config;
-
+Config config; // global config object so it can be accessed from anywhere
 
 void Config::load_config(String filename,bool addJsonExtension=true) {
     this->filename = filename;
@@ -108,11 +101,9 @@ void Config::rename(String old_name, String new_name) {
     }
 }
 void Config::new_config(String name) {
-    // should check if file already exists. rewrtiing on same filename can cause corruption ? 
-    //std::string input = readFile(LittleFS, config_model_path);
+    // should check if file already exists.
     copyFile(LittleFS, config_model_path, get_path(name).c_str());
     this->filename = name;
-    //writeFile(LittleFS, get_path(name).c_str(), input.c_str());
     logs.writeLog("new config: " + name);
 }
 

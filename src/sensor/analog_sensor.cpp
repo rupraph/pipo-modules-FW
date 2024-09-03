@@ -93,27 +93,11 @@ void AnalogSensor::update()
     }
     for (auto const& pair : touch_map)
     {
-        //triel filtering values
+        //trial filtering values
         //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
         float val = touchRead(pair.second)-sensor_dat[pair.first].offset;
 
-        // if (value>sensor_dat[pair.first].limit_max && touch_adaptative_max)
-        // {
-        //     sensor_dat[pair.first].value = value;
-        //     sensor_dat[pair.first].limit_max = value;
-            // Todo: should find a way that changing the sensor limit also propagates to the connected midi translator
-        // }
-        // else
-        // if (val>sensor_dat[pair.first].limit_max)// && !touch_adaptative_max)
-        // {
-        //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_max;
-        // }
-        // else if (val<sensor_dat[pair.first].limit_min)
-        // {
-        //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_min;
-        // }
-        // else
-        // {
+        //Todo: try to have an adaptative max ? 
 
         // should be generic for both or any sensor type ? 
         sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
@@ -146,7 +130,5 @@ void AnalogSensor::update()
     }
 }
 
-
-// generic functions /////////////////
 
 

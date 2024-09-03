@@ -9,7 +9,7 @@ void Sensor::teleplot_data(string axis)
 {   
     if (sensor_dat.find(axis) == sensor_dat.end())
     {
-        // Serial.println("error: Axis not found");
+        Serial.println("error: Axis not found");
         return;
     }
     else
@@ -40,7 +40,6 @@ unsigned long Sensor::end_duration()
 }
 
 //config
-
 json Sensor::get_config(bool debug)
 {
     json config;
@@ -85,7 +84,7 @@ void Sensor::set_config(json& config, bool debug)
     }
 }
 
-//gett setters
+//getter / setters
 
 unordered_map<string, Sensor::SensorDat> Sensor::get_sensor_dat_map() {
     return sensor_dat;
@@ -160,9 +159,6 @@ float Sensor::get_untriggered(const std::string& axis) {
     else
         throw std::invalid_argument("Axis not found: " + axis);
 }
-
-
-
 
 //Setters
 

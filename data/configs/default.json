@@ -17,7 +17,7 @@
             "dist": {
                 "cc_number": 2,
                 "channel": 1,
-                "enabled": false,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,

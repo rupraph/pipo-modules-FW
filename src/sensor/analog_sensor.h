@@ -6,7 +6,6 @@
 #include "utils/config.h"
 #include "HW_CONFIG.h"
 
-// find way to add/change mode
 
 using namespace std;
 
@@ -69,7 +68,6 @@ class AnalogSensor : public Sensor{
         };
 
         
-
         bool touch_adaptative_max;
 
         

@@ -5,7 +5,6 @@
 #include "HW_CONFIG.h"
 
 void midiBLESetup();
-//void midiBLELoop();
 void OnConnected();
 void OnDisconnected();
 

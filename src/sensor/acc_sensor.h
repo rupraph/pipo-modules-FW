@@ -23,23 +23,17 @@ class MotionSensor: public Sensor{
         void setup() override;
         void update() override;
 
-        bool enable_send_vizualizer = false;
-
         void calc_euler_angles();
-
         void convert_accell();
 
+        bool enable_send_vizualizer = false; //set on/off serial messages for vizualizer
 
     private:
-
-
         unordered_map<string, LowPassFilter> lp_filter_map = {
             {"roll", LowPassFilter(10)},
             {"pitch", LowPassFilter(10)},
             {"yaw", LowPassFilter(10)},
         };
-
-
 
         ArduinoICM20948 icm20948;
         ArduinoICM20948Settings icmSettings =
@@ -67,10 +61,7 @@ class MotionSensor: public Sensor{
         .quaternion9_frequency = 50,        // Max frequency = 225, min frequency = 50
         .har_frequency = 50,                // Max frequency = 225, min frequency = 50
         .steps_frequency = 50               // Max frequency = 225, min frequency = 50
-        
         };
-
-
 
         float quat_w;
         float quat_x;
@@ -81,13 +72,6 @@ class MotionSensor: public Sensor{
         float raw_accX;
         float raw_accY;
         float raw_accZ;
-
-
-        // // acellerometer value convertion (from before library change)
-        // const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
-        // float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
-
-
 };
 
 #endif //ACC_SENSOR_H

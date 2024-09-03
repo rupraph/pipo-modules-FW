@@ -1,6 +1,3 @@
-//#define PIPO_RANGE
-// could put it as build flag ! like -D PIPO_RANGE
-
 #if defined(PIPO_MOTION)
     #define PIPO_TYPE "motion"
 #elif defined(PIPO_RANGE)

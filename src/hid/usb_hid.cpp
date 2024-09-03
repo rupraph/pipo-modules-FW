@@ -1,6 +1,8 @@
 #include "usb_hid.h"
 
 
+// UNDER CONSTRUCTION
+
 Adafruit_USBD_HID usb_hid_port;
 // Report payload defined in src/class/hid/hid.h
 // - For Gamepad Button Bit Mask see  hid_gamepad_button_bm_t
@@ -33,7 +35,7 @@ void usb_hid::usb_hid_setup()
     usb_hid_port.begin();
 
 
-    // wait until device mounted. then timeout after 5 seconds and report not mounted
+    // wait until device mounted. then timeout and report not mounted
     unsigned long timeout = millis() + 3000;
 
 
@@ -55,8 +57,8 @@ void usb_hid::usb_hid_setup()
 
 
 }
- /// Find way on assigning sensor axis to game or mouse axis. this mapping should likely be in engine or a seperate calss than here.
 
+//Todo: Find way on assigning sensor axis to game or mouse axis. this mapping should likely be in engine or a seperate calss than here
 void usb_hid::usb_hid_update(const void *report)
 {   
     if ( !usb_hid_port.ready() ) return;
@@ -80,6 +82,5 @@ void usb_hid::usb_hid_update(const void *report)
     //     usb_hid.sendReport(0, &kb, sizeof(kb));
     //     break;
     }
-    //delay(2000);
     
 }

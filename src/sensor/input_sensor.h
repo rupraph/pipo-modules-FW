@@ -11,6 +11,9 @@
 using namespace std;
 using json = nlohmann::json;
 
+//This is a generic class for sensors.
+//It defines the basic structure of a sensor to make it adaptable with the engine and various translators classes 
+
 class Sensor {
 public:
     
@@ -27,14 +30,11 @@ public:
         float offset;
         float limit_max;
         float limit_min;
-        bool triggered; // for now for range, it means entered within range), for touch, trigger threshold)
+        bool triggered; 
         bool untriggered; 
-        // float threshold;
     };
 
     
-    
-
     void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
     bool is_within_range(const std::string& axis);
@@ -55,7 +55,6 @@ public:
     void set_config(json& config,bool debug=false);
 
     //Getter setters
-
     unordered_map<string, SensorDat> get_sensor_dat_map();
 
     bool get_enabled(const std::string& axis);
@@ -87,8 +86,6 @@ public:
 
     float get_untriggered(const std::string& axis);
     void set_untriggered(const std::string& axis, bool value);
-
-    
 
 protected:
     unordered_map<string, SensorDat> sensor_dat;

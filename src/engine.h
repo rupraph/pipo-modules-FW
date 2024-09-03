@@ -16,12 +16,10 @@
 
 using namespace std;
 
-// this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
-
-// maps should not be declare per axis, but per function since some output might rely on 2 inputs
+// this class takes care of the translation of the sensor data to the different outputs
+// Todo: maps should not be declared per axis, but per function since some output might rely on 2 inputs
 
 class OSC_handler; // why do I need forward declaration here??
-//class OSC_translator;
 
 class Engine
 {
@@ -130,7 +128,6 @@ class Engine
         void hid_processor(Sensor& sensor,usb_hid& hidio);
         void osc_processor(Sensor& sensor,OSC_handler& osc);
 
-        void set_default_config();
         json get_config(bool debug=false);
         void set_config(json& config,bool debug=false);
         friend void to_json(json& j, const Engine& t);

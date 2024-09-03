@@ -1,7 +1,5 @@
-    #include "midi_translator.h"
+#include "midi_translator.h"
 
-
-// for convenience
 using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
@@ -13,9 +11,6 @@ MidiTranslator::MidiTranslator() {
     else {
         max_output = 127;
     }
-
-    //printScale(current_scale);
-
 }
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
@@ -61,30 +56,6 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
     current_scale.clear();
     current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
 }
-
-
-// void MidiTranslator::set_every_note(vector<string> scale) {
-//     current_scale.clear();
-//     for (int i = 0; i < scale.size(); i++) {
-//         current_scale.push_back(convertNoteNameToNumber(scale[i]));
-//     }
-// }
-
-
-// not ready yet. dealing with custom scale or additional scale is not ready to be savec/loaded correctly 
-
-// void MidiTranslator::set_new_scale(string newscaleType,vector<string> newscale) {
-//     //convert newscale to int vector
-//     vector<int> newscalenb;
-
-//     for (const string& noteName : newscale) {
-//         int noteNumber = convertNoteNameToNumber(noteName);
-//         newscalenb.push_back(noteNumber);
-//     }
-//     scales.insert({newscaleType, newscalenb});
-
-//     set_Scale_Type(newscaleType);
-// }
 
 void MidiTranslator::set_root_note(string rootNote) {
     int rootNotenb = convertNoteNameToNumber(rootNote);
@@ -147,11 +118,8 @@ bool MidiTranslator::is_a_note(string noteName) {
 }
 
 vector<int> MidiTranslator::generate_full_Scale(int rootNote,int nb_notes, string scaleType) {
-    //int minNote = convertNoteNameToNumber(minimum_note);
-    //int maxNote = convertNoteNameToNumber(maximumNote);
 
     vector<int> scale = generate_base_Scale(rootNote, scaleType);
-    //printScale(scale);
     vector<int> expandedScale;
 
     int baseScaleSize = scale.size();
@@ -163,12 +131,6 @@ vector<int> MidiTranslator::generate_full_Scale(int rootNote,int nb_notes, strin
         baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
         expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
     }
-
-    // for (int i = rootNote; i <= maxNote; i++) {
-    //     int baseNoteIndex = (i - rootNote) % baseScaleSize;
-    //     int expandedNote = scale[baseNoteIndex] + (i / baseScaleSize) * 12;
-    //     expandedScale.push_back(expandedNote);
-    // }
 
     return expandedScale;
 }
@@ -200,7 +162,6 @@ vector<string> MidiTranslator::get_scale_names() {
 void MidiTranslator::update_scale() {
     current_scale.clear();
     current_scale = generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
-    //printScale(this->current_scale);
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,bool hires=false) {
@@ -220,27 +181,13 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,boo
         max_output = 127;
     }
     
-    // maybe the threshold system will haev to move on sensor side
-    // if (use_threshold){
-    //     if (value > threshold)
-    //     {
-    //         return max_output;
-    //     }
-    //     else
-    //     {
-    //         return min_output;
-    //     }
-    // }
-    // else 
-    // {
-        if (interpolation_type == 0) {
-        return map_linear(value, min_input, max_input);
-        }
-        else {
-        // not implemented yet
-        return 0;
-        }
-    // }
+    if (interpolation_type == 0) {
+    return map_linear(value, min_input, max_input);
+    }
+    else {
+    // not implemented yet
+    return 0;
+    }
 }
 
 int MidiTranslator::map_linear(float value, float min_input, float max_input) {
@@ -309,12 +256,6 @@ void MidiTranslator::set_from_json(const json& j) {
     }
 
     this->update_scale();
-
-    // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
-    //     Serial.println(it.key().c_str());
-    //     Serial.println(it.value());
-    //     set_param(it.key(), it.value());
-    // }
 }
 
 bool MidiTranslator::getHires() const{ return hires; }

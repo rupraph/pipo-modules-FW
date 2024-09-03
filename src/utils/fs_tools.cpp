@@ -4,8 +4,7 @@
    test or else use the LITTLEFS plugin to create a partition
    https://github.com/lorol/arduino-esp32littlefs-plugin */
 
-
-// please don't use printf in embedded systems
+// please don't use printf
 
 void init_filesystem(){
         // Init LittleFS

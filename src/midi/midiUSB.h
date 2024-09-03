@@ -5,8 +5,6 @@
 #include <MIDI.h>
 #include "HW_CONFIG.h"
 
-
-
 void MidiUSBSetup();
 void MidiUSBsendCC(int control, int value, int channel);
 void MidiUSBsendHiResCC(int value);

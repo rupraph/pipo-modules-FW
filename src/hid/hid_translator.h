@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// UNDER CONSTRUCTION
+
 class HidTranslator
 {
 private:

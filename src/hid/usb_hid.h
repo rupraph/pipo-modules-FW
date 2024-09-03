@@ -4,7 +4,7 @@
 #include <Adafruit_TinyUSB.h>
 #include "HW_CONFIG.h"
 
-// temporarily test hid here
+// UNDER CONSTRUCTION
 
 class usb_hid {
     public:
