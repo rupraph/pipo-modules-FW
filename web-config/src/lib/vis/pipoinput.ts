@@ -18,13 +18,23 @@ function parseCC(msg: string) {
 function parseNoteonoff(msg: string) {
   const match = msg.match(/(noteon|noteoff|cc)(\d+),(\d+),(\d+)/);
   if (!match) return;
-  const [whole, cmd, channel, note, velocity] = msg;
+  const [whole, cmd, channel, note, velocity] = match;
   return {
     cmd,
     msg: msg.slice(match.index, whole.length),
     channel: Number(channel),
     note: Number(note),
     velocity: Number(velocity),
+  };
+}
+function parseSensor(msg: string) {
+  const match = msg.match(/sensor(.*),(.*)/);
+  if (!match) return;
+  const [whole, axis, value] = match;
+  return {
+    axis,
+    msg: msg.slice(match.index, whole.length),
+    value: Number(value),
   };
 }
 
@@ -57,7 +67,6 @@ class PipoInput extends EventEmitter<PipoEvents> {
   }
   initWebSocket() {
     // const socket = new WebSocket("ws://localhost/ws");
-    return;
     const socket = new WebSocket(
       `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws` ||
         "ws://localhost/ws"
@@ -74,9 +83,15 @@ class PipoInput extends EventEmitter<PipoEvents> {
       this.retryConnection();
     });
     socket.addEventListener("message", (e) => {
-      let matches = true;
+      let matches = false;
       let msg = e.data;
       // while (matches && msg.length) {
+      const sensor = parseSensor(msg);
+      if (sensor) {
+        this.emit("sensor", sensor);
+        msg = sensor.msg;
+        matches = !!sensor;
+      }
       const noteonoff = parseNoteonoff(msg);
       if (noteonoff) {
         if (noteonoff.cmd === "noteon") {
@@ -93,16 +108,12 @@ class PipoInput extends EventEmitter<PipoEvents> {
         matches = !!noteonoff;
       }
       const cc = parseCC(msg);
-      if (!cc) {
-        matches = false;
-        // continue;
+      if (cc) {
+        this.emit("controlChange", {
+          control: cc.control,
+          value: cc.value,
+        });
       }
-      this.emit("controlChange", {
-        control: cc.control,
-        value: cc.value,
-      });
-      msg = cc.msg;
-      // }
     });
   }
   async initWebMidi() {

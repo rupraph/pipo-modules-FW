@@ -64,6 +64,10 @@ export type PipoConfig<T extends PipoTypes> = {
   };
 };
 
+export type SensorValues<T extends PipoTypes> = {
+  [Key in PipoKeys[T]]: number | undefined;
+};
+
 export type InputMinMax = {
   [T in PipoTypes]: {
     [Key in PipoKeys[T]]: {

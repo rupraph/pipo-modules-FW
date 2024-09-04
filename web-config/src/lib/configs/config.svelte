@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import { pipoInput } from "../vis/pipoinput";
+
   import { createEventDispatcher } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { pipoType as type } from "../../services";
@@ -11,6 +13,7 @@
     OscConfig,
     PipoConfig,
     PipoTypes,
+    SensorValues,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -21,7 +24,11 @@
   import Select from "../form/Select.svelte";
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
+  const sensorValues: SensorValues<T> = {};
 
+  pipoInput.on("sensor", ({ axis, value }) => {
+    sensorValues[axis] = value;
+  });
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
@@ -138,6 +145,7 @@
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
+          value={sensorValues[axis]}
           min={0}
           max={1000}
           minLabel="limit_min"

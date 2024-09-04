@@ -7,6 +7,7 @@
   export let max: number = 1;
   export let minLabel: string = "min";
   export let maxLabel: string = "max";
+  export let value: number | undefined = undefined;
   export let low: number = 0;
   export let high: number = 100;
   export let step: number = 1;
@@ -26,6 +27,9 @@
     const percent1 = (low / max) * 100;
     const percent2 = (high / max) * 100;
     return `linear-gradient(to right, #dadae5 ${percent1}% , var(--main) ${percent1}% , var(--main) ${percent2}%, #dadae5 ${percent2}%)`;
+  }
+  function left() {
+    return `${((value || 0) / max) * 100}%`;
   }
 </script>
 
@@ -48,6 +52,7 @@
         bind:value={high}
         on:input={(v) => onMaxChange(v.target.value)}
       />
+      <span class="value" style="left:${left()}"></span>
     </div>
     <span>{max}</span>
   </div>
@@ -101,6 +106,12 @@
   }
   .inputs > * {
     width: max-content;
+  }
+  .value {
+    position: absolute;
+    width: 1em;
+    background-color: red;
+    border-radius: 50%;
   }
   input[type="range"] {
     -webkit-appearance: none;
