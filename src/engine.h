@@ -9,6 +9,7 @@
 #include "hid/usb_hid.h"
 #include "utils/json.hpp"
 #include "utils/fs_tools.h"
+#include "server/pipo_socket.h"
 #include "sensor/input_sensor.h"
 #include "hw_ui.h"
 #include "osc_handler.h"
@@ -129,6 +130,7 @@ class Engine
         void midi_processor(Sensor& sensor,midi_io& midiio);
         void hid_processor(Sensor& sensor,usb_hid& hidio);
         void osc_processor(Sensor& sensor,OSC_handler& osc);
+        void monitor_sensors(Sensor& sensor);
 
         void set_default_config();
         json get_config(bool debug=false);
