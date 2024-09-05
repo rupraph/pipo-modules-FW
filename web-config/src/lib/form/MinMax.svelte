@@ -112,7 +112,7 @@
     height: 0;
     border-left: 0.5em solid transparent;
     border-right: 0.5em solid transparent;
-    border-top: 0.5em solid var(--main);
+    border-top: 0.5em solid var(--text-color);
     left: var(--left);
   }
   input[type="range"] {
