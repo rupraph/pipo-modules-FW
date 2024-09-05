@@ -136,9 +136,9 @@
       >Delete</button
     >
   </section>
-  <Collapse title="Sensor settings" open>
+  <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
-      <Collapse title={axis} open>
+      <Collapse title={axis}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
         <MinMax
@@ -154,11 +154,11 @@
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings" closed>
+  <Collapse title="Data Output settings" open>
     <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
         <section>
-          <Collapse title="Axis {axis}" bind:value={midiconfig.enabled}>
+          <Collapse title="Axis {axis}" bind:value={midiconfig.enabled} open>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"
