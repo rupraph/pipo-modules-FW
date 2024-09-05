@@ -1,6 +1,7 @@
 <script lang="ts" generics="T extends PipoTypes">
   import { createEventDispatcher } from "svelte";
   import MinMax from "../form/MinMax.svelte";
+  import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
@@ -11,6 +12,7 @@
     OscConfig,
     PipoConfig,
     PipoTypes,
+    PipoKeys,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -76,7 +78,7 @@
 
   function getMidiConfigs() {
     return Object.entries(config.engine["engine-midi"]) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       MidiConfig,
     ][];
   }
@@ -89,16 +91,20 @@
 
   function getSensorConf() {
     return Object.entries(config.sensor) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       SensorConfig,
     ][];
   }
 
   function getOscConf() {
     return Object.entries(config.engine["engine-osc"]) as unknown as [
-      Axis<typeof $type>,
+      PipoKeys[T],
       OscConfig,
     ][];
+  }
+
+  function getSchema(axis: PipoKeys[T]) {
+    return schema[$type as T][axis];
   }
 
   const wifimodes = [
@@ -131,17 +137,18 @@
   </section>
   <Collapse title="Sensor settings" open>
     {#each getSensorConf() as [axis, sensorconf]}
-      <Collapse title={axis} open>
+      {@const { label, unit, min, max } = getSchema(axis)}
+      <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
-          min={0}
-          max={1000}
-          minLabel="limit_min"
-          maxLabel="limit_max"
+          {min}
+          {max}
+          minLabel={`min (${unit})`}
+          maxLabel={`max (${unit})`}
         />
       </Collapse>
     {/each}
@@ -149,8 +156,9 @@
   <Collapse title="Data Output settings" closed>
     <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
+        {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title="Axis {axis}" bind:value={midiconfig.enabled}>
+          <Collapse title={label} bind:value={midiconfig.enabled}>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"
@@ -181,8 +189,9 @@
       <Text label="OSC IP" bind:value={config.general.OSC_IP} />
       <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
       {#each getOscConf() as [axis, oscconf]}
+        {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title="Axis {axis}" bind:value={oscconf.enabled}>
+          <Collapse title={label} bind:value={oscconf.enabled}>
             <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
             <Checkbox label="Mode_raw" bind:value={oscconf.mode_raw} />
             {#if !oscconf.mode_raw}
