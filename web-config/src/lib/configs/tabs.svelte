@@ -127,6 +127,5 @@
     margin-top: 4px;
     background: var(--bg-color);
     transform: translate(0, -1px);
-    padding: 1em;
   }
 </style>

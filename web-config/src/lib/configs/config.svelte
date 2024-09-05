@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import { createEventDispatcher } from "svelte";
+  import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
@@ -20,6 +22,8 @@
   import Text from "../form/Text.svelte";
   import Select from "../form/Select.svelte";
   export let config: PipoConfig<T>;
+  const dispatch = createEventDispatcher();
+
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
@@ -116,23 +120,35 @@
 </script>
 
 <article class="config">
-  <Collapse title="Sensor settings">
+  <section class="buttons">
+    <button
+      class="primary"
+      on:click={submit}
+      title="Apply and save the config in pipo">Set & Save</button
+    >
+    <button
+      class="primary Download"
+      on:click={download}
+      title="Download the config file locally">Download config</button
+    >
+    <button class="delete error" on:click={() => dispatch("delete")}
+      >Delete</button
+    >
+  </section>
+  <Collapse title="Sensor settings" open>
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max } = getSchema(axis)}
-      <Collapse title={label}>
+      <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
-        <Range
-          label={`limit min (${unit})`}
-          bind:value={sensorconf.limit_min}
+        <MinMax
+          label="Sensor Range"
+          bind:low={sensorconf.limit_min}
+          bind:high={sensorconf.limit_max}
           {min}
           {max}
-        />
-        <Range
-          label={`limit max (${unit})`}
-          bind:value={sensorconf.limit_max}
-          {min}
-          {max}
+          minLabel={`min (${unit})`}
+          maxLabel={`max (${unit})`}
         />
       </Collapse>
     {/each}
@@ -200,32 +216,11 @@
       >
     </section>
   </Collapse>
-
-  <section class="buttons">
-    <div class="left-buttons">
-      <!-- <button class="primary" on:click={test} title="Aplly the config without saving it">Set</button> -->
-      <button
-        class="primary"
-        on:click={submit}
-        title="Apply and save the config in pipo">Set & Save</button
-      >
-    </div>
-    <div>
-      <button
-        class="primary Download"
-        on:click={download}
-        title="Download the config file locally">Download config</button
-      >
-    </div>
-  </section>
 </article>
 
 <style>
-  article {
-    margin-left: 1em;
-  }
   .config {
-    max-width: min(600px, calc(100% - 80px));
+    max-width: 100%;
   }
   .board-settings {
     display: flex;
@@ -237,11 +232,10 @@
     justify-content: space-between;
     margin-top: 2em;
     text-align: start;
-  }
-
-  .left-buttons {
-    display: flex;
-    gap: 1em;
+    position: sticky;
+    top: 5px;
+    background-color: var(--bg-color);
+    z-index: 100;
   }
 
   button:hover {

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { uid } from "../../utils";
   const dispatch = createEventDispatcher();
-  let id = Math.random().toString(36).substring(2);
+  let id = uid();
   export let label: string = "";
   export let options: { label: string; value: string | number }[] = [];
   export let value: string | number;
