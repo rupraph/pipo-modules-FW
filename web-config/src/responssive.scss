@@ -19,6 +19,7 @@
 // Any Class Selector
 
 #app {
+  min-width: min(100vw, 450px);
   text-align: center;
   max-width: calc(100vw - 12px);
   margin-bottom: 100px;
