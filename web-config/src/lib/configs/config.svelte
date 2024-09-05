@@ -146,8 +146,8 @@
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
           value={sensorValues[axis]}
-          min={0}
-          max={1000}
+          min={-180}
+          max={180}
           minLabel="limit_min"
           maxLabel="limit_max"
         />

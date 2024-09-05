@@ -1,7 +1,6 @@
 <script lang="ts">
   import { uid } from "../../utils";
   import Input from "./Input.svelte";
-  import Range from "./Range.svelte";
   export let label: string;
   export let min: number = 0;
   export let max: number = 1;
@@ -24,12 +23,12 @@
     color = fillColor();
   }
   function fillColor() {
-    const percent1 = (low / max) * 100;
-    const percent2 = (high / max) * 100;
-    return `linear-gradient(to right, #dadae5 ${percent1}% , var(--main) ${percent1}% , var(--main) ${percent2}%, #dadae5 ${percent2}%)`;
+    const percent1 = toPercent(low, min, max);
+    const percent2 = toPercent(high, min, max);
+    return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
   }
-  function left() {
-    return `${((value || 0) / max) * 100}%`;
+  function toPercent(v: number, a: number, b: number) {
+    return `${((v - a) / (b - a)) * 100}%`;
   }
 </script>
 
@@ -52,7 +51,7 @@
         bind:value={high}
         on:input={(v) => onMaxChange(v.target.value)}
       />
-      <span class="value" style="left:${left()}"></span>
+      <span class="value" style="--left:{toPercent(value, min, max)}"></span>
     </div>
     <span>{max}</span>
   </div>
@@ -109,9 +108,12 @@
   }
   .value {
     position: absolute;
-    width: 1em;
-    background-color: red;
-    border-radius: 50%;
+    width: 0;
+    height: 0;
+    border-left: 0.5em solid transparent;
+    border-right: 0.5em solid transparent;
+    border-top: 0.5em solid var(--main);
+    left: var(--left);
   }
   input[type="range"] {
     -webkit-appearance: none;
