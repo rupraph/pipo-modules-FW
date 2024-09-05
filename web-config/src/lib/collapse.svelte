@@ -3,7 +3,7 @@
   import { cubicOut } from "svelte/easing";
   export let title: string;
   export let open = false;
-  export let value: boolean;
+  export let value: boolean | undefined = undefined;
 
   const hasState = value !== undefined;
 </script>
