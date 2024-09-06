@@ -237,7 +237,6 @@ void PipoServer::setup_ws() {
     server.addHandler(&ws);
     events.onConnect([](AsyncEventSourceClient* client) { client->send("hello!", NULL, millis(), 1000); });
     server.addHandler(&events);
-    pipoSocket.setup(&ws);
     ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data,
                    size_t len) {
         if (type == WS_EVT_CONNECT) {
@@ -314,4 +313,5 @@ void PipoServer::setup_ws() {
             }
         }
     });
+    pipoSocket.setup(&ws, &input_sens);
 }

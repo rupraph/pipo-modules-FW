@@ -9,7 +9,6 @@
 #include "hid/usb_hid.h"
 #include "utils/json.hpp"
 #include "utils/fs_tools.h"
-#include "server/pipo_socket.h"
 #include "sensor/input_sensor.h"
 #include "hw_ui.h"
 #include "osc_handler.h"

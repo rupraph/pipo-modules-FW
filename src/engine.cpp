@@ -251,21 +251,21 @@ void Engine::osc_processor(Sensor& sensor,OSC_handler& osc)
 }
 
 void Engine::monitor_sensors(Sensor& sensor){
-    const auto& sensor_dat = sensor.get_sensor_dat_map();
-    for (auto const& pair : sensor_dat)
-    {
-        string axis_name=pair.first;
-        float sensor_val=sensor.get_value(axis_name);
-        float sensor_min=sensor.get_limit_min(axis_name);
-        float sensor_max=sensor.get_limit_max(axis_name);
+    // const auto& sensor_dat = sensor.get_sensor_dat_map();
+    // for (auto const& pair : sensor_dat)
+    // {
+    //     string axis_name=pair.first;
+    //     float sensor_val=sensor.get_value(axis_name);
+    //     float sensor_min=sensor.get_limit_min(axis_name);
+    //     float sensor_max=sensor.get_limit_max(axis_name);
 
-        //check if axis is enabled, outside deadzone and not disabled
-        if (!sensor.get_enabled(axis_name) 
-        || !sensor.test_outside_deadzone(axis_name) )
-        continue;
-        pipoSocket.sendSensorValue(axis_name, sensor_val);
+    //     //check if axis is enabled, outside deadzone and not disabled
+    //     if (!sensor.get_enabled(axis_name) 
+    //     || !sensor.test_outside_deadzone(axis_name) )
+    //     continue;
+    //     pipoSocket.sendSensorValue(axis_name, sensor_val);
 
-    }
+    // }
 }
 
 void Engine::set_default_config()
