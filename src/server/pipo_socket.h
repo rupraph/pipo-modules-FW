@@ -9,7 +9,7 @@ class PipoSocket
 {
     public:
         PipoSocket();
-        void setup(AsyncWebSocket* ws, Sensor* sensor);
+        void setup(AsyncWebSocket* ws, Sensor& sensor);
         void sendNoteOn(int note, int velocity, int channel);
         void sendNoteOff(int note, int velocity, int channel);
         void sendSensorValue(std::string axis, float value);
@@ -17,8 +17,8 @@ class PipoSocket
 
     private:
         AsyncWebSocket* ws;
+        Sensor& input_sens;
         unsigned long lastSendTime = 0;
-        Sensor* input_sens;
         bool init = false;
         unsigned long iterations = 0;
 

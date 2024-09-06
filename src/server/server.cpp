@@ -313,5 +313,5 @@ void PipoServer::setup_ws() {
             }
         }
     });
-    pipoSocket.setup(&ws, &input_sens);
+    pipoSocket.setup(&ws, input_sens);
 }

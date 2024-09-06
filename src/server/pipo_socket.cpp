@@ -4,7 +4,7 @@ PipoSocket pipoSocket;
 PipoSocket::PipoSocket() { 
     this->ws = nullptr;
 }
-void PipoSocket::setup(AsyncWebSocket* ws, Sensor* sensor) { 
+void PipoSocket::setup(AsyncWebSocket* ws, Sensor& sensor) { 
     this->ws = ws;
     this->input_sens = sensor;
     init =true;
@@ -46,22 +46,23 @@ void PipoSocket::loop() {
         // iterations++;
         return;
     }
-    float fps = (float)(iterations /(now - lastSendTime) / 1000.0); 
-    iterations = 0;
+    // float fps = (float)(iterations /(now - lastSendTime) / 1000.0); 
+    // iterations = 0;
     lastSendTime = now;
-    const auto& sensor_dat = input_sens->get_sensor_dat_map();
-    std::string message = "fps,";
-    message += std::to_string(fps);
+    std::string message = "";
+    // std::string message = "fps,";
+    // message += std::to_string(fps);
+    const auto& sensor_dat = input_sens.get_sensor_dat_map();
     for (auto const& pair : sensor_dat)
     {
         string axis_name=pair.first;
-        float sensor_val=input_sens->get_value(axis_name);
-        float sensor_min=input_sens->get_limit_min(axis_name);
-        float sensor_max=input_sens->get_limit_max(axis_name);
+        float sensor_val=input_sens.get_value(axis_name);
+        float sensor_min=input_sens.get_limit_min(axis_name);
+        float sensor_max=input_sens.get_limit_max(axis_name);
 
         //check if axis is enabled, outside deadzone and not disabled
-        if (!input_sens->get_enabled(axis_name) 
-        || !input_sens->test_outside_deadzone(axis_name) )
+        if (!input_sens.get_enabled(axis_name) 
+        || !input_sens.test_outside_deadzone(axis_name) )
         continue;
 
         message += "\nsensor";

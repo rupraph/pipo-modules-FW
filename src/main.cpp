@@ -135,7 +135,7 @@ void loop() {
         // input_sens.teleplot_data("roll");
 
         engine.update(input_sens, midiio, hidio, osc);
-        pipoSocket.loop();
+        // pipoSocket.loop();
         hwui.update();
     } catch (const std::exception& e) {
         Serial.println("Exception in main loop");
