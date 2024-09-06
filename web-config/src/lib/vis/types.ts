@@ -3,5 +3,5 @@ export type PipoEvents = {
   noteOff: { note: number };
   sensor: { axis: string; value: number };
   controlChange: { control: number; value: number };
-  fps: { value: number };
+  fps: { drames: number; dt: number };
 };

@@ -235,7 +235,7 @@ void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
 }
 void PipoServer::setup_ws() {
     server.addHandler(&ws);
-    pipoSocket.setup(&ws, input_sens);
+    pipoSocket.setup(&ws, &input_sens);
     events.onConnect([](AsyncEventSourceClient* client) { client->send("hello!", NULL, millis(), 1000); });
     server.addHandler(&events);
     ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data,

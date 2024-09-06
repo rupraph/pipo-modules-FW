@@ -35,11 +35,12 @@ function parseSensor(msg: string) {
   };
 }
 function parseFPS(msg: string) {
-  const match = msg.match(/fps,(.*)/);
+  const match = msg.match(/fps,(.*),(.*)/);
   if (!match) return;
-  const [whole, value] = match;
+  const [whole, frames, dt] = match;
   return {
-    value: Number(value),
+    frames: Number(frames),
+    dt: Number(dt),
   };
 }
 class PipoInput extends EventEmitter<PipoEvents> {
@@ -97,24 +98,14 @@ class PipoInput extends EventEmitter<PipoEvents> {
           this.emit("sensor", sensor);
         } else if (noteonoff) {
           if (noteonoff.cmd === "noteon") {
-            this.emit("noteOn", {
-              note: noteonoff.note,
-              velocity: noteonoff.velocity,
-            });
+            this.emit("noteOn", noteonoff);
           } else {
-            this.emit("noteOff", {
-              note: noteonoff.note,
-            });
+            this.emit("noteOff", noteonoff);
           }
         } else if (cc) {
-          this.emit("controlChange", {
-            control: cc.control,
-            value: cc.value,
-          });
+          this.emit("controlChange", cc);
         } else if (fps) {
-          this.emit("fps", {
-            value: fps.value,
-          });
+          this.emit("fps", fps);
         }
       });
     });

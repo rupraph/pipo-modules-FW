@@ -28,11 +28,14 @@
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
   let fps = 0;
+  let frames = 0;
+  let dt = 0;
   pipoInput.on("sensor", ({ axis, value }) => {
     sensorValues[axis] = value;
   });
-  pipoInput.on("fps", ({ value }) => {
-    fps = value;
+  pipoInput.on("fps", (evt) => {
+    frames = evt.frames;
+    dt = evt.dt;
   });
   const options = [
     { label: "Note", value: "1" },
@@ -145,7 +148,7 @@
       >Delete</button
     >
   </section>
-  <p>FPS: {fps}</p>
+  <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
   <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max } = getSchema(axis)}
