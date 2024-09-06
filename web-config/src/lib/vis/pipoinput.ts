@@ -10,7 +10,6 @@ function parseCC(msg: string) {
   return {
     channel: Number(channel),
     control: Number(control),
-    msg: msg.slice(match.index, whole.length),
     value: Number(v),
     hires: Boolean(Number(hires)),
   };
@@ -21,7 +20,6 @@ function parseNoteonoff(msg: string) {
   const [whole, cmd, channel, note, velocity] = match;
   return {
     cmd,
-    msg: msg.slice(match.index, whole.length),
     channel: Number(channel),
     note: Number(note),
     velocity: Number(velocity),
@@ -33,11 +31,17 @@ function parseSensor(msg: string) {
   const [whole, axis, value] = match;
   return {
     axis,
-    msg: msg.slice(match.index, whole.length),
     value: Number(value),
   };
 }
-
+function parseFPS(msg: string) {
+  const match = msg.match(/fps,(.*)/);
+  if (!match) return;
+  const [whole, value] = match;
+  return {
+    value: Number(value),
+  };
+}
 class PipoInput extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
   private enabled: boolean = true;
@@ -83,37 +87,36 @@ class PipoInput extends EventEmitter<PipoEvents> {
       this.retryConnection();
     });
     socket.addEventListener("message", (e) => {
-      let matches = false;
-      let msg = e.data;
-      // while (matches && msg.length) {
-      const sensor = parseSensor(msg);
-      if (sensor) {
-        this.emit("sensor", sensor);
-        msg = sensor.msg;
-        matches = !!sensor;
-      }
-      const noteonoff = parseNoteonoff(msg);
-      if (noteonoff) {
-        if (noteonoff.cmd === "noteon") {
-          this.emit("noteOn", {
-            note: noteonoff.note,
-            velocity: noteonoff.velocity,
+      const lines = e.data.split("\n");
+      lines.forEach((msg) => {
+        const sensor = parseSensor(msg);
+        const noteonoff = parseNoteonoff(msg);
+        const cc = parseCC(msg);
+        const fps = parseFPS(msg);
+        if (sensor) {
+          this.emit("sensor", sensor);
+        } else if (noteonoff) {
+          if (noteonoff.cmd === "noteon") {
+            this.emit("noteOn", {
+              note: noteonoff.note,
+              velocity: noteonoff.velocity,
+            });
+          } else {
+            this.emit("noteOff", {
+              note: noteonoff.note,
+            });
+          }
+        } else if (cc) {
+          this.emit("controlChange", {
+            control: cc.control,
+            value: cc.value,
           });
-        } else {
-          this.emit("noteOff", {
-            note: noteonoff.note,
+        } else if (fps) {
+          this.emit("fps", {
+            value: fps.value,
           });
         }
-        msg = noteonoff.msg;
-        matches = !!noteonoff;
-      }
-      const cc = parseCC(msg);
-      if (cc) {
-        this.emit("controlChange", {
-          control: cc.control,
-          value: cc.value,
-        });
-      }
+      });
     });
   }
   async initWebMidi() {
