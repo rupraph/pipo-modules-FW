@@ -32,7 +32,11 @@
   }
 </script>
 
-<Input class="minmax-input" {label} {id}>
+<Input
+  class="minmax-input"
+  label={`Raw sensor value: ${Number(value).toFixed(3)}`}
+  {id}
+>
   <div class="minmax">
     <span>{min}</span>
     <div class="slider">

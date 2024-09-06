@@ -134,25 +134,25 @@
 
 <article class="config">
   <section class="buttons">
-    <button
-      class="primary"
-      on:click={submit}
-      title="Apply and save the config in pipo">Set & Save</button
+    <button class="delete error" on:click={() => dispatch("delete")}
+      >Delete</button
     >
     <button
       class="primary Download"
       on:click={download}
       title="Download the config file locally">Download config</button
     >
-    <button class="delete error" on:click={() => dispatch("delete")}
-      >Delete</button
+    <button
+      class="primary"
+      on:click={submit}
+      title="Apply and save the config in pipo">Set & Save</button
     >
   </section>
   <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
   <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max } = getSchema(axis)}
-      <Collapse title={label} open>
+      <Collapse title={label}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
         <MinMax
@@ -168,7 +168,7 @@
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings" open>
+  <Collapse title="Data Output settings">
     <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
         {@const { label } = getSchema(axis)}
