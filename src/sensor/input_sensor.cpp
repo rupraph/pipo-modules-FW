@@ -277,3 +277,27 @@ bool Sensor::is_within_range(const std::string& axis)
         return false;
     }
 }
+
+bool Sensor::is_prev_within_range(const std::string& axis)
+{
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+        if (sensor_dat[axis].value_prev > sensor_dat[axis].limit_min && sensor_dat[axis].value_prev < sensor_dat[axis].limit_max)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        Serial.println("error: Axis not found");
+        return false;
+    }
+}
+
+float Sensor::clip(float value, float min, float max) {
+    return std::max(min, std::min(value, max));
+}
