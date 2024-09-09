@@ -37,7 +37,7 @@
   }
   onMount(() => {
     fetch();
-    interval = setInterval(fetch, 1000);
+    interval = setInterval(fetch, 300000);
   });
   onDestroy(() => clearInterval(interval));
 </script>

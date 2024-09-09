@@ -41,3 +41,18 @@
   background: #ddd;
   border-radius: 20px;
 }
+
+.input-wrapper {
+  display: flex;
+  flex-direction: row;
+  border-radius: 3px;
+  background-color: var(--bg-secondary);
+  border: 1px solid transparent;
+  align-items: center;
+}
+.input-wrapper:hover {
+  border: 1px solid var(--main);
+}
+.input-wrapper.invalid {
+  border: 1px solid var(--red);
+}

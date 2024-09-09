@@ -77,6 +77,19 @@
 </Input>
 
 <style>
+  :global(.minmax-input) {
+    grid-auto-flow: column;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto;
+    width: 100%;
+  }
+  :global(.minmax-input > .input-wrapper) {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.5em;
+  }
+
   .minmax {
     display: flex;
     gap: 1rem;

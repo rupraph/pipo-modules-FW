@@ -3,6 +3,7 @@
   import type { PipoTypes } from "./types";
   import { pipoType } from "./services";
   import Collapse from "./lib/collapse.svelte";
+  import WifiConnect from "./lib/wifi/connect.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
   import Checkbox from "./lib/form/Checkbox.svelte";
@@ -41,6 +42,15 @@
     console.error("Error fetching info:", e);
   }
 
+  axios.get("/wifi-status").then(({ data }) => {
+    console.log("Wifi status:", data);
+  });
+  axios.get("/wifi-networks").then(({ data }) => {
+    console.log("Wifi networks:", data);
+  });
+  axios.get("/wifi-networks").then(({ data }) => {
+    console.log("Wifi networks:", data);
+  });
   const info = axios
     .get("/info", { timeout: 2000 })
     .then(({ data, status, statusText }) => {
@@ -60,6 +70,7 @@
 </script>
 
 <main>
+  <WifiConnect />
   <div class="title-container">
     <h1>Pipo {type}</h1>
     <img
