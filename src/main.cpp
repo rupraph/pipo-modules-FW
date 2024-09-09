@@ -1,6 +1,4 @@
 
-#include <Arduino.h>
-
 #include "HW_CONFIG.h"
 #include "engine.h"
 #include "hw_ui.h"
@@ -11,6 +9,7 @@
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "wifi/wifi.h"
+#include <Arduino.h>
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -30,25 +29,30 @@ midi_io midiio;
 usb_hid hidio;
 Engine engine(input_sens);
 OSC_handler osc(config);
-PipoServer server(input_sens, engine, osc);
 PipoWifi wm;
+PipoServer server(input_sens, engine, osc, wm);
 
 // quick declaration of functions
 void init_filesystem();
 
 void setup() {
   Serial.begin(115200);
-  // delay(3000);
+  delay(3000);
   //  while(!Serial) // "while" prevents usb to setup properly
   //  setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
   Serial.println(ESP.getFreeHeap());
   hwui.init();
   hwui.setup();
+  delay(500);
+
+  Serial.println("Before wifi setup");
   wm.setup();
+  Serial.println("After wifi setup");
 
   while (wm.getMode() == PipoWifi::CONNECTING) {
-    delay(200);
+    Serial.println("Wainting loop");
+    delay(1000);
   }
 
   /////// Init filesystem

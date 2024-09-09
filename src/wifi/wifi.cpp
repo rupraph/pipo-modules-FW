@@ -1,65 +1,65 @@
 #include <wifi/wifi.h>
 PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
+  Serial.println("Wifi setup");
   preferences.begin("pipo-wifi", false);
+  WiFi.disconnect(true);
   WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info) {
-    switch (event) {
-    case ARDUINO_EVENT_WIFI_READY:
-      scan();
-      break;
-    case ARDUINO_EVENT_WIFI_SCAN_DONE:
-      connect();
-      break;
-    }
-  });
-  WiFi.begin();
+  WiFi.setAutoReconnect(true);
+  scan();
+  connect();
 };
 void PipoWifi::scan() {
-  int num = WiFi.scanNetworks();
+  int num = WiFi.scanNetworks(false, false, false, 500U);
   for (int i = 0; i < num; i++) {
     int rssiperc = WiFi.RSSI(i);
     ssids[std::string(WiFi.SSID(i).c_str())] = rssiperc;
+    Serial.print("Network: ");
+    Serial.print(WiFi.SSID(i));
+    Serial.print(" RSSI: ");
+    Serial.println(rssiperc);
   }
+  Serial.println("Finished scan");
 };
 void PipoWifi::connect() {
-  int success = 0;
+  Serial.println("Connect...");
   mode = CONNECTING;
   for (auto const &ssid : ssids) {
     try {
-      String password = preferences.getString(ssid.first.c_str());
+      std::string password =
+          std::string(preferences.getString(ssid.first.c_str()).c_str());
       // try to connect
-      int status = WiFi.begin(ssid.first.c_str(), password.c_str());
-      if (status == WL_CONNECTED) {
-        success = 1;
-        mode = CONNECTED;
-        break;
+      if (connect(ssid.first, password)) {
+        return;
       }
     } catch (const std::exception &e) {
       continue;
     }
   }
-  if (success)
-    return;
   // if no success, switch to AP mode
-  mode = AP;
-  WiFi.softAP("Pipo", "pipo1234");
+  Serial.println("No one to connect to, switching to AP mode");
+  APMode();
 };
 
 bool PipoWifi::connect(std::string ssid, std::string password) {
+  Serial.print("Connecting to " + String(ssid.c_str()));
+  Serial.println(" with password " + String(password.c_str()));
   mode = CONNECTING;
-  if (WiFi.mode(WIFI_AP)) {
-    WiFi.softAPdisconnect(true);
-  } else if (WiFi.mode(WIFI_STA)) {
-    WiFi.disconnect();
-  }
+  WiFi.disconnect();
+  WiFi.mode(WIFI_STA);
   int result = WiFi.begin(ssid.c_str(), password.c_str());
-  if (result == WL_CONNECTED) {
+  uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
+  while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
+    delay(CHECK_TIMEOUT);
+  }
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("Connected to " + String(ssid.c_str()));
     save(ssid, password);
-    mode = AP;
+    mode = CONNECTED;
     return true;
   }
+  Serial.println("Failed to connect to " + String(ssid.c_str()));
+  Serial.println("Error: " + String(result));
   return false;
 };
 
@@ -82,3 +82,33 @@ void PipoWifi::APMode() {
   mode = AP;
 };
 PipoWifi::PipoWifiMode PipoWifi::getMode() { return mode; };
+
+std::string PipoWifi::status() {
+  std::string res;
+  switch (mode) {
+  case CONNECTING:
+    res = "CONNECTING";
+    break;
+  case AP:
+    res = "AP";
+    break;
+  case CONNECTED:
+    res = "CONNECTED";
+    res += " IP: ";
+    res += WiFi.localIP().toString().c_str();
+    res += " SSID: ";
+    res += WiFi.SSID().c_str();
+    break;
+  }
+  return res;
+}
+std::string PipoWifi::availableNetworks() {
+  std::string res;
+  for (auto const &ssid : ssids) {
+    res += ssid.first;
+    res += " ";
+    res += std::to_string(ssid.second);
+    res += "\n";
+  }
+  return res;
+}
