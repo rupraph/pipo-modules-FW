@@ -453,7 +453,7 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 200000.0,
-            "limit_min": 0.0
+            "limit_min": 500.0
         },
         "T2": {
             "deadzone": 0.0,
@@ -489,7 +489,7 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 200000.0,
-            "limit_min": 0.0
+            "limit_min": 500.0
         },
         "T6": {
             "deadzone": 0.0,
@@ -498,7 +498,7 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 200000.0,
-            "limit_min": 0.0
+            "limit_min": 500.0
         }
     },
     "general": {
