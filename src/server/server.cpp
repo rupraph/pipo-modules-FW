@@ -178,25 +178,26 @@ void PipoServer::setup_requests() {
     return request->send(200, "text/plain", wm.availableNetworks().c_str());
   });
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest *request) {
-    if (!request->hasParam("ssid") || !request->hasParam("password")) {
-      return request->send(400, "text/plain",
-                           "Error: no ssid or password parameter");
+    if (!request->hasParam("ssid")) {
+      return request->send(400, "text/plain", "Error: no ssid  parameter");
     }
     try {
+      request->send(200, "text/plain", "Wifi connected");
       std::string ssid =
           std::string(request->getParam("ssid")->value().c_str());
-      std::string password =
-          std::string(request->getParam("password")->value().c_str());
-      bool success = wm.connect(ssid, password);
-      if (success)
-        return request->send(200, "text/plain", "Wifi connected");
-      else
-        return request->send(500, "text/plain", "Error connecting to wifi");
+      bool success = false;
+      if (request->hasParam("password")) {
+        std::string password =
+            std::string(request->getParam("password")->value().c_str());
+        success = wm.connect(ssid, password);
+
+      } else {
+        success = wm.connect(ssid);
+      }
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
                            "Error connecting to wifi: " + String(e.what()));
     }
-    return request->send(200, "text/plain", wm.availableNetworks().c_str());
   });
 
   server.on(

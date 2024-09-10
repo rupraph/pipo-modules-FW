@@ -41,6 +41,12 @@ void PipoWifi::connect() {
   APMode();
 };
 
+bool PipoWifi::connect(std::string ssid) {
+  std::string password =
+      std::string(preferences.getString(ssid.c_str()).c_str());
+  return connect(ssid, password);
+}
+
 bool PipoWifi::connect(std::string ssid, std::string password) {
   Serial.print("Connecting to " + String(ssid.c_str()));
   Serial.println(" with password " + String(password.c_str()));
@@ -78,6 +84,7 @@ void PipoWifi::save(std::string ssid, std::string password) {
 };
 
 void PipoWifi::APMode() {
+  WiFi.mode(WIFI_MODE_APSTA);
   WiFi.softAP("Pipo", "pipo1234");
   mode = AP;
 };
@@ -108,6 +115,8 @@ std::string PipoWifi::availableNetworks() {
     res += ssid.first;
     res += " ";
     res += std::to_string(ssid.second);
+    res += strcmp(WiFi.SSID().c_str(), ssid.first.c_str()) == 0 ? " 1" : " 0";
+    res += preferences.getString(ssid.first.c_str()).length() > 0 ? " 1" : " 0";
     res += "\n";
   }
   return res;

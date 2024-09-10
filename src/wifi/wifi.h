@@ -16,6 +16,7 @@ public:
   PipoWifiMode getMode();
   std::string status();
   std::string availableNetworks();
+  bool connect(std::string ssid);
   bool connect(std::string ssid, std::string password);
   void scan();
 
