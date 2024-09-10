@@ -45,7 +45,7 @@ export type PipoTypes = "motion" | "range" | "analog" | "unknown";
 export type PipoKeys = {
   motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw";
   range: "dist";
-  analog: "A1" | "A2" | "A3" | "A4" | "A5" | "A6" | "T1" | "T2" | "T3" | "T4";
+  analog: "A1" | "A2" | "A3" | "A4" | "A5" | "A6" | "T1" | "T2" | "T3" | "T4"| "T5"| "T6";
   unknown: "";
 };
 

@@ -42,7 +42,7 @@ export const schema: Schema = {
   range: {
     dist: {
       label: "Distance",
-      unit: "cm",
+      unit: "mm",
       min: 0,
       max: 100,
     },
@@ -85,25 +85,37 @@ export const schema: Schema = {
       max: 5,
     },
     T1: {
-      label: "Temperature 1",
+      label: "Touch 1",
       unit: "°C",
       min: -40,
       max: 125,
     },
     T2: {
-      label: "Temperature 2",
+      label: "Touch 2",
       unit: "°C",
       min: -40,
       max: 125,
     },
     T3: {
-      label: "Temperature 3",
+      label: "Touch 3",
       unit: "°C",
       min: -40,
       max: 125,
     },
     T4: {
-      label: "Temperature 4",
+      label: "Touch 4",
+      unit: "°C",
+      min: -40,
+      max: 125,
+    },
+    T5: {
+      label: "Touch 4",
+      unit: "°C",
+      min: -40,
+      max: 125,
+    },
+    T6: {
+      label: "Touch 4",
       unit: "°C",
       min: -40,
       max: 125,
