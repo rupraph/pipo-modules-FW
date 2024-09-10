@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { uid } from "../../utils";
+
   export let label: string;
   export let value: boolean;
-  let id = Math.random().toString(36).substring(2);
+  let id = uid();
 </script>
 
 <span class="input checkbox column {$$restProps.class || ''}">

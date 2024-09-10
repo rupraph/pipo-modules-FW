@@ -2,11 +2,12 @@
   import { onMount } from "svelte";
   import Select from "svelte-select";
   import Input from "./Input.svelte";
+  import { uid } from "../../utils";
   export let label: string;
   export let value: string;
   export let options: { value: string; label: string }[] = [];
   let selectedItem: { value: string; label: string };
-  let id = Math.random().toString(36).substring(2);
+  let id = uid();
   onMount(async () => {
     if (!value || !options.length) return;
     const toSelect = options.find((option) => option.value === value);

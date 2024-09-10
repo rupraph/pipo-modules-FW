@@ -3,21 +3,21 @@
   import { cubicOut } from "svelte/easing";
   export let title: string;
   export let open = false;
-  export let value: boolean
+  export let value: boolean | undefined = undefined;
 
   const hasState = value !== undefined;
 </script>
 
-<div  class="title-container">
+<div class="title-container">
   <h3 on:click={() => (open = !open)}>
     <i class="arrow {open ? 'down' : 'right'}"></i>
     {title}
   </h3>
   {#if hasState}
-  <div class="input-checkbox">
-    <input type="checkbox" on:click|stopPropagation bind:checked={value}/>
-    <!-- <Switch bind:value={state} design="slider" label="" /> -->
-  </div>
+    <div class="input-checkbox">
+      <input type="checkbox" on:click|stopPropagation bind:checked={value} />
+      <!-- <Switch bind:value={state} design="slider" label="" /> -->
+    </div>
   {/if}
 </div>
 
@@ -86,14 +86,12 @@
     display: flex;
     /* margin-left: 20%; */
     /* margin-right:80%; */
-    
   }
 
-  .input-checkbox{
+  .input-checkbox {
     padding-right: 50%;
     /* padding: 1%; */
     /* padding: 1vm; */
     /* justify-content: center;   */
   }
-
 </style>

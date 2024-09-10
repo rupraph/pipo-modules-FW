@@ -101,7 +101,7 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
-    width: 600px;
+    max-width: 600px;
   }
 
   .pattern-image {
