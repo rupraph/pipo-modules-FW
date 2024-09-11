@@ -3,6 +3,7 @@
 
 #include <Adafruit_TinyUSB.h>
 #include "HW_CONFIG.h"
+#include "utils/config.h"
 
 // UNDER CONSTRUCTION
 
@@ -10,20 +11,23 @@ class usb_hid {
     public:
         usb_hid();
 
+        bool enabled = true;
         int hid_mode=0; //0=gamepad, 1=mouse, 2=keyboard
 
         void usb_hid_setup();
         void usb_hid_update(const void *report);
+
+
 };
 
 
 uint8_t const gamepad_hid_report[] = {
         TUD_HID_REPORT_DESC_GAMEPAD()
         };
-        uint8_t const mouse_hid_report[] = {
+uint8_t const mouse_hid_report[] = {
           TUD_HID_REPORT_DESC_MOUSE()
         };
-        uint8_t const key_hid_report[] = {
+uint8_t const key_hid_report[] = {
           TUD_HID_REPORT_DESC_KEYBOARD()
         };
 
