@@ -47,7 +47,7 @@ class Engine
                 };
 
 
-                hid_map ={
+                HID_translators ={
                     {"roll",HidTranslator()},
                     {"pitch",HidTranslator()},
                     {"yaw",HidTranslator()},
@@ -62,7 +62,7 @@ class Engine
                 Osctranslators ={
                     {"dist",OscTranslator()}
                 };
-                hid_map ={
+                HID_translators ={
                     {"dist",HidTranslator()}
                 };
             #elif defined(PIPO_ANALOG)
@@ -96,7 +96,7 @@ class Engine
                     {"T6",OscTranslator()}
                 };
 
-                hid_map ={
+                HID_translators ={
                     {"A1",HidTranslator()},
                     {"A2",HidTranslator()},
                     {"A3",HidTranslator()},
@@ -115,7 +115,7 @@ class Engine
        
         unordered_map<string, MidiTranslator> Miditranslators;
         unordered_map<string, OscTranslator> Osctranslators;
-        unordered_map<string, HidTranslator> hid_map;
+        unordered_map<string, HidTranslator> HID_translators;
 
         hid_gamepad_report_t    gp;
         hid_keyboard_report_t    kb;

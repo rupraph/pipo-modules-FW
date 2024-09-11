@@ -59,28 +59,23 @@ void usb_hid::usb_hid_setup()
 }
 
 //Todo: Find way on assigning sensor axis to game or mouse axis. this mapping should likely be in engine or a seperate calss than here
-void usb_hid::usb_hid_update(const void *report)
+void usb_hid::usb_hid_update()
 {   
     if ( !usb_hid_port.ready() ) return;
 
     switch (hid_mode)
     {
     case 0:
-        hid_gamepad_report_t* gp = (hid_gamepad_report_t*)report;
-
-        // Print the value of gp->x
-        // Serial.print("gp.x: ");
-        // Serial.println(gp->x);
-        usb_hid_port.sendReport(0, gp, sizeof(*gp));
+        usb_hid_port.sendReport(0, &gp, sizeof(*gp));
         break;
-    // case 1:
+    case 1:
     //     mouse.x = 10;
-    //     usb_hid.sendReport(0, &mouse, sizeof(mouse));
-    //     break;
-    // case 2:
+        usb_hid_port.sendReport(0, &mouse, sizeof(mouse));
+        break;
+    case 2:
     //     kb.keycode[0] = HID_KEY_A;
-    //     usb_hid.sendReport(0, &kb, sizeof(kb));
-    //     break;
+        usb_hid_port.sendReport(0, &kb, sizeof(kb));
+        break;
     }
     
 }

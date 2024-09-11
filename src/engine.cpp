@@ -144,38 +144,15 @@ void Engine::hid_processor(Sensor& sensor,usb_hid& hidio)
         float sensor_min=sensor.get_limit_min(axis_name);
         float sensor_max=sensor.get_limit_max(axis_name);
 
-        if (sensor.get_enabled(axis_name) && hid_map[axis_name].enabled==true)
+        if (sensor.get_enabled(axis_name) && HID_translators[axis_name].enabled==true)
         {
-            if (hid_map.find(axis_name) != hid_map.end())
+            if (HID_translators.find(axis_name) != HID_translators.end())
             {
-                string map_name=hid_map[axis_name].mapto;
-                int hid_val=hid_map[axis_name].get_current_int(sensor_val,sensor_min,sensor_max);
+                string map_name=HID_translators[axis_name].mapto;
+                int hid_val=HID_translators[axis_name].get_current_int(sensor_val,sensor_min,sensor_max);
                 if (hidio.hid_mode==0)
                 {
-                    if (map_name=="x")
-                    {
-                        gp.x=hid_val;
-                    }
-                    else if (map_name=="y")
-                    {
-                        gp.y=hid_val;
-                    }
-                    else if (map_name=="z")
-                    {
-                        gp.z=hid_val;
-                    }
-                    else if (map_name=="rx")
-                    {
-                        gp.rx=hid_val;
-                    }
-                    else if (map_name=="ry")
-                    {
-                        gp.ry=hid_val;
-                    }
-                    else if (map_name=="rz")
-                    {
-                        gp.rz=hid_val;
-                    }
+                    hidio.set_gamepad_report_value(map_name,hid_val);
                 }
                 else if (hidio.hid_mode==1)
                 {
@@ -242,7 +219,7 @@ json Engine::get_config(bool debug)
         {
             j["engine-midi"][pair.first] = pair.second.get_json();
         }
-        for (auto const& pair : hid_map)
+        for (auto const& pair : HID_translators)
         {
             j["engine-hid"][pair.first] = pair.second.get_json();
         }
@@ -284,11 +261,11 @@ void Engine::set_config(json& config, bool debug)
     Serial.println("midi config set");
     // set hid config from general config
     json jhid = config["engine-hid"];
-    for (auto const& pair : hid_map)
+    for (auto const& pair : HID_translators)
     {
         if (jhid.find(pair.first) != jhid.end())
         {
-            hid_map[pair.first].set_from_json(jhid[pair.first]);
+            HID_translators[pair.first].set_from_json(jhid[pair.first]);
         }
     }
     Serial.println("hid config set");

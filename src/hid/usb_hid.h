@@ -8,14 +8,23 @@
 // UNDER CONSTRUCTION
 
 class usb_hid {
-    public:
-        usb_hid();
+        public:
+                usb_hid();
 
-        bool enabled = true;
-        int hid_mode=0; //0=gamepad, 1=mouse, 2=keyboard
+                bool enabled = true;
+                int hid_mode=0; //0=gamepad, 1=mouse, 2=keyboard
 
-        void usb_hid_setup();
-        void usb_hid_update(const void *report);
+                void usb_hid_setup();
+                void usb_hid_update();
+
+                void set_mouse_report_value(string key, int value);
+                void set_gamepad_report_value(string key, int value);
+                void set_keyboard_report_value(string key, int value);
+                //void usb_hid_update(const void *report);
+        private:
+                hid_gamepad_report_t* gp;
+                hid_keyboard_report_t* kb;
+                hid_mouse_report_t* mouse;
 
 
 };
