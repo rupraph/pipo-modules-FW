@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import { pipoInput } from "../../pipoinput";
+
   import { createEventDispatcher } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
@@ -12,6 +14,7 @@
     OscConfig,
     PipoConfig,
     PipoTypes,
+    SensorValues,
     PipoKeys,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
@@ -23,7 +26,17 @@
   import Select from "../form/Select.svelte";
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
-
+  const sensorValues: SensorValues<T> = {};
+  let fps = 0;
+  let frames = 0;
+  let dt = 0;
+  pipoInput.on("sensor", ({ axis, value }) => {
+    sensorValues[axis] = value;
+  });
+  pipoInput.on("fps", (evt) => {
+    frames = evt.frames;
+    dt = evt.dt;
+  });
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
@@ -121,39 +134,42 @@
 
 <article class="config">
   <section class="buttons">
-    <button
-      class="primary"
-      on:click={submit}
-      title="Apply and save the config in pipo">Set & Save</button
+    <button class="delete error" on:click={() => dispatch("delete")}
+      >Delete</button
     >
     <button
       class="primary Download"
       on:click={download}
       title="Download the config file locally">Download config</button
     >
-    <button class="delete error" on:click={() => dispatch("delete")}
-      >Delete</button
+    <button
+      class="primary"
+      on:click={submit}
+      title="Apply and save the config in pipo">Set & Save</button
     >
   </section>
-  <Collapse title="Sensor settings" open>
+  <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
+  <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
-      {@const { label, unit, min, max } = getSchema(axis)}
-      <Collapse title={label} open>
+      {@const { label, unit, min, max, step } = getSchema(axis)}
+      <Collapse title={label}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
+          value={sensorValues[axis]}
           {min}
           {max}
+          {step}
           minLabel={`min (${unit})`}
           maxLabel={`max (${unit})`}
         />
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings" closed>
+  <Collapse title="Data Output settings">
     <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
         {@const { label } = getSchema(axis)}

@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import Collapse from "../collapse.svelte";
   import { sound } from "./sound";
-  import { pipoInput } from "./pipoinput";
+  import { pipoInput } from "../../pipoinput";
   let error: string;
   let angle = 0;
   let value = 0;

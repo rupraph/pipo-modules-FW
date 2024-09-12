@@ -5,7 +5,7 @@
   import muteIcon from "../../assets/mute.svg";
   import { sound } from "./sound";
   import Checkbox from "../form/Checkbox.svelte";
-  import { pipoInput } from "./pipoinput";
+  import { pipoInput } from "../../pipoinput";
   let midi;
   let error: string;
   let isMute = true;

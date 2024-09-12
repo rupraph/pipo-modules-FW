@@ -129,6 +129,7 @@ class Engine
         void midi_processor(Sensor& sensor,midi_io& midiio);
         void hid_processor(Sensor& sensor,usb_hid& hidio);
         void osc_processor(Sensor& sensor,OSC_handler& osc);
+        void monitor_sensors(Sensor& sensor);
 
         void set_default_config();
         json get_config(bool debug=false);

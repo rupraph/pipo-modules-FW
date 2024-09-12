@@ -1,12 +1,12 @@
 <script lang="ts">
   import { uid } from "../../utils";
   import Input from "./Input.svelte";
-  import Range from "./Range.svelte";
   export let label: string;
   export let min: number = 0;
   export let max: number = 1;
   export let minLabel: string = "min";
   export let maxLabel: string = "max";
+  export let value: number = 0;
   export let low: number = 0;
   export let high: number = 100;
   export let step: number = 1;
@@ -23,13 +23,20 @@
     color = fillColor();
   }
   function fillColor() {
-    const percent1 = (low / max) * 100;
-    const percent2 = (high / max) * 100;
-    return `linear-gradient(to right, #dadae5 ${percent1}% , var(--main) ${percent1}% , var(--main) ${percent2}%, #dadae5 ${percent2}%)`;
+    const percent1 = toPercent(low, min, max);
+    const percent2 = toPercent(high, min, max);
+    return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
+  }
+  function toPercent(v: number, a: number, b: number) {
+    return `${((v - a) / (b - a)) * 100}%`;
   }
 </script>
 
-<Input class="minmax-input" {label} {id}>
+<Input
+  class="minmax-input"
+  label={`Raw sensor value: ${Number(value).toFixed(3)}`}
+  {id}
+>
   <div class="minmax">
     <span>{min}</span>
     <div class="slider">
@@ -38,6 +45,7 @@
         type="range"
         {min}
         {max}
+        {step}
         bind:value={low}
         on:input={(v) => onMinChange(v.target.value)}
       />
@@ -45,9 +53,11 @@
         type="range"
         {min}
         {max}
+        {step}
         bind:value={high}
         on:input={(v) => onMaxChange(v.target.value)}
       />
+      <span class="value" style="--left:{toPercent(value, min, max)}"></span>
     </div>
     <span>{max}</span>
   </div>
@@ -60,6 +70,7 @@
       type="number"
       {min}
       {max}
+      {step}
       bind:value={low}
       on:change={(v) => onMinChange(v.target.value)}
     />
@@ -70,6 +81,7 @@
       type="number"
       {min}
       {max}
+      {step}
       bind:value={high}
       on:change={(v) => onMaxChange(v.target.value)}
     />
@@ -101,6 +113,15 @@
   }
   .inputs > * {
     width: max-content;
+  }
+  .value {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 0.5em solid transparent;
+    border-right: 0.5em solid transparent;
+    border-top: 0.5em solid var(--text-color);
+    left: var(--left);
   }
   input[type="range"] {
     -webkit-appearance: none;

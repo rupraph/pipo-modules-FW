@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { NoteConfig, BaseMidiConfig } from "../../types";
+  import NoteInput from "../form/NoteInput.svelte";
   import Range from "../form/Range.svelte";
   import Select from "../form/Select.svelte";
   export let config: NoteConfig & BaseMidiConfig;
@@ -54,6 +55,7 @@
 
 <Select label="Scale type" options={scaleTypes} bind:value={config.scaleType} />
 <Range label="Root Note" bind:value={config.rootNote} min={0} max={127} />
+<NoteInput label="Root Note" bind:value={config.rootNote} />
 <Range
   label="Number of Notes"
   bind:value={config.numberOfNotes}
