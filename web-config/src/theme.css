@@ -18,6 +18,7 @@
   --main: #ffcb64;
   --main-darker: #ff6624;
   --red: #e33333;
+  --green: #3bb143;
   
   background-color: var(--bg-color); 
   color: var(--text-color);

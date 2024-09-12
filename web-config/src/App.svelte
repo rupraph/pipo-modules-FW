@@ -6,6 +6,7 @@
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
   import Checkbox from "./lib/form/Checkbox.svelte";
+  import Menu from "./lib/Menu.svelte";
 
   // import Piano from "./lib/vis/Piano.svelte";
 
@@ -60,6 +61,7 @@
 </script>
 
 <main>
+  <Menu />
   <div class="title-container">
     <h1>Pipo {type}</h1>
     <img

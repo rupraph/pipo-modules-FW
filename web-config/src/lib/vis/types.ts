@@ -4,4 +4,7 @@ export type PipoEvents = {
   sensor: { axis: string; value: number };
   controlChange: { control: number; value: number };
   fps: { drames: number; dt: number };
+  logs: { entries: string[] };
+  connect: void;
+  disconnect: void;
 };

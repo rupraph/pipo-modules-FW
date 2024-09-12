@@ -45,14 +45,17 @@ class PipoInput extends EventEmitter<PipoEvents> {
     const socket = new WebSocket(url);
     this.socket = socket;
     socket.addEventListener("open", (event) => {
+      this.emit("connect");
       console.log("Connected to Pipo");
     });
     socket.addEventListener("error", (e) => {
+      this.emit("disconnect");
       if (!this.enabled) return;
       this.retryConnection();
     });
     socket.addEventListener("close", (e) => {
       this.socket = undefined;
+      this.emit("disconnect");
       if (!this.enabled) return;
       this.retryConnection();
     });
@@ -80,6 +83,11 @@ class PipoInput extends EventEmitter<PipoEvents> {
         if (command === "fps") {
           const [frames, dt] = numargs;
           return this.emit("fps", { frames, dt });
+        }
+        if (command === "logs") {
+          console.log("logs", e.data);
+          const entries = args[0].split("--");
+          return this.emit("logs", { entries });
         }
       });
     });
