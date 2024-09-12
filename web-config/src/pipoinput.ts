@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import type { PipoEvents } from "./types";
+import type { PipoEvents } from "./lib/vis/types";
 const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 export let error = "";

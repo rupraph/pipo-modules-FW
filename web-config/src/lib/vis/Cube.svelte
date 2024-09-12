@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import r from "regl";
   import mat4 from "gl-mat4";
-  import { pipoInput } from "./pipoinput";
-  import type { Axis, MidiConfig, PipoConfig } from "../../types";
+  import { pipoInput } from "../../pipoinput";
+  import type { PipoConfig } from "../../types";
   import { colors, cubeElements, cubePosition } from "./constants";
   export let config: PipoConfig<"motion">;
   function hexToRgba(hex: string) {
@@ -16,7 +16,6 @@
     ];
   }
   let angles = [0, 0, 0];
-  let value;
   onMount(() => {
     pipoInput.on("controlChange", ({ control, value }) => {
       if (!config) return;

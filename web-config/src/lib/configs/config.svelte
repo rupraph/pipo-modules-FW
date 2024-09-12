@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import { pipoInput } from "../vis/pipoinput";
+  import { pipoInput } from "../../pipoinput";
 
   import { createEventDispatcher } from "svelte";
   import MinMax from "../form/MinMax.svelte";
