@@ -6,7 +6,7 @@
   export let max: number = 1;
   export let minLabel: string = "min";
   export let maxLabel: string = "max";
-  export let value: number | undefined = undefined;
+  export let value: number = 0;
   export let low: number = 0;
   export let high: number = 100;
   export let step: number = 1;
@@ -45,6 +45,7 @@
         type="range"
         {min}
         {max}
+        {step}
         bind:value={low}
         on:input={(v) => onMinChange(v.target.value)}
       />
@@ -52,6 +53,7 @@
         type="range"
         {min}
         {max}
+        {step}
         bind:value={high}
         on:input={(v) => onMaxChange(v.target.value)}
       />
@@ -68,6 +70,7 @@
       type="number"
       {min}
       {max}
+      {step}
       bind:value={low}
       on:change={(v) => onMinChange(v.target.value)}
     />
@@ -78,6 +81,7 @@
       type="number"
       {min}
       {max}
+      {step}
       bind:value={high}
       on:change={(v) => onMaxChange(v.target.value)}
     />
