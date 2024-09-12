@@ -5,6 +5,126 @@
 
 //Todo: replace throw with Serial
 
+
+//Todo: deadzone should be in percentage or max or in value ?
+// true if outside deadzone
+bool Sensor::test_outside_deadzone(const std::string& axis)
+{   
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+
+        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        // Serial.println("error: Axis not found");
+        return false;
+    }
+}
+
+bool Sensor::is_within_range(const std::string& axis)
+{
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+        if (sensor_dat[axis].value > sensor_dat[axis].limit_min && sensor_dat[axis].value < sensor_dat[axis].limit_max)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        Serial.println("error: Axis not found");
+        return false;
+    }
+}
+
+bool Sensor::is_prev_within_range(const std::string& axis)
+{
+    if(sensor_dat.find(axis) != sensor_dat.end())
+    {
+        if (sensor_dat[axis].value_prev > sensor_dat[axis].limit_min && sensor_dat[axis].value_prev < sensor_dat[axis].limit_max)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        Serial.println("error: Axis not found");
+        return false;
+    }
+}
+
+float Sensor::clip(float value, float min, float max) {
+    return std::max(min, std::min(value, max));
+}
+
+
+void Sensor::process_sensor_triggers()
+{
+    for (auto &dat : sensor_dat)
+        {
+            string axis=dat.first;
+            // warning if reference modifies correctly the value
+            SensorDat &axis_data = dat.second;
+            if (axis_data.mode == 0)
+            {
+                if (is_within_range(axis)==false && is_prev_within_range(axis)==true)
+                {
+                    axis_data.untriggered = false;
+                }
+                if (is_within_range(axis)==true && is_prev_within_range(axis)==false)
+                {
+                    axis_data.triggered = true;
+                }
+            }
+            else
+            {
+                if (axis_data.threshold_mode == 0)
+                {
+                    if (axis_data.value > axis_data.limit_max)
+                    {
+                        axis_data.bool_value = true;
+                    }
+                    else
+                    {
+                        axis_data.bool_value = false;
+                    }
+                }
+                else
+                {
+                    if (axis_data.threshold_mode == 1)
+                    {
+                        if (axis_data.value > axis_data.limit_max)
+                        {
+                            axis_data.bool_value = true;
+                        }
+                        else if (axis_data.value < axis_data.limit_min)
+                        {
+                            axis_data.bool_value = false;
+                        }
+                    }
+                }
+            }
+                    
+        }
+}
+
 void Sensor::teleplot_data(string axis)
 {   
     if (sensor_dat.find(axis) == sensor_dat.end())
@@ -306,70 +426,3 @@ void Sensor::set_bool_value(const std::string& axis, bool value) {
 }
 
 
-//Todo: deadzone should be in percentage or max or in value ?
-// true if outside deadzone
-bool Sensor::test_outside_deadzone(const std::string& axis)
-{   
-    if(sensor_dat.find(axis) != sensor_dat.end())
-    {
-
-        if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-
-    }
-    else
-    {
-        // Serial.println("error: Axis not found");
-        return false;
-    }
-}
-
-bool Sensor::is_within_range(const std::string& axis)
-{
-    if(sensor_dat.find(axis) != sensor_dat.end())
-    {
-        if (sensor_dat[axis].value > sensor_dat[axis].limit_min && sensor_dat[axis].value < sensor_dat[axis].limit_max)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        Serial.println("error: Axis not found");
-        return false;
-    }
-}
-
-bool Sensor::is_prev_within_range(const std::string& axis)
-{
-    if(sensor_dat.find(axis) != sensor_dat.end())
-    {
-        if (sensor_dat[axis].value_prev > sensor_dat[axis].limit_min && sensor_dat[axis].value_prev < sensor_dat[axis].limit_max)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        Serial.println("error: Axis not found");
-        return false;
-    }
-}
-
-float Sensor::clip(float value, float min, float max) {
-    return std::max(min, std::min(value, max));
-}

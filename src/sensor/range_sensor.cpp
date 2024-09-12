@@ -67,37 +67,41 @@ void RangeSensor::update()
             //sensor_dat["dist"].value = km_filter.process(dist);
             //sensor_dat["dist"].value = dist;
             
+
+
+            process_sensor_triggers();
+            // below has been replaced by process_sensor_triggers. to be tested 
             // continuous mode
-            if(sensor_dat["dist"].mode == 0){
-                if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
-                    sensor_dat["dist"].untriggered = true;
-                }
-                if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
-                    sensor_dat["dist"].triggered = true;
-                }
-            }
-            else{ // trigger mode
-                // if basic threshold mode
-                if (sensor_dat["dist"].threshold_mode == 0) {
-                    if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
-                        sensor_dat["dist"].bool_value = true;
-                    }
-                    else {
-                        sensor_dat["dist"].bool_value = false;
-                    }
-                }
-                else{ // shmidt trigger mode
-                    if (sensor_dat["dist"].threshold_mode == 1) 
-                    {
-                        if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
-                            sensor_dat["dist"].bool_value = true;
-                        }
-                        else if (sensor_dat["dist"].value < sensor_dat["dist"].limit_min) {
-                            sensor_dat["dist"].bool_value = false;
-                        }
-                    }   
-                }
-            }
+            // if(sensor_dat["dist"].mode == 0){
+            //     if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
+            //         sensor_dat["dist"].untriggered = true;
+            //     }
+            //     if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
+            //         sensor_dat["dist"].triggered = true;
+            //     }
+            // }
+            // else{ // trigger mode
+            //     // if basic threshold mode
+            //     if (sensor_dat["dist"].threshold_mode == 0) {
+            //         if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+            //             sensor_dat["dist"].bool_value = true;
+            //         }
+            //         else {
+            //             sensor_dat["dist"].bool_value = false;
+            //         }
+            //     }
+            //     else{ // shmidt trigger mode
+            //         if (sensor_dat["dist"].threshold_mode == 1) 
+            //         {
+            //             if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+            //                 sensor_dat["dist"].bool_value = true;
+            //             }
+            //             else if (sensor_dat["dist"].value < sensor_dat["dist"].limit_min) {
+            //                 sensor_dat["dist"].bool_value = false;
+            //             }
+            //         }   
+            //     }
+            //}
 
 
 

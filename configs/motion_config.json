@@ -78,6 +78,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 25,
+              "sustain": 800,
               "rootNote": 45,
               "scaleType": "major",
               "translator_mode": 0
@@ -91,6 +92,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 18,
+              "sustain": 800,
               "rootNote": 45,
               "scaleType": "blues major",
               "translator_mode": 0
@@ -104,6 +106,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 10,
+              "sustain": 800,
               "rootNote": 45,
               "scaleType": "major",
               "translator_mode": 0
@@ -117,6 +120,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 25,
+              "sustain": 800,
               "rootNote": 45,
               "scaleType": "major",
               "translator_mode": 0
@@ -130,6 +134,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 15,
+              "sustain": 800,
               "rootNote": 55,
               "scaleType": "blues minor",
               "translator_mode": 1
@@ -143,6 +148,7 @@
               "max_output": 127,
               "min_output": 0,
               "numberOfNotes": 25,
+              "sustain": 800,
               "rootNote": 45,
               "scaleType": "major",
               "translator_mode": 0
@@ -190,57 +196,57 @@
   "sensor": {
       "accX": {
           "deadzone": 0.05,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 8.0,
-          "limit_min": -8.0
+          "limit_min": -8.0,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       },
       "accY": {
           "deadzone": 0.05,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 8.0,
-          "limit_min": -8.0
+          "limit_min": -8.0,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       },
       "accZ": {
           "deadzone": 0.05,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 8.0,
-          "limit_min": -8.0
+          "limit_min": -8.0,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       },
       "pitch": {
           "deadzone": 2,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 90,
-          "limit_min": -90
+          "limit_min": -90,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       },
       "roll": {
           "deadzone": 2,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 180,
-          "limit_min": -180
+          "limit_min": -180,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       },
       "yaw": {
           "deadzone": 2,
-          "enabled": true,
-          "inverted": false,
           "offset": 0.0,
-          "value": 0.0,
           "limit_max": 180,
-          "limit_min": -180
+          "limit_min": -180,
+          "mode": false,
+          "threshold_mode": false,
+          "threshold": 5.0
       }
   },
   "general": {

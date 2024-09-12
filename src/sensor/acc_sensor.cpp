@@ -39,6 +39,9 @@ void MotionSensor::update()
         convert_accell();
     }
 
+    process_sensor_triggers();
+    
+
     //Todo: try read additional data from sensor
 
     // send to adafruit visualizer 

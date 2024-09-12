@@ -12,19 +12,6 @@ class RangeSensor : public Sensor{
     public:
         RangeSensor(){
             sensor_dat["dist"] = SensorDat();
-
-            // sensor_dat["dist"].deadzone = 0.0;
-            // sensor_dat["dist"].offset = 0.0;
-            // sensor_dat["dist"].value = 0.0;
-            // sensor_dat["dist"].value_prev = 0.0;
-            // sensor_dat["dist"].limit_max = 1000.0;
-            // sensor_dat["dist"].limit_min = 0.0;
-            // sensor_dat["dist"].triggered = false;
-            // sensor_dat["dist"].untriggered = false;
-            // sensor_dat["dist"].mode = 0;
-            // sensor_dat["dist"].threshold_mode = 0;
-            // sensor_dat["dist"].threshold = 0.0;
-            // sensor_dat["dist"].bool_value = false;
         };
 
         void init() override;

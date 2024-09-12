@@ -101,39 +101,39 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 int sustain=Midi_translator.getSustain(); // 0 means sustain manager will not shutoff note after delay
                 
                 // probaly get triggered should be something linked to the deadzone
-                #if defined(PIPO_ANALOG)
+                //#if defined(PIPO_ANALOG)
                 // trigger new note if within range, not already playing, and new note is different from previous note
-                if (sensor.is_within_range(axis_name)
-                && note_val[channel]!=note_val_prev[channel]
-                && !midiio.is_note_playing(note_val[channel],channel))
-                {
-                    midiio.sendNoteOn(note_val[channel],127,channel,3000); 
-                }
+                // if (sensor.is_within_range(axis_name)
+                // && note_val[channel]!=note_val_prev[channel]
+                // && !midiio.is_note_playing(note_val[channel],channel))
+                // {
+                //     midiio.sendNoteOn(note_val[channel],127,channel,3000); 
+                // }
 
-                //if entering range, send new note
-                if (sensor.get_triggered(axis_name))
-                {
-                    midiio.sendNoteOn(note_val[channel],127,channel);
-                    sensor.set_triggered(axis_name,false);
-                }
+                // //if entering range, send new note
+                // if (sensor.get_triggered(axis_name))
+                // {
+                //     midiio.sendNoteOn(note_val[channel],127,channel);
+                //     sensor.set_triggered(axis_name,false);
+                // }
 
-                //if exiting range, send note off
-                if (sensor.get_untriggered(axis_name))
-                {
-                    midiio.sendAllNotesOff(channel);
-                    sensor.set_untriggered(axis_name,false);
-                }
-                #endif
+                // //if exiting range, send note off
+                // if (sensor.get_untriggered(axis_name))
+                // {
+                //     midiio.sendAllNotesOff(channel);
+                //     sensor.set_untriggered(axis_name,false);
+                // }
+                // #endif
 
-                # if defined(PIPO_MOTION)
-                if (note_val[channel]!=note_val_prev[channel])
-                {
-                    midiio.sendNoteOn(note_val[channel],127,channel,5000); 
-                }
-                #endif
+                // # if defined(PIPO_MOTION)
+                // if (note_val[channel]!=note_val_prev[channel])
+                // {
+                //     midiio.sendNoteOn(note_val[channel],127,channel,5000); 
+                // }
+                // #endif
 
 
-                #if defined(PIPO_RANGE) 
+                // #if defined(PIPO_RANGE) || defined(PIPO_ANALOG) 
                 // mode is threshold
                 if (sensor.get_mode(axis_name)==1)
                 {
@@ -170,7 +170,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                     }
                 }
 
-                #endif
+                // #endif
                 
             }
         }

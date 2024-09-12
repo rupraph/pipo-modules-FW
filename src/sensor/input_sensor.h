@@ -47,14 +47,15 @@ public:
     virtual void setup()=0;
     virtual void update()=0;
 
-
-    
-    void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
     bool is_within_range(const std::string& axis);
     bool is_prev_within_range(const std::string& axis);
+    void process_sensor_triggers();
     float clip(float value, float min, float max);
 
+    
+    void teleplot_data(string axis);
+    
     // function to measure time between 2 calls
     unsigned long measured_loop_duration();
     unsigned long last_update = 0;
