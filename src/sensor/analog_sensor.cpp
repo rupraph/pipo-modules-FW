@@ -67,7 +67,7 @@ void AnalogSensor::update()
         sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
         sensor_dat[pair.first].value =  analog_val;
         
-        
+        // above min + was below min -> triggered
         if (analog_val>sensor_dat[pair.first].limit_min  
         && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
         {
@@ -76,6 +76,7 @@ void AnalogSensor::update()
                 sensor_dat[pair.first].triggered = true;
             }
         }
+        // below min + was above min -> untriggered
         else if (analog_val<sensor_dat[pair.first].limit_min
         && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
         {
@@ -84,6 +85,7 @@ void AnalogSensor::update()
                 sensor_dat[pair.first].untriggered = true;
             }
         }
+        // else reset -> likely trigger should only be reset by engine to wait for the flag to be used
         else
         {
             sensor_dat[pair.first].triggered = false;

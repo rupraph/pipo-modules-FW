@@ -48,21 +48,24 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
         // if CC MODE
             if (Miditranslators[axis_name].translator_mode==0)
             {   
-                //Todo: hires not tested
-                int cc_number=Miditranslators[axis_name].cc_number;
-                if (Miditranslators[axis_name].getHires())
+                if (sensor.is_within_range(axis_name))
                 {
-                    uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,1),16383));
-                    midiio.sendControlChange(cc_number, cc_val, channel,true);
-                    
-                }
-                else
-                {
-                    uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,0),127));
-                    midiio.sendControlChange(cc_number, cc_val, channel,false);
+                    //Todo: hires not tested
+                    int cc_number=Miditranslators[axis_name].cc_number;
+                    if (Miditranslators[axis_name].getHires())
+                    {
+                        uint16_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,1),16383));
+                        midiio.sendControlChange(cc_number, cc_val, channel,true);
+                        
+                    }
+                    else
+                    {
+                        uint8_t cc_val=max(0,min(Miditranslators[axis_name].get_cc_val(sensor_val,sensor_min,sensor_max,0),127));
+                        midiio.sendControlChange(cc_number, cc_val, channel,false);
 
+                    }
+                    vTaskDelay(pdTICKS_TO_MS(5)); // virtually delay cc send. will be solved with task management 
                 }
-                vTaskDelay(pdTICKS_TO_MS(5)); // virtually delay cc send. will be solved with task management 
          
             }
 
@@ -106,22 +109,21 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio)
                 #endif
 
 
-                #if defined(PIPO_RANGE) // to be rewritten. not clear split between what shall be in sensor and what in engine
-                //Part of this logic migth have to move to sensor ?
-                if (sensor.get_triggered(axis_name) && sensor_val<sensor.get_limit_max(axis_name))
+                #if defined(PIPO_RANGE) 
+                if (sensor.is_within_range(axis_name) && !midiio.is_note_playing(note_val[channel],channel) && note_val[channel]!=note_val_prev[channel])
                 {
-                    // should probably move the value check in the io class. to be discussed
                     midiio.sendNoteOn(note_val[channel],127,channel,800); 
+                    if (sensor.get_triggered(axis_name))
+                    {
                     sensor.set_triggered(axis_name,false);
+                    }
                 }
-                if (sensor_val<sensor.get_limit_max(axis_name) && !midiio.is_note_playing(note_val[channel],channel))//midiio.channel_note_list[channel].find(note_val[channel]) == midiio.channel_note_list[channel].end())
+
+                if (sensor.get_untriggered(axis_name) && !sensor.is_within_range(axis_name))
                 {
-                    midiio.sendNoteOn(note_val[channel],127,channel,800);    
-                }
-                //deal with NoteOff for range (== to max) 
-                if (sensor_val==sensor.get_limit_max(axis_name))
-                {
+                    // midiio.sendNoteOff(note_val[channel],127,channel);
                     midiio.sendAllNotesOff(channel);
+                    sensor.set_untriggered(axis_name,false);
                 }
 
                 #endif

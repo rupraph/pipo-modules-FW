@@ -25,7 +25,7 @@ public:
         bool enabled;
         bool inverted; 
         float deadzone; // supposed to be % of the total range. value for now
-        float value;
+        float value; // should distinguish raw value from output value and have both
         float value_prev;
         float offset;
         float limit_max;
@@ -40,6 +40,8 @@ public:
     void teleplot_data(string axis);
     bool test_outside_deadzone(const std::string& axis);
     bool is_within_range(const std::string& axis);
+    bool is_prev_within_range(const std::string& axis);
+    float clip(float value, float min, float max);
 
     // function to measure time between 2 calls
     unsigned long measured_loop_duration();

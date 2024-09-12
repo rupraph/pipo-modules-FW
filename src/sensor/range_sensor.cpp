@@ -58,28 +58,25 @@ void RangeSensor::update()
         // not sure if capping is optimal to be here in sensor class or better in engine/translators
         else
         {
-            if (dist > sensor_dat["dist"].limit_max) {
-
-                within_range=false;
-                sensor_dat["dist"].value = sensor_dat["dist"].limit_max;
+            sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+            sensor_dat["dist"].value = ma_filter.process(dist);
+            //  ma_filter.process(lp_filter.process(dist)); 
+            //Todo: optimize filter choices
+            //sensor_dat["dist"].value = km_filter.process(dist);
+            //sensor_dat["dist"].value = dist;
+            
+            // check if triggered or untriggered
+            if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
+                sensor_dat["dist"].untriggered = true;
             }
-            else {
-                within_range=true;
-                sensor_dat["dist"].value = lp_filter.process(dist);//  ma_filter.process(lp_filter.process(dist)); 
-                //Todo: optimize filter choices
-                //sensor_dat["dist"].value = km_filter.process(dist);
-                //sensor_dat["dist"].value = dist;
-            }
-            if (within_range_prev==false && within_range==true)
-            {
+            if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
                 sensor_dat["dist"].triggered = true;
             }
-            else
-            {
-                //move reset when sending the note ???
-                sensor_dat["dist"].triggered = false;
-            }
-            within_range_prev = within_range;
+            
+        
+            //sensor_dat["dist"].value = clip(sensor_dat["dist"].value, sensor_dat["dist"].limit_min, sensor_dat["dist"].limit_max);
+    
+
         }
         if (status == 0) {
         status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
