@@ -3,45 +3,9 @@ import type { PipoEvents } from "./types";
 const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 export let error = "";
-function parseCC(msg: string) {
-  const match = msg.match(/(CC)(\d+),(\d+),(\d+),(\d+)/);
-  if (!match) return;
-  let [whole, , channel, control, v, hires] = match;
-  return {
-    channel: Number(channel),
-    control: Number(control),
-    value: Number(v),
-    hires: Boolean(Number(hires)),
-  };
-}
-function parseNoteonoff(msg: string) {
-  const match = msg.match(/(noteon|noteoff|cc)(\d+),(\d+),(\d+)/);
-  if (!match) return;
-  const [whole, cmd, channel, note, velocity] = match;
-  return {
-    cmd,
-    channel: Number(channel),
-    note: Number(note),
-    velocity: Number(velocity),
-  };
-}
-function parseSensor(msg: string) {
-  const match = msg.match(/sensor(.*),(.*)/);
-  if (!match) return;
-  const [whole, axis, value] = match;
-  return {
-    axis,
-    value: Number(value),
-  };
-}
-function parseFPS(msg: string) {
-  const match = msg.match(/fps,(.*),(.*)/);
-  if (!match) return;
-  const [whole, frames, dt] = match;
-  return {
-    frames: Number(frames),
-    dt: Number(dt),
-  };
+function parse(msg: string) {
+  const [command, ...args] = msg.split(",");
+  return { command, args };
 }
 class PipoInput extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
@@ -57,15 +21,17 @@ class PipoInput extends EventEmitter<PipoEvents> {
       await this.initWebMidi();
     } catch (e) {
       error = "Cannot init webMIDI";
-      this.initWebSocket();
     }
+    this.initWebSocket();
   }
   retryConnection() {
     if (this.timeout) window.clearTimeout(this.timeout);
     this.timeout = window.setTimeout(() => {
       try {
         this.initWebSocket();
+        error = "";
       } catch (e) {
+        this.retryConnection();
         error = "Cannot init webSocket";
       }
     }, 1000);
@@ -90,25 +56,33 @@ class PipoInput extends EventEmitter<PipoEvents> {
     socket.addEventListener("message", (e) => {
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
-        const sensor = parseSensor(msg);
-        const noteonoff = parseNoteonoff(msg);
-        const cc = parseCC(msg);
-        const fps = parseFPS(msg);
-        if (sensor) {
-          this.emit("sensor", sensor);
-        } else if (noteonoff) {
-          if (noteonoff.cmd === "noteon") {
-            this.emit("noteOn", noteonoff);
-          } else {
-            this.emit("noteOff", noteonoff);
-          }
-        } else if (cc) {
-          this.emit("controlChange", cc);
-        } else if (fps) {
-          this.emit("fps", fps);
+        const { command, args } = parse(msg);
+        const numargs = args.map(Number);
+        switch (command) {
+          case "sensor":
+            const [axis, value] = args;
+            this.emit("sensor", { axis, value: Number(value) });
+            break;
+          case "noteon":
+          case "noteoff":
+            const [channel, note, velocity] = numargs;
+            this.emit(command as "noteon" | "noteoff", {
+              channel,
+              note,
+              velocity,
+            });
+          case "cc":
+            const [channel, control, value, hires] = numargs;
+            this.emit("cc", { channel, control, value, hires });
+            break;
+          case "fps":
+            const [frames, dt] = numargs;
+            this.emit("fps", { frames, dt });
+            break;
         }
       });
     });
+    this.socket = socket;
   }
   async initWebMidi() {
     const access = await navigator.permissions.query({
