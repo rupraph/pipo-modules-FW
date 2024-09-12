@@ -5,7 +5,7 @@
 
 #include "fs_tools.h"
 class LittleLogs {
-public:
+ public:
   String allLogs;
   void writeLog(String log, int type = 0);
   void writeError(String error);
@@ -13,10 +13,10 @@ public:
   String readLogs(bool news = false);
   bool hasNews();
 
-private:
+ private:
   bool newLogs = false;
   bool flush = false;
   int lastFlush = 0;
 };
 extern LittleLogs logs;
-#endif // LOGS_H
+#endif  // LOGS_H

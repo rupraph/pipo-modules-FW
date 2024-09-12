@@ -9,7 +9,7 @@ void PipoServer::setup() {
   // to retrive the right type to connect to it.
   std::string mdns_name = std::string("pipo-") + PIPO_TYPE;
   if (!MDNS.begin(
-          mdns_name.c_str())) { // Start the mDNS responder for esp.local
+          mdns_name.c_str())) {  // Start the mDNS responder for esp.local
     Serial.println("Error setting up MDNS responder!");
   } else {
     Serial.println("mDNS responder started");
@@ -23,7 +23,7 @@ void PipoServer::setup() {
   DefaultHeaders::Instance().addHeader(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
-  server.onNotFound([](AsyncWebServerRequest *request) {
+  server.onNotFound([](AsyncWebServerRequest* request) {
     if (request->method() == HTTP_OPTIONS) {
       request->send(200);
     } else {
@@ -49,11 +49,11 @@ void PipoServer::stop() {
 }
 
 void PipoServer::setup_requests() {
-  server.on("/info", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
     String type;
     json info = {
-        {"name", "unnamed Pipo"},             // should come from config file
-        {"version", string(PIPO_FW_VERSION)}, // should come from HW_CONFIG
+        {"name", "unnamed Pipo"},              // should come from config file
+        {"version", string(PIPO_FW_VERSION)},  // should come from HW_CONFIG
         {"type", string(PIPO_TYPE)},
         {"ip", WiFi.localIP().toString().c_str()},
         {"mac", WiFi.macAddress().c_str()},
@@ -65,7 +65,7 @@ void PipoServer::setup_requests() {
   //     return request->send(200, "text/plain", config.get().dump().c_str());
   // });
 
-  server.on("/config", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("config")) {
       return request->send(400, "text/plain", "No config received");
     }
@@ -80,7 +80,7 @@ void PipoServer::setup_requests() {
   });
 
   // sends config with filename
-  server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name")) {
       return request->send(200, "text/plain", config.get_list());
     }
@@ -94,11 +94,11 @@ void PipoServer::setup_requests() {
     }
   });
 
-  server.on("/config-active", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/config-active", HTTP_GET, [&](AsyncWebServerRequest* request) {
     return request->send(200, "text/plain", config.filename.c_str());
   });
 
-  server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/active-config", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name")) {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
@@ -112,7 +112,7 @@ void PipoServer::setup_requests() {
                            "Error loading config: " + String(e.what()));
     }
   });
-  server.on("/config-delete", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/config-delete", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name")) {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
@@ -125,19 +125,19 @@ void PipoServer::setup_requests() {
                            "Error deleting config: " + String(e.what()));
     }
   });
-  server.on("/config-new", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/config-new", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name")) {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
     try {
       config.new_config(request->getParam("name")->value());
       return request->send(200, "text/plain", "Config created");
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error creating config: " + String(e.what()));
     }
   });
-  server.on("/config-copy", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/config-copy", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name") || !request->hasParam("config")) {
       return request->send(400, "text/plain",
                            "Error: no name or config parameter");
@@ -151,7 +151,7 @@ void PipoServer::setup_requests() {
                            "Error copying config: " + String(e.what()));
     }
   });
-  server.on("/config-rename", HTTP_POST, [&](AsyncWebServerRequest *request) {
+  server.on("/config-rename", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("oldname") || !request->hasParam("newname")) {
       return request->send(400, "text/plain",
                            "Error: no old or new name parameter");
@@ -168,17 +168,17 @@ void PipoServer::setup_requests() {
 
   server.on(
       "/save", HTTP_POST,
-      [&](AsyncWebServerRequest *request) {
+      [&](AsyncWebServerRequest* request) {
         return request->send(200, "text/plain", "Config sending");
       },
-      [&](AsyncWebServerRequest *request, String filename, size_t index,
-          uint8_t *data, size_t len, bool final) {
+      [&](AsyncWebServerRequest* request, String filename, size_t index,
+          uint8_t* data, size_t len, bool final) {
         try {
           if (index == 0) {
             // This is the start of the file upload
             received_configData.clear();
           }
-          received_configData.append((char *)data, len);
+          received_configData.append((char*)data, len);
 
           if (final) {
         // This is the end of the file upload
@@ -189,7 +189,7 @@ void PipoServer::setup_requests() {
         // value after all.
 
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap()); // 44k remaining
+            Serial.println(ESP.getFreeHeap());  // 44k remaining
 #endif
 
             config.save(config.filename + ".json", received_configData.c_str());
@@ -208,20 +208,20 @@ void PipoServer::setup_requests() {
             config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Config saved");
           }
-        } catch (const std::exception &e) {
+        } catch (const std::exception& e) {
           Serial.println("error saving config");
           return request->send(500, "text/plain",
                                "Error saving config: " + String(e.what()));
         }
       });
 
-  server.on("/reboot", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/reboot", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Rebooting");
     delay(3000);
     ESP.restart();
   });
 
-  server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (config.general_config["Wifi_mode"] == "AP") {
       // Todo: should use setter
       config.general_config["Wifi_mode"].clear();
@@ -237,27 +237,27 @@ void PipoServer::setup_requests() {
     // ESP.restart();
   });
 
-  server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest *request) {
+  server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", logs.readLogs().c_str());
   });
 
-  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Pong");
   });
 }
-void PipoServer::onMessage(AsyncWebSocketClient *client, String message) {
+void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
   Serial.println(message);
   // client->text("I got your message");
 }
 void PipoServer::setup_ws() {
   server.addHandler(&ws);
   pipoSocket.setup(&ws, &input_sens);
-  events.onConnect([](AsyncEventSourceClient *client) {
+  events.onConnect([](AsyncEventSourceClient* client) {
     client->send("hello!", NULL, millis(), 1000);
   });
   server.addHandler(&events);
-  ws.onEvent([&](AsyncWebSocket *server, AsyncWebSocketClient *client,
-                 AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
+                 AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
       // Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
       Serial.print("ws connect");
@@ -277,8 +277,8 @@ void PipoServer::setup_ws() {
       Serial.print("ws error");
       Serial.print(server->url());
       Serial.print(client->id());
-      Serial.print(*((uint16_t *)arg));
-      Serial.println((char *)data);
+      Serial.print(*((uint16_t*)arg));
+      Serial.println((char*)data);
     } else if (type == WS_EVT_PONG) {
       // Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(),
       // len, (len) ? (char*)data : "");
@@ -286,9 +286,9 @@ void PipoServer::setup_ws() {
       Serial.print(server->url());
       Serial.print(client->id());
       Serial.print(len);
-      Serial.println((len) ? (char *)data : "");
+      Serial.println((len) ? (char*)data : "");
     } else if (type == WS_EVT_DATA) {
-      AwsFrameInfo *info = (AwsFrameInfo *)arg;
+      AwsFrameInfo* info = (AwsFrameInfo*)arg;
       String msg = "";
       if (info->final && info->index == 0 && info->len == len) {
         // the whole message is in a single frame and we got all of it's data
@@ -303,7 +303,7 @@ void PipoServer::setup_ws() {
             // msg += buff;
             // removing sprintf to reduce memory usage
             if (data[i] < 16)
-              msg += '0'; // Add leading zero for single hex digit
+              msg += '0';  // Add leading zero for single hex digit
             msg += String((uint8_t)data[i], HEX);
             msg += ' ';
           }
@@ -327,7 +327,7 @@ void PipoServer::setup_ws() {
             // msg += buff;
             // removing sprintf to reduce memory usage
             if (data[i] < 16)
-              msg += '0'; // Add leading zero for single hex digit
+              msg += '0';  // Add leading zero for single hex digit
             msg += String((uint8_t)data[i], HEX);
             msg += ' ';
           }

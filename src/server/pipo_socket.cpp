@@ -5,7 +5,7 @@ PipoSocket::PipoSocket() {
   this->ws = nullptr;
   this->input_sens = nullptr;
 }
-void PipoSocket::setup(AsyncWebSocket *ws, Sensor *sensor) {
+void PipoSocket::setup(AsyncWebSocket* ws, Sensor* sensor) {
   this->ws = ws;
   this->input_sens = sensor;
 }
@@ -56,8 +56,8 @@ void PipoSocket::loop() {
   message += std::to_string((float)now - lastSendTime);
   iterations = 0;
   lastSendTime = now;
-  const auto &sensor_dat = input_sens->get_sensor_dat_map();
-  for (auto const &pair : sensor_dat) {
+  const auto& sensor_dat = input_sens->get_sensor_dat_map();
+  for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = input_sens->get_value(axis_name);
     float sensor_min = input_sens->get_limit_min(axis_name);

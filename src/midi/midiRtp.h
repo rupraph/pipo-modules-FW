@@ -5,7 +5,7 @@
 
 void midiRtpSetup();
 void midiRtpLoop();
-void OnAppleMidiException(const APPLEMIDI_NAMESPACE::ssrc_t&, const APPLEMIDI_NAMESPACE::Exception&, const int32_t);
+void OnAppleMidiException(const APPLEMIDI_NAMESPACE::ssrc_t&,
+                          const APPLEMIDI_NAMESPACE::Exception&, const int32_t);
 
-
-#endif //MIDIRTP_H
+#endif  // MIDIRTP_H
