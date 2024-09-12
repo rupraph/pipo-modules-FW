@@ -5,7 +5,9 @@ const NOTE_OFF = 0x80;
 export let error = "";
 function parse(msg: string) {
   const [command, ...args] = msg.split(",");
-  return { command, args };
+  const isSensor = command.startsWith("sensor");
+  const axis = isSensor ? command.replace("sensor", "") : "";
+  return { command, args, axis, isSensor };
 }
 class PipoInput extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
@@ -42,7 +44,9 @@ class PipoInput extends EventEmitter<PipoEvents> {
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
-    socket.addEventListener("open", (event) => {});
+    socket.addEventListener("open", (event) => {
+      console.log("Connected to Pipo");
+    });
     socket.addEventListener("error", (e) => {
       if (!this.enabled) return;
       this.retryConnection();
@@ -55,11 +59,10 @@ class PipoInput extends EventEmitter<PipoEvents> {
     socket.addEventListener("message", (e) => {
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
-        const { command, args } = parse(msg);
+        const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
-        if (command === "sensor") {
-          const [axis, value] = args;
-          return this.emit("sensor", { axis, value: Number(value) });
+        if (isSensor) {
+          return this.emit("sensor", { axis, value: numargs[0] });
         }
         if (command === "noteon" || command === "noteoff") {
           const [channel, note, velocity] = numargs;
