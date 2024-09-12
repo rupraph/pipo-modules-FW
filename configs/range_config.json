@@ -45,7 +45,9 @@
             "offset": 0.0,
             "value": 0.0,
             "limit_max": 600,
-            "limit_min": 20.0
+            "limit_min": 20.0,
+            "mode": 1,
+            "threshold": 200.0
         }
     },
     "general": {

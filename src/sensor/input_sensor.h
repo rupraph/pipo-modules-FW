@@ -30,8 +30,10 @@ public:
         float offset;
         float limit_max;
         float limit_min;
-        bool triggered; 
-        bool untriggered; 
+        bool triggered;  // when entering defined range
+        bool untriggered; // when leaving defined range
+        bool mode; // 0 = continuous, 1 = trigger
+        float threshold; 
     };
 
     
