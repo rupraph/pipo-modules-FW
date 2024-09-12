@@ -29,9 +29,6 @@ class MidiTranslator
 
         bool enabled = false;
 
-        // int use_threshold = 0;
-        // int threshold = 0;
-
         //notes variables
         int translator_mode = 0; //0=cc, 1 note, 2 both
 
@@ -39,13 +36,106 @@ class MidiTranslator
         int rootNote = 45;
         int numberOfNotes = 25;
         vector<int> current_scale;
+        int sustain=1000; //in ms. 0 for infinite
 
         //CC variables
         int max_output;
         int min_output = 0;
         int interpolation_type = 0; //0=linear, 1=step, 2=log
+        bool hires = false;
 
-        // Notes scale variables
+        // Notes scale methods
+        int get_note(float value,float min_input,float max_input);
+        void printScale(vector<int> scale);
+        void set_Scale_Type(string scaleType);
+        void set_root_note(string rootNote);
+        void set_number_of_notes(int numberOfNotes);
+        int convertNoteNameToNumber(string noteName);
+        string convertNumberToNoteName(int noteNumber); 
+        bool is_a_note(string noteName);
+        vector<string> get_scale_names();
+        void update_scale();
+
+        //cc methods
+        int get_cc_val(float value, float min_input,float max_input, bool hires=false);
+        int map_linear(float x, float min_input, float max_input);
+
+        // save/load
+        friend void to_json(nlohmann::json& j,const MidiTranslator& t);
+        friend void from_json(const nlohmann::json& j, MidiTranslator& t);
+        nlohmann::json get_json() const;
+        void set_from_json(const nlohmann::json& j);
+        string serialize() const;
+        void deserialize(const string& data);
+
+        // Getter setters
+        bool getHires() const;
+        void setHires(bool h);
+        int getChannel();
+        void setChannel(int c);
+        int getCcNumber();
+        void setCcNumber(int c);
+        int getTranslatorMode();
+        void setTranslatorMode(int t);
+        string getScaleType();
+        void setScaleType(string s);
+        int getRootNote();
+        void setRootNote(int r);
+        int getNumberOfNotes();
+        void setNumberOfNotes(int n);
+        int getSustain();
+        void setSustain(int s);
+        int getMaxOutput();
+        void setMaxOutput(int m);
+        int getMinOutput();
+        void setMinOutput(int m);
+        int getInterpolationType();
+        void setInterpolationType(int i);
+        bool getEnabled();
+        void setEnabled(bool e);
+
+
+        // template <typename T>
+        // void set_param(const string& param_name, const T& value) {
+        //     if (param_name == "translator_mode") {
+        //         translator_mode = value;
+        //     }
+        //     else if (param_name == "channel") {
+        //         channel = value;
+        //     }
+        //     else if (param_name == "cc_number") {
+        //         cc_number = value;
+        //     }
+        //     else if (param_name == "scaleType") {
+        //         scaleType = value;
+        //     }
+        //     else if (param_name == "rootNote") {
+        //         rootNote = value;
+        //     }
+        //     else if (param_name == "numberOfNotes") {
+        //         numberOfNotes = value;
+        //     }
+        //     else if (param_name == "max_output") {
+        //         max_output = value;
+        //     }
+        //     else if (param_name == "min_output") {
+        //         min_output = value;
+        //     }
+        //     else if (param_name == "interpolation_type") {
+        //         interpolation_type = value;
+        //     }
+        //     else if (param_name == "hires") {
+        //         hires = value;
+        //     }
+        //     else if (param_name == "enabled") {
+        //         enabled = value;
+        //     }
+        //     else {
+        //         Serial.println("Error: unknown parameter name");
+        //     }
+        // }
+
+                // Notes scale variables
         // Todo: add arpegios // chords
         unordered_map<string, vector<int>> scales = {
             {"major", {0, 2, 4, 5, 7, 9, 11}},
@@ -69,74 +159,6 @@ class MidiTranslator
             {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
             //Turkish ??
         };
-
-        int get_note(float value,float min_input,float max_input);
-        void printScale(vector<int> scale);
-        void set_Scale_Type(string scaleType);
-        void set_root_note(string rootNote);
-        void set_number_of_notes(int numberOfNotes);
-        int convertNoteNameToNumber(string noteName);
-        string convertNumberToNoteName(int noteNumber); 
-        bool is_a_note(string noteName);
-        vector<string> get_scale_names();
-        void update_scale();
-
-        // To cc variables
-        int get_cc_val(float value, float min_input,float max_input, bool hires=false);
-        int map_linear(float x, float min_input, float max_input);
-
-        // save/load
-        friend void to_json(nlohmann::json& j,const MidiTranslator& t);
-        friend void from_json(const nlohmann::json& j, MidiTranslator& t);
-        nlohmann::json get_json() const;
-        void set_from_json(const nlohmann::json& j);
-        string serialize() const;
-        void deserialize(const string& data);
-
-        template <typename T>
-        void set_param(const string& param_name, const T& value) {
-            if (param_name == "translator_mode") {
-                translator_mode = value;
-            }
-            else if (param_name == "channel") {
-                channel = value;
-            }
-            else if (param_name == "cc_number") {
-                cc_number = value;
-            }
-            else if (param_name == "scaleType") {
-                scaleType = value;
-            }
-            else if (param_name == "rootNote") {
-                rootNote = value;
-            }
-            else if (param_name == "numberOfNotes") {
-                numberOfNotes = value;
-            }
-            else if (param_name == "max_output") {
-                max_output = value;
-            }
-            else if (param_name == "min_output") {
-                min_output = value;
-            }
-            else if (param_name == "interpolation_type") {
-                interpolation_type = value;
-            }
-            else if (param_name == "hires") {
-                hires = value;
-            }
-            else if (param_name == "enabled") {
-                enabled = value;
-            }
-            else {
-                Serial.println("Error: unknown parameter name");
-            }
-        }
-
-    bool hires = false;
-    bool getHires() const;
-    void setHires(bool h);
-        
 
     private:
         vector<int> generate_full_Scale(int rootNote,int nb_notes, string scaleType);

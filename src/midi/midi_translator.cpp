@@ -203,6 +203,7 @@ void to_json(json& j, const MidiTranslator& t) {
         {"scaleType", t.scaleType},
         {"rootNote", t.rootNote},
         {"numberOfNotes", t.numberOfNotes},
+        {"sustain", t.sustain},
         // {"current_scale", t.current_scale},
         // {"max_input", t.max_input},
         // {"min_input", t.min_input},
@@ -230,6 +231,7 @@ void from_json(const json& j, MidiTranslator& t) {
     j.at("scaleType").get_to(t.scaleType);
     j.at("rootNote").get_to(t.rootNote);
     j.at("numberOfNotes").get_to(t.numberOfNotes);
+    j.at("sustain").get_to(t.sustain);
     //j.at("current_scale").get_to(t.current_scale);
     // j.at("max_input").get_to(t.max_input);
     // j.at("min_input").get_to(t.min_input);
@@ -258,6 +260,10 @@ void MidiTranslator::set_from_json(const json& j) {
     this->update_scale();
 }
 
+
+
+//Getter setters
+
 bool MidiTranslator::getHires() const{ return hires; }
 
 void MidiTranslator::setHires(bool h) {
@@ -269,3 +275,39 @@ void MidiTranslator::setHires(bool h) {
         max_output = 127;
     }
 }
+
+
+// Todo: should make setter more secure with value checking
+int MidiTranslator::getChannel() { return channel; }
+void MidiTranslator::setChannel(int c) {channel = c; }
+
+int MidiTranslator::getCcNumber() { return cc_number; }
+void MidiTranslator::setCcNumber(int c) { cc_number = c; }
+
+int MidiTranslator::getTranslatorMode() { return translator_mode; }
+void MidiTranslator::setTranslatorMode(int t) { translator_mode = t; }
+
+string MidiTranslator::getScaleType() { return scaleType; }
+void MidiTranslator::setScaleType(string s) { scaleType = s; }
+
+int MidiTranslator::getRootNote() { return rootNote; }
+void MidiTranslator::setRootNote(int r) { rootNote = r; }
+
+int MidiTranslator::getNumberOfNotes() { return numberOfNotes; }
+void MidiTranslator::setNumberOfNotes(int n) { numberOfNotes = n; }
+
+int MidiTranslator::getSustain() { return sustain; }
+void MidiTranslator::setSustain(int s) { sustain = s; }
+
+int MidiTranslator::getMaxOutput() { return max_output; }
+void MidiTranslator::setMaxOutput(int m) { max_output = m; }
+
+int MidiTranslator::getMinOutput() { return min_output; }
+void MidiTranslator::setMinOutput(int m) { min_output = m; }
+
+int MidiTranslator::getInterpolationType() { return interpolation_type; }
+void MidiTranslator::setInterpolationType(int i) { interpolation_type = i; }
+
+bool MidiTranslator::getEnabled() { return enabled; }
+void MidiTranslator::setEnabled(bool e) { enabled = e; }
+

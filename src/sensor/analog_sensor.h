@@ -12,20 +12,18 @@ using namespace std;
 class AnalogSensor : public Sensor{   
     public:
         AnalogSensor(){
-            sensor_dat = {
-            {"A1", {true, false, 0, 0, 0, 4095, false}},
-            {"A2", {true, false, 0, 0, 0, 4095, false}},
-            {"A3", {true, false, 0, 0, 0, 4095, false}},
-            {"A4", {true, false, 0, 0, 0, 4095, false}},
-            {"A5", {true, false, 0, 0, 0, 4095, false}},
-            {"A6", {true, false, 0, 0, 0, 4095, false}},
-            {"T1", {true, false, 0, 0, 0, 50000, false}},
-            {"T2", {true, false, 0, 0, 0, 50000, false}},
-            {"T3", {true, false, 0, 0, 0, 50000, false}},
-            {"T4", {true, false, 0, 0, 0, 50000, false}},
-            {"T5", {true, false, 0, 0, 0, 50000, false}},
-            {"T6", {true, false, 0, 0, 0, 50000, false}}
-            };
+            sensor_dat["A1"] = SensorDat();
+            sensor_dat["A2"] = SensorDat();
+            sensor_dat["A3"] = SensorDat();
+            sensor_dat["A4"] = SensorDat();
+            sensor_dat["A5"] = SensorDat();
+            sensor_dat["A6"] = SensorDat();
+            sensor_dat["T1"] = SensorDat();
+            sensor_dat["T2"] = SensorDat();
+            sensor_dat["T3"] = SensorDat();
+            sensor_dat["T4"] = SensorDat();
+            sensor_dat["T5"] = SensorDat();
+            sensor_dat["T6"] = SensorDat();
         };
 
         unordered_map<string, int> analog_map = {

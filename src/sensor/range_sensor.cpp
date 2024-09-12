@@ -52,7 +52,9 @@ void RangeSensor::update()
         //Todo: deal with second object detected
         // -> test driver to report single value. tested working on another sensor from same type.
         float dist = pMultiRangingData->RangeData[0].RangeMilliMeter;
-        
+
+
+        // process result
         if (dist < 0 || !pMultiRangingData->RangeData[0].RangeStatus == VL53L4CX_RANGESTATUS_RANGE_VALID) {
         }
         // not sure if capping is optimal to be here in sensor class or better in engine/translators
@@ -65,15 +67,40 @@ void RangeSensor::update()
             //sensor_dat["dist"].value = km_filter.process(dist);
             //sensor_dat["dist"].value = dist;
             
-            // check if triggered or untriggered
-            if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
-                sensor_dat["dist"].untriggered = true;
+            // continuous mode
+            if(sensor_dat["dist"].mode == 0){
+                if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
+                    sensor_dat["dist"].untriggered = true;
+                }
+                if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
+                    sensor_dat["dist"].triggered = true;
+                }
             }
-            if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
-                sensor_dat["dist"].triggered = true;
+            else{ // trigger mode
+                // if basic threshold mode
+                if (sensor_dat["dist"].threshold_mode == 0) {
+                    if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+                        sensor_dat["dist"].bool_value = true;
+                    }
+                    else {
+                        sensor_dat["dist"].bool_value = false;
+                    }
+                }
+                else{ // shmidt trigger mode
+                    if (sensor_dat["dist"].threshold_mode == 1) 
+                    {
+                        if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+                            sensor_dat["dist"].bool_value = true;
+                        }
+                        else if (sensor_dat["dist"].value < sensor_dat["dist"].limit_min) {
+                            sensor_dat["dist"].bool_value = false;
+                        }
+                    }   
+                }
             }
-            
-        
+
+
+
             //sensor_dat["dist"].value = clip(sensor_dat["dist"].value, sensor_dat["dist"].limit_min, sensor_dat["dist"].limit_max);
     
 

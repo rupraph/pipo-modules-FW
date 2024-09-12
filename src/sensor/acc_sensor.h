@@ -9,14 +9,12 @@
 class MotionSensor: public Sensor{   
     public:
         MotionSensor(){
-            sensor_dat = {
-            {"roll", {false, false,     0,  0,  0,  90.0,   false}},
-            {"pitch", {false, false,    0,  0,  0,  180.0,  false}},
-            {"yaw", {false, false,      0,  0,  0,  180.0,  false}},
-            {"accX", {true, false,      0,  0,  0,  8.0,    false}},
-            {"accY", {false, false,     0,  0,  0,  8.0,    false}},
-            {"accZ", {false, false,     0,  0,  0,  8.0,    false}}
-        };
+            sensor_dat["accX"] = SensorDat();
+            sensor_dat["accY"] = SensorDat();
+            sensor_dat["accZ"] = SensorDat();
+            sensor_dat["roll"] = SensorDat();
+            sensor_dat["pitch"] = SensorDat();
+            sensor_dat["yaw"] = SensorDat();
         }; 
 
         void init() override;

@@ -4,17 +4,19 @@
 
 void midi_io::setup()
 {
+
     MidiUSBSetup();
     midiBLESetup();
     //midiRtpSetup();
 }
-// if sustainmil is 0 it will not send a note off
+// if sustainmil is 0 = infinite sustain from sustain manager
 void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long sustain_mil)
 {
     unsigned long time = millis();
     if(is_note_playing(note, channel)) 
     {
-        if(channel_note_list[channel][note].starttime+20>time)
+        // don't play notes faster than 10ms
+        if(channel_note_list[channel][note].starttime+10>time)
         {
             // Serial.println("not playing");
             return;
@@ -25,8 +27,20 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
 
     //midisocket.sendNoteOn(note, velocity,channel);
     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+    
     // insert or update note to channel_note_list
-    channel_note_list[channel][note]={true, time+sustain_mil, time};
+    channel_note_list[channel][note].on=true;
+    channel_note_list[channel][note].starttime=time;
+
+    //set appropriate sustain endtime (0=infinite sustain)
+    if (sustain_mil>0)
+    {
+        channel_note_list[channel][note].sustain_endtime=time+sustain_mil;
+    }
+    else
+    {
+        channel_note_list[channel][note].sustain_endtime=0;
+    }
 }
 
 void midi_io::sendNoteOff(int note, int velocity, int channel)
@@ -115,11 +129,28 @@ void midi_io::manage_sustain()
         // Loop through the notes and send note off for all notes
         for (int note : notes)
         {
-            if (channel_note_list[i][note].sustain_endtime < millis())
+            // 0 means infinite sustain (no note off after a duration, off only by sensor/engine sending off)
+            if (channel_note_list[i][note].sustain_endtime!=0)
             {
-                sendNoteOff(note, 127, i);
+                if (channel_note_list[i][note].sustain_endtime < millis())
+                {
+                    sendNoteOff(note, 127, i);
+                }
             }
         }
+    }
+
+}
+
+void midi_io::printNoteList(int channel)
+{
+    Serial.println("Printing note list");
+    for (auto const& pair : channel_note_list[channel])
+    {
+        Serial.print("Note: ");
+        Serial.println(pair.first);
+        Serial.print("isplaying ?: ");
+        Serial.println(is_note_playing(pair.first, channel));
     }
 
 }

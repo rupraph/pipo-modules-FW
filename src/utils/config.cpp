@@ -6,15 +6,37 @@ void Config::load_config(String filename,bool addJsonExtension=true) {
     this->filename = filename;
     Serial.print("load config: ");
     Serial.println(get_path(filename,addJsonExtension).c_str());
-    #ifdef DEBUG_HEAP
+    try
+    {
+        #ifdef DEBUG_HEAP
         Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-    #endif
-    current_config.clear();
-    current_config = json::parse(readFile(LittleFS, get_path(filename,addJsonExtension).c_str()));
-    #ifdef DEBUG_HEAP
-        Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-    #endif
-    logs.writeLog("load config: " + filename);
+        #endif
+
+        if (DEBUG_CONFIG) {
+            Serial.println("config: before loading:");
+            Serial.println(current_config.dump(4).c_str());
+        }
+
+        current_config.clear();
+        current_config = json::parse(readFile(LittleFS, get_path(filename,addJsonExtension).c_str()));
+        
+        if (DEBUG_CONFIG) {
+            Serial.println("loaded config:");
+            Serial.println(current_config.dump(4).c_str());
+        }
+
+        #ifdef DEBUG_HEAP
+            Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+        #endif
+        logs.writeLog("load config: " + filename);
+    }
+    catch(const std::exception& e)
+    {
+        Serial.println("error loading config");
+        Serial.println(e.what());
+    }
+    
+
 }
 
 
@@ -142,21 +164,34 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug=false) {
         Serial.println("gathered_config_end");
     }
 }
-void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug) {
-    sensor.set_config(current_config["sensor"]);
-    engine.set_config(current_config["engine"]);
-    general_config.clear();
-    general_config = current_config["general"];
-    //log last config name
-    writeFile(LittleFS, last_config_path, filename.c_str());
-     /*TODO: improve: 
-     either pass the json to apply and avoid passing cofig object
-      to osc class, or follow the same config process than sensor 
-      and engine instead of being in the general config... 
-     */ 
-    osc.set_config();
 
-    logs.writeLog("config applied: " + filename);
+//* @brief propagates the current config content to the sensor, engine, etc...
+void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc, bool debug) {
+    try
+    {
+        sensor.set_config(current_config["sensor"],DEBUG_CONFIG);
+        engine.set_config(current_config["engine"],DEBUG_CONFIG);
+        general_config.clear();
+        general_config = current_config["general"];
+        //log last config name
+        writeFile(LittleFS, last_config_path, filename.c_str());
+        /*TODO: improve: 
+        either pass the json to apply and avoid passing cofig object
+        to osc class, or follow the same config process than sensor 
+        and engine instead of being in the general config... 
+        */ 
+        osc.set_config();
+
+        Serial.println("config applied: " + filename);
+        logs.writeLog("config applied: " + filename);
+    }
+    catch(const std::exception& e)
+    {
+        Serial.println("error applying config");
+        Serial.println(e.what());
+    }
+    
+    
 }
 
 

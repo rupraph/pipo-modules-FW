@@ -12,6 +12,8 @@
 
 #define DEBUG_HEAP true
 
+#define DEBUG_CONFIG true
+
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
     #define WIFI_LED 9
     #define BT_LED 10

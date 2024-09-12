@@ -50,6 +50,9 @@ class midi_io
         void sendAfterTouch(int pressure, int channel);
         
         void sendHiResControlChange(int control, int value, int channel);
+
+        //utility functions
+        void printNoteList(int channel);
     
 };
 

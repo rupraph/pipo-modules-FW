@@ -23,6 +23,7 @@
                 "max_output": 127,
                 "min_output": 0,
                 "numberOfNotes": 15,
+                "sustain": 800,
                 "rootNote": 55,
                 "scaleType": "major pentatonic",
                 "translator_mode": 1
@@ -40,12 +41,12 @@
     "sensor": {
         "dist": {
             "deadzone": 0.0,
-            "enabled": true,
-            "inverted": false,
             "offset": 0.0,
-            "value": 0.0,
-            "limit_max": 600,
-            "limit_min": 20.0
+            "limit_max": 60.0,
+            "limit_min": 2.0,
+            "mode": true,
+            "threshold_mode": false,
+            "threshold": 20.0
         }
     },
     "general": {
