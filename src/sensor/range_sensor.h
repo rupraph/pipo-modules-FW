@@ -1,43 +1,38 @@
 #ifndef RANGE_SENSOR_H
 #define RANGE_SENSOR_H
 
-#include "sensor/input_sensor.h"
-#include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
+#include "HW_CONFIG.h"
+#include "sensor/input_sensor.h"
 #include "utils/filters.h"
 
+class RangeSensor : public Sensor {
+ public:
+  RangeSensor() {
+    sensor_dat = {{"dist", {true, false, 0, 0, 0, 1000.0, false}}};
+  };
 
+  void init() override;
+  void setup() override;
+  void update() override;
 
-class RangeSensor : public Sensor{   
-    public:
-        RangeSensor(){
-            sensor_dat = {
-            {"dist", {true, false, 0, 0, 0,1000.0, false}}
-        };
-        };
+ private:
+  bool within_range = false;
+  bool within_range_prev = false;
 
-        void init() override;
-        void setup() override;
-        void update() override;
+  VL53L4CX vl53l4cx;
+  VL53L4CX_MultiRangingData_t MultiRangingData;
+  VL53L4CX_MultiRangingData_t* pMultiRangingData = &MultiRangingData;
+  uint8_t NewDataReady;
+  int no_of_object_found;
+  char report[64];
+  int status;
 
-    private:
+  SensorDat prev_sensor_dat;
 
-        bool within_range=false;
-        bool within_range_prev=false;
-
-        VL53L4CX vl53l4cx;
-        VL53L4CX_MultiRangingData_t MultiRangingData;
-        VL53L4CX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
-        uint8_t NewDataReady;
-        int no_of_object_found;
-        char report[64];
-        int status;
-
-        SensorDat prev_sensor_dat;
-
-        LowPassFilter lp_filter;
-        MovingAverageFilter ma_filter;
-        KalmanFilter km_filter;
+  LowPassFilter lp_filter;
+  MovingAverageFilter ma_filter;
+  KalmanFilter km_filter;
 };
 
-#endif //RANGE_SENSOR_H
+#endif  //RANGE_SENSOR_H

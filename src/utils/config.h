@@ -5,15 +5,15 @@
 
 #include <Arduino.h>
 #include <iostream>
-#include <vector>
-#include <unordered_map>
 #include <sstream>
+#include <unordered_map>
+#include <vector>
+#include "../engine.h"
+#include "../osc_handler.h"
 #include "fs_tools.h"
+#include "sensor/input_sensor.h"
 #include "utils/json.hpp"
 #include "utils/logs.h"
-#include "../engine.h"
-#include "sensor/input_sensor.h"
-#include "../osc_handler.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -24,72 +24,69 @@ using json = nlohmann::json;
 class Engine;
 class OSC_handler;
 
-class Config
-{
-    public:
+class Config {
+ public:
+  Config() {
+    general_config = {
+        {"Wifi_mode", "STA"},
+        {"OSC_ENA", true},
+        {"OSC_PORT", 8000},
+        {"OSC_IP", "0.0.0.0"},
+    };
+  }
+  String filename;  // raw config file name (no extension)
+  json current_config;
+  //json res;
+  //json test_config;
+  // only config element not comming from external classes.
+  // placed here for now.
+  json general_config = {
+      // {"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
+      // {"OSC_ENA", true},
+      // {"OSC_PORT", 5000},
+      // {"OSC_IP", IPAddress(0,0,0,0)},
+  };
 
-        Config(){
-                general_config = {
-                    {"Wifi_mode", "STA"},
-                    {"OSC_ENA", true},
-                    {"OSC_PORT", 8000},
-                    {"OSC_IP", "0.0.0.0"},
-        };
-        }
-        String filename; // raw config file name (no extension)
-        json current_config;
-        //json res;
-        //json test_config;
-        // only config element not comming from external classes. 
-        // placed here for now.
-        json general_config= {
-        // {"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
-        // {"OSC_ENA", true},
-        // {"OSC_PORT", 5000},
-        // {"OSC_IP", IPAddress(0,0,0,0)},
-        };
-    
+  // load config from files into current_config
+  void load_config(String filename, bool addJsonExtension = true);
+  void load_config();
 
-        // load config from files into current_config
-        void load_config(String filename,bool addJsonExtension=true);
-        void load_config();
+  // set current_config from a json object
+  void set(const json& config);
 
-        // set current_config from a json object
-        void set(const json& config);
+  //load all config into
 
-        //load all config into 
+  //void load_all_configs();
 
-        //void load_all_configs();
+  void save();
+  void save(String filename);
+  void save(String filename, String config);
 
-        void save();
-        void save(String filename);
-        void save(String filename, String config);
-        
-        void delete_config(String filename);
-        
-        void rename(String old_name, String new_name);
-        void new_config(String name);
+  void delete_config(String filename);
 
-        //json get_config_from_file(String filename);
-        String get_list();
-        //json get_configs();
+  void rename(String old_name, String new_name);
+  void new_config(String name);
 
-        json get(); // return current_config
-        json get(string key); // return current_config[key]
-        
-        // void save_for_key(string key, json data);
-        void print();
-        void gather(Sensor& sensor,Engine& engine,bool debug=false); 
-        void apply(Sensor& sensor,Engine& engine,OSC_handler& osc, bool debug=false); 
-        String get_path(String filename, bool add_extension=true);
+  //json get_config_from_file(String filename);
+  String get_list();
+  //json get_configs();
 
-    private:
-      const char* last_config_path = "/last_config.txt";
-      const char* config_model_path = "/default.json";
-      const char* configs_root = "/configs";
-      
+  json get();            // return current_config
+  json get(string key);  // return current_config[key]
+
+  // void save_for_key(string key, json data);
+  void print();
+  void gather(Sensor& sensor, Engine& engine, bool debug = false);
+  void apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
+             bool debug = false);
+  String get_path(String filename, bool add_extension = true);
+
+ private:
+  const char* last_config_path = "/last_config.txt";
+  const char* config_model_path = "/default.json";
+  const char* configs_root = "/configs";
 };
 
 extern Config config;
 
-#endif //CONFIG_H
+#endif  //CONFIG_H

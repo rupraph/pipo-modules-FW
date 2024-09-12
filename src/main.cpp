@@ -4,14 +4,14 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "utils/config.h"
 #include "hw_ui.h"
-#include "server/server.h"
 #include "midi/midi_io.h"
+#include "osc_handler.h"
+#include "server/server.h"
+#include "utils/config.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
-#include "osc_handler.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -39,107 +39,103 @@ void setup_wifi();
 void monitor_wifi();
 
 void setup() {
-    Serial.begin(115200);
-    //delay(3000);
-    // while(!Serial) // "while" prevents usb to setup properly
-    // setCpuFrequencyMhz(80); will be usefull to save power on battery
-    /////// Init hardware user interface (leds and switches)
-    Serial.println(ESP.getFreeHeap());
-    hwui.init();
-    hwui.setup();
+  Serial.begin(115200);
+  //delay(3000);
+  // while(!Serial) // "while" prevents usb to setup properly
+  // setCpuFrequencyMhz(80); will be usefull to save power on battery
+  /////// Init hardware user interface (leds and switches)
+  Serial.println(ESP.getFreeHeap());
+  hwui.init();
+  hwui.setup();
 
-    /////// Init filesystem
-    init_filesystem();
+  /////// Init filesystem
+  init_filesystem();
 
-    /////// Init midi and hid
-    midiio.setup();
-    hidio.usb_hid_setup();
+  /////// Init midi and hid
+  midiio.setup();
+  hidio.usb_hid_setup();
 
-    
+  /////// Load config
+  Serial.print("config list:");
+  Serial.println(config.get_list());
+  config.load_config();
+  config.apply(input_sens, engine, osc, false);  // input_sens,
+  //config.print();
 
-    /////// Load config
-    Serial.print("config list:");
-    Serial.println(config.get_list());
-    config.load_config();
-    config.apply(input_sens, engine, osc, false);  // input_sens,
-    //config.print();
+  /////// Init wifi
+  setup_wifi();
 
-    
-    /////// Init wifi
-    setup_wifi();
-    
+  listDir(LittleFS, "/", 0);
 
-    listDir(LittleFS, "/", 0);
+  /////// initialize sensor/inputs
+  input_sens.init();
+  input_sens.setup();
+  // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
+  config.gather(input_sens, engine, true);
+  config.save(config.filename + ".json");
 
-    /////// initialize sensor/inputs
-    input_sens.init();
-    input_sens.setup();
-    // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
-    config.gather(input_sens, engine, true);
-    config.save(config.filename+".json");
+  Serial.print("after sensor setup");
+  Serial.println(ESP.getFreeHeap());
 
-    Serial.print("after sensor setup");
-    Serial.println(ESP.getFreeHeap());
+  // Start server if TA connected or AP mode
+  // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
+  Serial.println("starting config page");
+  server.setup();
+  // }
+  // else{
+  //     Serial.println("Wifi not connected, no config page for now");
+  // }
+  osc.setup();  // requires config to be loaded before.
 
-    // Start server if TA connected or AP mode
-    // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
-    Serial.println("starting config page");
-    server.setup();
-    // }
-    // else{
-    //     Serial.println("Wifi not connected, no config page for now");
-    // }
-    osc.setup(); // requires config to be loaded before. 
+  // Memo on tracking frequency adjustements
+  // uint32_t Freq = getCpuFrequencyMhz();
+  // Serial.print("CPU Freq = ");
+  // Serial.print(Freq);
+  // Serial.println(" MHz");
+  // Freq = getXtalFrequencyMhz();
+  // Serial.print("XTAL Freq = ");
+  // Serial.print(Freq);
+  // Serial.println(" MHz");
+  // Freq = getApbFrequency();
+  // Serial.print("APB Freq = ");
+  // Serial.print(Freq);
+  // Serial.println(" Hz");
 
-    // Memo on tracking frequency adjustements
-    // uint32_t Freq = getCpuFrequencyMhz();
-    // Serial.print("CPU Freq = ");
-    // Serial.print(Freq);
-    // Serial.println(" MHz");
-    // Freq = getXtalFrequencyMhz();
-    // Serial.print("XTAL Freq = ");
-    // Serial.print(Freq);
-    // Serial.println(" MHz");
-    // Freq = getApbFrequency();
-    // Serial.print("APB Freq = ");
-    // Serial.print(Freq);
-    // Serial.println(" Hz");
-    
-    Serial.println("Setup done");
-    #ifdef DEBUG_HEAP
-        Serial.print(F("Remaining Heap:"));
-        Serial.println(String(ESP.getFreeHeap()));
-        Serial.print(F("Min Free Heap:"));
-        Serial.println(String(ESP.getMinFreeHeap()));
-        Serial.print(F("Max Alloc Heap:"));
-        Serial.println(ESP.getMaxAllocHeap());
+  Serial.println("Setup done");
+#ifdef DEBUG_HEAP
+  Serial.print(F("Remaining Heap:"));
+  Serial.println(String(ESP.getFreeHeap()));
+  Serial.print(F("Min Free Heap:"));
+  Serial.println(String(ESP.getMinFreeHeap()));
+  Serial.print(F("Max Alloc Heap:"));
+  Serial.println(ESP.getMaxAllocHeap());
 
-    #endif
+#endif
 }
 
 void loop() {
-    try {
-        //wm.process();
-        monitor_wifi(server.is_running);
+  try {
+    //wm.process();
+    monitor_wifi(server.is_running);
 
-        input_sens.update();
+    input_sens.update();
 
-        // Measure loop time
-        // Serial.print("loop");
-        // Serial.println(input_sens.measured_loop);
-        // Serial.print("interval");
-        // Serial.println(input_sens.measured_interval_duration);
+    // Measure loop time
+    // Serial.print("loop");
+    // Serial.println(input_sens.measured_loop);
+    // Serial.print("interval");
+    // Serial.println(input_sens.measured_interval_duration);
 
-        // Plot some sensor values
-        // input_sens.teleplot_data("dist");
-        // input_sens.teleplot_data("roll");
+    // Plot some sensor values
+    // input_sens.teleplot_data("dist");
+    // input_sens.teleplot_data("roll");
 
-        engine.update(input_sens, midiio, hidio, osc);
-        pipoSocket.loop();
-        hwui.update();
-    } catch (const std::exception& e) {
-        Serial.println("Exception in main loop");
-        logs.writeLog(e.what());
-        delay(50);
-    }
+    engine.update(input_sens, midiio, hidio, osc);
+    pipoSocket.loop();
+    hwui.update();
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
+  }
 }
