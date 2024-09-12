@@ -37,11 +37,10 @@ class PipoInput extends EventEmitter<PipoEvents> {
     }, 1000);
   }
   initWebSocket() {
-    // const socket = new WebSocket("ws://localhost/ws");
-    const socket = new WebSocket(
-      `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws` ||
-        "ws://localhost/ws"
-    );
+    const url = import.meta.env.VITE_STATIC_IP
+      ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
+      : `ws://${location.hostname}/ws`;
+    const socket = new WebSocket(url);
     this.socket = socket;
     socket.addEventListener("open", (event) => {});
     socket.addEventListener("error", (e) => {
@@ -58,27 +57,26 @@ class PipoInput extends EventEmitter<PipoEvents> {
       lines.forEach((msg) => {
         const { command, args } = parse(msg);
         const numargs = args.map(Number);
-        switch (command) {
-          case "sensor":
-            const [axis, value] = args;
-            this.emit("sensor", { axis, value: Number(value) });
-            break;
-          case "noteon":
-          case "noteoff":
-            const [channel, note, velocity] = numargs;
-            this.emit(command as "noteon" | "noteoff", {
-              channel,
-              note,
-              velocity,
-            });
-          case "cc":
-            const [channel, control, value, hires] = numargs;
-            this.emit("cc", { channel, control, value, hires });
-            break;
-          case "fps":
-            const [frames, dt] = numargs;
-            this.emit("fps", { frames, dt });
-            break;
+        if (command === "sensor") {
+          const [axis, value] = args;
+          return this.emit("sensor", { axis, value: Number(value) });
+        }
+        if (command === "noteon" || command === "noteoff") {
+          const [channel, note, velocity] = numargs;
+
+          return this.emit(command === "noteon" ? "noteOn" : "noteOff", {
+            channel,
+            note,
+            velocity,
+          });
+        }
+        if (command === "cc") {
+          const [channel, control, value, hires] = numargs;
+          return this.emit("controlChange", { channel, control, value, hires });
+        }
+        if (command === "fps") {
+          const [frames, dt] = numargs;
+          return this.emit("fps", { frames, dt });
         }
       });
     });
