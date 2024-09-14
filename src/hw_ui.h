@@ -33,7 +33,7 @@ class HwUi {
 
   static const int NUM_LEDS = 4;
 
-  // Todo: avoid assigning both blink and pulse to same led
+  //Todo: avoid assigning both blink and pulse to same led
 
   std::unordered_map<int, led_blink>
       led_blink_table;  // position is led_name (ie pin)
@@ -67,4 +67,4 @@ class HwUi {
 
 extern HwUi hwui;
 
-#endif  // HW_UI_H
+#endif  //HW_UI_H

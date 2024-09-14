@@ -1,10 +1,10 @@
 #ifndef ANALOG_SENSOR_H
 #define ANALOG_SENSOR_H
 
-#include "HW_CONFIG.h"
 #include "sensor/input_sensor.h"
-#include "utils/config.h"
 #include "utils/filters.h"
+#include "utils/config.h"
+#include "HW_CONFIG.h"
 
 // find way to add/change mode
 
@@ -50,4 +50,4 @@ class AnalogSensor : public Sensor {
   bool touch_adaptative_max;
 };
 
-#endif  // ANALOG_SENSOR_H
+#endif  //ANALOG_SENSOR_H

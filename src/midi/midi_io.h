@@ -1,23 +1,22 @@
 #ifndef MIDI_IO_H
 #define MIDI_IO_H
 
-#include <unordered_map>
-#include <vector>
-#include "hw_ui.h"
 #include "midi/midiBLE.h"
 #include "midi/midiRtp.h"
 #include "midi/midiUSB.h"
+#include <vector>
+#include <unordered_map>
+#include "hw_ui.h"
 #include "server/pipo_socket.h"
 using namespace std;
 
-// midiio will deal with sending the midi messages to the various output
-// interfaces midiio will also manage the active notes, and the sustain of the
-// notes
+// midiio will deal with sending the midi messages to the various output interfaces
+// midiio will also manage the active notes, and the sustain of the notes
 
 class midi_io {
  private:
  public:
-  // midi_io();
+  //midi_io();
   bool midi_usb_enabled = true;
   bool midi_ble_connected = false;
   bool midi_rtp_connected = false;
@@ -30,9 +29,8 @@ class midi_io {
   typedef unordered_map<int, NoteSatus> Notelist;
   Notelist channel_note_list[16];
 
-  // this should be replaced by dynamic allocation since this takes a
-  // significant amount of memory
-  // should likley be in engine
+  // this should be replaced by dynamic allocation since this takes a significant amount of memory
+  //should likley be in engine
   uint8_t lastcc[16][128];
 
   bool off_before_next_note =
@@ -48,7 +46,7 @@ class midi_io {
   void sendProgramChange(int program, int channel);
   void sendPitchBend(int value, int channel);
   void sendAfterTouch(int pressure, int channel);
-  // void update();
+  //void update();
   void manage_sustain();
   void sendHiResControlChange(int control, int value, int channel);
 
@@ -57,4 +55,4 @@ class midi_io {
  private:
 };
 
-#endif  // MIDI_IO_H
+#endif  //MIDI_IO_H

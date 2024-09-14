@@ -5,22 +5,21 @@
 
 #include <Arduino.h>
 #include <iostream>
-#include <sstream>
-#include <unordered_map>
 #include <vector>
-#include "../engine.h"
-#include "../osc_handler.h"
+#include <unordered_map>
+#include <sstream>
 #include "fs_tools.h"
-#include "sensor/input_sensor.h"
 #include "utils/json.hpp"
 #include "utils/logs.h"
+#include "../engine.h"
+#include "sensor/input_sensor.h"
+#include "../osc_handler.h"
 
 using namespace std;
 using json = nlohmann::json;
 
-// the config file wil define the data structure and methods to save and load
-// the configuration of the device the configuration will be saved in the
-// preferences of the ESP32
+// the config file wil define the data structure and methods to save and load the configuration of the device
+// the configuration will be saved in the preferences of the ESP32
 
 class Engine;
 class OSC_handler;
@@ -37,10 +36,10 @@ class Config {
   }
   String filename;  // raw config file name (no extension)
   json current_config;
-  // json res;
-  // json test_config;
-  //  only config element not comming from external classes.
-  //  placed here for now.
+  //json res;
+  //json test_config;
+  // only config element not comming from external classes.
+  // placed here for now.
   json general_config = {
       // {"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
       // {"OSC_ENA", true},
@@ -55,9 +54,9 @@ class Config {
   // set current_config from a json object
   void set(const json& config);
 
-  // load all config into
+  //load all config into
 
-  // void load_all_configs();
+  //void load_all_configs();
 
   void save();
   void save(String filename);
@@ -68,9 +67,9 @@ class Config {
   void rename(String old_name, String new_name);
   void new_config(String name);
 
-  // json get_config_from_file(String filename);
+  //json get_config_from_file(String filename);
   String get_list();
-  // json get_configs();
+  //json get_configs();
 
   json get();            // return current_config
   json get(string key);  // return current_config[key]
@@ -90,4 +89,4 @@ class Config {
 
 extern Config config;
 
-#endif  // CONFIG_H
+#endif  //CONFIG_H

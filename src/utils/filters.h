@@ -1,8 +1,8 @@
 #ifndef FILTERS_H
 #define FILTERS_H
 
-#include <Arduino.h>
 #include <math.h>
+#include <Arduino.h>
 #include <vector>
 
 class HighPassFilter {
@@ -46,7 +46,7 @@ class LowPassFilter {
   }
 
   float process(float rawValue, float deltaTimeExt = 0) {
-    // deltaTime in seconds
+    //deltaTime in seconds
     if (deltaTimeExt != 0) {
       deltaTime = deltaTimeExt;
     } else {
@@ -62,7 +62,7 @@ class LowPassFilter {
   }
 };
 
-// Todo: not toroughly tested for eg buffer resize...)
+//Todo: not toroughly tested for eg buffer resize...)
 class MovingAverageFilter {
  private:
   std::vector<float> buffer;
@@ -119,9 +119,8 @@ class MovingAverageFilter {
 //         }
 // };
 
-// from Kalman Filter for Noise Reducer on Sensor Readings, Alfian Ma’arif
-// a,1,*, Iswanto b,2, Aninditya Anggari Nuryono does not seem to work properly
-// for now
+// from Kalman Filter for Noise Reducer on Sensor Readings, Alfian Ma’arif a,1,*, Iswanto b,2, Aninditya Anggari Nuryono
+// does not seem to work properly for now
 class KalmanFilter {
  private:
   float current_dat, Kalman_dat;
@@ -153,4 +152,4 @@ class KalmanFilter {
   }
 };
 
-#endif  // hp_filter_h
+#endif  //hp_filter_h

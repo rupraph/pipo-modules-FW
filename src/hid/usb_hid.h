@@ -10,7 +10,7 @@ class usb_hid {
  public:
   usb_hid();
 
-  int hid_mode = 0;  // 0=gamepad, 1=mouse, 2=keyboard
+  int hid_mode = 0;  //0=gamepad, 1=mouse, 2=keyboard
 
   void usb_hid_setup();
   void usb_hid_update(const void* report);

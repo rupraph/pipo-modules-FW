@@ -1,9 +1,9 @@
 #ifndef ACC_SENSOR_H
 #define ACC_SENSOR_H
 
-#include "Arduino-ICM20948.h"
-#include "HW_CONFIG.h"
 #include "sensor/input_sensor.h"
+#include "HW_CONFIG.h"
+#include "Arduino-ICM20948.h"
 #include "utils/filters.h"
 
 class MotionSensor : public Sensor {
@@ -75,10 +75,8 @@ class MotionSensor : public Sensor {
   float raw_accZ;
 
   // // acellerometer value convertion (from before library change)
-  // const float acc_range=8.0; // full scale change. only for conversion, not
-  // linked/implemented with the sensor setup yet float
-  // accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...
-  // * 9.81;to convert in m/s-2
+  // const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
+  // float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
 };
 
-#endif  // ACC_SENSOR_H
+#endif  //ACC_SENSOR_H

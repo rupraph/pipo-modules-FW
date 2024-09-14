@@ -10,10 +10,10 @@ class HidTranslator {
  private:
   /* data */
  public:
-  // Todo: link to usb hid mode or use only one of the 2
-  int out_type = 0;    // 0=axis, 1=button
-  string mapto = "x";  // Gamepad: x,y,z,rz,rx,ry,buttons, hat //Mouse:
-                       // x,y,wheel,buttons,pan //Keyboard: keycodes
+  //Todo: link to usb hid mode or use only one of the 2
+  int out_type = 0;  //0=axis, 1=button
+  string mapto =
+      "x";  //Gamepad: x,y,z,rz,rx,ry,buttons, hat //Mouse: x,y,wheel,buttons,pan //Keyboard: keycodes
 
   // axis are int8_t
 
@@ -67,4 +67,4 @@ class HidTranslator {
   }
 };
 
-#endif  // HID_TRANSLATOR_H
+#endif  //HID_TRANSLATOR_H

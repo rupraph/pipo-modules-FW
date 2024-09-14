@@ -3,28 +3,25 @@
 
 #include <Arduino.h>
 #include <unordered_map>
-#include "hid/hid_translator.h"
-#include "hid/usb_hid.h"
-#include "hw_ui.h"
-#include "midi/midi_io.h"
 #include "midi/midi_translator.h"
+#include "hid/hid_translator.h"
+#include "midi/midi_io.h"
+#include "hid/usb_hid.h"
+#include "utils/json.hpp"
+#include "utils/fs_tools.h"
+#include "sensor/input_sensor.h"
+#include "hw_ui.h"
 #include "osc_handler.h"
 #include "osc_translators.h"
-#include "sensor/input_sensor.h"
-#include "utils/fs_tools.h"
-#include "utils/json.hpp"
 
 using namespace std;
 
-// this class will process each data stream from the sensor, and depending on
-// the applied settings, process it further, to finally send it on the selected
-// output interface
+// this class will process each data stream from the sensor, and depending on the applied settings, process it further, to finally send it on the selected output interface
 
-// maps should not be declare per axis, but per function since some output might
-// rely on 2 inputs
+// maps should not be declare per axis, but per function since some output might rely on 2 inputs
 
 class OSC_handler;  // why do I need forward declaration here??
-// class OSC_translator;
+//class OSC_translator;
 
 class Engine {
  public:
@@ -100,4 +97,4 @@ class Engine {
   uint8_t note_val_prev[128];
 };
 
-#endif  // ENGINE_H
+#endif  //ENGINE_H

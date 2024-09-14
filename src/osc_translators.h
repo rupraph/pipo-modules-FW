@@ -9,9 +9,8 @@ using namespace std;
 
 class OscTranslator {
  public:
-  // OscTranslator();// = default;
-  //  OscTranslator(float input_min, float input_max): input_min(input_min),
-  //  input_max(input_max) {}
+  //OscTranslator();// = default;
+  // OscTranslator(float input_min, float input_max): input_min(input_min), input_max(input_max) {}
 
   bool enabled = false;
   bool mode_raw = true;  // sends raw sensor data
@@ -31,9 +30,9 @@ class OscTranslator {
   string serialize() const;
   void deserialize(const string& data);
 
-  // private:
-  //  float input_min;
-  //  float input_max;
+  //private:
+  // float input_min;
+  // float input_max;
 };
 
 #endif  // OSC_TRANSLATORS_H

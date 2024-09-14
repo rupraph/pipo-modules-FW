@@ -2,8 +2,8 @@
 #define FS_TOOLS_H
 
 #include <Arduino.h>
-#include <LittleFS.h>
 #include "FS.h"
+#include <LittleFS.h>
 #include "HW_CONFIG.h"
 
 void init_filesystem();
@@ -20,4 +20,4 @@ void renameFile(fs::FS& fs, const char* path1, const char* path2);
 void testFileIO(fs::FS& fs, const char* path);
 void listDir(fs::FS& fs, const char* dirname, uint8_t levels);
 
-#endif  // FS_TOOLS_H
+#endif  //FS_TOOLS_H

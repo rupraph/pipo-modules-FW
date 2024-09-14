@@ -2,27 +2,27 @@
 #define MIDI_TRANSLATOR_H
 
 #include <Arduino.h>
-#include <MIDI.h>
 #include <iostream>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
+#include <MIDI.h>
 #include "utils/json.hpp"
 
 using namespace std;
 
 class MidiTranslator
 
-// Todo move all members to private and right methods to public
-// change all set/get in engine
-//  add option to accomodate full turn ie back to beginning at end of range to
-//  avoid sawtooth replace limit_max by a range. propagate to Hid ?
+//Todo move all members to private and right methods to public
+//change all set/get in engine
+// add option to accomodate full turn ie back to beginning at end of range to avoid sawtooth
+// replace limit_max by a range. propagate to Hid ?
 
 {
  public:
   MidiTranslator();  // = default;
   // MidiTranslator(float limit_max);
 
-  // midi
+  //midi
   int channel = 1;  // should be in engine.
   int cc_number = 1;
 
@@ -31,8 +31,8 @@ class MidiTranslator
   // int use_threshold = 0;
   // int threshold = 0;
 
-  // notes variables
-  int translator_mode = 0;  // 0=cc, 1 note, 2 both
+  //notes variables
+  int translator_mode = 0;  //0=cc, 1 note, 2 both
 
   string scaleType = "major";
   int rootNote = 45;
@@ -43,11 +43,11 @@ class MidiTranslator
   // float max_input = 100;
   // float min_input = 0;
 
-  // CC variables
+  //CC variables
 
   int max_output;  // shoudl be private
   int min_output = 0;
-  int interpolation_type = 0;  // 0=linear, 1=step, 2=log
+  int interpolation_type = 0;  //0=linear, 1=step, 2=log
 
   // Notes scale variables
 
@@ -72,7 +72,7 @@ class MidiTranslator
       {"locrian", {0, 1, 3, 5, 6, 8, 10}},
       {"ionian", {0, 2, 4, 5, 7, 9, 11}},
       {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
-      // Turkish ??
+      //Turkish ??
   };
 
   int get_note(float value, float min_input, float max_input);
@@ -80,10 +80,10 @@ class MidiTranslator
   void set_Scale_Type(string scaleType);
   void set_root_note(string rootNote);
   void set_number_of_notes(int numberOfNotes);
-  // void set_with_start_and_number(string first_note, int total_note_number);
+  //void set_with_start_and_number(string first_note, int total_note_number);
 
-  // void set_every_note(vector<string> scale);
-  //  void set_new_scale(string newscaleType,vector<string> newscale);
+  //void set_every_note(vector<string> scale);
+  // void set_new_scale(string newscaleType,vector<string> newscale);
 
   int convertNoteNameToNumber(string noteName);
   string convertNumberToNoteName(int noteNumber);
@@ -163,4 +163,4 @@ class MidiTranslator
   vector<int> generate_base_Scale(int rootNote, string scaleType);
 };
 
-#endif  // MIDI_TRANSLATOR_H
+#endif  //MIDI_TRANSLATOR_H
