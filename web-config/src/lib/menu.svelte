@@ -32,7 +32,6 @@
     gap: 1em;
     align-items: center;
     box-sizing: border-box;
-    z-index: 10000;
   }
   .status {
     width: 1em;

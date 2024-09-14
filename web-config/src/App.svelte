@@ -1,7 +1,7 @@
 <script lang="ts">
   import Logs from "./lib/logs.svelte";
   import type { PipoTypes } from "./types";
-  import { pipoType } from "./services";
+  import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
@@ -43,10 +43,10 @@
   }
   function fetch() {
     return axios
-      .get("/info", { timeout: 2000 })
+      .get<PipoInfo>("/info", { timeout: 2000 })
       .then(({ data, status, statusText }) => {
         type = data.type.toLowerCase().replace("pipo_", "");
-        console.log("Pipo type:", type);
+        ip.set(data.ip);
         pipoType.set(type);
         return data;
       })

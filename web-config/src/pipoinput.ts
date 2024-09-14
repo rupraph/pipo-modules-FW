@@ -13,6 +13,7 @@ class PipoInput extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
   private enabled: boolean = true;
   private timeout: number = 0;
+  private bailTimeout = 0;
   constructor() {
     super();
     this.init();
@@ -47,7 +48,8 @@ class PipoInput extends EventEmitter<PipoEvents> {
     this.retryConnection();
   }
   bailOnNoNews(delay = 1000) {
-    return setTimeout(() => this.onDisconnect(), delay);
+    clearTimeout(this.bailTimeout);
+    this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
   }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
@@ -55,17 +57,16 @@ class PipoInput extends EventEmitter<PipoEvents> {
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
-    let timeout = this.bailOnNoNews(2000);
+    this.bailOnNoNews(2000);
     socket.addEventListener("open", (event) => {
-      clearTimeout(timeout);
+      clearTimeout(this.bailTimeout);
       this.emit("connect");
       console.log("Connected to Pipo");
     });
     socket.addEventListener("error", () => this.onDisconnect());
     socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
-      clearTimeout(timeout);
-      timeout = this.bailOnNoNews(2000);
+      this.bailOnNoNews(2000);
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
@@ -97,7 +98,6 @@ class PipoInput extends EventEmitter<PipoEvents> {
         }
       });
     });
-    this.socket = socket;
   }
   async initWebMidi() {
     const access = await navigator.permissions.query({
