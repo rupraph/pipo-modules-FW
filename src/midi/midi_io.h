@@ -1,12 +1,12 @@
 #ifndef MIDI_IO_H
 #define MIDI_IO_H
 
-#include <unordered_map>
-#include <vector>
-#include "hw_ui.h"
 #include "midi/midiBLE.h"
 #include "midi/midiRtp.h"
 #include "midi/midiUSB.h"
+#include <vector>
+#include <unordered_map>
+#include "hw_ui.h"
 #include "server/pipo_socket.h"
 using namespace std;
 

@@ -2,10 +2,10 @@
 #define MIDI_TRANSLATOR_H
 
 #include <Arduino.h>
-#include <MIDI.h>
 #include <iostream>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
+#include <MIDI.h>
 #include "utils/json.hpp"
 
 using namespace std;

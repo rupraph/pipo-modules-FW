@@ -1,8 +1,8 @@
 #ifndef FILTERS_H
 #define FILTERS_H
 
-#include <Arduino.h>
 #include <math.h>
+#include <Arduino.h>
 #include <vector>
 
 class HighPassFilter {

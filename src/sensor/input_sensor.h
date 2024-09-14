@@ -2,11 +2,11 @@
 #define INPUT_SENSOR_H
 
 #include <Arduino.h>
-#include <Wire.h>
-#include <unordered_map>
 #include <vector>
-#include "utils/filters.h"
+#include <unordered_map>
+#include <Wire.h>
 #include "utils/json.hpp"
+#include "utils/filters.h"
 
 using namespace std;
 using json = nlohmann::json;

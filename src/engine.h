@@ -3,16 +3,16 @@
 
 #include <Arduino.h>
 #include <unordered_map>
-#include "hid/hid_translator.h"
-#include "hid/usb_hid.h"
-#include "hw_ui.h"
-#include "midi/midi_io.h"
 #include "midi/midi_translator.h"
+#include "hid/hid_translator.h"
+#include "midi/midi_io.h"
+#include "hid/usb_hid.h"
+#include "utils/json.hpp"
+#include "utils/fs_tools.h"
+#include "sensor/input_sensor.h"
+#include "hw_ui.h"
 #include "osc_handler.h"
 #include "osc_translators.h"
-#include "sensor/input_sensor.h"
-#include "utils/fs_tools.h"
-#include "utils/json.hpp"
 
 using namespace std;
 

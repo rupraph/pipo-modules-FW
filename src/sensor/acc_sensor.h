@@ -1,9 +1,9 @@
 #ifndef ACC_SENSOR_H
 #define ACC_SENSOR_H
 
-#include "Arduino-ICM20948.h"
-#include "HW_CONFIG.h"
 #include "sensor/input_sensor.h"
+#include "HW_CONFIG.h"
+#include "Arduino-ICM20948.h"
 #include "utils/filters.h"
 
 class MotionSensor : public Sensor {
