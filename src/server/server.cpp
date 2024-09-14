@@ -69,20 +69,7 @@ void PipoServer::setup_requests() {
     info += "\"mac\":\"";
     info += WiFi.macAddress();
     info += "\"}";
-
     return request->send(200, "text/json", info.c_str());
-  });
-
-  server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    String type;
-    json info = {
-        {"name", "unnamed Pipo"},  // Todo: should come from config file
-        {"version", string(PIPO_FW_VERSION)},
-        {"type", string(PIPO_TYPE)},
-        {"ip", WiFi.localIP().toString().c_str()},
-        {"mac", WiFi.macAddress().c_str()},
-    };
-    return request->send(200, "text/json", info.dump().c_str());
   });
 
   // recevies and apply config
