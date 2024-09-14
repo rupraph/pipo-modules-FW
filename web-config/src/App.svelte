@@ -5,8 +5,9 @@
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
-  import Checkbox from "./lib/form/Checkbox.svelte";
-  import Menu from "./lib/Menu.svelte";
+  import { pipoInput } from "./pipoinput";
+  import Menu from "./lib/menu.svelte";
+  import OfflineOverlay from "./lib/offline-overlay.svelte";
 
   // import Piano from "./lib/vis/Piano.svelte";
 
@@ -18,7 +19,6 @@
     as: "url",
   });
 
-  console.log("Images:", images);
   let type: PipoTypes = "unknown";
   let error: string;
   function onError(e: AxiosError) {
@@ -41,16 +41,22 @@
     }
     console.error("Error fetching info:", e);
   }
+  function fetch() {
+    return axios
+      .get("/info", { timeout: 2000 })
+      .then(({ data, status, statusText }) => {
+        type = data.type.toLowerCase().replace("pipo_", "");
+        console.log("Pipo type:", type);
+        pipoType.set(type);
+        return data;
+      })
+      .catch((e) => onError(e));
+  }
+  let info = fetch();
+  pipoInput.on("connect", () => {
+    info = fetch();
+  });
 
-  const info = axios
-    .get("/info", { timeout: 2000 })
-    .then(({ data, status, statusText }) => {
-      type = data.type.toLowerCase().replace("pipo_", "");
-      console.log("Pipo type:", type);
-      pipoType.set(type);
-      return data;
-    })
-    .catch((e) => onError(e));
   $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
 
   function reboot() {
@@ -95,6 +101,7 @@
       </article>
     {/await}
   {/if}
+  <OfflineOverlay />
 </main>
 
 <style>
@@ -104,6 +111,9 @@
     justify-content: space-around;
     align-items: center;
     max-width: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100vh;
   }
 
   .pattern-image {

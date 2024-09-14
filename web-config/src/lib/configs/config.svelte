@@ -27,28 +27,13 @@
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
-  let fps = 0;
-  let frames = 0;
-  let dt = 0;
   pipoInput.on("sensor", ({ axis, value }) => {
     sensorValues[axis] = value;
-  });
-  pipoInput.on("fps", (evt) => {
-    frames = evt.frames;
-    dt = evt.dt;
   });
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
   ];
-
-  function submit2() {
-    axios({
-      method: "post",
-      url: "/save",
-      params: { config: JSON.stringify(config) },
-    }).then(() => console.log("DONE"));
-  }
 
   async function submit() {
     const blob = new Blob([JSON.stringify(config)], {
@@ -62,19 +47,6 @@
       url: "/save",
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
-    }).then(() => console.log("DONE"));
-  }
-
-  function test() {
-    const blob = new Blob([JSON.stringify(config)], {
-      type: "application/json",
-    });
-    const data = new FormData();
-    data.append("config.json", blob);
-    axios({
-      method: "post",
-      url: "/config",
-      params: { config: JSON.stringify(config) },
     }).then(() => console.log("DONE"));
   }
 
@@ -148,7 +120,6 @@
       title="Apply and save the config in pipo">Set & Save</button
     >
   </section>
-  <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
   <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max, step } = getSchema(axis)}

@@ -4,7 +4,9 @@
   font-family: 'Brugty';
   src: url('./assets/Brugty.ttf') format('truetype');
 }
-
+body{
+  overflow: hidden;
+}
 :root {
   font-family: Helvetica, system-ui, Brugty, Arial, sans-serif;
   line-height: 1.5;

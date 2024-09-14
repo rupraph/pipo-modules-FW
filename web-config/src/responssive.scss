@@ -135,3 +135,9 @@ article {
       padding: 0 0.2em;
   }
 }
+
+ul{
+  @include phone {
+    padding: 0 0.5em;
+  }
+}

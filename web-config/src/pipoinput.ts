@@ -38,28 +38,34 @@ class PipoInput extends EventEmitter<PipoEvents> {
       }
     }, 1000);
   }
+  onDisconnect() {
+    if (this.socket) {
+      this.socket.close();
+    }
+    this.emit("disconnect");
+    if (!this.enabled) return;
+    this.retryConnection();
+  }
+  bailOnNoNews(delay = 1000) {
+    return setTimeout(() => this.onDisconnect(), delay);
+  }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
       ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
+    let timeout = this.bailOnNoNews(2000);
     socket.addEventListener("open", (event) => {
+      clearTimeout(timeout);
       this.emit("connect");
       console.log("Connected to Pipo");
     });
-    socket.addEventListener("error", (e) => {
-      this.emit("disconnect");
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
-    socket.addEventListener("close", (e) => {
-      this.socket = undefined;
-      this.emit("disconnect");
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
+    socket.addEventListener("error", () => this.onDisconnect());
+    socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
+      clearTimeout(timeout);
+      timeout = this.bailOnNoNews(2000);
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
