@@ -11,6 +11,9 @@
 #include "server/pipo_socket.h"
 #include "HW_CONFIG.h"
 
+#define stringify(s) _stringifyDo(s)
+#define _stringifyDo(s) #s
+
 using namespace std;
 
 class PipoServer {

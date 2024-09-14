@@ -49,15 +49,29 @@ void PipoServer::stop() {
 
 void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    String type;
-    json info = {
-        {"name", "unnamed Pipo"},              // should come from config file
-        {"version", string(PIPO_FW_VERSION)},  // should come from HW_CONFIG
-        {"type", string(PIPO_TYPE)},
-        {"ip", WiFi.localIP().toString().c_str()},
-        {"mac", WiFi.macAddress().c_str()},
-    };
-    return request->send(200, "text/json", info.dump().c_str());
+    Serial.println("info request");
+#ifdef PIPO_FW_VERSION
+    const char* version = stringify(PIPO_FW_VERSION);
+#else
+    const char* version = "unknown";
+#endif
+
+    String info = "{";
+    info += "\"name\":\"unnamed Pipo\",";
+    info += "\"version\":\"";
+    info += version;
+    info += "\",";
+    info += "\"type\":\"";
+    info += PIPO_TYPE;
+    info += "\",";
+    info += "\"ip\":\"";
+    info += WiFi.localIP().toString();
+    info += "\",";
+    info += "\"mac\":\"";
+    info += WiFi.macAddress();
+    info += "\"}";
+
+    return request->send(200, "text/json", info.c_str());
   });
 
   // server.on("/config", HTTP_GET,[&](AsyncWebServerRequest* request){
