@@ -40,8 +40,10 @@ void monitor_wifi();
 
 void setup() {
   Serial.begin(115200);
-
-  /////// Init hardware user interface
+  // delay(3000);
+  // while(!Serial) // "while" prevents usb to setup properly
+  // setCpuFrequencyMhz(80); will be usefull to save power on battery
+  /////// Init hardware user interface (leds and switches)
   Serial.println(ESP.getFreeHeap());
   hwui.init();
   hwui.setup();
