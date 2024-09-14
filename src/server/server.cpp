@@ -52,8 +52,12 @@ void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
     String type;
     json info = {
-        {"name", "unnamed Pipo"},              // should come from config file
+        {"name", "unnamed Pipo"},  // should come from config file
+#ifdef PIPO_FW_VERSION
         {"version", string(PIPO_FW_VERSION)},  // should come from HW_CONFIG
+#else
+        {"version", "unknown"},  // should come from HW_CONFIG
+#endif
         {"type", string(PIPO_TYPE)},
         {"ip", WiFi.localIP().toString().c_str()},
         {"mac", WiFi.macAddress().c_str()},
