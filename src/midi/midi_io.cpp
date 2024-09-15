@@ -25,7 +25,7 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,unsigned long susta
     MidiUSBsendNoteOn(note, velocity, channel);   
     MidiBLEsendNoteOn(note, velocity, channel);
 
-    //midisocket.sendNoteOn(note, velocity,channel);
+    //pipoSocket.sendNoteOn(note, velocity,channel);
     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
     
     // insert or update note to channel_note_list
@@ -50,7 +50,7 @@ void midi_io::sendNoteOff(int note, int velocity, int channel)
         {
             MidiUSBsendNoteOff(note, velocity, channel);
             MidiBLEsendNoteOff(note, velocity, channel);
-            //midisocket.sendNoteOff(note, velocity,channel);
+            //pipoSocket.sendNoteOff(note, velocity,channel);
             channel_note_list[channel].erase(note);
         }
         

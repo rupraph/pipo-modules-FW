@@ -7,7 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include "hw_ui.h"
-#include "server/midi_socket.h"
+#include "server/pipo_socket.h"
 using namespace std;
 
 
