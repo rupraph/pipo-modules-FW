@@ -70,7 +70,7 @@ void Sensor::process_sensor_triggers() {
       }
     } else {
       if (axis_data.threshold_mode == 0) {
-        if (axis_data.value > axis_data.limit_max) {
+        if (axis_data.value > axis_data.limit_min) {
           axis_data.bool_value = true;
         } else {
           axis_data.bool_value = false;
