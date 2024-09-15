@@ -3,10 +3,12 @@
 
 using json = nlohmann::json;
 
-//the engine takes the sensor data and outputs it to the selected interfaces based on the configuration
+// the engine takes the sensor data and outputs it to the selected interfaces
+// based on the configuration
 
 // Todo engine.
-// could use combination mode to have note from orientation, and trigger from acceleration
+// could use combination mode to have note from orientation, and trigger from
+// acceleration
 
 void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
                     OSC_handler& osc) {
@@ -34,11 +36,9 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
     float sensor_max = sensor.get_limit_max(axis_name);
     int channel = Midi_translator.channel;
 
-    //check if axis is enabled, outside deadzone and not disabled
+    // check if axis is enabled, outside deadzone and not disabled
     if (sensor.test_outside_deadzone(axis_name) &&
-        Midi_translator.enabled ==
-            true)  //Todo: temporary. should likely have "in_use" to trigger note on/off
-    {
+        Midi_translator.enabled == true) {
       // if CC MODE
       if (Midi_translator.translator_mode == 0) {
         int cc_number = Midi_translator.cc_number;
@@ -46,12 +46,13 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
         // sensor uses continuous mode
         if (sensor.get_mode(axis_name) == 0) {
           if (sensor.is_within_range(axis_name)) {
-            //Todo: hires not tested
+            // Todo: hires not tested
             if (Midi_translator.getHires()) {
               uint16_t cc_val =
                   max(0, min(Midi_translator.get_cc_val(sensor_val, sensor_min,
                                                         sensor_max, 1),
                              16383));
+
               midiio.sendControlChange(cc_number, cc_val, channel, true);
             } else {
               uint8_t cc_val =
@@ -60,48 +61,45 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
                              127));
               midiio.sendControlChange(cc_number, cc_val, channel, false);
             }
-            vTaskDelay(pdTICKS_TO_MS(
-                5));  // virtually delay cc send. will be solved with task management
           }
         } else  // sensor uses trigger mode
         {
           if (sensor.get_bool_value(axis_name)) {
+            uint16_t cc_val = Midi_translator.getMaxOutput();
             if (Midi_translator.getHires()) {
-              uint16_t cc_val =
-                  max(0, min(Midi_translator.get_cc_val(sensor_max, sensor_min,
-                                                        sensor_max, 1),
-                             16383));
               midiio.sendControlChange(cc_number, cc_val, channel, true);
+            } else {
+              midiio.sendControlChange(cc_number, cc_val, channel, false);
             }
           } else {
+            uint16_t cc_val = Midi_translator.getMinOutput();
             if (Midi_translator.getHires()) {
-              uint16_t cc_val =
-                  max(0, min(Midi_translator.get_cc_val(sensor_min, sensor_min,
-                                                        sensor_max, 1),
-                             16383));
               midiio.sendControlChange(cc_number, cc_val, channel, true);
+            } else {
+              midiio.sendControlChange(cc_number, cc_val, channel, false);
             }
           }
+          vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
+                                         // solved with task management
         }
-
       }
 
       // if Note mode
       else {
-        //getting note for continuous mode
+        // getting note for continuous mode
         note_val_prev[channel] = note_val[channel];
         int note =
             (Midi_translator.get_note(sensor_val, sensor_min, sensor_max));
-        note_val[channel] = max(0, min(note, 127));  //clip between 0 and 127
+        note_val[channel] = max(0, min(note, 127));  // clip between 0 and 127
 
         int sustain =
-            Midi_translator
-                .getSustain();  // 0 means sustain manager will not shutoff note after delay
+            Midi_translator.getSustain();  // 0 means sustain manager will not
+                                           // shutoff note after delay
 
         // probaly get triggered should be something linked to the deadzone
-        //#if defined(PIPO_ANALOG)
-        // trigger new note if within range, not already playing, and new note is different from previous note
-        // if (sensor.is_within_range(axis_name)
+        // #if defined(PIPO_ANALOG)
+        // trigger new note if within range, not already playing, and new note
+        // is different from previous note if (sensor.is_within_range(axis_name)
         // && note_val[channel]!=note_val_prev[channel]
         // && !midiio.is_note_playing(note_val[channel],channel))
         // {
@@ -224,22 +222,34 @@ void Engine::hid_processor(Sensor& sensor,
 }
 
 void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
-  // Todo: loop through sensor data -> indentical for 3 processor, should be factorized
+  // Todo: loop through sensor data -> indentical for 3 processor, should be
+  // factorized
 
   const auto& sensor_dat = sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = sensor.get_value(axis_name);
-    float sensor_min = sensor.get_limit_min(axis_name);
-    float sensor_max = sensor.get_limit_max(axis_name);
-    if (Osctranslators[axis_name].enabled &&
-        sensor.test_outside_deadzone(axis_name)) {
-      //Serial.print(axis_name.c_str());
-      //Serial.println(sensor_val);
-      float osc_val = Osctranslators[axis_name].get_value(
-          sensor_val, sensor_min, sensor_max);
-      //Serial.println(osc_val);
-      osc.sendOscMessage(axis_name, osc_val);
+    OscTranslator Osc_translator = Osctranslators[axis_name];
+
+    if (Osc_translator.enabled && sensor.test_outside_deadzone(axis_name)) {
+      if (sensor.get_mode(axis_name) == 0) {  // continuous mode
+        float sensor_min = sensor.get_limit_min(axis_name);
+        float sensor_max = sensor.get_limit_max(axis_name);
+        if (sensor.is_within_range(axis_name)) {
+          float osc_val =
+              Osc_translator.get_value(sensor_val, sensor_min, sensor_max);
+          osc.sendOscMessage(axis_name, osc_val);
+        }
+      } else  // sensor uses trigger mode
+      {
+        if (sensor.get_bool_value(axis_name)) {
+          float osc_val = Osc_translator.get_output_max();
+          osc.sendOscMessage(axis_name, osc_val);
+        } else {
+          float osc_val = Osc_translator.get_output_min();
+          osc.sendOscMessage(axis_name, osc_val);
+        }
+      }
     }
   }
 }

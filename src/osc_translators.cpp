@@ -13,6 +13,22 @@ float OscTranslator::get_value(float value, float input_min, float input_max) {
   }
 }
 
+float OscTranslator::get_output_max() {
+  return output_max;
+}
+
+float OscTranslator::get_output_min() {
+  return output_min;
+}
+
+void OscTranslator::set_output_max(float value) {
+  output_max = value;
+}
+
+void OscTranslator::set_output_min(float value) {
+  output_min = value;
+}
+
 void to_json(json& j, const OscTranslator& t) {
   j = json{
       {"enabled", t.enabled},
