@@ -99,6 +99,11 @@ class PipoInput extends EventEmitter<PipoEvents> {
       });
     });
   }
+
+  setValue(path: string, value: number) {
+    if (!this.socket) return;
+    this.socket.send(`config:${path}:${value}`);
+  }
   async initWebMidi() {
     const access = await navigator.permissions.query({
       name: "midi",

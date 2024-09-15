@@ -86,6 +86,7 @@ void PipoServer::setup_requests() {
     try {
       config.set(json::parse(request->getParam("config")->value()));
       config.apply(input_sens, engine, osc, true);
+      config.save();
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
       return request->send(500, "text/plain",
@@ -260,7 +261,13 @@ void PipoServer::setup_requests() {
   });
 }
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
-  Serial.println(message);
+  if (message.startsWith("config:")) {
+    config.setValue(message.substring(7));
+    config.apply(input_sens, engine, osc, true);
+  }
+  if (message.startsWith("save")) {
+    config.save();
+  }
   // client->text("I got your message");
 }
 void PipoServer::setup_ws() {

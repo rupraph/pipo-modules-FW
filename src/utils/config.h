@@ -36,16 +36,7 @@ class Config {
   }
   String filename;  // raw config file name (no extension)
   json current_config;
-  //json res;
-  //json test_config;
-  // only config element not comming from external classes.
-  // placed here for now.
-  json general_config = {
-      // {"Wifi_mode", "STA"}, //can be AP, STA, OR AP_STA
-      // {"OSC_ENA", true},
-      // {"OSC_PORT", 5000},
-      // {"OSC_IP", IPAddress(0,0,0,0)},
-  };
+  json general_config = {};
 
   // load config from files into current_config
   void load_config(String filename, bool addJsonExtension = true);
@@ -53,27 +44,17 @@ class Config {
 
   // set current_config from a json object
   void set(const json& config);
-
-  //load all config into
-
-  //void load_all_configs();
-
+  void setValue(String input);
   void save();
   void save(String filename);
   void save(String filename, String config);
-
   void delete_config(String filename);
-
   void rename(String old_name, String new_name);
   void new_config(String name);
-
-  //json get_config_from_file(String filename);
   String get_list();
-  //json get_configs();
 
   json get();            // return current_config
   json get(string key);  // return current_config[key]
-
   // void save_for_key(string key, json data);
   void print();
   void gather(Sensor& sensor, Engine& engine, bool debug = false);
@@ -82,6 +63,8 @@ class Config {
   String get_path(String filename, bool add_extension = true);
 
  private:
+  std::vector<std::string> split(const std::string& str, char delimiter);
+
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";

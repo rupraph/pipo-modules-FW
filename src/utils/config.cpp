@@ -140,6 +140,67 @@ void Config::set(const json& config) {
     logs.writeError("Error setting config: " + String(e.what()));
   }
 }
+std::vector<std::string> Config::split(const std::string& str, char delimiter) {
+  std::vector<std::string> tokens;
+  std::stringstream ss(str);
+  std::string token;
+  while (std::getline(ss, token, delimiter)) {
+    tokens.push_back(token);
+  }
+  return tokens;
+}
+
+void Config::setValue(String input) {
+  Serial.println("set value: " + input);
+  std::string path_value = input.c_str();
+  // Split the input into path and value
+  std::vector<std::string> path_and_value = split(path_value, ':');
+  if (path_and_value.size() != 2) {
+    throw std::invalid_argument("Input format should be 'path/to/key: value'");
+  }
+
+  std::string path = path_and_value[0];
+  std::string value = path_and_value[1];
+
+  // Split the path into individual keys
+  std::vector<std::string> keys = split(path, '/');
+
+  // Traverse the JSON object using the keys
+  json* current = &current_config;
+  for (size_t i = 0; i < keys.size() - 1; ++i) {
+    Serial.print(keys[i].c_str());
+    if (current->contains(keys[i])) {
+      Serial.println(" exists ");
+      current = &(*current)[keys[i]];
+    } else {
+      Serial.println(" does not exist ");
+
+      // Create a new JSON object at this level if the key doesn't exist
+      (*current)[keys[i]] = json::object();
+      current = &(*current)[keys[i]];
+    }
+  }
+  Serial.print("Before Assign ");
+  Serial.println(current->dump().c_str());
+
+  json* target = &(*current)[keys.back()];
+  // Assign the value to the final key
+  if (target->type() == json::value_t::string) {
+    Serial.println("assigning string");
+    (*current)[keys.back()] = value;
+  } else if (target->type() == json::value_t::number_integer) {
+    Serial.println("assigning integer");
+    (*current)[keys.back()] = std::stoi(value);
+  } else if (target->type() == json::value_t::number_float) {
+    Serial.println("assigning float");
+    (*current)[keys.back()] = std::stof(value);
+  } else if (target->type() == json::value_t::boolean) {
+    Serial.println("assigning boolean");
+    (*current)[keys.back()] = value == "true";
+  }
+  Serial.print("After Assign ");
+  Serial.println(current->dump().c_str());
+}
 
 void Config::print() {
   Serial.println(current_config.dump(4).c_str());
@@ -169,7 +230,7 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
   general_config.clear();
   general_config = current_config["general"];
   // log last config name
-  writeFile(LittleFS, last_config_path, filename.c_str());
+  // writeFile(LittleFS, last_config_path, filename.c_str());
   /*TODO: improve:
   either pass the json to apply and avoid passing cofig object
    to osc class, or follow the same config process than sensor
