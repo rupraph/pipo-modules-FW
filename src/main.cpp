@@ -4,14 +4,14 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "utils/config.h"
 #include "hw_ui.h"
-#include "server/server.h"
 #include "midi/midi_io.h"
+#include "osc_handler.h"
+#include "server/server.h"
+#include "utils/config.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
-#include "osc_handler.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
