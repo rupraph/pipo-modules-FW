@@ -17,11 +17,26 @@ export type NoteConfig = {
   current_scale: number[];
 };
 export type MidiConfig = BaseMidiConfig & CCConfig & NoteConfig;
-
+export const BASIC = false;
+export const HISTERESIS = true;
+export const CONTINUOUS = false;
+export const THRESHOLD = true;
+export function isContinuousMode(config: SensorConfig): boolean {
+  return config.mode === CONTINUOUS;
+}
+export function isThresholdMode(config: SensorConfig): boolean {
+  return config.thresold_mode === THRESHOLD;
+}
+export function isHisteresisMode(config: SensorConfig): boolean {
+  return config.thresold_mode === HISTERESIS;
+}
+export function isBasicThresholdMode(config: SensorConfig): boolean {
+  return config.thresold_mode === THRESHOLD;
+}
 export type SensorConfig = {
+  mode: boolean;
+  thresold_mode: boolean;
   deadzone: number;
-  enabled: boolean;
-  inverted: boolean;
   limit_max: number;
   limit_min: number;
   offset: number;

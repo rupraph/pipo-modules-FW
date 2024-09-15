@@ -62,7 +62,11 @@ class PipoInput extends EventEmitter<PipoEvents> {
         const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
         if (isSensor) {
-          return this.emit("sensor", { axis, value: numargs[0] });
+          return this.emit("sensor", {
+            axis,
+            value: numargs[0],
+            withinWindow: Boolean(numargs[1]),
+          });
         }
         if (command === "noteon" || command === "noteoff") {
           const [channel, note, velocity] = numargs;

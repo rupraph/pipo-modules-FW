@@ -7,15 +7,16 @@
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
-  import type {
-    Axis,
-    MidiConfig,
-    SensorConfig,
-    OscConfig,
-    PipoConfig,
-    PipoTypes,
-    SensorValues,
-    PipoKeys,
+  import {
+    type MidiConfig,
+    type SensorConfig,
+    type OscConfig,
+    type PipoConfig,
+    type PipoTypes,
+    type SensorValues,
+    type PipoKeys,
+    isHisteresisMode,
+    isContinuousMode,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -27,11 +28,13 @@
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
+  const withinWindowValues: SensorValues<T> = {};
   let fps = 0;
   let frames = 0;
   let dt = 0;
-  pipoInput.on("sensor", ({ axis, value }) => {
+  pipoInput.on("sensor", ({ axis, value, withinWindow }) => {
     sensorValues[axis] = value;
+    withinWindowValues[axis] = withinWindow;
   });
   pipoInput.on("fps", (evt) => {
     frames = evt.frames;
@@ -51,6 +54,7 @@
   }
 
   async function submit() {
+    console.log("submitting", JSON.stringify(config, 0, 2));
     const blob = new Blob([JSON.stringify(config)], {
       type: "application/json",
     });
@@ -149,17 +153,25 @@
     >
   </section>
   <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
-  <Collapse title="Sensor settings">
+  <Collapse title="Sensor settings" open>
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max, step } = getSchema(axis)}
-      <Collapse title={label}>
+      <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
+        is CONTINUOUS {isContinuousMode(sensorconf)}
+        is HISTERESIS {isHisteresisMode(sensorconf)}
+        <Checkbox label="Mode" bind:value={sensorconf.mode} />
+        <Checkbox label="Histeresis" bind:value={sensorconf.thresold_mode} />
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
           value={sensorValues[axis]}
+          mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
+            ? "double"
+            : "single"}
+          cursorActive={withinWindowValues[axis]}
           {min}
           {max}
           {step}

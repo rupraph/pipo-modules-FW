@@ -15,6 +15,7 @@
     return `${date.toTimeString().split(" ")[0]}:${date.getMilliseconds()}`;
   }
   async function fetch() {
+    return;
     return await axios
       .get<string>("/logs")
       .then(({ data }) => {
@@ -37,7 +38,7 @@
   }
   onMount(() => {
     fetch();
-    interval = setInterval(fetch, 1000);
+    // interval = setInterval(fetch, 1000);
   });
   onDestroy(() => clearInterval(interval));
 </script>

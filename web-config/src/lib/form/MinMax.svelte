@@ -4,9 +4,11 @@
   export let label: string;
   export let min: number = 0;
   export let max: number = 1;
+  export let mode: "double" | "single" = "double";
   export let minLabel: string = "min";
   export let maxLabel: string = "max";
   export let value: number = 0;
+  export let cursorActive: boolean = false;
   export let low: number = 0;
   export let high: number = 100;
   export let step: number = 1;
@@ -23,6 +25,9 @@
     color = fillColor();
   }
   function fillColor() {
+    if (mode === "single") {
+      return "#dadae5";
+    }
     const percent1 = toPercent(low, min, max);
     const percent2 = toPercent(high, min, max);
     return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
@@ -30,6 +35,10 @@
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
+  $: mode === "double" || mode === "single",
+    () => {
+      color = fillColor();
+    };
 </script>
 
 <Input
@@ -39,6 +48,7 @@
 >
   <div class="minmax">
     <span>{min}</span>
+    {cursorActive}
     <div class="slider">
       <div class="slider-track" style="--background-color: {color}"></div>
       <input
@@ -49,15 +59,20 @@
         bind:value={low}
         on:input={(v) => onMinChange(v.target.value)}
       />
-      <input
-        type="range"
-        {min}
-        {max}
-        {step}
-        bind:value={high}
-        on:input={(v) => onMaxChange(v.target.value)}
-      />
-      <span class="value" style="--left:{toPercent(value, min, max)}"></span>
+      {#if mode === "double"}
+        <input
+          type="range"
+          {min}
+          {max}
+          {step}
+          bind:value={high}
+          on:input={(v) => onMaxChange(v.target.value)}
+        />
+      {/if}
+      <span
+        class="value {cursorActive ? 'cursorActive' : ''}"
+        style="--left:{toPercent(value, min, max)}"
+      ></span>
     </div>
     <span>{max}</span>
   </div>
@@ -123,6 +138,10 @@
     border-top: 0.5em solid var(--text-color);
     left: var(--left);
   }
+  .value.cursorActive {
+    border-top-color: var(--main);
+  }
+
   input[type="range"] {
     -webkit-appearance: none;
     -moz-appearance: none;
