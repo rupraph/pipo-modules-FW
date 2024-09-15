@@ -77,15 +77,13 @@ void Sensor::process_sensor_triggers() {
         }
       } else {
         if (axis_data.threshold_mode == 1) {
-          if (axis_data.value > axis_data.limit_max) {
-            axis_data.bool_value = true;
-          } else if (axis_data.value < axis_data.limit_min) {
-            axis_data.bool_value = false;
-          }
+          axis_data.bool_value = axis_data.value < axis_data.limit_max &&
+                                 axis_data.value > axis_data.limit_min;
         }
       }
     }
   }
+}
 }
 
 void Sensor::teleplot_data(string axis) {
