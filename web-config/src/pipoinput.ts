@@ -100,7 +100,7 @@ class PipoInput extends EventEmitter<PipoEvents> {
     });
   }
 
-  setValue(path: string, value: number) {
+  setValue(path: string, value: unknown) {
     if (!this.socket) return;
     this.socket.send(`config:${path}:${value}`);
   }

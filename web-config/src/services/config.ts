@@ -1,54 +1,43 @@
-import axios from "axios";
 import { pipoInput } from "../pipoinput";
 import type { PipoConfig, PipoTypes } from "../types";
-import { writable } from "svelte/store";
-import type { Writable } from "svelte/store";
 
-class ConfigService<T extends PipoTypes> {
-  private saveTimeout = 0;
-  private store: Writable<PipoConfig<T>>;
+class ConfigSave<T extends PipoTypes> {
   private previousConfig: PipoConfig<T> | null = null;
-  constructor(store: Writable<PipoConfig<T>>) {
-    this.store = store;
-    store.subscribe((value) => {
-      if (!this.previousConfig) {
-        this.previousConfig = value;
-        return;
-      }
-      const diff = clearTimeout(this.saveTimeout);
-    });
+  constructor(config: PipoConfig<T> | null = null) {
+    this.previousConfig = config;
   }
 
   diff(prev: PipoConfig<T>, next: PipoConfig<T>) {
-    const diff: string[] = [];
-    const path: string[] = [];
-    const Q: [string, unknown][] = Object.entries(next);
+    const diff: { path: string; value: unknown }[] = [];
+    const Q: [string, string, unknown, unknown][] = Object.entries(next).map(
+      ([key, value]) => [key, key, value, prev[key]]
+    );
     while (Q.length) {
-      const [key, value] = Q.shift()!;
+      const [key, path, value, prevValue] = Q.shift()!;
       if (typeof value === "object") {
-        path.push(key);
         Object.entries(value as Object).forEach(([k, v]) => {
-          Q.push([k, v]);
+          Q.push([k, `${path}/${k}`, v, prevValue[k]]);
         });
       } else {
-        if (prev[key] !== value) {
-          diff.push(path.concat(key).join("."));
+        if (prevValue !== value) {
+          diff.push({ path, value });
         }
       }
     }
+    return diff;
   }
 
-  async fetch(name?: string) {
-    if (!name) {
-      name = (await axios.get<string>("/config-active")).data;
-    }
-    const { data: config } = await axios.get<PipoConfig<T>>(`/configs`, {
-      params: {
-        name,
-      },
+  update(config: PipoConfig<T>) {
+    if (!this.previousConfig) return;
+    const diff = this.diff(this.previousConfig, config);
+    this.previousConfig = JSON.parse(JSON.stringify(config));
+    diff.forEach(({ path, value }) => {
+      pipoInput.setValue(path, value);
     });
-    this.previousConfig = null;
-    this.store.set(config);
+  }
+  set(config: PipoConfig<T>) {
+    this.previousConfig = config;
   }
 }
-const 
+
+export const configSave = new ConfigSave();

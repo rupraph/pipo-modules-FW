@@ -1,7 +1,8 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import { pipoInput } from "../../pipoinput";
+  import { configSave } from "../../services/config";
 
-  import { createEventDispatcher } from "svelte";
+  import { pipoInput } from "../../pipoinput";
+  import { createEventDispatcher, onMount } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
@@ -102,6 +103,9 @@
       console.log("Rebooting...");
     });
   }
+  onMount(() => {
+    setInterval(() => configSave.update(config), 1000);
+  });
 </script>
 
 <article class="config">
