@@ -273,9 +273,7 @@ void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
 void PipoServer::setup_ws() {
   server.addHandler(&ws);
   pipoSocket.setup(&ws, &input_sens);
-  events.onConnect([](AsyncEventSourceClient* client) {
-    client->send("hello!", NULL, millis(), 1000);
-  });
+  events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
@@ -320,9 +318,6 @@ void PipoServer::setup_ws() {
         } else {
           char buff[3];
           for (size_t i = 0; i < info->len; i++) {
-            // sprintf(buff, "%02x ", (uint8_t)data[i]);
-            // msg += buff;
-            // removing sprintf to reduce memory usage
             if (data[i] < 16)
               msg += '0';  // Add leading zero for single hex digit
             msg += String((uint8_t)data[i], HEX);
@@ -344,9 +339,6 @@ void PipoServer::setup_ws() {
         } else {
           char buff[3];
           for (size_t i = 0; i < len; i++) {
-            // sprintf(buff, "%02x ", (uint8_t)data[i]);
-            // msg += buff;
-            // removing sprintf to reduce memory usage
             if (data[i] < 16)
               msg += '0';  // Add leading zero for single hex digit
             msg += String((uint8_t)data[i], HEX);
