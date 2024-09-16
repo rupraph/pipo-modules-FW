@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pipoInput } from "../pipoinput";
+  import { pipoio } from "../pipoio";
   import { isLive } from "../services";
   let live = false;
   isLive.subscribe((value) => {
@@ -9,7 +9,7 @@
   const max = 10;
   let last = 0;
   const dts: number[] = new Array(max).fill(0);
-  pipoInput
+  pipoio
     .on("fps", ({ frames, dt }) => {
       dts[last++ % max] = frames / dt;
       fps = Math.round((dts.reduce((a, b) => a + b, 0) / max) * 1000);
@@ -20,7 +20,7 @@
     .on("connect", () => {
       console.log("SHOULD FUCKING SEND");
       setTimeout(() => {
-        pipoInput.setValue("engine/engine-midi/yaw/channel", 10);
+        pipoio.setValue("engine/engine-midi/yaw/channel", 10);
       }, 500);
     });
 </script>

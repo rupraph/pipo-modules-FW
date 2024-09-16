@@ -9,7 +9,7 @@ function parse(msg: string) {
   const axis = isSensor ? command.replace("sensor", "") : "";
   return { command, args, axis, isSensor };
 }
-class PipoInput extends EventEmitter<PipoEvents> {
+class PipoIO extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
   private enabled: boolean = true;
   private timeout: number = 0;
@@ -104,6 +104,10 @@ class PipoInput extends EventEmitter<PipoEvents> {
     if (!this.socket) return;
     this.socket.send(`config:${path}:${value}`);
   }
+  saveConfig() {
+    if (!this.socket) return;
+    this.socket.send(`save`);
+  }
   async initWebMidi() {
     const access = await navigator.permissions.query({
       name: "midi",
@@ -139,4 +143,4 @@ class PipoInput extends EventEmitter<PipoEvents> {
   }
 }
 
-export const pipoInput = new PipoInput();
+export const pipoio = new PipoIO();

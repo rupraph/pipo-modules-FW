@@ -1,4 +1,4 @@
-import { pipoInput } from "../pipoinput";
+import { pipoio } from "../pipoio";
 import type { PipoConfig, PipoTypes } from "../types";
 
 class ConfigSave<T extends PipoTypes> {
@@ -30,10 +30,12 @@ class ConfigSave<T extends PipoTypes> {
   update(config: PipoConfig<T>) {
     if (!this.previousConfig) return;
     const diff = this.diff(this.previousConfig, config);
+    if (!diff.length) return;
     this.previousConfig = JSON.parse(JSON.stringify(config));
     diff.forEach(({ path, value }) => {
-      pipoInput.setValue(path, value);
+      pipoio.setValue(path, value);
     });
+    pipoio.saveConfig();
   }
   set(config: PipoConfig<T>) {
     this.previousConfig = config;

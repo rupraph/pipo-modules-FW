@@ -1,11 +1,11 @@
 <script lang="ts">
   import Logs from "./lib/logs.svelte";
-  import type { PipoTypes } from "./types";
+  import type { PipoInfo, PipoTypes } from "./types";
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
-  import { pipoInput } from "./pipoinput";
+  import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
 
@@ -45,7 +45,7 @@
     return axios
       .get<PipoInfo>("/info", { timeout: 2000 })
       .then(({ data, status, statusText }) => {
-        type = data.type.toLowerCase().replace("pipo_", "");
+        type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
         ip.set(data.ip);
         pipoType.set(type);
         return data;
@@ -53,7 +53,7 @@
       .catch((e) => onError(e));
   }
   let info = fetch();
-  pipoInput.on("connect", () => {
+  pipoio.on("connect", () => {
     info = fetch();
   });
 

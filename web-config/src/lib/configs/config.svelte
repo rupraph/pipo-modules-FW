@@ -1,7 +1,7 @@
 <script lang="ts" generics="T extends PipoTypes">
   import { configSave } from "../../services/config";
 
-  import { pipoInput } from "../../pipoinput";
+  import { pipoio } from "../../pipoio";
   import { createEventDispatcher, onMount } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
@@ -28,7 +28,7 @@
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
-  pipoInput.on("sensor", ({ axis, value }) => {
+  pipoio.on("sensor", ({ axis, value }) => {
     sensorValues[axis] = value;
   });
   const options = [

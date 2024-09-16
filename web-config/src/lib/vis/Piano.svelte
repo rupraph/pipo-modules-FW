@@ -5,7 +5,7 @@
   import muteIcon from "../../assets/mute.svg";
   import { sound } from "./sound";
   import Checkbox from "../form/Checkbox.svelte";
-  import { pipoInput } from "../../pipoinput";
+  import { pipoio } from "../../pipoio";
   let midi;
   let error: string;
   let isMute = true;
@@ -44,12 +44,12 @@
   }
 
   onMount(async () => {
-    pipoInput.on("noteOn", ({ note }) => {
+    pipoio.on("noteOn", ({ note }) => {
       playing[note] = true;
       sound.noteOn(note);
       scrollTo(note);
     });
-    pipoInput.on("noteOff", ({ note }) => {
+    pipoio.on("noteOff", ({ note }) => {
       playing[note] = false;
       sound.noteOff(note);
     });

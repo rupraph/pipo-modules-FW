@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import axios from "axios";
   import Collapse from "./collapse.svelte";
-  import { pipoInput } from "../pipoinput";
+  import { pipoio } from "../pipoio";
   type Log = {
     type: "error" | "warning" | "info";
     message: string;
@@ -30,7 +30,7 @@
       .filter(Boolean) as Log[];
     logs = append ? [...logs, ...news] : news;
   }
-  pipoInput.on("logs", ({ entries }) => {
+  pipoio.on("logs", ({ entries }) => {
     console.log("entries", entries);
     parse(entries, true);
   });
