@@ -8,7 +8,7 @@ void midi_io::setup() {
 }
 // if sustainmil is 0 = infinite sustain from sustain manager
 void midi_io::sendNoteOn(int note, int velocity, int channel,
-                         unsigned long sustain_mil) {
+                         unsigned long sustain_ms) {
   unsigned long time = millis();
   if (is_note_playing(note, channel)) {
     // don't play notes faster than 10ms
@@ -28,8 +28,8 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
   channel_note_list[channel][note].starttime = time;
 
   //set appropriate sustain endtime (0=infinite sustain)
-  if (sustain_mil > 0) {
-    channel_note_list[channel][note].sustain_endtime = time + sustain_mil;
+  if (sustain_ms > 0) {
+    channel_note_list[channel][note].sustain_endtime = time + sustain_ms;
   } else {
     channel_note_list[channel][note].sustain_endtime = 0;
   }
