@@ -36,7 +36,7 @@ class MidiTranslator
   int rootNote = 45;
   int numberOfNotes = 25;
   vector<int> current_scale;
-  int sustain = 1000;  //in ms. 0 for infinite
+  float sustain = 1.0;  //in seconds. 0 for infinite
 
   //CC variables
   int max_output;
@@ -84,8 +84,8 @@ class MidiTranslator
   void setRootNote(int r);
   int getNumberOfNotes();
   void setNumberOfNotes(int n);
-  int getSustain();
-  void setSustain(int s);
+  float getSustain();
+  void setSustain(float s);
   int getMaxOutput();
   void setMaxOutput(int m);
   int getMinOutput();

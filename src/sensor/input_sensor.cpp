@@ -59,27 +59,38 @@ void Sensor::process_sensor_triggers() {
     string axis = dat.first;
     // warning if reference modifies correctly the value
     SensorDat& axis_data = dat.second;
+
+    // range flags for continuous mode
     if (axis_data.mode == 0) {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
-        axis_data.untriggered = false;
+        axis_data.untriggered = true;
       }
       if (is_within_range(axis) == true &&
           is_prev_within_range(axis) == false) {
         axis_data.triggered = true;
       }
-    } else {
+    }
+
+    // calc boolean value for trigger mode
+    if (axis_data.mode == 1) {
+      axis_data.bool_value_prev = axis_data.bool_value;
       if (axis_data.threshold_mode == 0) {
-        if (axis_data.value > axis_data.limit_min) {
-          axis_data.bool_value = true;
-        } else {
-          axis_data.bool_value = false;
-        }
+        axis_data.bool_value = axis_data.value > axis_data.limit_min;
       } else {
         if (axis_data.threshold_mode == 1) {
-          axis_data.bool_value = is_within_range(axis);
+          axis_data.bool_value = axis_data.value > axis_data.limit_min &&
+                                 axis_data.value < axis_data.limit_max;
         }
       }
+    }
+
+    // trigger flags for trigger mode
+    if (axis_data.bool_value == true && axis_data.bool_value_prev == false) {
+      axis_data.triggered = true;
+    }
+    if (axis_data.bool_value == false && axis_data.bool_value_prev == true) {
+      axis_data.untriggered = true;
     }
   }
 }

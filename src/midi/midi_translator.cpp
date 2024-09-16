@@ -310,10 +310,10 @@ void MidiTranslator::setNumberOfNotes(int n) {
   numberOfNotes = n;
 }
 
-int MidiTranslator::getSustain() {
+float MidiTranslator::getSustain() {
   return sustain;
 }
-void MidiTranslator::setSustain(int s) {
+void MidiTranslator::setSustain(float s) {
   sustain = s;
 }
 

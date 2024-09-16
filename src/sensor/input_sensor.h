@@ -27,10 +27,11 @@ struct SensorDat {
   bool triggered;  // rising edge entering defined range or if using threshold.
   bool untriggered;  // falling edge leaving defined range.
 
-  bool mode;            // 0 = continuous, 1 = trigger
-  bool threshold_mode;  // 0 = basic, 1 = schmitt trigger
-  float threshold;      // value to trigger on
-  bool bool_value;
+  bool mode;             // 0 = continuous, 1 = trigger
+  bool threshold_mode;   // 0 = basic, 1 = schmitt trigger
+  float threshold;       // value to trigger on
+  bool bool_value;       // boolean output when in trigger mode
+  bool bool_value_prev;  // previous value of bool_value
 
   SensorDat()
       : deadzone(0.0),
@@ -44,7 +45,8 @@ struct SensorDat {
         mode(false),
         threshold_mode(false),
         threshold(0.0),
-        bool_value(false) {}
+        bool_value(false),
+        bool_value_prev(false) {}
 };
 
 class Sensor {

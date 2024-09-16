@@ -162,7 +162,7 @@
         is CONTINUOUS {isContinuousMode(sensorconf)}
         is HISTERESIS {isHisteresisMode(sensorconf)}
         <Checkbox label="Mode" bind:value={sensorconf.mode} />
-        <Checkbox label="Histeresis" bind:value={sensorconf.thresold_mode} />
+        <Checkbox label="Histeresis" bind:value={sensorconf.threshold_mode} />
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}

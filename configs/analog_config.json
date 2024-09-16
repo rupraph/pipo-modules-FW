@@ -168,7 +168,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -182,7 +182,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -196,7 +196,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -210,7 +210,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -224,7 +224,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -238,7 +238,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -252,7 +252,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -266,7 +266,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 1,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 79,
         "scaleType": "major",
         "translator_mode": 1
@@ -280,7 +280,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 1,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 75,
         "scaleType": "major",
         "translator_mode": 1
@@ -294,7 +294,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 1,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 72,
         "scaleType": "major",
         "translator_mode": 1
@@ -308,7 +308,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0
@@ -322,7 +322,7 @@
         "max_output": 127,
         "min_output": 0,
         "numberOfNotes": 25,
-        "sustain": 800,
+        "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
         "translator_mode": 0

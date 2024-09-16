@@ -13,6 +13,7 @@ export type CCConfig = {
 export type NoteConfig = {
   scaleType: string;
   rootNote: number;
+  sustain: number;
   numberOfNotes: number;
   current_scale: number[];
 };
@@ -25,17 +26,17 @@ export function isContinuousMode(config: SensorConfig): boolean {
   return config.mode === CONTINUOUS;
 }
 export function isThresholdMode(config: SensorConfig): boolean {
-  return config.thresold_mode === THRESHOLD;
+  return config.threshold_mode === THRESHOLD;
 }
 export function isHisteresisMode(config: SensorConfig): boolean {
-  return config.thresold_mode === HISTERESIS;
+  return config.threshold_mode === HISTERESIS;
 }
 export function isBasicThresholdMode(config: SensorConfig): boolean {
-  return config.thresold_mode === THRESHOLD;
+  return config.threshold_mode === THRESHOLD;
 }
 export type SensorConfig = {
   mode: boolean;
-  thresold_mode: boolean;
+  threshold_mode: boolean;
   deadzone: number;
   limit_max: number;
   limit_min: number;

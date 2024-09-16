@@ -47,7 +47,7 @@ void RangeSensor::update() {
     no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
     //Todo: deal with second object detected
     // -> test driver to report single value. tested working on another sensor from same type.
-    float dist = pMultiRangingData->RangeData[0].RangeMilliMeter;
+    float dist = pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
 
     // process result
     if (dist < 0 || !pMultiRangingData->RangeData[0].RangeStatus ==
