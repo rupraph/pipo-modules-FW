@@ -20,17 +20,17 @@ void usb_hid::usb_hid_setup() {
   // Set HID Report descriptor
   hid_mode = config.general_config["HID_MODE"];
   switch (hid_mode) {
-  case 0:
-    usb_hid_port.setReportDescriptor(gamepad_hid_report,
-                                     sizeof(gamepad_hid_report));
-    break;
-  case 1:
-    usb_hid_port.setReportDescriptor(mouse_hid_report,
-                                     sizeof(mouse_hid_report));
-    break;
-  case 2:
-    usb_hid_port.setReportDescriptor(key_hid_report, sizeof(key_hid_report));
-    break;
+    case 0:
+      usb_hid_port.setReportDescriptor(gamepad_hid_report,
+                                       sizeof(gamepad_hid_report));
+      break;
+    case 1:
+      usb_hid_port.setReportDescriptor(mouse_hid_report,
+                                       sizeof(mouse_hid_report));
+      break;
+    case 2:
+      usb_hid_port.setReportDescriptor(key_hid_report, sizeof(key_hid_report));
+      break;
   }
   usb_hid_port.setStringDescriptor("PiPo HID");
 
@@ -41,7 +41,20 @@ void usb_hid::usb_hid_setup() {
 
   // wait until device mounted. then timeout and report not mounted
   unsigned long timeout = millis() + 3000;
+  // wait until device mounted. then timeout and report not mounted
+  unsigned long timeout = millis() + 3000;
 
+  while (!TinyUSBDevice.mounted() && millis() <= timeout) {
+    delay(1);
+  }
+  if (!TinyUSBDevice.mounted()) {
+    Serial.println("USB HID not mounted");
+  } else {
+    Serial.println("USB HID mounted");
+  }
+#ifdef DEBUG_HEAP
+  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+#endif
   while (!TinyUSBDevice.mounted() && millis() <= timeout) {
     delay(1);
   }
@@ -69,20 +82,20 @@ void usb_hid::usb_hid_update() {
   }
 
   switch (hid_mode) {
-  case 0:
-    usb_hid_port.sendReport(0, &gp, sizeof(gp));
-    break;
-  case 1:
-    //     mouse.x = 10;
-    usb_hid_port.sendReport(0, &mouse, sizeof(mouse));
-    break;
+    case 0:
+      usb_hid_port.sendReport(0, &gp, sizeof(gp));
+      break;
+    case 1:
+      //     mouse.x = 10;
+      usb_hid_port.sendReport(0, &mouse, sizeof(mouse));
+      break;
 
-    // keyboard should not have a continous report or this will likley cause
-    // redundant keypresses
-    //  case 2:
-    //  //     kb.keycode[0] = HID_KEY_A;
-    //      usb_hid_port.sendReport(0, &kb, sizeof(kb));
-    //      break;
+      // keyboard should not have a continous report or this will likley cause
+      // redundant keypresses
+      //  case 2:
+      //  //     kb.keycode[0] = HID_KEY_A;
+      //      usb_hid_port.sendReport(0, &kb, sizeof(kb));
+      //      break;
   }
 }
 
@@ -128,8 +141,9 @@ void usb_hid::keyboard_set_press(uint8_t keycodes[]) {
   }
 }
 
-void usb_hid::keyboard_update() { // Todo: unsure if I shoudl stupidly send keys
-                                  // then release as long as they are "pressed"
+void usb_hid::
+    keyboard_update() {  // Todo: unsure if I shoudl stupidly send keys
+                         // then release as long as they are "pressed"
   if (!usb_hid_port.ready())
     return;
   if (sizeof(kb_keycodes) > 0) {

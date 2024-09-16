@@ -1,6 +1,6 @@
 #!/bin/bash
-cd ../pipo-config
+cd ./web-config
 npm run build
 cd -
 rm -rf ./data/webpage
-cp -R ../pipo-config/dist ./data/webpage
+cp -R ./web-config/dist ./data/webpage

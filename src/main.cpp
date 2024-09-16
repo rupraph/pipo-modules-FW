@@ -4,14 +4,14 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "utils/config.h"
 #include "hw_ui.h"
-#include "server/server.h"
 #include "midi/midi_io.h"
+#include "osc_handler.h"
+#include "server/server.h"
+#include "utils/config.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
-#include "osc_handler.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -39,69 +39,72 @@ void setup_wifi();
 void monitor_wifi();
 
 void setup() {
-    Serial.begin(115200);
-    
-    /////// Init hardware user interface
-    Serial.println(ESP.getFreeHeap());
-    hwui.init();
-    hwui.setup();
+  Serial.begin(115200);
+  // setCpuFrequencyMhz(80); will be usefull to save power on battery
+  /////// Init hardware user interface (leds and switches)
+  Serial.println(ESP.getFreeHeap());
+  hwui.init();
+  hwui.setup();
 
-    /////// Init filesystem
-    init_filesystem();
+  /////// Init filesystem
+  init_filesystem();
 
-    /////// Init midi and hid
-    midiio.setup();
-    hidio.usb_hid_setup();
+  /////// Init midi and hid
+  midiio.setup();
+  hidio.usb_hid_setup();
+  // while (!Serial)
+  //   delay(100);
 
-    /////// Load config
-    Serial.print("config list:");
-    Serial.println(config.get_list());
-    config.load_config();
-    config.apply(input_sens, engine, osc, false);  // input_sens,
+  /////// Load config
+  Serial.print("config list:");
+  Serial.println(config.get_list());
+  config.load_config();
+  config.apply(input_sens, engine, osc, false);  // input_sens,
 
-    /////// Init wifi
-    setup_wifi();
-    
-    /////// print filesystem files list
-    listDir(LittleFS, "/", 0);
+  /////// Init wifi
+  setup_wifi();
 
-    /////// initialize sensor/inputs
-    input_sens.init();
-    input_sens.setup();
-    // capturing and storing config at this point 
-    //(this is a temp solution to store the initial sensor offset measurements)
-    config.gather(input_sens, engine, true);
-    config.save(config.filename+".json");
+  /////// print filesystem files list
+  listDir(LittleFS, "/", 0);
 
-    // Start server
-    Serial.println("starting config page");
-    server.setup();
+  /////// initialize sensor/inputs
+  input_sens.init();
+  input_sens.setup();
+  // capturing and storing config at this point
+  //(this is a temp solution to store the initial sensor offset measurements)
+  config.gather(input_sens, engine, true);
+  config.save(config.filename + ".json");
 
-    // Start OSC
-    osc.setup(); 
-    
-    Serial.println("Setup done");
-    #ifdef DEBUG_HEAP
-        Serial.print(F("Remaining Heap:"));
-        Serial.println(String(ESP.getFreeHeap()));
-        Serial.print(F("Min Free Heap:"));
-        Serial.println(String(ESP.getMinFreeHeap()));
-        Serial.print(F("Max Alloc Heap:"));
-        Serial.println(ESP.getMaxAllocHeap());
-    #endif
+  // Start server
+  Serial.println("starting config page");
+  server.setup();
+
+  // Start OSC
+  osc.setup();
+
+  Serial.println("Setup done");
+#ifdef DEBUG_HEAP
+  Serial.print(F("Remaining Heap:"));
+  Serial.println(String(ESP.getFreeHeap()));
+  Serial.print(F("Min Free Heap:"));
+  Serial.println(String(ESP.getMinFreeHeap()));
+  Serial.print(F("Max Alloc Heap:"));
+  Serial.println(ESP.getMaxAllocHeap());
+#endif
 }
 
 void loop() {
-    try {
-        
-        monitor_wifi(server.is_running);
-        input_sens.update();
-        engine.update(input_sens, midiio, hidio, osc);
-        hwui.update();
+  try {
 
-    } catch (const std::exception& e) {
-        Serial.println("Exception in main loop");
-        logs.writeLog(e.what());
-        delay(50);
-    }
+    monitor_wifi(server.is_running);
+    input_sens.update();
+    engine.update(input_sens, midiio, hidio, osc);
+    pipoSocket.loop();
+    hwui.update();
+
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
+  }
 }
