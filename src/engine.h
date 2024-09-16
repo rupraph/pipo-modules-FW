@@ -88,9 +88,14 @@ class Engine {
   void set_config(json& config, bool debug = false);
   friend void to_json(json& j, const Engine& t);
 
+  float round_to(float value, int decimal);
+
  private:
   uint8_t note_val[128];
   uint8_t note_val_prev[128];
+
+  unordered_map<string, float> osc_val;
+  unordered_map<string, float> osc_val_prev;
 };
 
 #endif  //ENGINE_H

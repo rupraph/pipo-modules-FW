@@ -236,26 +236,39 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
     OscTranslator Osc_translator = Osctranslators[axis_name];
 
     if (Osc_translator.enabled && sensor.test_outside_deadzone(axis_name)) {
+      float sensor_min = sensor.get_limit_min(axis_name);
+      float sensor_max = sensor.get_limit_max(axis_name);
+      osc_val_prev[axis_name] = osc_val[axis_name];
       if (sensor.get_mode(axis_name) == 0) {  // continuous mode
-        float sensor_min = sensor.get_limit_min(axis_name);
-        float sensor_max = sensor.get_limit_max(axis_name);
+
         if (sensor.is_within_range(axis_name)) {
-          float osc_val =
-              Osc_translator.get_value(sensor_val, sensor_min, sensor_max);
-          osc.sendOscMessage(axis_name, osc_val);
+          osc_val[axis_name] = round_to(
+              Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 2);
+
+          if (osc_val[axis_name] != osc_val_prev[axis_name]) {
+            osc.sendOscMessage(axis_name, osc_val[axis_name]);
+          }
         }
       } else  // sensor uses trigger mode
       {
         if (sensor.get_bool_value(axis_name)) {
-          float osc_val = Osc_translator.get_output_max();
-          osc.sendOscMessage(axis_name, osc_val);
+          osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 2);
+          if (osc_val[axis_name] != osc_val_prev[axis_name]) {
+            osc.sendOscMessage(axis_name, osc_val[axis_name]);
+          }
         } else {
-          float osc_val = Osc_translator.get_output_min();
-          osc.sendOscMessage(axis_name, osc_val);
+          osc_val[axis_name] = round_to(Osc_translator.get_output_min(), 2);
+          if (osc_val[axis_name] != osc_val_prev[axis_name]) {
+            osc.sendOscMessage(axis_name, osc_val[axis_name]);
+          }
         }
       }
     }
   }
+}
+
+float Engine::round_to(float value, int decimal) {
+  return round(value * pow(10, decimal)) / pow(10, decimal);
 }
 
 json Engine::get_config(bool debug) {
