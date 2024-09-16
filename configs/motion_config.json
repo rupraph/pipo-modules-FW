@@ -1,253 +1,247 @@
 {
   "engine": {
-      "engine-hid": {
-          "accX": {
-              "mapto": "rx",
-              "out_type": 0,
-              "output_max": 255,
-              "output_min": 0,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": false
-          },
-          "accY": {
-              "mapto": "ry",
-              "out_type": 0,
-              "output_max": 255,
-              "output_min": 0,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": false
-          },
-          "accZ": {
-              "mapto": "rz",
-              "out_type": 0,
-              "output_max": 255,
-              "output_min": 0,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": false
-          },
-          "pitch": {
-              "mapto": "y",
-              "out_type": 0,
-              "output_max": 127,
-              "output_min": -127,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": true
-          },
-          "roll": {
-              "mapto": "x",
-              "out_type": 0,
-              "output_max": 127,
-              "output_min": -127,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": true
-          },
-          "yaw": {
-              "mapto": "z",
-              "out_type": 0,
-              "output_max": 255,
-              "output_min": 0,
-              "quantize": false,
-              "quantize_steps": 5,
-              "threshold": 0,
-              "use_threshold": 0,
-              "enabled": false
-          }
-      },
-      "engine-midi": {
-          "accX": {
-              "cc_number": 4,
-              "channel": 1,
-              "enabled": true,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 25,
-              "sustain": 800,
-              "rootNote": 45,
-              "scaleType": "major",
-              "translator_mode": 0
-          },
-          "accY": {
-              "cc_number": 5,
-              "channel": 1,
-              "enabled": false,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 18,
-              "sustain": 800,
-              "rootNote": 45,
-              "scaleType": "blues major",
-              "translator_mode": 0
-          },
-          "accZ": {
-              "cc_number": 6,
-              "channel": 1,
-              "enabled": false,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 10,
-              "sustain": 800,
-              "rootNote": 45,
-              "scaleType": "major",
-              "translator_mode": 0
-          },
-          "pitch": {
-              "cc_number": 1,
-              "channel": 1,
-              "enabled": false,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 25,
-              "sustain": 800,
-              "rootNote": 45,
-              "scaleType": "major",
-              "translator_mode": 0
-          },
-          "roll": {
-              "cc_number": 2,
-              "channel": 1,
-              "enabled": true,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 15,
-              "sustain": 800,
-              "rootNote": 55,
-              "scaleType": "blues minor",
-              "translator_mode": 1
-          },
-          "yaw": {
-              "cc_number": 3,
-              "channel": 1,
-              "enabled": false,
-              "hires": false,
-              "interpolation_type": 0,
-              "max_output": 127,
-              "min_output": 0,
-              "numberOfNotes": 25,
-              "sustain": 800,
-              "rootNote": 45,
-              "scaleType": "major",
-              "translator_mode": 0
-          }
-      },
-      "engine-osc": {
-            "accX": {
-                "enabled":true,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            },
-            "accY": {
-                "enabled":false,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            },
-            "accZ": {
-                "enabled":false,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            },
-            "pitch": {
-                "enabled":false,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            },
-            "roll": {
-                "enabled":true,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            },
-            "yaw": {
-                "enabled":false,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            }
-      }
-  },
-  "sensor": {
+    "engine-hid": {
       "accX": {
-          "deadzone": 0.05,
-          "offset": 0.0,
-          "limit_max": 8.0,
-          "limit_min": -8.0,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "rx",
+        "out_type": 0,
+        "output_max": 255,
+        "output_min": 0,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": false
       },
       "accY": {
-          "deadzone": 0.05,
-          "offset": 0.0,
-          "limit_max": 8.0,
-          "limit_min": -8.0,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "ry",
+        "out_type": 0,
+        "output_max": 255,
+        "output_min": 0,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": false
       },
       "accZ": {
-          "deadzone": 0.05,
-          "offset": 0.0,
-          "limit_max": 8.0,
-          "limit_min": -8.0,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "rz",
+        "out_type": 0,
+        "output_max": 255,
+        "output_min": 0,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": false
       },
       "pitch": {
-          "deadzone": 2,
-          "offset": 0.0,
-          "limit_max": 90,
-          "limit_min": -90,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "y",
+        "out_type": 0,
+        "output_max": 127,
+        "output_min": -127,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": true
       },
       "roll": {
-          "deadzone": 2,
-          "offset": 0.0,
-          "limit_max": 180,
-          "limit_min": -180,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "x",
+        "out_type": 0,
+        "output_max": 127,
+        "output_min": -127,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": true
       },
       "yaw": {
-          "deadzone": 2,
-          "offset": 0.0,
-          "limit_max": 180,
-          "limit_min": -180,
-          "mode": false,
-          "threshold_mode": false,
-          "threshold": 5.0
+        "mapto": "z",
+        "out_type": 0,
+        "output_max": 255,
+        "output_min": 0,
+        "quantize": false,
+        "quantize_steps": 5,
+        "threshold": 0,
+        "use_threshold": 0,
+        "enabled": false
       }
+    },
+    "engine-midi": {
+      "accX": {
+        "cc_number": 4,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "scaleType": "major",
+        "translator_mode": 0
+      },
+      "accY": {
+        "cc_number": 5,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 18,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "scaleType": "blues major",
+        "translator_mode": 0
+      },
+      "accZ": {
+        "cc_number": 6,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 10,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "scaleType": "major",
+        "translator_mode": 0
+      },
+      "pitch": {
+        "cc_number": 1,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "scaleType": "major",
+        "translator_mode": 0
+      },
+      "roll": {
+        "cc_number": 2,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 15,
+        "sustain": 0.8,
+        "rootNote": 55,
+        "scaleType": "blues minor",
+        "translator_mode": 1
+      },
+      "yaw": {
+        "cc_number": 3,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "interpolation_type": 0,
+        "max_output": 127,
+        "min_output": 0,
+        "numberOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "scaleType": "major",
+        "translator_mode": 0
+      }
+    },
+    "engine-osc": {
+      "accX": {
+        "enabled": true,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      },
+      "accY": {
+        "enabled": false,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      },
+      "accZ": {
+        "enabled": false,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      },
+      "pitch": {
+        "enabled": false,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      },
+      "roll": {
+        "enabled": true,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      },
+      "yaw": {
+        "enabled": false,
+        "mode_raw": false,
+        "output_max": 1,
+        "output_min": 0
+      }
+    }
+  },
+  "sensor": {
+    "accX": {
+      "deadzone": 0.05,
+      "offset": 0.0,
+      "limit_max": 8.0,
+      "limit_min": -8.0,
+      "mode": false,
+      "threshold_mode": false
+    },
+    "accY": {
+      "deadzone": 0.05,
+      "offset": 0.0,
+      "limit_max": 8.0,
+      "limit_min": -8.0,
+      "mode": false,
+      "threshold_mode": false
+    },
+    "accZ": {
+      "deadzone": 0.05,
+      "offset": 0.0,
+      "limit_max": 8.0,
+      "limit_min": -8.0,
+      "mode": false,
+      "threshold_mode": false
+    },
+    "pitch": {
+      "deadzone": 2,
+      "offset": 0.0,
+      "limit_max": 90,
+      "limit_min": -90,
+      "mode": false,
+      "threshold_mode": false
+    },
+    "roll": {
+      "deadzone": 2,
+      "offset": 0.0,
+      "limit_max": 180,
+      "limit_min": -180,
+      "mode": false,
+      "threshold_mode": false
+    },
+    "yaw": {
+      "deadzone": 2,
+      "offset": 0.0,
+      "limit_max": 180,
+      "limit_min": -180,
+      "mode": false,
+      "threshold_mode": false
+    }
   },
   "general": {
     "Wifi_mode": "STA",
@@ -256,5 +250,5 @@
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": true
-}
+  }
 }

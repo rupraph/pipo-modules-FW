@@ -45,8 +45,7 @@
       "limit_max": 60.0,
       "limit_min": 2.0,
       "mode": true,
-      "threshold_mode": false,
-      "threshold": 20.0
+      "threshold_mode": false
     }
   },
   "general": {

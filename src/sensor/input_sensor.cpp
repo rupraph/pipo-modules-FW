@@ -138,7 +138,6 @@ json Sensor::get_config(bool debug) {
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
       config[axis_name]["threshold_mode"] =
           sensor_dat[axis_name].threshold_mode;
-      config[axis_name]["threshold"] = sensor_dat[axis_name].threshold;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -165,7 +164,6 @@ void Sensor::set_config(json& config, bool debug) {
     sensor_dat[axis_name].limit_min = config[axis_name]["limit_min"];
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
     sensor_dat[axis_name].threshold_mode = config[axis_name]["threshold_mode"];
-    sensor_dat[axis_name].threshold = config[axis_name]["threshold"];
   }
   if (debug) {
     Serial.println("set_sensor_config");
@@ -264,13 +262,6 @@ bool Sensor::get_threshold_mode(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-float Sensor::get_threshold(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].threshold;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
-
 bool Sensor::get_bool_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].bool_value;
@@ -361,13 +352,6 @@ void Sensor::set_mode(const std::string& axis, bool value) {
 void Sensor::set_threshold_mode(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     sensor_dat[axis].threshold_mode = value;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
-
-void Sensor::set_threshold(const std::string& axis, float value) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].threshold = value;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

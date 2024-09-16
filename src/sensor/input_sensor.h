@@ -29,7 +29,6 @@ struct SensorDat {
 
   bool mode;             // 0 = continuous, 1 = trigger
   bool threshold_mode;   // 0 = basic, 1 = schmitt trigger
-  float threshold;       // value to trigger on
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
@@ -44,7 +43,6 @@ struct SensorDat {
         untriggered(false),
         mode(false),
         threshold_mode(false),
-        threshold(0.0),
         bool_value(false),
         bool_value_prev(false) {}
 };
@@ -116,9 +114,6 @@ class Sensor {
 
   bool get_threshold_mode(const std::string& axis);
   void set_threshold_mode(const std::string& axis, bool value);
-
-  float get_threshold(const std::string& axis);
-  void set_threshold(const std::string& axis, float value);
 
   bool get_bool_value(const std::string& axis);
   void set_bool_value(const std::string& axis, bool value);
