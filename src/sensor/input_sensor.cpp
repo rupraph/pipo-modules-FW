@@ -77,13 +77,11 @@ void Sensor::process_sensor_triggers() {
         }
       } else {
         if (axis_data.threshold_mode == 1) {
-          axis_data.bool_value = axis_data.value < axis_data.limit_max &&
-                                 axis_data.value > axis_data.limit_min;
+          axis_data.bool_value = is_within_range(axis);
         }
       }
     }
   }
-}
 }
 
 void Sensor::teleplot_data(string axis) {

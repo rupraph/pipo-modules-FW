@@ -40,8 +40,6 @@ void monitor_wifi();
 
 void setup() {
   Serial.begin(115200);
-  // delay(3000);
-  // while(!Serial) // "while" prevents usb to setup properly
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
   Serial.println(ESP.getFreeHeap());
@@ -54,6 +52,8 @@ void setup() {
   /////// Init midi and hid
   midiio.setup();
   hidio.usb_hid_setup();
+  // while (!Serial)
+  //   delay(100);
 
   /////// Load config
   Serial.print("config list:");
