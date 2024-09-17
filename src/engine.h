@@ -25,14 +25,9 @@ class Engine {
  public:
   Engine() {
 #if defined(PIPO_MOTION)
-    Miditranslators = {{"roll", MidiTranslator()},
-                       {"pitch", MidiTranslator()},
-                       {"yaw", MidiTranslator()},
-                       {"accX", MidiTranslator()},
-                       {"accY", MidiTranslator()},
-                       {"accZ", MidiTranslator()}
-
-    };
+    Miditranslators = {{"roll", MidiTranslator()}, {"pitch", MidiTranslator()},
+                       {"yaw", MidiTranslator()},  {"accX", MidiTranslator()},
+                       {"accY", MidiTranslator()}, {"accZ", MidiTranslator()}};
 
     Osctranslators = {{"roll", OscTranslator()}, {"pitch", OscTranslator()},
                       {"yaw", OscTranslator()},  {"accX", OscTranslator()},
@@ -41,31 +36,44 @@ class Engine {
     HID_translators = {{"roll", HidTranslator()}, {"pitch", HidTranslator()},
                        {"yaw", HidTranslator()},  {"accX", HidTranslator()},
                        {"accY", HidTranslator()}, {"accZ", HidTranslator()}};
+
 #elif defined(PIPO_RANGE)
     Miditranslators = {{"dist", MidiTranslator()}};
     Osctranslators = {{"dist", OscTranslator()}};
     HID_translators = {{"dist", HidTranslator()}};
+
 #elif defined(PIPO_ANALOG)
-    Miditranslators = {{"A1", MidiTranslator()}, {"A2", MidiTranslator()},
-                       {"A3", MidiTranslator()}, {"A4", MidiTranslator()},
-                       {"A5", MidiTranslator()}, {"A6", MidiTranslator()},
-                       {"T1", MidiTranslator()}, {"T2", MidiTranslator()},
-                       {"T3", MidiTranslator()}, {"T4", MidiTranslator()},
-                       {"T5", MidiTranslator()}, {"T6", MidiTranslator()}};
 
-    Osctranslators = {{"A1", OscTranslator()}, {"A2", OscTranslator()},
-                      {"A3", OscTranslator()}, {"A4", OscTranslator()},
-                      {"A5", OscTranslator()}, {"A6", OscTranslator()},
-                      {"T1", OscTranslator()}, {"T2", OscTranslator()},
-                      {"T3", OscTranslator()}, {"T4", OscTranslator()},
-                      {"T5", OscTranslator()}, {"T6", OscTranslator()}};
+    string axis_list[] = {"A1", "A2", "A3", "A4", "A5", "A6",
+                          "T1", "T2", "T3", "T4", "T5", "T6"};
 
-    HID_translators = {{"A1", HidTranslator()}, {"A2", HidTranslator()},
-                       {"A3", HidTranslator()}, {"A4", HidTranslator()},
-                       {"A5", HidTranslator()}, {"A6", HidTranslator()},
-                       {"T1", HidTranslator()}, {"T2", HidTranslator()},
-                       {"T3", HidTranslator()}, {"T4", HidTranslator()},
-                       {"T5", HidTranslator()}, {"T6", HidTranslator()}};
+    for (auto axis : axis_list) {
+      Miditranslators[axis] = MidiTranslator();
+      Osctranslators[axis] = OscTranslator();
+      HID_translators[axis] = HidTranslator();
+      trigger_flags[axis] = trigger_flag();
+      untrigger_flags[axis] = trigger_flag();
+    }
+    // Miditranslators = {{"A1", MidiTranslator()}, {"A2", MidiTranslator()},
+    //                    {"A3", MidiTranslator()}, {"A4", MidiTranslator()},
+    //                    {"A5", MidiTranslator()}, {"A6", MidiTranslator()},
+    //                    {"T1", MidiTranslator()}, {"T2", MidiTranslator()},
+    //                    {"T3", MidiTranslator()}, {"T4", MidiTranslator()},
+    //                    {"T5", MidiTranslator()}, {"T6", MidiTranslator()}};
+
+    // Osctranslators = {{"A1", OscTranslator()}, {"A2", OscTranslator()},
+    //                   {"A3", OscTranslator()}, {"A4", OscTranslator()},
+    //                   {"A5", OscTranslator()}, {"A6", OscTranslator()},
+    //                   {"T1", OscTranslator()}, {"T2", OscTranslator()},
+    //                   {"T3", OscTranslator()}, {"T4", OscTranslator()},
+    //                   {"T5", OscTranslator()}, {"T6", OscTranslator()}};
+
+    // HID_translators = {{"A1", HidTranslator()}, {"A2", HidTranslator()},
+    //                    {"A3", HidTranslator()}, {"A4", HidTranslator()},
+    //                    {"A5", HidTranslator()}, {"A6", HidTranslator()},
+    //                    {"T1", HidTranslator()}, {"T2", HidTranslator()},
+    //                    {"T3", HidTranslator()}, {"T4", HidTranslator()},
+    //                    {"T5", HidTranslator()}, {"T6", HidTranslator()}};
 #endif
   }
 

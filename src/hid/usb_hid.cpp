@@ -115,7 +115,7 @@ void usb_hid::set_gamepad_report_value(string key, int value) {
 }
 
 // for keyboard, key is keycode. keycode to name is maintained in config client
-void usb_hid::keyboard_set_press(uint8_t keycode) {
+void usb_hid::keyboard_set_press(char keycode) {
 
   usb_hid_port.keyboardPress(0, keycode);
 

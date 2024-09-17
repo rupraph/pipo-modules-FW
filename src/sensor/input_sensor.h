@@ -11,6 +11,8 @@
 using namespace std;
 using json = nlohmann::json;
 
+enum Protocol { OSC, MIDI, HID };
+
 //This is a generic class for sensors.
 //It defines the basic structure of a sensor to make it adaptable with the engine and various translators classes
 
@@ -24,14 +26,24 @@ struct SensorDat {
 
   float limit_max;  // can be used in shcmitt trigger mode for high/low triggers
   float limit_min;
-  bool triggered;  // rising edge entering defined range or if using threshold.
-  bool untriggered;  // falling edge leaving defined range.
+  // bool triggered;  // rising edge entering defined range or if using threshold.
+  // bool untriggered;  // falling edge leaving defined range.
 
   bool mode;             // 0 = continuous, 1 = trigger
   bool threshold_mode;   // 0 = basic, 1 = schmitt trigger
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
+  struct trigger_flag {
+    bool osc_trig = false;
+    bool midi_trig = false;
+    bool hid_trig = false;
+  };
+
+  trigger_flag trigger_flags;
+  trigger_flag untrigger_flags;
+
+  // should split in structs for config items and live data.
   SensorDat()
       : deadzone(0.0),
         offset(0.0),
@@ -39,8 +51,6 @@ struct SensorDat {
         value_prev(0.0),
         limit_max(1000.0),
         limit_min(0.0),
-        triggered(false),
-        untriggered(false),
         mode(false),
         threshold_mode(false),
         bool_value(false),
@@ -103,11 +113,15 @@ class Sensor {
   float get_limit_min(const std::string& axis);
   void set_limit_min(const std::string& axis, float value);
 
-  bool get_triggered(const std::string& axis);
-  void set_triggered(const std::string& axis, bool value);
+  void set_all_trigger(const std::string& axis, bool value);
+  void set_all_untrigger(const std::string& axis, bool value);
 
-  bool get_untriggered(const std::string& axis);
-  void set_untriggered(const std::string& axis, bool value);
+  void set_trigger_flag(const std::string& axis, Protocol protocol, bool value);
+  bool get_trigger_flag(const std::string& axis, Protocol protocol);
+
+  void set_untrigger_flag(const std::string& axis, Protocol protocol,
+                          bool value);
+  bool get_untrigger_flag(const std::string& axis, Protocol protocol);
 
   bool get_mode(const std::string& axis);
   void set_mode(const std::string& axis, bool value);

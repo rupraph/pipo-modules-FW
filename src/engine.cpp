@@ -136,9 +136,9 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           // midiio.printNoteList(channel);
           if (sensor.get_bool_value(axis_name)) {
             if (!midiio.is_note_playing(thresh_note, channel) &&
-                sensor.get_triggered(axis_name)) {
+                sensor.get_trigger_flag(axis_name, MIDI)) {
               midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
-              sensor.set_triggered(axis_name, false);
+              sensor.set_trigger_flag(axis_name, MIDI, false);
             }
           } else {
             midiio.sendAllNotesOff(channel);
@@ -148,18 +148,18 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           if (sensor.is_within_range(axis_name) &&
               !midiio.is_note_playing(note_val[channel], channel) &&
               (note_val[channel] != note_val_prev[channel] ||
-               sensor.get_triggered(axis_name))) {
+               sensor.get_trigger_flag(axis_name, MIDI))) {
             midiio.sendNoteOn(note_val[channel], 127, channel, sustain_ms);
-            if (sensor.get_triggered(axis_name)) {
-              sensor.set_triggered(axis_name, false);
+            if (sensor.get_trigger_flag(axis_name, MIDI)) {
+              sensor.set_trigger_flag(axis_name, MIDI, false);
             }
           }
 
-          if (sensor.get_untriggered(axis_name))
+          if (sensor.get_untrigger_flag(axis_name, MIDI))
           // &&!sensor.is_within_range(axis_name))
           {
             midiio.sendAllNotesOff(channel);
-            sensor.set_untriggered(axis_name, false);
+            sensor.set_untrigger_flag(axis_name, MIDI, false);
           }
         }
 
@@ -186,18 +186,17 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
     {
       if (HID_translators.find(axis_name) != HID_translators.end()) {
         string map_address = HID_translators[axis_name].get_map_address();
-        char key = 'b';  //map_address[4];
-        //uint8_t keycode = hidio.kb_ascii_to_code[0][0];
+        char key = map_address[4];
 
         //maybe key should be send until it is released, trigger is for debug
-        if (sensor.get_triggered(axis_name)) {
+        if (sensor.get_trigger_flag(axis_name, HID)) {
           Serial.println("key pressed");
           Serial.println(key);
           //hidio.keyboard_update();
           hidio.keyboard_set_press('b');
-          sensor.set_triggered(axis_name, false);
+          sensor.set_trigger_flag(axis_name, HID, false);
         }
-        if (sensor.get_untriggered(axis_name)) {}
+        if (sensor.get_untrigger_flag(axis_name, HID)) {}
       } else {
         Serial.println("key not found");
       }

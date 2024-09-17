@@ -64,11 +64,11 @@ void Sensor::process_sensor_triggers() {
     if (axis_data.mode == 0) {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
-        axis_data.untriggered = true;
+        set_all_untrigger(axis, true);
       }
       if (is_within_range(axis) == true &&
           is_prev_within_range(axis) == false) {
-        axis_data.triggered = true;
+        set_all_trigger(axis, true);
       }
     }
 
@@ -87,11 +87,11 @@ void Sensor::process_sensor_triggers() {
 
     // trigger flags for trigger mode
     if (axis_data.bool_value == true && axis_data.bool_value_prev == false) {
-      axis_data.triggered = true;
+      set_all_trigger(axis, true);
       Serial.println("triggered");
     }
     if (axis_data.bool_value == false && axis_data.bool_value_prev == true) {
-      axis_data.untriggered = true;
+      set_all_untrigger(axis, true);
     }
   }
 }
@@ -179,6 +179,63 @@ unordered_map<string, SensorDat> Sensor::get_sensor_dat_map() {
   return sensor_dat;
 }
 
+void Sensor::set_all_trigger(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    sensor_dat[axis].trigger_flags.hid_trig = value;
+    sensor_dat[axis].trigger_flags.midi_trig = value;
+    sensor_dat[axis].trigger_flags.osc_trig = value;
+  } else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_all_untrigger(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    sensor_dat[axis].untrigger_flags.hid_trig = value;
+    sensor_dat[axis].untrigger_flags.midi_trig = value;
+    sensor_dat[axis].untrigger_flags.osc_trig = value;
+  } else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_trigger_flag(const std::string& axis, Protocol protocol,
+                              bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    switch (protocol) {
+      case Protocol::MIDI:
+        sensor_dat[axis].trigger_flags.midi_trig = value;
+        break;
+      case Protocol::OSC:
+        sensor_dat[axis].trigger_flags.osc_trig = value;
+        break;
+      case Protocol::HID:
+        sensor_dat[axis].trigger_flags.hid_trig = value;
+        break;
+      default:
+        throw std::invalid_argument("Protocol not found: " +
+                                    std::to_string((int)protocol));
+    }
+  } else {
+    throw std::invalid_argument("Axis not found: " + axis);
+  }
+}
+
+bool Sensor::get_trigger_flag(const std::string& axis, Protocol protocol) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    switch (protocol) {
+      case Protocol::MIDI:
+        return sensor_dat[axis].trigger_flags.midi_trig;
+      case Protocol::OSC:
+        return sensor_dat[axis].trigger_flags.osc_trig;
+      case Protocol::HID:
+        return sensor_dat[axis].trigger_flags.hid_trig;
+      default:
+        throw std::invalid_argument("Protocol not found: " +
+                                    std::to_string((int)protocol));
+    }
+  } else {
+    throw std::invalid_argument("Axis not found: " + axis);
+  }
+}
 // bool Sensor::get_enabled(const std::string& axis) {
 //     if(sensor_dat.find(axis) != sensor_dat.end())
 //         return sensor_dat[axis].enabled;
@@ -235,19 +292,19 @@ float Sensor::get_limit_min(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-bool Sensor::get_triggered(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].triggered;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
+// bool Sensor::get_triggered(const std::string& axis) {
+//   if (sensor_dat.find(axis) != sensor_dat.end())
+//     return sensor_dat[axis].triggered;
+//   else
+//     throw std::invalid_argument("Axis not found: " + axis);
+// }
 
-bool Sensor::get_untriggered(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].untriggered;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
+// bool Sensor::get_untriggered(const std::string& axis) {
+//   if (sensor_dat.find(axis) != sensor_dat.end())
+//     return sensor_dat[axis].untriggered;
+//   else
+//     throw std::invalid_argument("Axis not found: " + axis);
+// }
 
 bool Sensor::get_mode(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
@@ -329,19 +386,19 @@ void Sensor::set_limit_min(const std::string& axis, float value) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-void Sensor::set_triggered(const std::string& axis, bool value) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].triggered = value;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
+// void Sensor::set_triggered(const std::string& axis, bool value) {
+//   if (sensor_dat.find(axis) != sensor_dat.end())
+//     sensor_dat[axis].triggered = value;
+//   else
+//     throw std::invalid_argument("Axis not found: " + axis);
+// }
 
-void Sensor::set_untriggered(const std::string& axis, bool value) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].untriggered = value;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
+// void Sensor::set_untriggered(const std::string& axis, bool value) {
+//   if (sensor_dat.find(axis) != sensor_dat.end())
+//     sensor_dat[axis].untriggered = value;
+//   else
+//     throw std::invalid_argument("Axis not found: " + axis);
+// }
 
 void Sensor::set_mode(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())

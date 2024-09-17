@@ -9,6 +9,8 @@
 
 // UNDER CONSTRUCTION
 
+//some interesting stuff here: https://arduino-pico.readthedocs.io/en/latest/usb.html
+
 using namespace std;
 
 class usb_hid {
@@ -25,7 +27,7 @@ class usb_hid {
   void set_gamepad_report_value(string key, int value);
 
   void keyboard_update();
-  void keyboard_set_press(uint8_t keycode);
+  void keyboard_set_press(char keycode);
   void keyboard_release();
   uint8_t const kb_ascii_to_code[128][2] = {HID_ASCII_TO_KEYCODE};
 
