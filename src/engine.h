@@ -23,7 +23,7 @@ class OSC_handler;  // why do I need forward declaration here??
 
 class Engine {
  public:
-  Engine(Sensor& sensor) {
+  Engine() {
 #if defined(PIPO_MOTION)
     Miditranslators = {{"roll", MidiTranslator()},
                        {"pitch", MidiTranslator()},

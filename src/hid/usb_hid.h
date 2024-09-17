@@ -3,10 +3,13 @@
 
 #include <Adafruit_TinyUSB.h>
 #include "HW_CONFIG.h"
-#include "utils/config.h"
+// #include "utils/config.h"
 #include <vector>
+#include <unordered_map>
 
 // UNDER CONSTRUCTION
+
+using namespace std;
 
 class usb_hid {
  public:
@@ -22,11 +25,18 @@ class usb_hid {
   void set_gamepad_report_value(string key, int value);
 
   void keyboard_update();
-  void keyboard_set_press(uint8_t keycodes[]);
-  //void usb_hid_update(const void *report);
+  void keyboard_set_press(uint8_t keycode);
+  void keyboard_release();
+  uint8_t const kb_ascii_to_code[128][2] = {HID_ASCII_TO_KEYCODE};
+
+  void set_hid_mode(int mode);
+  void set_enabled(bool ena);
+  bool get_enabled();
+  int get_hid_mode();
+
  private:
   hid_gamepad_report_t gp;
-  hid_keyboard_report_t kb;
+
   hid_mouse_report_t mouse;
 
   using MousePtr = int8_t hid_mouse_report_t::*;
@@ -46,7 +56,9 @@ class usb_hid {
       //{"hat", &hid_gamepad_report_t::hat}
   };
 
-  uint8_t kb_keycodes[6];
+  //keyboard
+  hid_keyboard_report_t kb;
+  std::vector<uint8_t> kb_keycodes;
   uint8_t kb_keycodes_previously[6];
   bool key_pressed_previously = false;
 };

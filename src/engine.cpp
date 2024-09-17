@@ -19,9 +19,9 @@ void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
   if (config.general_config["OSC_ENA"] == true) {
     osc_processor(sensor, osc);
   }
-  if (config.general_config["HidEnabled"] == true) {
-    hid_processor(sensor, hidio);
-  }
+  //if (config.general_config["HidEnabled"] == true) {
+  hid_processor(sensor, hidio);
+  //}
 }
 
 void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
@@ -169,59 +169,41 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
   }
 }
 
-void Engine::hid_processor(Sensor& sensor,
-                           usb_hid& hidio) {  // not dealing with buttons yet
+void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
 
-  // const auto& sensor_dat = sensor.get_sensor_dat_map();
+  const auto& sensor_dat = sensor.get_sensor_dat_map();
 
-  // for (auto const& pair : sensor_dat)
-  // {
-  //     string axis_name=pair.first;
-  //     float sensor_val=sensor.get_value(axis_name);
-  //     float sensor_min=sensor.get_limit_min(axis_name);
-  //     float sensor_max=sensor.get_limit_max(axis_name);
+  for (auto const& pair : sensor_dat) {
+    string axis_name = pair.first;
+    float sensor_val = sensor.get_value(axis_name);
+    float sensor_min = sensor.get_limit_min(axis_name);
+    float sensor_max = sensor.get_limit_max(axis_name);
 
-  //     if (sensor.get_enabled(axis_name) && HID_translators[axis_name].enabled==true)
-  //     {
-  //         if (HID_translators.find(axis_name) != HID_translators.end())
-  //         {
-  //             string map_name=HID_translators[axis_name].mapto;
-  //             int hid_val=HID_translators[axis_name].get_current_int(sensor_val,sensor_min,sensor_max);
-  //             if (hidio.hid_mode==0)
-  //             {
-  //                 hidio.set_gamepad_report_value(map_name,hid_val);
-  //             }
-  //             else if (hidio.hid_mode==1)
-  //             {
-  //                 if (map_name=="x")
-  //                 {
-  //                     mouse.x=hid_val;
-  //                 }
-  //                 else if (map_name=="y")
-  //                 {
-  //                     mouse.y=hid_val;
-  //                 }
-  //                 else if (map_name=="wheel")
-  //                 {
-  //                     mouse.wheel=hid_val;
-  //                 }
-  //             }
-  //         }
-  //     }
-  // }
+    //keyboard
+    //hidio.keyboard_release();
+    if (HID_translators[axis_name].get_enabled() == true)  // &&
+    // hidio.get_hid_mode() == 2)
+    {
+      if (HID_translators.find(axis_name) != HID_translators.end()) {
+        string map_address = HID_translators[axis_name].get_map_address();
+        char key = 'b';  //map_address[4];
+        //uint8_t keycode = hidio.kb_ascii_to_code[0][0];
 
-  // switch (hidio.hid_mode)
-  // {
-  // case 0:
-  //     hidio.usb_hid_update(&gp);
-  //     break;
-  // case 1:
-  //     hidio.usb_hid_update(&mouse);
-  //     break;
-  // case 2:
-  //     hidio.usb_hid_update(&kb);
-  //     break;
-  // }
+        //maybe key should be send until it is released, trigger is for debug
+        if (sensor.get_triggered(axis_name)) {
+          Serial.println("key pressed");
+          Serial.println(key);
+          //hidio.keyboard_update();
+          hidio.keyboard_set_press('b');
+          sensor.set_triggered(axis_name, false);
+        }
+        if (sensor.get_untriggered(axis_name)) {}
+      } else {
+        Serial.println("key not found");
+      }
+    }
+    hidio.keyboard_release();
+  }
 }
 
 void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {

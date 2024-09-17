@@ -29,7 +29,7 @@ string sensor_type = "analog";
 
 midi_io midiio;
 usb_hid hidio;
-Engine engine(input_sens);
+Engine engine;
 OSC_handler osc(config);
 PipoServer server(input_sens, engine, osc);
 

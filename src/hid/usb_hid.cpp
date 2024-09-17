@@ -16,9 +16,11 @@ void usb_hid::usb_hid_setup() {
   // if willing to have boot functionality, missing something like:
   // usb_hid_port.setBootProtocol(HID_ITF_PROTOCOL_KEYBOARD);
 
-  usb_hid_port.setPollInterval(2);
   // Set HID Report descriptor
-  hid_mode = config.general_config["HID_MODE"];
+  // hid_mode = config.general_config["HID_MODE"];
+  hid_mode = 2;
+  // usb_hid_port.setBootProtocol(HID_ITF_PROTOCOL_KEYBOARD); low level protocol (bios, etc...)
+  usb_hid_port.setPollInterval(2);
   switch (hid_mode) {
     case 0:
       usb_hid_port.setReportDescriptor(gamepad_hid_report,
@@ -41,20 +43,7 @@ void usb_hid::usb_hid_setup() {
 
   // wait until device mounted. then timeout and report not mounted
   unsigned long timeout = millis() + 3000;
-  // wait until device mounted. then timeout and report not mounted
-  unsigned long timeout = millis() + 3000;
 
-  while (!TinyUSBDevice.mounted() && millis() <= timeout) {
-    delay(1);
-  }
-  if (!TinyUSBDevice.mounted()) {
-    Serial.println("USB HID not mounted");
-  } else {
-    Serial.println("USB HID mounted");
-  }
-#ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-#endif
   while (!TinyUSBDevice.mounted() && millis() <= timeout) {
     delay(1);
   }
@@ -126,34 +115,46 @@ void usb_hid::set_gamepad_report_value(string key, int value) {
 }
 
 // for keyboard, key is keycode. keycode to name is maintained in config client
-void usb_hid::keyboard_set_press(uint8_t keycodes[]) {
-  // Todo. there is likely a better way to do this
-  //  this = setting the press from a setter
-  //  and later updating the keybaord based on those
-  //  (should work as long as task are serial
+void usb_hid::keyboard_set_press(uint8_t keycode) {
 
-  if (sizeof(keycodes) > 6) {
-    Serial.println("keyboard key count exceeded, only using the first 6 keys");
-  }
+  usb_hid_port.keyboardPress(0, keycode);
 
-  for (int i = 0; i < 6; i++) {
-    kb_keycodes[i] = keycodes[i];
-  }
+  // if (kb_keycodes.size() >= 6) {
+  //   Serial.println("keyboard key count exceeded, only using the first 6 keys");
+  // } else {
+  //   kb_keycodes.push_back(keycode);
+  // }
 }
 
-void usb_hid::
-    keyboard_update() {  // Todo: unsure if I shoudl stupidly send keys
-                         // then release as long as they are "pressed"
+void usb_hid::keyboard_release() {
   if (!usb_hid_port.ready())
     return;
-  if (sizeof(kb_keycodes) > 0) {
-    key_pressed_previously = true;
-    usb_hid_port.keyboardReport(0, 0, kb_keycodes);
-    key_pressed_previously = true;
-  } else {
-    if (key_pressed_previously) {
-      usb_hid_port.keyboardRelease(0);
-      key_pressed_previously = false;
-    }
-  }
+  usb_hid_port.keyboardRelease(0);
+}
+
+void usb_hid::keyboard_update() {
+  //modifier not taken into account for now
+  if (!usb_hid_port.ready())
+    return;
+
+  usb_hid_port.keyboardPress(0, 'a');
+
+  // if (sizeof(kb_keycodes) > 0) {
+  //   key_pressed_previously = true;
+  //   usb_hid_port.keyboardReport(0, 0, kb_keycodes.data());
+  //   kb_keycodes.clear();
+  // } else {
+  //   if (key_pressed_previously) {
+  //     usb_hid_port.keyboardRelease(0);
+  //     key_pressed_previously = false;
+  //   }
+  // }
+}
+
+void usb_hid::set_hid_mode(int mode) {
+  hid_mode = mode;
+}
+
+void usb_hid::set_enabled(bool ena) {
+  enabled = ena;
 }

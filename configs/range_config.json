@@ -2,15 +2,10 @@
   "engine": {
     "engine-hid": {
       "dist": {
-        "enabled": false,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": true,
+        "map_address": "a",
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       }
     },
     "engine-midi": {
@@ -43,7 +38,7 @@
       "deadzone": 0.0,
       "offset": 0.0,
       "limit_max": 60.0,
-      "limit_min": 2.0,
+      "limit_min": 5.0,
       "mode": true,
       "threshold_mode": false
     }
@@ -54,6 +49,7 @@
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
-    "HidEnabled": true
+    "HidEnabled": true,
+    "HidMode": 2
   }
 }

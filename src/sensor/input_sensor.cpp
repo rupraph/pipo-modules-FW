@@ -88,6 +88,7 @@ void Sensor::process_sensor_triggers() {
     // trigger flags for trigger mode
     if (axis_data.bool_value == true && axis_data.bool_value_prev == false) {
       axis_data.triggered = true;
+      Serial.println("triggered");
     }
     if (axis_data.bool_value == false && axis_data.bool_value_prev == true) {
       axis_data.untriggered = true;

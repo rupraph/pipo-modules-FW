@@ -151,7 +151,7 @@ void Config::print() {
   Serial.println(current_config.dump(4).c_str());
 }
 
-void Config::gather(Sensor& sensor, Engine& engine, bool debug = false) {
+void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
   Serial.print("gatherconfig sensor");
   current_config["sensor"].clear();
   current_config["sensor"] = sensor.get_config(debug);
