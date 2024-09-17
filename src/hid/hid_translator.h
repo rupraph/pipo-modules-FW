@@ -14,7 +14,8 @@ class HidTranslator {
   bool enabled = false;
   string map_address = "a";
   // for keyboard should start with KEY_
-
+  bool stroke_mode = false;
+  // stroke mode means key is either pressed once per trigger (false), or maintained (true)
   int output_max = 255;
   int output_min = 0;
 
@@ -40,6 +41,9 @@ class HidTranslator {
 
   string get_map_address();
   void set_map_address(string value);
+
+  bool get_stroke_mode();
+  void set_stroke_mode(bool value);
 
   int get_output_max();
   void set_output_max(int value);

@@ -7,8 +7,6 @@
 #include <vector>
 #include <unordered_map>
 
-// UNDER CONSTRUCTION
-
 //some interesting stuff here: https://arduino-pico.readthedocs.io/en/latest/usb.html
 
 using namespace std;
@@ -27,9 +25,8 @@ class usb_hid {
   void set_gamepad_report_value(string key, int value);
 
   void keyboard_update();
-  void keyboard_set_press(char keycode);
+  void keyboard_set_press(string keycode);
   void keyboard_release();
-  uint8_t const kb_ascii_to_code[128][2] = {HID_ASCII_TO_KEYCODE};
 
   void set_hid_mode(int mode);
   void set_enabled(bool ena);
@@ -60,7 +57,10 @@ class usb_hid {
 
   //keyboard
   hid_keyboard_report_t kb;
-  std::vector<uint8_t> kb_keycodes;
+  //   std::vector<uint8_t> kb_keycodes;
+  int8_t const _ascii2keycode[128][2] = {HID_ASCII_TO_KEYCODE};
+  uint8_t kb_keycodes[6];
+  int keycodes_index = 0;
   uint8_t kb_keycodes_previously[6];
   bool key_pressed_previously = false;
 };

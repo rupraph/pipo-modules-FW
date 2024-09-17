@@ -3,7 +3,8 @@
     "engine-hid": {
       "dist": {
         "enabled": true,
-        "map_address": "a",
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
         "output_min": 0
       }

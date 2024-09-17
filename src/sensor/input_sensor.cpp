@@ -236,6 +236,46 @@ bool Sensor::get_trigger_flag(const std::string& axis, Protocol protocol) {
     throw std::invalid_argument("Axis not found: " + axis);
   }
 }
+
+void Sensor::set_untrigger_flag(const std::string& axis, Protocol protocol,
+                                bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    switch (protocol) {
+      case Protocol::MIDI:
+        sensor_dat[axis].untrigger_flags.midi_trig = value;
+        break;
+      case Protocol::OSC:
+        sensor_dat[axis].untrigger_flags.osc_trig = value;
+        break;
+      case Protocol::HID:
+        sensor_dat[axis].untrigger_flags.hid_trig = value;
+        break;
+      default:
+        throw std::invalid_argument("Protocol not found: " +
+                                    std::to_string((int)protocol));
+    }
+  } else {
+    throw std::invalid_argument("Axis not found: " + axis);
+  }
+}
+
+bool Sensor::get_untrigger_flag(const std::string& axis, Protocol protocol) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    switch (protocol) {
+      case Protocol::MIDI:
+        return sensor_dat[axis].untrigger_flags.midi_trig;
+      case Protocol::OSC:
+        return sensor_dat[axis].untrigger_flags.osc_trig;
+      case Protocol::HID:
+        return sensor_dat[axis].untrigger_flags.hid_trig;
+      default:
+        throw std::invalid_argument("Protocol not found: " +
+                                    std::to_string((int)protocol));
+    }
+  } else {
+    throw std::invalid_argument("Axis not found: " + axis);
+  }
+}
 // bool Sensor::get_enabled(const std::string& axis) {
 //     if(sensor_dat.find(axis) != sensor_dat.end())
 //         return sensor_dat[axis].enabled;

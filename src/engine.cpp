@@ -180,29 +180,32 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
     float sensor_max = sensor.get_limit_max(axis_name);
 
     //keyboard
-    //hidio.keyboard_release();
+    // does not allow multiple key presses yet while it could.
     if (HID_translators[axis_name].get_enabled() == true)  // &&
     // hidio.get_hid_mode() == 2)
     {
       if (HID_translators.find(axis_name) != HID_translators.end()) {
-        string map_address = HID_translators[axis_name].get_map_address();
-        char key = map_address[4];
 
-        //maybe key should be send until it is released, trigger is for debug
-        if (sensor.get_trigger_flag(axis_name, HID)) {
-          Serial.println("key pressed");
-          Serial.println(key);
-          //hidio.keyboard_update();
-          hidio.keyboard_set_press('b');
-          sensor.set_trigger_flag(axis_name, HID, false);
+        string key_adress = HID_translators[axis_name].get_map_address();
+        //stroke mode once
+        if (HID_translators[axis_name].get_stroke_mode() == false) {
+          if (sensor.get_trigger_flag(axis_name, HID)) {
+            hidio.keyboard_set_press(key_adress);
+            sensor.set_trigger_flag(axis_name, HID, false);
+          }
+        } else {
+          // strike mode maintained
+          if (sensor.get_bool_value(axis_name)) {
+            hidio.keyboard_set_press(key_adress);
+          }
         }
-        if (sensor.get_untrigger_flag(axis_name, HID)) {}
       } else {
         Serial.println("key not found");
       }
+      hidio.keyboard_update();
     }
-    hidio.keyboard_release();
   }
+  hidio.keyboard_release();
 }
 
 void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {

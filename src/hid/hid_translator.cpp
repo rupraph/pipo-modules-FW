@@ -32,6 +32,7 @@ int HidTranslator::get_current_int(float value, float input_min,
 
 void to_json(json& j, const HidTranslator& t) {
   j = json{{"map_address", t.map_address},
+           {"stroke_mode", t.stroke_mode},
            {"output_max", t.output_max},
            {"output_min", t.output_min},
            {"enabled", t.enabled}};
@@ -39,6 +40,7 @@ void to_json(json& j, const HidTranslator& t) {
 
 void from_json(const json& j, HidTranslator& t) {
   j.at("map_address").get_to(t.map_address);
+  j.at("stroke_mode").get_to(t.stroke_mode);
   j.at("output_max").get_to(t.output_max);
   j.at("output_min").get_to(t.output_min);
   j.at("enabled").get_to(t.enabled);
@@ -76,6 +78,14 @@ std::string HidTranslator::get_map_address() {
 
 void HidTranslator::set_map_address(std::string value) {
   map_address = value;
+}
+
+bool HidTranslator::get_stroke_mode() {
+  return stroke_mode;
+}
+
+void HidTranslator::set_stroke_mode(bool value) {
+  stroke_mode = value;
 }
 
 int HidTranslator::get_output_max() {

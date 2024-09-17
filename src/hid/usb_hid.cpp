@@ -115,9 +115,44 @@ void usb_hid::set_gamepad_report_value(string key, int value) {
 }
 
 // for keyboard, key is keycode. keycode to name is maintained in config client
-void usb_hid::keyboard_set_press(char keycode) {
+void usb_hid::keyboard_set_press(string address) {
+  //this derives from keyboardPress in Adafruit_USBD_HID.cpp
+  string map_address = address;
+  if (map_address.length() == 5) {
+    char ch = map_address[4];
+    uint8_t modifier = 0;
+    uint8_t uch = (uint8_t)ch;
+    // if (_ascii2keycode[uch][0]) {
+    //   modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
+    // }
+    Serial.println(_ascii2keycode[uch][1]);
+    kb_keycodes[keycodes_index] = _ascii2keycode[uch][1];
+  } else {  // deal with KEY_UP / KEY_DOWN / KEY_LEFT / KEY_RIGHT
+    if (map_address == "KEY_UP") {
+      kb_keycodes[keycodes_index] = HID_KEY_ARROW_UP;
+    }
+    if (map_address == "KEY_DOWN") {
+      kb_keycodes[keycodes_index] = HID_KEY_ARROW_DOWN;
+    }
+    if (map_address == "KEY_LEFT") {
+      kb_keycodes[keycodes_index] = HID_KEY_ARROW_LEFT;
+    }
+    if (map_address == "KEY_RIGHT") {
+      kb_keycodes[keycodes_index] = HID_KEY_ARROW_RIGHT;
+    }
+    if (map_address == "KEY_ENTER") {
+      kb_keycodes[keycodes_index] = HID_KEY_ENTER;
+    }
+    if (map_address == "KEY_ESC") {
+      kb_keycodes[keycodes_index] = HID_KEY_ESCAPE;
+    }
+  }
 
-  usb_hid_port.keyboardPress(0, keycode);
+  if (keycodes_index < 5) {
+    keycodes_index++;
+  } else {
+    Serial.println("keyboard key count exceeded, only using the first 6 keys");
+  }
 
   // if (kb_keycodes.size() >= 6) {
   //   Serial.println("keyboard key count exceeded, only using the first 6 keys");
@@ -127,9 +162,15 @@ void usb_hid::keyboard_set_press(char keycode) {
 }
 
 void usb_hid::keyboard_release() {
-  if (!usb_hid_port.ready())
-    return;
-  usb_hid_port.keyboardRelease(0);
+  // if (!usb_hid_port.ready())
+  //   return;
+  // usb_hid_port.keyboardRelease(0);
+
+  // Reset keycodes
+  for (int i = 0; i < 6; ++i) {
+    kb_keycodes[i] = 0;
+  }
+  keycodes_index = 0;
 }
 
 void usb_hid::keyboard_update() {
@@ -137,7 +178,7 @@ void usb_hid::keyboard_update() {
   if (!usb_hid_port.ready())
     return;
 
-  usb_hid_port.keyboardPress(0, 'a');
+  usb_hid_port.keyboardReport(0, 0, kb_keycodes);
 
   // if (sizeof(kb_keycodes) > 0) {
   //   key_pressed_previously = true;
