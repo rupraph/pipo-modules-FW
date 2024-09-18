@@ -276,19 +276,13 @@ bool Sensor::get_untrigger_flag(const std::string& axis, Protocol protocol) {
     throw std::invalid_argument("Axis not found: " + axis);
   }
 }
-// bool Sensor::get_enabled(const std::string& axis) {
-//     if(sensor_dat.find(axis) != sensor_dat.end())
-//         return sensor_dat[axis].enabled;
-//     else
-//         throw std::invalid_argument("Axis not found: " + axis);
-// }
 
-// bool Sensor::get_inverted(const std::string& axis) {
-//     if(sensor_dat.find(axis) != sensor_dat.end())
-//         return sensor_dat[axis].inverted;
-//     else
-//         throw std::invalid_argument("Axis not found: " + axis);
-// }
+bool Sensor::get_inverted(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].inverted;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
 
 int Sensor::get_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())

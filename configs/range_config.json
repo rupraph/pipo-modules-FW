@@ -38,6 +38,7 @@
     "dist": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 60.0,
       "limit_min": 5.0,
       "mode": true,

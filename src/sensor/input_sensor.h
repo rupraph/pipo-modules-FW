@@ -21,6 +21,7 @@ struct SensorDat {
   // bool inverted; // should likely move to output section
   float deadzone;  // supposed to be % of the total range. value for now
   float offset;
+  bool invert;
   float value;  // should distinguish raw value from output value and have both
   float value_prev;
 
@@ -47,6 +48,7 @@ struct SensorDat {
   SensorDat()
       : deadzone(0.0),
         offset(0.0),
+        invert(false),
         value(0.0),
         value_prev(0.0),
         limit_max(1000.0),
@@ -89,11 +91,8 @@ class Sensor {
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();
 
-  // bool get_enabled(const std::string& axis);
-  // void set_enabled(const std::string& axis, bool value);
-
-  // bool get_inverted(const std::string& axis);
-  // void set_inverted(const std::string& axis, bool value);
+  bool get_inverted(const std::string& axis);
+  void set_inverted(const std::string& axis, bool value);
 
   int get_deadzone(const std::string& axis);
   void set_deadzone(const std::string& axis, int value);

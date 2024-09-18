@@ -3,159 +3,87 @@
     "engine-hid": {
       "A1": {
         "enabled": false,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "A2": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "A3": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "A4": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "A5": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "A6": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T1": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T2": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T3": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T4": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T5": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       },
       "T6": {
-        "enabled": true,
-        "input_max": 4096,
-        "input_min": 0,
-        "mapto": "x",
-        "out_type": 0,
+        "enabled": false,
+        "map_address": "KEY_DOWN",
+        "stroke_mode": true,
         "output_max": 255,
-        "output_min": 0,
-        "quantize": false,
-        "quantize_steps": 5,
-        "threshold": 0,
-        "use_threshold": 0
+        "output_min": 0
       }
     },
     "engine-midi": {
@@ -407,6 +335,7 @@
     "A1": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -415,6 +344,7 @@
     "A2": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -423,6 +353,7 @@
     "A3": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -431,6 +362,7 @@
     "A4": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -439,6 +371,7 @@
     "A5": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -447,6 +380,7 @@
     "A6": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 3.3,
       "limit_min": 0.0,
       "mode": false,
@@ -455,6 +389,7 @@
     "T1": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
       "mode": false,
@@ -463,6 +398,7 @@
     "T2": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
       "mode": false,
@@ -471,6 +407,7 @@
     "T3": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
       "mode": false,
@@ -479,6 +416,7 @@
     "T4": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
       "mode": false,
@@ -487,6 +425,7 @@
     "T5": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
       "mode": false,
@@ -495,6 +434,7 @@
     "T6": {
       "deadzone": 0.0,
       "offset": 0.0,
+      "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
       "mode": false,
@@ -507,6 +447,7 @@
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
-    "HidEnabled": true
+    "HidEnabled": true,
+    "HidMode": 2
   }
 }
