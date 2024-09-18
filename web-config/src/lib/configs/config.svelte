@@ -158,11 +158,14 @@
       {@const { label, unit, min, max, step } = getSchema(axis)}
       <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-        <Range label="Deadzone" bind:value={sensorconf.deadzone} />
-        is CONTINUOUS {isContinuousMode(sensorconf)}
-        is HISTERESIS {isHisteresisMode(sensorconf)}
-        <Checkbox label="Mode" bind:value={sensorconf.mode} />
-        <Checkbox label="Histeresis" bind:value={sensorconf.threshold_mode} />
+
+        <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
+        {#if sensorconf.mode === true}
+          <Checkbox
+            label="Window threshold"
+            bind:value={sensorconf.threshold_mode}
+          />
+        {/if}
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
@@ -178,6 +181,7 @@
           minLabel={`min (${unit})`}
           maxLabel={`max (${unit})`}
         />
+        <!-- <Range label="Deadzone" bind:value={sensorconf.deadzone} /> -->
       </Collapse>
     {/each}
   </Collapse>
