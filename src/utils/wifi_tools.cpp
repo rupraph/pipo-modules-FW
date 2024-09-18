@@ -30,7 +30,8 @@ void setup_wifi() {
     }
     // keep pressing to reset
 
-    ///////// HIGH here should be low. temporary patch to cope with switch not wired corectly on proto boards
+    ///////// HIGH here should be low. temporary patch to cope with switch not
+    ///wired corectly)
     if (digitalRead(MODE_SW) == HIGH && digitalRead(PP_SW) == LOW) {
       Serial.println(F("Settings reset"));
       wm.resetSettings();
@@ -88,14 +89,14 @@ void monitor_wifi(bool is_server_runing) {
   }
 
   else if (WiFi.status() != WL_CONNECTED) {
-    //Serial.println("Wifi disconnected");
+    // Serial.println("Wifi disconnected");
     hwui.stop_pulse(WIFI_LED);
   }
 }
 
 void debug_connect() {
-  //temp function for debug
-  //connect to wifi manually
+  // temp function for debug
+  // connect to wifi manually
   WiFi.mode(WIFI_STA);
   WiFi.begin("ssid", "password");
   while (WiFi.status() != WL_CONNECTED) {

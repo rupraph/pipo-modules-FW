@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import axios from "axios";
   import Collapse from "./collapse.svelte";
+  import { pipoio } from "../pipoio";
   type Log = {
     type: "error" | "warning" | "info";
     message: string;
@@ -14,31 +15,33 @@
     date.setHours(date.getHours() - 1);
     return `${date.toTimeString().split(" ")[0]}:${date.getMilliseconds()}`;
   }
-  async function fetch() {
-    return;
-    return await axios
-      .get<string>("/logs")
-      .then(({ data }) => {
-        logs = data
-          .split("\n")
-          .map((line) => {
-            const match = line.match(/(\d+):\((\d)\)(.*)/);
-            if (!match) return null;
-            return {
-              timestamp: format(match[1]),
-              type: ["info", "warning", "error"][parseInt(match[2])],
-              message: match[3],
-            };
-          })
-          .filter(Boolean) as Log[];
+
+  function parse(entries: string[], append = false) {
+    const news = entries
+      .map((entry) => {
+        const match = entry.match(/(\d+):\((\d)\)(.*)/);
+        if (!match) return null;
+        return {
+          timestamp: format(match[1]),
+          type: ["info", "warning", "error"][parseInt(match[2])],
+          message: match[3],
+        };
       })
-      .catch((e) => {
-        console.error(e);
-      });
+      .filter(Boolean) as Log[];
+    logs = append ? [...logs, ...news] : news;
+  }
+  pipoio.on("logs", ({ entries }) => {
+    console.log("entries", entries);
+    parse(entries, true);
+  });
+  function fetch() {
+    axios.get("/logs").then(({ data }) => {
+      console.log("ICI", logs);
+      parse(data.split("--"));
+    });
   }
   onMount(() => {
     fetch();
-    // interval = setInterval(fetch, 1000);
   });
   onDestroy(() => clearInterval(interval));
 </script>

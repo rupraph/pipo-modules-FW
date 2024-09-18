@@ -1,15 +1,16 @@
 #include "midiRtp.h"
 #include <WiFi.h>
-//#include <WiFiClient.h>
-//#include <WiFiUdp.h>
+// #include <WiFiClient.h>
+// #include <WiFiUdp.h>
 #include <ESPmDNS.h>
 
 bool isConnected = false;
 
 APPLEMIDI_CREATE_INSTANCE(WiFiUDP, MidiRtp, "PipoMotion", DEFAULT_CONTROL_PORT);
-//APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
+// APPLEMIDI_CREATE_DEFAULTSESSION_INSTANCE();
 
-// see https://github.com/lathoub/Arduino-AppleMIDI-Library/tree/master/examples/wESP32_NoteOnOffEverySec
+// see
+// https://github.com/lathoub/Arduino-AppleMIDI-Library/tree/master/examples/wESP32_NoteOnOffEverySec
 
 void OnConnected(const APPLEMIDI_NAMESPACE::ssrc_t& ssrc, const char* name) {
   Serial.println("Rtp Connected");
@@ -41,7 +42,7 @@ void midiRtpLoop() {
   if (isConnected) {
     MidiRtp.sendNoteOn(69, 127, 1);
     // delay(100);
-    //Serial.println("Rtp Note on");
+    // Serial.println("Rtp Note on");
     delay(1000);
   }
 }

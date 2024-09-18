@@ -1,8 +1,8 @@
 #ifndef PIPOSOCKET_H
 #define PIPOSOCKET_H
-#include <ESPAsyncWebServer.h>
 #include "sensor/input_sensor.h"
-
+#include "utils/logs.h"
+#include <ESPAsyncWebServer.h>
 using namespace std;
 
 class PipoSocket {

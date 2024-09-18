@@ -4,7 +4,7 @@ void midi_io::setup() {
 
   MidiUSBSetup();
   midiBLESetup();
-  //midiRtpSetup();
+  // midiRtpSetup();
 }
 // if sustainmil is 0 = infinite sustain from sustain manager
 void midi_io::sendNoteOn(int note, int velocity, int channel,
@@ -20,7 +20,7 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
   MidiUSBsendNoteOn(note, velocity, channel);
   MidiBLEsendNoteOn(note, velocity, channel);
 
-  //pipoSocket.sendNoteOn(note, velocity,channel);
+  // pipoSocket.sendNoteOn(note, velocity,channel);
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 
   // insert or update note to channel_note_list
@@ -41,7 +41,7 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
       channel_note_list[channel].end()) {
     MidiUSBsendNoteOff(note, velocity, channel);
     MidiBLEsendNoteOff(note, velocity, channel);
-    //pipoSocket.sendNoteOff(note, velocity,channel);
+    // pipoSocket.sendNoteOff(note, velocity,channel);
     channel_note_list[channel].erase(note);
   }
 }
@@ -49,7 +49,7 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
 void midi_io::sendAllNotesOff(int channel) {
   unsigned long time = millis();
 
-  //loop through channel_note_list[channel] and send note off for all notes
+  // loop through channel_note_list[channel] and send note off for all notes
   // Create a copy of the keys (notes)
   std::vector<int> notes;
   for (auto const& pair : channel_note_list[channel]) {
@@ -84,7 +84,7 @@ void midi_io::sendHiResControlChange(int control, int value, int channel) {
 
   MidiUSBsendCC(control, msb, channel);
   MidiUSBsendCC(control + 32, lsb, channel);
-  //MidiUsb.sendControlChange(control, value, channel);
+  // MidiUsb.sendControlChange(control, value, channel);
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 }
 

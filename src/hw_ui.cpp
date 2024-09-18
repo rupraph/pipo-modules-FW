@@ -26,7 +26,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-  //led setup
+  // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
   ledcSetup(1, PWM_FREQ, PWM_Resolution);
@@ -95,7 +95,7 @@ void HwUi::stop_pulse(int led_name) {
 void HwUi::blinker() {
   unsigned long current_millis = millis();
 
-  //loop through led_blink_table
+  // loop through led_blink_table
   for (auto& pair : led_blink_table) {
     int led_pin = pair.first;
     led_blink& led = led_blink_table[pair.first];
@@ -120,9 +120,10 @@ void HwUi::blinker() {
 }
 
 void HwUi::
-    pulse() {  //this should oscillate the led brightness between min and max brightness
+    pulse() {  // this should oscillate the led brightness between min and
+               // max brightness
   unsigned long current_millis = millis();
-  //loop through led_pulse_table
+  // loop through led_pulse_table
   for (auto& pair : led_pulse_table) {
     int led_pin = pair.first;
     led_pulse& led = led_pulse_table[pair.first];
