@@ -29,8 +29,10 @@
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
-  pipoio.on("sensor", ({ axis, value }) => {
+  const withinWindowValues: SensorValues<T> = {};
+  pipoio.on("sensor", ({ axis, value, withinWindow }) => {
     sensorValues[axis] = value;
+    withinWindowValues[axis] = withinWindow;
   });
   const options = [
     { label: "Note", value: "1" },

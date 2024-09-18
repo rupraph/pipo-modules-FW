@@ -250,11 +250,11 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
   Serial.println("config applied: " + filename);
   logs.writeLog("config applied: " + filename);
 }
-catch (const std::exception& e) {
-  Serial.println("error applying config");
-  Serial.println(e.what());
-}
-}
+// catch (const std::exception& e) {
+//   Serial.println("error applying config");
+//   Serial.println(e.what());
+// }
+// }
 
 String Config::get_path(String filename, bool addExtension) {
   if (addExtension) {
