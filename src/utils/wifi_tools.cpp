@@ -12,7 +12,7 @@ void setup_wifi() {
     Serial.println(F("Starting STA mode"));
 
     WiFi.mode(WIFI_STA);
-
+    WiFi.setMinSecurity(WIFI_AUTH_WPA_PSK);
     wm.setDarkMode(true);
     wm.setHostname(string(PIPO_TYPE).c_str());
     wm.setConnectTimeout(10);
