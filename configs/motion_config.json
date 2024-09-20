@@ -4,44 +4,32 @@
       "accX": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "accY": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "accZ": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "pitch": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "roll": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "yaw": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       }
     },
     "engine-midi": {

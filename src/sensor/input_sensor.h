@@ -20,6 +20,7 @@ struct SensorDat {
   // bool enabled;
   // bool inverted; // should likely move to output section
   float deadzone;  // supposed to be % of the total range. value for now
+  float inverted;
   float offset;
   bool invert;
   float value;  // should distinguish raw value from output value and have both

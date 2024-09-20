@@ -10,6 +10,7 @@ using json = nlohmann::json;
 // could use combination mode to have note from orientation, and trigger from
 // acceleration
 
+//Todo: could likely reorganise the loop through axis to be in update instead of being in each processor
 void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
                     OSC_handler& osc) {
   if (config.general_config["MidiEnabled"] == true) {
@@ -19,9 +20,9 @@ void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
   if (config.general_config["OSC_ENA"] == true) {
     osc_processor(sensor, osc);
   }
-  //if (config.general_config["HidEnabled"] == true) {
-  hid_processor(sensor, hidio);
-  //}
+  if (config.general_config["HidEnabled"] == true) {
+    hid_processor(sensor, hidio);
+  }
 }
 
 void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
@@ -176,36 +177,52 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = sensor.get_value(axis_name);
+    bool sensor_bool_val = sensor.get_bool_value(axis_name);
     float sensor_min = sensor.get_limit_min(axis_name);
     float sensor_max = sensor.get_limit_max(axis_name);
+    HidTranslator HID_translator = HID_translators[axis_name];
 
-    //keyboard
-    // does not allow multiple key presses yet while it could.
-    if (HID_translators[axis_name].get_enabled() == true)  // &&
-    // hidio.get_hid_mode() == 2)
-    {
+    if (HID_translator.get_enabled() == true) {
       if (HID_translators.find(axis_name) != HID_translators.end()) {
 
-        string key_adress = HID_translators[axis_name].get_map_address();
-        //stroke mode once
-        if (HID_translators[axis_name].get_stroke_mode() == false) {
-          if (sensor.get_trigger_flag(axis_name, HID)) {
-            hidio.keyboard_set_press(key_adress);
-            sensor.set_trigger_flag(axis_name, HID, false);
-          }
-        } else {
-          // strike mode maintained
-          if (sensor.get_bool_value(axis_name)) {
-            hidio.keyboard_set_press(key_adress);
-          }
+        string address = HID_translator.get_map_address();
+
+        switch ((int)config.general_config["HidMode"]) {
+          case 0:
+            //gamepad mode
+            break;
+          case 1:
+            hidio.mouse_update(address,
+                               HID_translator.get_mouse_int(
+                                   sensor_val, sensor_min, sensor_max),
+                               sensor_bool_val);
+            break;
+          case 2:
+            //stroke mode once
+            if (HID_translator.get_stroke_mode() == false) {
+              if (sensor.get_trigger_flag(axis_name, HID)) {
+                //Keyboard (it does not allow multiple key presses yet while it could)
+                hidio.keyboard_set_press(address);
+                // hidio.mouse_set_press(address);
+                sensor.set_trigger_flag(axis_name, HID, false);
+              }
+            } else {
+              // strike mode maintained
+              if (sensor_bool_val) {
+                hidio.keyboard_set_press(address);
+                // hidio.mouse_set_press(address);
+              }
+            }
+            break;
         }
+
       } else {
         Serial.println("key not found");
       }
-      hidio.keyboard_update();
+      hidio.update();
     }
+    hidio.keyboard_release();
   }
-  hidio.keyboard_release();
 }
 
 void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {

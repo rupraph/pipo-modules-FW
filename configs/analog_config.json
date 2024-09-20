@@ -4,86 +4,62 @@
       "A1": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "A2": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "A3": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "A4": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "A5": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "A6": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T1": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T2": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T3": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T4": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T5": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       },
       "T6": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "stroke_mode": true,
-        "output_max": 255,
-        "output_min": 0
+        "stroke_mode": true
       }
     },
     "engine-midi": {

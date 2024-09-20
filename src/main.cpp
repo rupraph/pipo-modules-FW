@@ -49,17 +49,17 @@ void setup() {
   /////// Init filesystem
   init_filesystem();
 
-  /////// Init midi and hid
-  midiio.setup();
-  hidio.usb_hid_setup();
-  // while (!Serial)
-  //   delay(100);
-
   /////// Load config
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
   config.apply(input_sens, engine, osc, false);  // input_sens,
+
+  /////// Init midi and hid
+  midiio.setup();
+  hidio.setup(config.general_config["HidMode"]);
+  // while (!Serial)
+  //   delay(100);
 
   /////// Init wifi
   setup_wifi();
