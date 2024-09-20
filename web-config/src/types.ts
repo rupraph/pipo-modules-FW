@@ -55,6 +55,15 @@ export type GeneralConfig = {
   OSC_ENA: boolean;
   OSC_IP: string;
   OSC_PORT: number;
+  MidiEnabled: boolean;
+  HidEnabled: boolean;
+  HidMode: number;
+};
+
+export type HidConfig = {
+  enabled: boolean;
+  map_address: string;
+  stroke_mode: boolean;
 };
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
@@ -91,6 +100,9 @@ export type Schema = {
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {
+    "engine-hid": {
+      [Key in PipoKeys[T]]: HidConfig;
+    };
     "engine-midi": {
       [Key in PipoKeys[T]]: MidiConfig;
     };

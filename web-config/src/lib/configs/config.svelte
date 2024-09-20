@@ -11,6 +11,7 @@
     type MidiConfig,
     type SensorConfig,
     type OscConfig,
+    type HidConfig,
     type PipoConfig,
     type PipoTypes,
     type SensorValues,
@@ -120,6 +121,13 @@
     ][];
   }
 
+  function getHidConf() {
+    return Object.entries(config.engine["engine-hid"]) as unknown as [
+      PipoKeys[T],
+      HidConfig,
+    ][];
+  }
+
   function getSchema(axis: PipoKeys[T]) {
     return schema[$type as T][axis];
   }
@@ -226,6 +234,28 @@
               <Range label="OSC Min" bind:value={oscconf.output_min} />
               <Range label="OSC Max" bind:value={oscconf.output_max} />
             {/if}
+          </Collapse>
+        </section>
+      {/each}
+    </Collapse>
+    <Collapse title="HID output">
+      <h4>Keyboard/Mouse mode settings</h4>
+      <Checkbox label="HID Enabled" bind:value={config.general.HidEnabled} />
+      <Select
+        label="HID Mode"
+        options={[
+          { label: "Keyboard", value: 2 },
+          { label: "Mouse", value: 1 },
+        ]}
+        bind:value={config.general.HidEnabled}
+      />
+      {#each getHidConf() as [axis, hidconf]}
+        {@const { label } = getSchema(axis)}
+        <section>
+          <Collapse title={label} bind:value={hidconf.enabled}>
+            <!-- <Checkbox label="Enabled" bind:value={hidconf.enabled} /> -->
+            <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
+            <Text label="Adress" bind:value={hidconf.map_address} />
           </Collapse>
         </section>
       {/each}
