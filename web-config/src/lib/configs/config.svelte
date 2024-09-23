@@ -161,10 +161,10 @@
     >
   </section>
   <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
-  <Collapse title="Sensor settings" open>
+  <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max, step } = getSchema(axis)}
-      <Collapse title={label} open>
+      <Collapse title={label}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
         is CONTINUOUS {isContinuousMode(sensorconf)}
