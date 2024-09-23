@@ -84,26 +84,26 @@ void usb_hid::update() {
 }
 
 void usb_hid::mouse_update(string key, float value, bool bool_value) {
-  if (key == "x") {
+  if (key == "X") {
     mouse.x = value;
   }
-  if (key == "y") {
+  if (key == "Y") {
     mouse.y = value;
   }
-  if (key == "wheel") {
+  if (key == "WHEEL") {
     mouse.wheel = value;
   }
-  if (key == "pan") {
+  if (key == "PAN") {
     mouse.pan = value;
   }
-  if (key == "left" && bool_value) {
+  if (key == "LEFT" && bool_value) {
     mouse.buttons |= MOUSE_BUTTON_LEFT;
-  } else if (key == "left" && !bool_value) {
+  } else if (key == "LEFT" && !bool_value) {
     mouse.buttons &= ~MOUSE_BUTTON_LEFT;
   }
-  if (key == "right" && bool_value) {
+  if (key == "RIGHT" && bool_value) {
     mouse.buttons |= MOUSE_BUTTON_RIGHT;
-  } else if (key == "right" && !bool_value) {
+  } else if (key == "RIGHT" && !bool_value) {
     mouse.buttons &= ~MOUSE_BUTTON_RIGHT;
   }
 }

@@ -4,7 +4,7 @@
       "accX": {
         "enabled": false,
         "map_address": "KEY_DOWN",
-        "map_address2": "",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "accY": {
