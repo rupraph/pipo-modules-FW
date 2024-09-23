@@ -50,7 +50,7 @@ export const schema: Schema = {
       label: "Distance",
       unit: "cm",
       min: 0,
-      max: 50,
+      max: 400,
       step: 1,
     },
   },

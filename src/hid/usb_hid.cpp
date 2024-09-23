@@ -29,7 +29,7 @@ void usb_hid::setup(int hid_mode) {
     case 1:
       usb_hid_port.setReportDescriptor(mouse_hid_report,
                                        sizeof(mouse_hid_report));
-      usb_hid_port.setStringDescriptor("PiPo Keyboard");
+      usb_hid_port.setStringDescriptor("PiPo Mouse");
       break;
     case 2:
       usb_hid_port.setReportDescriptor(key_hid_report, sizeof(key_hid_report));
@@ -83,28 +83,27 @@ void usb_hid::update() {
   }
 }
 
-void usb_hid::mouse_update(string key, float sensor_value,
-                           bool sensor_bool_value) {
+void usb_hid::mouse_update(string key, float value, bool bool_value) {
   if (key == "x") {
-    mouse.x = sensor_value;
+    mouse.x = value;
   }
   if (key == "y") {
-    mouse.y = sensor_value;
+    mouse.y = value;
   }
   if (key == "wheel") {
-    mouse.wheel = sensor_value;
+    mouse.wheel = value;
   }
   if (key == "pan") {
-    mouse.pan = sensor_value;
+    mouse.pan = value;
   }
-  if (key == "left" && sensor_bool_value) {
+  if (key == "left" && bool_value) {
     mouse.buttons |= MOUSE_BUTTON_LEFT;
-  } else if (key == "left" && !sensor_bool_value) {
+  } else if (key == "left" && !bool_value) {
     mouse.buttons &= ~MOUSE_BUTTON_LEFT;
   }
-  if (key == "right" && sensor_bool_value) {
+  if (key == "right" && bool_value) {
     mouse.buttons |= MOUSE_BUTTON_RIGHT;
-  } else if (key == "right" && !sensor_bool_value) {
+  } else if (key == "right" && !bool_value) {
     mouse.buttons &= ~MOUSE_BUTTON_RIGHT;
   }
 }

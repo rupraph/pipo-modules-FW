@@ -22,12 +22,10 @@ class OSC_handler;
 class Config {
  public:
   Config() {
-    general_config = {
-        {"Wifi_mode", "STA"},
-        {"OSC_ENA", true},
-        {"OSC_PORT", 8000},
-        {"OSC_IP", "0.0.0.0"},
-    };
+    general_config = {{"Wifi_mode", "STA"},  {"OSC_ENA", true},
+                      {"OSC_PORT", 8000},    {"OSC_IP", "0.0.0.0"},
+                      {"MidiEnabled", true}, {"HidEnabled", true},
+                      {"HidMode", 2}};
   }
   String filename;  // raw config file name (no extension)
   json current_config;

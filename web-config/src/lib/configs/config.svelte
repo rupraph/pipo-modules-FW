@@ -247,15 +247,40 @@
           { label: "Keyboard", value: 2 },
           { label: "Mouse", value: 1 },
         ]}
-        bind:value={config.general.HidEnabled}
+        bind:value={config.general.HidMode}
       />
+      <h4>Please restart Pipo after enabling or switching HID mode</h4>
       {#each getHidConf() as [axis, hidconf]}
         {@const { label } = getSchema(axis)}
         <section>
+          <h4>
+            NOTE: The available mapping options below will depend on the sensor
+            and Hid mode
+          </h4>
           <Collapse title={label} bind:value={hidconf.enabled}>
-            <!-- <Checkbox label="Enabled" bind:value={hidconf.enabled} /> -->
-            <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
-            <Text label="Adress" bind:value={hidconf.map_address} />
+            {#if config.sensor[axis].mode === true && config.general.HidMode === 2}
+              <h4>
+                Map a keyboard key. Address format for "u" would be: "KEY_u" (or
+                KEY_UP,KEY_ENTER,...)
+              </h4>
+              <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
+              <Text label="Address" bind:value={hidconf.map_address} />
+            {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
+              <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
+              <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
+              <Text label="Address" bind:value={hidconf.map_address} />
+            {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
+              <h4>
+                Not possible to map a continuous sensor axis to a key stoke
+                (must change to Threshold mode)
+              </h4>
+            {:else if config.sensor[axis].mode === false && config.general.HidMode === 1}
+              <h4>
+                Map a continuous sensor axis to a mouse axis (Address can be
+                "X","Y","WHEEL","PAN")
+              </h4>
+              <Text label="Address" bind:value={hidconf.map_address} />
+            {/if}
           </Collapse>
         </section>
       {/each}

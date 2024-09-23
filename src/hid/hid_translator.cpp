@@ -33,7 +33,9 @@ int HidTranslator::get_current_int(float value, float input_min,
 
 int8_t HidTranslator::get_mouse_int(float value, float input_min,
                                     float input_max) {
-  int8_t mapped_value = map_linear(value, input_min, input_max, -127, 127);
+  int8_t mapped_value =
+      map_linear(value, input_min, input_max, -32,
+                 32);  //mouse is btw -127 and 127 but this would move very fast
   return mapped_value;
 }
 
