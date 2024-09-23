@@ -186,6 +186,7 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
       if (HID_translators.find(axis_name) != HID_translators.end()) {
 
         string address = HID_translator.get_map_address();
+        string address2 = HID_translator.get_map_address2();
 
         switch ((int)config.general_config["HidMode"]) {
           case 0:
@@ -208,9 +209,23 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
               }
             } else {
               // strike mode maintained
-              if (sensor_bool_val) {
-                hidio.keyboard_set_press(address);
-                // hidio.mouse_set_press(address);
+              if (!sensor.get_threshold_mode(axis_name)) {
+                if (sensor_bool_val) {
+                  hidio.keyboard_set_press(address);
+                  // hidio.mouse_set_press(address);
+                }
+              } else {
+                if (!sensor_bool_val) {
+                  if (sensor.get_value(axis_name) >
+                      sensor.get_limit_max(axis_name)) {
+                    hidio.keyboard_set_press(address);
+                  }
+                  if (sensor.get_value(axis_name) <
+                      sensor.get_limit_min(axis_name)) {
+                    hidio.keyboard_set_press(address2);
+                  }
+                  // hidio.mouse_set_press(address);
+                }
               }
             }
             break;

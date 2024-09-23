@@ -63,6 +63,7 @@ export type GeneralConfig = {
 export type HidConfig = {
   enabled: boolean;
   map_address: string;
+  map_address2: string;
   stroke_mode: boolean;
 };
 

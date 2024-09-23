@@ -4,31 +4,37 @@
       "accX": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "",
         "stroke_mode": true
       },
       "accY": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "accZ": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "pitch": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "roll": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "yaw": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       }
     },

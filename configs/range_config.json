@@ -4,6 +4,7 @@
       "dist": {
         "enabled": true,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       }
     },

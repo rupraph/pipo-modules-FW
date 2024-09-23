@@ -263,11 +263,20 @@
                 Map a keyboard key. Address format for "u" would be: "KEY_u" (or
                 KEY_UP,KEY_ENTER,...)
               </h4>
-              <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
+              <Checkbox
+                label="Stroke continuous"
+                bind:value={hidconf.stroke_mode}
+              />
               <Text label="Address" bind:value={hidconf.map_address} />
+              {#if hidconf.stroke_mode && config.sensor[axis].threshold_mode === true}
+                <Text label="Address2" bind:value={hidconf.map_address2} />
+              {/if}
             {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
               <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
-              <Checkbox label="Stroke once" bind:value={hidconf.stroke_mode} />
+              <Checkbox
+                label="Stroke continuous"
+                bind:value={hidconf.stroke_mode}
+              />
               <Text label="Address" bind:value={hidconf.map_address} />
             {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
               <h4>

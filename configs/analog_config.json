@@ -4,61 +4,73 @@
       "A1": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_DOWN",
         "stroke_mode": true
       },
       "A2": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "A3": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "A4": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "A5": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "A6": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T1": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T2": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T3": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T4": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T5": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       },
       "T6": {
         "enabled": false,
         "map_address": "KEY_DOWN",
+        "map_address2": "KEY_UP",
         "stroke_mode": true
       }
     },
@@ -424,6 +436,6 @@
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": true,
-    "HidMode": 2
+    "HidMode": 1
   }
 }
