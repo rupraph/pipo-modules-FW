@@ -116,3 +116,10 @@ export type InputMinMax = {
     };
   };
 };
+
+export type PipoInfo = {
+  mac: string;
+  ip: string;
+  type: string;
+  name: string;
+};

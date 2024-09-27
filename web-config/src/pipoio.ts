@@ -9,10 +9,11 @@ function parse(msg: string) {
   const axis = isSensor ? command.replace("sensor", "") : "";
   return { command, args, axis, isSensor };
 }
-class PipoInput extends EventEmitter<PipoEvents> {
+class PipoIO extends EventEmitter<PipoEvents> {
   private socket?: WebSocket;
   private enabled: boolean = true;
   private timeout: number = 0;
+  private bailTimeout = 0;
   constructor() {
     super();
     this.init();
@@ -38,25 +39,34 @@ class PipoInput extends EventEmitter<PipoEvents> {
       }
     }, 1000);
   }
+  onDisconnect() {
+    if (this.socket) {
+      this.socket.close();
+    }
+    this.emit("disconnect");
+    if (!this.enabled) return;
+    this.retryConnection();
+  }
+  bailOnNoNews(delay = 1000) {
+    clearTimeout(this.bailTimeout);
+    this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
+  }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
       ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
+    this.bailOnNoNews(2000);
     socket.addEventListener("open", (event) => {
+      clearTimeout(this.bailTimeout);
+      this.emit("connect");
       console.log("Connected to Pipo");
     });
-    socket.addEventListener("error", (e) => {
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
-    socket.addEventListener("close", (e) => {
-      this.socket = undefined;
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
+    socket.addEventListener("error", () => this.onDisconnect());
+    socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
+      this.bailOnNoNews(2000);
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
@@ -85,9 +95,22 @@ class PipoInput extends EventEmitter<PipoEvents> {
           const [frames, dt] = numargs;
           return this.emit("fps", { frames, dt });
         }
+        if (command === "logs") {
+          console.log("logs", e.data);
+          const entries = args[0].split("--");
+          return this.emit("logs", { entries });
+        }
       });
     });
-    this.socket = socket;
+  }
+
+  setValue(path: string, value: unknown) {
+    if (!this.socket) return;
+    this.socket.send(`config:${path}:${value}`);
+  }
+  saveConfig() {
+    if (!this.socket) return;
+    this.socket.send(`save`);
   }
   async initWebMidi() {
     const access = await navigator.permissions.query({
@@ -124,4 +147,4 @@ class PipoInput extends EventEmitter<PipoEvents> {
   }
 }
 
-export const pipoInput = new PipoInput();
+export const pipoio = new PipoIO();

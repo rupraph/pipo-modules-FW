@@ -1,7 +1,8 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import { pipoInput } from "../../pipoinput";
+  import { configSave } from "../../services/config";
 
-  import { createEventDispatcher } from "svelte";
+  import { pipoio } from "../../pipoio";
+  import { createEventDispatcher, onMount } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
@@ -29,29 +30,14 @@
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
   const withinWindowValues: SensorValues<T> = {};
-  let fps = 0;
-  let frames = 0;
-  let dt = 0;
-  pipoInput.on("sensor", ({ axis, value, withinWindow }) => {
+  pipoio.on("sensor", ({ axis, value, withinWindow }) => {
     sensorValues[axis] = value;
     withinWindowValues[axis] = withinWindow;
-  });
-  pipoInput.on("fps", (evt) => {
-    frames = evt.frames;
-    dt = evt.dt;
   });
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
   ];
-
-  function submit2() {
-    axios({
-      method: "post",
-      url: "/save",
-      params: { config: JSON.stringify(config) },
-    }).then(() => console.log("DONE"));
-  }
 
   async function submit() {
     console.log("submitting", JSON.stringify(config, 0, 2));
@@ -66,19 +52,6 @@
       url: "/save",
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
-    }).then(() => console.log("DONE"));
-  }
-
-  function test() {
-    const blob = new Blob([JSON.stringify(config)], {
-      type: "application/json",
-    });
-    const data = new FormData();
-    data.append("config.json", blob);
-    axios({
-      method: "post",
-      url: "/config",
-      params: { config: JSON.stringify(config) },
     }).then(() => console.log("DONE"));
   }
 
@@ -134,6 +107,9 @@
       console.log("Rebooting...");
     });
   }
+  onMount(() => {
+    setInterval(() => configSave.update(config), 1000);
+  });
 </script>
 
 <article class="config">
@@ -152,17 +128,19 @@
       title="Apply and save the config in pipo">Set & Save</button
     >
   </section>
-  <p>FPS: {dt === 0 ? `000` : Math.round((frames / dt) * 1000)}</p>
-  <Collapse title="Sensor settings" open>
+  <Collapse title="Sensor settings">
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max, step } = getSchema(axis)}
       <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-        <Range label="Deadzone" bind:value={sensorconf.deadzone} />
-        is CONTINUOUS {isContinuousMode(sensorconf)}
-        is HISTERESIS {isHisteresisMode(sensorconf)}
-        <Checkbox label="Mode" bind:value={sensorconf.mode} />
-        <Checkbox label="Histeresis" bind:value={sensorconf.threshold_mode} />
+
+        <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
+        {#if sensorconf.mode === true}
+          <Checkbox
+            label="Window threshold"
+            bind:value={sensorconf.threshold_mode}
+          />
+        {/if}
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
@@ -178,6 +156,7 @@
           minLabel={`min (${unit})`}
           maxLabel={`max (${unit})`}
         />
+        <!-- <Range label="Deadzone" bind:value={sensorconf.deadzone} /> -->
       </Collapse>
     {/each}
   </Collapse>

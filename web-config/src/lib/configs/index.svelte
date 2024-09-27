@@ -1,7 +1,7 @@
 <script lang="ts">
   import axios from "axios";
   import Config from "./config.svelte";
-
+  import { configSave } from "../../services/config";
   import Tabs from "./tabs.svelte";
   import { onError } from "../../utils";
   import type { PipoConfig } from "../../types";
@@ -37,6 +37,7 @@
       ).data;
       // Format numbers in the config object
       config = formatNumbers(config, 4);
+      configSave.set(config);
       return {
         names,
         active,

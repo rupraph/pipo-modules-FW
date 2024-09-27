@@ -42,7 +42,7 @@
 
 <Input
   class="minmax-input"
-  label={`Raw sensor value: ${Number(value).toFixed(3)}`}
+  label={`Current value: ${Number(value).toFixed(2)} `}
   {id}
 >
   <div class="minmax">

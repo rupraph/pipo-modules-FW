@@ -16,7 +16,7 @@ void AnalogSensor::setup() {
 #endif
 }
 
-//Todo: add function to perform individual offset or of provided list
+// Todo: add function to perform individual offset or of provided list
 
 void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
@@ -46,7 +46,7 @@ void AnalogSensor::measure_offset_all() {
 
 void AnalogSensor::update() {
   for (auto const& pair : analog_map) {
-    float analog_val = analogRead(pair.second) * 0.000806;  //convert to volts
+    float analog_val = analogRead(pair.second) * 0.000806;  // convert to volts
 
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
     sensor_dat[pair.first].value = analog_val;

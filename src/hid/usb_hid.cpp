@@ -8,8 +8,8 @@ Adafruit_USBD_HID usb_hid_port;
 // - For Gamepad Hat    Bit Mask see  hid_gamepad_hat_t
 
 usb_hid::usb_hid() {
-  //usb_hid_port;
-  //hid_gamepad_report_t gp;
+  // usb_hid_port;
+  // hid_gamepad_report_t gp;
 }
 
 void usb_hid::usb_hid_setup() {
