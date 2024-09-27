@@ -88,9 +88,9 @@ void Config::save(String filename) {
 }
 
 void Config::save(String filename, String config) {
-  logs.writeLog("save config: " + filename);
-  Serial.println("save config: " + filename);
-  writeFile(LittleFS, get_path(filename, false).c_str(), config.c_str());
+  // logs.writeLog("save config: " + filename);
+  // Serial.println("save config: " + filename);
+  writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
 }
 
 void Config::delete_config(String filename) {
@@ -157,11 +157,15 @@ std::vector<std::string> Config::split(const std::string& str, char delimiter) {
   return tokens;
 }
 
+void Config::setValues(String input) {
+  std::vector<std::string> lines = split(input.c_str(), '\n');
+  for (size_t i = 0; i < lines.size(); ++i) {
+    setValue(String(lines[i].c_str()));
+  }
+}
 void Config::setValue(String input) {
-  Serial.println("set value: " + input);
-  std::string path_value = input.c_str();
   // Split the input into path and value
-  std::vector<std::string> path_and_value = split(path_value, ':');
+  std::vector<std::string> path_and_value = split(input.c_str(), ':');
   if (path_and_value.size() != 2) {
     throw std::invalid_argument("Input format should be 'path/to/key: value'");
   }
@@ -175,38 +179,25 @@ void Config::setValue(String input) {
   // Traverse the JSON object using the keys
   json* current = &current_config;
   for (size_t i = 0; i < keys.size() - 1; ++i) {
-    Serial.print(keys[i].c_str());
     if (current->contains(keys[i])) {
-      Serial.println(" exists ");
       current = &(*current)[keys[i]];
     } else {
-      Serial.println(" does not exist ");
-
       // Create a new JSON object at this level if the key doesn't exist
       (*current)[keys[i]] = json::object();
       current = &(*current)[keys[i]];
     }
   }
-  Serial.print("Before Assign ");
-  Serial.println(current->dump().c_str());
-
   json* target = &(*current)[keys.back()];
   // Assign the value to the final key
   if (target->type() == json::value_t::string) {
-    Serial.println("assigning string");
     (*current)[keys.back()] = value;
   } else if (target->type() == json::value_t::number_integer) {
-    Serial.println("assigning integer");
     (*current)[keys.back()] = std::stoi(value);
   } else if (target->type() == json::value_t::number_float) {
-    Serial.println("assigning float");
     (*current)[keys.back()] = std::stof(value);
   } else if (target->type() == json::value_t::boolean) {
-    Serial.println("assigning boolean");
     (*current)[keys.back()] = value == "true";
   }
-  Serial.print("After Assign ");
-  Serial.println(current->dump().c_str());
 }
 
 void Config::print() {
@@ -238,16 +229,12 @@ void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
   engine.set_config(current_config["engine"]);
   general_config.clear();
   general_config = current_config["general"];
-  // log last config name
-  // writeFile(LittleFS, last_config_path, filename.c_str());
   /*TODO: improve:
   either pass the json to apply and avoid passing cofig object
    to osc class, or follow the same config process than sensor
    and engine instead of being in the general config...
   */
   osc.set_config();
-
-  Serial.println("config applied: " + filename);
   logs.writeLog("config applied: " + filename);
 }
 // catch (const std::exception& e) {

@@ -39,6 +39,7 @@ class Config {
 
   void set(const json& config);
   void setValue(String input);
+  void setValues(String input);
   void save();
   void save(String filename);
   void save(String filename, String config);

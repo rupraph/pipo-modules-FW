@@ -51,7 +51,7 @@
     {#each logs as log}
       <span class="log {log.type}"
         ><bold>{log.timestamp}</bold>
-        <p>{log.message}</p></span
+        <p>{log.message} {log.type}</p></span
       >
     {/each}
   </div>

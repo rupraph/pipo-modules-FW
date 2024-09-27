@@ -5,6 +5,7 @@
   import Tabs from "./tabs.svelte";
   import { onError } from "../../utils";
   import type { PipoConfig } from "../../types";
+  import { pipoio } from "../../pipoio";
 
   let fetchError: string;
   let error: string;
@@ -37,6 +38,7 @@
       ).data;
       // Format numbers in the config object
       config = formatNumbers(config, 4);
+      console.log("ACTIVE", config);
       configSave.set(config);
       return {
         names,
@@ -54,6 +56,9 @@
   }
 
   let state = fetch();
+  pipoio.on("connect", () => {
+    state = fetch();
+  });
 
   function onClick(name: string) {
     return axios({
@@ -139,6 +144,7 @@
         {#if resp.config}
           <Config
             config={resp.config}
+            name={resp.active}
             on:delete={() => onDelete(resp.active)}
           />
         {/if}

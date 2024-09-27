@@ -56,27 +56,35 @@
   ];
 </script>
 
-<Tooltip title="You are in threshold mode, this value is ignored.">
+<Tooltip
+  title="You are in threshold mode, this value is ignored."
+  enabled={isThresholdMode}
+>
   <Select
-    class="disabled"
+    class={isThresholdMode ? "disabled" : ""}
     label="Scale type"
     options={scaleTypes}
     bind:value={config.scaleType}
   />
 </Tooltip>
 <NoteInput label="Root Note" bind:value={config.rootNote} />
-<Range
-  class="disabled"
-  on:mousemove={() => console.log("hover")}
-  on:click={() => console.log("click")}
-  on:mouseenter={() => console.log("enter")}
-  on:mouseleave={() => console.log("leave")}
-  label="Number of Notes"
-  tooltip="You are in threshold mode, this value is ignored."
-  bind:value={config.numberOfNotes}
-  min={1}
-  max={50}
-/>
+<Tooltip
+  title="You are in threshold mode, this value is ignored."
+  enabled={isThresholdMode}
+>
+  <Range
+    class={isThresholdMode ? "disabled" : ""}
+    on:mousemove={() => console.log("hover")}
+    on:click={() => console.log("click")}
+    on:mouseenter={() => console.log("enter")}
+    on:mouseleave={() => console.log("leave")}
+    label="Number of Notes"
+    tooltip="You are in threshold mode, this value is ignored."
+    bind:value={config.numberOfNotes}
+    min={1}
+    max={50}
+  />
+</Tooltip>
 <Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
 
 <style>

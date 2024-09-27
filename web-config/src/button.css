@@ -14,6 +14,12 @@ button {
   outline-style: none;
   padding: 0 18px;
   text-align: center;
+  border: 1px solid transparent;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.25s;
 }
 button:hover {
   filter: brightness(120%);
@@ -26,4 +32,15 @@ button.primary {
 button.error{
   color: white;
   background-color: var(--red);
+}
+button.success{
+  color:white;
+  background-color: var(--green);
+}
+button.active {
+  transform: scale(0.95);
+  box-shadow: none;
+}
+button.disabled {
+ cursor: not-allowed;
 }

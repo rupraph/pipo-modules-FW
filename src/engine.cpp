@@ -308,7 +308,6 @@ void Engine::set_config(json& config, bool debug) {
       Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
     }
   }
-  Serial.println("midi config set");
   // set hid config from general config
   json jhid = config["engine-hid"];
   for (auto const& pair : hid_map) {
@@ -316,13 +315,10 @@ void Engine::set_config(json& config, bool debug) {
       hid_map[pair.first].set_from_json(jhid[pair.first]);
     }
   }
-  Serial.println("hid config set");
-
   json josc = config["engine-osc"];
   for (auto const& pair : Osctranslators) {
     if (josc.find(pair.first) != josc.end()) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
   }
-  Serial.println("osc config set");
 }

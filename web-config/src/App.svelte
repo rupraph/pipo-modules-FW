@@ -78,7 +78,7 @@
   </div>
 
   {#if error}
-    <p class="error">{error}</p>
+    <!-- <p class="error">{error}</p> -->
   {/if}
   <Configs />
 
@@ -111,9 +111,6 @@
     justify-content: space-around;
     align-items: center;
     max-width: 600px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 100vh;
   }
 
   .pattern-image {

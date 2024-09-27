@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { teleport } from "./index";
   export let title = "";
+  export let enabled = false;
   let isHovered = false;
   let x: number;
   let y: number;
@@ -11,10 +13,9 @@
       y: by,
       width,
       height,
-    } = event.target!.getBoundingClientRect();
-    x = event.clientX; //+ width / 2 + 5;
-    y = event.clientY; // + height / 2 + 5;
-    console.log("x", x, "y", y);
+    } = event.currentTarget!.getBoundingClientRect();
+    x = bx;
+    y = by + height + 5;
   }
   function mouseMove(event: MouseEvent) {
     const {
@@ -22,9 +23,9 @@
       y: by,
       width,
       height,
-    } = event.target!.getBoundingClientRect();
-    x = event.clientX; //+ width / 2 + 5;
-    y = event.clientY; // + height / 2 + 5;
+    } = event.currentTarget!.getBoundingClientRect();
+    x = bx;
+    y = by + height + 5;
   }
   function mouseLeave() {
     isHovered = false;
@@ -38,9 +39,10 @@
 >
   <slot />
 </div>
-
-{#if isHovered}
-  <div style="transform: translate({x}px, {y}px)" class="tooltip">{title}</div>
+{#if isHovered && enabled}
+  <div use:teleport style="transform: translate({x}px, {y}px)" class="tooltip">
+    {title}
+  </div>
 {/if}
 
 <style>
@@ -48,11 +50,12 @@
     /* transform: translate(-50%, 0); */
     border: 1px solid #ddd;
     box-shadow: 1px 1px 1px #ddd;
-    background: white;
+    background-color: var(--bg-color);
     border-radius: 4px;
     padding: 4px;
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1000;
   }
 </style>

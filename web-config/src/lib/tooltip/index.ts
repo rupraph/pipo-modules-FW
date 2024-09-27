@@ -42,3 +42,9 @@ export function tooltip(element: HTMLElement) {
     },
   };
 }
+
+export function teleport(node, name = 'teleport-container') {
+  let teleportContainer = document.getElementById(name);
+  teleportContainer?.appendChild(node);
+  teleportContainer.focus(); // optional
+}

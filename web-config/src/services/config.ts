@@ -27,18 +27,20 @@ class ConfigSave<T extends PipoTypes> {
     return diff;
   }
 
-  update(config: PipoConfig<T>) {
+  async update(config: PipoConfig<T>) {
     if (!this.previousConfig) return;
     const diff = this.diff(this.previousConfig, config);
     if (!diff.length) return;
     this.previousConfig = JSON.parse(JSON.stringify(config));
-    diff.forEach(({ path, value }) => {
+    pipoio.setValues(diff);
+    for (const { path, value } of diff) {
       pipoio.setValue(path, value);
-    });
-    pipoio.saveConfig();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    pipoio.saveConfig(config);
   }
   set(config: PipoConfig<T>) {
-    this.previousConfig = config;
+    this.previousConfig = JSON.parse(JSON.stringify(config));
   }
 }
 

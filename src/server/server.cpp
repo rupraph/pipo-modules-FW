@@ -201,21 +201,14 @@ void PipoServer::setup_requests() {
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());  // 44k remaining
 #endif
-
-            config.save(config.filename + ".json", received_configData.c_str());
-
+            config.save(config.filename, received_configData.c_str());
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif
-
-            config.load_config(config.filename, true);
-
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif
-
             received_configData.clear();
-            config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Config saved");
           }
         } catch (const std::exception& e) {
@@ -254,16 +247,29 @@ void PipoServer::setup_requests() {
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Pong");
   });
+  server.on("/conf-debug", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    request->send(200, "text/plain", config.current_config.dump().c_str());
+  });
 }
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
-  if (message.startsWith("config:")) {
-    config.setValue(message.substring(7));
-    config.apply(input_sens, engine, osc, true);
+  try {
+
+    if (message.startsWith("config:")) {
+      config.setValue(message.substring(7));
+      config.apply(input_sens, engine, osc, true);
+    }
+    if (message.startsWith("configs:")) {
+      config.setValues(message.substring(8));
+      config.apply(input_sens, engine, osc, true);
+    }
+    if (message.startsWith("save")) {
+      config.save();
+    }
+  } catch (const std::exception& e) {
+    logs.writeError("error on message" + String(e.what()));
+    Serial.println("error on message");
+    Serial.println(e.what());
   }
-  if (message.startsWith("save")) {
-    config.save();
-  }
-  // client->text("I got your message");
 }
 void PipoServer::setup_ws() {
   server.addHandler(&ws);
@@ -319,9 +325,6 @@ void PipoServer::setup_ws() {
             msg += ' ';
           }
         }
-        // Serial.printf("%s\n", msg.c_str());
-        Serial.print(msg);
-
         if (info->opcode == WS_TEXT)
           onMessage(client, msg);
       } else {

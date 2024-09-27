@@ -16,12 +16,6 @@
     })
     .on("disconnect", () => {
       fps = 0;
-    })
-    .on("connect", () => {
-      console.log("SHOULD FUCKING SEND");
-      setTimeout(() => {
-        pipoio.setValue("engine/engine-midi/yaw/channel", 10);
-      }, 500);
     });
 </script>
 

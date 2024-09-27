@@ -26,8 +26,11 @@
   import Range from "../form/Range.svelte";
   import Text from "../form/Text.svelte";
   import Select from "../form/Select.svelte";
+  import LoadingButton from "../form/LoadingButton.svelte";
   export let config: PipoConfig<T>;
+  export let name: string;
   const dispatch = createEventDispatcher();
+  let savingStatus = "none";
   const sensorValues: SensorValues<T> = {};
   const withinWindowValues: SensorValues<T> = {};
   pipoio.on("sensor", ({ axis, value, withinWindow }) => {
@@ -39,20 +42,33 @@
     { label: "CC", value: "0" },
   ];
 
-  async function submit() {
-    console.log("submitting", JSON.stringify(config, 0, 2));
+  function submit() {
+    savingStatus = "loading";
     const blob = new Blob([JSON.stringify(config)], {
       type: "application/json",
     });
     const formData = new FormData();
-    formData.append("file", blob, "thisconfig.json"); //maybe we could pass the right name here
-
-    await axios({
-      method: "post",
-      url: "/save",
-      data: formData,
-      headers: { "Content-Type": "multipart/form-data" },
-    }).then(() => console.log("DONE"));
+    formData.append("file", blob, name);
+    Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      axios({
+        method: "post",
+        url: "/save",
+        data: formData,
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
+    ])
+      .then(() => {
+        savingStatus = "success";
+      })
+      .catch(() => {
+        savingStatus = "error";
+      })
+      .finally(() => {
+        setTimeout(() => {
+          savingStatus = "none";
+        }, 1000);
+      });
   }
 
   function download() {
@@ -108,7 +124,7 @@
     });
   }
   onMount(() => {
-    setInterval(() => configSave.update(config), 1000);
+    setInterval(() => configSave.update({ ...config }), 2000);
   });
 </script>
 
@@ -122,10 +138,16 @@
       on:click={download}
       title="Download the config file locally">Download config</button
     >
-    <button
-      class="primary"
-      on:click={submit}
-      title="Apply and save the config in pipo">Set & Save</button
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
     >
   </section>
   <Collapse title="Sensor settings">
@@ -160,12 +182,12 @@
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings">
-    <Collapse title="Midi Output">
+  <Collapse title="Data Output settings" open>
+    <Collapse title="Midi Output" open>
       {#each getMidiConfigs() as [axis, midiconfig]}
         {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title={label} bind:value={midiconfig.enabled}>
+          <Collapse title={label} bind:value={midiconfig.enabled} open>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"
