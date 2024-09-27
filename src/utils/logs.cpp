@@ -2,12 +2,12 @@
 
 LittleLogs logs;
 void LittleLogs::writeLog(String log, int type) {
+  if (allLogs.length() > 1000) {
+    allLogs = "";
+  }
   int date = millis();
   newLogs = true;
   allLogs += String(date) + ":" + "(" + type + ")" + log + "--";
-  if (allLogs.length() > 1000) {
-    allLogs = allLogs.substring(500);
-  }
 }
 void LittleLogs::writeWarning(String log) {
   writeLog(log, 1);
