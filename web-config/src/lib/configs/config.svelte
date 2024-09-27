@@ -149,10 +149,10 @@
       title="Apply and save the config in pipo">Save</LoadingButton
     >
   </section>
-  <Collapse title="Sensor settings">
+  <Collapse title="Sensor settings" open>
     {#each getSensorConf() as [axis, sensorconf]}
       {@const { label, unit, min, max, step } = getSchema(axis)}
-      <Collapse title={label}>
+      <Collapse title={label} open>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
         <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
@@ -181,12 +181,12 @@
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings" open>
-    <Collapse title="Midi Output" open>
+  <Collapse title="Data Output settings">
+    <Collapse title="Midi Output">
       {#each getMidiConfigs() as [axis, midiconfig]}
         {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title={label} bind:value={midiconfig.enabled} open>
+          <Collapse title={label} bind:value={midiconfig.enabled}>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"

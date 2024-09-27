@@ -47,7 +47,6 @@
 >
   <div class="minmax">
     <span>{min}</span>
-    {cursorActive}
     <div class="slider">
       <div class="slider-track" style="--background-color: {color}"></div>
       <input
