@@ -17,6 +17,15 @@
 </span>
 
 <style>
+  .input.disabled,
+  .input.disabled > :global(*) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .input.disabled > .input-wrapper :global(input),
+  .input.disabled > .input-wrapper :global(div) {
+    pointer-events: none;
+  }
   .minmax-input {
     grid-auto-flow: column;
     grid-template-rows: auto auto;

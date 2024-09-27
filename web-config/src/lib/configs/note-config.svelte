@@ -3,7 +3,10 @@
   import NoteInput from "../form/NoteInput.svelte";
   import Range from "../form/Range.svelte";
   import Select from "../form/Select.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
+
   export let config: NoteConfig & BaseMidiConfig;
+  export let isThresholdMode = false;
 
   // this is currently defined both on pipo and config side.
   const scaleTypes = [
@@ -53,11 +56,23 @@
   ];
 </script>
 
-<Select label="Scale type" options={scaleTypes} bind:value={config.scaleType} />
-<!-- <Range label="Root Note" bind:value={config.rootNote} min={0} max={127} /> -->
+<Tooltip title="You are in threshold mode, this value is ignored.">
+  <Select
+    class="disabled"
+    label="Scale type"
+    options={scaleTypes}
+    bind:value={config.scaleType}
+  />
+</Tooltip>
 <NoteInput label="Root Note" bind:value={config.rootNote} />
 <Range
+  class="disabled"
+  on:mousemove={() => console.log("hover")}
+  on:click={() => console.log("click")}
+  on:mouseenter={() => console.log("enter")}
+  on:mouseleave={() => console.log("leave")}
   label="Number of Notes"
+  tooltip="You are in threshold mode, this value is ignored."
   bind:value={config.numberOfNotes}
   min={1}
   max={50}

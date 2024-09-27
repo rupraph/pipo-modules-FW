@@ -35,10 +35,9 @@
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
-  $: mode === "double" || mode === "single",
-    () => {
-      color = fillColor();
-    };
+  $: if (mode) {
+    color = fillColor();
+  }
 </script>
 
 <Input
