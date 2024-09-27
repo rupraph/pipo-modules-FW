@@ -47,7 +47,7 @@ class PipoIO extends EventEmitter<PipoEvents> {
     if (this.socket) {
       this.socket.close();
     }
-    this.emit("disconnect");
+    // this.emit("disconnect");
     if (!this.enabled) return;
     this.retryConnection();
   }

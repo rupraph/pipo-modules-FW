@@ -38,8 +38,6 @@
       ).data;
       // Format numbers in the config object
       config = formatNumbers(config, 4);
-      console.log("ACTIVE", config);
-      configSave.set(config);
       return {
         names,
         active,

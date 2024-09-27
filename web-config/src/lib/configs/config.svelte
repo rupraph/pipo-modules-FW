@@ -181,12 +181,12 @@
       </Collapse>
     {/each}
   </Collapse>
-  <Collapse title="Data Output settings">
-    <Collapse title="Midi Output">
+  <Collapse title="Data Output settings" open>
+    <Collapse title="Midi Output" open>
       {#each getMidiConfigs() as [axis, midiconfig]}
         {@const { label } = getSchema(axis)}
         <section>
-          <Collapse title={label} bind:value={midiconfig.enabled}>
+          <Collapse title={label} bind:value={midiconfig.enabled} open>
             <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
             <Range
               label="Midi Channel"
