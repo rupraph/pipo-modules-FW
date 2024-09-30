@@ -104,6 +104,15 @@ export type PipoConfig<T extends PipoTypes> = {
   };
 };
 
+export type SmoothSensorValue = {
+  old: number;
+  new: number;
+  dt: number;
+  timestamp: number;
+};
+export type SmoothSensorValues<T extends PipoTypes> = {
+  [Key in PipoKeys[T]]: SmoothSensorValue;
+};
 export type SensorValues<T extends PipoTypes> = {
   [Key in PipoKeys[T]]: number | undefined;
 };

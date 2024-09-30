@@ -2,6 +2,7 @@ import EventEmitter from "eventemitter3";
 import type { PipoEvents } from "./lib/vis/types";
 import axios from "axios";
 import type { PipoConfig, PipoTypes } from "./types";
+import { formatNumbers } from "./utils";
 const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 export let error = "";
@@ -12,7 +13,7 @@ function parse(msg: string) {
   const axis = isSensor ? command.replace("sensor", "") : "";
   return { command, args, axis, isSensor };
 }
-class PipoIO extends EventEmitter<PipoEvents> {
+class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private socket?: WebSocket;
   private enabled: boolean = true;
   private timeout: number = 0;
@@ -109,7 +110,8 @@ class PipoIO extends EventEmitter<PipoEvents> {
 
   setValue(path: string, value: unknown) {
     if (!this.socket) return;
-    this.socket.send(`config:${path}:${value}`);
+
+    this.socket.send(`config:${path}:${formatNumbers(value, 4)}`);
   }
 
   setValues(pathvalues: { path: string; value: unknown }[]) {
@@ -117,7 +119,7 @@ class PipoIO extends EventEmitter<PipoEvents> {
     last = Date.now();
     this.socket.send(
       `configs:${pathvalues
-        .map(({ path, value }) => `${path}:${value}`)
+        .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
         .join("\n")}`
     );
   }

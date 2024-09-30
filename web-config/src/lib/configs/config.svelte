@@ -16,6 +16,8 @@
     type PipoTypes,
     type SensorValues,
     type PipoKeys,
+    type SmoothSensorValues,
+    type SmoothSensorValue,
     isHisteresisMode,
     isContinuousMode,
   } from "../../types";
@@ -31,19 +33,38 @@
   export let name: string;
   const dispatch = createEventDispatcher();
   let savingStatus = "none";
-  const sensorValues: SensorValues<T> = {};
+  const smoothValues: SmoothSensorValues<T> = {};
   const withinWindowValues: SensorValues<T> = {};
+  const sensorValues: SensorValues<T> = {};
   pipoio.on("sensor", ({ axis, value, withinWindow }) => {
+    withinWindowValues[axis] = withinWindow;
     const now = Date.now();
-    if (!sensorValues[axis]) {
-      sensorValues[axis] = {
-        value: 0,
+    if (!smoothValues[axis]) {
+      smoothValues[axis] = {
+        new: value,
+        old: value,
+        dt: 0,
         timestamp: now,
       };
+      sensorValues[axis] = value;
     }
-    sensorValues[axis] = value;
-    withinWindowValues[axis] = withinWindow;
+    const dt = now - smoothValues[axis].timestamp;
+    smoothValues[axis].dt = dt;
+    smoothValues[axis].timestamp = now;
+    smoothValues[axis].old = smoothValues[axis].new;
+    smoothValues[axis].new = value;
   });
+
+  function animateSensor() {
+    Object.entries(smoothValues).forEach(([axis, value]) => {
+      if (value.dt > 0) {
+        sensorValues[axis] =
+          value.old + (value.new - value.old) * (value.dt / 1000);
+      }
+    });
+    requestAnimationFrame(animateSensor);
+  }
+  animateSensor();
   const options = [
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },

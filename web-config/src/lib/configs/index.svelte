@@ -3,29 +3,12 @@
   import Config from "./config.svelte";
   import { configSave } from "../../services/config";
   import Tabs from "./tabs.svelte";
-  import { onError } from "../../utils";
+  import { formatNumbers, onError } from "../../utils";
   import type { PipoConfig } from "../../types";
   import { pipoio } from "../../pipoio";
 
   let fetchError: string;
   let error: string;
-
-  function formatNumbers(obj: any, decimals: number): any {
-    if (typeof obj === "number") {
-      return parseFloat(obj.toFixed(decimals));
-    } else if (Array.isArray(obj)) {
-      return obj.map((item) => formatNumbers(item, decimals));
-    } else if (typeof obj === "object" && obj !== null) {
-      const formattedObj: any = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          formattedObj[key] = formatNumbers(obj[key], decimals);
-        }
-      }
-      return formattedObj;
-    }
-    return obj;
-  }
 
   async function fetch() {
     try {
