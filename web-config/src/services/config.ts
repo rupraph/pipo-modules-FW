@@ -28,15 +28,14 @@ class ConfigSave<T extends PipoTypes> {
   }
 
   async update(config: PipoConfig<T>) {
-    if (!this.previousConfig) return;
+    if (!this.previousConfig) {
+      this.previousConfig = JSON.parse(JSON.stringify(config));
+      return;
+    }
     const diff = this.diff(this.previousConfig, config);
     if (!diff.length) return;
     this.previousConfig = JSON.parse(JSON.stringify(config));
     pipoio.setValues(diff);
-    for (const { path, value } of diff) {
-      pipoio.setValue(path, value);
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
     pipoio.saveConfig(config);
   }
   set(config: PipoConfig<T>) {

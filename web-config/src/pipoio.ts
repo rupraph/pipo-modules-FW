@@ -100,7 +100,6 @@ class PipoIO extends EventEmitter<PipoEvents> {
           return this.emit("fps", { frames, dt });
         }
         if (command === "logs") {
-          console.log("logs", e.data);
           const entries = args[0].split("--");
           return this.emit("logs", { entries });
         }
@@ -110,13 +109,11 @@ class PipoIO extends EventEmitter<PipoEvents> {
 
   setValue(path: string, value: unknown) {
     if (!this.socket) return;
-    console.log(`config:${path}:${value}`);
     this.socket.send(`config:${path}:${value}`);
   }
 
   setValues(pathvalues: { path: string; value: unknown }[]) {
     if (!this.socket) return;
-    console.log((Date.now() - last) / 1000);
     last = Date.now();
     this.socket.send(
       `configs:${pathvalues
@@ -137,6 +134,7 @@ class PipoIO extends EventEmitter<PipoEvents> {
       //   data: JSON.stringify(config),
       //   headers: { "Content-Type": "multipart/form-data" },
       // });
+      this.socket.send("save");
       this.saveTimeout = 0;
     }, 1000);
   }

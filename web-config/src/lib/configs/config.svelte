@@ -34,6 +34,13 @@
   const sensorValues: SensorValues<T> = {};
   const withinWindowValues: SensorValues<T> = {};
   pipoio.on("sensor", ({ axis, value, withinWindow }) => {
+    const now = Date.now();
+    if (!sensorValues[axis]) {
+      sensorValues[axis] = {
+        value: 0,
+        timestamp: now,
+      };
+    }
     sensorValues[axis] = value;
     withinWindowValues[axis] = withinWindow;
   });
