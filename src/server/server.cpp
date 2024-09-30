@@ -277,6 +277,7 @@ void PipoServer::setup_ws() {
   pipoSocket.setup(&ws, &input_sens);
   events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
+  String msg = "";
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
@@ -288,11 +289,13 @@ void PipoServer::setup_ws() {
       // client->printf("Hello Client %u :)", client->id());
       client->ping();
     } else if (type == WS_EVT_DISCONNECT) {
+      ws.cleanupClients(1);
       // Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
       Serial.print("ws disconnect");
       Serial.print(server->url());
       Serial.print(client->id());
     } else if (type == WS_EVT_ERROR) {
+      ws.cleanupClients(1);
       // Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(),
       // client->id(), *((uint16_t*)arg), (char*)data);
       Serial.print("ws error");
@@ -310,7 +313,7 @@ void PipoServer::setup_ws() {
       Serial.println((len) ? (char*)data : "");
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
-      String msg = "";
+
       if (info->final && info->index == 0 && info->len == len) {
         // the whole message is in a single frame and we got all of it's data
         if (info->opcode == WS_TEXT) {
@@ -326,8 +329,11 @@ void PipoServer::setup_ws() {
             msg += ' ';
           }
         }
-        if (info->opcode == WS_TEXT)
+        if (info->opcode == WS_TEXT) {
           onMessage(client, msg);
+          msg = "";
+          info = nullptr;
+        }
       } else {
         // message is sent as multiple frames or the frame is split into
         // multiple packets
@@ -344,12 +350,16 @@ void PipoServer::setup_ws() {
             msg += ' ';
           }
         }
-        if ((info->index + len) < info->len)
+        if ((info->index + len) < info->len || !info->final) {
+          // message is not complete yet
+          info = nullptr;
           return;
-        if (!info->final)
-          return;
-        if (info->message_opcode == WS_TEXT)
+        }
+        if (info->message_opcode == WS_TEXT) {
           onMessage(client, msg);
+          msg = "";
+          info = nullptr;
+        }
       }
     }
   });
