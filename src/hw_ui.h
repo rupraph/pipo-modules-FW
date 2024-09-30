@@ -63,6 +63,15 @@ class HwUi {
   void stop_pulse(int led_name);
 
   bool is_pulsing(int led_name);
+
+  void measure_battery();
+  void monitor_battery();
+
+  // getter/setter
+  float get_bat_voltage() { return bat_voltage; }
+
+  private:
+    float bat_voltage = analogRead(BAT_VOLTAGE) * ANALOG_TO_VOLTS*2.0;
 };
 
 extern HwUi hwui;

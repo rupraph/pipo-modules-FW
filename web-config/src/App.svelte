@@ -50,6 +50,7 @@
       return data;
     })
     .catch((e) => onError(e));
+
   $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
 
   function reboot() {
@@ -57,6 +58,11 @@
       console.log("Rebooting...");
     });
   }
+
+  const batt = axios.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
+    console.log("Batt voltage:", data);
+    return data;
+  });
 </script>
 
 <main>
@@ -73,6 +79,14 @@
     <p class="error">{error}</p>
   {/if}
   <Configs />
+
+  {#if !error && batt}
+    {#await batt}
+      <p>Waiting for Pipo to respond...</p>
+    {:then resp}
+      <span><bold>Batt Voltage: </bold>{resp}</span>
+    {/await}
+  {/if}
 
   <article>
     <Logs />

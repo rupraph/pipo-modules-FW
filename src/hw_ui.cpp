@@ -49,6 +49,7 @@ void HwUi::update() {
   blinker();
   pulse();
   stop_blink_once();
+  monitor_battery();
 }
 
 void HwUi::set_led(int led_name, int value) {
@@ -151,5 +152,18 @@ void HwUi::stop_blink_once() {
       set_led(pair.first, 0);
       blink_once[i] = 0;
     }
+  }
+}
+
+void HwUi::measure_battery() {
+  bat_voltage = analogReadMilliVolts(BAT_VOLTAGE) * 2.0;
+}
+
+void HwUi::monitor_battery() {
+  measure_battery();
+  if (bat_voltage < LOW_BAT_VOLTAGE) {
+    start_blink(LOW_BAT_LED, 500, 0.5);
+  } else {
+    stop_blink(LOW_BAT_LED);
   }
 }

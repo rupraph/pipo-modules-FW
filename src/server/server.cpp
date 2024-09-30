@@ -256,6 +256,11 @@ void PipoServer::setup_requests() {
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Pong");
   });
+
+  server.on("/battlevel", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    return request->send(200, "text/plain",
+                         String(hwui.get_bat_voltage()).c_str());
+  });
 }
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
   Serial.println(message);
