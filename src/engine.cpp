@@ -30,7 +30,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
   const auto& sensor_dat = sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
-    MidiTranslator Midi_translator = Miditranslators[axis_name];
+    MidiTranslator& Midi_translator = Miditranslators[axis_name];
 
     float sensor_val = sensor.get_value(axis_name);
     float sensor_min = sensor.get_limit_min(axis_name);
@@ -180,7 +180,7 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
     bool sensor_bool_val = sensor.get_bool_value(axis_name);
     float sensor_min = sensor.get_limit_min(axis_name);
     float sensor_max = sensor.get_limit_max(axis_name);
-    HidTranslator HID_translator = HID_translators[axis_name];
+    HidTranslator& HID_translator = HID_translators[axis_name];
 
     if (HID_translator.get_enabled() == true) {
       if (HID_translators.find(axis_name) != HID_translators.end()) {
@@ -190,7 +190,7 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
 
         switch ((int)config.general_config["HidMode"]) {
           case 0:
-            //gamepad mode
+            //gamepad mode. to do
             break;
           case 1:
             hidio.mouse_update(address,
@@ -199,7 +199,9 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
                                sensor_bool_val);
             break;
           case 2:
-            //stroke mode once
+            // keyboard mode. only compatible with axis in threshold mode
+
+            //keystroke mode "once"
             if (HID_translator.get_stroke_mode() == false) {
               if (sensor.get_trigger_flag(axis_name, HID)) {
                 //Keyboard (it does not allow multiple key presses yet while it could)
@@ -208,13 +210,14 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
                 sensor.set_trigger_flag(axis_name, HID, false);
               }
             } else {
-              // strike mode maintained
+              // keystroke mode "maintained".
               if (!sensor.get_threshold_mode(axis_name)) {
                 if (sensor_bool_val) {
                   hidio.keyboard_set_press(address);
                   // hidio.mouse_set_press(address);
                 }
               } else {
+                //deal with 2 key addresses for true/false when basic threshold mode selected
                 if (!sensor_bool_val) {
                   if (sensor.get_value(axis_name) >
                       sensor.get_limit_max(axis_name)) {
@@ -248,7 +251,7 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = sensor.get_value(axis_name);
-    OscTranslator Osc_translator = Osctranslators[axis_name];
+    OscTranslator& Osc_translator = Osctranslators[axis_name];
 
     if (Osc_translator.enabled && sensor.test_outside_deadzone(axis_name)) {
       float sensor_min = sensor.get_limit_min(axis_name);

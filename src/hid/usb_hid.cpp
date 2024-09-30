@@ -83,7 +83,7 @@ void usb_hid::update() {
   }
 }
 
-void usb_hid::mouse_update(string key, float value, bool bool_value) {
+void usb_hid::mouse_update(string key, int8_t value, bool bool_value) {
   if (key == "X") {
     mouse.x = value;
   }

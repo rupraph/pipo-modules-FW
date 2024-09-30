@@ -11,6 +11,7 @@ using namespace std;
 class HidTranslator {
 
  public:
+  //Config elements
   bool enabled = false;
   string map_address = "a";
   string map_address2 = "b";
@@ -56,6 +57,9 @@ class HidTranslator {
 
   // int get_output_min();
   // void set_output_min(int value);
+
+ private:
+  float last_value = 0;
 };
 
 #endif  //HID_TRANSLATOR_H

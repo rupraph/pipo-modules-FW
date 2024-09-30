@@ -33,9 +33,20 @@ int HidTranslator::get_current_int(float value, float input_min,
 
 int8_t HidTranslator::get_mouse_int(float value, float input_min,
                                     float input_max) {
-  int8_t mapped_value =
-      map_linear(value, input_min, input_max, -32,
-                 32);  //mouse is btw -127 and 127 but this would move very fast
+  float delta = value - last_value;
+  //move if delta is more than 2% of the range
+  if (abs(delta) < (input_max - input_min) * 0.02) {
+    return 0;
+  }
+
+  //Todo: add sensitivity setting
+  //should probably scale delta with: pixel/unit
+  //temorary solution, % of range
+  float delta_scaled = delta * 100.0 / (input_max - input_min);
+  int8_t mapped_value = map_linear(
+      delta_scaled, -20, 20, -127,
+      127);  //mouse is btw -127 and 127 but this would move very fast
+  last_value = value;
   return mapped_value;
 }
 

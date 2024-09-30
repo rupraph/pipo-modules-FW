@@ -28,7 +28,7 @@ class usb_hid {
   void keyboard_set_press(string keycode);
   void keyboard_release();
   //Mouse
-  void mouse_update(string key, float value, bool bool_value);
+  void mouse_update(string key, int8_t value, bool bool_value);
 
   //Getter//setters
   void set_hid_mode(int mode);
