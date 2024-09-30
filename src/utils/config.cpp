@@ -79,6 +79,16 @@ String Config::get_list() {
   file.close();
   return list;
 }
+// void Config::shouldSave() {
+//   _should_save = true;
+// }
+// void Config::saveIfNecessary() {
+//   if (!_should_save) {
+//     return;
+//   }
+//   _should_save = false;
+//   save();
+// }
 
 void Config::save() {
   save(filename);
@@ -88,8 +98,6 @@ void Config::save(String filename) {
 }
 
 void Config::save(String filename, String config) {
-  // logs.writeLog("save config: " + filename);
-  // Serial.println("save config: " + filename);
   writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
 }
 
@@ -162,12 +170,14 @@ void Config::setValues(String input) {
   for (size_t i = 0; i < lines.size(); ++i) {
     setValue(String(lines[i].c_str()));
   }
+  lines.clear();
 }
 void Config::setValue(String input) {
   // Split the input into path and value
   std::vector<std::string> path_and_value = split(input.c_str(), ':');
   if (path_and_value.size() != 2) {
-    throw std::invalid_argument("Input format should be 'path/to/key: value'");
+    Serial.println("invalid input");
+    return;
   }
 
   std::string path = path_and_value[0];
@@ -179,13 +189,11 @@ void Config::setValue(String input) {
   // Traverse the JSON object using the keys
   json* current = &current_config;
   for (size_t i = 0; i < keys.size() - 1; ++i) {
-    if (current->contains(keys[i])) {
-      current = &(*current)[keys[i]];
-    } else {
-      // Create a new JSON object at this level if the key doesn't exist
-      (*current)[keys[i]] = json::object();
-      current = &(*current)[keys[i]];
+    if (!current->contains(keys[i])) {
+      Serial.println("key not found");
+      break;
     }
+    current = &(*current)[keys[i]];
   }
   json* target = &(*current)[keys.back()];
   // Assign the value to the final key
@@ -198,6 +206,9 @@ void Config::setValue(String input) {
   } else if (target->type() == json::value_t::boolean) {
     (*current)[keys.back()] = value == "true";
   }
+  path_and_value.clear();
+  keys.clear();
+  target = nullptr;
 }
 
 void Config::print() {

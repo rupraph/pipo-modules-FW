@@ -32,19 +32,19 @@ void setup_wifi() {
 
     ///////// HIGH here should be low. temporary patch to cope with switch not
     ///wired corectly)
-    if (digitalRead(MODE_SW) == HIGH && digitalRead(PP_SW) == LOW) {
-      Serial.println(F("Settings reset"));
-      wm.resetSettings();
-      ESP.restart();
+    // if (digitalRead(MODE_SW) == HIGH && digitalRead(PP_SW) == HIGH) {
+    // Serial.println(F("Settings reset"));
+    // wm.resetSettings();
+    // ESP.restart();
+    // } else {
+    if (wm.autoConnect("Pipo")) {
+      Serial.println(F("connected...yeey :)"));
+      hwui.start_pulse(WIFI_LED, 3000, 3, 30);
     } else {
-      if (wm.autoConnect("Pipo")) {
-        Serial.println(F("connected...yeey :)"));
-        hwui.start_pulse(WIFI_LED, 3000, 3, 30);
-      } else {
-        Serial.println(
-            F("Could not connect automatically, Configportal running"));
-      }
+      Serial.println(
+          F("Could not connect automatically, Configportal running"));
     }
+    // }
   }
 #ifdef DEBUG_HEAP
   Serial.print(F("Remaining Heap:"));

@@ -50,6 +50,9 @@ void OSC_handler::start() {
 }
 
 void OSC_handler::stop() {
+  if (!isStarted) {
+    return;
+  }
   Udp.stop();
   isStarted = false;
 }

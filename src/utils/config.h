@@ -36,7 +36,8 @@ class Config {
   // load config from files into current_config
   void load_config(String filename, bool addJsonExtension = true);
   void load_config();
-
+  // void shouldSave();
+  // void saveIfNecessary();
   void set(const json& config);
   void setValue(String input);
   void setValues(String input);
@@ -59,7 +60,7 @@ class Config {
 
  private:
   std::vector<std::string> split(const std::string& str, char delimiter);
-
+  // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";

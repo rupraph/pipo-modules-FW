@@ -264,6 +264,7 @@ void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
     }
     if (message.startsWith("save")) {
       config.save();
+      // config.shouldSave();
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
