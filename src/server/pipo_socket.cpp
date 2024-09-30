@@ -46,7 +46,7 @@ void PipoSocket::loop() {
   if (ws == nullptr || input_sens == nullptr)
     return;
   unsigned long now = millis();
-  if (now - lastSendTime < 50) {
+  if (now - lastSendTime < 100) {
     iterations += 1;
     return;
   }
