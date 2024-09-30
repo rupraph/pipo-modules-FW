@@ -44,7 +44,7 @@ int8_t HidTranslator::get_mouse_int(float value, float input_min,
   //temorary solution, % of range
   float delta_scaled = delta * 100.0 / (input_max - input_min);
   int8_t mapped_value = map_linear(
-      delta_scaled, -20, 20, -127,
+      delta_scaled, -40, 40, -127,
       127);  //mouse is btw -127 and 127 but this would move very fast
   last_value = value;
   return mapped_value;
