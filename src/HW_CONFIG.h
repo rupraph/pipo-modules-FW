@@ -37,8 +37,11 @@
 // general constants definitions
 #define NOTE_BLINK_TIME 20
 #define NOTE_BLINK_BRIGHTNESS 80
-#define ANALOG_TO_VOLTS 0.000806
-#define LOW_BAT_VOLTAGE 3.3
+// #define ANALOG_TO_VOLTS 0.000806
+
+#define LOW_BAT_VOLTAGE 3300  // in mV
+#define BAT_SAMPLE_SIZE 20
+#define BATT_COEF 2.56
 
 // other global definitions
 #define FORMAT_LITTLEFS_IF_FAILED true

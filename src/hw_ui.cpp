@@ -156,8 +156,18 @@ void HwUi::stop_blink_once() {
 }
 
 void HwUi::measure_battery() {
-  // temporary ratio used 2.56
-  bat_voltage = analogReadMilliVolts(BAT_VOLTAGE) * 2.56;
+  if (bat_sampling_index >= BAT_SAMPLE_SIZE) {
+    bat_sampling_index = 0;
+  }
+  bat_sampling[bat_sampling_index] =
+      analogReadMilliVolts(BAT_VOLTAGE) * BATT_COEF;
+  bat_sampling_index++;
+
+  float sum = 0;
+  for (int i = 0; i < BAT_SAMPLE_SIZE; i++) {
+    sum += bat_sampling[i];
+  }
+  bat_voltage = sum / BAT_SAMPLE_SIZE;
 }
 
 void HwUi::monitor_battery() {

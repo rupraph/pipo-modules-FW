@@ -7,7 +7,7 @@
 
 class HwUi {
  public:
-  HwUi(){};
+  HwUi() {};
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;
@@ -68,10 +68,12 @@ class HwUi {
   void monitor_battery();
 
   // getter/setter
-  float get_bat_voltage() { return bat_voltage; }
+  int get_bat_voltage() { return bat_voltage; }
 
-  private:
-    float bat_voltage = analogRead(BAT_VOLTAGE) * ANALOG_TO_VOLTS*2.0;
+ private:
+  int bat_sampling[BAT_SAMPLE_SIZE];
+  int bat_sampling_index = 0;
+  int bat_voltage = 0;
 };
 
 extern HwUi hwui;
