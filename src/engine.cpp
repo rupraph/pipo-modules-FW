@@ -201,10 +201,20 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
             //gamepad mode. to do
             break;
           case 1:
-            hidio.mouse_update(address,
-                               HID_translator.get_mouse_int(
-                                   sensor_val, sensor_min, sensor_max),
-                               sensor_bool_val);
+            //continuous mode -> do not update if outise measuring range
+            if (sensor.get_mode(axis_name) == false) {
+              if (sensor.is_within_range(axis_name)) {
+                hidio.mouse_update(address,
+                                   HID_translator.get_mouse_int(
+                                       sensor_val, sensor_min, sensor_max),
+                                   sensor_bool_val);
+              }
+            } else {
+              hidio.mouse_update(address,
+                                 HID_translator.get_mouse_int(
+                                     sensor_val, sensor_min, sensor_max),
+                                 sensor_bool_val);
+            }
             break;
           case 2:
             // keyboard mode. only compatible with axis in threshold mode
@@ -241,7 +251,6 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
             }
             break;
         }
-
       } else {
         Serial.println("key not found");
       }
