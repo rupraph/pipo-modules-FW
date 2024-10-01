@@ -277,6 +277,11 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
+
+  server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    engine.toggle_pause();
+    return request->send(200, "text/plain", "Engine paused");
+  });
 }
 
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {

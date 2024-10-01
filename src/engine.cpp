@@ -18,6 +18,9 @@ using json = nlohmann::json;
 
 void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
                     OSC_handler& osc) {
+  if (paused) {
+    return;
+  }
   if (config.general_config["MidiEnabled"] == true) {
     midiio.manage_sustain();
     midi_processor(sensor, midiio);
@@ -28,7 +31,11 @@ void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
   if (config.general_config["HidEnabled"] == true) {
     hid_processor(sensor, hidio);
   }
-  monitor_sensors(sensor);
+  // monitor_sensors(sensor);
+}
+
+void Engine::toggle_pause() {
+  paused = !paused;
 }
 
 void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {

@@ -97,6 +97,12 @@
     }).then(() => console.log("DONE"));
   }
 
+  function pause() {
+    axios.post("/pause").then(() => {
+      console.log("Pausing...");
+    });
+  }
+
   function getMidiConfigs() {
     return Object.entries(config.engine["engine-midi"]) as unknown as [
       PipoKeys[T],
@@ -150,6 +156,9 @@
       on:click={download}
       title="Download the config file locally">Download config</button
     > -->
+    <button class="primary Pause" on:click={pause} title="Pause sending data">
+      &gt; / ||
+    </button>
     <button
       class="primary"
       on:click={submit}
@@ -276,5 +285,9 @@
   }
   .Download:hover {
     background-color: rgba(0.2, 0.1, 0.2, 0.3);
+  }
+
+  .Pause {
+    background-color: rgb(211, 211, 211);
   }
 </style>

@@ -92,9 +92,14 @@ class Engine {
   void set_config(json& config, bool debug = false);
   friend void to_json(json& j, const Engine& t);
 
+  bool get_paused() { return paused; }
+  void set_paused(bool value) { paused = value; }
+  void toggle_pause();
+
  private:
   uint8_t note_val[128];
   uint8_t note_val_prev[128];
+  bool paused = false;
 };
 
 #endif  //ENGINE_H
