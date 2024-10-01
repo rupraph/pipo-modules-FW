@@ -145,11 +145,11 @@
     <button class="delete error" on:click={() => dispatch("delete")}
       >Delete</button
     >
-    <button
+    <!-- <button
       class="primary Download"
       on:click={download}
       title="Download the config file locally">Download config</button
-    >
+    > -->
     <button
       class="primary"
       on:click={submit}
