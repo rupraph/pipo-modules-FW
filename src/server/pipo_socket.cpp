@@ -46,9 +46,13 @@ void PipoSocket::loop() {
   if (ws == nullptr || input_sens == nullptr)
     return;
   unsigned long now = millis();
-  if (now - lastSendTime < 100) {
+  if (now - lastSendTime < 50) {
     iterations += 1;
     return;
+  }
+  if (now - lastCleanTime > 1000) {
+    ws->cleanupClients(1);
+    lastCleanTime = now;
   }
   std::string message = "fps,";
   message += std::to_string((float)iterations);

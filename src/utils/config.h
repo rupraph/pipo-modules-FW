@@ -39,8 +39,8 @@ class Config {
   // void shouldSave();
   // void saveIfNecessary();
   void set(const json& config);
-  void setValue(String input);
-  void setValues(String input);
+  void setValue(char input[], int len);
+  void setValues(char input[], int len);
   void save();
   void save(String filename);
   void save(String filename, String config);
@@ -64,6 +64,7 @@ class Config {
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";
+  json* tmp;
 };
 
 extern Config config;

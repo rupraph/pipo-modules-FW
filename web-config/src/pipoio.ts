@@ -18,6 +18,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private enabled: boolean = true;
   private timeout: number = 0;
   private bailTimeout = 0;
+  private connected = false;
   private saveTimeout = 0;
   constructor() {
     super();
@@ -42,19 +43,24 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
         this.retryConnection();
         error = "Cannot init webSocket";
       }
-    }, 1000);
+    }, 500);
   }
   onDisconnect() {
     if (this.socket) {
       this.socket.close();
     }
-    // this.emit("disconnect");
+    this.emit("disconnect");
+    this.connected = false;
     if (!this.enabled) return;
     this.retryConnection();
   }
+  onConnect() {
+    this.emit("connect");
+    this.connected = true;
+  }
   bailOnNoNews(delay = 1000) {
-    clearTimeout(this.bailTimeout);
-    this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
+    // clearTimeout(this.bailTimeout);
+    // this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
   }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
@@ -63,14 +69,13 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     const socket = new WebSocket(url);
     this.socket = socket;
     this.bailOnNoNews(2000);
-    socket.addEventListener("open", (event) => {
-      clearTimeout(this.bailTimeout);
-      this.emit("connect");
-      console.log("Connected to Pipo");
-    });
+    socket.addEventListener("open", () => this.onConnect());
     socket.addEventListener("error", () => this.onDisconnect());
     socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
+      if (!this.connected) {
+        this.onConnect();
+      }
       this.bailOnNoNews(2000);
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
@@ -130,13 +135,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     }
     this.saveTimeout = window.setTimeout(async () => {
       if (!this.socket) return;
-      // await axios({
-      //   method: "post",
-      //   url: "/save",
-      //   data: JSON.stringify(config),
-      //   headers: { "Content-Type": "multipart/form-data" },
-      // });
-      this.socket.send("save");
+      this.socket.send("save: ");
       this.saveTimeout = 0;
     }, 1000);
   }

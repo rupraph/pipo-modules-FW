@@ -15,5 +15,5 @@ pipoio
   .on("disconnect", () => {
     timeout = setTimeout(() => {
       isLive.set(false);
-    }, 1000);
+    }, 2000);
   });

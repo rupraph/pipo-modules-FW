@@ -165,49 +165,69 @@ std::vector<std::string> Config::split(const std::string& str, char delimiter) {
   return tokens;
 }
 
-void Config::setValues(String input) {
-  std::vector<std::string> lines = split(input.c_str(), '\n');
-  for (size_t i = 0; i < lines.size(); ++i) {
-    setValue(String(lines[i].c_str()));
+void Config::setValues(char input[], int len) {
+  int start = 0;
+  char c;
+  for (int i = 0; i < len; i++) {
+    c = input[i];
+    if (c != '\n')
+      continue;
+    start = i + 1;
+    setValue(input + start, i - start);
   }
-  lines.clear();
+  setValue(input + start, len - start);
 }
-void Config::setValue(String input) {
-  // Split the input into path and value
-  std::vector<std::string> path_and_value = split(input.c_str(), ':');
-  if (path_and_value.size() != 2) {
-    Serial.println("invalid input");
+void Config::setValue(char input[], int len) {
+  char value[64];
+  char key[64];
+  bool isValue = false;
+  int offset = 0;
+  int i = 0;
+  char c;
+  tmp = &current_config;
+
+  for (int i = 0; i < len; i++) {
+    c = input[i];
+    if (c == '\0') {
+      break;
+    }
+    if (c == ':') {
+      offset = 0;
+      isValue = true;
+      continue;
+    }
+    if (c == '/') {
+      if (!tmp->contains(key)) {
+        return;
+      }
+      tmp = &(*tmp)[key];
+      offset = 0;
+      isValue = c == ':';
+      continue;
+    }
+    if (isValue) {
+      value[offset++] = c;
+      value[offset] = '\0';
+    } else {
+      key[offset++] = c;
+      key[offset] = '\0';
+    }
+  }
+  if (!tmp->contains(key)) {
     return;
   }
 
-  std::string path = path_and_value[0];
-  std::string value = path_and_value[1];
-
-  // Split the path into individual keys
-  std::vector<std::string> keys = split(path, '/');
-
-  // Traverse the JSON object using the keys
-  json* current = &current_config;
-  for (size_t i = 0; i < keys.size() - 1; ++i) {
-    if (!current->contains(keys[i])) {
-      Serial.println("key not found");
-      break;
-    }
-    current = &(*current)[keys[i]];
-  }
-  json* target = &(*current)[keys.back()];
+  json* target = &(*tmp)[key];
   // Assign the value to the final key
   if (target->type() == json::value_t::string) {
-    (*current)[keys.back()] = value;
+    (*tmp)[key] = value;
   } else if (target->type() == json::value_t::number_integer) {
-    (*current)[keys.back()] = std::stoi(value);
+    (*tmp)[key] = std::stoi(value);
   } else if (target->type() == json::value_t::number_float) {
-    (*current)[keys.back()] = std::stof(value);
+    (*tmp)[key] = std::stof(value);
   } else if (target->type() == json::value_t::boolean) {
-    (*current)[keys.back()] = value == "true";
+    (*tmp)[key] = value == "true";
   }
-  path_and_value.clear();
-  keys.clear();
   target = nullptr;
 }
 

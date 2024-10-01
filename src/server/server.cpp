@@ -251,20 +251,27 @@ void PipoServer::setup_requests() {
     request->send(200, "text/plain", config.current_config.dump().c_str());
   });
 }
-void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
+void PipoServer::onMessage(AsyncWebSocketClient* client) {
   try {
+    char command[16];
+    int offset = 0;
+    int i = 0;
+    for (i = 0; i < ws_message_len; i++) {
+      if (ws_message[i] == ':') {
+        command[offset] = 0;
+        break;
+      }
+      command[offset++] = ws_message[i];
+    }
 
-    if (message.startsWith("config:")) {
-      config.setValue(message.substring(7));
+    if (strcmp("config", command) == 0) {
+      config.setValue(ws_message + offset + 1, ws_message_len - offset - 1);
       config.apply(input_sens, engine, osc, true);
-    }
-    if (message.startsWith("configs:")) {
-      config.setValues(message.substring(8));
+    } else if (strcmp("configs", command) == 0) {
+      config.setValues(ws_message + offset + 1, ws_message_len - offset - 1);
       config.apply(input_sens, engine, osc, true);
-    }
-    if (message.startsWith("save")) {
+    } else if (strcmp("save", command) == 0) {
       config.save();
-      // config.shouldSave();
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -281,31 +288,17 @@ void PipoServer::setup_ws() {
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-      // Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
-      Serial.print("ws connect");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.println();
-      // client->printf("Hello Client %u :)", client->id());
       client->ping();
     } else if (type == WS_EVT_DISCONNECT) {
       ws.cleanupClients(1);
-      // Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
-      Serial.print("ws disconnect");
-      Serial.print(server->url());
-      Serial.print(client->id());
     } else if (type == WS_EVT_ERROR) {
       ws.cleanupClients(1);
-      // Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(),
-      // client->id(), *((uint16_t*)arg), (char*)data);
       Serial.print("ws error");
       Serial.print(server->url());
       Serial.print(client->id());
       Serial.print(*((uint16_t*)arg));
       Serial.println((char*)data);
     } else if (type == WS_EVT_PONG) {
-      // Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(),
-      // len, (len) ? (char*)data : "");
       Serial.print("ws pong");
       Serial.print(server->url());
       Serial.print(client->id());
@@ -313,52 +306,31 @@ void PipoServer::setup_ws() {
       Serial.println((len) ? (char*)data : "");
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
-
       if (info->final && info->index == 0 && info->len == len) {
-        // the whole message is in a single frame and we got all of it's data
-        if (info->opcode == WS_TEXT) {
-          for (size_t i = 0; i < info->len; i++) {
-            msg += (char)data[i];
-          }
-        } else {
-          char buff[3];
-          for (size_t i = 0; i < info->len; i++) {
-            if (data[i] < 16)
-              msg += '0';  // Add leading zero for single hex digit
-            msg += String((uint8_t)data[i], HEX);
-            msg += ' ';
-          }
-        }
-        if (info->opcode == WS_TEXT) {
-          onMessage(client, msg);
-          msg = "";
-          info = nullptr;
-        }
-      } else {
-        // message is sent as multiple frames or the frame is split into
-        // multiple packets
-        if (info->opcode == WS_TEXT) {
-          for (size_t i = 0; i < len; i++) {
-            msg += (char)data[i];
-          }
-        } else {
-          char buff[3];
-          for (size_t i = 0; i < len; i++) {
-            if (data[i] < 16)
-              msg += '0';  // Add leading zero for single hex digit
-            msg += String((uint8_t)data[i], HEX);
-            msg += ' ';
-          }
-        }
-        if ((info->index + len) < info->len || !info->final) {
-          // message is not complete yet
-          info = nullptr;
+        memcpy((void*)ws_message, data, info->len);
+        ws_message_len = info->len;
+        ws_message[ws_message_len] = 0;
+        onMessage(client);
+        return;
+      }
+      if (info->len >= ws_max_len - 1) {
+        ws_message_len = 0;
+        ws_message[0] = 0;
+        return;
+      }
+      if (info->index == 0) {
+        if (info->len + ws_message_len >= ws_max_len - 1) {
+          ws_message_len = 0;
+          ws_message[0] = 0;
           return;
         }
-        if (info->message_opcode == WS_TEXT) {
-          onMessage(client, msg);
-          msg = "";
-          info = nullptr;
+        memcpy((void*)(ws_message + ws_message_len), data, info->len);
+        ws_message_len += info->len;
+        if (info->index + len == info->len && info->final) {
+          ws_message[ws_message_len] = 0;
+          onMessage(client);
+          ws_message_len = 0;
+          ws_message[0] = 0;
         }
       }
     }

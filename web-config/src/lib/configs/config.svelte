@@ -2,7 +2,7 @@
   import { configSave } from "../../services/config";
 
   import { pipoio } from "../../pipoio";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
@@ -151,8 +151,14 @@
       console.log("Rebooting...");
     });
   }
+  let interval = 0;
   onMount(() => {
-    setInterval(() => configSave.update({ ...config }), 2000);
+    interval = window.setInterval(() => {
+      configSave.update(JSON.parse(JSON.stringify(config)));
+    }, 1000);
+  });
+  onDestroy(() => {
+    clearInterval(interval);
   });
 </script>
 

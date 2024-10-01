@@ -27,7 +27,7 @@ class PipoServer {
         osc(osc) {}
   void setup();
   void setup_ws();
-  void onMessage(AsyncWebSocketClient* client, String message);
+  void onMessage(AsyncWebSocketClient* client);
   void setup_requests();
   void stop();  // Todo: start stop not much tested yet
   bool is_running = false;
@@ -40,5 +40,8 @@ class PipoServer {
   Engine& engine;
   OSC_handler& osc;
   string received_configData;
+  const int ws_max_len = 2048;
+  int ws_message_len = 0;
+  char ws_message[2048];
 };
 #endif  // WEBSERVER_H
