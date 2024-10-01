@@ -139,7 +139,7 @@
     font-family: Brugty;
     position: relative;
     z-index: 1; /* Ensure the title is above the image */
-    color: white; /* Adjust the text color for better visibility */
+    color: rgb(60, 60, 60); /* Adjust the text color for better visibility */
   }
 
   :global(.info) span {

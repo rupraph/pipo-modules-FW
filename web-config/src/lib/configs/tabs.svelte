@@ -69,6 +69,7 @@
   .tab.active {
     z-index: 12;
     cursor: text;
+    color: rgb(2, 141, 176);
   }
   .tab > input {
     padding: 0;
@@ -88,7 +89,7 @@
     background-color: var(--bg-color);
     grid-area: 1 / 3 / 4 / 5;
     font-size: 1.2em;
-    border-top: 2px solid white;
+    border-top: 2px solid rgb(80, 80, 80);
     min-width: 50px;
     padding: 0 10px;
     z-index: 10;
@@ -97,7 +98,7 @@
   .tab::after {
     content: "";
     height: 100%;
-    border-top: 2px solid white;
+    border-top: 2px solid rgb(80, 80, 80);
     min-width: 16px;
     background: var(--bg-color);
   }
@@ -106,7 +107,7 @@
     content: "";
     transform: skew(25deg);
     border-radius: 0 8px 0 0;
-    border-right: 2px solid white;
+    border-right: 2px solid rgb(80, 80, 80);
     padding-left: 6px;
   }
   .tab:before {
@@ -114,7 +115,7 @@
     border-radius: 8px 0 0 0;
     transform: skew(-25deg);
     border-radius: 8px 0 0 0;
-    border-left: 2px solid white;
+    border-left: 2px solid rgb(80, 80, 80);
     padding-right: 6px;
   }
   .tab.new > span {
@@ -122,9 +123,9 @@
   }
   .content {
     z-index: 10;
-    border-radius: 10px;
-    border: 2px solid white;
-    margin-top: 4px;
+    border-radius: 12px;
+    border: 2px solid rgb(80, 80, 80);
+    margin-top: 6px;
     background: var(--bg-color);
     transform: translate(0, -1px);
   }

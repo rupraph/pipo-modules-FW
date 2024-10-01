@@ -356,12 +356,12 @@
     background-color: var(--main-darker);
   }
 
-  .Download {
+  /* .Download {
     background-color: rgba(106, 106, 106, 0.263);
   }
   .Download:hover {
     background-color: rgba(0.2, 0.1, 0.2, 0.3);
-  }
+  } */
 
   .Pause {
     background-color: rgb(211, 211, 211);

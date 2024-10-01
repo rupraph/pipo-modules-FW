@@ -10,9 +10,9 @@
   line-height: 1.5;
   font-weight: 00;
 
-  --text-color: white;
-  --bg-color: #242424;
-  --bg-secondary:#3A3A3A;
+  --text-color: rgb(0, 0, 0);
+  --bg-color: #fff7e8;
+  --bg-secondary:#ede1e1;
   --bg-tertiary:#1A1A1A;
   --bg-lighter:#6A6A6A;
   --main: #ffcb64;
