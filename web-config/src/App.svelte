@@ -61,7 +61,7 @@
 
   const batt = axios.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
     console.log("Batt voltage:", data);
-    return data;
+    return data / 1000;
   });
 </script>
 
@@ -84,7 +84,7 @@
     {#await batt}
       <p>Waiting for Pipo to respond...</p>
     {:then resp}
-      <span><bold>Batt Voltage: </bold>{resp}</span>
+      <span><bold>Batt Voltage: </bold>{resp} V</span>
     {/await}
   {/if}
 

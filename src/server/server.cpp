@@ -257,6 +257,7 @@ void PipoServer::setup_requests() {
     request->send(200, "text/plain", "Pong");
   });
 
+  // batt is temporarily as a request since I don't want it to be polled as fast as the pipo data
   server.on("/battlevel", HTTP_GET, [&](AsyncWebServerRequest* request) {
     return request->send(200, "text/plain",
                          String(hwui.get_bat_voltage()).c_str());
