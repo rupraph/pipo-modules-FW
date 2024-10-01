@@ -45,6 +45,7 @@ void AnalogSensor::measure_offset_all() {
 }
 
 void AnalogSensor::update() {
+
   for (auto const& pair : analog_map) {
     float analog_val = analogRead(pair.second) * 0.000806;  // convert to volts
 
@@ -76,6 +77,7 @@ void AnalogSensor::update() {
     //     sensor_dat[pair.first].untriggered = false;
     // }
   }
+
   for (auto const& pair : touch_map) {
     //trial filtering values
     //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
@@ -87,7 +89,6 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
     sensor_dat[pair.first].value = val;
 
-    process_sensor_triggers();
     // if (val>sensor_dat[pair.first].limit_min
     // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
     // {
@@ -111,4 +112,6 @@ void AnalogSensor::update() {
     // }
     // }
   }
+
+  process_sensor_triggers();
 }
