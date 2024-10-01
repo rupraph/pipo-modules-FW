@@ -35,6 +35,8 @@
 
 #define OFFSET_CAL_SAMPLES_NB 50
 
+#define MAX_TOUCH_VALUE 200000
+
 #endif
 
 // general constants definitions
