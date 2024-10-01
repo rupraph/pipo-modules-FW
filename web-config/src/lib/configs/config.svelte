@@ -89,6 +89,14 @@
     a.click();
   }
 
+  function cal_offset(axis: PipoKeys[T]) {
+    axios({
+      method: "post",
+      url: "/offsetcal",
+      params: { axis },
+    }).then(() => console.log("DONE"));
+  }
+
   function getMidiConfigs() {
     return Object.entries(config.engine["engine-midi"]) as unknown as [
       PipoKeys[T],
@@ -166,6 +174,11 @@
           minLabel={`min (${unit})`}
           maxLabel={`max (${unit})`}
         />
+        {#if $type === "analog" && axis.includes("T")}
+          <button class="primary" on:click={() => cal_offset(axis)}
+            >Offset calib</button
+          >
+        {/if}
       </Collapse>
     {/each}
   </Collapse>

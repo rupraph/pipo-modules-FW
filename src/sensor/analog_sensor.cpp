@@ -4,7 +4,7 @@ void AnalogSensor::init() {}
 
 void AnalogSensor::setup() {
   for (auto const& pair : analog_map) {
-    pinMode(pair.second, INPUT);
+    pinMode(pair.second, INPUT_PULLDOWN);
   }
   for (auto const& pair : touch_map) {
     pinMode(pair.second, INPUT);
@@ -18,9 +18,24 @@ void AnalogSensor::setup() {
 
 //Todo: add function to perform individual offset or of provided list
 
+void AnalogSensor::measure_offset(const string& sensor_name) {
+  int num_samples = OFFSET_CAL_SAMPLES_NB;
+  float offset = 0;
+  for (int i = 0; i < num_samples; i++) {
+    if (analog_map.find(sensor_name) != analog_map.end()) {
+      offset += analogRead(analog_map[sensor_name]) * 0.000806;
+    } else if (touch_map.find(sensor_name) != touch_map.end()) {
+      offset += touchRead(touch_map[sensor_name]);
+    }
+    delay(20);
+  }
+  sensor_dat[sensor_name].offset =
+      round((offset / num_samples) * 1000.0) / 1000.0;
+}
+
 void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
-  int num_samples = 50;
+  int num_samples = OFFSET_CAL_SAMPLES_NB;
   unordered_map<string, float> offset;
   for (int i = 0; i < num_samples; i++) {
 

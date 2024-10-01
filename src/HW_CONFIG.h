@@ -32,6 +32,9 @@
 #define MODE_SW 18
 #define BAT_VOLTAGE 17
 #define PP_SW 7
+
+#define OFFSET_CAL_SAMPLES_NB 50
+
 #endif
 
 // general constants definitions

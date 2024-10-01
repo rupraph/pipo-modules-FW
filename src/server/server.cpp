@@ -262,7 +262,23 @@ void PipoServer::setup_requests() {
     return request->send(200, "text/plain",
                          String(hwui.get_bat_voltage()).c_str());
   });
+
+  server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("axis")) {
+      return request->send(400, "text/plain", "No sensor provided");
+    }
+    try {
+      string axis = request->getParam("axis")->value().c_str();
+      Serial.println(axis.c_str());
+      input_sens.measure_offset(axis);
+      return request->send(200, "text/plain", "Offset measured");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
 }
+
 void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
   Serial.println(message);
   // client->text("I got your message");

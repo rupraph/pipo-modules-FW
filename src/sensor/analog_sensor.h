@@ -36,6 +36,7 @@ class AnalogSensor : public Sensor {
   void init() override;
   void setup() override;
   void update() override;
+  void measure_offset(const string& sensor_name);
   void measure_offset_all();
 
  private:

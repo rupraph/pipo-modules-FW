@@ -16,6 +16,7 @@ class Sensor {
   virtual void init() = 0;
   virtual void setup() = 0;
   virtual void update() = 0;
+  virtual void measure_offset(const string& sensor_name) = 0;
 
   struct SensorDat {
     bool enabled;
