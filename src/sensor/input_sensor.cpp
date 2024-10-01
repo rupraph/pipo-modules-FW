@@ -22,6 +22,11 @@ bool Sensor::test_outside_deadzone(const std::string& axis) {
   }
 }
 
+//provide default implementation
+void Sensor::measure_offset(const std::string& sensor_name) {
+  Serial.println("default implementation does not measure offset");
+}
+
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
     if (sensor_dat[axis].value > sensor_dat[axis].limit_min &&

@@ -32,10 +32,6 @@
 #define BAT_VOLTAGE 17
 #define PP_SW 7
 
-#define OFFSET_CAL_SAMPLES_NB 50
-
-#define MAX_TOUCH_VALUE 200000
-
 #endif
 
 // general constants definitions
@@ -46,6 +42,10 @@
 #define LOW_BAT_VOLTAGE 3300  // in mV
 #define BAT_SAMPLE_SIZE 20
 #define BATT_COEF 2.56
+
+//analog sensor specific definitions
+#define OFFSET_CAL_SAMPLES_NB 50
+#define MAX_TOUCH_VALUE 200000
 
 // other global definitions
 #define FORMAT_LITTLEFS_IF_FAILED true

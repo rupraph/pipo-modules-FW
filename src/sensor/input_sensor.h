@@ -65,7 +65,7 @@ class Sensor {
   virtual void init() = 0;
   virtual void setup() = 0;
   virtual void update() = 0;
-  virtual void measure_offset(const string& sensor_name) = 0;
+  virtual void measure_offset(const string& sensor_name);
 
   bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);
