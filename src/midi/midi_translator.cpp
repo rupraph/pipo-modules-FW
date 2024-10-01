@@ -1,6 +1,5 @@
 #include "midi_translator.h"
 
-// for convenience
 using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
@@ -11,8 +10,6 @@ MidiTranslator::MidiTranslator() {
   } else {
     max_output = 127;
   }
-
-  //printScale(current_scale);
 }
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
@@ -57,28 +54,6 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
   current_scale.clear();
   current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
 }
-
-// void MidiTranslator::set_every_note(vector<string> scale) {
-//     current_scale.clear();
-//     for (int i = 0; i < scale.size(); i++) {
-//         current_scale.push_back(convertNoteNameToNumber(scale[i]));
-//     }
-// }
-
-// not ready yet. dealing with custom scale or additional scale is not ready to be savec/loaded correctly
-
-// void MidiTranslator::set_new_scale(string newscaleType,vector<string> newscale) {
-//     //convert newscale to int vector
-//     vector<int> newscalenb;
-
-//     for (const string& noteName : newscale) {
-//         int noteNumber = convertNoteNameToNumber(noteName);
-//         newscalenb.push_back(noteNumber);
-//     }
-//     scales.insert({newscaleType, newscalenb});
-
-//     set_Scale_Type(newscaleType);
-// }
 
 void MidiTranslator::set_root_note(string rootNote) {
   int rootNotenb = convertNoteNameToNumber(rootNote);
@@ -137,11 +112,8 @@ bool MidiTranslator::is_a_note(string noteName) {
 
 vector<int> MidiTranslator::generate_full_Scale(int rootNote, int nb_notes,
                                                 string scaleType) {
-  //int minNote = convertNoteNameToNumber(minimum_note);
-  //int maxNote = convertNoteNameToNumber(maximumNote);
 
   vector<int> scale = generate_base_Scale(rootNote, scaleType);
-  //printScale(scale);
   vector<int> expandedScale;
 
   int baseScaleSize = scale.size();
@@ -153,12 +125,6 @@ vector<int> MidiTranslator::generate_full_Scale(int rootNote, int nb_notes,
     baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
     expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
   }
-
-  // for (int i = rootNote; i <= maxNote; i++) {
-  //     int baseNoteIndex = (i - rootNote) % baseScaleSize;
-  //     int expandedNote = scale[baseNoteIndex] + (i / baseScaleSize) * 12;
-  //     expandedScale.push_back(expandedNote);
-  // }
 
   return expandedScale;
 }
@@ -190,7 +156,6 @@ void MidiTranslator::update_scale() {
   current_scale.clear();
   current_scale =
       generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
-  //printScale(this->current_scale);
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
@@ -209,26 +174,12 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
     max_output = 127;
   }
 
-  // maybe the threshold system will haev to move on sensor side
-  // if (use_threshold){
-  //     if (value > threshold)
-  //     {
-  //         return max_output;
-  //     }
-  //     else
-  //     {
-  //         return min_output;
-  //     }
-  // }
-  // else
-  // {
   if (interpolation_type == 0) {
     return map_linear(value, min_input, max_input);
   } else {
     // not implemented yet
     return 0;
   }
-  // }
 }
 
 int MidiTranslator::map_linear(float value, float min_input, float max_input) {
@@ -245,6 +196,7 @@ void to_json(json& j, const MidiTranslator& t) {
            {"scaleType", t.scaleType},
            {"rootNote", t.rootNote},
            {"numberOfNotes", t.numberOfNotes},
+           {"sustain", t.sustain},
            // {"current_scale", t.current_scale},
            // {"max_input", t.max_input},
            // {"min_input", t.min_input},
@@ -271,6 +223,7 @@ void from_json(const json& j, MidiTranslator& t) {
   j.at("scaleType").get_to(t.scaleType);
   j.at("rootNote").get_to(t.rootNote);
   j.at("numberOfNotes").get_to(t.numberOfNotes);
+  j.at("sustain").get_to(t.sustain);
   //j.at("current_scale").get_to(t.current_scale);
   // j.at("max_input").get_to(t.max_input);
   // j.at("min_input").get_to(t.min_input);
@@ -297,13 +250,9 @@ void MidiTranslator::set_from_json(const json& j) {
   }
 
   this->update_scale();
-
-  // for( json::const_iterator it = j.begin(); it != j.end(); ++it ) {
-  //     Serial.println(it.key().c_str());
-  //     Serial.println(it.value());
-  //     set_param(it.key(), it.value());
-  // }
 }
+
+//Getter setters
 
 bool MidiTranslator::getHires() const {
   return hires;
@@ -316,4 +265,82 @@ void MidiTranslator::setHires(bool h) {
   } else {
     max_output = 127;
   }
+}
+
+// Todo: should make setter more secure with value checking
+int MidiTranslator::getChannel() {
+  return channel;
+}
+void MidiTranslator::setChannel(int c) {
+  channel = c;
+}
+
+int MidiTranslator::getCcNumber() {
+  return cc_number;
+}
+void MidiTranslator::setCcNumber(int c) {
+  cc_number = c;
+}
+
+int MidiTranslator::getTranslatorMode() {
+  return translator_mode;
+}
+void MidiTranslator::setTranslatorMode(int t) {
+  translator_mode = t;
+}
+
+string MidiTranslator::getScaleType() {
+  return scaleType;
+}
+void MidiTranslator::setScaleType(string s) {
+  scaleType = s;
+}
+
+int MidiTranslator::getRootNote() {
+  return rootNote;
+}
+void MidiTranslator::setRootNote(int r) {
+  rootNote = r;
+}
+
+int MidiTranslator::getNumberOfNotes() {
+  return numberOfNotes;
+}
+void MidiTranslator::setNumberOfNotes(int n) {
+  numberOfNotes = n;
+}
+
+float MidiTranslator::getSustain() {
+  return sustain;
+}
+void MidiTranslator::setSustain(float s) {
+  sustain = s;
+}
+
+int MidiTranslator::getMaxOutput() {
+  return max_output;
+}
+void MidiTranslator::setMaxOutput(int m) {
+  max_output = m;
+}
+
+int MidiTranslator::getMinOutput() {
+  return min_output;
+}
+void MidiTranslator::setMinOutput(int m) {
+  min_output = m;
+}
+
+int MidiTranslator::getInterpolationType() {
+  return interpolation_type;
+}
+void MidiTranslator::setInterpolationType(int i) {
+  interpolation_type = i;
+}
+
+bool MidiTranslator::getEnabled() {
+  return enabled;
+}
+void MidiTranslator::setEnabled(bool e) {
+  enabled = e;
 }

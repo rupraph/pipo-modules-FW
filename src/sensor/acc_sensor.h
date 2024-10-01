@@ -9,23 +9,23 @@
 class MotionSensor : public Sensor {
  public:
   MotionSensor() {
-    sensor_dat = {{"roll", {false, false, 0, 0, 0, 90.0, false}},
-                  {"pitch", {false, false, 0, 0, 0, 180.0, false}},
-                  {"yaw", {false, false, 0, 0, 0, 180.0, false}},
-                  {"accX", {true, false, 0, 0, 0, 8.0, false}},
-                  {"accY", {false, false, 0, 0, 0, 8.0, false}},
-                  {"accZ", {false, false, 0, 0, 0, 8.0, false}}};
+    sensor_dat["accX"] = SensorDat();
+    sensor_dat["accY"] = SensorDat();
+    sensor_dat["accZ"] = SensorDat();
+    sensor_dat["roll"] = SensorDat();
+    sensor_dat["pitch"] = SensorDat();
+    sensor_dat["yaw"] = SensorDat();
   };
 
   void init() override;
   void setup() override;
   void update() override;
 
-  bool enable_send_vizualizer = false;
-
   void calc_euler_angles();
-
   void convert_accell();
+
+  bool enable_send_vizualizer =
+      false;  //set on/off serial messages for vizualizer
 
  private:
   unordered_map<string, LowPassFilter> lp_filter_map = {
@@ -61,7 +61,6 @@ class MotionSensor : public Sensor {
       .quaternion9_frequency = 50,   // Max frequency = 225, min frequency = 50
       .har_frequency = 50,           // Max frequency = 225, min frequency = 50
       .steps_frequency = 50          // Max frequency = 225, min frequency = 50
-
   };
 
   float quat_w;
@@ -73,10 +72,6 @@ class MotionSensor : public Sensor {
   float raw_accX;
   float raw_accY;
   float raw_accZ;
-
-  // // acellerometer value convertion (from before library change)
-  // const float acc_range=8.0; // full scale change. only for conversion, not linked/implemented with the sensor setup yet
-  // float accel_scale_coef=acc_range/32767.0; // range here is bare +-8, 16, etc...  * 9.81;to convert in m/s-2
 };
 
 #endif  //ACC_SENSOR_H

@@ -7,15 +7,17 @@
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
-  import type {
-    Axis,
-    MidiConfig,
-    SensorConfig,
-    OscConfig,
-    PipoConfig,
-    PipoTypes,
-    SensorValues,
-    PipoKeys,
+  import {
+    type MidiConfig,
+    type SensorConfig,
+    type OscConfig,
+    type HidConfig,
+    type PipoConfig,
+    type PipoTypes,
+    type SensorValues,
+    type PipoKeys,
+    isHisteresisMode,
+    isContinuousMode,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -27,11 +29,13 @@
   export let config: PipoConfig<T>;
   const dispatch = createEventDispatcher();
   const sensorValues: SensorValues<T> = {};
+  const withinWindowValues: SensorValues<T> = {};
   let fps = 0;
   let frames = 0;
   let dt = 0;
-  pipoInput.on("sensor", ({ axis, value }) => {
+  pipoInput.on("sensor", ({ axis, value, withinWindow }) => {
     sensorValues[axis] = value;
+    withinWindowValues[axis] = withinWindow;
   });
   pipoInput.on("fps", (evt) => {
     frames = evt.frames;
@@ -51,6 +55,7 @@
   }
 
   async function submit() {
+    console.log("submitting", JSON.stringify(config, 0, 2));
     const blob = new Blob([JSON.stringify(config)], {
       type: "application/json",
     });
@@ -130,6 +135,13 @@
     ][];
   }
 
+  function getHidConf() {
+    return Object.entries(config.engine["engine-hid"]) as unknown as [
+      PipoKeys[T],
+      HidConfig,
+    ][];
+  }
+
   function getSchema(axis: PipoKeys[T]) {
     return schema[$type as T][axis];
   }
@@ -172,11 +184,19 @@
       <Collapse title={label}>
         <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
         <Range label="Deadzone" bind:value={sensorconf.deadzone} />
+        is CONTINUOUS {isContinuousMode(sensorconf)}
+        is HISTERESIS {isHisteresisMode(sensorconf)}
+        <Checkbox label="Mode" bind:value={sensorconf.mode} />
+        <Checkbox label="Histeresis" bind:value={sensorconf.threshold_mode} />
         <MinMax
           label="Sensor Range"
           bind:low={sensorconf.limit_min}
           bind:high={sensorconf.limit_max}
           value={sensorValues[axis]}
+          mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
+            ? "double"
+            : "single"}
+          cursorActive={withinWindowValues[axis]}
           {min}
           {max}
           {step}
@@ -235,6 +255,62 @@
             {#if !oscconf.mode_raw}
               <Range label="OSC Min" bind:value={oscconf.output_min} />
               <Range label="OSC Max" bind:value={oscconf.output_max} />
+            {/if}
+          </Collapse>
+        </section>
+      {/each}
+    </Collapse>
+    <Collapse title="HID output">
+      <h4>Keyboard/Mouse mode settings</h4>
+      <Checkbox label="HID Enabled" bind:value={config.general.HidEnabled} />
+      <Select
+        label="HID Mode"
+        options={[
+          { label: "Keyboard", value: 2 },
+          { label: "Mouse", value: 1 },
+        ]}
+        bind:value={config.general.HidMode}
+      />
+      <h4>Please restart Pipo after enabling or switching HID mode</h4>
+      {#each getHidConf() as [axis, hidconf]}
+        {@const { label } = getSchema(axis)}
+        <section>
+          <h4>
+            NOTE: The available mapping options below will depend on the sensor
+            and Hid mode
+          </h4>
+          <Collapse title={label} bind:value={hidconf.enabled}>
+            {#if config.sensor[axis].mode === true && config.general.HidMode === 2}
+              <h4>
+                Map a keyboard key. Address format for "u" would be: "KEY_u" (or
+                KEY_UP,KEY_ENTER,...)
+              </h4>
+              <Checkbox
+                label="Stroke continuous"
+                bind:value={hidconf.stroke_mode}
+              />
+              <Text label="Address" bind:value={hidconf.map_address} />
+              {#if hidconf.stroke_mode && config.sensor[axis].threshold_mode === true}
+                <Text label="Address2" bind:value={hidconf.map_address2} />
+              {/if}
+            {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
+              <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
+              <Checkbox
+                label="Stroke continuous"
+                bind:value={hidconf.stroke_mode}
+              />
+              <Text label="Address" bind:value={hidconf.map_address} />
+            {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
+              <h4>
+                Not possible to map a continuous sensor axis to a key stoke
+                (must change to Threshold mode)
+              </h4>
+            {:else if config.sensor[axis].mode === false && config.general.HidMode === 1}
+              <h4>
+                Map a continuous sensor axis to a mouse axis (Address can be
+                "X","Y","WHEEL","PAN")
+              </h4>
+              <Text label="Address" bind:value={hidconf.map_address} />
             {/if}
           </Collapse>
         </section>

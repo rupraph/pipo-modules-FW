@@ -60,18 +60,15 @@ void PipoSocket::loop() {
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = input_sens->get_value(axis_name);
+    bool sensor_bool = input_sens->get_bool_value(axis_name);
     float sensor_min = input_sens->get_limit_min(axis_name);
     float sensor_max = input_sens->get_limit_max(axis_name);
-
-    //check if axis is enabled, outside deadzone and not disabled
-    if (!input_sens->get_enabled(axis_name) ||
-        !input_sens->test_outside_deadzone(axis_name))
-      continue;
-
     message += "\nsensor";
     message += axis_name;
     message += ",";
     message += std::to_string(sensor_val);
+    message += ",";
+    message += std::to_string(sensor_bool);
   }
   ws->textAll(message.c_str());
 }

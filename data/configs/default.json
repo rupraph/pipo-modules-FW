@@ -17,12 +17,13 @@
             "dist": {
                 "cc_number": 2,
                 "channel": 1,
-                "enabled": false,
+                "enabled": true,
                 "hires": false,
                 "interpolation_type": 0,
                 "max_output": 127,
                 "min_output": 0,
                 "numberOfNotes": 15,
+                "sustain": 800,
                 "rootNote": 55,
                 "scaleType": "major pentatonic",
                 "translator_mode": 1
@@ -40,12 +41,12 @@
     "sensor": {
         "dist": {
             "deadzone": 0.0,
-            "enabled": true,
-            "inverted": false,
             "offset": 0.0,
-            "value": 0.0,
-            "limit_max": 600,
-            "limit_min": 20.0
+            "limit_max": 60.0,
+            "limit_min": 2.0,
+            "mode": true,
+            "threshold_mode": false,
+            "threshold": 20.0
         }
     },
     "general": {
@@ -54,6 +55,7 @@
         "OSC_IP": "192.168.1.71",
         "OSC_PORT": 8000,
         "MidiEnabled": true,
-        "HidEnabled": true
+        "HidEnabled": true,
+        "HIDmode": 2
     }
 }

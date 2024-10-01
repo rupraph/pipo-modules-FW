@@ -8,9 +8,7 @@
 
 class RangeSensor : public Sensor {
  public:
-  RangeSensor() {
-    sensor_dat = {{"dist", {true, false, 0, 0, 0, 1000.0, false}}};
-  };
+  RangeSensor() { sensor_dat["dist"] = SensorDat(); };
 
   void init() override;
   void setup() override;

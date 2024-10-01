@@ -66,30 +66,41 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
     sensor_dat[pair.first].value = analog_val;
 
-    if (analog_val > sensor_dat[pair.first].limit_min &&
-        sensor_dat[pair.first].value_prev < sensor_dat[pair.first].limit_min) {
-      if (!sensor_dat[pair.first].triggered) {
-        sensor_dat[pair.first].triggered = true;
-      }
-    } else if (analog_val < sensor_dat[pair.first].limit_min &&
-               sensor_dat[pair.first].value_prev >
-                   sensor_dat[pair.first].limit_min) {
-      if (!sensor_dat[pair.first].untriggered) {
-        sensor_dat[pair.first].untriggered = true;
-      }
-    } else {
-      sensor_dat[pair.first].triggered = false;
-      sensor_dat[pair.first].untriggered = false;
-    }
+    // // above min + was below min -> triggered
+    // if (analog_val>sensor_dat[pair.first].limit_min
+    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
+    // {
+    //     if (!sensor_dat[pair.first].triggered)
+    //     {
+    //         sensor_dat[pair.first].triggered = true;
+    //     }
+    // }
+    // // below min + was above min -> untriggered
+    // else if (analog_val<sensor_dat[pair.first].limit_min
+    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+    // {
+    //     if (!sensor_dat[pair.first].untriggered)
+    //     {
+    //         sensor_dat[pair.first].untriggered = true;
+    //     }
+    // }
+    // // else reset -> likely trigger should only be reset by engine to wait for the flag to be used
+    // else
+    // {
+    //     sensor_dat[pair.first].triggered = false;
+    //     sensor_dat[pair.first].untriggered = false;
+    // }
   }
   for (auto const& pair : touch_map) {
-    //triel filtering values
+    //trial filtering values
     //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
     float val = touchRead(pair.second) - sensor_dat[pair.first].offset;
 
     if (val > MAX_TOUCH_VALUE) {
       val = MAX_TOUCH_VALUE;
     }
+
+    //Todo: try to have an adaptative max ? -> when no touch on, min can be adapted.
 
     // if (value>sensor_dat[pair.first].limit_max && touch_adaptative_max)
     // {
@@ -113,23 +124,28 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
     sensor_dat[pair.first].value = val;
 
-    if (val > sensor_dat[pair.first].limit_min &&
-        sensor_dat[pair.first].value_prev < sensor_dat[pair.first].limit_min) {
-      if (!sensor_dat[pair.first].triggered) {
-        sensor_dat[pair.first].triggered = true;
-      }
-    } else if (val < sensor_dat[pair.first].limit_min &&
-               sensor_dat[pair.first].value_prev >
-                   sensor_dat[pair.first].limit_min) {
-      if (!sensor_dat[pair.first].untriggered) {
-        sensor_dat[pair.first].untriggered = true;
-      }
-    } else {
-      sensor_dat[pair.first].triggered = false;
-      sensor_dat[pair.first].untriggered = false;
-    }
+    process_sensor_triggers();
+    // if (val>sensor_dat[pair.first].limit_min
+    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
+    // {
+    //     if (!sensor_dat[pair.first].triggered)
+    //     {
+    //         sensor_dat[pair.first].triggered = true;
+    //     }
+    // }
+    // else if (val<sensor_dat[pair.first].limit_min
+    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+    // {
+    //     if (!sensor_dat[pair.first].untriggered)
+    //     {
+    //         sensor_dat[pair.first].untriggered = true;
+    //     }
+    // }
+    // else
+    // {
+    //     sensor_dat[pair.first].triggered = false;
+    //     sensor_dat[pair.first].untriggered = false;
+    // }
     // }
   }
 }
-
-// generic functions /////////////////

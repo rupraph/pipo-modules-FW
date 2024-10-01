@@ -40,6 +40,5 @@ class PipoServer {
   Engine& engine;
   OSC_handler& osc;
   string received_configData;
-  //json parsed_configData;
 };
 #endif  // WEBSERVER_H

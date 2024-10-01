@@ -15,6 +15,7 @@ void OSC_handler::setup() {
 #endif
 }
 
+// Todo pass arguments there
 void OSC_handler::set_config() {
   if (config.general_config.find("OSC_IP") != config.general_config.end()) {
     string ip = config.general_config["OSC_IP"];

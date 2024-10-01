@@ -54,7 +54,7 @@
 </script>
 
 <Select label="Scale type" options={scaleTypes} bind:value={config.scaleType} />
-<Range label="Root Note" bind:value={config.rootNote} min={0} max={127} />
+<!-- <Range label="Root Note" bind:value={config.rootNote} min={0} max={127} /> -->
 <NoteInput label="Root Note" bind:value={config.rootNote} />
 <Range
   label="Number of Notes"
@@ -62,6 +62,7 @@
   min={1}
   max={50}
 />
+<Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
 
 <style>
 </style>

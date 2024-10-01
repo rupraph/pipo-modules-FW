@@ -1,27 +1,38 @@
-// this will implement the methods from config.h
-
 #include "config.h"
 
-// todo should be able to save different config and retrieve them (from webpage)
-// should be able to report wherther config is succefully loade, saved,etc..
-
-// todo. when changing sensor range for eg, this should trigger an update of miditranslator max ????
-Config config;
+Config config;  // global config object so it can be accessed from anywhere
 
 void Config::load_config(String filename, bool addJsonExtension = true) {
   this->filename = filename;
   Serial.print("load config: ");
   Serial.println(get_path(filename, addJsonExtension).c_str());
+  try {
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
 #endif
-  current_config.clear();
-  current_config = json::parse(
-      readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
+
+    if (DEBUG_CONFIG) {
+      Serial.println("config: before loading:");
+      Serial.println(current_config.dump(4).c_str());
+    }
+
+    current_config.clear();
+    current_config = json::parse(
+        readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
+
+    if (DEBUG_CONFIG) {
+      Serial.println("loaded config:");
+      Serial.println(current_config.dump(4).c_str());
+    }
+
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
 #endif
-  logs.writeLog("load config: " + filename);
+    logs.writeLog("load config: " + filename);
+  } catch (const std::exception& e) {
+    Serial.println("error loading config");
+    Serial.println(e.what());
+  }
 }
 
 /// @brief Load the last config used, if it exists, otherwise load the default config.
@@ -110,11 +121,9 @@ void Config::rename(String old_name, String new_name) {
   }
 }
 void Config::new_config(String name) {
-  // should check if file already exists. rewrtiing on same filename can cause corruption ?
-  //std::string input = readFile(LittleFS, config_model_path);
+  // should check if file already exists.
   copyFile(LittleFS, config_model_path, get_path(name).c_str());
   this->filename = name;
-  //writeFile(LittleFS, get_path(name).c_str(), input.c_str());
   logs.writeLog("new config: " + name);
 }
 
@@ -142,7 +151,7 @@ void Config::print() {
   Serial.println(current_config.dump(4).c_str());
 }
 
-void Config::gather(Sensor& sensor, Engine& engine, bool debug = false) {
+void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
   Serial.print("gatherconfig sensor");
   current_config["sensor"].clear();
   current_config["sensor"] = sensor.get_config(debug);
@@ -159,22 +168,30 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug = false) {
     Serial.println("gathered_config_end");
   }
 }
+
+//* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
                    bool debug) {
-  sensor.set_config(current_config["sensor"]);
-  engine.set_config(current_config["engine"]);
-  general_config.clear();
-  general_config = current_config["general"];
-  //log last config name
-  writeFile(LittleFS, last_config_path, filename.c_str());
-  /*TODO: improve: 
-     either pass the json to apply and avoid passing cofig object
-      to osc class, or follow the same config process than sensor 
-      and engine instead of being in the general config... 
-     */
-  osc.set_config();
+  try {
+    sensor.set_config(current_config["sensor"], DEBUG_CONFIG);
+    engine.set_config(current_config["engine"], DEBUG_CONFIG);
+    general_config.clear();
+    general_config = current_config["general"];
+    //log last config name
+    writeFile(LittleFS, last_config_path, filename.c_str());
+    /*TODO: improve: 
+        either pass the json to apply and avoid passing cofig object
+        to osc class, or follow the same config process than sensor 
+        and engine instead of being in the general config... 
+        */
+    osc.set_config();
 
-  logs.writeLog("config applied: " + filename);
+    Serial.println("config applied: " + filename);
+    logs.writeLog("config applied: " + filename);
+  } catch (const std::exception& e) {
+    Serial.println("error applying config");
+    Serial.println(e.what());
+  }
 }
 
 String Config::get_path(String filename, bool addExtension) {

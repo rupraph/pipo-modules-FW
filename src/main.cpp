@@ -29,7 +29,7 @@ string sensor_type = "analog";
 
 midi_io midiio;
 usb_hid hidio;
-Engine engine(input_sens);
+Engine engine;
 OSC_handler osc(config);
 PipoServer server(input_sens, engine, osc);
 
@@ -40,8 +40,6 @@ void monitor_wifi();
 
 void setup() {
   Serial.begin(115200);
-  // delay(3000);
-  // while(!Serial) // "while" prevents usb to setup properly
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
   Serial.println(ESP.getFreeHeap());
@@ -51,55 +49,38 @@ void setup() {
   /////// Init filesystem
   init_filesystem();
 
-  /////// Init midi and hid
-  midiio.setup();
-  hidio.usb_hid_setup();
-
   /////// Load config
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
   config.apply(input_sens, engine, osc, false);  // input_sens,
-  //config.print();
+
+  /////// Init midi and hid
+  midiio.setup();
+  hidio.setup(config.general_config["HidMode"]);
+  // while (!Serial)
+  //   delay(100);
 
   /////// Init wifi
   setup_wifi();
 
+  /////// print filesystem files list
   listDir(LittleFS, "/", 0);
 
   /////// initialize sensor/inputs
   input_sens.init();
   input_sens.setup();
-  // capturing and storing config: this is the temp solution used to store the initial offset measurement (mostly for touch inputs)
+  // capturing and storing config at this point
+  //(this is a temp solution to store the initial sensor offset measurements)
   config.gather(input_sens, engine, true);
   config.save(config.filename + ".json");
 
-  Serial.print("after sensor setup");
-  Serial.println(ESP.getFreeHeap());
-
-  // Start server if TA connected or AP mode
-  // if(WiFi.status() == WL_CONNECTED || WiFi.getMode() == WIFI_AP){
+  // Start server
   Serial.println("starting config page");
   server.setup();
-  // }
-  // else{
-  //     Serial.println("Wifi not connected, no config page for now");
-  // }
-  osc.setup();  // requires config to be loaded before.
 
-  // Memo on tracking frequency adjustements
-  // uint32_t Freq = getCpuFrequencyMhz();
-  // Serial.print("CPU Freq = ");
-  // Serial.print(Freq);
-  // Serial.println(" MHz");
-  // Freq = getXtalFrequencyMhz();
-  // Serial.print("XTAL Freq = ");
-  // Serial.print(Freq);
-  // Serial.println(" MHz");
-  // Freq = getApbFrequency();
-  // Serial.print("APB Freq = ");
-  // Serial.print(Freq);
-  // Serial.println(" Hz");
+  // Start OSC
+  osc.setup();
 
   Serial.println("Setup done");
 #ifdef DEBUG_HEAP
@@ -109,30 +90,18 @@ void setup() {
   Serial.println(String(ESP.getMinFreeHeap()));
   Serial.print(F("Max Alloc Heap:"));
   Serial.println(ESP.getMaxAllocHeap());
-
 #endif
 }
 
 void loop() {
   try {
-    //wm.process();
+
     monitor_wifi(server.is_running);
-
     input_sens.update();
-
-    // Measure loop time
-    // Serial.print("loop");
-    // Serial.println(input_sens.measured_loop);
-    // Serial.print("interval");
-    // Serial.println(input_sens.measured_interval_duration);
-
-    // Plot some sensor values
-    // input_sens.teleplot_data("dist");
-    // input_sens.teleplot_data("roll");
-
     engine.update(input_sens, midiio, hidio, osc);
     pipoSocket.loop();
     hwui.update();
+
   } catch (const std::exception& e) {
     Serial.println("Exception in main loop");
     logs.writeLog(e.what());

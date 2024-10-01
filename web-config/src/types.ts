@@ -13,15 +13,31 @@ export type CCConfig = {
 export type NoteConfig = {
   scaleType: string;
   rootNote: number;
+  sustain: number;
   numberOfNotes: number;
   current_scale: number[];
 };
 export type MidiConfig = BaseMidiConfig & CCConfig & NoteConfig;
-
+export const BASIC = false;
+export const HISTERESIS = true;
+export const CONTINUOUS = false;
+export const THRESHOLD = true;
+export function isContinuousMode(config: SensorConfig): boolean {
+  return config.mode === CONTINUOUS;
+}
+export function isThresholdMode(config: SensorConfig): boolean {
+  return config.threshold_mode === THRESHOLD;
+}
+export function isHisteresisMode(config: SensorConfig): boolean {
+  return config.threshold_mode === HISTERESIS;
+}
+export function isBasicThresholdMode(config: SensorConfig): boolean {
+  return config.threshold_mode === THRESHOLD;
+}
 export type SensorConfig = {
+  mode: boolean;
+  threshold_mode: boolean;
   deadzone: number;
-  enabled: boolean;
-  inverted: boolean;
   limit_max: number;
   limit_min: number;
   offset: number;
@@ -39,6 +55,16 @@ export type GeneralConfig = {
   OSC_ENA: boolean;
   OSC_IP: string;
   OSC_PORT: number;
+  MidiEnabled: boolean;
+  HidEnabled: boolean;
+  HidMode: number;
+};
+
+export type HidConfig = {
+  enabled: boolean;
+  map_address: string;
+  map_address2: string;
+  stroke_mode: boolean;
 };
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
@@ -75,6 +101,9 @@ export type Schema = {
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {
+    "engine-hid": {
+      [Key in PipoKeys[T]]: HidConfig;
+    };
     "engine-midi": {
       [Key in PipoKeys[T]]: MidiConfig;
     };

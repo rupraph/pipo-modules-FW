@@ -12,8 +12,7 @@ void setup_wifi() {
     Serial.println(F("Starting STA mode"));
 
     WiFi.mode(WIFI_STA);
-
-    // WiFiManager wm;
+    WiFi.setMinSecurity(WIFI_AUTH_WPA_PSK);
     wm.setDarkMode(true);
     wm.setHostname(string(PIPO_TYPE).c_str());
     wm.setConnectTimeout(10);
@@ -31,19 +30,14 @@ void setup_wifi() {
     }
     // keep pressing to reset
 
-    ///////// HIGH here should be low. temporary patch to cope with switch not wired corectly)
+    ///////// HIGH here should be low. temporary patch to cope with switch not wired corectly on proto boards
     if (digitalRead(MODE_SW) == HIGH && digitalRead(PP_SW) == LOW) {
       Serial.println(F("Settings reset"));
       wm.resetSettings();
-      //Setting reset should be mover somewhere else
-      // Serial.println("Launching config portal");
-      // wm.setConfigPortalBlocking(true);
-      // wm.autoConnect("Pipo");
       ESP.restart();
     } else {
       if (wm.autoConnect("Pipo")) {
         Serial.println(F("connected...yeey :)"));
-        //hwui.set_led(WIFI_LED,60);
         hwui.start_pulse(WIFI_LED, 3000, 3, 30);
       } else {
         Serial.println(
@@ -68,9 +62,6 @@ void monitor_wifi(bool is_server_runing) {
     //Todo: Starting the server here does not seem to work.
     // for now, when setting wifi for first time, then reset and server works.
     //server cannot be setup in the loop ?
-
-    // Serial.println("Wifi connected, starting config page");
-    // wm.setDisableConfigPortal(true);
   }
 
   if (Serial.available() > 0) {
