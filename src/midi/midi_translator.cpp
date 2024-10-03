@@ -13,7 +13,7 @@ MidiTranslator::MidiTranslator() {
 }
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
-  //cap value to input range
+  // cap value to input range
   float out_value = value;
   if (value < min_input) {
     out_value = min_input + 1;
@@ -160,9 +160,10 @@ void MidiTranslator::update_scale() {
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
                                bool hires = false) {
-  // this returns a scaled value from the input range (max_input/min_input) to the output range (max_output/min_output)
+  // this returns a scaled value from the input range (max_input/min_input) to
+  // the output range (max_output/min_output)
 
-  //cap value to input range
+  // cap value to input range
   if (value < min_input) {
     value = min_input;
   } else if (value > max_input) {

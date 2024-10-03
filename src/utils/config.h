@@ -29,28 +29,27 @@ class Config {
   }
   String filename;  // raw config file name (no extension)
   json current_config;
-
   json general_config = {};
 
+  // load config from files into current_config
   void load_config(String filename, bool addJsonExtension = true);
   void load_config();
-
+  // void shouldSave();
+  // void saveIfNecessary();
   void set(const json& config);
-
+  void setValue(char input[], int len);
+  void setValues(char input[], int len);
   void save();
   void save(String filename);
   void save(String filename, String config);
-
   void delete_config(String filename);
-
   void rename(String old_name, String new_name);
   void new_config(String name);
-
   String get_list();
 
-  json get();
-  json get(string key);
-
+  json get();            // return current_config
+  json get(string key);  // return current_config[key]
+  // void save_for_key(string key, json data);
   void print();
   void gather(Sensor& sensor, Engine& engine, bool debug = false);
   void apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
@@ -58,9 +57,12 @@ class Config {
   String get_path(String filename, bool add_extension = true);
 
  private:
+  std::vector<std::string> split(const std::string& str, char delimiter);
+  // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";
+  json* tmp;
 };
 
 extern Config config;

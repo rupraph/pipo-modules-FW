@@ -1,18 +1,25 @@
 import EventEmitter from "eventemitter3";
 import type { PipoEvents } from "./lib/vis/types";
+import axios from "axios";
+import type { PipoConfig, PipoTypes } from "./types";
+import { formatNumbers } from "./utils";
 const NOTE_ON = 0x90;
 const NOTE_OFF = 0x80;
 export let error = "";
+let last = 0;
 function parse(msg: string) {
   const [command, ...args] = msg.split(",");
   const isSensor = command.startsWith("sensor");
   const axis = isSensor ? command.replace("sensor", "") : "";
   return { command, args, axis, isSensor };
 }
-class PipoInput extends EventEmitter<PipoEvents> {
+class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private socket?: WebSocket;
   private enabled: boolean = true;
   private timeout: number = 0;
+  private bailTimeout = 0;
+  private connected = false;
+  private saveTimeout = 0;
   constructor() {
     super();
     this.init();
@@ -36,7 +43,24 @@ class PipoInput extends EventEmitter<PipoEvents> {
         this.retryConnection();
         error = "Cannot init webSocket";
       }
-    }, 1000);
+    }, 500);
+  }
+  onDisconnect() {
+    if (this.socket) {
+      this.socket.close();
+    }
+    this.emit("disconnect");
+    this.connected = false;
+    if (!this.enabled) return;
+    this.retryConnection();
+  }
+  onConnect() {
+    this.emit("connect");
+    this.connected = true;
+  }
+  bailOnNoNews(delay = 1000) {
+    // clearTimeout(this.bailTimeout);
+    // this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
   }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
@@ -44,19 +68,15 @@ class PipoInput extends EventEmitter<PipoEvents> {
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
-    socket.addEventListener("open", (event) => {
-      console.log("Connected to Pipo");
-    });
-    socket.addEventListener("error", (e) => {
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
-    socket.addEventListener("close", (e) => {
-      this.socket = undefined;
-      if (!this.enabled) return;
-      this.retryConnection();
-    });
+    this.bailOnNoNews(2000);
+    socket.addEventListener("open", () => this.onConnect());
+    socket.addEventListener("error", () => this.onDisconnect());
+    socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
+      if (!this.connected) {
+        this.onConnect();
+      }
+      this.bailOnNoNews(2000);
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
@@ -85,9 +105,39 @@ class PipoInput extends EventEmitter<PipoEvents> {
           const [frames, dt] = numargs;
           return this.emit("fps", { frames, dt });
         }
+        if (command === "logs") {
+          const entries = args[0].split("--");
+          return this.emit("logs", { entries });
+        }
       });
     });
-    this.socket = socket;
+  }
+
+  setValue(path: string, value: unknown) {
+    if (!this.socket) return;
+
+    this.socket.send(`config:${path}:${formatNumbers(value, 4)}`);
+  }
+
+  setValues(pathvalues: { path: string; value: unknown }[]) {
+    if (!this.socket) return;
+    last = Date.now();
+    this.socket.send(
+      `configs:${pathvalues
+        .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
+        .join("\n")}`
+    );
+  }
+  saveConfig<T extends PipoTypes>(config: PipoConfig<T>) {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = 0;
+    }
+    this.saveTimeout = window.setTimeout(async () => {
+      if (!this.socket) return;
+      this.socket.send("save: ");
+      this.saveTimeout = 0;
+    }, 1000);
   }
   async initWebMidi() {
     const access = await navigator.permissions.query({
@@ -122,6 +172,12 @@ class PipoInput extends EventEmitter<PipoEvents> {
       }
     });
   }
+  getDebug() {
+    return axios.get("/conf-debug").then((res) => {
+      console.log(res.data);
+    });
+  }
 }
 
-export const pipoInput = new PipoInput();
+export const pipoio = new PipoIO();
+window.pipio = pipoio;

@@ -11,7 +11,7 @@
 </script>
 
 <span class="input columns">
-  <span>{label}</span>
+  <label>{label}</label>
   {#each options as { label, value: v }, i}
     <span class="radio-wrapper">
       <input
@@ -35,6 +35,7 @@
   }
   .radio-wrapper {
     display: grid;
+    grid-template-rows: auto;
     grid-template-columns: 20px auto;
     text-align: start;
     align-items: center;
@@ -42,11 +43,13 @@
   }
   .radio-wrapper input {
     width: max-content;
+    grid-area: 1 / 1 / 2 / 2;
   }
 
   .radio-wrapper label {
     width: 100%;
     cursor: pointer;
+    grid-area: 1 / 2 / 2 / 3;
   }
   .radio-wrapper:hover > label {
     text-decoration: underline;

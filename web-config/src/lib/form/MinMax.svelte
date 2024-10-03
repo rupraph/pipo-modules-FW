@@ -35,20 +35,18 @@
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
-  $: mode === "double" || mode === "single",
-    () => {
-      color = fillColor();
-    };
+  $: if (mode) {
+    color = fillColor();
+  }
 </script>
 
 <Input
   class="minmax-input"
-  label={`Raw sensor value: ${Number(value).toFixed(3)}`}
+  label={`Current value: ${Number(value).toFixed(2)} `}
   {id}
 >
   <div class="minmax">
     <span>{min}</span>
-    {cursorActive}
     <div class="slider">
       <div class="slider-track" style="--background-color: {color}"></div>
       <input

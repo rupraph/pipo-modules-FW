@@ -4,7 +4,9 @@
   font-family: 'Brugty';
   src: url('./assets/Brugty.ttf') format('truetype');
 }
-
+body{
+  overflow: hidden;
+}
 :root {
   font-family: Helvetica, system-ui, Brugty, Arial, sans-serif;
   line-height: 1.5;
@@ -18,6 +20,7 @@
   --main: #ffcb64;
   --main-darker: #ff6624;
   --red: #e33333;
+  --green: #3bb143;
   
   background-color: var(--bg-color); 
   color: var(--text-color);
@@ -26,7 +29,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
+.scroll{
+  overflow-y: auto;
+}
 .scroll::-webkit-scrollbar {
   width: 5px;
   height: 5px;

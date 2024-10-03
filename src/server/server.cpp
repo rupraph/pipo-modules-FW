@@ -80,6 +80,7 @@ void PipoServer::setup_requests() {
     try {
       config.set(json::parse(request->getParam("config")->value()));
       config.apply(input_sens, engine, osc, true);
+      config.save();
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
       return request->send(500, "text/plain",
@@ -200,21 +201,14 @@ void PipoServer::setup_requests() {
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());  // 44k remaining
 #endif
-
-            config.save(config.filename + ".json", received_configData.c_str());
-
+            config.save(config.filename, received_configData.c_str());
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif
-
-            config.load_config(config.filename, true);
-
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif
-
             received_configData.clear();
-            config.apply(input_sens, engine, osc, true);
             return request->send(200, "text/plain", "Config saved");
           }
         } catch (const std::exception& e) {
@@ -241,9 +235,9 @@ void PipoServer::setup_requests() {
       config.general_config["Wifi_mode"] = "switch to AP";
       return request->send(200, "text/plain", "STA");
     }
-    //config.save(config.filename);
-    //delay(1000);
-    //ESP.restart();
+    // config.save(config.filename);
+    // delay(1000);
+    // ESP.restart();
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -252,6 +246,9 @@ void PipoServer::setup_requests() {
 
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Pong");
+  });
+  server.on("/conf-debug", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    request->send(200, "text/plain", config.current_config.dump().c_str());
   });
 
   // batt is temporarily as a request since I don't want it to be polled as fast as the pipo data
@@ -281,41 +278,54 @@ void PipoServer::setup_requests() {
   });
 }
 
-void PipoServer::onMessage(AsyncWebSocketClient* client, String message) {
-  Serial.println(message);
-  // client->text("I got your message");
+void PipoServer::onMessage(AsyncWebSocketClient* client) {
+  try {
+    char command[16];
+    int offset = 0;
+    int i = 0;
+    for (i = 0; i < ws_message_len; i++) {
+      if (ws_message[i] == ':') {
+        command[offset] = 0;
+        break;
+      }
+      command[offset++] = ws_message[i];
+    }
+
+    if (strcmp("config", command) == 0) {
+      config.setValue(ws_message + offset + 1, ws_message_len - offset - 1);
+      config.apply(input_sens, engine, osc, true);
+    } else if (strcmp("configs", command) == 0) {
+      config.setValues(ws_message + offset + 1, ws_message_len - offset - 1);
+      config.apply(input_sens, engine, osc, true);
+    } else if (strcmp("save", command) == 0) {
+      config.save();
+    }
+  } catch (const std::exception& e) {
+    logs.writeError("error on message" + String(e.what()));
+    Serial.println("error on message");
+    Serial.println(e.what());
+  }
 }
 void PipoServer::setup_ws() {
   server.addHandler(&ws);
   pipoSocket.setup(&ws, &input_sens);
-  events.onConnect([](AsyncEventSourceClient* client) {
-    client->send("hello!", NULL, millis(), 1000);
-  });
+  events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
+  String msg = "";
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-      //Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
-      Serial.print("ws connect");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.println();
-      //client->printf("Hello Client %u :)", client->id());
       client->ping();
     } else if (type == WS_EVT_DISCONNECT) {
-      //Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
-      Serial.print("ws disconnect");
-      Serial.print(server->url());
-      Serial.print(client->id());
+      ws.cleanupClients(1);
     } else if (type == WS_EVT_ERROR) {
-      //Serial.printf("ws[%s][%u] error(%u): %s\n", server->url(), client->id(), *((uint16_t*)arg), (char*)data);
+      ws.cleanupClients(1);
       Serial.print("ws error");
       Serial.print(server->url());
       Serial.print(client->id());
       Serial.print(*((uint16_t*)arg));
       Serial.println((char*)data);
     } else if (type == WS_EVT_PONG) {
-      //Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char*)data : "");
       Serial.print("ws pong");
       Serial.print(server->url());
       Serial.print(client->id());
@@ -323,54 +333,32 @@ void PipoServer::setup_ws() {
       Serial.println((len) ? (char*)data : "");
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
-      String msg = "";
       if (info->final && info->index == 0 && info->len == len) {
-        // the whole message is in a single frame and we got all of it's data
-        if (info->opcode == WS_TEXT) {
-          for (size_t i = 0; i < info->len; i++) {
-            msg += (char)data[i];
-          }
-        } else {
-          char buff[3];
-          for (size_t i = 0; i < info->len; i++) {
-            // sprintf(buff, "%02x ", (uint8_t)data[i]);
-            // msg += buff;
-            // removing sprintf to reduce memory usage
-            if (data[i] < 16)
-              msg += '0';  // Add leading zero for single hex digit
-            msg += String((uint8_t)data[i], HEX);
-            msg += ' ';
-          }
-        }
-        //Serial.printf("%s\n", msg.c_str());
-        Serial.print(msg);
-
-        if (info->opcode == WS_TEXT)
-          onMessage(client, msg);
-      } else {
-        // message is sent as multiple frames or the frame is split into multiple packets
-        if (info->opcode == WS_TEXT) {
-          for (size_t i = 0; i < len; i++) {
-            msg += (char)data[i];
-          }
-        } else {
-          char buff[3];
-          for (size_t i = 0; i < len; i++) {
-            // sprintf(buff, "%02x ", (uint8_t)data[i]);
-            // msg += buff;
-            // removing sprintf to reduce memory usage
-            if (data[i] < 16)
-              msg += '0';  // Add leading zero for single hex digit
-            msg += String((uint8_t)data[i], HEX);
-            msg += ' ';
-          }
-        }
-        if ((info->index + len) < info->len)
+        memcpy((void*)ws_message, data, info->len);
+        ws_message_len = info->len;
+        ws_message[ws_message_len] = 0;
+        onMessage(client);
+        return;
+      }
+      if (info->len >= ws_max_len - 1) {
+        ws_message_len = 0;
+        ws_message[0] = 0;
+        return;
+      }
+      if (info->index == 0) {
+        if (info->len + ws_message_len >= ws_max_len - 1) {
+          ws_message_len = 0;
+          ws_message[0] = 0;
           return;
-        if (!info->final)
-          return;
-        if (info->message_opcode == WS_TEXT)
-          onMessage(client, msg);
+        }
+        memcpy((void*)(ws_message + ws_message_len), data, info->len);
+        ws_message_len += info->len;
+        if (info->index + len == info->len && info->final) {
+          ws_message[ws_message_len] = 0;
+          onMessage(client);
+          ws_message_len = 0;
+          ws_message[0] = 0;
+        }
       }
     }
   });

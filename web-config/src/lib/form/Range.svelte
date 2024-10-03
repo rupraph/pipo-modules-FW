@@ -6,6 +6,7 @@
   export let max: number = Infinity;
   export let step: number = 1;
   export let value: number = 0;
+  export let tooltip: string | undefined;
   let id = uid();
   let interval = 0;
   let timeout = 0;
@@ -52,10 +53,11 @@
   }, 100);
 </script>
 
-<Input {label} {id}>
+<Input class={$$restProps.class || ""} {label} {id} {tooltip}>
   <input type="number" {id} name={label} {min} {max} {step} bind:value />
 
   <button
+    class={value <= min ? "disabled" : ""}
     on:click={() => {
       value -= step;
       onmouseup();
@@ -69,6 +71,7 @@
     on:focusout={onmouseup}>-</button
   >
   <button
+    class={value >= max ? "disabled" : ""}
     on:click={() => {
       value += step;
       onmouseup();

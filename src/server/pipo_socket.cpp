@@ -50,6 +50,10 @@ void PipoSocket::loop() {
     iterations += 1;
     return;
   }
+  if (now - lastCleanTime > 1000) {
+    ws->cleanupClients(1);
+    lastCleanTime = now;
+  }
   std::string message = "fps,";
   message += std::to_string((float)iterations);
   message += ",";
@@ -63,6 +67,11 @@ void PipoSocket::loop() {
     bool sensor_bool = input_sens->get_bool_value(axis_name);
     float sensor_min = input_sens->get_limit_min(axis_name);
     float sensor_max = input_sens->get_limit_max(axis_name);
+
+    // check if axis is enabled, outside deadzone and not disabled
+    if (!input_sens->test_outside_deadzone(axis_name))
+      continue;
+
     message += "\nsensor";
     message += axis_name;
     message += ",";
@@ -71,4 +80,9 @@ void PipoSocket::loop() {
     message += std::to_string(sensor_bool);
   }
   ws->textAll(message.c_str());
+  if (logs.hasNews()) {
+    message = "logs,";
+    message += logs.readLogs(true).c_str();
+    ws->textAll(message.c_str());
+  }
 }

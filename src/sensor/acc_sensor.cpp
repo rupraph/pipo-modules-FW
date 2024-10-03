@@ -47,8 +47,8 @@ void MotionSensor::update() {
     // Serial.print(q2);
     // Serial.print(",");
     // Serial.println(q3);
-    // Output the Quaternion data in the format expected by ZaneL's Node.js Quaternion animation tool
-    // Serial.print(F("{\"quat_w\":"));
+    // Output the Quaternion data in the format expected by ZaneL's Node.js
+    // Quaternion animation tool Serial.print(F("{\"quat_w\":"));
     // Serial.print(q0, 3);
     // Serial.print(F(", \"quat_x\":"));
     // Serial.print(q1, 3);

@@ -1,8 +1,8 @@
 #ifndef PIPOSOCKET_H
 #define PIPOSOCKET_H
-#include <ESPAsyncWebServer.h>
 #include "sensor/input_sensor.h"
-
+#include "utils/logs.h"
+#include <ESPAsyncWebServer.h>
 using namespace std;
 
 class PipoSocket {
@@ -18,6 +18,7 @@ class PipoSocket {
   AsyncWebSocket* ws;
   Sensor* input_sens;
   unsigned long lastSendTime = 0;
+  unsigned long lastCleanTime = 0;
   unsigned long iterations = 0;
 };
 extern PipoSocket pipoSocket;

@@ -22,6 +22,27 @@ int HidTranslator::map_linear(float value, float input_min, float input_max,
                output_min);
 }
 
+int HidTranslator::get_current_bool(float value, float input_min,
+                                    float input_max) {
+  // if threshold is used, we will return 1 if the value is above the threshold,
+  // and 0 if it is below if not, return 1 if value is above the half of the
+  // input range, defined by input_max and input_min
+
+  int input_range_center = ((input_max - input_min) + input_min) / 2;
+
+  if (use_threshold) {
+    if (value > threshold) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else if (value > input_range_center) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
 int HidTranslator::get_current_int(float value, float input_min,
                                    float input_max) {
   int mapped_value = map_linear(value, input_min, input_max, 0, 255);

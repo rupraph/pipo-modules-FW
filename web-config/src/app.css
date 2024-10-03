@@ -10,11 +10,10 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
   width: 100vw;
   max-width: 100vw;
   overflow-x: hidden;
-  justify-content: space-around;
+  justify-content: center;
 }
 
 h1 {
@@ -43,21 +42,6 @@ label {
 }
 .input:hover > label {
   text-decoration: underline;
-}
-
-button {
-  border: 1px solid transparent;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: color 0.25s;
-}
-button.active {
-  transform: scale(0.95);
-  box-shadow: none;
-  
-
 }
 
 input {
