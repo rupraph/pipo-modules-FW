@@ -152,14 +152,14 @@
     });
   }
   let interval = 0;
-  onMount(() => {
-    interval = window.setInterval(() => {
-      configSave.update(JSON.parse(JSON.stringify(config)));
-    }, 1000);
-  });
-  onDestroy(() => {
-    clearInterval(interval);
-  });
+  // onMount(() => {
+  //   interval = window.setInterval(() => {
+  //     configSave.update(JSON.parse(JSON.stringify(config)));
+  //   }, 1000);
+  // });
+  // onDestroy(() => {
+  //   clearInterval(interval);
+  // });
 </script>
 
 <article class="config">
