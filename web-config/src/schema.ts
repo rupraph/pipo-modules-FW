@@ -4,6 +4,7 @@ export const schema: Schema = {
   motion: {
     accX: {
       label: "X-axis acceleration",
+      cat: "Linear Acceleration",
       unit: "m/s²",
       min: -16,
       max: 16,
@@ -11,6 +12,7 @@ export const schema: Schema = {
     },
     accY: {
       label: "Y-axis acceleration",
+      cat: "Linear Acceleration",
       unit: "m/s²",
       min: -16,
       max: 16,
@@ -18,6 +20,7 @@ export const schema: Schema = {
     },
     accZ: {
       label: "Z-axis acceleration",
+      cat: "Linear Acceleration",
       unit: "m/s²",
       min: -16,
       max: 16,
@@ -25,6 +28,7 @@ export const schema: Schema = {
     },
     pitch: {
       label: "Pitch",
+      cat: "Rotations",
       unit: "°",
       min: -90,
       max: 90,
@@ -32,6 +36,7 @@ export const schema: Schema = {
     },
     roll: {
       label: "Roll",
+      cat: "Rotations",
       unit: "°",
       min: -180,
       max: 180,
@@ -39,6 +44,7 @@ export const schema: Schema = {
     },
     yaw: {
       label: "Yaw",
+      cat: "Rotations",
       unit: "°",
       min: -180,
       max: 180,
@@ -48,6 +54,7 @@ export const schema: Schema = {
   range: {
     dist: {
       label: "Distance",
+      cat: "",
       unit: "cm",
       min: 0,
       max: 400,
@@ -57,6 +64,7 @@ export const schema: Schema = {
   analog: {
     A1: {
       label: "Analog 1",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -64,6 +72,7 @@ export const schema: Schema = {
     },
     A2: {
       label: "Analog 2",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -71,6 +80,7 @@ export const schema: Schema = {
     },
     A3: {
       label: "Analog 3",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -78,6 +88,7 @@ export const schema: Schema = {
     },
     A4: {
       label: "Analog 4",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -85,6 +96,7 @@ export const schema: Schema = {
     },
     A5: {
       label: "Analog 5",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -92,6 +104,7 @@ export const schema: Schema = {
     },
     A6: {
       label: "Analog 6",
+      cat: "Voltage",
       unit: "V",
       min: 0,
       max: 3.3,
@@ -99,6 +112,7 @@ export const schema: Schema = {
     },
     T1: {
       label: "Touch 1",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
@@ -106,6 +120,7 @@ export const schema: Schema = {
     },
     T2: {
       label: "Touch 2",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
@@ -113,6 +128,7 @@ export const schema: Schema = {
     },
     T3: {
       label: "Touch 3",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
@@ -120,25 +136,28 @@ export const schema: Schema = {
     },
     T4: {
       label: "Touch 4",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
       step: 1,
     },
     T5: {
-      label: "Touch 4",
+      label: "Touch 5",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
       step: 1,
     },
     T6: {
-      label: "Touch 4",
+      label: "Touch 6",
+      cat: "Touch",
       unit: "-",
       min: 0,
       max: 200000,
       step: 1,
     },
   },
-  unknown: { "": { label: "", unit: "", min: 0, max: 0, step: 1 } },
+  unknown: { "": { label: "", cat: "", unit: "", min: 0, max: 0, step: 1 } },
 };

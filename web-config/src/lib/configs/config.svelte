@@ -37,6 +37,15 @@
   const smoothValues: SmoothSensorValues<T> = {};
   const withinWindowValues: SensorValues<T> = {};
   const sensorValues: SensorValues<T> = {};
+
+  let sensorConfs = [];
+  let groupedSensorConfs = {};
+
+  onMount(() => {
+    sensorConfs = getSensorConf();
+    groupedSensorConfs = groupBySection(sensorConfs);
+  });
+
   pipoio.on("sensor", ({ axis, value, withinWindow }) => {
     withinWindowValues[axis] = withinWindow;
     const now = Date.now();
@@ -145,6 +154,20 @@
     ][];
   }
 
+  function groupBySection(sensorConfs: [PipoKeys[T], SensorConfig][]) {
+    const sections = {};
+    for (const [axis, sensorconf] of sensorConfs) {
+      const { cat } = getSchema(axis);
+      console.log(cat);
+      if (!sections[cat]) {
+        sections[cat] = [];
+      }
+      sections[cat].push([axis, sensorconf]);
+    }
+    console.log(sections);
+    return sections;
+  }
+
   function getOscConf() {
     return Object.entries(config.engine["engine-osc"]) as unknown as [
       PipoKeys[T],
@@ -209,38 +232,43 @@
     >
   </section>
   <Collapse title="Sensor settings" open>
-    {#each getSensorConf() as [axis, sensorconf]}
-      {@const { label, unit, min, max, step } = getSchema(axis)}
-      <Collapse title={label}>
-        <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-
-        <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
-        {#if sensorconf.mode === true}
-          <Checkbox
-            label="Window threshold"
-            bind:value={sensorconf.threshold_mode}
-          />
-        {/if}
-        <MinMax
-          label="Sensor Range"
-          bind:low={sensorconf.limit_min}
-          bind:high={sensorconf.limit_max}
-          value={sensorValues[axis]}
-          mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
-            ? "double"
-            : "single"}
-          cursorActive={withinWindowValues[axis]}
-          {min}
-          {max}
-          {step}
-          minLabel={`min (${unit})`}
-          maxLabel={`max (${unit})`}
-        />
-        {#if $type === "analog" && axis.includes("T")}
-          <button class="primary" on:click={() => cal_offset(axis)}
-            >Offset calib</button
-          >
-        {/if}
+    {#each Object.entries(groupedSensorConfs) as [cat, sensors]}
+      <Collapse title={cat}>
+        {#each sensors as [axis, sensorconf]}
+          {@const { label, cat, unit, min, max, step } = getSchema(axis)}
+          <Collapse title={label}>
+            <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+            {#if cat !== "Touch"}
+              <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
+              {#if sensorconf.mode === true}
+                <Checkbox
+                  label="Window threshold"
+                  bind:value={sensorconf.threshold_mode}
+                />
+              {/if}
+            {/if}
+            <MinMax
+              label="Sensor Range"
+              bind:low={sensorconf.limit_min}
+              bind:high={sensorconf.limit_max}
+              value={sensorValues[axis]}
+              mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
+                ? "double"
+                : "single"}
+              cursorActive={withinWindowValues[axis]}
+              {min}
+              {max}
+              {step}
+              minLabel={`min (${unit})`}
+              maxLabel={`max (${unit})`}
+            />
+            {#if cat === "Touch"}
+              <button class="primary" on:click={() => cal_offset(axis)}
+                >Offset calib</button
+              >
+            {/if}
+          </Collapse>
+        {/each}
       </Collapse>
     {/each}
   </Collapse>
@@ -305,13 +333,13 @@
         bind:value={config.general.HidMode}
       />
       <h4>Please restart Pipo after enabling or switching HID mode</h4>
+      <h4>
+        NOTE: The available mapping options below will depend on the sensor and
+        Hid mode
+      </h4>
       {#each getHidConf() as [axis, hidconf]}
         {@const { label } = getSchema(axis)}
         <section>
-          <h4>
-            NOTE: The available mapping options below will depend on the sensor
-            and Hid mode
-          </h4>
           <Collapse title={label} bind:value={hidconf.enabled}>
             {#if config.sensor[axis].mode === true && config.general.HidMode === 2}
               <h4>

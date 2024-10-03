@@ -91,6 +91,7 @@ export type Schema = {
   [T in PipoTypes]: {
     [Key in PipoKeys[T]]: {
       label: string;
+      cat: string;
       unit: string;
       min: number;
       max: number;
@@ -98,6 +99,9 @@ export type Schema = {
     };
   };
 };
+
+
+
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {

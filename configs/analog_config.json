@@ -380,7 +380,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     },
     "T2": {
@@ -389,7 +389,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     },
     "T3": {
@@ -398,7 +398,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     },
     "T4": {
@@ -407,7 +407,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 500.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     },
     "T5": {
@@ -416,7 +416,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     },
     "T6": {
@@ -425,7 +425,7 @@
       "invert": false,
       "limit_max": 200000.0,
       "limit_min": 0.0,
-      "mode": false,
+      "mode": true,
       "threshold_mode": false
     }
   },
