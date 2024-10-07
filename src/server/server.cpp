@@ -1,6 +1,6 @@
 #include "server/server.h"
 
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
@@ -78,7 +78,7 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "No config received");
     }
     try {
-      config.set(json::parse(request->getParam("config")->value()));
+      config.set(request->getParam("config")->value());
       config.apply(input_sens, engine, osc, true);
       config.save();
       return request->send(200, "text/plain", "Config set");
@@ -250,7 +250,7 @@ void PipoServer::setup_requests() {
     request->send(200, "text/plain", "Pong");
   });
   server.on("/conf-debug", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    request->send(200, "text/plain", config.current_config.dump().c_str());
+    // request->send(200, "text/plain", config.current_config.dump().c_str());
   });
 
   // batt is temporarily as a request since I don't want it to be polled as fast as the pipo data

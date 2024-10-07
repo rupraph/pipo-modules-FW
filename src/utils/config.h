@@ -7,14 +7,15 @@
 #include <unordered_map>
 #include <sstream>
 #include "fs_tools.h"
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 #include "utils/logs.h"
 #include "../engine.h"
 #include "sensor/input_sensor.h"
 #include "../osc_handler.h"
 
 using namespace std;
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 class Engine;
 class OSC_handler;
@@ -22,21 +23,24 @@ class OSC_handler;
 class Config {
  public:
   Config() {
-    general_config = {{"Wifi_mode", "STA"},  {"OSC_ENA", true},
-                      {"OSC_PORT", 8000},    {"OSC_IP", "0.0.0.0"},
-                      {"MidiEnabled", true}, {"HidEnabled", true},
-                      {"HidMode", 2}};
+    general_config["Wifi_mode"] = "STA";
+    general_config["OSC_ENA"] = true;
+    general_config["OSC_PORT"] = 8000;
+    general_config["OSC_IP"] = "0.0.0.0";
+    general_config["MidiEnabled"] = true;
+    general_config["HidEnabled"] = true;
+    general_config["HidMode"] = 2;
   }
   String filename;  // raw config file name (no extension)
-  json current_config;
-  json general_config = {};
+  JsonDocument current_config;
+  JsonDocument general_config;
 
   // load config from files into current_config
   void load_config(String filename, bool addJsonExtension = true);
   void load_config();
   // void shouldSave();
   // void saveIfNecessary();
-  void set(const json& config);
+  void set(const String& config);
   void setValue(char input[], int len);
   void setValues(char input[], int len);
   void save();
@@ -47,8 +51,8 @@ class Config {
   void new_config(String name);
   String get_list();
 
-  json get();            // return current_config
-  json get(string key);  // return current_config[key]
+  JsonDocument get();            // return current_config
+  JsonDocument get(string key);  // return current_config[key]
   // void save_for_key(string key, json data);
   void print();
   void gather(Sensor& sensor, Engine& engine, bool debug = false);
@@ -62,7 +66,7 @@ class Config {
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";
-  json* tmp;
+  JsonDocument* tmp;
 };
 
 extern Config config;

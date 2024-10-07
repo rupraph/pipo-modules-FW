@@ -6,7 +6,8 @@
 #include <vector>
 #include <unordered_map>
 #include <MIDI.h>
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 
 using namespace std;
 
@@ -23,11 +24,9 @@ class MidiTranslator
 {
  public:
   MidiTranslator();
-
+  bool enabled = false;
   int channel = 1;  // should be in engine.
   int cc_nb = 1;
-
-  bool enabled = false;
 
   //notes variables
   int tl_mode = 0;  //0=cc, 1 note, 2 both
@@ -62,12 +61,12 @@ class MidiTranslator
   int map_linear(float x, float min_input, float max_input);
 
   // save/load
-  friend void to_json(nlohmann::json& j, const MidiTranslator& t);
-  friend void from_json(const nlohmann::json& j, MidiTranslator& t);
-  nlohmann::json get_json() const;
-  void set_from_json(const nlohmann::json& j);
-  string serialize() const;
-  void deserialize(const string& data);
+  // friend void to_json(JsonDocument& j, const MidiTranslator& t);
+  // friend void from_json(const JsonDocument& j, MidiTranslator& t);
+  JsonDocument get_json() const;
+  void set_from_json(const JsonDocument& j);
+  // string serialize() const;
+  // void deserialize(const string& data);
 
   // Getter setters
   bool getHires() const;

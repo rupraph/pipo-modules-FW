@@ -1,6 +1,6 @@
 #include "hid_translator.h"
 
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 // UNDER CONSTRUCTION
 
@@ -50,41 +50,52 @@ int8_t HidTranslator::get_mouse_int(float value, float input_min,
   return mapped_value;
 }
 
-void to_json(json& j, const HidTranslator& t) {
-  j = json{{"addr", t.addr},
-           {"addr2", t.addr2},
-           {"stroke_mode", t.stroke_mode},
-           //  {"output_max", t.output_max},
-           //  {"output_min", t.output_min},
-           {"enabled", t.enabled}};
+// void to_json(JsonDocument& j, const HidTranslator& t) {
+//   j = json{{"addr", t.addr},
+//            {"addr2", t.addr2},
+//            {"stroke_mode", t.stroke_mode},
+//            {"enabled", t.enabled}};
+// }
+
+// void from_json(const JsonDocument& j, HidTranslator& t) {
+//   j.at("addr").get_to(t.addr);
+//   j.at("addr2").get_to(t.addr2);
+//   j.at("stroke_mode").get_to(t.stroke_mode);
+//   // j.at("output_max").get_to(t.output_max);
+//   // j.at("output_min").get_to(t.output_min);
+//   j.at("enabled").get_to(t.enabled);
+// }
+
+JsonDocument HidTranslator::get_json() const {
+  JsonDocument j;
+  j["enabled"] = enabled;
+  j["addr"] = addr;
+  j["addr2"] = addr2;
+  j["stroke_mode"] = stroke_mode;
+  return j;
 }
 
-void from_json(const json& j, HidTranslator& t) {
-  j.at("addr").get_to(t.addr);
-  j.at("addr2").get_to(t.addr2);
-  j.at("stroke_mode").get_to(t.stroke_mode);
-  // j.at("output_max").get_to(t.output_max);
-  // j.at("output_min").get_to(t.output_min);
-  j.at("enabled").get_to(t.enabled);
+void HidTranslator::set_from_json(const JsonDocument& j) {
+  try {
+    enabled = j["enabled"];
+    addr = j["addr"].as<string>();
+    addr2 = j["addr2"].as<string>();
+    stroke_mode = j["stroke_mode"];
+  } catch (const std::exception& e) {
+    Serial.print("Error: ");
+    Serial.println(e.what());
+  }
 }
 
-json HidTranslator::get_json() const {
-  return json(*this);
-}
+// std::string HidTranslator::serialize() const {
+//   json j = *this;
+//   return j.dump();
+// }
 
-void HidTranslator::set_from_json(const json& j) {
-  *this = j.get<HidTranslator>();
-}
-
-std::string HidTranslator::serialize() const {
-  json j = *this;
-  return j.dump();
-}
-
-void HidTranslator::deserialize(const std::string& data) {
-  json j = json::parse(data);
-  from_json(j, *this);
-}
+// void HidTranslator::deserialize(const std::string& data) {
+//   json j = json::parse(data);
+//   from_json(j, *this);
+// }
 
 bool HidTranslator::get_enabled() {
   return enabled;

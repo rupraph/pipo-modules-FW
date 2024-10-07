@@ -13,16 +13,17 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
 
     if (DEBUG_CONFIG) {
       Serial.println("config: before loading:");
-      Serial.println(current_config.dump(4).c_str());
+      serializeJsonPretty(current_config, Serial);
     }
 
     current_config.clear();
-    current_config = json::parse(
+    DeserializationError error = deserializeJson(
+        current_config,
         readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
 
     if (DEBUG_CONFIG) {
       Serial.println("loaded config:");
-      Serial.println(current_config.dump(4).c_str());
+      serializeJsonPretty(current_config, Serial);
     }
 
 #ifdef DEBUG_HEAP
@@ -94,7 +95,17 @@ void Config::save() {
   save(filename);
 }
 void Config::save(String filename) {
-  save(filename, current_config.dump().c_str());
+  //uses serialize method to write file
+  File file = LittleFS.open(get_path(filename).c_str(), FILE_WRITE);
+  if (!file) {
+    Serial.println("failed to open file for writing");
+    return;
+  }
+  if (serializeJson(current_config, file) == 0) {
+    Serial.println("Failed to write to file");
+  }
+  file.close();
+  // save(filename, current_config.dump().c_str());
 }
 
 void Config::save(String filename, String config) {
@@ -136,18 +147,25 @@ void Config::new_config(String name) {
   logs.writeLog("new config: " + name);
 }
 
-json Config::get(string key) {
-  return current_config.at(key);
+JsonDocument Config::get(string key) {
+  return current_config[key];
 }
-json Config::get() {
+JsonDocument Config::get() {
   return current_config;
 }
 
-void Config::set(const json& config) {
+void Config::set(const String& config) {
   try {
     // Serial.println(config.dump().c_str());
     current_config.clear();
-    current_config = config;
+    DeserializationError error = deserializeJson(current_config, config);
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      logs.writeError("Error setting config: " + String(error.c_str()));
+      return;
+    }
+    // current_config = config;
     logs.writeLog("config set");
   } catch (const std::exception& e) {
     Serial.println("error setting current_config from a json object");
@@ -155,6 +173,7 @@ void Config::set(const json& config) {
     logs.writeError("Error setting config: " + String(e.what()));
   }
 }
+
 std::vector<std::string> Config::split(const std::string& str, char delimiter) {
   std::vector<std::string> tokens;
   std::stringstream ss(str);
@@ -177,62 +196,64 @@ void Config::setValues(char input[], int len) {
   }
   setValue(input + start, len - start);
 }
+
 void Config::setValue(char input[], int len) {
-  char value[64];
-  char key[64];
-  bool isValue = false;
-  int offset = 0;
-  int i = 0;
-  char c;
-  tmp = &current_config;
+  // char value[64];
+  // char key[64];
+  // bool isValue = false;
+  // int offset = 0;
+  // int i = 0;
+  // char c;
+  // tmp = &current_config;
 
-  for (int i = 0; i < len; i++) {
-    c = input[i];
-    if (c == '\0') {
-      break;
-    }
-    if (c == ':') {
-      offset = 0;
-      isValue = true;
-      continue;
-    }
-    if (c == '/') {
-      if (!tmp->contains(key)) {
-        return;
-      }
-      tmp = &(*tmp)[key];
-      offset = 0;
-      isValue = c == ':';
-      continue;
-    }
-    if (isValue) {
-      value[offset++] = c;
-      value[offset] = '\0';
-    } else {
-      key[offset++] = c;
-      key[offset] = '\0';
-    }
-  }
-  if (!tmp->contains(key)) {
-    return;
-  }
+  // for (int i = 0; i < len; i++) {
+  //   c = input[i];
+  //   if (c == '\0') {
+  //     break;
+  //   }
+  //   if (c == ':') {
+  //     offset = 0;
+  //     isValue = true;
+  //     continue;
+  //   }
+  //   if (c == '/') {
+  //     if (!tmp->contains(key)) {
+  //       return;
+  //     }
+  //     tmp = &(*tmp)[key];
+  //     offset = 0;
+  //     isValue = c == ':';
+  //     continue;
+  //   }
+  //   if (isValue) {
+  //     value[offset++] = c;
+  //     value[offset] = '\0';
+  //   } else {
+  //     key[offset++] = c;
+  //     key[offset] = '\0';
+  //   }
+  // }
+  // if (!tmp->contains(key)) {
+  //   return;
+  // }
 
-  json* target = &(*tmp)[key];
-  // Assign the value to the final key
-  if (target->type() == json::value_t::string) {
-    (*tmp)[key] = value;
-  } else if (target->type() == json::value_t::number_integer) {
-    (*tmp)[key] = std::stoi(value);
-  } else if (target->type() == json::value_t::number_float) {
-    (*tmp)[key] = std::stof(value);
-  } else if (target->type() == json::value_t::boolean) {
-    (*tmp)[key] = value == "true";
-  }
-  target = nullptr;
+  // Todo: to be updated with newer json lib
+  // json* target = &(*tmp)[key];
+  // // Assign the value to the final key
+  // if (target->type() == json::value_t::string) {
+  //   (*tmp)[key] = value;
+  // } else if (target->type() == json::value_t::number_integer) {
+  //   (*tmp)[key] = std::stoi(value);
+  // } else if (target->type() == json::value_t::number_float) {
+  //   (*tmp)[key] = std::stof(value);
+  // } else if (target->type() == json::value_t::boolean) {
+  //   (*tmp)[key] = value == "true";
+  // }
+  // target = nullptr;
 }
 
 void Config::print() {
-  Serial.println(current_config.dump(4).c_str());
+  serializeJsonPretty(current_config, Serial);
 }
 
 void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
@@ -248,7 +269,7 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 
   if (debug) {
     Serial.println("gathered_config");
-    Serial.println(current_config.dump(4).c_str());
+    serializeJsonPretty(current_config, Serial);
     Serial.println("gathered_config_end");
   }
 }
@@ -256,8 +277,8 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 //* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
                    bool debug) {
-  sensor.set_config(current_config["sensor"]);
-  engine.set_config(current_config["engine"]);
+  sensor.set_config(current_config["sensor"].as<JsonObject>());
+  engine.set_config(current_config["engine"].as<JsonObject>());
   general_config.clear();
   general_config = current_config["general"];
   /*TODO: improve:

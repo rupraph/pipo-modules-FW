@@ -66,7 +66,7 @@ void Sensor::process_sensor_triggers() {
     SensorDat& axis_data = dat.second;
 
     axis_data.bool_value_prev = axis_data.bool_value;
-    
+
     // flags for continuous mode
     if (axis_data.mode == 0) {
       if (is_within_range(axis) == false &&
@@ -130,8 +130,8 @@ unsigned long Sensor::end_duration() {
 }
 
 //config
-json Sensor::get_config(bool debug) {
-  json config;
+JsonDocument Sensor::get_config(bool debug) {
+  JsonDocument config;
   try {
     for (auto const& pair : sensor_dat) {
       string axis_name = pair.first;
@@ -143,12 +143,11 @@ json Sensor::get_config(bool debug) {
       config[axis_name]["lmax"] = sensor_dat[axis_name].lmax;
       config[axis_name]["lmin"] = sensor_dat[axis_name].lmin;
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
-      config[axis_name]["th_mode"] =
-          sensor_dat[axis_name].th_mode;
+      config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
-      Serial.println(config.dump(4).c_str());
+      serializeJsonPretty(config, Serial);
       Serial.println("returned_sensor_get_config_end");
     }
   } catch (const std::exception& e) {
@@ -159,9 +158,9 @@ json Sensor::get_config(bool debug) {
   return config;
 }
 
-void Sensor::set_config(json& config, bool debug) {
-  for (auto const& pair : config.items()) {
-    string axis_name = pair.key();
+void Sensor::set_config(JsonObject config, bool debug) {
+  for (auto const& pair : config) {
+    string axis_name = pair.key().c_str();
     sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
     sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
@@ -171,7 +170,7 @@ void Sensor::set_config(json& config, bool debug) {
   }
   if (debug) {
     Serial.println("set_sensor_config");
-    Serial.println(config.dump(4).c_str());
+
     Serial.println("set_sensor_config_end");
   }
 }

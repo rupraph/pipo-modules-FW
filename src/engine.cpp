@@ -1,7 +1,7 @@
 #include "engine.h"
 #include "HW_CONFIG.h"
 
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 // the engine takes the sensor data and outputs it to the selected interfaces
 // based on the configuration
@@ -145,7 +145,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           int thresh_note = Midi_translator.getRootNote();
           // midiio.printNoteList(channel);
           if (sensor.get_bool_value(axis_name)) {
-            if (//!midiio.is_note_playing(thresh_note, channel) &&
+            if (  //!midiio.is_note_playing(thresh_note, channel) &&
                 sensor.get_trigger_flag(axis_name, MIDI)) {
               midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
               sensor.set_trigger_flag(axis_name, MIDI, false);
@@ -307,8 +307,8 @@ float Engine::round_to(float value, int decimal) {
   return round(value * pow(10, decimal)) / pow(10, decimal);
 }
 
-json Engine::get_config(bool debug) {
-  json j;
+JsonDocument Engine::get_config(bool debug) {
+  JsonDocument j;
   for (auto const& pair : Miditranslators) {
     j["engine-midi"][pair.first] = pair.second.get_json();
   }
@@ -320,40 +320,40 @@ json Engine::get_config(bool debug) {
   }
   if (debug) {
     Serial.println(F("engine_get_config"));
-    Serial.println(j.dump(4).c_str());
+    serializeJsonPretty(j, Serial);
     Serial.println("engine_get_config_end");
   }
 
   return j;
 }
 
-void Engine::set_config(json& config, bool debug) {
+void Engine::set_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("will set config");
-    Serial.println(config.dump().c_str());
+    serializeJsonPretty(config, Serial);
     Serial.println();
   }
 
-  json jmidi = config["engine-midi"];
+  JsonDocument jmidi = config["engine-midi"];
 
   // set midi config from main config
   for (auto const& pair : Miditranslators) {
-    if (jmidi.find(pair.first) != jmidi.end()) {
+    if (jmidi.containsKey(pair.first)) {
       // Serial.println(jmidi[pair.first].dump().c_str());
       // Serial.println(pair.first.c_str());
       Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
     }
   }
   // set hid config from general config
-  json jhid = config["engine-hid"];
+  JsonDocument jhid = config["engine-hid"];
   for (auto const& pair : HID_translators) {
-    if (jhid.find(pair.first) != jhid.end()) {
+    if (jhid.containsKey(pair.first)) {
       HID_translators[pair.first].set_from_json(jhid[pair.first]);
     }
   }
-  json josc = config["engine-osc"];
+  JsonDocument josc = config["engine-osc"];
   for (auto const& pair : Osctranslators) {
-    if (josc.find(pair.first) != josc.end()) {
+    if (josc.containsKey(pair.first)) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
   }

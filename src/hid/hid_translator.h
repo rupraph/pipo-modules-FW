@@ -2,7 +2,8 @@
 #define HID_TRANSLATOR_H
 
 #include <Arduino.h>
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 
 using namespace std;
 
@@ -30,14 +31,14 @@ class HidTranslator {
   int8_t get_mouse_int(float value, float min_input, float max_input);
 
   // config stuff
-  void to_json(nlohmann::json& j, const HidTranslator& t);
-  void from_json(const nlohmann::json& j, HidTranslator& t);
+  // void to_json(JsonDocument& j, const HidTranslator& t);
+  // void from_json(const JsonDocument& j, HidTranslator& t);
 
-  nlohmann::json get_json() const;
-  void set_from_json(const nlohmann::json& j);
+  JsonDocument get_json() const;
+  void set_from_json(const JsonDocument& j);
 
-  string serialize() const;
-  void deserialize(const string& data);
+  // string serialize() const;
+  // void deserialize(const string& data);
 
   // getter/setters
   bool get_enabled();

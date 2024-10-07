@@ -5,11 +5,12 @@
 #include <vector>
 #include <unordered_map>
 #include <Wire.h>
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 #include "utils/filters.h"
 
 using namespace std;
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 enum Protocol { OSC, MIDI, HID };
 
@@ -25,9 +26,9 @@ struct SensorDat {
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
   float lmin;
 
-  bool mode;             // 0 = continuous, 1 = trigger
-  bool th_mode;   // 0 = basic, 1 = window trigger
-  
+  bool mode;     // 0 = continuous, 1 = trigger
+  bool th_mode;  // 0 = basic, 1 = window trigger
+
   // Live attributes
   float value;  // should distinguish raw value from output value and have both
   float value_prev;
@@ -85,8 +86,8 @@ class Sensor {
   unsigned long measured_interval_duration = 0;  //ms
 
   //config
-  json get_config(bool debug = false);
-  void set_config(json& config, bool debug = false);
+  JsonDocument get_config(bool debug = false);
+  void set_config(JsonObject config, bool debug = false);
 
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();

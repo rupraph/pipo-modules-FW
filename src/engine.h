@@ -7,7 +7,8 @@
 #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensor/input_sensor.h"
 #include "hw_ui.h"
@@ -63,9 +64,9 @@ class Engine {
   void hid_processor(Sensor& sensor, usb_hid& hidio);
   void osc_processor(Sensor& sensor, OSC_handler& osc);
 
-  json get_config(bool debug = false);
-  void set_config(json& config, bool debug = false);
-  friend void to_json(json& j, const Engine& t);
+  JsonDocument get_config(bool debug = false);
+  void set_config(JsonObject config, bool debug = false);
+  // friend void to_json(json& j, const Engine& t);
 
   bool get_paused() { return paused; }
   void set_paused(bool value) { paused = value; }

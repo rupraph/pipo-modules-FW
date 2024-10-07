@@ -17,16 +17,17 @@ void OSC_handler::setup() {
 
 // Todo pass arguments there
 void OSC_handler::set_config() {
-  if (config.general_config.find("OSC_IP") != config.general_config.end()) {
+
+  if (config.general_config.containsKey("OSC_IP")) {
     string ip = config.general_config["OSC_IP"];
     setDestIp(ip);
     // Serial.println("OSC IP set to: " + dest_ip.toString());
   }
-  if (config.general_config.find("OSC_PORT") != config.general_config.end()) {
+  if (config.general_config.containsKey("OSC_PORT")) {
     setOutPort(config.general_config["OSC_PORT"]);
     // Serial.println("OSC port set to: " + String(out_port));
   }
-  if (config.general_config.find("OSC_ENA") != config.general_config.end()) {
+  if (config.general_config.containsKey("OSC_ENA")) {
     setEnabled(config.general_config["OSC_ENA"]);
     // Serial.println("OSC enabled: " + String(enabled));
   }

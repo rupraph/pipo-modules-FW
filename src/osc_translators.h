@@ -3,7 +3,8 @@
 
 #include <Arduino.h>
 #include "config.h"
-#include "utils/json.hpp"
+// #include "utils/json.hpp"
+#include <ArduinoJson.h>
 
 using namespace std;
 
@@ -28,14 +29,14 @@ class OscTranslator {
   void set_output_min(float value);
 
   // config
-  void to_json(nlohmann::json& j, const OscTranslator& t);
-  void from_json(const nlohmann::json& j, OscTranslator& t);
+  //   void to_json(JsonDocument& j, const OscTranslator& t);
+  //   void from_json(const JsonDocument& j, OscTranslator& t);
 
-  nlohmann::json get_json() const;
-  void set_from_json(const nlohmann::json& j);
+  JsonDocument get_json() const;
+  void set_from_json(const JsonDocument& j);
 
-  string serialize() const;
-  void deserialize(const string& data);
+  //   string serialize() const;
+  //   void deserialize(const string& data);
 
  private:
 };

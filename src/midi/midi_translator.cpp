@@ -1,6 +1,6 @@
 #include "midi_translator.h"
 
-using json = nlohmann::json;
+// using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
   current_scale.clear();
@@ -176,7 +176,7 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
   }
 
   // if (interpolation_type == 0) {
-    return map_linear(value, min_input, max_input);
+  return map_linear(value, min_input, max_input);
   // } else {
   //   // not implemented yet
   //   return 0;
@@ -192,59 +192,76 @@ int MidiTranslator::map_linear(float value, float min_input, float max_input) {
                cc_min);
 }
 
-void to_json(json& j, const MidiTranslator& t) {
-  j = json{{"tl_mode", t.tl_mode},
-           {"scaleType", t.scaleType},
-           {"rootNote", t.rootNote},
-           {"nbOfNotes", t.nbOfNotes},
-           {"sustain", t.sustain},
-           // {"current_scale", t.current_scale},
-           // {"max_input", t.max_input},
-           // {"min_input", t.min_input},
-           {"cc_max", t.cc_max},
-           {"cc_min", t.cc_min},
+// void to_json(json& j, const MidiTranslator& t) {
+//   j = json{{"tl_mode", t.tl_mode},
+//            {"scaleType", t.scaleType},
+//            {"rootNote", t.rootNote},
+//            {"nbOfNotes", t.nbOfNotes},
+//            {"sustain", t.sustain},
+//            // {"current_scale", t.current_scale},
+//            // {"max_input", t.max_input},
+//            // {"min_input", t.min_input},
+//            {"cc_max", t.cc_max},
+//            {"cc_min", t.cc_min},
 
-           {"hires", t.hires},
-           {"channel", t.channel},
-           {"cc_nb", t.cc_nb},
-           {"enabled", t.enabled}};
+//            {"hires", t.hires},
+//            {"channel", t.channel},
+//            {"cc_nb", t.cc_nb},
+//            {"enabled", t.enabled}};
+// }
+
+// string MidiTranslator::serialize() const {
+//   json j = *this;
+//   return j.dump();
+// }
+
+JsonDocument MidiTranslator::get_json() const {
+  JsonDocument j;
+  j["enabled"] = enabled;
+  j["channel"] = channel;
+  j["cc_nb"] = cc_nb;
+  j["tl_mode"] = tl_mode;
+  j["scaleType"] = scaleType;
+  j["rootNote"] = rootNote;
+  j["nbOfNotes"] = nbOfNotes;
+  j["sustain"] = sustain;
+  return j;
 }
 
-string MidiTranslator::serialize() const {
-  json j = *this;
-  return j.dump();
-}
+// void from_json(const json& j, MidiTranslator& t) {
+//   j.at("tl_mode").get_to(t.tl_mode);
+//   j.at("scaleType").get_to(t.scaleType);
+//   j.at("rootNote").get_to(t.rootNote);
+//   j.at("nbOfNotes").get_to(t.nbOfNotes);
+//   j.at("sustain").get_to(t.sustain);
+//   //j.at("current_scale").get_to(t.current_scale);
+//   // j.at("max_input").get_to(t.max_input);
+//   // j.at("min_input").get_to(t.min_input);
+//   j.at("cc_max").get_to(t.cc_max);
+//   j.at("cc_min").get_to(t.cc_min);
+//   // j.at("interpolation_type").get_to(t.interpolation_type);
+//   j.at("hires").get_to(t.hires);
+//   j.at("channel").get_to(t.channel);
+//   j.at("cc_nb").get_to(t.cc_nb);
+//   j.at("enabled").get_to(t.enabled);
+// }
 
-json MidiTranslator::get_json() const {
-  return json(*this);
-}
+// void MidiTranslator::deserialize(const string& data) {
+//   json j = json::parse(data);
+//   *this = j.get<MidiTranslator>();
+// }
 
-void from_json(const json& j, MidiTranslator& t) {
-  j.at("tl_mode").get_to(t.tl_mode);
-  j.at("scaleType").get_to(t.scaleType);
-  j.at("rootNote").get_to(t.rootNote);
-  j.at("nbOfNotes").get_to(t.nbOfNotes);
-  j.at("sustain").get_to(t.sustain);
-  //j.at("current_scale").get_to(t.current_scale);
-  // j.at("max_input").get_to(t.max_input);
-  // j.at("min_input").get_to(t.min_input);
-  j.at("cc_max").get_to(t.cc_max);
-  j.at("cc_min").get_to(t.cc_min);
-  // j.at("interpolation_type").get_to(t.interpolation_type);
-  j.at("hires").get_to(t.hires);
-  j.at("channel").get_to(t.channel);
-  j.at("cc_nb").get_to(t.cc_nb);
-  j.at("enabled").get_to(t.enabled);
-}
-
-void MidiTranslator::deserialize(const string& data) {
-  json j = json::parse(data);
-  *this = j.get<MidiTranslator>();
-}
-
-void MidiTranslator::set_from_json(const json& j) {
+void MidiTranslator::set_from_json(const JsonDocument& j) {
   try {
-    *this = j.get<MidiTranslator>();
+    enabled = j["enabled"];
+    channel = j["channel"];
+    cc_nb = j["cc_nb"];
+    tl_mode = j["tl_mode"];
+    scaleType = j["scaleType"].as<string>();
+    rootNote = j["rootNote"];
+    nbOfNotes = j["nbOfNotes"];
+    sustain = j["sustain"];
+
   } catch (const std::exception& e) {
     Serial.print("Error: ");
     Serial.println(e.what());
