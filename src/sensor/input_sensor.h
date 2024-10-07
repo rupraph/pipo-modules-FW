@@ -17,22 +17,20 @@ enum Protocol { OSC, MIDI, HID };
 //It defines the basic structure of a sensor to make it adaptable with the engine and various translators classes
 
 struct SensorDat {
-  // bool enabled;
-  // bool inverted; // should likely move to output section
+
+  // Config attributes
   float deadzone;  // supposed to be % of the total range. value for now
-  float inverted;
   float offset;
   bool invert;
-  float value;  // should distinguish raw value from output value and have both
-  float value_prev;
-
   float limit_max;  // can be used in shcmitt trigger mode for high/low triggers
   float limit_min;
-  // bool triggered;  // rising edge entering defined range or if using threshold.
-  // bool untriggered;  // falling edge leaving defined range.
 
   bool mode;             // 0 = continuous, 1 = trigger
-  bool threshold_mode;   // 0 = basic, 1 = schmitt trigger
+  bool threshold_mode;   // 0 = basic, 1 = window trigger
+  
+  // Live attributes
+  float value;  // should distinguish raw value from output value and have both
+  float value_prev;
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
@@ -93,8 +91,8 @@ class Sensor {
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();
 
-  bool get_inverted(const std::string& axis);
-  void set_inverted(const std::string& axis, bool value);
+  // bool get_inverted(const std::string& axis);
+  // void set_inverted(const std::string& axis, bool value);
 
   int get_deadzone(const std::string& axis);
   void set_deadzone(const std::string& axis, int value);

@@ -162,7 +162,7 @@
       "T1": {
         "cc_number": 7,
         "channel": 1,
-        "enabled": false,
+        "enabled": true,
         "hires": false,
         "interpolation_type": 0,
         "max_output": 127,
@@ -171,7 +171,7 @@
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "translator_mode": 1
       },
       "T2": {
         "cc_number": 8,
@@ -379,7 +379,7 @@
       "offset": 0.0,
       "invert": false,
       "limit_max": 200000.0,
-      "limit_min": 0.0,
+      "limit_min": 500.0,
       "mode": true,
       "threshold_mode": false
     },
@@ -415,7 +415,7 @@
       "offset": 0.0,
       "invert": false,
       "limit_max": 200000.0,
-      "limit_min": 0.0,
+      "limit_min": 500.0,
       "mode": true,
       "threshold_mode": false
     },
@@ -424,7 +424,7 @@
       "offset": 0.0,
       "invert": false,
       "limit_max": 200000.0,
-      "limit_min": 0.0,
+      "limit_min": 500.0,
       "mode": true,
       "threshold_mode": false
     }

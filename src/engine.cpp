@@ -144,7 +144,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           int thresh_note = Midi_translator.getRootNote();
           // midiio.printNoteList(channel);
           if (sensor.get_bool_value(axis_name)) {
-            if (!midiio.is_note_playing(thresh_note, channel) &&
+            if (//!midiio.is_note_playing(thresh_note, channel) &&
                 sensor.get_trigger_flag(axis_name, MIDI)) {
               midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
               sensor.set_trigger_flag(axis_name, MIDI, false);

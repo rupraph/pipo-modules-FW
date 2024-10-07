@@ -65,6 +65,7 @@ void Sensor::process_sensor_triggers() {
     // warning if reference modifies correctly the value
     SensorDat& axis_data = dat.second;
 
+    axis_data.bool_value_prev = axis_data.bool_value;
     // range flags for continuous mode
     if (axis_data.mode == 0) {
       if (is_within_range(axis) == false &&
@@ -79,7 +80,6 @@ void Sensor::process_sensor_triggers() {
 
     // calc boolean value for trigger mode
     if (axis_data.mode == 1) {
-      axis_data.bool_value_prev = axis_data.bool_value;
       if (axis_data.threshold_mode == 0) {
         axis_data.bool_value = axis_data.value > axis_data.limit_min;
       } else {
@@ -91,11 +91,10 @@ void Sensor::process_sensor_triggers() {
     }
 
     // trigger flags for trigger mode
-    if (axis_data.bool_value == true && axis_data.bool_value_prev == false) {
+    if (axis_data.bool_value && !axis_data.bool_value_prev) {
       set_all_trigger(axis, true);
-      Serial.println("triggered");
     }
-    if (axis_data.bool_value == false && axis_data.bool_value_prev == true) {
+    if (!axis_data.bool_value && axis_data.bool_value_prev) {
       set_all_untrigger(axis, true);
     }
   }
@@ -282,12 +281,12 @@ bool Sensor::get_untrigger_flag(const std::string& axis, Protocol protocol) {
   }
 }
 
-bool Sensor::get_inverted(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].inverted;
-  else
-    throw std::invalid_argument("Axis not found: " + axis);
-}
+// bool Sensor::get_inverted(const std::string& axis) {
+//   if (sensor_dat.find(axis) != sensor_dat.end())
+//     return sensor_dat[axis].inverted;
+//   else
+//     throw std::invalid_argument("Axis not found: " + axis);
+// }
 
 int Sensor::get_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
