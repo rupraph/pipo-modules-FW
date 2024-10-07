@@ -73,7 +73,7 @@ void setup() {
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
   config.gather(input_sens, engine, true);
-  config.save(config.filename + ".json");
+  config.save(config.filename);
 
   // Start server
   Serial.println("starting config page");

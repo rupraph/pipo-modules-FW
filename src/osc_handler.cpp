@@ -18,16 +18,16 @@ void OSC_handler::setup() {
 // Todo pass arguments there
 void OSC_handler::set_config() {
 
-  if (config.general_config.containsKey("OSC_IP")) {
+  if (config.general_config["OSC_IP"].is<JsonVariant>()) {
     string ip = config.general_config["OSC_IP"];
     setDestIp(ip);
     // Serial.println("OSC IP set to: " + dest_ip.toString());
   }
-  if (config.general_config.containsKey("OSC_PORT")) {
+  if (config.general_config["OSC_PORT"].is<JsonVariant>()) {
     setOutPort(config.general_config["OSC_PORT"]);
     // Serial.println("OSC port set to: " + String(out_port));
   }
-  if (config.general_config.containsKey("OSC_ENA")) {
+  if (config.general_config["OSC_ENA"].is<JsonVariant>()) {
     setEnabled(config.general_config["OSC_ENA"]);
     // Serial.println("OSC enabled: " + String(enabled));
   }

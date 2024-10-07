@@ -20,6 +20,12 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
     DeserializationError error = deserializeJson(
         current_config,
         readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
+    if (error) {
+      Serial.print("deserializeJson() failed: ");
+      Serial.println(error.c_str());
+      logs.writeError("Error loading config: " + String(error.c_str()));
+      return;
+    }
 
     if (DEBUG_CONFIG) {
       Serial.println("loaded config:");
@@ -96,6 +102,9 @@ void Config::save() {
 }
 void Config::save(String filename) {
   //uses serialize method to write file
+  Serial.print("save config: ");
+  Serial.println(get_path(filename).c_str());
+
   File file = LittleFS.open(get_path(filename).c_str(), FILE_WRITE);
   if (!file) {
     Serial.println("failed to open file for writing");
@@ -103,11 +112,14 @@ void Config::save(String filename) {
   }
   if (serializeJson(current_config, file) == 0) {
     Serial.println("Failed to write to file");
+  } else {
+    logs.writeLog("save config: " + filename);
   }
   file.close();
   // save(filename, current_config.dump().c_str());
 }
 
+// saving from a string
 void Config::save(String filename, String config) {
   writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
 }
@@ -257,13 +269,13 @@ void Config::print() {
 }
 
 void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
-  Serial.print("gatherconfig sensor");
+  Serial.println("gatherconfig sensor");
   current_config["sensor"].clear();
-  current_config["sensor"] = sensor.get_config(debug);
-  Serial.print("gatherconfig engine");
+  current_config["sensor"] = sensor.get_config();
+  Serial.println("gatherconfig engine");
   current_config["engine"].clear();
-  current_config["engine"] = engine.get_config(debug);
-  Serial.print("gatherconfig general");
+  current_config["engine"] = engine.get_config();
+  Serial.println("gatherconfig general");
   current_config["general"].clear();
   current_config["general"] = general_config;
 

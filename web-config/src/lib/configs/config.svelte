@@ -288,12 +288,12 @@
             <Radio
               label="Message Type"
               {options}
-              value={midiconfig.th_mode}
+              value={midiconfig.tl_mode}
               on:change={(evt) => {
-                midiconfig.th_mode = evt.detail;
+                midiconfig.tl_mode = evt.detail;
               }}
             />
-            {#if midiconfig.th_mode === 0}
+            {#if midiconfig.tl_mode === 0}
               <CCConfig config={midiconfig} />
             {:else}
               <NoteConfig config={midiconfig} />

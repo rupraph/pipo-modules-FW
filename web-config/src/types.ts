@@ -1,6 +1,6 @@
 export type BaseMidiConfig = {
   channel: number;
-  th_mode: number; // 0=cc, 1 note
+  tl_mode: number; // 0=cc, 1 note
   enabled: boolean;
 };
 export type CCConfig = {
