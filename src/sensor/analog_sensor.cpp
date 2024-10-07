@@ -68,8 +68,8 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value = analog_val;
 
     // // above min + was below min -> triggered
-    // if (analog_val>sensor_dat[pair.first].limit_min
-    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
+    // if (analog_val>sensor_dat[pair.first].lmin
+    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].lmin )
     // {
     //     if (!sensor_dat[pair.first].triggered)
     //     {
@@ -77,8 +77,8 @@ void AnalogSensor::update() {
     //     }
     // }
     // // below min + was above min -> untriggered
-    // else if (analog_val<sensor_dat[pair.first].limit_min
-    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+    // else if (analog_val<sensor_dat[pair.first].lmin
+    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].lmin)
     // {
     //     if (!sensor_dat[pair.first].untriggered)
     //     {
@@ -104,20 +104,20 @@ void AnalogSensor::update() {
 
     //Todo: try to have an adaptative max ? -> when no touch on, min can be adapted.
 
-    // if (value>sensor_dat[pair.first].limit_max && touch_adaptative_max)
+    // if (value>sensor_dat[pair.first].lmax && touch_adaptative_max)
     // {
     //     sensor_dat[pair.first].value = value;
-    //     sensor_dat[pair.first].limit_max = value;
+    //     sensor_dat[pair.first].lmax = value;
     // Todo: should find a way that changing the sensor limit also propagates to the connected midi translator
     // }
     // else
-    // if (val>sensor_dat[pair.first].limit_max)// && !touch_adaptative_max)
+    // if (val>sensor_dat[pair.first].lmax)// && !touch_adaptative_max)
     // {
-    //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_max;
+    //     sensor_dat[pair.first].value = sensor_dat[pair.first].lmax;
     // }
-    // else if (val<sensor_dat[pair.first].limit_min)
+    // else if (val<sensor_dat[pair.first].lmin)
     // {
-    //     sensor_dat[pair.first].value = sensor_dat[pair.first].limit_min;
+    //     sensor_dat[pair.first].value = sensor_dat[pair.first].lmin;
     // }
     // else
     // {
@@ -126,16 +126,16 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
     sensor_dat[pair.first].value = val;
 
-    // if (val>sensor_dat[pair.first].limit_min
-    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].limit_min )
+    // if (val>sensor_dat[pair.first].lmin
+    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].lmin )
     // {
     //     if (!sensor_dat[pair.first].triggered)
     //     {
     //         sensor_dat[pair.first].triggered = true;
     //     }
     // }
-    // else if (val<sensor_dat[pair.first].limit_min
-    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].limit_min)
+    // else if (val<sensor_dat[pair.first].lmin
+    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].lmin)
     // {
     //     if (!sensor_dat[pair.first].untriggered)
     //     {

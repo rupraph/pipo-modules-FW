@@ -20,7 +20,7 @@
     {#each getMidiConfigs() as [axis, midiconfig]}
     <h3 id={axis}>{axis}</h3>
     <section>
-      {#if midiconfig.translator_mode}
+      {#if midiconfig.th_mode}
         <!-- <Piano /> -->
       {:else}
         <!-- <Potentiometer ccNumber={midiconfig.cc_number} /> -->

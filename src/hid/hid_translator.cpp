@@ -51,8 +51,8 @@ int8_t HidTranslator::get_mouse_int(float value, float input_min,
 }
 
 void to_json(json& j, const HidTranslator& t) {
-  j = json{{"map_address", t.map_address},
-           {"map_address2", t.map_address2},
+  j = json{{"addr", t.addr},
+           {"addr2", t.addr2},
            {"stroke_mode", t.stroke_mode},
            //  {"output_max", t.output_max},
            //  {"output_min", t.output_min},
@@ -60,8 +60,8 @@ void to_json(json& j, const HidTranslator& t) {
 }
 
 void from_json(const json& j, HidTranslator& t) {
-  j.at("map_address").get_to(t.map_address);
-  j.at("map_address2").get_to(t.map_address2);
+  j.at("addr").get_to(t.addr);
+  j.at("addr2").get_to(t.addr2);
   j.at("stroke_mode").get_to(t.stroke_mode);
   // j.at("output_max").get_to(t.output_max);
   // j.at("output_min").get_to(t.output_min);
@@ -95,19 +95,19 @@ void HidTranslator::set_enabled(bool value) {
 }
 
 std::string HidTranslator::get_map_address() {
-  return map_address;
+  return addr;
 }
 
 std::string HidTranslator::get_map_address2() {
-  return map_address2;
+  return addr2;
 }
 
 void HidTranslator::set_map_address(std::string value) {
-  map_address = value;
+  addr = value;
 }
 
 void HidTranslator::set_map_address2(std::string value) {
-  map_address2 = value;
+  addr2 = value;
 }
 
 bool HidTranslator::get_stroke_mode() {

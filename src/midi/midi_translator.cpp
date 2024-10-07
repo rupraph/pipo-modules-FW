@@ -4,11 +4,11 @@ using json = nlohmann::json;
 
 MidiTranslator::MidiTranslator() {
   current_scale.clear();
-  current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+  current_scale = generate_full_Scale(rootNote, nbOfNotes, scaleType);
   if (hires) {
-    max_output = 16383;
+    cc_max = 16383;
   } else {
-    max_output = 127;
+    cc_max = 127;
   }
 }
 
@@ -30,8 +30,8 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
   // scale value from 0 to 1 to the range of the current scale
   // map value from input range to 0-1
   float scaledValue = (out_value - min_input) / (max_input - min_input);
-  int index = round(scaledValue * (numberOfNotes - 1));
-  index = constrain(index, 0, numberOfNotes - 1);
+  int index = round(scaledValue * (nbOfNotes - 1));
+  index = constrain(index, 0, nbOfNotes - 1);
   return current_scale[index];
 }
 
@@ -52,7 +52,7 @@ void MidiTranslator::set_Scale_Type(string scaleType) {
     cout << "Invalid scale type." << endl;
   }
   current_scale.clear();
-  current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+  current_scale = generate_full_Scale(rootNote, nbOfNotes, scaleType);
 }
 
 void MidiTranslator::set_root_note(string rootNote) {
@@ -63,18 +63,18 @@ void MidiTranslator::set_root_note(string rootNote) {
   } else {
     rootNotenb = rootNotenb;
     current_scale.clear();
-    current_scale = generate_full_Scale(rootNotenb, numberOfNotes, scaleType);
+    current_scale = generate_full_Scale(rootNotenb, nbOfNotes, scaleType);
   }
 }
 
-void MidiTranslator::set_number_of_notes(int numberOfNotes) {
-  if (numberOfNotes < 0 || numberOfNotes > 127) {
+void MidiTranslator::set_number_of_notes(int nbOfNotes) {
+  if (nbOfNotes < 0 || nbOfNotes > 127) {
     cout << "Invalid number of notes." << endl;
     return;
   } else {
-    numberOfNotes = numberOfNotes;
+    nbOfNotes = nbOfNotes;
     current_scale.clear();
-    current_scale = generate_full_Scale(rootNote, numberOfNotes, scaleType);
+    current_scale = generate_full_Scale(rootNote, nbOfNotes, scaleType);
   }
 }
 
@@ -155,7 +155,7 @@ vector<string> MidiTranslator::get_scale_names() {
 void MidiTranslator::update_scale() {
   current_scale.clear();
   current_scale =
-      generate_full_Scale(this->rootNote, this->numberOfNotes, this->scaleType);
+      generate_full_Scale(this->rootNote, this->nbOfNotes, this->scaleType);
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
@@ -170,43 +170,43 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
     value = max_input;
   }
   if (hires) {
-    max_output = 16383;
+    cc_max = 16383;
   } else {
-    max_output = 127;
+    cc_max = 127;
   }
 
-  if (interpolation_type == 0) {
+  // if (interpolation_type == 0) {
     return map_linear(value, min_input, max_input);
-  } else {
-    // not implemented yet
-    return 0;
-  }
+  // } else {
+  //   // not implemented yet
+  //   return 0;
+  // }
 }
 
 int MidiTranslator::map_linear(float value, float min_input, float max_input) {
-  if (min_input == max_input || min_output == max_output) {
+  if (min_input == max_input || cc_min == cc_max) {
     Serial.println("min and max values cannot be equal");
   }
   return round((value - min_input) / (max_input - min_input) *
-                   (max_output - min_output) +
-               min_output);
+                   (cc_max - cc_min) +
+               cc_min);
 }
 
 void to_json(json& j, const MidiTranslator& t) {
-  j = json{{"translator_mode", t.translator_mode},
+  j = json{{"tl_mode", t.tl_mode},
            {"scaleType", t.scaleType},
            {"rootNote", t.rootNote},
-           {"numberOfNotes", t.numberOfNotes},
+           {"nbOfNotes", t.nbOfNotes},
            {"sustain", t.sustain},
            // {"current_scale", t.current_scale},
            // {"max_input", t.max_input},
            // {"min_input", t.min_input},
-           {"max_output", t.max_output},
-           {"min_output", t.min_output},
-           {"interpolation_type", t.interpolation_type},
+           {"cc_max", t.cc_max},
+           {"cc_min", t.cc_min},
+
            {"hires", t.hires},
            {"channel", t.channel},
-           {"cc_number", t.cc_number},
+           {"cc_nb", t.cc_nb},
            {"enabled", t.enabled}};
 }
 
@@ -220,20 +220,20 @@ json MidiTranslator::get_json() const {
 }
 
 void from_json(const json& j, MidiTranslator& t) {
-  j.at("translator_mode").get_to(t.translator_mode);
+  j.at("tl_mode").get_to(t.tl_mode);
   j.at("scaleType").get_to(t.scaleType);
   j.at("rootNote").get_to(t.rootNote);
-  j.at("numberOfNotes").get_to(t.numberOfNotes);
+  j.at("nbOfNotes").get_to(t.nbOfNotes);
   j.at("sustain").get_to(t.sustain);
   //j.at("current_scale").get_to(t.current_scale);
   // j.at("max_input").get_to(t.max_input);
   // j.at("min_input").get_to(t.min_input);
-  j.at("max_output").get_to(t.max_output);
-  j.at("min_output").get_to(t.min_output);
-  j.at("interpolation_type").get_to(t.interpolation_type);
+  j.at("cc_max").get_to(t.cc_max);
+  j.at("cc_min").get_to(t.cc_min);
+  // j.at("interpolation_type").get_to(t.interpolation_type);
   j.at("hires").get_to(t.hires);
   j.at("channel").get_to(t.channel);
-  j.at("cc_number").get_to(t.cc_number);
+  j.at("cc_nb").get_to(t.cc_nb);
   j.at("enabled").get_to(t.enabled);
 }
 
@@ -262,9 +262,9 @@ bool MidiTranslator::getHires() const {
 void MidiTranslator::setHires(bool h) {
   hires = h;
   if (hires) {
-    max_output = 16383;
+    cc_max = 16383;
   } else {
-    max_output = 127;
+    cc_max = 127;
   }
 }
 
@@ -277,17 +277,17 @@ void MidiTranslator::setChannel(int c) {
 }
 
 int MidiTranslator::getCcNumber() {
-  return cc_number;
+  return cc_nb;
 }
 void MidiTranslator::setCcNumber(int c) {
-  cc_number = c;
+  cc_nb = c;
 }
 
 int MidiTranslator::getTranslatorMode() {
-  return translator_mode;
+  return tl_mode;
 }
 void MidiTranslator::setTranslatorMode(int t) {
-  translator_mode = t;
+  tl_mode = t;
 }
 
 string MidiTranslator::getScaleType() {
@@ -305,10 +305,10 @@ void MidiTranslator::setRootNote(int r) {
 }
 
 int MidiTranslator::getNumberOfNotes() {
-  return numberOfNotes;
+  return nbOfNotes;
 }
 void MidiTranslator::setNumberOfNotes(int n) {
-  numberOfNotes = n;
+  nbOfNotes = n;
 }
 
 float MidiTranslator::getSustain() {
@@ -319,25 +319,25 @@ void MidiTranslator::setSustain(float s) {
 }
 
 int MidiTranslator::getMaxOutput() {
-  return max_output;
+  return cc_max;
 }
 void MidiTranslator::setMaxOutput(int m) {
-  max_output = m;
+  cc_max = m;
 }
 
 int MidiTranslator::getMinOutput() {
-  return min_output;
+  return cc_min;
 }
 void MidiTranslator::setMinOutput(int m) {
-  min_output = m;
+  cc_min = m;
 }
 
-int MidiTranslator::getInterpolationType() {
-  return interpolation_type;
-}
-void MidiTranslator::setInterpolationType(int i) {
-  interpolation_type = i;
-}
+// int MidiTranslator::getInterpolationType() {
+//   return interpolation_type;
+// }
+// void MidiTranslator::setInterpolationType(int i) {
+//   interpolation_type = i;
+// }
 
 bool MidiTranslator::getEnabled() {
   return enabled;

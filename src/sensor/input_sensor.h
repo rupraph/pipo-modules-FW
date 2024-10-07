@@ -22,11 +22,11 @@ struct SensorDat {
   float deadzone;  // supposed to be % of the total range. value for now
   float offset;
   bool invert;
-  float limit_max;  // can be used in shcmitt trigger mode for high/low triggers
-  float limit_min;
+  float lmax;  // can be used in shcmitt trigger mode for high/low triggers
+  float lmin;
 
   bool mode;             // 0 = continuous, 1 = trigger
-  bool threshold_mode;   // 0 = basic, 1 = window trigger
+  bool th_mode;   // 0 = basic, 1 = window trigger
   
   // Live attributes
   float value;  // should distinguish raw value from output value and have both
@@ -50,10 +50,10 @@ struct SensorDat {
         invert(false),
         value(0.0),
         value_prev(0.0),
-        limit_max(1000.0),
-        limit_min(0.0),
+        lmax(1000.0),
+        lmin(0.0),
         mode(false),
-        threshold_mode(false),
+        th_mode(false),
         bool_value(false),
         bool_value_prev(false) {}
 };

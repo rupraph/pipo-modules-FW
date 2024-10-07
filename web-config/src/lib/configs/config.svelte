@@ -243,14 +243,14 @@
               {#if sensorconf.mode === true}
                 <Checkbox
                   label="Window threshold"
-                  bind:value={sensorconf.threshold_mode}
+                  bind:value={sensorconf.th_mode}
                 />
               {/if}
             {/if}
             <MinMax
               label="Sensor Range"
-              bind:low={sensorconf.limit_min}
-              bind:high={sensorconf.limit_max}
+              bind:low={sensorconf.lmin}
+              bind:high={sensorconf.lmax}
               value={sensorValues[axis]}
               mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
                 ? "double"
@@ -288,12 +288,12 @@
             <Radio
               label="Message Type"
               {options}
-              value={midiconfig.translator_mode}
+              value={midiconfig.th_mode}
               on:change={(evt) => {
-                midiconfig.translator_mode = evt.detail;
+                midiconfig.th_mode = evt.detail;
               }}
             />
-            {#if midiconfig.translator_mode === 0}
+            {#if midiconfig.th_mode === 0}
               <CCConfig config={midiconfig} />
             {:else}
               <NoteConfig config={midiconfig} />
@@ -314,8 +314,8 @@
             <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
             <Checkbox label="Mode_raw" bind:value={oscconf.mode_raw} />
             {#if !oscconf.mode_raw}
-              <Range label="OSC Min" bind:value={oscconf.output_min} />
-              <Range label="OSC Max" bind:value={oscconf.output_max} />
+              <Range label="OSC Min" bind:value={oscconf.osc_min} />
+              <Range label="OSC Max" bind:value={oscconf.osc_max} />
             {/if}
           </Collapse>
         </section>
@@ -350,9 +350,9 @@
                 label="Stroke continuous"
                 bind:value={hidconf.stroke_mode}
               />
-              <Text label="Address" bind:value={hidconf.map_address} />
-              {#if hidconf.stroke_mode && config.sensor[axis].threshold_mode === true}
-                <Text label="Address2" bind:value={hidconf.map_address2} />
+              <Text label="Address" bind:value={hidconf.addr} />
+              {#if hidconf.stroke_mode && config.sensor[axis].th_mode === true}
+                <Text label="Address2" bind:value={hidconf.addr2} />
               {/if}
             {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
               <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
@@ -360,7 +360,7 @@
                 label="Stroke continuous"
                 bind:value={hidconf.stroke_mode}
               />
-              <Text label="Address" bind:value={hidconf.map_address} />
+              <Text label="Address" bind:value={hidconf.addr} />
             {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
               <h4>
                 Not possible to map a continuous sensor axis to a key stoke
@@ -371,7 +371,7 @@
                 Map a continuous sensor axis to a mouse axis (Address can be
                 "X","Y","WHEEL","PAN")
               </h4>
-              <Text label="Address" bind:value={hidconf.map_address} />
+              <Text label="Address" bind:value={hidconf.addr} />
             {/if}
           </Collapse>
         </section>

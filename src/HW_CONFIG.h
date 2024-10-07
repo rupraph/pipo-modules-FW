@@ -10,7 +10,7 @@
 
 #define DEBUG_HEAP true
 
-#define DEBUG_CONFIG true
+#define DEBUG_CONFIG false
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9

@@ -3,163 +3,157 @@
     "engine-hid": {
       "accX": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "accY": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "accZ": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "pitch": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "roll": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "yaw": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       }
     },
     "engine-midi": {
       "accX": {
-        "cc_number": 4,
+        "cc_nb": 4,
         "channel": 1,
         "enabled": true,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "accY": {
-        "cc_number": 5,
+        "cc_nb": 5,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 18,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 18,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "blues major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "accZ": {
-        "cc_number": 6,
+        "cc_nb": 6,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 10,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 10,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "pitch": {
-        "cc_number": 1,
+        "cc_nb": 1,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "roll": {
-        "cc_number": 2,
+        "cc_nb": 2,
         "channel": 1,
         "enabled": true,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 15,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 15,
         "sustain": 0.8,
         "rootNote": 55,
         "scaleType": "blues minor",
-        "translator_mode": 1
+        "tl_mode": 1
       },
       "yaw": {
-        "cc_number": 3,
+        "cc_nb": 3,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       }
     },
     "engine-osc": {
       "accX": {
         "enabled": true,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "accY": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "accZ": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "pitch": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "roll": {
         "enabled": true,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "yaw": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       }
     }
   },
@@ -168,55 +162,55 @@
       "deadzone": 0.05,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 8.0,
-      "limit_min": -8.0,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "accY": {
       "deadzone": 0.05,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 8.0,
-      "limit_min": -8.0,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "accZ": {
       "deadzone": 0.05,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 8.0,
-      "limit_min": -8.0,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "pitch": {
       "deadzone": 2,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 90,
-      "limit_min": -90,
+      "lmax": 90,
+      "lmin": -90,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "roll": {
       "deadzone": 2,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 180,
-      "limit_min": -180,
+      "lmax": 180,
+      "lmin": -180,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "yaw": {
       "deadzone": 2,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 180,
-      "limit_min": -180,
+      "lmax": 180,
+      "lmin": -180,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     }
   },
   "general": {

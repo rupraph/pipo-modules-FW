@@ -80,7 +80,7 @@
     on:mouseleave={() => console.log("leave")}
     label="Number of Notes"
     tooltip="You are in threshold mode, this value is ignored."
-    bind:value={config.numberOfNotes}
+    bind:value={config.nbOfNotes}
     min={1}
     max={50}
   />

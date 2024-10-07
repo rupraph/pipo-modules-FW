@@ -29,8 +29,8 @@ void Sensor::measure_offset(const std::string& sensor_name) {
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value > sensor_dat[axis].limit_min &&
-        sensor_dat[axis].value < sensor_dat[axis].limit_max) {
+    if (sensor_dat[axis].value > sensor_dat[axis].lmin &&
+        sensor_dat[axis].value < sensor_dat[axis].lmax) {
       return true;
     } else {
       return false;
@@ -43,8 +43,8 @@ bool Sensor::is_within_range(const std::string& axis) {
 
 bool Sensor::is_prev_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value_prev > sensor_dat[axis].limit_min &&
-        sensor_dat[axis].value_prev < sensor_dat[axis].limit_max) {
+    if (sensor_dat[axis].value_prev > sensor_dat[axis].lmin &&
+        sensor_dat[axis].value_prev < sensor_dat[axis].lmax) {
       return true;
     } else {
       return false;
@@ -83,12 +83,12 @@ void Sensor::process_sensor_triggers() {
     else if (axis_data.mode == 1) {
 
       //simple threshold mode
-      if (axis_data.threshold_mode == 0) {
-        axis_data.bool_value = axis_data.value > axis_data.limit_min;
+      if (axis_data.th_mode == 0) {
+        axis_data.bool_value = axis_data.value > axis_data.lmin;
       } else {
-        if (axis_data.threshold_mode == 1) {
-          axis_data.bool_value = axis_data.value > axis_data.limit_min &&
-                                 axis_data.value < axis_data.limit_max;
+        if (axis_data.th_mode == 1) {
+          axis_data.bool_value = axis_data.value > axis_data.lmin &&
+                                 axis_data.value < axis_data.lmax;
         }
       }
       // trigger flags for trigger mode
@@ -140,11 +140,11 @@ json Sensor::get_config(bool debug) {
       config[axis_name]["deadzone"] = sensor_dat[axis_name].deadzone;
       // config[axis_name]["value"] = sensor_dat[axis_name].value;
       config[axis_name]["offset"] = sensor_dat[axis_name].offset;
-      config[axis_name]["limit_max"] = sensor_dat[axis_name].limit_max;
-      config[axis_name]["limit_min"] = sensor_dat[axis_name].limit_min;
+      config[axis_name]["lmax"] = sensor_dat[axis_name].lmax;
+      config[axis_name]["lmin"] = sensor_dat[axis_name].lmin;
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
-      config[axis_name]["threshold_mode"] =
-          sensor_dat[axis_name].threshold_mode;
+      config[axis_name]["th_mode"] =
+          sensor_dat[axis_name].th_mode;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -164,10 +164,10 @@ void Sensor::set_config(json& config, bool debug) {
     string axis_name = pair.key();
     sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
-    sensor_dat[axis_name].limit_max = config[axis_name]["limit_max"];
-    sensor_dat[axis_name].limit_min = config[axis_name]["limit_min"];
+    sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
+    sensor_dat[axis_name].lmin = config[axis_name]["lmin"];
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
-    sensor_dat[axis_name].threshold_mode = config[axis_name]["threshold_mode"];
+    sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
   }
   if (debug) {
     Serial.println("set_sensor_config");
@@ -317,14 +317,14 @@ float Sensor::get_value_prev(const std::string& axis) {
 
 float Sensor::get_limit_max(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].limit_max;
+    return sensor_dat[axis].lmax;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
 float Sensor::get_limit_min(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].limit_min;
+    return sensor_dat[axis].lmin;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -352,7 +352,7 @@ bool Sensor::get_mode(const std::string& axis) {
 
 bool Sensor::get_threshold_mode(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].threshold_mode;
+    return sensor_dat[axis].th_mode;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -410,7 +410,7 @@ void Sensor::set_value_prev(const std::string& axis, float value) {
 
 void Sensor::set_limit_max(const std::string& axis, float value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].limit_max = value;
+    sensor_dat[axis].lmax = value;
 
   else
     throw std::invalid_argument("Axis not found: " + axis);
@@ -418,7 +418,7 @@ void Sensor::set_limit_max(const std::string& axis, float value) {
 
 void Sensor::set_limit_min(const std::string& axis, float value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].limit_min = value;
+    sensor_dat[axis].lmin = value;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -446,7 +446,7 @@ void Sensor::set_mode(const std::string& axis, bool value) {
 
 void Sensor::set_threshold_mode(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    sensor_dat[axis].threshold_mode = value;
+    sensor_dat[axis].th_mode = value;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

@@ -12,8 +12,8 @@ class OscTranslator {
   bool enabled = false;
   bool mode_raw = true;  // sends raw sensor data.
 
-  float output_max = 1;
-  float output_min = 0;
+  float osc_max = 1;
+  float osc_min = 0;
 
   float get_value(float value, float min_input, float max_input);
 

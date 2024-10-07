@@ -202,6 +202,8 @@ void PipoServer::setup_requests() {
             Serial.println(ESP.getFreeHeap());  // 44k remaining
 #endif
             config.save(config.filename, received_configData.c_str());
+            config.load_config(config.filename);
+            config.apply(input_sens, engine, osc, true);
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif

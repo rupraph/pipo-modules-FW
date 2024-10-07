@@ -49,8 +49,8 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
     if (sensor.test_outside_deadzone(axis_name) &&
         Midi_translator.enabled == true) {
       // if CC MODE
-      if (Midi_translator.translator_mode == 0) {
-        int cc_number = Midi_translator.cc_number;
+      if (Midi_translator.tl_mode == 0) {
+        int cc_nb = Midi_translator.cc_nb;
 
         // sensor uses continuous mode
         if (sensor.get_mode(axis_name) == 0) {
@@ -62,13 +62,14 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
                                                         sensor_max, 1),
                              16383));
 
-              midiio.sendControlChange(cc_number, cc_val, channel, true);
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
             } else {
               uint8_t cc_val =
                   max(0, min(Midi_translator.get_cc_val(sensor_val, sensor_min,
                                                         sensor_max, 0),
                              127));
-              midiio.sendControlChange(cc_number, cc_val, channel, false);
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
+              //Serial.println(sensor_min);
             }
           }
         } else  // sensor uses trigger mode
@@ -76,16 +77,16 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           if (sensor.get_bool_value(axis_name)) {
             uint16_t cc_val = Midi_translator.getMaxOutput();
             if (Midi_translator.getHires()) {
-              midiio.sendControlChange(cc_number, cc_val, channel, true);
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
             } else {
-              midiio.sendControlChange(cc_number, cc_val, channel, false);
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
             }
           } else {
             uint16_t cc_val = Midi_translator.getMinOutput();
             if (Midi_translator.getHires()) {
-              midiio.sendControlChange(cc_number, cc_val, channel, true);
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
             } else {
-              midiio.sendControlChange(cc_number, cc_val, channel, false);
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
             }
           }
           vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be

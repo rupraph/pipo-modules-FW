@@ -1,20 +1,20 @@
 export type BaseMidiConfig = {
   channel: number;
-  translator_mode: number; // 0=cc, 1 note
+  th_mode: number; // 0=cc, 1 note
   enabled: boolean;
 };
 export type CCConfig = {
-  cc_number: number;
-  max_output: number;
-  min_output: number;
+  cc_nb: number;
+  cc_max: number;
+  cc_min: number;
   hires: boolean;
-  interpolation_type: number; // 0=linear, 1=step, 2=log
+  // interpolation_type: number; // 0=linear, 1=step, 2=log
 };
 export type NoteConfig = {
   scaleType: string;
   rootNote: number;
   sustain: number;
-  numberOfNotes: number;
+  nbOfNotes: number;
   current_scale: number[];
 };
 export type MidiConfig = BaseMidiConfig & CCConfig & NoteConfig;
@@ -26,28 +26,28 @@ export function isContinuousMode(config: SensorConfig): boolean {
   return config.mode === CONTINUOUS;
 }
 export function isThresholdMode(config: SensorConfig): boolean {
-  return config.threshold_mode === THRESHOLD;
+  return config.th_mode === THRESHOLD;
 }
 export function isHisteresisMode(config: SensorConfig): boolean {
-  return config.threshold_mode === HISTERESIS;
+  return config.th_mode === HISTERESIS;
 }
 export function isBasicThresholdMode(config: SensorConfig): boolean {
-  return config.threshold_mode === THRESHOLD;
+  return config.th_mode === THRESHOLD;
 }
 export type SensorConfig = {
   mode: boolean;
-  threshold_mode: boolean;
+  th_mode: boolean;
   deadzone: number;
-  limit_max: number;
-  limit_min: number;
+  lmax: number;
+  lmin: number;
   offset: number;
 };
 
 export type OscConfig = {
   enabled: boolean;
   mode_raw: boolean;
-  output_max: number;
-  output_min: number;
+  osc_max: number;
+  osc_min: number;
 };
 
 export type GeneralConfig = {
@@ -62,8 +62,8 @@ export type GeneralConfig = {
 
 export type HidConfig = {
   enabled: boolean;
-  map_address: string;
-  map_address2: string;
+  addr: string;
+  addr2: string;
   stroke_mode: boolean;
 };
 

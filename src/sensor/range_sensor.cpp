@@ -75,8 +75,8 @@ void RangeSensor::update() {
       // }
       // else{ // trigger mode
       //     // if basic threshold mode
-      //     if (sensor_dat["dist"].threshold_mode == 0) {
-      //         if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+      //     if (sensor_dat["dist"].th_mode == 0) {
+      //         if (sensor_dat["dist"].value > sensor_dat["dist"].lmax) {
       //             sensor_dat["dist"].bool_value = true;
       //         }
       //         else {
@@ -84,19 +84,19 @@ void RangeSensor::update() {
       //         }
       //     }
       //     else{ // shmidt trigger mode
-      //         if (sensor_dat["dist"].threshold_mode == 1)
+      //         if (sensor_dat["dist"].th_mode == 1)
       //         {
-      //             if (sensor_dat["dist"].value > sensor_dat["dist"].limit_max) {
+      //             if (sensor_dat["dist"].value > sensor_dat["dist"].lmax) {
       //                 sensor_dat["dist"].bool_value = true;
       //             }
-      //             else if (sensor_dat["dist"].value < sensor_dat["dist"].limit_min) {
+      //             else if (sensor_dat["dist"].value < sensor_dat["dist"].lmin) {
       //                 sensor_dat["dist"].bool_value = false;
       //             }
       //         }
       //     }
       //}
 
-      //sensor_dat["dist"].value = clip(sensor_dat["dist"].value, sensor_dat["dist"].limit_min, sensor_dat["dist"].limit_max);
+      //sensor_dat["dist"].value = clip(sensor_dat["dist"].value, sensor_dat["dist"].lmin, sensor_dat["dist"].lmax);
     }
     if (status == 0) {
       status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();

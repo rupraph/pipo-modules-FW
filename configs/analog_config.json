@@ -3,319 +3,307 @@
     "engine-hid": {
       "A1": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_DOWN",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_DOWN",
         "stroke_mode": true
       },
       "A2": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "A3": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "A4": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "A5": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "A6": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T1": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T2": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T3": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T4": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T5": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       },
       "T6": {
         "enabled": false,
-        "map_address": "KEY_DOWN",
-        "map_address2": "KEY_UP",
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
         "stroke_mode": true
       }
     },
     "engine-midi": {
       "A1": {
-        "cc_number": 1,
+        "cc_nb": 1,
         "channel": 1,
         "enabled": true,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "A2": {
-        "cc_number": 2,
+        "cc_nb": 2,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "A3": {
-        "cc_number": 3,
+        "cc_nb": 3,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "A4": {
-        "cc_number": 4,
+        "cc_nb": 4,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "A5": {
-        "cc_number": 5,
+        "cc_nb": 5,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "A6": {
-        "cc_number": 6,
+        "cc_nb": 6,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "T1": {
-        "cc_number": 7,
+        "cc_nb": 7,
         "channel": 1,
         "enabled": true,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 1
+        "tl_mode": 1
       },
       "T2": {
-        "cc_number": 8,
+        "cc_nb": 8,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 1,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 79,
         "scaleType": "major",
-        "translator_mode": 1
+        "tl_mode": 1
       },
       "T3": {
-        "cc_number": 9,
+        "cc_nb": 9,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 1,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 75,
         "scaleType": "major",
-        "translator_mode": 1
+        "tl_mode": 1
       },
       "T4": {
-        "cc_number": 10,
+        "cc_nb": 10,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 1,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 72,
         "scaleType": "major",
-        "translator_mode": 1
+        "tl_mode": 1
       },
       "T5": {
-        "cc_number": 11,
+        "cc_nb": 11,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       },
       "T6": {
-        "cc_number": 12,
+        "cc_nb": 12,
         "channel": 1,
         "enabled": false,
         "hires": false,
-        "interpolation_type": 0,
-        "max_output": 127,
-        "min_output": 0,
-        "numberOfNotes": 25,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
         "scaleType": "major",
-        "translator_mode": 0
+        "tl_mode": 0
       }
     },
     "engine-osc": {
       "A1": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "A2": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "A3": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "A4": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "A5": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "A6": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T1": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T2": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T3": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T4": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T5": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       },
       "T6": {
         "enabled": false,
         "mode_raw": false,
-        "output_max": 1,
-        "output_min": 0
+        "osc_max": 1,
+        "osc_min": 0
       }
     }
   },
@@ -324,109 +312,109 @@
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "A2": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "A3": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "A4": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "A5": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "A6": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 3.3,
-      "limit_min": 0.0,
+      "lmax": 3.3,
+      "lmin": 0.0,
       "mode": false,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T1": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T2": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T3": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T4": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T5": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     },
     "T6": {
       "deadzone": 0.0,
       "offset": 0.0,
       "invert": false,
-      "limit_max": 200000.0,
-      "limit_min": 500.0,
+      "lmax": 200000.0,
+      "lmin": 500.0,
       "mode": true,
-      "threshold_mode": false
+      "th_mode": false
     }
   },
   "general": {

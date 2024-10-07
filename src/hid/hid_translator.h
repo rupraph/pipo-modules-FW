@@ -13,8 +13,8 @@ class HidTranslator {
  public:
   //Config elements
   bool enabled = false;
-  string map_address = "a";
-  string map_address2 = "b";
+  string addr = "a";
+  string addr2 = "b";
   // for keyboard should start with KEY_
   bool stroke_mode = false;
   // stroke mode means key is either pressed once per trigger (false), or maintained (true)
@@ -23,8 +23,8 @@ class HidTranslator {
 
   HidTranslator();
 
-  int map_linear(float value, float min_input, float max_input, int min_output,
-                 int max_output);
+  int map_linear(float value, float min_input, float max_input, int cc_min,
+                 int cc_max);
   int get_current_bool(float valu, float min_input, float max_input);
   int get_current_int(float value, float min_input, float max_input);
   int8_t get_mouse_int(float value, float min_input, float max_input);

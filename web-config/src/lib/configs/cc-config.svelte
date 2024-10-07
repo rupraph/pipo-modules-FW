@@ -7,7 +7,7 @@
 
 <Range
   label="CC number"
-  bind:value={config.cc_number}
+  bind:value={config.cc_nb}
   min={0}
   max={127}
   step={1}
@@ -15,14 +15,14 @@
 
 <Range
   label="Min"
-  bind:value={config.min_output}
+  bind:value={config.cc_min}
   min={0}
-  max={Math.min(Infinity, config.max_output)}
+  max={Math.min(Infinity, config.cc_max)}
 />
 <Range
   label="Max"
-  bind:value={config.max_output}
-  min={Math.max(0, config.min_output)}
+  bind:value={config.cc_max}
+  min={Math.max(0, config.cc_min)}
   max={Infinity}
 />
 <Checkbox label="High Resolution" bind:value={config.hires} />

@@ -25,23 +25,23 @@ class MidiTranslator
   MidiTranslator();
 
   int channel = 1;  // should be in engine.
-  int cc_number = 1;
+  int cc_nb = 1;
 
   bool enabled = false;
 
   //notes variables
-  int translator_mode = 0;  //0=cc, 1 note, 2 both
+  int tl_mode = 0;  //0=cc, 1 note, 2 both
 
   string scaleType = "major";
   int rootNote = 45;
-  int numberOfNotes = 25;
+  int nbOfNotes = 25;
   vector<int> current_scale;
   float sustain = 1.0;  //in seconds. 0 for infinite
 
   //CC variables
-  int max_output;
-  int min_output = 0;
-  int interpolation_type = 0;  //0=linear, 1=step, 2=log
+  int cc_max;
+  int cc_min = 0;
+  // int interpolation_type = 0;  //0=linear, 1=step, 2=log
   bool hires = false;
 
   // Notes scale methods
@@ -49,7 +49,7 @@ class MidiTranslator
   void printScale(vector<int> scale);
   void set_Scale_Type(string scaleType);
   void set_root_note(string rootNote);
-  void set_number_of_notes(int numberOfNotes);
+  void set_number_of_notes(int nbOfNotes);
   int convertNoteNameToNumber(string noteName);
   string convertNumberToNoteName(int noteNumber);
   bool is_a_note(string noteName);
@@ -97,14 +97,14 @@ class MidiTranslator
 
   // template <typename T>
   // void set_param(const string& param_name, const T& value) {
-  //     if (param_name == "translator_mode") {
-  //         translator_mode = value;
+  //     if (param_name == "tl_mode") {
+  //         tl_mode = value;
   //     }
   //     else if (param_name == "channel") {
   //         channel = value;
   //     }
-  //     else if (param_name == "cc_number") {
-  //         cc_number = value;
+  //     else if (param_name == "cc_nb") {
+  //         cc_nb = value;
   //     }
   //     else if (param_name == "scaleType") {
   //         scaleType = value;
@@ -112,8 +112,8 @@ class MidiTranslator
   //     else if (param_name == "rootNote") {
   //         rootNote = value;
   //     }
-  //     else if (param_name == "numberOfNotes") {
-  //         numberOfNotes = value;
+  //     else if (param_name == "nbOfNotes") {
+  //         nbOfNotes = value;
   //     }
   //     else if (param_name == "max_output") {
   //         max_output = value;
