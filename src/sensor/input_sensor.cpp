@@ -66,7 +66,8 @@ void Sensor::process_sensor_triggers() {
     SensorDat& axis_data = dat.second;
 
     axis_data.bool_value_prev = axis_data.bool_value;
-    // range flags for continuous mode
+    
+    // flags for continuous mode
     if (axis_data.mode == 0) {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
@@ -78,8 +79,10 @@ void Sensor::process_sensor_triggers() {
       }
     }
 
-    // calc boolean value for trigger mode
-    if (axis_data.mode == 1) {
+    // flags and bool value for thresh modes
+    else if (axis_data.mode == 1) {
+
+      //simple threshold mode
       if (axis_data.threshold_mode == 0) {
         axis_data.bool_value = axis_data.value > axis_data.limit_min;
       } else {
@@ -88,14 +91,13 @@ void Sensor::process_sensor_triggers() {
                                  axis_data.value < axis_data.limit_max;
         }
       }
-    }
-
-    // trigger flags for trigger mode
-    if (axis_data.bool_value && !axis_data.bool_value_prev) {
-      set_all_trigger(axis, true);
-    }
-    if (!axis_data.bool_value && axis_data.bool_value_prev) {
-      set_all_untrigger(axis, true);
+      // trigger flags for trigger mode
+      if (axis_data.bool_value && !axis_data.bool_value_prev) {
+        set_all_trigger(axis, true);
+      }
+      if (!axis_data.bool_value && axis_data.bool_value_prev) {
+        set_all_untrigger(axis, true);
+      }
     }
   }
 }
@@ -160,10 +162,7 @@ json Sensor::get_config(bool debug) {
 void Sensor::set_config(json& config, bool debug) {
   for (auto const& pair : config.items()) {
     string axis_name = pair.key();
-    // sensor_dat[axis_name].enabled = config[axis_name]["enabled"];
-    // sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
     sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
-    // sensor_dat[axis_name].value = config[axis_name]["value"];
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
     sensor_dat[axis_name].limit_max = config[axis_name]["limit_max"];
     sensor_dat[axis_name].limit_min = config[axis_name]["limit_min"];
