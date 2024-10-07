@@ -6,7 +6,6 @@
 #include <vector>
 #include <unordered_map>
 #include <MIDI.h>
-// #include "utils/json.hpp"
 #include <ArduinoJson.h>
 
 using namespace std;
@@ -45,12 +44,13 @@ class MidiTranslator
 
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
-  void printScale(vector<int> scale);
-  void set_Scale_Type(string scaleType);
+  void print_scale(vector<int> scale);
+  void set_scale_type(string scaleType);
   void set_root_note(string rootNote);
+  void set_root_note(int notenb);
   void set_number_of_notes(int nbOfNotes);
-  int convertNoteNameToNumber(string noteName);
-  string convertNumberToNoteName(int noteNumber);
+  int convert_note_name_to_number(string noteName);
+  string convert_number_to_note_name(int noteNumber);
   bool is_a_note(string noteName);
   vector<string> get_scale_names();
   void update_scale();
@@ -61,38 +61,31 @@ class MidiTranslator
   int map_linear(float x, float min_input, float max_input);
 
   // save/load
-  // friend void to_json(JsonDocument& j, const MidiTranslator& t);
-  // friend void from_json(const JsonDocument& j, MidiTranslator& t);
   JsonDocument get_json() const;
   void set_from_json(const JsonDocument& j);
-  // string serialize() const;
-  // void deserialize(const string& data);
 
   // Getter setters
-  bool getHires() const;
-  void setHires(bool h);
-  int getChannel();
-  void setChannel(int c);
-  int getCcNumber();
-  void setCcNumber(int c);
-  int getTranslatorMode();
-  void setTranslatorMode(int t);
-  string getScaleType();
-  void setScaleType(string s);
-  int getRootNote();
-  void setRootNote(int r);
-  int getNumberOfNotes();
-  void setNumberOfNotes(int n);
-  float getSustain();
-  void setSustain(float s);
-  int getMaxOutput();
-  void setMaxOutput(int m);
-  int getMinOutput();
-  void setMinOutput(int m);
-  int getInterpolationType();
-  void setInterpolationType(int i);
-  bool getEnabled();
-  void setEnabled(bool e);
+  bool get_hires() const;
+  void set_hires(bool h);
+  int get_channel();
+  void set_channel(int c);
+  int get_cc_number();
+  void set_cc_number(int c);
+  int get_translator_mode();
+  void set_translator_mode(int t);
+  string get_scale_type();
+  int get_root_note();
+  int get_number_of_notes();
+  float get_sustain();
+  void set_sustain(float s);
+  int get_max_output();
+  void set_max_output(int m);
+  int get_min_output();
+  void set_min_output(int m);
+  int get_interpolation_type();
+  void set_interpolation_type(int i);
+  bool get_enabled();
+  void set_enabled(bool e);
 
   // template <typename T>
   // void set_param(const string& param_name, const T& value) {
@@ -160,8 +153,8 @@ class MidiTranslator
   };
 
  private:
-  vector<int> generate_full_Scale(int rootNote, int nb_notes, string scaleType);
-  vector<int> generate_base_Scale(int rootNote, string scaleType);
+  vector<int> generate_full_scale(int rootNote, int nb_notes, string scaleType);
+  vector<int> generate_base_scale(int rootNote, string scaleType);
 };
 
 #endif  //MIDI_TRANSLATOR_H

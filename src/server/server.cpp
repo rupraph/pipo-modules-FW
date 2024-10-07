@@ -1,7 +1,5 @@
 #include "server/server.h"
 
-// using json = nlohmann::json;
-
 void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
 

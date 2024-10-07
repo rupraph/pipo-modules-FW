@@ -14,7 +14,10 @@ class OSC_handler {
 
   void setup();
   void set_config();
-  void sendOscMessage(string address, float value);
+  void send_osc_message(string address, float value);
+
+  void set_enabled(bool ena);
+  bool get_enabled();
 
  private:
   Config& config;
@@ -25,9 +28,8 @@ class OSC_handler {
   WiFiUDP Udp;
   void start();
   void stop();
-  void setDestIp(string ip);
-  void setOutPort(int port);
-  void setEnabled(bool ena);
+  void set_dest_ip(string ip);
+  void set_out_port(int port);
 };
 
 #endif  // OSC_HANDLER_H

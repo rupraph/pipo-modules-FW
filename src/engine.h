@@ -7,7 +7,6 @@
 #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
-// #include "utils/json.hpp"
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensor/input_sensor.h"
@@ -57,21 +56,21 @@ class Engine {
   hid_keyboard_report_t kb;
   hid_mouse_report_t mouse;
 
-  void update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
-              OSC_handler& osc);
-
-  void midi_processor(Sensor& sensor, midi_io& midiio);
-  void hid_processor(Sensor& sensor, usb_hid& hidio);
-  void osc_processor(Sensor& sensor, OSC_handler& osc);
-
-  JsonDocument get_config(bool debug = false);
-  void set_config(JsonObject config, bool debug = false);
-  // friend void to_json(json& j, const Engine& t);
-
   bool get_paused() { return paused; }
   void set_paused(bool value) { paused = value; }
   void toggle_pause();
 
+  void update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
+              OSC_handler& osc);
+  void midi_processor(Sensor& sensor, midi_io& midiio);
+  void hid_processor(Sensor& sensor, usb_hid& hidio);
+  void osc_processor(Sensor& sensor, OSC_handler& osc);
+
+  // config
+  JsonDocument get_config(bool debug = false);
+  void set_config(JsonObject config, bool debug = false);
+
+  //utils
   float round_to(float value, int decimal);
 
  private:

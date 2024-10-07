@@ -20,15 +20,15 @@ void OSC_handler::set_config() {
 
   if (config.general_config["OSC_IP"].is<JsonVariant>()) {
     string ip = config.general_config["OSC_IP"];
-    setDestIp(ip);
+    set_dest_ip(ip);
     // Serial.println("OSC IP set to: " + dest_ip.toString());
   }
   if (config.general_config["OSC_PORT"].is<JsonVariant>()) {
-    setOutPort(config.general_config["OSC_PORT"]);
+    set_out_port(config.general_config["OSC_PORT"]);
     // Serial.println("OSC port set to: " + String(out_port));
   }
   if (config.general_config["OSC_ENA"].is<JsonVariant>()) {
-    setEnabled(config.general_config["OSC_ENA"]);
+    set_enabled(config.general_config["OSC_ENA"]);
     // Serial.println("OSC enabled: " + String(enabled));
   }
 }
@@ -60,7 +60,7 @@ void OSC_handler::stop() {
 }
 
 /// @brief use to update the destination IP
-void OSC_handler::setDestIp(string ip) {
+void OSC_handler::set_dest_ip(string ip) {
   IPAddress new_ip;
   new_ip.fromString(ip.c_str());
   if (!isStarted) {
@@ -74,7 +74,7 @@ void OSC_handler::setDestIp(string ip) {
 }
 
 /// @brief use to update the output port
-void OSC_handler::setOutPort(int port) {
+void OSC_handler::set_out_port(int port) {
   if (!isStarted) {
     out_port = port;
   }
@@ -85,7 +85,21 @@ void OSC_handler::setOutPort(int port) {
   }
 }
 
-void OSC_handler::setEnabled(bool ena) {
+void OSC_handler::send_osc_message(string address, float value) {
+  if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+    OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str());
+    msg.add(value);
+    Udp.beginPacket(dest_ip, out_port);
+    msg.send(Udp);
+    Udp.endPacket();
+    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+    msg.empty();
+  } else {
+    Serial.println(F("No destination IP or port set"));
+  }
+}
+
+void OSC_handler::set_enabled(bool ena) {
   if (ena) {
     enabled = true;
     if (!isStarted) {
@@ -98,16 +112,6 @@ void OSC_handler::setEnabled(bool ena) {
   }
 }
 
-void OSC_handler::sendOscMessage(string address, float value) {
-  if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-    OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str());
-    msg.add(value);
-    Udp.beginPacket(dest_ip, out_port);
-    msg.send(Udp);
-    Udp.endPacket();
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-    msg.empty();
-  } else {
-    Serial.println(F("No destination IP or port set"));
-  }
+bool OSC_handler::get_enabled() {
+  return enabled;
 }

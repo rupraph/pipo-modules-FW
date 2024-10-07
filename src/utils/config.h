@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <sstream>
 #include "fs_tools.h"
-// #include "utils/json.hpp"
 #include <ArduinoJson.h>
 #include "utils/logs.h"
 #include "../engine.h"
@@ -15,7 +14,6 @@
 #include "../osc_handler.h"
 
 using namespace std;
-// using json = nlohmann::json;
 
 class Engine;
 class OSC_handler;

@@ -1,7 +1,5 @@
 #include "hid_translator.h"
 
-// using json = nlohmann::json;
-
 // UNDER CONSTRUCTION
 
 HidTranslator::HidTranslator() {}
@@ -50,22 +48,6 @@ int8_t HidTranslator::get_mouse_int(float value, float input_min,
   return mapped_value;
 }
 
-// void to_json(JsonDocument& j, const HidTranslator& t) {
-//   j = json{{"addr", t.addr},
-//            {"addr2", t.addr2},
-//            {"stroke_mode", t.stroke_mode},
-//            {"enabled", t.enabled}};
-// }
-
-// void from_json(const JsonDocument& j, HidTranslator& t) {
-//   j.at("addr").get_to(t.addr);
-//   j.at("addr2").get_to(t.addr2);
-//   j.at("stroke_mode").get_to(t.stroke_mode);
-//   // j.at("output_max").get_to(t.output_max);
-//   // j.at("output_min").get_to(t.output_min);
-//   j.at("enabled").get_to(t.enabled);
-// }
-
 JsonDocument HidTranslator::get_json() const {
   JsonDocument j;
   j["enabled"] = enabled;
@@ -86,16 +68,6 @@ void HidTranslator::set_from_json(const JsonDocument& j) {
     Serial.println(e.what());
   }
 }
-
-// std::string HidTranslator::serialize() const {
-//   json j = *this;
-//   return j.dump();
-// }
-
-// void HidTranslator::deserialize(const std::string& data) {
-//   json j = json::parse(data);
-//   from_json(j, *this);
-// }
 
 bool HidTranslator::get_enabled() {
   return enabled;
@@ -128,19 +100,3 @@ bool HidTranslator::get_stroke_mode() {
 void HidTranslator::set_stroke_mode(bool value) {
   stroke_mode = value;
 }
-
-// int HidTranslator::get_output_max() {
-//   return output_max;
-// }
-
-// void HidTranslator::set_output_max(int value) {
-//   output_max = value;
-// }
-
-// int HidTranslator::get_output_min() {
-//   return output_min;
-// }
-
-// void HidTranslator::set_output_min(int value) {
-//   output_min = value;
-// }
