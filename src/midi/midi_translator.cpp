@@ -70,7 +70,6 @@ void MidiTranslator::set_number_of_notes(int nbOfNotes) {
     cout << "Invalid number of notes." << endl;
     return;
   } else {
-    nbOfNotes = nbOfNotes;
     this->nbOfNotes = nbOfNotes;
     current_scale.clear();
     current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);

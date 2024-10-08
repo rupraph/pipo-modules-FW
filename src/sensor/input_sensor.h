@@ -5,12 +5,10 @@
 #include <vector>
 #include <unordered_map>
 #include <Wire.h>
-// #include "utils/json.hpp"
 #include <ArduinoJson.h>
 #include "utils/filters.h"
 
 using namespace std;
-// using json = nlohmann::json;
 
 enum Protocol { OSC, MIDI, HID };
 
@@ -30,6 +28,7 @@ struct SensorDat {
   bool th_mode;  // 0 = basic, 1 = window trigger
 
   // Live attributes
+  float raw_value;  // raw value from sensor
   float value;  // should distinguish raw value from output value and have both
   float value_prev;
   bool bool_value;       // boolean output when in trigger mode
@@ -49,6 +48,7 @@ struct SensorDat {
       : deadzone(0.0),
         offset(0.0),
         invert(false),
+        raw_value(0.0),
         value(0.0),
         value_prev(0.0),
         lmax(1000.0),

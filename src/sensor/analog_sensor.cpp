@@ -62,92 +62,27 @@ void AnalogSensor::measure_offset_all() {
 void AnalogSensor::update() {
 
   for (auto const& pair : analog_map) {
-    float analog_val = analogRead(pair.second) * 0.000806;  // convert to volts
 
+    sensor_dat[pair.first].raw_value = analogRead(pair.second);
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-    sensor_dat[pair.first].value = analog_val;
-
-    // // above min + was below min -> triggered
-    // if (analog_val>sensor_dat[pair.first].lmin
-    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].lmin )
-    // {
-    //     if (!sensor_dat[pair.first].triggered)
-    //     {
-    //         sensor_dat[pair.first].triggered = true;
-    //     }
-    // }
-    // // below min + was above min -> untriggered
-    // else if (analog_val<sensor_dat[pair.first].lmin
-    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].lmin)
-    // {
-    //     if (!sensor_dat[pair.first].untriggered)
-    //     {
-    //         sensor_dat[pair.first].untriggered = true;
-    //     }
-    // }
-    // // else reset -> likely trigger should only be reset by engine to wait for the flag to be used
-    // else
-    // {
-    //     sensor_dat[pair.first].triggered = false;
-    //     sensor_dat[pair.first].untriggered = false;
-    // }
+    sensor_dat[pair.first].value = sensor_dat[pair.first].raw_value * 0.000806;
   }
 
   for (auto const& pair : touch_map) {
     //trial filtering values
     //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
-    float val = touchRead(pair.second) - sensor_dat[pair.first].offset;
+    sensor_dat[pair.first].raw_value = touchRead(pair.second);
 
-    if (val > MAX_TOUCH_VALUE) {
-      val = MAX_TOUCH_VALUE;
+    sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+
+    sensor_dat[pair.first].value =
+        sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset;
+
+    if (sensor_dat[pair.first].value > MAX_TOUCH_VALUE) {
+      sensor_dat[pair.first].value = MAX_TOUCH_VALUE;
     }
 
     //Todo: try to have an adaptative max ? -> when no touch on, min can be adapted.
-
-    // if (value>sensor_dat[pair.first].lmax && touch_adaptative_max)
-    // {
-    //     sensor_dat[pair.first].value = value;
-    //     sensor_dat[pair.first].lmax = value;
-    // Todo: should find a way that changing the sensor limit also propagates to the connected midi translator
-    // }
-    // else
-    // if (val>sensor_dat[pair.first].lmax)// && !touch_adaptative_max)
-    // {
-    //     sensor_dat[pair.first].value = sensor_dat[pair.first].lmax;
-    // }
-    // else if (val<sensor_dat[pair.first].lmin)
-    // {
-    //     sensor_dat[pair.first].value = sensor_dat[pair.first].lmin;
-    // }
-    // else
-    // {
-
-    // should be generic for both or any sensor type ?
-    sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-    sensor_dat[pair.first].value = val;
-
-    // if (val>sensor_dat[pair.first].lmin
-    // && sensor_dat[pair.first].value_prev<sensor_dat[pair.first].lmin )
-    // {
-    //     if (!sensor_dat[pair.first].triggered)
-    //     {
-    //         sensor_dat[pair.first].triggered = true;
-    //     }
-    // }
-    // else if (val<sensor_dat[pair.first].lmin
-    // && sensor_dat[pair.first].value_prev>sensor_dat[pair.first].lmin)
-    // {
-    //     if (!sensor_dat[pair.first].untriggered)
-    //     {
-    //         sensor_dat[pair.first].untriggered = true;
-    //     }
-    // }
-    // else
-    // {
-    //     sensor_dat[pair.first].triggered = false;
-    //     sensor_dat[pair.first].untriggered = false;
-    // }
-    // }
   }
 
   process_sensor_triggers();

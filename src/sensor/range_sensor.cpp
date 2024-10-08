@@ -47,56 +47,25 @@ void RangeSensor::update() {
     no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
     //Todo: deal with second object detected
     // -> test driver to report single value. tested working on another sensor from same type.
-    float dist = pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
+    sensor_dat["dist"].raw_value =
+        pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
 
     // process result
-    if (dist < 0 || !pMultiRangingData->RangeData[0].RangeStatus ==
-                        VL53L4CX_RANGESTATUS_RANGE_VALID) {
+    if (sensor_dat["dist"].raw_value < 0 ||
+        !pMultiRangingData->RangeData[0].RangeStatus ==
+            VL53L4CX_RANGESTATUS_RANGE_VALID) {
     }
     // not sure if capping is optimal to be here in sensor class or better in engine/translators
     else {
       sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-      sensor_dat["dist"].value = ma_filter.process(dist);
+      sensor_dat["dist"].value =
+          ma_filter.process(sensor_dat["dist"].raw_value);
       //  ma_filter.process(lp_filter.process(dist));
+
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-      //sensor_dat["dist"].value = dist;
 
       process_sensor_triggers();
-      // below has been replaced by process_sensor_triggers. to be tested
-      // continuous mode
-      // if(sensor_dat["dist"].mode == 0){
-      //     if (is_within_range("dist")==false && is_prev_within_range("dist")==true) {
-      //         sensor_dat["dist"].untriggered = true;
-      //     }
-      //     if (is_within_range("dist")==true && is_prev_within_range("dist")==false) {
-      //         sensor_dat["dist"].triggered = true;
-      //     }
-      // }
-      // else{ // trigger mode
-      //     // if basic threshold mode
-      //     if (sensor_dat["dist"].th_mode == 0) {
-      //         if (sensor_dat["dist"].value > sensor_dat["dist"].lmax) {
-      //             sensor_dat["dist"].bool_value = true;
-      //         }
-      //         else {
-      //             sensor_dat["dist"].bool_value = false;
-      //         }
-      //     }
-      //     else{ // shmidt trigger mode
-      //         if (sensor_dat["dist"].th_mode == 1)
-      //         {
-      //             if (sensor_dat["dist"].value > sensor_dat["dist"].lmax) {
-      //                 sensor_dat["dist"].bool_value = true;
-      //             }
-      //             else if (sensor_dat["dist"].value < sensor_dat["dist"].lmin) {
-      //                 sensor_dat["dist"].bool_value = false;
-      //             }
-      //         }
-      //     }
-      //}
-
-      //sensor_dat["dist"].value = clip(sensor_dat["dist"].value, sensor_dat["dist"].lmin, sensor_dat["dist"].lmax);
     }
     if (status == 0) {
       status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
@@ -105,5 +74,3 @@ void RangeSensor::update() {
   end_duration();
   measured_loop_duration();
 }
-
-// generic functions /////////////////
