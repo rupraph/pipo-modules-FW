@@ -8,6 +8,7 @@ void setup_wifi() {
     delay(1000);
     Serial.println(F("Starting AP mode"));
     WiFi.softAP("Pipo", "pipo1234");
+    hwui.start_blink(WIFI_LED, 1, 0.5);
   } else {
     Serial.println(F("Starting STA mode"));
 
@@ -24,6 +25,7 @@ void setup_wifi() {
     wm.setCleanConnect(true);
 
     wm.setSaveConfigCallback([]() { ESP.restart(); });
+    wm.setAPCallback([]() { hwui.start_blink(WIFI_LED, 1, 0.5); });
 
     if (digitalRead(MODE_SW) == LOW) {
       delay(3000);
