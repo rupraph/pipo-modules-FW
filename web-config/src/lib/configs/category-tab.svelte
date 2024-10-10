@@ -7,7 +7,7 @@
   }
 </script>
 
-<div class="section-tabs">
+<div class="cat-tabs">
   {#each items as { value, label }}
     <span
       class="tab {value === active ? 'active' : ''}"
@@ -19,21 +19,21 @@
 </div>
 
 <style>
-  .section-tabs {
+  .cat-tabs {
     width: 100%;
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
+    margin: 1em 0;
   }
-  .section-tabs > .tab {
+  .cat-tabs > .tab {
     grid-template-columns: 8px 8px auto 8px 8px;
     grid-template-rows: 100%;
     border: 0;
     line-height: 2em;
   }
 
-  .section-tabs > .tab.active {
-    z-index: 12;
+  .cat-tabs > .tab.active {
     cursor: text;
     color: rgb(2, 141, 176);
   }

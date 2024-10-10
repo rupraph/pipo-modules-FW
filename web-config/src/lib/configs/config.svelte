@@ -1,24 +1,20 @@
 <script lang="ts" generics="T extends PipoTypes">
   import { configSave } from "../../services/config";
-
   import { pipoio } from "../../pipoio";
-  import { createEventDispatcher, onDestroy, onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
+  import Select from "svelte-select";
   import {
-    type MidiConfig,
     type SensorConfig,
-    type OscConfig,
-    type HidConfig,
     type PipoConfig,
     type PipoTypes,
     type SensorValues,
     type PipoKeys,
     type SmoothSensorValues,
-    type SmoothSensorValue,
     isHisteresisMode,
     isContinuousMode,
     type ConfigByAxis,
@@ -31,7 +27,6 @@
   import Collapse from "../collapse.svelte";
   import Range from "../form/Range.svelte";
   import Text from "../form/Text.svelte";
-  import Select from "../form/Select.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
   import CategoryTab from "./category-tab.svelte";
   export let config: PipoConfig<T>;
@@ -50,6 +45,7 @@
   let configByAxis: ConfigByAxis<T>;
   let currentAxis: PipoKeys[T];
   let currentConfig: AxisConfig & AxisSchema;
+  let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "HID";
   onMount(() => {
     configByAxis = (
@@ -63,6 +59,9 @@
       };
       return acc;
     }, {} as ConfigByAxis<T>);
+    axisSelect = Object.keys(configByAxis).map((axis) => {
+      return { value: axis, label: schema[$type as T][axis].label };
+    });
     setAxis(Object.keys(configByAxis)[0]);
   });
 
@@ -170,12 +169,6 @@
   function setCategory(cat: string) {
     currentCat = cat;
   }
-  function getAxisNames() {
-    return Object.keys(configByAxis).map((axis) => {
-      return { value: axis, label: schema[$type as T][axis].label };
-    });
-  }
-
   const wifimodes = [
     { label: "Create Access Point", value: "AP" },
     { label: "Station (Connect to others)", value: "STA" },
@@ -228,7 +221,25 @@
     >
   </section>
   {#if currentConfig}
-    <h3>{currentConfig.label}</h3>
+    <Select
+      items={axisSelect}
+      clearable={false}
+      bind:value={currentAxis}
+      --selected-item-color="var(--text-color)"
+      --font-size="27.2px"
+      --item-is-active-bg="var(--bg-tertiary)"
+      --item-color="var(--text-color)"
+      --item-bg="var(--bg-secondary)"
+      --input-color="var(--text-color)"
+      --item-hover-color="var(--text-color)"
+      --item-hover-bg="var(--bg-lighter)"
+      --border-radius="0"
+      --border="0"
+      --border-focused="0"
+      --list-background="var(--bg-secondary)"
+      --background="var(--bg-color)"
+      on:change={(evt) => setAxis(evt.detail.value)}
+    />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
     {#if currentConfig.cat !== "Touch"}
       <Checkbox label="Threshold mode" bind:value={currentConfig.sensor.mode} />
@@ -384,6 +395,12 @@
     display: flex;
     flex-direction: column;
     justify-content: left;
+  }
+  :global(.selected-item) {
+    font-weight: bold;
+    font-size: 27.2px;
+    margin-block-start: 27.2px;
+    margin-block-end: 27.2px;
   }
   .buttons {
     display: flex;
