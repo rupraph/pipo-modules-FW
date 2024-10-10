@@ -21,6 +21,9 @@
     type SmoothSensorValue,
     isHisteresisMode,
     isContinuousMode,
+    type ConfigByAxis,
+    type AxisConfig,
+    type AxisSchema,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -30,6 +33,7 @@
   import Text from "../form/Text.svelte";
   import Select from "../form/Select.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
+  import CategoryTab from "./category-tab.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
@@ -38,12 +42,28 @@
   const withinWindowValues: SensorValues<T> = {};
   const sensorValues: SensorValues<T> = {};
 
-  let sensorConfs = [];
-  let groupedSensorConfs = {};
-
+  const categories = [
+    { value: "HID", label: "HID" },
+    { value: "MIDI", label: "MIDI" },
+    { value: "OSC", label: "OSC" },
+  ];
+  let configByAxis: ConfigByAxis<T>;
+  let currentAxis: PipoKeys[T];
+  let currentConfig: AxisConfig & AxisSchema;
+  let currentCat = "HID";
   onMount(() => {
-    sensorConfs = getSensorConf();
-    groupedSensorConfs = groupBySection(sensorConfs);
+    configByAxis = (
+      Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
+    ).reduce((acc, [axis, sensor]) => {
+      acc[axis] = {
+        sensor,
+        hid: config.engine["engine-hid"][axis],
+        midi: config.engine["engine-midi"][axis],
+        osc: config.engine["engine-osc"][axis],
+      };
+      return acc;
+    }, {} as ConfigByAxis<T>);
+    setAxis(Object.keys(configByAxis)[0]);
   });
 
   pipoio.on("sensor", ({ axis, value, withinWindow }) => {
@@ -134,56 +154,26 @@
     });
   }
 
-  function getMidiConfigs() {
-    return Object.entries(config.engine["engine-midi"]) as unknown as [
-      PipoKeys[T],
-      MidiConfig,
-    ][];
-  }
-
   function switchwifimode() {
     axios.post("/wifimode").then(() => {
       console.log("Switching wifi mode...");
     });
   }
 
-  function getSensorConf() {
-    return Object.entries(config.sensor) as unknown as [
-      PipoKeys[T],
-      SensorConfig,
-    ][];
+  function setAxis(axis: PipoKeys[T]) {
+    currentAxis = axis;
+    currentConfig = {
+      ...configByAxis[axis],
+      ...schema[$type as T][axis],
+    };
   }
-
-  function groupBySection(sensorConfs: [PipoKeys[T], SensorConfig][]) {
-    const sections = {};
-    for (const [axis, sensorconf] of sensorConfs) {
-      const { cat } = getSchema(axis);
-      console.log(cat);
-      if (!sections[cat]) {
-        sections[cat] = [];
-      }
-      sections[cat].push([axis, sensorconf]);
-    }
-    console.log(sections);
-    return sections;
+  function setCategory(cat: string) {
+    currentCat = cat;
   }
-
-  function getOscConf() {
-    return Object.entries(config.engine["engine-osc"]) as unknown as [
-      PipoKeys[T],
-      OscConfig,
-    ][];
-  }
-
-  function getHidConf() {
-    return Object.entries(config.engine["engine-hid"]) as unknown as [
-      PipoKeys[T],
-      HidConfig,
-    ][];
-  }
-
-  function getSchema(axis: PipoKeys[T]) {
-    return schema[$type as T][axis];
+  function getAxisNames() {
+    return Object.keys(configByAxis).map((axis) => {
+      return { value: axis, label: schema[$type as T][axis].label };
+    });
   }
 
   const wifimodes = [
@@ -205,6 +195,12 @@
   // onDestroy(() => {
   //   clearInterval(interval);
   // });
+
+  /**
+ 
+
+
+ */
 </script>
 
 <article class="config">
@@ -231,166 +227,153 @@
       title="Apply and save the config in pipo">Save</LoadingButton
     >
   </section>
-  <Collapse title="Sensor settings" open>
-    {#each Object.entries(groupedSensorConfs) as [cat, sensors]}
-      <Collapse title={cat}>
-        {#each sensors as [axis, sensorconf]}
-          {@const { label, cat, unit, min, max, step } = getSchema(axis)}
-          <Collapse title={label}>
-            <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-            {#if cat !== "Touch"}
-              <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
-              {#if sensorconf.mode === true}
-                <Checkbox
-                  label="Window threshold"
-                  bind:value={sensorconf.th_mode}
-                />
-              {/if}
-            {/if}
-            <MinMax
-              label="Sensor Range"
-              bind:low={sensorconf.lmin}
-              bind:high={sensorconf.lmax}
-              value={sensorValues[axis]}
-              mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
-                ? "double"
-                : "single"}
-              cursorActive={withinWindowValues[axis]}
-              {min}
-              {max}
-              {step}
-              minLabel={`min (${unit})`}
-              maxLabel={`max (${unit})`}
-            />
-            {#if cat === "Touch"}
-              <button class="primary" on:click={() => cal_offset(axis)}
-                >Offset calib</button
-              >
-            {/if}
-          </Collapse>
-        {/each}
-      </Collapse>
-    {/each}
-  </Collapse>
-  <Collapse title="Data Output settings">
-    <Collapse title="Midi Output">
-      {#each getMidiConfigs() as [axis, midiconfig]}
-        {@const { label } = getSchema(axis)}
+  {#if currentConfig}
+    <h3>{currentConfig.label}</h3>
+    <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+    {#if currentConfig.cat !== "Touch"}
+      <Checkbox label="Threshold mode" bind:value={currentConfig.sensor.mode} />
+      {#if currentConfig.sensor.mode === true}
+        <Checkbox
+          label="Window threshold"
+          bind:value={currentConfig.sensor.th_mode}
+        />
+      {/if}
+    {/if}
+    <MinMax
+      label="Sensor Range"
+      bind:low={currentConfig.sensor.lmin}
+      bind:high={currentConfig.sensor.lmax}
+      value={sensorValues[currentAxis]}
+      mode={isContinuousMode(currentConfig.sensor) ||
+      isHisteresisMode(currentConfig.sensor)
+        ? "double"
+        : "single"}
+      cursorActive={withinWindowValues[currentAxis]}
+      min={currentConfig.sensor.min}
+      max={currentConfig.sensor.max}
+      step={currentConfig.sensor.step}
+      minLabel={`min (${currentConfig.unit})`}
+      maxLabel={`max (${currentConfig.unit})`}
+    />
+    <CategoryTab
+      items={categories}
+      active={currentCat}
+      onClick={(cat) => setCategory(cat)}
+    />
+    {#if currentCat === "MIDI"}
+      <section>
+        <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
+        <Range
+          label="Midi Channel"
+          bind:value={currentConfig.midi.channel}
+          min={1}
+          max={16}
+        />
+        <Radio
+          label="Message Type"
+          {options}
+          value={currentConfig.midi.tl_mode}
+          on:change={(evt) => {
+            currentConfig.midi.tl_mode = evt.detail;
+          }}
+        />
+        {#if currentConfig.midi.tl_mode === 0}
+          <CCConfig config={currentConfig.midi} />
+        {:else}
+          <NoteConfig config={currentConfig.midi} />
+        {/if}
+      </section>
+    {/if}
+    {#if currentCat === "HID"}
+      <section>
+        <h4>Keyboard/Mouse mode settings</h4>
+        <Checkbox label="HID Enabled" bind:value={config.general.HidEnabled} />
+        <Select
+          label="HID Mode"
+          options={[
+            { label: "Keyboard", value: 2 },
+            { label: "Mouse", value: 1 },
+          ]}
+          bind:value={config.general.HidMode}
+        />
+        <h4>Please restart Pipo after enabling or switching HID mode</h4>
+        <h4>
+          NOTE: The available mapping options below will depend on the sensor
+          and Hid mode
+        </h4>
+        {#if currentConfig.sensor.mode === true && config.general.HidMode === 2}
+          <h4>
+            Map a keyboard key. Address format for "u" would be: "KEY_u" (or
+            KEY_UP,KEY_ENTER,...)
+          </h4>
+          <Checkbox
+            label="Stroke continuous"
+            bind:value={currentConfig.hid.stroke_mode}
+          />
+          <Text label="Address" bind:value={currentConfig.hid.addr} />
+          {#if currentConfig.hid.stroke_mode && currentConfig.sensor.th_mode === true}
+            <Text label="Address2" bind:value={currentConfig.hid.addr2} />
+          {/if}
+        {:else if currentConfig.sensor.mode === true && config.general.HidMode === 1}
+          <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
+          <Checkbox
+            label="Stroke continuous"
+            bind:value={currentConfig.hid.stroke_mode}
+          />
+          <Text label="Address" bind:value={currentConfig.hid.addr} />
+        {:else if currentConfig.sensor.mode === false && config.general.HidMode === 2}
+          <h4>
+            Not possible to map a continuous sensor axis to a key stoke (must
+            change to Threshold mode)
+          </h4>
+        {:else if currentConfig.sensor.mode === false && config.general.HidMode === 1}
+          <h4>
+            Map a continuous sensor axis to a mouse axis (Address can be
+            "X","Y","WHEEL","PAN")
+          </h4>
+          <Text label="Address" bind:value={currentConfig.hid.addr} />
+        {:else}
+          PROBLEM !
+        {/if}
+      </section>
+    {/if}
+
+    {#if currentCat === "OSC"}
+      <section>
+        <h4>OSC Network settings</h4>
+        <Checkbox label="OSC Enabled" bind:value={config.general.OSC_ENA} />
+        <Text label="OSC IP" bind:value={config.general.OSC_IP} />
+        <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
         <section>
-          <Collapse title={label} bind:value={midiconfig.enabled}>
-            <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
-            <Range
-              label="Midi Channel"
-              bind:value={midiconfig.channel}
-              min={1}
-              max={16}
-            />
-            <Radio
-              label="Message Type"
-              {options}
-              value={midiconfig.tl_mode}
-              on:change={(evt) => {
-                midiconfig.tl_mode = evt.detail;
-              }}
-            />
-            {#if midiconfig.tl_mode === 0}
-              <CCConfig config={midiconfig} />
-            {:else}
-              <NoteConfig config={midiconfig} />
-            {/if}
-          </Collapse>
+          <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
+          <Checkbox label="Mode_raw" bind:value={currentConfig.osc.mode_raw} />
+          {#if !currentConfig.osc.mode_raw}
+            <Range label="OSC Min" bind:value={currentConfig.osc.osc_min} />
+            <Range label="OSC Max" bind:value={currentConfig.osc.osc_max} />
+          {/if}
         </section>
-      {/each}
+      </section>
+    {/if}
+    <Collapse title="Board Settings">
+      <section class="board-settings">
+        <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
+        <Select
+          label="Wifi Mode"
+          options={wifimodes}
+          bind:value={config.general.Wifi_mode}
+        />
+        <button class="primary" on:click={reboot} style="width: fit-content"
+          >Reboot</button
+        >
+      </section>
     </Collapse>
-    <Collapse title="OSC output">
-      <h4>OSC Network settings</h4>
-      <Checkbox label="OSC Enabled" bind:value={config.general.OSC_ENA} />
-      <Text label="OSC IP" bind:value={config.general.OSC_IP} />
-      <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
-      {#each getOscConf() as [axis, oscconf]}
-        {@const { label } = getSchema(axis)}
-        <section>
-          <Collapse title={label} bind:value={oscconf.enabled}>
-            <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
-            <Checkbox label="Mode_raw" bind:value={oscconf.mode_raw} />
-            {#if !oscconf.mode_raw}
-              <Range label="OSC Min" bind:value={oscconf.osc_min} />
-              <Range label="OSC Max" bind:value={oscconf.osc_max} />
-            {/if}
-          </Collapse>
-        </section>
-      {/each}
-    </Collapse>
-    <Collapse title="HID output">
-      <h4>Keyboard/Mouse mode settings</h4>
-      <Checkbox label="HID Enabled" bind:value={config.general.HidEnabled} />
-      <Select
-        label="HID Mode"
-        options={[
-          { label: "Keyboard", value: 2 },
-          { label: "Mouse", value: 1 },
-        ]}
-        bind:value={config.general.HidMode}
-      />
-      <h4>Please restart Pipo after enabling or switching HID mode</h4>
-      <h4>
-        NOTE: The available mapping options below will depend on the sensor and
-        Hid mode
-      </h4>
-      {#each getHidConf() as [axis, hidconf]}
-        {@const { label } = getSchema(axis)}
-        <section>
-          <Collapse title={label} bind:value={hidconf.enabled}>
-            {#if config.sensor[axis].mode === true && config.general.HidMode === 2}
-              <h4>
-                Map a keyboard key. Address format for "u" would be: "KEY_u" (or
-                KEY_UP,KEY_ENTER,...)
-              </h4>
-              <Checkbox
-                label="Stroke continuous"
-                bind:value={hidconf.stroke_mode}
-              />
-              <Text label="Address" bind:value={hidconf.addr} />
-              {#if hidconf.stroke_mode && config.sensor[axis].th_mode === true}
-                <Text label="Address2" bind:value={hidconf.addr2} />
-              {/if}
-            {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
-              <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
-              <Checkbox
-                label="Stroke continuous"
-                bind:value={hidconf.stroke_mode}
-              />
-              <Text label="Address" bind:value={hidconf.addr} />
-            {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
-              <h4>
-                Not possible to map a continuous sensor axis to a key stoke
-                (must change to Threshold mode)
-              </h4>
-            {:else if config.sensor[axis].mode === false && config.general.HidMode === 1}
-              <h4>
-                Map a continuous sensor axis to a mouse axis (Address can be
-                "X","Y","WHEEL","PAN")
-              </h4>
-              <Text label="Address" bind:value={hidconf.addr} />
-            {/if}
-          </Collapse>
-        </section>
-      {/each}
-    </Collapse>
-  </Collapse>
-  <Collapse title="Board Settings">
-    <section class="board-settings">
-      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-      <Select
-        label="Wifi Mode"
-        options={wifimodes}
-        bind:value={config.general.Wifi_mode}
-      />
-      <button class="primary" on:click={reboot} style="width: fit-content"
-        >Reboot</button
+
+    <!-- {#if cat === "Touch"}
+      <button class="primary" on:click={() => cal_offset(axis)}
+        >Offset calib</button
       >
-    </section>
-  </Collapse>
+    {/if} -->
+  {/if}
 </article>
 
 <style>

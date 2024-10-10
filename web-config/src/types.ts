@@ -87,20 +87,19 @@ export type PipoKeys = {
   unknown: "";
 };
 
+export type AxisSchema = {
+  label: string;
+  cat: string;
+  unit: string;
+  min: number;
+  max: number;
+  step: number;
+};
 export type Schema = {
   [T in PipoTypes]: {
-    [Key in PipoKeys[T]]: {
-      label: string;
-      cat: string;
-      unit: string;
-      min: number;
-      max: number;
-      step: number;
-    };
+    [Key in PipoKeys[T]]: AxisSchema;
   };
 };
-
-
 
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
@@ -120,7 +119,15 @@ export type PipoConfig<T extends PipoTypes> = {
     [Key in PipoKeys[T]]: SensorConfig;
   };
 };
-
+export type AxisConfig = {
+  sensor: SensorConfig;
+  hid: HidConfig;
+  midi: MidiConfig;
+  osc: OscConfig;
+};
+export type ConfigByAxis<T extends PipoTypes> = {
+  [Key in PipoKeys[T]]: AxisConfig;
+};
 export type SmoothSensorValue = {
   old: number;
   new: number;
