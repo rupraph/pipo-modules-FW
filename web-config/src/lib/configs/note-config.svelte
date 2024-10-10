@@ -67,6 +67,7 @@
     bind:value={config.scaleType}
   />
 </Tooltip>
+
 <NoteInput label="Root Note" bind:value={config.rootNote} />
 <Tooltip
   title="You are in threshold mode, this value is ignored."

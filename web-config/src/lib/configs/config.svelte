@@ -20,6 +20,9 @@
     type ConfigByAxis,
     type AxisConfig,
     type AxisSchema,
+    type MidiConfig,
+    type OscConfig,
+    type HidConfig,
   } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Checkbox from "../form/Checkbox.svelte";
@@ -44,7 +47,11 @@
   ];
   let configByAxis: ConfigByAxis<T>;
   let currentAxis: PipoKeys[T];
-  let currentConfig: AxisConfig & AxisSchema;
+  let midi: MidiConfig;
+  let osc: OscConfig;
+  let hid: HidConfig;
+  let sensor: SensorConfig;
+  let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "HID";
   onMount(() => {
@@ -161,10 +168,13 @@
 
   function setAxis(axis: PipoKeys[T]) {
     currentAxis = axis;
-    currentConfig = {
-      ...configByAxis[axis],
-      ...schema[$type as T][axis],
-    };
+    midi = configByAxis[axis].midi;
+
+    console.log("Setting axis", axis, midi.rootNote);
+    osc = configByAxis[axis].osc;
+    hid = configByAxis[axis].hid;
+    aschema = schema[$type as T][axis];
+    sensor = configByAxis[axis].sensor;
   }
   function setCategory(cat: string) {
     currentCat = cat;
@@ -220,11 +230,11 @@
       title="Apply and save the config in pipo">Save</LoadingButton
     >
   </section>
-  {#if currentConfig}
+  {#if currentAxis}
     <Select
       items={axisSelect}
       clearable={false}
-      bind:value={currentAxis}
+      value={currentAxis}
       --selected-item-color="var(--text-color)"
       --font-size="27.2px"
       --item-is-active-bg="var(--bg-tertiary)"
@@ -241,30 +251,26 @@
       on:change={(evt) => setAxis(evt.detail.value)}
     />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-    {#if currentConfig.cat !== "Touch"}
-      <Checkbox label="Threshold mode" bind:value={currentConfig.sensor.mode} />
-      {#if currentConfig.sensor.mode === true}
-        <Checkbox
-          label="Window threshold"
-          bind:value={currentConfig.sensor.th_mode}
-        />
+    {#if aschema.cat !== "Touch"}
+      <Checkbox label="Threshold mode" bind:value={sensor.mode} />
+      {#if sensor.mode === true}
+        <Checkbox label="Window threshold" bind:value={sensor.th_mode} />
       {/if}
     {/if}
     <MinMax
       label="Sensor Range"
-      bind:low={currentConfig.sensor.lmin}
-      bind:high={currentConfig.sensor.lmax}
+      bind:low={sensor.lmin}
+      bind:high={sensor.lmax}
       value={sensorValues[currentAxis]}
-      mode={isContinuousMode(currentConfig.sensor) ||
-      isHisteresisMode(currentConfig.sensor)
+      mode={isContinuousMode(sensor) || isHisteresisMode(sensor)
         ? "double"
         : "single"}
       cursorActive={withinWindowValues[currentAxis]}
-      min={currentConfig.sensor.min}
-      max={currentConfig.sensor.max}
-      step={currentConfig.sensor.step}
-      minLabel={`min (${currentConfig.unit})`}
-      maxLabel={`max (${currentConfig.unit})`}
+      min={aschema.min}
+      max={aschema.max}
+      step={aschema.step}
+      minLabel={`min (${aschema.unit})`}
+      maxLabel={`max (${aschema.unit})`}
     />
     <CategoryTab
       items={categories}
@@ -276,22 +282,22 @@
         <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
         <Range
           label="Midi Channel"
-          bind:value={currentConfig.midi.channel}
+          bind:value={midi.channel}
           min={1}
           max={16}
         />
         <Radio
           label="Message Type"
           {options}
-          value={currentConfig.midi.tl_mode}
+          value={midi.tl_mode}
           on:change={(evt) => {
-            currentConfig.midi.tl_mode = evt.detail;
+            midi.tl_mode = evt.detail;
           }}
         />
-        {#if currentConfig.midi.tl_mode === 0}
-          <CCConfig config={currentConfig.midi} />
+        {#if midi.tl_mode === 0}
+          <CCConfig config={midi} />
         {:else}
-          <NoteConfig config={currentConfig.midi} />
+          <NoteConfig config={midi} />
         {/if}
       </section>
     {/if}
@@ -312,43 +318,36 @@
           NOTE: The available mapping options below will depend on the sensor
           and Hid mode
         </h4>
-        {#if currentConfig.sensor.mode === true && config.general.HidMode === 2}
+        {#if sensor.mode === true && config.general.HidMode === 2}
           <h4>
             Map a keyboard key. Address format for "u" would be: "KEY_u" (or
             KEY_UP,KEY_ENTER,...)
           </h4>
-          <Checkbox
-            label="Stroke continuous"
-            bind:value={currentConfig.hid.stroke_mode}
-          />
-          <Text label="Address" bind:value={currentConfig.hid.addr} />
-          {#if currentConfig.hid.stroke_mode && currentConfig.sensor.th_mode === true}
-            <Text label="Address2" bind:value={currentConfig.hid.addr2} />
+          <Checkbox label="Stroke continuous" bind:value={hid.stroke_mode} />
+          <Text label="Address" bind:value={hid.addr} />
+          {#if hid.stroke_mode && sensor.th_mode === true}
+            <Text label="Address2" bind:value={hid.addr2} />
           {/if}
-        {:else if currentConfig.sensor.mode === true && config.general.HidMode === 1}
+        {:else if sensor.mode === true && config.general.HidMode === 1}
           <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
-          <Checkbox
-            label="Stroke continuous"
-            bind:value={currentConfig.hid.stroke_mode}
-          />
-          <Text label="Address" bind:value={currentConfig.hid.addr} />
-        {:else if currentConfig.sensor.mode === false && config.general.HidMode === 2}
+          <Checkbox label="Stroke continuous" bind:value={hid.stroke_mode} />
+          <Text label="Address" bind:value={hid.addr} />
+        {:else if sensor.mode === false && config.general.HidMode === 2}
           <h4>
             Not possible to map a continuous sensor axis to a key stoke (must
             change to Threshold mode)
           </h4>
-        {:else if currentConfig.sensor.mode === false && config.general.HidMode === 1}
+        {:else if sensor.mode === false && config.general.HidMode === 1}
           <h4>
             Map a continuous sensor axis to a mouse axis (Address can be
             "X","Y","WHEEL","PAN")
           </h4>
-          <Text label="Address" bind:value={currentConfig.hid.addr} />
+          <Text label="Address" bind:value={hid.addr} />
         {:else}
           PROBLEM !
         {/if}
       </section>
     {/if}
-
     {#if currentCat === "OSC"}
       <section>
         <h4>OSC Network settings</h4>
@@ -357,10 +356,10 @@
         <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
         <section>
           <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
-          <Checkbox label="Mode_raw" bind:value={currentConfig.osc.mode_raw} />
-          {#if !currentConfig.osc.mode_raw}
-            <Range label="OSC Min" bind:value={currentConfig.osc.osc_min} />
-            <Range label="OSC Max" bind:value={currentConfig.osc.osc_max} />
+          <Checkbox label="Mode_raw" bind:value={osc.mode_raw} />
+          {#if !osc.mode_raw}
+            <Range label="OSC Min" bind:value={osc.osc_min} />
+            <Range label="OSC Max" bind:value={osc.osc_max} />
           {/if}
         </section>
       </section>

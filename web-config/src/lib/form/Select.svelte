@@ -18,6 +18,11 @@
   onMount(() => {
     select();
   });
+  $: {
+    if (value !== undefined) {
+      select();
+    }
+  }
 </script>
 
 <Input {label} {id} class={$$restProps.class || ""}>
