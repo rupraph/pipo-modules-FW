@@ -3,6 +3,7 @@
   import Checkbox from "../form/Checkbox.svelte";
   import Text from "../form/Text.svelte";
   import type { SensorConfig, HidConfig } from "../../types";
+  import DisabledWarning from "./disabled-warning.svelte";
 
   export let hidEnabled: boolean;
   export let hidMode: number;
@@ -10,6 +11,7 @@
   export let hid: HidConfig;
 </script>
 
+<DisabledWarning enabled={!hid.enabled} feature="HID" />
 <h4>Keyboard/Mouse mode settings</h4>
 <Checkbox label="HID Enabled" bind:value={hidEnabled} />
 <Select

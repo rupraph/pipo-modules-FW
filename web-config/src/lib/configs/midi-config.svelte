@@ -4,6 +4,7 @@
   import type { MidiConfig } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Range from "../form/Range.svelte";
+  import DisabledWarning from "./disabled-warning.svelte";
 
   export let midi: MidiConfig;
   const options = [
@@ -12,6 +13,7 @@
   ];
 </script>
 
+<DisabledWarning enabled={!midi.enabled} feature="MIDI" />
 <Range label="Midi Channel" bind:value={midi.channel} min={1} max={16} />
 <Radio
   label="Message Type"

@@ -3,6 +3,7 @@
   import Text from "../form/Text.svelte";
   import Range from "../form/Range.svelte";
   import Checkbox from "../form/Checkbox.svelte";
+  import DisabledWarning from "./disabled-warning.svelte";
 
   export let osc: OscConfig;
   export let oscEnabled: boolean;
@@ -10,6 +11,7 @@
   export let port: number;
 </script>
 
+<DisabledWarning enabled={!osc.enabled} feature="OSC" />
 <h4>OSC Network settings</h4>
 <Checkbox label="OSC Enabled" bind:value={oscEnabled} />
 <Text label="OSC IP" bind:value={ip} />

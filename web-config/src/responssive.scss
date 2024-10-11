@@ -141,10 +141,21 @@ article {
 }
 
 .configs>.content{
-  padding: 1em;
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: 1em auto 1em;
   @include phone {
-      padding: 0 0.2em;
+  grid-template-columns: 0 auto 0;
   }
+}
+.configs>.content>*{
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+.configs>.content>.hero{
+  margin: 1em 0;
+  grid-column-start: 1;
+  grid-column-end: 4;
 }
 
 ul{

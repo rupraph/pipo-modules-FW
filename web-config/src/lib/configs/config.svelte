@@ -22,6 +22,7 @@
   import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
+  import QuickConfig from "./quick-config.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
@@ -156,40 +157,45 @@
 
 
  */
+  $: if (config && currentAxis) {
+    setAxis(currentAxis);
+  }
 </script>
 
-<article class="config">
-  <section class="buttons">
-    <button class="delete error" on:click={() => dispatch("delete")}
-      >Delete</button
-    >
-    <!-- <button
+<section class="buttons">
+  <button class="delete error" on:click={() => dispatch("delete")}
+    >Delete</button
+  >
+  <!-- <button
       class="primary Download"
       on:click={download}
       title="Download the config file locally">Download config</button
     > -->
-    <button class="primary Pause" on:click={pause} title="Pause sending data">
-      &gt; / ||
-    </button>
-    <LoadingButton
-      onClick={submit}
-      loading={savingStatus === "loading"}
-      class={savingStatus === "success"
-        ? "success"
-        : savingStatus === "error"
-          ? "error"
-          : "primary"}
-      title="Apply and save the config in pipo">Save</LoadingButton
-    >
-  </section>
-  {#if currentAxis}
+  <button class="primary Pause" on:click={pause} title="Pause sending data">
+    &gt; / ||
+  </button>
+  <LoadingButton
+    onClick={submit}
+    loading={savingStatus === "loading"}
+    class={savingStatus === "success"
+      ? "success"
+      : savingStatus === "error"
+        ? "error"
+        : "primary"}
+    title="Apply and save the config in pipo">Save</LoadingButton
+  >
+</section>
+<QuickConfig bind:config />
+{#if currentAxis}
+  <span class="hero">
     <Select
       items={axisSelect}
       clearable={false}
+      searchable={false}
       value={currentAxis}
       --selected-item-color="var(--text-color)"
       --font-size="27.2px"
-      --item-is-active-bg="var(--bg-tertiary)"
+      --item-is-active-bg="var(--text-color)"
       --item-color="var(--text-color)"
       --item-bg="var(--bg-secondary)"
       --input-color="var(--text-color)"
@@ -199,65 +205,63 @@
       --border="0"
       --border-focused="0"
       --list-background="var(--bg-secondary)"
-      --background="var(--bg-color)"
+      --background="var(--bg-tertiary)"
       on:change={(evt) => setAxis(evt.detail.value)}
     />
-    <AxisConfig {sensor} {aschema} {currentAxis} />
-    <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+  </span>
 
-    <CategoryTab
-      items={categories}
-      active={currentCat}
-      onClick={(cat) => setCategory(cat)}
-    />
-    <section>
-      {#if currentCat === "MIDI"}
-        <MidiConfigForm {midi} />
-      {/if}
-      {#if currentCat === "HID"}
-        <HidConfigForm
-          bind:hidEnabled={config.general.HidEnabled}
-          bind:hidMode={config.general.HidMode}
-          {sensor}
-          {hid}
-        />
-      {/if}
-      {#if currentCat === "OSC"}
-        <OscConfigForm
-          {osc}
-          bind:oscEnabled={config.general.OSC_ENA}
-          bind:ip={config.general.OSC_IP}
-          bind:port={config.general.OSC_PORT}
-        />
-      {/if}
+  <AxisConfig {sensor} {aschema} {currentAxis} />
+  <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+
+  <CategoryTab
+    items={categories}
+    active={currentCat}
+    onClick={(cat) => setCategory(cat)}
+  />
+  <section>
+    {#if currentCat === "MIDI"}
+      <MidiConfigForm {midi} />
+    {/if}
+    {#if currentCat === "HID"}
+      <HidConfigForm
+        bind:hidEnabled={config.general.HidEnabled}
+        bind:hidMode={config.general.HidMode}
+        {sensor}
+        {hid}
+      />
+    {/if}
+    {#if currentCat === "OSC"}
+      <OscConfigForm
+        {osc}
+        bind:oscEnabled={config.general.OSC_ENA}
+        bind:ip={config.general.OSC_IP}
+        bind:port={config.general.OSC_PORT}
+      />
+    {/if}
+  </section>
+
+  <Collapse title="Board Settings">
+    <section class="board-settings">
+      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
+      <Select
+        label="Wifi Mode"
+        options={wifimodes}
+        bind:value={config.general.Wifi_mode}
+      />
+      <button class="primary" on:click={reboot} style="width: fit-content"
+        >Reboot</button
+      >
     </section>
+  </Collapse>
 
-    <Collapse title="Board Settings">
-      <section class="board-settings">
-        <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-        <Select
-          label="Wifi Mode"
-          options={wifimodes}
-          bind:value={config.general.Wifi_mode}
-        />
-        <button class="primary" on:click={reboot} style="width: fit-content"
-          >Reboot</button
-        >
-      </section>
-    </Collapse>
-
-    <!-- {#if cat === "Touch"}
+  <!-- {#if cat === "Touch"}
       <button class="primary" on:click={() => cal_offset(axis)}
         >Offset calib</button
       >
     {/if} -->
-  {/if}
-</article>
+{/if}
 
 <style>
-  .config {
-    max-width: 100%;
-  }
   .board-settings {
     display: flex;
     flex-direction: column;

@@ -7,7 +7,7 @@
   }
 </script>
 
-<div class="cat-tabs">
+<div class="cat-tabs hero">
   {#each items as { value, label }}
     <span
       class="tab {value === active ? 'active' : ''}"
@@ -24,7 +24,12 @@
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
-    margin: 1em 0;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    background-color: var(--bg-tertiary);
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 0.5em 0;
   }
   .cat-tabs > .tab {
     grid-template-columns: 8px 8px auto 8px 8px;
@@ -35,6 +40,6 @@
 
   .cat-tabs > .tab.active {
     cursor: text;
-    color: rgb(2, 141, 176);
+    color: var(--main);
   }
 </style>
