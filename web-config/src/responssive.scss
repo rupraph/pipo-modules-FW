@@ -140,7 +140,7 @@ article {
   color: var(--main);
 }
 
-.configs>.content{
+.content{
   display: grid;
   grid-auto-flow: row;
   gap: 0.5em;
@@ -149,17 +149,21 @@ article {
   grid-template-columns: 0 auto 0;
   }
 }
-.configs>.content>*{
+.content>*,
+.content>.subgrid>*{
   grid-column-start: 2;
   grid-column-end: 3;
 }
-.configs>.content>.hero{
+.content>.hero{
   grid-column-start: 1;
   grid-column-end: 4;
+  background-color: var(--bg-tertiary);
 }
-
 ul{
   @include phone {
     padding: 0 0.5em;
   }
+}
+.configs>.content{
+  padding-bottom: 2em;
 }

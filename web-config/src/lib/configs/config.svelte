@@ -23,6 +23,8 @@
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
   import QuickConfig from "./quick-config.svelte";
+  import OscGlobalConfig from "./osc-global-config.svelte";
+  import BoardConfig from "./board-config.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
@@ -36,7 +38,7 @@
   let sensor: SensorConfig;
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
-  let currentCat = "HID";
+  let currentCat = "OSC";
   onMount(() => {
     configByAxis = (
       Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
@@ -133,11 +135,6 @@
     { label: "Station (Connect to others)", value: "STA" },
   ];
 
-  function reboot() {
-    axios.get("/reboot").then(() => {
-      console.log("Rebooting...");
-    });
-  }
   let interval = 0;
   // onMount(() => {
   //   interval = window.setInterval(() => {
@@ -188,6 +185,7 @@
       items={axisSelect}
       clearable={false}
       searchable={false}
+      class="axis-select"
       value={currentAxis}
       --selected-item-color="var(--text-color)"
       --font-size="27.2px"
@@ -223,29 +221,19 @@
       />
     {/if}
     {#if currentCat === "OSC"}
-      <OscConfigForm
-        {osc}
+      <OscConfigForm {osc} />
+    {/if}
+  </section>
+  {#if currentCat === "OSC"}
+    <div class="hero content">
+      <OscGlobalConfig
         bind:oscEnabled={config.general.OSC_ENA}
         bind:ip={config.general.OSC_IP}
         bind:port={config.general.OSC_PORT}
       />
-    {/if}
-  </section>
-
-  <Collapse title="Board Settings">
-    <section class="board-settings">
-      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-      <Select
-        label="Wifi Mode"
-        options={wifimodes}
-        bind:value={config.general.Wifi_mode}
-      />
-      <button class="primary" on:click={reboot} style="width: fit-content"
-        >Reboot</button
-      >
-    </section>
-  </Collapse>
-
+    </div>
+  {/if}
+  <BoardConfig bind:wifiMode={config.general.Wifi_mode} />
   <!-- {#if cat === "Touch"}
       <button class="primary" on:click={() => cal_offset(axis)}
         >Offset calib</button
@@ -259,7 +247,7 @@
     flex-direction: column;
     justify-content: left;
   }
-  :global(.selected-item) {
+  :global(.axis-select .selected-item) {
     font-weight: bold;
     font-size: 27.2px;
     margin-block-start: 27.2px;
