@@ -1,6 +1,10 @@
 <script lang="ts">
   export let onClick: (name: string) => void;
-  export let items: { value: string; label: string }[];
+  const items = [
+    { value: "MIDI", label: "MIDI" },
+    { value: "OSC", label: "OSC" },
+    { value: "HID", label: "HID" },
+  ];
   export let active: string;
   function itemClick(item: string) {
     onClick(item);
@@ -24,8 +28,6 @@
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
-    margin-top: 1em;
-    margin-bottom: 1em;
     background-color: var(--bg-tertiary);
     font-size: 1.5em;
     font-weight: bold;

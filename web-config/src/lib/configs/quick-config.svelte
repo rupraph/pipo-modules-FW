@@ -4,42 +4,47 @@
   export let config: PipoConfig<T>;
   let columns: number = 0;
   let headers: PipoKeys[T][] = [];
+  const rows: {
+    key: string;
+    value: keyof PipoConfig<T>["engine"];
+  }[] = [
+    {
+      key: "MIDI",
+      value: "engine-midi",
+    },
+    {
+      key: "OSC",
+      value: "engine-osc",
+    },
+    {
+      key: "HID",
+      value: "engine-hid",
+    },
+  ];
   $: {
     if (config) {
       columns = Object.keys(config.engine["engine-hid"]).length + 1;
-      headers = Object.keys(config.engine["engine-hid"]);
+      headers = Object.keys(config.engine["engine-hid"]) as PipoKeys[T][];
     }
   }
 </script>
 
 <div class="quick-settings" style="--columns: {columns}">
   <span class="row-header" style="grid-row=1">Axis</span>
-  <span class="row-header" style="grid-row=2">MIDI</span>
-  <span class="row-header" style="grid-row=3">OSC</span>
-  <span class="row-header" style="grid-row=4">HID</span>
   {#each headers as header, i}
     <div class="header" style="grid-column:{i + 2}">{header}</div>
   {/each}
-  {#each headers as header, i}
-    <input
-      type="checkbox"
-      style="grid-row:2; grid-column:{i + 2}"
-      bind:checked={config.engine["engine-midi"][header].enabled}
-    />
-  {/each}
-  {#each headers as header, i}
-    <input
-      type="checkbox"
-      style="grid-row:3; grid-column:{i + 2}"
-      bind:checked={config.engine["engine-osc"][header].enabled}
-    />
-  {/each}
-  {#each headers as header, i}
-    <input
-      type="checkbox"
-      style="grid-row:4; grid-column:{i + 2}"
-      bind:checked={config.engine["engine-hid"][header].enabled}
-    />
+  {#each rows as row, i}
+    <span class="row-header" style="grid-row={i + 2}">{row.key}</span>
+    {#each headers as header, j}
+      <label class="checkbox" style="grid-row:{i + 2}; grid-column:{j + 2}">
+        <input
+          type="checkbox"
+          class="checkbox__input"
+          bind:checked={config.engine[row.value][header].enabled}
+        />
+      </label>
+    {/each}
   {/each}
 </div>
 
@@ -54,12 +59,24 @@
   .header {
     grid-row: 1;
   }
-  input {
-    width: 1em;
-    height: 1em;
-  }
 
   .row-header {
     grid-column: 1;
+  }
+  input[type="checkbox"] {
+    width: 0;
+    height: 0;
+    visibility: hidden;
+  }
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #626262;
+    background: var(--bg-tertiary) no-repeat center;
+  }
+  .checkbox:has(input:checked) {
+    border-color: var(--main);
+    background-color: var(--main);
   }
 </style>

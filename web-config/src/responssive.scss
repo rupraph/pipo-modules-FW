@@ -143,6 +143,7 @@ article {
 .configs>.content{
   display: grid;
   grid-auto-flow: row;
+  gap: 0.5em;
   grid-template-columns: 1em auto 1em;
   @include phone {
   grid-template-columns: 0 auto 0;
@@ -153,7 +154,6 @@ article {
   grid-column-end: 3;
 }
 .configs>.content>.hero{
-  margin: 1em 0;
   grid-column-start: 1;
   grid-column-end: 4;
 }

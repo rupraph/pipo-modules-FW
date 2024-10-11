@@ -27,11 +27,7 @@
   export let name: string;
   const dispatch = createEventDispatcher();
   let savingStatus = "none";
-  const categories = [
-    { value: "HID", label: "HID" },
-    { value: "MIDI", label: "MIDI" },
-    { value: "OSC", label: "OSC" },
-  ];
+
   let configByAxis: ConfigByAxis<T>;
   let currentAxis: PipoKeys[T];
   let midi: MidiConfig;
@@ -213,11 +209,7 @@
   <AxisConfig {sensor} {aschema} {currentAxis} />
   <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
-  <CategoryTab
-    items={categories}
-    active={currentCat}
-    onClick={(cat) => setCategory(cat)}
-  />
+  <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
   <section>
     {#if currentCat === "MIDI"}
       <MidiConfigForm {midi} />

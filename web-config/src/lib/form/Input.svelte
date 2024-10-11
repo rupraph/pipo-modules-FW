@@ -46,6 +46,7 @@
     background-color: var(--bg-secondary);
     border: 1px solid transparent;
     align-items: center;
+    width: 100%;
   }
   .input-wrapper:hover {
     border: 1px solid var(--main);
