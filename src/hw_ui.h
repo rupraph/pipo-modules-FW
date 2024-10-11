@@ -52,7 +52,7 @@ class HwUi {
   void init_blink_once(int led_name, int blink_time, int brightness);
   void stop_blink_once();
 
-  void start_blink(int led_name, int blink_freq, float duty_cycle);
+  void start_blink(int led_name, int blink_time, float duty_cycle);
   void stop_blink(int led_name);
 
   void blinker();

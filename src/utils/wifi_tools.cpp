@@ -27,7 +27,7 @@ void setup_wifi() {
     wm.setSaveConfigCallback([]() { ESP.restart(); });
     wm.setAPCallback([](WiFiManager* wm) {
       Serial.println(F("Entered config mode"));
-      hwui.start_blink(WIFI_LED, 1, 0.5);
+      hwui.start_blink(WIFI_LED, 500, 0.2);
     });
 
     if (digitalRead(MODE_SW) == LOW) {
