@@ -195,7 +195,7 @@
 <h3>Axis settings</h3>
 {#if currentAxis}
   <div class="axis-select-head">
-    <h4>Axis selector:</h4>
+    <h4>Editing axis :</h4>
     <span class="hero">
       <Select
         items={axisSelect}
@@ -227,7 +227,7 @@
   <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
   <section>
     {#if currentCat === "MIDI"}
-      <MidiConfigForm {midi} />
+      <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
     {/if}
     {#if currentCat === "HID"}
       <HidConfigForm

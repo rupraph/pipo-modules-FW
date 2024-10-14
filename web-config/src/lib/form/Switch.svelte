@@ -16,6 +16,9 @@
 
   const slugify = (str = "") =>
     str.toLowerCase().replace(/ /g, "-").replace(/\./g, "");
+
+  // Reactive statement to update `checked` when `value` changes
+  $: checked = typeof value === "boolean" ? value : value === "on";
 </script>
 
 {#if design == "slider"}

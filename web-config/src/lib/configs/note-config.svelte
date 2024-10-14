@@ -56,10 +56,7 @@
   ];
 </script>
 
-<Tooltip
-  title="You are in threshold mode, this value is ignored."
-  enabled={isThresholdMode}
->
+<Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
   <Select
     class={isThresholdMode ? "disabled" : ""}
     label="Scale type"
@@ -69,10 +66,8 @@
 </Tooltip>
 
 <NoteInput label="Root Note" bind:value={config.rootNote} />
-<Tooltip
-  title="You are in threshold mode, this value is ignored."
-  enabled={isThresholdMode}
->
+
+<Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
   <Range
     class={isThresholdMode ? "disabled" : ""}
     on:mousemove={() => console.log("hover")}
