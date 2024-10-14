@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import HidGlobalConfig from "./hid-global-config.svelte";
+
   import { createEventDispatcher, onMount } from "svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
@@ -242,12 +244,16 @@
     {/if}
   </section>
   <hr class="separator" />
-  <Collapse title="Global OSC" bind:value={config.general.OSC_ENA}>
+  <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
     <OscGlobalConfig
       bind:ip={config.general.OSC_IP}
       bind:port={config.general.OSC_PORT}
     />
   </Collapse>
+  <hr class="separator" />
+  <Collapse title="HID settings" bind:value={config.general.HidEnabled}
+    ><HidGlobalConfig bind:mode={config.general.HidMode} /></Collapse
+  >
 
   <hr class="separator" />
   <Collapse title="Board settings"
