@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import Switch from "./form/Switch.svelte";
   export let title: string;
   export let open = false;
   export let value: boolean | undefined = undefined;
@@ -14,13 +15,13 @@
     {title}
   </h3>
   {#if hasState}
-    <input
+    <!-- <input
       class="input-checkbox"
       type="checkbox"
       on:click|stopPropagation
       bind:checked={value}
-    />
-    <!-- <Switch bind:value={state} design="slider" label="" /> -->
+    /> -->
+    <Switch bind:value design="slider" label="" />
   {/if}
 </div>
 

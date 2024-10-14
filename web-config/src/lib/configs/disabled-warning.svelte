@@ -6,9 +6,7 @@
 </script>
 
 {#if enabled}
-  <p class="warning">
-    Warning: {feature} is disabled from quick config for this axis.
-  </p>
+  <p class="warning">Warning: Disabled in quick config</p>
 {/if}
 
 <style>

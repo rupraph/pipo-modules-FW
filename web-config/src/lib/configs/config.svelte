@@ -105,10 +105,12 @@
     }).then(() => console.log("DONE"));
   }
 
+  let isPaused = false;
   function pause() {
     axios.post("/pause").then(() => {
       console.log("Pausing...");
     });
+    isPaused = !isPaused;
   }
 
   function switchwifimode() {
@@ -155,7 +157,7 @@
   }
 </script>
 
-<section class="buttons">
+<section class="buttonbar">
   <button class="delete error" on:click={() => dispatch("delete")}
     >Delete</button
   >
@@ -164,9 +166,7 @@
       on:click={download}
       title="Download the config file locally">Download config</button
     > -->
-  <button class="primary Pause" on:click={pause} title="Pause sending data">
-    &gt; / ||
-  </button>
+
   <LoadingButton
     onClick={submit}
     loading={savingStatus === "loading"}
@@ -178,31 +178,48 @@
     title="Apply and save the config in pipo">Save</LoadingButton
   >
 </section>
+<h3>Quick settings</h3>
+
 <QuickConfig bind:config />
+<button class="primary Pause" on:click={pause} title="Pause sending data">
+  {#if isPaused}
+    Resume
+  {/if}
+  {#if !isPaused}
+    Pause all output
+  {/if}
+</button>
+
+<hr class="separator" />
+
+<h3>Axis settings</h3>
 {#if currentAxis}
-  <span class="hero">
-    <Select
-      items={axisSelect}
-      clearable={false}
-      searchable={false}
-      class="axis-select"
-      value={currentAxis}
-      --selected-item-color="var(--text-color)"
-      --font-size="27.2px"
-      --item-is-active-bg="var(--text-color)"
-      --item-color="var(--text-color)"
-      --item-bg="var(--bg-secondary)"
-      --input-color="var(--text-color)"
-      --item-hover-color="var(--text-color)"
-      --item-hover-bg="var(--bg-lighter)"
-      --border-radius="0"
-      --border="0"
-      --border-focused="0"
-      --list-background="var(--bg-secondary)"
-      --background="var(--bg-tertiary)"
-      on:change={(evt) => setAxis(evt.detail.value)}
-    />
-  </span>
+  <div class="axis-select-head">
+    <h4>Axis selector:</h4>
+    <span class="hero">
+      <Select
+        items={axisSelect}
+        clearable={false}
+        searchable={false}
+        class="axis-select"
+        value={currentAxis}
+        --selected-item-color="var(--text-color)"
+        --font-size="20px"
+        --item-is-active-bg="var(--text-color)"
+        --item-color="var(--text-color)"
+        --item-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-lighter)"
+        --border-radius="0"
+        --border="0"
+        --border-focused="0"
+        --list-background="var(--bg-secondary)"
+        --background="var(--bg-tertiary)"
+        on:change={(evt) => setAxis(evt.detail.value)}
+      />
+    </span>
+  </div>
 
   <AxisConfig {sensor} {aschema} {currentAxis} />
   <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
@@ -224,16 +241,19 @@
       <OscConfigForm {osc} />
     {/if}
   </section>
-  {#if currentCat === "OSC"}
-    <div class="hero content">
-      <OscGlobalConfig
-        bind:oscEnabled={config.general.OSC_ENA}
-        bind:ip={config.general.OSC_IP}
-        bind:port={config.general.OSC_PORT}
-      />
-    </div>
-  {/if}
-  <BoardConfig bind:wifiMode={config.general.Wifi_mode} />
+  <hr class="separator" />
+  <Collapse title="Global OSC" bind:value={config.general.OSC_ENA}>
+    <OscGlobalConfig
+      bind:ip={config.general.OSC_IP}
+      bind:port={config.general.OSC_PORT}
+    />
+  </Collapse>
+
+  <hr class="separator" />
+  <Collapse title="Board settings"
+    ><BoardConfig bind:wifiMode={config.general.Wifi_mode} /></Collapse
+  >
+
   <!-- {#if cat === "Touch"}
       <button class="primary" on:click={() => cal_offset(axis)}
         >Offset calib</button
@@ -247,13 +267,13 @@
     flex-direction: column;
     justify-content: left;
   }
-  :global(.axis-select .selected-item) {
+  /* :global(.axis-select .selected-item) {
     font-weight: bold;
     font-size: 27.2px;
     margin-block-start: 27.2px;
     margin-block-end: 27.2px;
-  }
-  .buttons {
+  } */
+  .buttonbar {
     display: flex;
     justify-content: space-between;
     margin-top: 2em;
@@ -266,6 +286,20 @@
 
   button:hover {
     background-color: var(--main-darker);
+  }
+
+  .axis-select-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .separator {
+    border: 0;
+    height: 2px;
+    background: var(--bg-lighter);
+    margin: 20px 0;
   }
 
   /* .Download {

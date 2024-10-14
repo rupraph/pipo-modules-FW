@@ -9,6 +9,7 @@
     type SmoothSensorValues,
   } from "../../types";
   import Checkbox from "../form/Checkbox.svelte";
+  import Switch from "../form/Switch.svelte";
   import MinMax from "../form/MinMax.svelte";
 
   export let sensor: SensorConfig;
@@ -49,6 +50,17 @@
   animateSensor();
 </script>
 
+{#if aschema.cat !== "Touch"}
+  <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
+  {#if sensor.mode === true}
+    <Switch
+      label="2-level threshold"
+      bind:value={sensor.th_mode}
+      design="slider"
+    />
+  {/if}
+{/if}
+
 <MinMax
   label="Sensor Range"
   bind:low={sensor.lmin}
@@ -64,9 +76,3 @@
   minLabel={`min (${aschema.unit})`}
   maxLabel={`max (${aschema.unit})`}
 />
-{#if aschema.cat !== "Touch"}
-  <Checkbox label="Threshold mode" bind:value={sensor.mode} />
-  {#if sensor.mode === true}
-    <Checkbox label="Window threshold" bind:value={sensor.th_mode} />
-  {/if}
-{/if}

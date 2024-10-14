@@ -47,9 +47,6 @@ void MidiBLEsendCC(int control, int value, int channel) {
 
 void MidiBLEsendNoteOn(int note, int velocity, int channel) {
   MidiBle.sendNoteOn(note, velocity, channel);
-#ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-#endif
 }
 
 void MidiBLEsendNoteOff(int note, int velocity, int channel) {

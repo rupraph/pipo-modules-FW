@@ -16,14 +16,17 @@
   let color = fillColor();
   const minId = uid();
   const maxId = uid();
+
   function onMinChange(v: number) {
     low = Math.min(v, high);
     color = fillColor();
   }
+
   function onMaxChange(v: number) {
     high = Math.max(v, low);
     color = fillColor();
   }
+
   function fillColor() {
     if (mode === "single") {
       return "#dadae5";
@@ -32,6 +35,7 @@
     const percent2 = toPercent(high, min, max);
     return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
   }
+
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
