@@ -7,10 +7,12 @@
     type SensorConfig,
     type SensorValues,
     type SmoothSensorValues,
+    type PipoKeys,
   } from "../../types";
   import Checkbox from "../form/Checkbox.svelte";
   import Switch from "../form/Switch.svelte";
   import MinMax from "../form/MinMax.svelte";
+  import axios from "axios";
 
   export let sensor: SensorConfig;
   export let aschema: AxisSchema;
@@ -48,6 +50,14 @@
     requestAnimationFrame(animateSensor);
   }
   animateSensor();
+
+  function cal_offset(axis: PipoKeys[T]) {
+    axios({
+      method: "post",
+      url: "/offsetcal",
+      params: { axis },
+    }).then(() => console.log("DONE"));
+  }
 </script>
 
 {#if aschema.cat !== "Touch"}
@@ -76,3 +86,9 @@
   minLabel={`min (${aschema.unit})`}
   maxLabel={`max (${aschema.unit})`}
 />
+
+{#if aschema.cat === "Touch"}
+  <button class="primary" on:click={() => cal_offset(currentAxis)}
+    >Zero offset calibration</button
+  >
+{/if}
