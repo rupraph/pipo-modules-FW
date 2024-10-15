@@ -31,7 +31,7 @@ void setup_wifi() {
     // keep pressing to reset
 
     ///////// HIGH here should be low. temporary patch to cope with switch not
-    ///wired corectly on proto boards
+    /// wired corectly on proto boards
     if (digitalRead(MODE_SW) == HIGH && digitalRead(PP_SW) == LOW) {
       Serial.println(F("Settings reset"));
       wm.resetSettings();
@@ -79,7 +79,7 @@ void monitor_wifi(bool is_server_runing) {
       config.save(config.filename);
       ESP.restart();
     }
-    if (c == 'a') {
+    if (c == 's') {
       Serial.println(F("Switching to STA mode"));
       config.general_config["Wifi_mode"] = "STA";
       config.save(config.filename);
