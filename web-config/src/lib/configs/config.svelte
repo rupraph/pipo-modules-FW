@@ -40,7 +40,7 @@
   let sensor: SensorConfig;
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
-  let currentCat = "OSC";
+  let currentCat = "MIDI";
   onMount(() => {
     configByAxis = (
       Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
