@@ -5,13 +5,7 @@
   export let config: CCConfig & BaseMidiConfig;
 </script>
 
-<Range
-  label="CC number"
-  bind:value={config.cc_nb}
-  min={0}
-  max={127}
-  step={1}
-/>
+<Range label="CC number" bind:value={config.cc_nb} min={0} max={127} step={1} />
 
 <Range
   label="Min"

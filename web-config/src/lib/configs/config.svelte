@@ -99,14 +99,6 @@
     a.click();
   }
 
-  function cal_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/offsetcal",
-      params: { axis },
-    }).then(() => console.log("DONE"));
-  }
-
   let isPaused = false;
   function pause() {
     axios.post("/pause").then(() => {
@@ -259,12 +251,6 @@
   <Collapse title="Board settings"
     ><BoardConfig bind:wifiMode={config.general.Wifi_mode} /></Collapse
   >
-
-  <!-- {#if cat === "Touch"}
-      <button class="primary" on:click={() => cal_offset(axis)}
-        >Offset calib</button
-      >
-    {/if} -->
 {/if}
 
 <style>
