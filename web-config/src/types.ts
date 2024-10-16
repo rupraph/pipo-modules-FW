@@ -94,6 +94,7 @@ export type AxisSchema = {
   min: number;
   max: number;
   step: number;
+  index: number;
 };
 export type Schema = {
   [T in PipoTypes]: {

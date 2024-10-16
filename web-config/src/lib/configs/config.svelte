@@ -44,15 +44,20 @@
   onMount(() => {
     configByAxis = (
       Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
-    ).reduce((acc, [axis, sensor]) => {
-      acc[axis] = {
-        sensor,
-        hid: config.engine["engine-hid"][axis],
-        midi: config.engine["engine-midi"][axis],
-        osc: config.engine["engine-osc"][axis],
-      };
-      return acc;
-    }, {} as ConfigByAxis<T>);
+    )
+      .sort(
+        (a, b) =>
+          schema[$type as T][a[0]].index - schema[$type as T][b[0]].index
+      )
+      .reduce((acc, [axis, sensor]) => {
+        acc[axis] = {
+          sensor,
+          hid: config.engine["engine-hid"][axis],
+          midi: config.engine["engine-midi"][axis],
+          osc: config.engine["engine-osc"][axis],
+        };
+        return acc;
+      }, {} as ConfigByAxis<T>);
     axisSelect = Object.keys(configByAxis).map((axis) => {
       return { value: axis, label: schema[$type as T][axis].label };
     });
@@ -167,7 +172,7 @@
 </section>
 <h3>Quick settings</h3>
 
-<QuickConfig bind:config />
+<QuickConfig bind:config schema={schema[$type]} />
 <button class="primary Pause" on:click={pause} title="Pause sending data">
   {#if isPaused}
     Resume

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { uid } from "../../utils";
-  import Input from "./Input.svelte";
   export let label: string;
   export let min: number = 0;
   export let max: number = 1;

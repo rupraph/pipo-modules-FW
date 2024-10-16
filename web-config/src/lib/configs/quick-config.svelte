@@ -1,7 +1,8 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import type { PipoConfig, PipoKeys, PipoTypes } from "../../types";
+  import type { Schema, PipoConfig, PipoKeys, PipoTypes } from "../../types";
 
   export let config: PipoConfig<T>;
+  export let schema: Schema<T>;
   let columns: number = 0;
   let headers: PipoKeys[T][] = [];
   const rows: {
@@ -23,8 +24,10 @@
   ];
   $: {
     if (config) {
-      columns = Object.keys(config.engine["engine-hid"]).length + 1;
-      headers = Object.keys(config.engine["engine-hid"]) as PipoKeys[T][];
+      columns = Object.keys(schema).length + 1;
+      headers = Object.entries(schema)
+        .sort((a, b) => a[1].index - b[1].index)
+        .map(([key]) => key) as PipoKeys[T][];
     }
   }
 </script>

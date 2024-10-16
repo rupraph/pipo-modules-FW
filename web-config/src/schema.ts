@@ -9,6 +9,7 @@ export const schema: Schema = {
       min: -16,
       max: 16,
       step: 0.1,
+      index: 3,
     },
     accY: {
       label: "Y-axis acceleration",
@@ -17,6 +18,7 @@ export const schema: Schema = {
       min: -16,
       max: 16,
       step: 0.1,
+      index: 4,
     },
     accZ: {
       label: "Z-axis acceleration",
@@ -25,6 +27,7 @@ export const schema: Schema = {
       min: -16,
       max: 16,
       step: 0.1,
+      index: 5,
     },
     pitch: {
       label: "Pitch",
@@ -33,6 +36,7 @@ export const schema: Schema = {
       min: -90,
       max: 90,
       step: 1,
+      index: 1,
     },
     roll: {
       label: "Roll",
@@ -41,6 +45,7 @@ export const schema: Schema = {
       min: -180,
       max: 180,
       step: 1,
+      index: 2,
     },
     yaw: {
       label: "Yaw",
@@ -49,6 +54,7 @@ export const schema: Schema = {
       min: -180,
       max: 180,
       step: 1,
+      index: 0,
     },
   },
   range: {
@@ -59,6 +65,7 @@ export const schema: Schema = {
       min: 0,
       max: 400,
       step: 1,
+      index: 0,
     },
   },
   analog: {
@@ -69,6 +76,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 0,
     },
     A2: {
       label: "Analog 2",
@@ -77,6 +85,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 1,
     },
     A3: {
       label: "Analog 3",
@@ -85,6 +94,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 3,
     },
     A4: {
       label: "Analog 4",
@@ -93,6 +103,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 4,
     },
     A5: {
       label: "Analog 5",
@@ -109,6 +120,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 5,
     },
     T1: {
       label: "Touch 1",
@@ -117,6 +129,7 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 6,
     },
     T2: {
       label: "Touch 2",
@@ -125,6 +138,7 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 7,
     },
     T3: {
       label: "Touch 3",
@@ -133,6 +147,7 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 8,
     },
     T4: {
       label: "Touch 4",
@@ -141,6 +156,7 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 9,
     },
     T5: {
       label: "Touch 5",
@@ -149,6 +165,7 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 10,
     },
     T6: {
       label: "Touch 6",
@@ -157,7 +174,10 @@ export const schema: Schema = {
       min: 0,
       max: 200000,
       step: 1,
+      index: 11,
     },
   },
-  unknown: { "": { label: "", cat: "", unit: "", min: 0, max: 0, step: 1 } },
+  unknown: {
+    "": { label: "", cat: "", unit: "", min: 0, max: 0, step: 1, index: 0 },
+  },
 };
