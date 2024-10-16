@@ -118,16 +118,13 @@
       <Tabs
         items={resp.names}
         active={resp.active}
+        {onDelete}
         {onCreate}
         {onClick}
         {onRename}
       >
         {#if resp.config}
-          <Config
-            config={resp.config}
-            name={resp.active}
-            on:delete={() => onDelete(resp.active)}
-          />
+          <Config config={resp.config} name={resp.active} />
         {/if}
       </Tabs>
     {/await}

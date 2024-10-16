@@ -60,6 +60,7 @@
   });
 
   function submit() {
+    console.log("Saving...");
     savingStatus = "loading";
     const blob = new Blob([JSON.stringify(config)], {
       type: "application/json",
@@ -76,6 +77,7 @@
       }),
     ])
       .then(() => {
+        console.log("Saved...");
         savingStatus = "success";
       })
       .catch(() => {
@@ -152,15 +154,6 @@
 </script>
 
 <section class="buttonbar">
-  <button class="delete error" on:click={() => dispatch("delete")}
-    >Delete</button
-  >
-  <!-- <button
-      class="primary Download"
-      on:click={download}
-      title="Download the config file locally">Download config</button
-    > -->
-
   <LoadingButton
     onClick={submit}
     loading={savingStatus === "loading"}
@@ -188,9 +181,9 @@
 
 <h3>Axis settings</h3>
 {#if currentAxis}
-  <div class="axis-select-head">
+  <div class="input">
     <h4>Editing axis :</h4>
-    <span class="hero">
+    <div class="hero">
       <Select
         items={axisSelect}
         clearable={false}
@@ -212,7 +205,7 @@
         --background="var(--bg-tertiary)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
-    </span>
+    </div>
   </div>
 
   <AxisConfig {sensor} {aschema} {currentAxis} />
@@ -267,6 +260,7 @@
   } */
   .buttonbar {
     display: flex;
+    flex-direction: row-reverse;
     justify-content: space-between;
     margin-top: 2em;
     text-align: start;
@@ -278,13 +272,6 @@
 
   button:hover {
     background-color: var(--main-darker);
-  }
-
-  .axis-select-head {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
   }
 
   .separator {

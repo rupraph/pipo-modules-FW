@@ -28,10 +28,10 @@
   }
 
   function fillColor() {
-    if (mode === "single") {
-      return "#dadae5";
-    }
     const percent1 = toPercent(low, min, max);
+    if (mode === "single") {
+      return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) 100%`;
+    }
     const percent2 = toPercent(high, min, max);
     return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
   }
@@ -44,11 +44,8 @@
   }
 </script>
 
-<Input
-  class="minmax-input"
-  label={`Current value: ${Number(value).toFixed(2)} `}
-  {id}
->
+<div class="minmax-input" {id}>
+  <div class="curr-value">Current value: {value.toFixed(2)}</div>
   <div class="minmax">
     <span>{min}</span>
     <div class="slider">
@@ -103,14 +100,22 @@
       on:change={(v) => onMaxChange(v.target.value)}
     />
   </div>
-</Input>
+</div>
 
 <style>
+  .minmax-input {
+    grid-auto-flow: column;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto;
+    width: 100%;
+  }
   .minmax {
     display: flex;
     gap: 1rem;
-    grid-area: 1 / 1 / 2 / 3;
     width: 100%;
+  }
+  .curr-value {
+    margin-bottom: 1rem;
   }
   .minmax > span:first-child {
     margin-left: 1rem;
@@ -119,8 +124,14 @@
     margin-right: 1rem;
   }
   .slider {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: auto;
     position: relative;
     flex: 1;
+  }
+  .slider > * {
+    grid-area: 1 / 1 / 2 / 2;
   }
   .inputs {
     display: flex;

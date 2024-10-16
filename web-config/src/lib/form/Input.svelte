@@ -26,18 +26,6 @@
   .input.disabled > .input-wrapper :global(div) {
     pointer-events: none;
   }
-  .minmax-input {
-    grid-auto-flow: column;
-    grid-template-rows: auto auto;
-    grid-template-columns: auto;
-    width: 100%;
-  }
-  .minmax-input > .input-wrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-top: 0.5em;
-  }
 
   .input-wrapper {
     display: flex;

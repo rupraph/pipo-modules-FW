@@ -1,11 +1,15 @@
 <script lang="ts">
+  import LoadingButton from "../form/LoadingButton.svelte";
+
   export let onClick: (name: string) => void;
   export let onCreate: () => void;
   export let onRename: (oldName: string, newName: string) => void;
+  export let onDelete: (name: string) => Promise<void>;
   export let items: string[];
   export let active: string;
   let newname = "";
   let renaming = false;
+  let deleting = false;
   function itemClick(item: string) {
     if (item === active) {
       newname = item;
@@ -20,6 +24,13 @@
       renaming = false;
     }
   }
+  function onDeleteClick() {
+    deleting = true;
+    Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      // onDelete(active),
+    ]).finally(() => (deleting = false));
+  }
 </script>
 
 <div class="configs">
@@ -29,10 +40,22 @@
         class="tab {item === active ? 'active' : ''}"
         on:click={() => itemClick(item)}
       >
-        {#if item === active && renaming}
-          <span contenteditable bind:textContent={newname} on:keyup={onkeyup}>
-            {newname}
-          </span>
+        {#if item === active}
+          {#if renaming}
+            <span contenteditable bind:textContent={newname} on:keyup={onkeyup}>
+              {newname}
+            </span>
+          {:else}
+            <span>
+              <LoadingButton
+                onClick={onDeleteClick}
+                class="delete"
+                loading={deleting}
+                title="Delete">x</LoadingButton
+              >
+              {item}
+            </span>
+          {/if}
         {:else}
           <span>
             {item}
@@ -128,5 +151,18 @@
     margin-top: 6px;
     background: var(--bg-color);
     transform: translate(0, -1px);
+  }
+  :global(.tab .delete) {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 1.2em;
+    height: 1.2em;
+    cursor: pointer;
+    border-radius: 50%;
+    transform: translate(-0.9em, -0.3em);
+  }
+  :global(.tab .delete:hover) {
+    background: var(--bg-color);
   }
 </style>
