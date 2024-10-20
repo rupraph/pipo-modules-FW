@@ -190,31 +190,30 @@
 
 <Collapse title="Axis settings" open>
   {#if currentAxis}
-    <div class="input">
-      <h4>Editing axis :</h4>
-      <div class="hero">
-        <Select
-          items={axisSelect}
-          clearable={false}
-          searchable={false}
-          class="axis-select"
-          value={currentAxis}
-          --selected-item-color="var(--text-color)"
-          --font-size="20px"
-          --item-is-active-bg="var(--text-color)"
-          --item-color="var(--text-color)"
-          --item-bg="var(--bg-secondary)"
-          --input-color="var(--text-color)"
-          --item-hover-color="var(--text-color)"
-          --item-hover-bg="var(--bg-lighter)"
-          --border-radius="0"
-          --border="0"
-          --border-focused="0"
-          --list-background="var(--bg-secondary)"
-          --background="var(--bg-tertiary)"
-          on:change={(evt) => setAxis(evt.detail.value)}
-        />
-      </div>
+    <div class="axis-selector">
+      <h4>Input:</h4>
+      <Select
+        items={axisSelect}
+        clearable={false}
+        searchable={false}
+        class="axis-select"
+        value={currentAxis}
+        --selected-item-color="var(--text-color)"
+        --font-size="20px"
+        --item-is-active-bg="var(--bg-lighter)"
+        --item-color="var(--text-color)"
+        --item-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-lighter)"
+        --border-radius="30px"
+        --border="0"
+        --width="35%"
+        --border-focused="0"
+        --list-background="var(--bg-secondary)"
+        --background="var(--bg-tabs)"
+        on:change={(evt) => setAxis(evt.detail.value)}
+      />
     </div>
 
     <AxisConfig {sensor} {aschema} {currentAxis} />
@@ -358,4 +357,16 @@
     border-bottom-left-radius: 0.8em;
     border-bottom-right-radius: 0.8em;
   }
+
+  .axis-selector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5em;
+    gap: 1em;
+  /* background-color: var(--bg-tabs); */
+  /* padding-top: 0.4em;
+    padding-bottom: 0.4em;
+   }
 </style>
