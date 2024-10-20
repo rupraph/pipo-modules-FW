@@ -60,16 +60,22 @@
   }
 </script>
 
-{#if aschema.cat !== "Touch"}
-  <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
-  {#if sensor.mode === true}
-    <Switch
-      label="2-level threshold"
-      bind:value={sensor.th_mode}
-      design="slider"
-    />
+<div
+  style="display: flex; align-items: left; justify-content: space-around; margin-bottom:1.5em"
+>
+  {#if aschema.cat !== "Touch"}
+    <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
+    <!-- {#if sensor.mode === true} -->
+    <div class:disabled={!sensor.mode}>
+      <Switch
+        label="2-level threshold"
+        bind:value={sensor.th_mode}
+        design="slider"
+      />
+    </div>
+    <!-- {/if} -->
   {/if}
-{/if}
+</div>
 
 <MinMax
   label="Sensor Range"
@@ -92,3 +98,10 @@
     >Zero offset calibration</button
   >
 {/if}
+
+<style>
+  :global(.disabled) {
+    opacity: 0.2;
+    pointer-events: none;
+  }
+</style>

@@ -87,17 +87,10 @@
   {/if}
   <Configs />
 
-  {#if !error && batt}
-    {#await batt}
-      <p>Waiting for Pipo to respond...</p>
-    {:then resp}
-      <span><bold>Batt Voltage: </bold>{resp} V</span>
-    {/await}
-  {/if}
-
   <article>
     <Logs />
   </article>
+
   {#if !error && info}
     {#await info}
       <p>Waiting for Pipo to respond...</p>
@@ -109,6 +102,13 @@
           <span><bold>Type</bold>{resp.type}</span>
           <span><bold>Name</bold>{resp.name}</span>
           <span><bold>Version</bold>{resp.version}</span>
+          {#if !error && batt}
+            {#await batt}
+              <p>Waiting for Pipo to respond...</p>
+            {:then resp}
+              <span><bold>Batt Voltage: </bold>{resp} V</span>
+            {/await}
+          {/if}
         </Collapse>
         <!-- <Piano /> -->
       </article>

@@ -42,7 +42,7 @@
   .title-container {
     display: flex;
     align-items: center;
-    height: auto;
+    height: 3em;
     justify-content: space-between;
     width: 100%;
   }

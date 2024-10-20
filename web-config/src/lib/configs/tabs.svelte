@@ -47,13 +47,14 @@
             </span>
           {:else}
             <span>
+              {item}
               <LoadingButton
                 onClick={onDeleteClick}
                 class="delete"
                 loading={deleting}
-                title="Delete">x</LoadingButton
+                title="Delete"
+                width="1em">x</LoadingButton
               >
-              {item}
             </span>
           {/if}
         {:else}
@@ -77,7 +78,7 @@
     grid-template-rows: 2em auto;
   }
   .tabs {
-    gap: 10px;
+    gap: 20px;
     margin-left: 25px;
     max-height: 2em;
   }
@@ -106,7 +107,7 @@
     outline: 0px solid transparent;
   }
   .tab.active > span {
-    padding-bottom: 3px;
+    padding-bottom: 5%;
   }
   .tab > span {
     background-color: var(--bg-color);
@@ -149,6 +150,7 @@
     border-radius: 12px;
     border: 2px solid rgb(80, 80, 80);
     margin-top: 6px;
+    padding-top: 1.5em;
     background: var(--bg-color);
     transform: translate(0, -1px);
   }
@@ -156,11 +158,11 @@
     background: transparent;
     margin: 0;
     padding: 0;
-    width: 1.2em;
+    width: 1em;
     height: 1.2em;
     cursor: pointer;
-    border-radius: 50%;
-    transform: translate(-0.9em, -0.3em);
+    border-radius: 10%;
+    /* transform: translate(-0.9em, -0.3em); */
   }
   :global(.tab .delete:hover) {
     background: var(--bg-color);

@@ -158,7 +158,22 @@
   }
 </script>
 
-<section class="buttonbar">
+<Collapse title="Quick settings">
+  <QuickConfig bind:config schema={schema[$type]} />
+  <button
+    class="primary Pause"
+    on:click={pause}
+    title="Pause sending data"
+    style="margin: 20px;"
+  >
+    {#if isPaused}
+      Resume
+    {/if}
+    {#if !isPaused}
+      Pause all output
+    {/if}
+  </button>
+
   <LoadingButton
     onClick={submit}
     loading={savingStatus === "loading"}
@@ -169,87 +184,79 @@
         : "primary"}
     title="Apply and save the config in pipo">Save</LoadingButton
   >
-</section>
-<h3>Quick settings</h3>
-
-<QuickConfig bind:config schema={schema[$type]} />
-<button class="primary Pause" on:click={pause} title="Pause sending data">
-  {#if isPaused}
-    Resume
-  {/if}
-  {#if !isPaused}
-    Pause all output
-  {/if}
-</button>
+</Collapse>
 
 <hr class="separator" />
 
-<h3>Axis settings</h3>
-{#if currentAxis}
-  <div class="input">
-    <h4>Editing axis :</h4>
-    <div class="hero">
-      <Select
-        items={axisSelect}
-        clearable={false}
-        searchable={false}
-        class="axis-select"
-        value={currentAxis}
-        --selected-item-color="var(--text-color)"
-        --font-size="20px"
-        --item-is-active-bg="var(--text-color)"
-        --item-color="var(--text-color)"
-        --item-bg="var(--bg-secondary)"
-        --input-color="var(--text-color)"
-        --item-hover-color="var(--text-color)"
-        --item-hover-bg="var(--bg-lighter)"
-        --border-radius="0"
-        --border="0"
-        --border-focused="0"
-        --list-background="var(--bg-secondary)"
-        --background="var(--bg-tertiary)"
-        on:change={(evt) => setAxis(evt.detail.value)}
-      />
+<Collapse title="Axis settings" open>
+  {#if currentAxis}
+    <div class="input">
+      <h4>Editing axis :</h4>
+      <div class="hero">
+        <Select
+          items={axisSelect}
+          clearable={false}
+          searchable={false}
+          class="axis-select"
+          value={currentAxis}
+          --selected-item-color="var(--text-color)"
+          --font-size="20px"
+          --item-is-active-bg="var(--text-color)"
+          --item-color="var(--text-color)"
+          --item-bg="var(--bg-secondary)"
+          --input-color="var(--text-color)"
+          --item-hover-color="var(--text-color)"
+          --item-hover-bg="var(--bg-lighter)"
+          --border-radius="0"
+          --border="0"
+          --border-focused="0"
+          --list-background="var(--bg-secondary)"
+          --background="var(--bg-tertiary)"
+          on:change={(evt) => setAxis(evt.detail.value)}
+        />
+      </div>
     </div>
-  </div>
 
-  <AxisConfig {sensor} {aschema} {currentAxis} />
-  <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+    <AxisConfig {sensor} {aschema} {currentAxis} />
+    <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
-  <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
-  <section>
-    {#if currentCat === "MIDI"}
-      <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
-    {/if}
-    {#if currentCat === "HID"}
-      <HidConfigForm
-        bind:hidEnabled={config.general.HidEnabled}
-        bind:hidMode={config.general.HidMode}
-        {sensor}
-        {hid}
-      />
-    {/if}
-    {#if currentCat === "OSC"}
-      <OscConfigForm {osc} />
-    {/if}
-  </section>
-  <hr class="separator" />
-  <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-    <OscGlobalConfig
-      bind:ip={config.general.OSC_IP}
-      bind:port={config.general.OSC_PORT}
-    />
-  </Collapse>
-  <hr class="separator" />
-  <Collapse title="HID settings" bind:value={config.general.HidEnabled}
-    ><HidGlobalConfig bind:mode={config.general.HidMode} /></Collapse
-  >
+    <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
+    <section class="translator-settings">
+      {#if currentCat === "MIDI"}
+        <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
+      {/if}
+      {#if currentCat === "HID"}
+        <HidConfigForm
+          bind:hidEnabled={config.general.HidEnabled}
+          bind:hidMode={config.general.HidMode}
+          {sensor}
+          {hid}
+        />
+      {/if}
+      {#if currentCat === "OSC"}
+        <OscConfigForm {osc} />
+      {/if}
+    </section>
+  {/if}
+</Collapse>
 
-  <hr class="separator" />
-  <Collapse title="Board settings"
-    ><BoardConfig bind:wifiMode={config.general.Wifi_mode} /></Collapse
-  >
-{/if}
+<hr class="separator" />
+
+<Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
+  <OscGlobalConfig
+    bind:ip={config.general.OSC_IP}
+    bind:port={config.general.OSC_PORT}
+  />
+</Collapse>
+<hr class="separator" />
+<Collapse title="HID settings" bind:value={config.general.HidEnabled}
+  ><HidGlobalConfig bind:mode={config.general.HidMode} /></Collapse
+>
+
+<hr class="separator" />
+<Collapse title="Board settings"
+  ><BoardConfig bind:wifiMode={config.general.Wifi_mode} /></Collapse
+>
 
 <style>
   .board-settings {
@@ -283,7 +290,7 @@
     border: 0;
     height: 2px;
     background: var(--bg-lighter);
-    margin: 20px 0;
+    margin: 10px 0;
   }
 
   /* .Download {
@@ -295,5 +302,12 @@
 
   .Pause {
     background-color: rgb(211, 211, 211);
+  }
+
+  .translator-settings {
+    background-color: var(--bg-tabs);
+    padding: 1em;
+    border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em;
   }
 </style>
