@@ -59,6 +59,7 @@
     grid-template-rows: 4;
     grid-gap: 1em;
   }
+
   .header {
     grid-row: 1;
   }
