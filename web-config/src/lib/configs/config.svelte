@@ -237,6 +237,18 @@
         <OscConfigForm {osc} />
       {/if}
     </section>
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div>
   {/if}
 </Collapse>
 
@@ -247,15 +259,51 @@
     bind:ip={config.general.OSC_IP}
     bind:port={config.general.OSC_PORT}
   />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </div>
 </Collapse>
 <hr class="separator" />
 <Collapse title="HID settings" bind:value={config.general.HidEnabled}
-  ><HidGlobalConfig bind:mode={config.general.HidMode} /></Collapse
+  ><HidGlobalConfig bind:mode={config.general.HidMode} />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </div></Collapse
 >
 
 <hr class="separator" />
 <Collapse title="Board settings"
-  ><BoardConfig bind:wifiMode={config.general.Wifi_mode} /></Collapse
+  ><BoardConfig bind:wifiMode={config.general.Wifi_mode} />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </div></Collapse
 >
 
 <style>
