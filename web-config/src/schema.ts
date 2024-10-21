@@ -94,7 +94,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
-      index: 3,
+      index: 2,
     },
     A4: {
       label: "Analog 4",
@@ -103,7 +103,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
-      index: 4,
+      index: 3,
     },
     A5: {
       label: "Analog 5",
@@ -112,6 +112,7 @@ export const schema: Schema = {
       min: 0,
       max: 3.3,
       step: 0.1,
+      index: 4,
     },
     A6: {
       label: "Analog 6",

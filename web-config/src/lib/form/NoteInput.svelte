@@ -28,7 +28,8 @@
   function onChange() {
     if (isNaN(value)) return;
     note = nOptions[value % 12].value;
-    octave = Math.floor(value / 12);
+    octave = Math.floor(value / 12) - 1;
+    console.log(`onChange: value=${value}, note=${note}, octave=${octave}`);
   }
   onMount(() => {
     onChange();
@@ -36,7 +37,7 @@
 
   $: {
     if (!isNaN(note) && !isNaN(octave)) {
-      value = note + octave * 12;
+      value = note + (octave + 1) * 12;
     }
   }
   $: {
@@ -48,7 +49,7 @@
 
 <Input {label} {id}>
   <div class="noteinput">
-    {#if note && octave}
+    {#if typeof note === "number" && typeof octave === "number"}
       <Select
         class="autocolumns"
         label="Note"
