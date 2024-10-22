@@ -365,8 +365,8 @@
     justify-content: center;
     margin-bottom: 1.5em;
     gap: 1em;
-  /* background-color: var(--bg-tabs); */
-  /* padding-top: 0.4em;
-    padding-bottom: 0.4em;
-   }
+    /* background-color: var(--bg-tabs); */
+    /* padding-top: 0.4em;
+    padding-bottom: 0.4em;*/
+  }
 </style>
