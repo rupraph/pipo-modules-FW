@@ -72,6 +72,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
           }
         } else  // sensor uses trigger mode
         {
+
           if (sensor.get_bool_value(axis_name)) {
             uint16_t cc_val = Midi_translator.get_max_output();
             if (Midi_translator.get_hires()) {
@@ -115,7 +116,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
               sensor.set_trigger_flag(axis_name, MIDI, false);
             }
           } else {
-            midiio.sendAllNotesOff(channel);
+            midiio.sendNoteOff(thresh_note, 127, channel);
           }
         } else  // mode is continuous
         {
