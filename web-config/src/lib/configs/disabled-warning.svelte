@@ -6,7 +6,7 @@
 </script>
 
 {#if enabled}
-  <p class="warning">Warning: Disabled in quick config</p>
+  <p class="warning">Note: Disabled in quick config</p>
 {/if}
 
 <style>

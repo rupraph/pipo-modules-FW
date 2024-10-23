@@ -48,7 +48,6 @@
   ];
 </script>
 
-<DisabledWarning enabled={!hid.enabled} feature="HID" />
 <h4>Current HID mode is {currentMode ? currentMode.label : "Unknown"}</h4>
 <!-- <p>
   NOTE: The available mapping options below will depend on the sensor and Hid
@@ -115,3 +114,5 @@
 {:else}
   PROBLEM !
 {/if}
+
+<DisabledWarning enabled={!hid.enabled} feature="HID" />

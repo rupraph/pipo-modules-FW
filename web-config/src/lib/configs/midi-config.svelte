@@ -14,8 +14,6 @@
   ];
 </script>
 
-<DisabledWarning enabled={!midi.enabled} feature="MIDI" />
-
 <Range label="Midi Channel" bind:value={midi.channel} min={1} max={16} />
 
 <Radio
@@ -32,3 +30,5 @@
 {:else}
   <NoteConfig config={midi} bind:isThresholdMode={sensormode} />
 {/if}
+
+<DisabledWarning enabled={!midi.enabled} feature="MIDI" />

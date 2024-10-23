@@ -44,7 +44,9 @@
 </script>
 
 <div class="minmax-input" {id}>
-  <div class="curr-value">Current reading: {value.toFixed(2)}</div>
+  {#if value !== undefined}
+    <div class="curr-value">Current reading: {value.toFixed(2)}</div>
+  {/if}
   <div class="minmax">
     <span>{min}</span>
     <div class="slider">

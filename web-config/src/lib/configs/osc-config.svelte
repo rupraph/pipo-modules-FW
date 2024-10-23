@@ -12,7 +12,6 @@
   export let port: number;
 </script>
 
-<DisabledWarning enabled={!osc.enabled} feature="OSC" />
 <Checkbox label="Raw Mode" bind:value={osc.mode_raw} />
 {#if !osc.mode_raw}
   <Range label="Min" bind:value={osc.osc_min} min={0} max={osc.osc_max} />
@@ -23,3 +22,5 @@
     max={Infinity}
   />
 {/if}
+
+<DisabledWarning enabled={!osc.enabled} feature="OSC" />

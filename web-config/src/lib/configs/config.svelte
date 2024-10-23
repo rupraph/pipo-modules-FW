@@ -189,7 +189,7 @@
 <hr class="separator" />
 
 <Collapse title="Axis settings" open>
-  {#if currentAxis}
+  {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
       <Select
