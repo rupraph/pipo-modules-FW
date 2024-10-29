@@ -154,6 +154,9 @@ void usb_hid::keyboard_set_press(string address) {
     if (map_address == "KEY_ESC") {
       kb_keycodes[keycodes_index] = HID_KEY_ESCAPE;
     }
+    if (map_address == "KEY_SPACE") {
+      kb_keycodes[keycodes_index] = HID_KEY_SPACE;
+    }
   }
 
   if (keycodes_index < 5) {

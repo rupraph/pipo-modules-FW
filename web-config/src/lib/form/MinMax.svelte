@@ -1,6 +1,5 @@
 <script lang="ts">
   import { uid } from "../../utils";
-  import Input from "./Input.svelte";
   export let label: string;
   export let min: number = 0;
   export let max: number = 1;
@@ -16,22 +15,26 @@
   let color = fillColor();
   const minId = uid();
   const maxId = uid();
+
   function onMinChange(v: number) {
     low = Math.min(v, high);
     color = fillColor();
   }
+
   function onMaxChange(v: number) {
     high = Math.max(v, low);
     color = fillColor();
   }
+
   function fillColor() {
-    if (mode === "single") {
-      return "#dadae5";
-    }
     const percent1 = toPercent(low, min, max);
+    if (mode === "single") {
+      return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) 100%`;
+    }
     const percent2 = toPercent(high, min, max);
     return `linear-gradient(to right, #dadae5 ${percent1} , var(--main) ${percent1} , var(--main) ${percent2}, #dadae5 ${percent2})`;
   }
+
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
@@ -40,11 +43,10 @@
   }
 </script>
 
-<Input
-  class="minmax-input"
-  label={`Current value: ${Number(value).toFixed(2)} `}
-  {id}
->
+<div class="minmax-input" {id}>
+  {#if value !== undefined}
+    <div class="curr-value">Current reading: {value.toFixed(2)}</div>
+  {/if}
   <div class="minmax">
     <span>{min}</span>
     <div class="slider">
@@ -99,14 +101,22 @@
       on:change={(v) => onMaxChange(v.target.value)}
     />
   </div>
-</Input>
+</div>
 
 <style>
+  .minmax-input {
+    grid-auto-flow: column;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto;
+    width: 100%;
+  }
   .minmax {
     display: flex;
     gap: 1rem;
-    grid-area: 1 / 1 / 2 / 3;
     width: 100%;
+  }
+  .curr-value {
+    margin-bottom: 1rem;
   }
   .minmax > span:first-child {
     margin-left: 1rem;
@@ -115,8 +125,14 @@
     margin-right: 1rem;
   }
   .slider {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: auto;
     position: relative;
     flex: 1;
+  }
+  .slider > * {
+    grid-area: 1 / 1 / 2 / 2;
   }
   .inputs {
     display: flex;

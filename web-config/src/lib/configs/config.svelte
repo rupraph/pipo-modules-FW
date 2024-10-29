@@ -1,86 +1,71 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import { configSave } from "../../services/config";
+  import HidGlobalConfig from "./hid-global-config.svelte";
 
-  import { pipoio } from "../../pipoio";
-  import { createEventDispatcher, onDestroy, onMount } from "svelte";
-  import MinMax from "../form/MinMax.svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
-  import CCConfig from "./cc-config.svelte";
-  import NoteConfig from "./note-config.svelte";
+  import Select from "svelte-select";
   import {
-    type MidiConfig,
     type SensorConfig,
-    type OscConfig,
-    type HidConfig,
     type PipoConfig,
     type PipoTypes,
-    type SensorValues,
     type PipoKeys,
-    type SmoothSensorValues,
-    type SmoothSensorValue,
-    isHisteresisMode,
-    isContinuousMode,
+    type ConfigByAxis,
+    type AxisSchema,
+    type MidiConfig,
+    type OscConfig,
+    type HidConfig,
   } from "../../types";
-  import Radio from "../form/Radio.svelte";
-  import Checkbox from "../form/Checkbox.svelte";
   import axios from "axios";
   import Collapse from "../collapse.svelte";
-  import Range from "../form/Range.svelte";
-  import Text from "../form/Text.svelte";
-  import Select from "../form/Select.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
+  import AxisConfig from "./axis-config.svelte";
+  import CategoryTab from "./category-tab.svelte";
+  import HidConfigForm from "./hid-config.svelte";
+  import MidiConfigForm from "./midi-config.svelte";
+  import OscConfigForm from "./osc-config.svelte";
+  import QuickConfig from "./quick-config.svelte";
+  import OscGlobalConfig from "./osc-global-config.svelte";
+  import BoardConfig from "./board-config.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
   let savingStatus = "none";
-  const smoothValues: SmoothSensorValues<T> = {};
-  const withinWindowValues: SensorValues<T> = {};
-  const sensorValues: SensorValues<T> = {};
 
-  let sensorConfs = [];
-  let groupedSensorConfs = {};
-
+  let configByAxis: ConfigByAxis<T>;
+  let currentAxis: PipoKeys[T];
+  let midi: MidiConfig;
+  let osc: OscConfig;
+  let hid: HidConfig;
+  let sensor: SensorConfig;
+  let aschema: AxisSchema;
+  let axisSelect: { value: string; label: string }[] = [];
+  let currentCat = "MIDI";
   onMount(() => {
-    sensorConfs = getSensorConf();
-    groupedSensorConfs = groupBySection(sensorConfs);
-  });
-
-  pipoio.on("sensor", ({ axis, value, withinWindow }) => {
-    withinWindowValues[axis] = withinWindow;
-    const now = Date.now();
-    if (!smoothValues[axis]) {
-      smoothValues[axis] = {
-        new: value,
-        old: value,
-        dt: 0,
-        timestamp: now,
-      };
-      sensorValues[axis] = value;
-    }
-    const dt = now - smoothValues[axis].timestamp;
-    smoothValues[axis].dt = dt;
-    smoothValues[axis].timestamp = now;
-    smoothValues[axis].old = smoothValues[axis].new;
-    smoothValues[axis].new = value;
-  });
-
-  function animateSensor() {
-    Object.entries(smoothValues).forEach(([axis, value]) => {
-      if (value.dt > 0) {
-        sensorValues[axis] =
-          value.old + (value.new - value.old) * (value.dt / 1000);
-      }
+    configByAxis = (
+      Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
+    )
+      .sort(
+        (a, b) =>
+          schema[$type as T][a[0]].index - schema[$type as T][b[0]].index
+      )
+      .reduce((acc, [axis, sensor]) => {
+        acc[axis] = {
+          sensor,
+          hid: config.engine["engine-hid"][axis],
+          midi: config.engine["engine-midi"][axis],
+          osc: config.engine["engine-osc"][axis],
+        };
+        return acc;
+      }, {} as ConfigByAxis<T>);
+    axisSelect = Object.keys(configByAxis).map((axis) => {
+      return { value: axis, label: schema[$type as T][axis].label };
     });
-    requestAnimationFrame(animateSensor);
-  }
-  animateSensor();
-  const options = [
-    { label: "Note", value: "1" },
-    { label: "CC", value: "0" },
-  ];
+    setAxis(Object.keys(configByAxis)[0]);
+  });
 
   function submit() {
+    console.log("Saving...");
     savingStatus = "loading";
     const blob = new Blob([JSON.stringify(config)], {
       type: "application/json",
@@ -97,6 +82,7 @@
       }),
     ])
       .then(() => {
+        console.log("Saved...");
         savingStatus = "success";
       })
       .catch(() => {
@@ -120,25 +106,12 @@
     a.click();
   }
 
-  function cal_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/offsetcal",
-      params: { axis },
-    }).then(() => console.log("DONE"));
-  }
-
+  let isPaused = false;
   function pause() {
     axios.post("/pause").then(() => {
       console.log("Pausing...");
     });
-  }
-
-  function getMidiConfigs() {
-    return Object.entries(config.engine["engine-midi"]) as unknown as [
-      PipoKeys[T],
-      MidiConfig,
-    ][];
+    isPaused = !isPaused;
   }
 
   function switchwifimode() {
@@ -147,55 +120,24 @@
     });
   }
 
-  function getSensorConf() {
-    return Object.entries(config.sensor) as unknown as [
-      PipoKeys[T],
-      SensorConfig,
-    ][];
-  }
+  function setAxis(axis: PipoKeys[T]) {
+    currentAxis = axis;
+    midi = configByAxis[axis].midi;
 
-  function groupBySection(sensorConfs: [PipoKeys[T], SensorConfig][]) {
-    const sections = {};
-    for (const [axis, sensorconf] of sensorConfs) {
-      const { cat } = getSchema(axis);
-      console.log(cat);
-      if (!sections[cat]) {
-        sections[cat] = [];
-      }
-      sections[cat].push([axis, sensorconf]);
-    }
-    console.log(sections);
-    return sections;
+    console.log("Setting axis", axis, midi.rootNote);
+    osc = configByAxis[axis].osc;
+    hid = configByAxis[axis].hid;
+    aschema = schema[$type as T][axis];
+    sensor = configByAxis[axis].sensor;
   }
-
-  function getOscConf() {
-    return Object.entries(config.engine["engine-osc"]) as unknown as [
-      PipoKeys[T],
-      OscConfig,
-    ][];
+  function setCategory(cat: string) {
+    currentCat = cat;
   }
-
-  function getHidConf() {
-    return Object.entries(config.engine["engine-hid"]) as unknown as [
-      PipoKeys[T],
-      HidConfig,
-    ][];
-  }
-
-  function getSchema(axis: PipoKeys[T]) {
-    return schema[$type as T][axis];
-  }
-
   const wifimodes = [
     { label: "Create Access Point", value: "AP" },
     { label: "Station (Connect to others)", value: "STA" },
   ];
 
-  function reboot() {
-    axios.get("/reboot").then(() => {
-      console.log("Rebooting...");
-    });
-  }
   let interval = 0;
   // onMount(() => {
   //   interval = window.setInterval(() => {
@@ -205,21 +147,118 @@
   // onDestroy(() => {
   //   clearInterval(interval);
   // });
+
+  /**
+ 
+
+
+ */
+  $: if (config && currentAxis) {
+    setAxis(currentAxis);
+  }
 </script>
 
-<article class="config">
-  <section class="buttons">
-    <button class="delete error" on:click={() => dispatch("delete")}
-      >Delete</button
-    >
-    <!-- <button
-      class="primary Download"
-      on:click={download}
-      title="Download the config file locally">Download config</button
-    > -->
-    <button class="primary Pause" on:click={pause} title="Pause sending data">
-      &gt; / ||
-    </button>
+<Collapse title="Quick settings">
+  <QuickConfig bind:config schema={schema[$type]} />
+  <button
+    class="primary Pause"
+    on:click={pause}
+    title="Pause sending data"
+    style="margin: 20px;"
+  >
+    {#if isPaused}
+      Resume
+    {/if}
+    {#if !isPaused}
+      Pause all output
+    {/if}
+  </button>
+
+  <LoadingButton
+    onClick={submit}
+    loading={savingStatus === "loading"}
+    class={savingStatus === "success"
+      ? "success"
+      : savingStatus === "error"
+        ? "error"
+        : "primary"}
+    title="Apply and save the config in pipo">Save</LoadingButton
+  >
+</Collapse>
+
+<hr class="separator" />
+
+<Collapse title="Axis settings" open>
+  {#if currentAxis && config}
+    <div class="axis-selector">
+      <h4>Input:</h4>
+      <Select
+        items={axisSelect}
+        clearable={false}
+        searchable={false}
+        class="axis-select"
+        value={currentAxis}
+        --selected-item-color="var(--text-color)"
+        --font-size="20px"
+        --item-is-active-bg="var(--bg-lighter)"
+        --item-color="var(--text-color)"
+        --item-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-lighter)"
+        --border-radius="30px"
+        --border="0"
+        --width="35%"
+        --border-focused="0"
+        --list-background="var(--bg-secondary)"
+        --background="var(--bg-tabs)"
+        on:change={(evt) => setAxis(evt.detail.value)}
+      />
+    </div>
+
+    <AxisConfig {sensor} {aschema} {currentAxis} />
+    <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+
+    <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
+    <section class="translator-settings">
+      {#if currentCat === "MIDI"}
+        <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
+      {/if}
+      {#if currentCat === "HID"}
+        <HidConfigForm
+          bind:hidEnabled={config.general.HidEnabled}
+          bind:hidMode={config.general.HidMode}
+          {sensor}
+          {hid}
+        />
+      {/if}
+      {#if currentCat === "OSC"}
+        <OscConfigForm {osc} />
+      {/if}
+    </section>
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div>
+  {/if}
+</Collapse>
+
+<hr class="separator" />
+
+<Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
+  <OscGlobalConfig
+    bind:ip={config.general.OSC_IP}
+    bind:port={config.general.OSC_PORT}
+  />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
     <LoadingButton
       onClick={submit}
       loading={savingStatus === "loading"}
@@ -230,180 +269,57 @@
           : "primary"}
       title="Apply and save the config in pipo">Save</LoadingButton
     >
-  </section>
-  <Collapse title="Sensor settings" open>
-    {#each Object.entries(groupedSensorConfs) as [cat, sensors]}
-      <Collapse title={cat}>
-        {#each sensors as [axis, sensorconf]}
-          {@const { label, cat, unit, min, max, step } = getSchema(axis)}
-          <Collapse title={label}>
-            <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
-            {#if cat !== "Touch"}
-              <Checkbox label="Threshold mode" bind:value={sensorconf.mode} />
-              {#if sensorconf.mode === true}
-                <Checkbox
-                  label="Window threshold"
-                  bind:value={sensorconf.th_mode}
-                />
-              {/if}
-            {/if}
-            <MinMax
-              label="Sensor Range"
-              bind:low={sensorconf.lmin}
-              bind:high={sensorconf.lmax}
-              value={sensorValues[axis]}
-              mode={isContinuousMode(sensorconf) || isHisteresisMode(sensorconf)
-                ? "double"
-                : "single"}
-              cursorActive={withinWindowValues[axis]}
-              {min}
-              {max}
-              {step}
-              minLabel={`min (${unit})`}
-              maxLabel={`max (${unit})`}
-            />
-            {#if cat === "Touch"}
-              <button class="primary" on:click={() => cal_offset(axis)}
-                >Offset calib</button
-              >
-            {/if}
-          </Collapse>
-        {/each}
-      </Collapse>
-    {/each}
-  </Collapse>
-  <Collapse title="Data Output settings">
-    <Collapse title="Midi Output">
-      {#each getMidiConfigs() as [axis, midiconfig]}
-        {@const { label } = getSchema(axis)}
-        <section>
-          <Collapse title={label} bind:value={midiconfig.enabled}>
-            <!-- <Checkbox label="enabled" bind:value={midiconfig.enabled} /> -->
-            <Range
-              label="Midi Channel"
-              bind:value={midiconfig.channel}
-              min={1}
-              max={16}
-            />
-            <Radio
-              label="Message Type"
-              {options}
-              value={midiconfig.tl_mode}
-              on:change={(evt) => {
-                midiconfig.tl_mode = evt.detail;
-              }}
-            />
-            {#if midiconfig.tl_mode === 0}
-              <CCConfig config={midiconfig} />
-            {:else}
-              <NoteConfig config={midiconfig} />
-            {/if}
-          </Collapse>
-        </section>
-      {/each}
-    </Collapse>
-    <Collapse title="OSC output">
-      <h4>OSC Network settings</h4>
-      <Checkbox label="OSC Enabled" bind:value={config.general.OSC_ENA} />
-      <Text label="OSC IP" bind:value={config.general.OSC_IP} />
-      <Range label="OSC Port" bind:value={config.general.OSC_PORT} />
-      {#each getOscConf() as [axis, oscconf]}
-        {@const { label } = getSchema(axis)}
-        <section>
-          <Collapse title={label} bind:value={oscconf.enabled}>
-            <!-- <Checkbox label="Enabled" bind:value={oscconf.enabled} /> -->
-            <Checkbox label="Mode_raw" bind:value={oscconf.mode_raw} />
-            {#if !oscconf.mode_raw}
-              <Range label="OSC Min" bind:value={oscconf.osc_min} />
-              <Range label="OSC Max" bind:value={oscconf.osc_max} />
-            {/if}
-          </Collapse>
-        </section>
-      {/each}
-    </Collapse>
-    <Collapse title="HID output">
-      <h4>Keyboard/Mouse mode settings</h4>
-      <Checkbox label="HID Enabled" bind:value={config.general.HidEnabled} />
-      <Select
-        label="HID Mode"
-        options={[
-          { label: "Keyboard", value: 2 },
-          { label: "Mouse", value: 1 },
-        ]}
-        bind:value={config.general.HidMode}
-      />
-      <h4>Please restart Pipo after enabling or switching HID mode</h4>
-      <h4>
-        NOTE: The available mapping options below will depend on the sensor and
-        Hid mode
-      </h4>
-      {#each getHidConf() as [axis, hidconf]}
-        {@const { label } = getSchema(axis)}
-        <section>
-          <Collapse title={label} bind:value={hidconf.enabled}>
-            {#if config.sensor[axis].mode === true && config.general.HidMode === 2}
-              <h4>
-                Map a keyboard key. Address format for "u" would be: "KEY_u" (or
-                KEY_UP,KEY_ENTER,...)
-              </h4>
-              <Checkbox
-                label="Stroke continuous"
-                bind:value={hidconf.stroke_mode}
-              />
-              <Text label="Address" bind:value={hidconf.addr} />
-              {#if hidconf.stroke_mode && config.sensor[axis].th_mode === true}
-                <Text label="Address2" bind:value={hidconf.addr2} />
-              {/if}
-            {:else if config.sensor[axis].mode === true && config.general.HidMode === 1}
-              <h4>Map a mouse button ("LEFT" or "RIGHT")</h4>
-              <Checkbox
-                label="Stroke continuous"
-                bind:value={hidconf.stroke_mode}
-              />
-              <Text label="Address" bind:value={hidconf.addr} />
-            {:else if config.sensor[axis].mode === false && config.general.HidMode === 2}
-              <h4>
-                Not possible to map a continuous sensor axis to a key stoke
-                (must change to Threshold mode)
-              </h4>
-            {:else if config.sensor[axis].mode === false && config.general.HidMode === 1}
-              <h4>
-                Map a continuous sensor axis to a mouse axis (Address can be
-                "X","Y","WHEEL","PAN")
-              </h4>
-              <Text label="Address" bind:value={hidconf.addr} />
-            {/if}
-          </Collapse>
-        </section>
-      {/each}
-    </Collapse>
-  </Collapse>
-  <Collapse title="Board Settings">
-    <section class="board-settings">
-      <!-- <button class="primary" on:click={switchwifimode} style="width: fit-content">{config.general.Wifi_mode}</button> -->
-      <Select
-        label="Wifi Mode"
-        options={wifimodes}
-        bind:value={config.general.Wifi_mode}
-      />
-      <button class="primary" on:click={reboot} style="width: fit-content"
-        >Reboot</button
-      >
-    </section>
-  </Collapse>
-</article>
+  </div>
+</Collapse>
+<hr class="separator" />
+<Collapse title="HID settings" bind:value={config.general.HidEnabled}
+  ><HidGlobalConfig bind:mode={config.general.HidMode} />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </div></Collapse
+>
+
+<hr class="separator" />
+<Collapse title="Board settings"
+  ><BoardConfig bind:wifiMode={config.general.Wifi_mode} />
+  <div style="display:flex; margin-top:1em; justify-content:right;">
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </div></Collapse
+>
 
 <style>
-  .config {
-    max-width: 100%;
-  }
   .board-settings {
     display: flex;
     flex-direction: column;
     justify-content: left;
   }
-  .buttons {
+  /* :global(.axis-select .selected-item) {
+    font-weight: bold;
+    font-size: 27.2px;
+    margin-block-start: 27.2px;
+    margin-block-end: 27.2px;
+  } */
+  .buttonbar {
     display: flex;
+    flex-direction: row-reverse;
     justify-content: space-between;
     margin-top: 2em;
     text-align: start;
@@ -417,6 +333,13 @@
     background-color: var(--main-darker);
   }
 
+  .separator {
+    border: 0;
+    height: 2px;
+    background: var(--bg-lighter);
+    margin: 10px 0;
+  }
+
   /* .Download {
     background-color: rgba(106, 106, 106, 0.263);
   }
@@ -426,5 +349,24 @@
 
   .Pause {
     background-color: rgb(211, 211, 211);
+  }
+
+  .translator-settings {
+    background-color: var(--bg-tabs);
+    padding: 1em;
+    border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em;
+  }
+
+  .axis-selector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5em;
+    gap: 1em;
+    /* background-color: var(--bg-tabs); */
+    /* padding-top: 0.4em;
+    padding-bottom: 0.4em;*/
   }
 </style>

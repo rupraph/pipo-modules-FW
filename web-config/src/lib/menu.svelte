@@ -21,7 +21,7 @@
 
 <nav>
   <span class="status {live ? 'live' : ''}"> </span>
-  <span>FPS: {fps}</span>
+  <!-- <span>FPS: {fps}</span> -->
 </nav>
 
 <style>

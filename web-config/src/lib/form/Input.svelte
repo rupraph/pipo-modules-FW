@@ -26,18 +26,6 @@
   .input.disabled > .input-wrapper :global(div) {
     pointer-events: none;
   }
-  .minmax-input {
-    grid-auto-flow: column;
-    grid-template-rows: auto auto;
-    grid-template-columns: auto;
-    width: 100%;
-  }
-  .minmax-input > .input-wrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-top: 0.5em;
-  }
 
   .input-wrapper {
     display: flex;
@@ -46,6 +34,7 @@
     background-color: var(--bg-secondary);
     border: 1px solid transparent;
     align-items: center;
+    width: 100%;
   }
   .input-wrapper:hover {
     border: 1px solid var(--main);

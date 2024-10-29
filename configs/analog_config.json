@@ -423,7 +423,7 @@
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
-    "HidEnabled": true,
+    "HidEnabled": false,
     "HidMode": 1
   }
 }

@@ -18,6 +18,11 @@
   onMount(() => {
     select();
   });
+  $: {
+    if (value !== undefined) {
+      select();
+    }
+  }
 </script>
 
 <Input {label} {id} class={$$restProps.class || ""}>
@@ -26,7 +31,8 @@
     {clearable}
     bind:value={selectedItem}
     --selected-item-color="var(--text-color)"
-    --item-is-active-bg="var(--bg-tertiary)"
+    --item-is-active-bg="var(--bg-lighter)"
+    --item-is-active-color="var(--text-color)"
     --item-color="var(--text-color)"
     --item-bg="var(--bg-secondary)"
     --input-color="var(--text-color)"

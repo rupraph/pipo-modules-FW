@@ -2,6 +2,7 @@
   export let loading: boolean = false;
   export let disabled: boolean = false;
   export let onClick: () => void;
+  export let width: string = "100px"; // New prop for adjustable width
 </script>
 
 <button
@@ -10,6 +11,7 @@
     " loading-button contract " +
     (loading ? " loading" : "") +
     (disabled ? " disabled" : "")}
+  style="width: {width};"
 >
   {#if !loading}
     <span class="label"><slot></slot></span>

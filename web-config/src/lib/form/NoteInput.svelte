@@ -24,26 +24,32 @@
     "B",
   ].map((label, i) => ({ label, value: i }));
 
-  const oOptions = new Array(11)
-    .fill(0)
-    .map((_, i) => ({ label: `${i}`, value: i }));
-
   let id = uid();
-  onMount(() => {
+  function onChange() {
     if (isNaN(value)) return;
     note = nOptions[value % 12].value;
-    octave = Math.floor(value / 12);
-    console.log("NoteInput", { note, octave, nOptions, oOptions });
+    octave = Math.floor(value / 12) - 1;
+    console.log(`onChange: value=${value}, note=${note}, octave=${octave}`);
+  }
+  onMount(() => {
+    onChange();
   });
 
   $: {
-    if (!isNaN(note) && !isNaN(octave)) value = note + octave * 12;
+    if (!isNaN(note) && !isNaN(octave)) {
+      value = note + (octave + 1) * 12;
+    }
+  }
+  $: {
+    if (!isNaN(value)) {
+      onChange();
+    }
   }
 </script>
 
 <Input {label} {id}>
   <div class="noteinput">
-    {#if note && octave}
+    {#if typeof note === "number" && typeof octave === "number"}
       <Select
         class="autocolumns"
         label="Note"

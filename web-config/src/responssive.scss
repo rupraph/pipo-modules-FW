@@ -45,7 +45,7 @@ h3{
  }
 }
 section{
-  margin-left: 1rem;
+  // margin-left: 1rem;
   @include phone{    
     margin-left: 0.2em;
   }
@@ -140,15 +140,30 @@ article {
   color: var(--main);
 }
 
-.configs>.content{
-  padding: 1em;
+.content{
+  display: grid;
+  grid-auto-flow: row;
+  gap: 0.5em;
+  grid-template-columns: 1em auto 1em;
   @include phone {
-      padding: 0 0.2em;
+  grid-template-columns: 0 auto 0;
   }
 }
-
+.content>*,
+.content>.subgrid>*{
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+.content>.hero{
+  grid-column-start: 1;
+  grid-column-end: 4;
+  background-color: var(--bg-tertiary);
+}
 ul{
   @include phone {
     padding: 0 0.5em;
   }
+}
+.configs>.content{
+  padding-bottom: 2em;
 }

@@ -200,6 +200,9 @@ JsonDocument MidiTranslator::get_json() const {
   j["rootNote"] = rootNote;
   j["nbOfNotes"] = nbOfNotes;
   j["sustain"] = sustain;
+  j["cc_max"] = cc_max;
+  j["cc_min"] = cc_min;
+  j["hires"] = hires;
   return j;
 }
 
@@ -213,6 +216,9 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     rootNote = j["rootNote"];
     nbOfNotes = j["nbOfNotes"];
     sustain = j["sustain"];
+    cc_max = j["cc_max"];
+    cc_min = j["cc_min"];
+    hires = j["hires"];
 
   } catch (const std::exception& e) {
     Serial.print("Error: ");

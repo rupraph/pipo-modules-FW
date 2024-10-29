@@ -58,6 +58,7 @@
 
   <button
     class={value <= min ? "disabled" : ""}
+    style="padding:10px;"
     on:click={() => {
       value -= step;
       onmouseup();
@@ -72,6 +73,7 @@
   >
   <button
     class={value >= max ? "disabled" : ""}
+    style="padding:10px;"
     on:click={() => {
       value += step;
       onmouseup();
