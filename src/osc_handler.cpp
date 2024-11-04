@@ -87,7 +87,12 @@ void OSC_handler::set_out_port(int port) {
 
 void OSC_handler::send_osc_message(string address, float value) {
   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-    OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str());
+    //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
+
+    if (address[0] != '/') {
+      address = "/" + address;
+    }
+    OSCMessage msg((address).c_str());
     msg.add(value);
     Udp.beginPacket(dest_ip, out_port);
     msg.send(Udp);

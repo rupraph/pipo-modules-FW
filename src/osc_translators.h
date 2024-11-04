@@ -19,6 +19,8 @@ class OscTranslator {
   void set_mode_raw(bool value);
   void set_output_max(float value);
   void set_output_min(float value);
+  void set_osc_addr(string value);
+  string get_osc_addr();
 
   // config
   JsonDocument get_json() const;
@@ -30,6 +32,9 @@ class OscTranslator {
 
   float osc_max = 1;
   float osc_min = 0;
+
+  // OSC address
+  string osc_addr = "/";
 };
 
 #endif  // OSC_TRANSLATORS_H

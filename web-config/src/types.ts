@@ -48,6 +48,7 @@ export type OscConfig = {
   mode_raw: boolean;
   osc_max: number;
   osc_min: number;
+  osc_addr: string;
 };
 
 export type GeneralConfig = {

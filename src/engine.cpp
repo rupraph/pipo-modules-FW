@@ -235,6 +235,7 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
     string axis_name = pair.first;
     float sensor_val = sensor.get_value(axis_name);
     OscTranslator& Osc_translator = Osctranslators[axis_name];
+    string address = Osc_translator.get_osc_addr();
 
     if (Osc_translator.get_enabled() &&
         sensor.test_outside_deadzone(axis_name)) {
@@ -248,7 +249,7 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
               Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 2);
 
           if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-            osc.send_osc_message(axis_name, osc_val[axis_name]);
+            osc.send_osc_message(address, osc_val[axis_name]);
           }
         }
       } else  // sensor uses trigger mode
@@ -256,12 +257,12 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
         if (sensor.get_bool_value(axis_name)) {
           osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 2);
           if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-            osc.send_osc_message(axis_name, osc_val[axis_name]);
+            osc.send_osc_message(address, osc_val[axis_name]);
           }
         } else {
           osc_val[axis_name] = round_to(Osc_translator.get_output_min(), 2);
           if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-            osc.send_osc_message(axis_name, osc_val[axis_name]);
+            osc.send_osc_message(address, osc_val[axis_name]);
           }
         }
       }
