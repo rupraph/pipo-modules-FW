@@ -1,59 +1,55 @@
 {
-    "engine": {
-        "engine-hid": {
-            "dist": {
-                "enabled": false,
-                "mapto": "x",
-                "out_type": 0,
-                "output_max": 255,
-                "output_min": 0,
-                "quantize": false,
-                "quantize_steps": 5,
-                "threshold": 0,
-                "use_threshold": 0
-            }
-        },
-        "engine-midi": {
-            "dist": {
-                "cc_number": 2,
-                "channel": 1,
-                "enabled": true,
-                "hires": false,
-                "interpolation_type": 0,
-                "max_output": 127,
-                "min_output": 0,
-                "numberOfNotes": 15,
-                "rootNote": 55,
-                "scaleType": "major pentatonic",
-                "translator_mode": 1
-            }
-        },
-        "engine-osc": {
-            "dist": {
-                "enabled":false,
-                "mode_raw": false,
-                "output_max":1,
-                "output_min":0
-            }
-        }
+  "engine": {
+    "engine-hid": {
+      "dist": {
+        "enabled": true,
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
+        "stroke_mode": true
+      }
     },
-    "sensor": {
-        "dist": {
-            "deadzone": 0.0,
-            "enabled": true,
-            "inverted": false,
-            "offset": 0.0,
-            "value": 0.0,
-            "limit_max": 600,
-            "limit_min": 20.0
-        }
+    "engine-midi": {
+      "dist": {
+        "cc_nb": 2,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 15,
+        "sustain": 0.8,
+        "rootNote": 55,
+        "scaleType": "major pentatonic",
+        "tl_mode": 1
+      }
     },
-    "general": {
-        "Wifi_mode": "STA",
-        "OSC_ENA": true,
-        "OSC_IP": "192.168.1.71",
-        "OSC_PORT": 8000,
-        "MidiEnabled": true,
-        "HidEnabled": true
+    "engine-osc": {
+      "dist": {
+        "enabled": false,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0
+      }
     }
+  },
+  "sensor": {
+    "dist": {
+      "deadzone": 0.0,
+      "offset": 0.0,
+      "invert": false,
+      "lmax": 60.0,
+      "lmin": 5.0,
+      "mode": true,
+      "th_mode": false
+    }
+  },
+  "general": {
+    "Wifi_mode": "STA",
+    "OSC_ENA": true,
+    "OSC_IP": "192.168.1.71",
+    "OSC_PORT": 8000,
+    "MidiEnabled": true,
+    "HidEnabled": false,
+    "HidMode": 2
+  }
 }

@@ -5,27 +5,21 @@
   export let config: CCConfig & BaseMidiConfig;
 </script>
 
-<Range
-  label="CC number"
-  bind:value={config.cc_number}
-  min={0}
-  max={127}
-  step={1}
-/>
+<Range label="CC Number" bind:value={config.cc_nb} min={0} max={127} step={1} />
 
 <Range
-  label="Min"
-  bind:value={config.min_output}
+  label="CC Out Min"
+  bind:value={config.cc_min}
   min={0}
-  max={Math.min(Infinity, config.max_output)}
+  max={Math.min(Infinity, config.cc_max)}
 />
 <Range
-  label="Max"
-  bind:value={config.max_output}
-  min={Math.max(0, config.min_output)}
+  label="CC Out Max"
+  bind:value={config.cc_max}
+  min={Math.max(0, config.cc_min)}
   max={Infinity}
 />
-<Checkbox label="High Resolution" bind:value={config.hires} />
+<Checkbox label="High Res mode" bind:value={config.hires} />
 
 <style>
 </style>

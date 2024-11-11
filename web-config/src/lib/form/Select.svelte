@@ -4,24 +4,35 @@
   import Input from "./Input.svelte";
   import { uid } from "../../utils";
   export let label: string;
-  export let value: string;
-  export let options: { value: string; label: string }[] = [];
-  let selectedItem: { value: string; label: string };
+  export let clearable: boolean = false;
+  export let value: string | number;
+  export let options: { value: string | number; label: string }[] = [];
+  let selectedItem: { value: string | number; label: string };
   let id = uid();
-  onMount(async () => {
+  function select() {
     if (!value || !options.length) return;
     const toSelect = options.find((option) => option.value === value);
     if (!toSelect) return;
     selectedItem = toSelect;
+  }
+  onMount(() => {
+    select();
   });
+  $: {
+    if (value !== undefined) {
+      select();
+    }
+  }
 </script>
 
-<Input {label} {id}>
+<Input {label} {id} class={$$restProps.class || ""}>
   <Select
     items={options}
+    {clearable}
     bind:value={selectedItem}
     --selected-item-color="var(--text-color)"
-    --item-is-active-bg="var(--bg-tertiary)"
+    --item-is-active-bg="var(--bg-lighter)"
+    --item-is-active-color="var(--text-color)"
     --item-color="var(--text-color)"
     --item-bg="var(--bg-secondary)"
     --input-color="var(--text-color)"

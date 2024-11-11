@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { pipoType } from "../../services";
   import type { NoteConfig, BaseMidiConfig } from "../../types";
+  import NoteInput from "../form/NoteInput.svelte";
   import Range from "../form/Range.svelte";
   import Select from "../form/Select.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
+
   export let config: NoteConfig & BaseMidiConfig;
+  export let isThresholdMode = false;
 
   // this is currently defined both on pipo and config side.
   const scaleTypes = [
@@ -52,14 +57,36 @@
   ];
 </script>
 
-<Select label="Scale type" options={scaleTypes} bind:value={config.scaleType} />
-<Range label="Root Note" bind:value={config.rootNote} min={0} max={127} />
-<Range
-  label="Number of Notes"
-  bind:value={config.numberOfNotes}
-  min={1}
-  max={50}
-/>
+{#if $pipoType !== "analog"}
+  <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
+    <Select
+      class={isThresholdMode ? "disabled" : ""}
+      label="Scale type"
+      options={scaleTypes}
+      bind:value={config.scaleType}
+    />
+  </Tooltip>
+{/if}
+
+<NoteInput label="Root Note" bind:value={config.rootNote} />
+
+{#if $pipoType !== "analog"}
+  <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
+    <Range
+      class={isThresholdMode ? "disabled" : ""}
+      on:mousemove={() => console.log("hover")}
+      on:click={() => console.log("click")}
+      on:mouseenter={() => console.log("enter")}
+      on:mouseleave={() => console.log("leave")}
+      label="Number of Notes"
+      tooltip="You are in threshold mode, this value is ignored."
+      bind:value={config.nbOfNotes}
+      min={1}
+      max={50}
+    />
+  </Tooltip>
+{/if}
+<Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
 
 <style>
 </style>

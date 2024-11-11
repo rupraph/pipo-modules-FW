@@ -1,6 +1,7 @@
 <script lang="ts">
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import Switch from "./form/Switch.svelte";
   export let title: string;
   export let open = false;
   export let value: boolean | undefined = undefined;
@@ -14,10 +15,13 @@
     {title}
   </h3>
   {#if hasState}
-    <div class="input-checkbox">
-      <input type="checkbox" on:click|stopPropagation bind:checked={value} />
-      <!-- <Switch bind:value={state} design="slider" label="" /> -->
-    </div>
+    <!-- <input
+      class="input-checkbox"
+      type="checkbox"
+      on:click|stopPropagation
+      bind:checked={value}
+    /> -->
+    <Switch bind:value design="slider" label="" />
   {/if}
 </div>
 
@@ -35,20 +39,30 @@
 {/if}
 
 <style>
+  .title-container {
+    display: flex;
+    align-items: center;
+    height: 3em;
+    justify-content: space-between;
+    width: 100%;
+  }
   h3 {
     cursor: pointer;
     display: flex;
     align-items: center;
-    width: auto;
-    margin: 2%;
+    flex: 1;
   }
   h3:hover {
     text-decoration: underline;
   }
+  .title-container > input {
+    height: 1.5em;
+    width: 1.5em;
+  }
   .arrow {
     margin-right: 1em;
     border-radius: 3px;
-    border: solid white;
+    border: solid rgb(0, 0, 0);
     border-width: 0 3px 3px 0;
     display: inline-block;
     padding: 3px;
@@ -72,26 +86,5 @@
   .down {
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
-  }
-
-  .title-container {
-    display: flex;
-    align-items: center;
-    height: auto;
-    justify-content: space-between;
-  }
-
-  .input.checkbox {
-    /* margin-left: 20%; */
-    display: flex;
-    /* margin-left: 20%; */
-    /* margin-right:80%; */
-  }
-
-  .input-checkbox {
-    padding-right: 50%;
-    /* padding: 1%; */
-    /* padding: 1vm; */
-    /* justify-content: center;   */
   }
 </style>

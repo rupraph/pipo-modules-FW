@@ -24,7 +24,7 @@
         "hires": false,
         "interpolation_type": 0,
         "max_input": 300,
-        "max_output": 127,
+        "cc_max": 127,
         "min_input": 20.0,
         "min_output": 0,
         "numberOfNotes": 15,

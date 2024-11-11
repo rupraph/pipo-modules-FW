@@ -1,11 +1,15 @@
 <script lang="ts">
+  import LoadingButton from "../form/LoadingButton.svelte";
+
   export let onClick: (name: string) => void;
   export let onCreate: () => void;
   export let onRename: (oldName: string, newName: string) => void;
+  export let onDelete: (name: string) => Promise<void>;
   export let items: string[];
   export let active: string;
   let newname = "";
   let renaming = false;
+  let deleting = false;
   function itemClick(item: string) {
     if (item === active) {
       newname = item;
@@ -20,6 +24,13 @@
       renaming = false;
     }
   }
+  function onDeleteClick() {
+    deleting = true;
+    Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      // onDelete(active),
+    ]).finally(() => (deleting = false));
+  }
 </script>
 
 <div class="configs">
@@ -29,10 +40,23 @@
         class="tab {item === active ? 'active' : ''}"
         on:click={() => itemClick(item)}
       >
-        {#if item === active && renaming}
-          <span contenteditable bind:textContent={newname} on:keyup={onkeyup}>
-            {newname}
-          </span>
+        {#if item === active}
+          {#if renaming}
+            <span contenteditable bind:textContent={newname} on:keyup={onkeyup}>
+              {newname}
+            </span>
+          {:else}
+            <span>
+              {item}
+              <LoadingButton
+                onClick={onDeleteClick}
+                class="delete"
+                loading={deleting}
+                title="Delete"
+                width="1em">x</LoadingButton
+              >
+            </span>
+          {/if}
         {:else}
           <span>
             {item}
@@ -54,7 +78,7 @@
     grid-template-rows: 2em auto;
   }
   .tabs {
-    gap: 10px;
+    gap: 20px;
     margin-left: 25px;
     max-height: 2em;
   }
@@ -69,6 +93,7 @@
   .tab.active {
     z-index: 12;
     cursor: text;
+    color: rgb(2, 141, 176);
   }
   .tab > input {
     padding: 0;
@@ -82,13 +107,13 @@
     outline: 0px solid transparent;
   }
   .tab.active > span {
-    padding-bottom: 3px;
+    padding-bottom: 5%;
   }
   .tab > span {
     background-color: var(--bg-color);
     grid-area: 1 / 3 / 4 / 5;
     font-size: 1.2em;
-    border-top: 2px solid white;
+    border-top: 2px solid rgb(80, 80, 80);
     min-width: 50px;
     padding: 0 10px;
     z-index: 10;
@@ -97,7 +122,7 @@
   .tab::after {
     content: "";
     height: 100%;
-    border-top: 2px solid white;
+    border-top: 2px solid rgb(80, 80, 80);
     min-width: 16px;
     background: var(--bg-color);
   }
@@ -106,7 +131,7 @@
     content: "";
     transform: skew(25deg);
     border-radius: 0 8px 0 0;
-    border-right: 2px solid white;
+    border-right: 2px solid rgb(80, 80, 80);
     padding-left: 6px;
   }
   .tab:before {
@@ -114,7 +139,7 @@
     border-radius: 8px 0 0 0;
     transform: skew(-25deg);
     border-radius: 8px 0 0 0;
-    border-left: 2px solid white;
+    border-left: 2px solid rgb(80, 80, 80);
     padding-right: 6px;
   }
   .tab.new > span {
@@ -122,10 +147,24 @@
   }
   .content {
     z-index: 10;
-    border-radius: 10px;
-    border: 2px solid white;
-    margin-top: 4px;
+    border-radius: 12px;
+    border: 2px solid rgb(80, 80, 80);
+    margin-top: 6px;
+    padding-top: 1.5em;
     background: var(--bg-color);
     transform: translate(0, -1px);
+  }
+  :global(.tab .delete) {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 1em;
+    height: 1.2em;
+    cursor: pointer;
+    border-radius: 10%;
+    /* transform: translate(-0.9em, -0.3em); */
+  }
+  :global(.tab .delete:hover) {
+    background: var(--bg-color);
   }
 </style>

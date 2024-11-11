@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import Collapse from "../collapse.svelte";
   import { sound } from "./sound";
-  import { pipoInput } from "./pipoinput";
+  import { pipoio } from "../../pipoio";
   let error: string;
   let angle = 0;
   let value = 0;
@@ -14,7 +13,7 @@
   }
 
   onMount(async () => {
-    pipoInput.on("controlChange", ({ control, value }) => {
+    pipoio.on("controlChange", ({ control, value }) => {
       if (control !== ccNumber) return;
       angle = ((value - min) / (max - min)) * 270;
       value = interp(value);

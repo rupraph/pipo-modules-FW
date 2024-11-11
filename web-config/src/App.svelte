@@ -1,12 +1,14 @@
 <script lang="ts">
   import Logs from "./lib/logs.svelte";
-  import type { PipoTypes } from "./types";
-  import { pipoType } from "./services";
+  import type { PipoInfo, PipoTypes } from "./types";
+  import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import WifiConnect from "./lib/wifi/connect.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
-  import Checkbox from "./lib/form/Checkbox.svelte";
+  import { pipoio } from "./pipoio";
+  import Menu from "./lib/menu.svelte";
+  import OfflineOverlay from "./lib/offline-overlay.svelte";
 
   // import Piano from "./lib/vis/Piano.svelte";
 
@@ -18,7 +20,6 @@
     as: "url",
   });
 
-  console.log("Images:", images);
   let type: PipoTypes = "unknown";
   let error: string;
   function onError(e: AxiosError) {
@@ -41,25 +42,22 @@
     }
     console.error("Error fetching info:", e);
   }
+  function fetch() {
+    return axios
+      .get<PipoInfo>("/info", { timeout: 2000 })
+      .then(({ data, status, statusText }) => {
+        type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
+        ip.set(data.ip);
+        pipoType.set(type);
+        return data;
+      })
+      .catch((e) => onError(e));
+  }
+  let info = fetch();
+  pipoio.on("connect", () => {
+    info = fetch();
+  });
 
-  axios.get("/wifi-status").then(({ data }) => {
-    console.log("Wifi status:", data);
-  });
-  axios.get("/wifi-networks").then(({ data }) => {
-    console.log("Wifi networks:", data);
-  });
-  axios.get("/wifi-networks").then(({ data }) => {
-    console.log("Wifi networks:", data);
-  });
-  const info = axios
-    .get("/info", { timeout: 2000 })
-    .then(({ data, status, statusText }) => {
-      type = data.type.toLowerCase().replace("pipo_", "");
-      console.log("Pipo type:", type);
-      pipoType.set(type);
-      return data;
-    })
-    .catch((e) => onError(e));
   $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
 
   function reboot() {
@@ -67,10 +65,15 @@
       console.log("Rebooting...");
     });
   }
+
+  const batt = axios.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
+    console.log("Batt voltage:", data);
+    return data / 1000;
+  });
 </script>
 
 <main>
-  <WifiConnect />
+  <Menu />
   <div class="title-container">
     <h1>Pipo {type}</h1>
     <img
@@ -81,13 +84,14 @@
   </div>
 
   {#if error}
-    <p class="error">{error}</p>
+    <!-- <p class="error">{error}</p> -->
   {/if}
   <Configs />
 
   <article>
     <Logs />
   </article>
+
   {#if !error && info}
     {#await info}
       <p>Waiting for Pipo to respond...</p>
@@ -99,11 +103,19 @@
           <span><bold>Type</bold>{resp.type}</span>
           <span><bold>Name</bold>{resp.name}</span>
           <span><bold>Version</bold>{resp.version}</span>
+          {#if !error && batt}
+            {#await batt}
+              <p>Waiting for Pipo to respond...</p>
+            {:then resp}
+              <span><bold>Batt Voltage: </bold>{resp} V</span>
+            {/await}
+          {/if}
         </Collapse>
         <!-- <Piano /> -->
       </article>
     {/await}
   {/if}
+  <OfflineOverlay />
 </main>
 
 <style>
@@ -136,7 +148,7 @@
     font-family: Brugty;
     position: relative;
     z-index: 1; /* Ensure the title is above the image */
-    color: white; /* Adjust the text color for better visibility */
+    color: rgb(60, 60, 60); /* Adjust the text color for better visibility */
   }
 
   :global(.info) span {
