@@ -6,6 +6,7 @@ void PipoWifi::setup() {
   WiFi.disconnect(true);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
+  load();
   scan();
   connect();
 };
@@ -13,7 +14,7 @@ void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 500U);
   for (int i = 0; i < num; i++) {
     int rssiperc = WiFi.RSSI(i);
-    ssids[std::string(WiFi.SSID(i).c_str())] = rssiperc;
+    signals[WiFi.SSID(i)] = rssiperc;
     Serial.print("Network: ");
     Serial.print(WiFi.SSID(i));
     Serial.print(" RSSI: ");
@@ -24,15 +25,12 @@ void PipoWifi::scan() {
 void PipoWifi::connect() {
   Serial.println("Connect...");
   mode = CONNECTING;
-  for (auto const &ssid : ssids) {
+  for (auto const& ssid : signals) {
     try {
-      std::string password =
-          std::string(preferences.getString(ssid.first.c_str()).c_str());
-      // try to connect
-      if (connect(ssid.first, password)) {
+      if (connect(ssid.first, passwords[ssid.first])) {
         return;
       }
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
       continue;
     }
   }
@@ -41,26 +39,25 @@ void PipoWifi::connect() {
   APMode();
 };
 
-bool PipoWifi::connect(std::string ssid) {
-  std::string password =
-      std::string(preferences.getString(ssid.c_str()).c_str());
-  return connect(ssid, password);
+bool PipoWifi::connect(String ssid) {
+  return connect(ssid, passwords[ssid]);
 }
 
-bool PipoWifi::connect(std::string ssid, std::string password) {
-  Serial.print("Connecting to " + String(ssid.c_str()));
-  Serial.println(" with password " + String(password.c_str()));
+bool PipoWifi::connect(String ssid, String password) {
+  Serial.print("Connecting to " + ssid);
+  Serial.println(" with password " + String(password));
   mode = CONNECTING;
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
-  int result = WiFi.begin(ssid.c_str(), password.c_str());
+  int result = WiFi.begin(ssid.c_str(), password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
     delay(CHECK_TIMEOUT);
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Connected to " + String(ssid.c_str()));
-    save(ssid, password);
+    passwords[ssid] = password;
+    save();
     mode = CONNECTED;
     return true;
   }
@@ -69,54 +66,89 @@ bool PipoWifi::connect(std::string ssid, std::string password) {
   return false;
 };
 
-void PipoWifi::save(std::string ssid, std::string password) {
-  if (preferences.getString(ssid.c_str()).length() == 0) {
-    preferences.putString(ssid.c_str(), password.c_str());
-    return;
+void PipoWifi::save() {
+  String buffer = "";
+  String indexes = "";
+  for (auto const& pair : passwords) {
+    indexes += pair.first.length();
+    indexes += ' ';
+    indexes += pair.second.length();
+    indexes += ' ';
+    buffer += pair.first;
+    buffer += pair.second;
   }
-  int num = preferences.getInt("num", -1);
-  if (num < 5) {
-    num++;
-  }
-  preferences.putInt("num", num);
-  preferences.putString(ssid.c_str(), password.c_str());
-  preferences.putString(String(num).c_str(), ssid.c_str());
+  preferences.putString("indexes", indexes);
+  preferences.putString("buffer", buffer);
 };
 
+void PipoWifi::load() {
+  String indexes = preferences.getString("indexes", "");
+  String buffer = preferences.getString("buffer", "");
+  int n = 0;
+  bool isPassword = false;
+  int ssidStart = 0;
+  int passwordStart = 0;
+  int passwordEnd = 0;
+  for (int i = 0; i < indexes.length(); i++) {
+    if (indexes[i] != ',') {
+      n *= 10;
+      n += indexes[i] - '0';
+      continue;
+    }
+    if (!isPassword) {
+      isPassword = true;
+      ssidStart = n;
+    } else {
+      if (!passwordStart) {
+        passwordStart = n;
+      } else {
+        passwordEnd = n;
+        passwords[buffer.substring(ssidStart, passwordEnd)] =
+            buffer.substring(passwordEnd, n);
+        passwordStart = 0;
+        passwordEnd = 0;
+        isPassword = false;
+      }
+    }
+    n = 0;
+  }
+}
 void PipoWifi::APMode() {
   WiFi.mode(WIFI_MODE_APSTA);
   WiFi.softAP("Pipo", "pipo1234");
   mode = AP;
 };
-PipoWifi::PipoWifiMode PipoWifi::getMode() { return mode; };
+PipoWifi::PipoWifiMode PipoWifi::getMode() {
+  return mode;
+};
 
-std::string PipoWifi::status() {
-  std::string res;
+String PipoWifi::status() {
+  String res;
   switch (mode) {
-  case CONNECTING:
-    res = "CONNECTING";
-    break;
-  case AP:
-    res = "AP";
-    break;
-  case CONNECTED:
-    res = "CONNECTED";
-    res += " IP: ";
-    res += WiFi.localIP().toString().c_str();
-    res += " SSID: ";
-    res += WiFi.SSID().c_str();
-    break;
+    case CONNECTING:
+      res = "CONNECTING";
+      break;
+    case AP:
+      res = "AP";
+      break;
+    case CONNECTED:
+      res = "CONNECTED";
+      res += " IP: ";
+      res += WiFi.localIP().toString().c_str();
+      res += " SSID: ";
+      res += WiFi.SSID().c_str();
+      break;
   }
   return res;
 }
-std::string PipoWifi::availableNetworks() {
-  std::string res;
-  for (auto const &ssid : ssids) {
+String PipoWifi::availableNetworks() {
+  String res;
+  for (auto const& ssid : signals) {
     res += ssid.first;
     res += " ";
-    res += std::to_string(ssid.second);
+    res += String(ssid.second);
     res += strcmp(WiFi.SSID().c_str(), ssid.first.c_str()) == 0 ? " 1" : " 0";
-    res += preferences.getString(ssid.first.c_str()).length() > 0 ? " 1" : " 0";
+    res += passwords[ssid.first].length() > 0 ? " 1" : " 0";
     res += "\n";
   }
   return res;

@@ -8,27 +8,31 @@
 #include <string>
 class PipoWifi {
 
-public:
+ public:
   enum PipoWifiMode { CONNECTING, AP, CONNECTED };
   PipoWifi();
   void setup();
   bool is_running = false;
   PipoWifiMode getMode();
-  std::string status();
-  std::string availableNetworks();
-  bool connect(std::string ssid);
-  bool connect(std::string ssid, std::string password);
+  String status();
+  String availableNetworks();
+  bool connect(String ssid);
+  bool connect(String ssid, String password);
   void scan();
+  void decode(char);
 
-private:
+ private:
+  static const int MAX_NETWORKS = 10;
   static const uint CONNECT_TIMEOUT = 2000;
   static const uint CHECK_TIMEOUT = 50;
   PipoWifiMode mode = CONNECTING;
   Preferences preferences;
-  std::map<std::string, float> ssids;
+  std::map<String, float> signals;
+  std::map<String, String> passwords;
   void connect();
-  void save(std::string ssid, std::string password);
+  void save();
+  void load();
   void APMode();
 };
 
-#endif // PIPOWIFI_H
+#endif  // PIPOWIFI_H
