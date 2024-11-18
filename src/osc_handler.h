@@ -8,29 +8,28 @@
 
 class Config;
 
-class OSC_handler
-{
-    public:
-        OSC_handler(Config& config): config(config) {}
-        
-        void setup();
-        void set_config();
-        void sendOscMessage(string address, float value);
-        
-        
-    private:
-        Config& config;
-        IPAddress dest_ip;
-        int out_port;
-        bool isStarted = false;
-        bool enabled = false;
-        WiFiUDP Udp;
-        void start();
-        void stop();
-        void setDestIp(string ip);
-        void setOutPort(int port);
-        void setEnabled(bool ena);
+class OSC_handler {
+ public:
+  OSC_handler(Config& config) : config(config) {}
 
+  void setup();
+  void set_config();
+  void send_osc_message(string address, float value);
+
+  void set_enabled(bool ena);
+  bool get_enabled();
+
+ private:
+  Config& config;
+  IPAddress dest_ip;
+  int out_port;
+  bool isStarted = false;
+  bool enabled = false;
+  WiFiUDP Udp;
+  void start();
+  void stop();
+  void set_dest_ip(string ip);
+  void set_out_port(int port);
 };
 
-#endif // OSC_HANDLER_H
+#endif  // OSC_HANDLER_H

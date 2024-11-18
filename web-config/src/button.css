@@ -1,0 +1,46 @@
+button {
+  display: flex;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 500;
+  height: 34px;
+  justify-content: center;
+  letter-spacing: normal;
+  line-height: 14px;
+  margin: 0;
+  outline-style: none;
+  padding: 0 18px;
+  text-align: center;
+  border: 1px solid transparent;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.25s;
+}
+button:hover {
+  filter: brightness(120%);
+}
+
+button.primary {
+  color: black;
+  background-color: var(--main);
+}
+button.error{
+  color: white;
+  background-color: var(--red);
+}
+button.success{
+  color:white;
+  background-color: var(--green);
+}
+button.active {
+  transform: scale(0.95);
+  box-shadow: none;
+}
+button.disabled {
+ cursor: not-allowed;
+}

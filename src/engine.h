@@ -4,10 +4,10 @@
 #include <Arduino.h>
 #include <unordered_map>
 #include "midi/midi_translator.h"
+#include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
-#include "hid/usb_hid.h"
-#include "utils/json.hpp"
+#include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensor/input_sensor.h"
 #include "hw_ui.h"
@@ -19,125 +19,67 @@ using namespace std;
 // this class takes care of the translation of the sensor data to the different outputs
 // Todo: maps should not be declared per axis, but per function since some output might rely on 2 inputs
 
-class OSC_handler; // why do I need forward declaration here??
+class OSC_handler;  // why do I need forward declaration here??
 
-class Engine
-{
-    public:
-        Engine(Sensor& sensor)
-        {
-             #if defined(PIPO_MOTION)
-                Miditranslators ={
-                    {"roll",MidiTranslator()},
-                    {"pitch",MidiTranslator()},
-                    {"yaw",MidiTranslator()},
-                    {"accX",MidiTranslator()},
-                    {"accY",MidiTranslator()},
-                    {"accZ",MidiTranslator()}   
+class Engine {
+ public:
+  Engine() {
+#if defined(PIPO_MOTION)
+    string axis_list[] = {"roll", "pitch", "yaw", "accX", "accY", "accZ"};
+    for (auto axis : axis_list) {
+      Miditranslators[axis] = MidiTranslator();
+      Osctranslators[axis] = OscTranslator();
+      HID_translators[axis] = HidTranslator();
+    }
 
-                };
+#elif defined(PIPO_RANGE)
+    Miditranslators = {{"dist", MidiTranslator()}};
+    Osctranslators = {{"dist", OscTranslator()}};
+    HID_translators = {{"dist", HidTranslator()}};
 
-                Osctranslators ={
-                    {"roll",OscTranslator()},
-                    {"pitch",OscTranslator()},
-                    {"yaw",OscTranslator()},
-                    {"accX",OscTranslator()},
-                    {"accY",OscTranslator()},
-                    {"accZ",OscTranslator()}
-                };
+#elif defined(PIPO_ANALOG)
+    string axis_list[] = {"A1", "A2", "A3", "A4", "A5", "A6",
+                          "T1", "T2", "T3", "T4", "T5", "T6"};
+    for (auto axis : axis_list) {
+      Miditranslators[axis] = MidiTranslator();
+      Osctranslators[axis] = OscTranslator();
+      HID_translators[axis] = HidTranslator();
+    }
+#endif
+  }
 
+  unordered_map<string, MidiTranslator> Miditranslators;
+  unordered_map<string, OscTranslator> Osctranslators;
+  unordered_map<string, HidTranslator> HID_translators;
 
-                hid_map ={
-                    {"roll",HidTranslator()},
-                    {"pitch",HidTranslator()},
-                    {"yaw",HidTranslator()},
-                    {"accX",HidTranslator()},
-                    {"accY",HidTranslator()},
-                    {"accZ",HidTranslator()}
-                };
-            #elif defined(PIPO_RANGE)
-                Miditranslators ={
-                    {"dist",MidiTranslator()}
-                };
-                Osctranslators ={
-                    {"dist",OscTranslator()}
-                };
-                hid_map ={
-                    {"dist",HidTranslator()}
-                };
-            #elif defined(PIPO_ANALOG)
-                Miditranslators ={
-                    {"A1",MidiTranslator()},
-                    {"A2",MidiTranslator()},
-                    {"A3",MidiTranslator()},
-                    {"A4",MidiTranslator()},
-                    {"A5",MidiTranslator()},
-                    {"A6",MidiTranslator()},
-                    {"T1",MidiTranslator()},
-                    {"T2",MidiTranslator()},
-                    {"T3",MidiTranslator()},
-                    {"T4",MidiTranslator()},
-                    {"T5",MidiTranslator()},
-                    {"T6",MidiTranslator()}
-                };
+  hid_gamepad_report_t gp;
+  hid_keyboard_report_t kb;
+  hid_mouse_report_t mouse;
 
-                Osctranslators ={
-                    {"A1",OscTranslator()},
-                    {"A2",OscTranslator()},
-                    {"A3",OscTranslator()},
-                    {"A4",OscTranslator()},
-                    {"A5",OscTranslator()},
-                    {"A6",OscTranslator()},
-                    {"T1",OscTranslator()},
-                    {"T2",OscTranslator()},
-                    {"T3",OscTranslator()},
-                    {"T4",OscTranslator()},
-                    {"T5",OscTranslator()},
-                    {"T6",OscTranslator()}
-                };
+  bool get_paused() { return paused; }
+  void set_paused(bool value) { paused = value; }
+  void toggle_pause();
 
-                hid_map ={
-                    {"A1",HidTranslator()},
-                    {"A2",HidTranslator()},
-                    {"A3",HidTranslator()},
-                    {"A4",HidTranslator()},
-                    {"A5",HidTranslator()},
-                    {"A6",HidTranslator()},
-                    {"T1",HidTranslator()},
-                    {"T2",HidTranslator()},
-                    {"T3",HidTranslator()},
-                    {"T4",HidTranslator()},
-                    {"T5",HidTranslator()},
-                    {"T6",HidTranslator()}
-                };
-            #endif
-        }
-       
-        unordered_map<string, MidiTranslator> Miditranslators;
-        unordered_map<string, OscTranslator> Osctranslators;
-        unordered_map<string, HidTranslator> hid_map;
+  void update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
+              OSC_handler& osc);
+  void midi_processor(Sensor& sensor, midi_io& midiio);
+  void hid_processor(Sensor& sensor, usb_hid& hidio);
+  void osc_processor(Sensor& sensor, OSC_handler& osc);
 
-        hid_gamepad_report_t    gp;
-        hid_keyboard_report_t    kb;
-        hid_mouse_report_t       mouse;
+  // config
+  JsonDocument get_config(bool debug = false);
+  void set_config(JsonObject config, bool debug = false);
 
+  //utils
+  float round_to(float value, int decimal);
 
-        void update(Sensor& sensor, midi_io& midiio,usb_hid& hidio,OSC_handler& osc);
+ private:
+  uint8_t note_val[128];
+  uint8_t note_val_prev[128];
+  bool paused = false;
 
-        void midi_processor(Sensor& sensor,midi_io& midiio);
-        void hid_processor(Sensor& sensor,usb_hid& hidio);
-        void osc_processor(Sensor& sensor,OSC_handler& osc);
-
-        json get_config(bool debug=false);
-        void set_config(json& config,bool debug=false);
-        friend void to_json(json& j, const Engine& t);
-
-    private:
-        uint8_t note_val[128];
-        uint8_t note_val_prev[128];
-
-
+  unordered_map<string, float> osc_val;
+  unordered_map<string, float> osc_val_prev;
 };
 
-
-#endif //ENGINE_H
+#endif  //ENGINE_H

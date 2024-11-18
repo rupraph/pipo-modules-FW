@@ -2,18 +2,28 @@
 
 LittleLogs logs;
 void LittleLogs::writeLog(String log, int type) {
-    int date = millis();
-    allLogs += String(date) + ":" +"(" + type + ")" + log + "\n";
-    if (allLogs.length() > 1000) {
-        allLogs = allLogs.substring(500);
-    }
+  if (allLogs.length() > 1000) {
+    allLogs = "";
+  }
+  int date = millis();
+  newLogs = true;
+  allLogs += String(date) + ":" + "(" + type + ")" + log + "--";
 }
 void LittleLogs::writeWarning(String log) {
-    writeLog(log, 1);
+  writeLog(log, 1);
 }
 
 void LittleLogs::writeError(String log) {
-    writeLog(log, 2);
+  writeLog(log, 2);
 }
 
-String LittleLogs::readLogs() { return allLogs; }
+String LittleLogs::readLogs(bool news) {
+  newLogs = false;
+  int start = lastFlush;
+  lastFlush = allLogs.length();
+  return news ? allLogs.substring(start) : allLogs;
+}
+
+bool LittleLogs::hasNews() {
+  return newLogs;
+}

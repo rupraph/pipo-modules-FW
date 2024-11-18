@@ -2,84 +2,58 @@
 #define HID_TRANSLATOR_H
 
 #include <Arduino.h>
-#include "utils/json.hpp"
+#include <ArduinoJson.h>
 
 using namespace std;
 
 // UNDER CONSTRUCTION
 
-class HidTranslator
-{
-private:
-    /* data */
-public:
+class HidTranslator {
 
-    //Todo: link to usb hid mode or use only one of the 2
-    int out_type=0; //0=axis, 1=button
-    string mapto="x"; //Gamepad: x,y,z,rz,rx,ry,buttons, hat //Mouse: x,y,wheel,buttons,pan //Keyboard: keycodes
+ public:
+  HidTranslator();
 
-    // axis are int8_t
+  int get_current_bool(float valu, float min_input, float max_input);
+  int get_current_int(float value, float min_input, float max_input);
+  int8_t get_mouse_int(float value, float min_input, float max_input);
 
-    bool quantize=0;
-    int quantize_steps=5;
+  int map_linear(float value, float min_input, float max_input, int cc_min,
+                 int cc_max);
 
+  // config
+  JsonDocument get_json() const;
+  void set_from_json(const JsonDocument& j);
 
-    int use_threshold=0;
-    int threshold=0;
+  // getter/setters
+  bool get_enabled();
+  void set_enabled(bool value);
 
-    int output_max=255;
-    int output_min=0;
+  string get_map_address();
+  void set_map_address(string value);
 
-    bool enabled=false;
+  string get_map_address2();
+  void set_map_address2(string value);
 
-    HidTranslator();
+  bool get_stroke_mode();
+  void set_stroke_mode(bool value);
 
-    int map_linear(float value, float min_input, float max_input);
-    int get_current_bool(float valu, float min_input, float max_input);
-    int get_current_int(float value, float min_input, float max_input);
+  // int get_output_max();
+  // void set_output_max(int value);
 
-    void to_json(nlohmann::json& j, const HidTranslator& t);
-    void from_json(const nlohmann::json& j, HidTranslator& t);
+  // int get_output_min();
+  // void set_output_min(int value);
 
-    nlohmann::json get_json() const;
-    void set_from_json(const nlohmann::json& j);
-    
-    string serialize() const;
-    void deserialize(const string& data);
-
-    template <typename T>
-    void set_param(const string& param_name, const T& value){
-        if (param_name == "out_type") {
-            out_type = value;
-        }
-        else if (param_name == "mapto") {
-            mapto = value;
-        }
-        else if (param_name == "quantize") {
-            quantize = value;
-        }
-        else if (param_name == "quantize_steps") {
-            quantize_steps = value;
-        }
-        else if (param_name == "use_threshold") {
-            use_threshold = value;
-        }
-        else if (param_name == "threshold") {
-            threshold = value;
-        }
-        else if (param_name == "output_max") {
-            output_max = value;
-        }
-        else if (param_name == "output_min") {
-            output_min = value;
-        }
-        else {
-            Serial.println("Invalid parameter name.") ;
-        }
-    }
-
-
+ private:
+  //Config elements
+  bool enabled = false;
+  string addr = "a";
+  string addr2 = "b";
+  // for keyboard should start with KEY_
+  bool stroke_mode = false;
+  // stroke mode means key is either pressed once per trigger (false), or maintained (true)
+  // int output_max = 255;
+  // int output_min = 0;
+  float last_value = 0;
 };
 
-
-#endif //HID_TRANSLATOR_H
+#endif  //HID_TRANSLATOR_H

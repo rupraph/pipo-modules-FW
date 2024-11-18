@@ -3,33 +3,38 @@
 
 #include <Arduino.h>
 #include "config.h"
-#include "utils/json.hpp"
-
+#include <ArduinoJson.h>
 
 using namespace std;
 
-class OscTranslator
-{
-    public:
+class OscTranslator {
+ public:
+  float get_value(float value, float min_input, float max_input);
 
-        bool enabled=false;
-        bool mode_raw=true; // sends raw sensor data.
+  // Getter/setter
+  bool get_enabled();
+  float get_output_max();
+  float get_output_min();
+  void set_enabled(bool value);
+  void set_mode_raw(bool value);
+  void set_output_max(float value);
+  void set_output_min(float value);
+  void set_osc_addr(string value);
+  string get_osc_addr();
 
-        float output_max=1;
-        float output_min=0;
+  // config
+  JsonDocument get_json() const;
+  void set_from_json(const JsonDocument& j);
 
-        float get_value(float value, float min_input, float max_input);
-        int get_current_bool(float value, float min_input, float max_input);
+ private:
+  bool enabled = false;
+  bool mode_raw = true;  // sends raw sensor data.
 
-        void to_json(nlohmann::json& j, const OscTranslator& t);
-        void from_json(const nlohmann::json& j, OscTranslator& t);
+  float osc_max = 1;
+  float osc_min = 0;
 
-        nlohmann::json get_json() const;
-        void set_from_json(const nlohmann::json& j);
-
-        string serialize() const;
-        void deserialize(const string& data);
-
+  // OSC address
+  string osc_addr = "/";
 };
 
-#endif // OSC_TRANSLATORS_H
+#endif  // OSC_TRANSLATORS_H

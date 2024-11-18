@@ -1,0 +1,49 @@
+
+/* Not working font. should find a font which I can use for the project. */
+@font-face {
+  font-family: 'Brugty';
+  src: url('./assets/Brugty.ttf') format('truetype');
+}
+body{
+  overflow: hidden;
+}
+:root {
+  font-family: Helvetica, system-ui, Brugty, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 00;
+
+  --text-color: rgb(0, 0, 0);
+  --bg-color: #fff7e8;
+  --bg-secondary:#ede1e1;
+  --bg-tertiary:#fff;
+  --bg-lighter:#6A6A6A;
+  --bg-tabs:#ffe8a7;
+  --main: #ffcb64;
+  --main-darker: #eaa31f;
+  --red: #e33333;
+  --green: #3bb143;
+  
+  background-color: var(--bg-color); 
+  color: var(--text-color);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.scroll{
+  overflow-y: auto;
+}
+.scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 20px;
+}
+
+.scroll::-webkit-scrollbar-track {
+  background: #ddd;
+  border-radius: 20px;
+}
