@@ -8,7 +8,7 @@
 #include "utils/config.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
-#include "utils/wifi_tools.h"
+#include "wifi/wifi.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -26,10 +26,11 @@ string sensor_type = "analog";
 
 midi_io midiio;
 usb_hid hidio;
+PipoWifi wifi;
 Engine engine;
 OSC_handler osc(config);
 PipoWifi wm;
-PipoServer server(input_sens, engine, osc, wm);
+PipoServer server(input_sens, engine, osc);
 
 // quick declaration of functions
 void init_filesystem();
@@ -58,7 +59,7 @@ void setup() {
   //   delay(100);
 
   /////// Init wifi
-  setup_wifi();
+  wifi.setup();
 
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
@@ -92,7 +93,7 @@ void setup() {
 void loop() {
   try {
 
-    monitor_wifi(server.is_running);
+    // monitor_wifi(server.is_running);
     input_sens.update();
     engine.update(input_sens, midiio, hidio, osc);
     pipoSocket.loop();
