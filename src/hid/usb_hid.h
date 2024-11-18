@@ -56,4 +56,6 @@ uint8_t const gamepad_hid_report[] = {TUD_HID_REPORT_DESC_GAMEPAD()};
 uint8_t const mouse_hid_report[] = {TUD_HID_REPORT_DESC_MOUSE()};
 uint8_t const key_hid_report[] = {TUD_HID_REPORT_DESC_KEYBOARD()};
 
+extern usb_hid hidio;
+
 #endif

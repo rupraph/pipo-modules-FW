@@ -14,10 +14,6 @@
 #include "utils/wifi_tools.h"
 #include "sensor/sensor.h"
 
-midi_io midiio;
-usb_hid hidio;
-PipoServer server;
-
 // quick declaration of functions
 void init_filesystem();
 void setup_wifi();

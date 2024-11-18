@@ -55,4 +55,6 @@ class midi_io {
   void printNoteList(int channel);
 };
 
+extern midi_io midiio;
+
 #endif  //MIDI_IO_H

@@ -1,5 +1,7 @@
 #include "server/server.h"
 
+PipoServer server;
+
 void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
 

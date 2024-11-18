@@ -36,4 +36,7 @@ class PipoServer {
   int ws_message_len = 0;
   char ws_message[2048];
 };
+
+extern PipoServer server;
+
 #endif  // WEBSERVER_H

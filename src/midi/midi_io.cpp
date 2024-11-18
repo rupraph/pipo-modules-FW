@@ -1,5 +1,7 @@
 #include "midi_io.h"
 
+midi_io midiio;
+
 void midi_io::setup() {
 
   MidiUSBSetup();
