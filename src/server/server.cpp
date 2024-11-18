@@ -77,7 +77,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.set(request->getParam("config")->value());
-      config.apply(input_sens, engine, osc, true);
+      config.apply(engine, osc, true);
       config.save();
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
@@ -113,7 +113,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.load_config(request->getParam("name")->value().c_str(), true);
-      config.apply(input_sens, engine, osc, true);
+      config.apply(engine, osc, true);
       return request->send(200, "text/plain", "Active config set");
     } catch (const std::exception e) {
       Serial.println("error loading config");
@@ -128,7 +128,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.delete_config(request->getParam("name")->value());
-      config.apply(input_sens, engine, osc, true);
+      config.apply(engine, osc, true);
       return request->send(200, "text/plain", "Config deleted");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -201,7 +201,7 @@ void PipoServer::setup_requests() {
 #endif
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
-            config.apply(input_sens, engine, osc, true);
+            config.apply(engine, osc, true);
 #ifdef DEBUG_HEAP
             Serial.println(ESP.getFreeHeap());
 #endif
@@ -264,7 +264,7 @@ void PipoServer::setup_requests() {
     try {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
-      input_sens.measure_offset(axis);
+      input_sensor.measure_offset(axis);
       return request->send(200, "text/plain", "Offset measured");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
@@ -293,10 +293,10 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
 
     if (strcmp("config", command) == 0) {
       config.setValue(ws_message + offset + 1, ws_message_len - offset - 1);
-      config.apply(input_sens, engine, osc, true);
+      config.apply(engine, osc, true);
     } else if (strcmp("configs", command) == 0) {
       config.setValues(ws_message + offset + 1, ws_message_len - offset - 1);
-      config.apply(input_sens, engine, osc, true);
+      config.apply(engine, osc, true);
     } else if (strcmp("save", command) == 0) {
       config.save();
     }
@@ -308,7 +308,7 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
 }
 void PipoServer::setup_ws() {
   server.addHandler(&ws);
-  pipoSocket.setup(&ws, &input_sens);
+  pipoSocket.setup(&ws);
   events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
   String msg = "";

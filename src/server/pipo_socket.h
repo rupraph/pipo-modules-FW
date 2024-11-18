@@ -1,6 +1,6 @@
 #ifndef PIPOSOCKET_H
 #define PIPOSOCKET_H
-#include "sensor/input_sensor.h"
+#include "sensor/sensor.h"
 #include "utils/logs.h"
 #include <ESPAsyncWebServer.h>
 using namespace std;
@@ -8,7 +8,7 @@ using namespace std;
 class PipoSocket {
  public:
   PipoSocket();
-  void setup(AsyncWebSocket* ws, Sensor* sensor);
+  void setup(AsyncWebSocket* ws);
   void sendNoteOn(int note, int velocity, int channel);
   void sendNoteOff(int note, int velocity, int channel);
   void sendSensorValue(std::string axis, float value);
@@ -16,7 +16,6 @@ class PipoSocket {
 
  private:
   AsyncWebSocket* ws;
-  Sensor* input_sens;
   unsigned long lastSendTime = 0;
   unsigned long lastCleanTime = 0;
   unsigned long iterations = 0;

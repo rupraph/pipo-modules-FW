@@ -1,4 +1,4 @@
-#include "acc_sensor.h"
+#include "sensor/acc_sensor.h"
 
 // should test quat 9 and other inputs
 

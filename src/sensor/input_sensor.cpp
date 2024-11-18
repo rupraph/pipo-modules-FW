@@ -1,12 +1,13 @@
-#include "input_sensor.h"
-#include "acc_sensor.h"
-#include "range_sensor.h"
+#include "sensor/input_sensor.h"
+// #include "acc_sensor.h"
+// #include "range_sensor.h"
 // #include "analog_sensor.h"
 
 //Todo: replace throw with Serial
 
 //Todo: deadzone should be in percentage or max or in value ?
 // true if outside deadzone
+
 bool Sensor::test_outside_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
 

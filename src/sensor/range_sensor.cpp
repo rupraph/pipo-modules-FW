@@ -1,4 +1,4 @@
-#include "range_sensor.h"
+#include "sensor/range_sensor.h"
 
 void RangeSensor::init() {
 #if defined(PROTO_ATOM)

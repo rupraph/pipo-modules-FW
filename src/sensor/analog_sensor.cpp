@@ -1,4 +1,4 @@
-#include "analog_sensor.h"
+#include "sensor/analog_sensor.h"
 
 void AnalogSensor::init() {}
 

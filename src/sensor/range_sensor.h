@@ -33,4 +33,6 @@ class RangeSensor : public Sensor {
   KalmanFilter km_filter;
 };
 
+// extern RangeSensor input_sensor;
+
 #endif  //RANGE_SENSOR_H

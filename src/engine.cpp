@@ -1,5 +1,4 @@
 #include "engine.h"
-#include "HW_CONFIG.h"
 
 // the engine takes the sensor data and outputs it to the selected interfaces
 // based on the configuration
@@ -7,22 +6,22 @@
 // Todo engine.
 // could use combination mode to have note from orientation, and trigger from
 // acceleration
+Engine engine;
 
 //Todo: could likely reorganise the loop through axis to be in update instead of being in each processor
-void Engine::update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
-                    OSC_handler& osc) {
+void Engine::update(midi_io& midiio, usb_hid& hidio, OSC_handler& osc) {
   if (paused) {
     return;
   }
   if (config.general_config["MidiEnabled"] == true) {
     midiio.manage_sustain();
-    midi_processor(sensor, midiio);
+    midi_processor(midiio);
   }
   if (config.general_config["OSC_ENA"] == true) {
-    osc_processor(sensor, osc);
+    osc_processor(osc);
   }
   if (config.general_config["HidEnabled"] == true) {
-    hid_processor(sensor, hidio);
+    hid_processor(hidio);
   }
   // monitor_sensors(sensor);
 }
@@ -31,28 +30,28 @@ void Engine::toggle_pause() {
   paused = !paused;
 }
 
-void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
+void Engine::midi_processor(midi_io& midiio) {
   // loop through sensor data
-  const auto& sensor_dat = sensor.get_sensor_dat_map();
+  const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     MidiTranslator& Midi_translator = Miditranslators[axis_name];
 
-    float sensor_val = sensor.get_value(axis_name);
-    float sensor_min = sensor.get_limit_min(axis_name);
-    float sensor_max = sensor.get_limit_max(axis_name);
+    float sensor_val = input_sensor.get_value(axis_name);
+    float sensor_min = input_sensor.get_limit_min(axis_name);
+    float sensor_max = input_sensor.get_limit_max(axis_name);
     int channel = Midi_translator.channel;
 
     // check if axis is enabled, outside deadzone and not disabled
-    if (sensor.test_outside_deadzone(axis_name) &&
+    if (input_sensor.test_outside_deadzone(axis_name) &&
         Midi_translator.get_enabled() == true) {
       // if CC MODE
       if (Midi_translator.tl_mode == 0) {
         int cc_nb = Midi_translator.cc_nb;
 
         // sensor uses continuous mode
-        if (sensor.get_mode(axis_name) == 0) {
-          if (sensor.is_within_range(axis_name)) {
+        if (input_sensor.get_mode(axis_name) == 0) {
+          if (input_sensor.is_within_range(axis_name)) {
             // Todo: hires not tested
             if (Midi_translator.get_hires()) {
               uint16_t cc_val =
@@ -73,7 +72,7 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
         } else  // sensor uses trigger mode
         {
 
-          if (sensor.get_bool_value(axis_name)) {
+          if (input_sensor.get_bool_value(axis_name)) {
             uint16_t cc_val = Midi_translator.get_max_output();
             if (Midi_translator.get_hires()) {
               midiio.sendControlChange(cc_nb, cc_val, channel, true);
@@ -106,35 +105,35 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
                                        // shutoff note after delay
 
         // mode is threshold
-        if (sensor.get_mode(axis_name) == 1) {
+        if (input_sensor.get_mode(axis_name) == 1) {
           int thresh_note = Midi_translator.get_root_note();
           // midiio.printNoteList(channel);
-          if (sensor.get_bool_value(axis_name)) {
+          if (input_sensor.get_bool_value(axis_name)) {
             if (  //!midiio.is_note_playing(thresh_note, channel) &&
-                sensor.get_trigger_flag(axis_name, MIDI)) {
+                input_sensor.get_trigger_flag(axis_name, MIDI)) {
               midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
-              sensor.set_trigger_flag(axis_name, MIDI, false);
+              input_sensor.set_trigger_flag(axis_name, MIDI, false);
             }
           } else {
             midiio.sendNoteOff(thresh_note, 127, channel);
           }
         } else  // mode is continuous
         {
-          if (sensor.is_within_range(axis_name) &&
+          if (input_sensor.is_within_range(axis_name) &&
               !midiio.is_note_playing(note_val[channel], channel) &&
               (note_val[channel] != note_val_prev[channel] ||
-               sensor.get_trigger_flag(axis_name, MIDI))) {
+               input_sensor.get_trigger_flag(axis_name, MIDI))) {
             midiio.sendNoteOn(note_val[channel], 127, channel, sustain_ms);
-            if (sensor.get_trigger_flag(axis_name, MIDI)) {
-              sensor.set_trigger_flag(axis_name, MIDI, false);
+            if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
+              input_sensor.set_trigger_flag(axis_name, MIDI, false);
             }
           }
 
-          if (sensor.get_untrigger_flag(axis_name, MIDI))
+          if (input_sensor.get_untrigger_flag(axis_name, MIDI))
           // &&!sensor.is_within_range(axis_name))
           {
             midiio.sendAllNotesOff(channel);
-            sensor.set_untrigger_flag(axis_name, MIDI, false);
+            input_sensor.set_untrigger_flag(axis_name, MIDI, false);
           }
         }
 
@@ -144,16 +143,16 @@ void Engine::midi_processor(Sensor& sensor, midi_io& midiio) {
   }
 }
 
-void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
+void Engine::hid_processor(usb_hid& hidio) {
 
-  const auto& sensor_dat = sensor.get_sensor_dat_map();
+  const auto& sensor_dat = input_sensor.get_sensor_dat_map();
 
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
-    float sensor_val = sensor.get_value(axis_name);
-    bool sensor_bool_val = sensor.get_bool_value(axis_name);
-    float sensor_min = sensor.get_limit_min(axis_name);
-    float sensor_max = sensor.get_limit_max(axis_name);
+    float sensor_val = input_sensor.get_value(axis_name);
+    bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
+    float sensor_min = input_sensor.get_limit_min(axis_name);
+    float sensor_max = input_sensor.get_limit_max(axis_name);
     HidTranslator& HID_translator = HID_translators[axis_name];
 
     if (HID_translator.get_enabled() == true) {
@@ -168,8 +167,8 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
             break;
           case 1:
             //continuous mode -> do not update if outise measuring range
-            if (sensor.get_mode(axis_name) == false) {
-              if (sensor.is_within_range(axis_name)) {
+            if (input_sensor.get_mode(axis_name) == false) {
+              if (input_sensor.is_within_range(axis_name)) {
                 hidio.mouse_update(address,
                                    HID_translator.get_mouse_int(
                                        sensor_val, sensor_min, sensor_max),
@@ -187,15 +186,15 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
 
             //keystroke mode "once"
             if (HID_translator.get_stroke_mode() == false) {
-              if (sensor.get_trigger_flag(axis_name, HID)) {
+              if (input_sensor.get_trigger_flag(axis_name, HID)) {
                 //Keyboard (it does not allow multiple key presses yet while it could)
                 hidio.keyboard_set_press(address);
                 // hidio.mouse_set_press(address);
-                sensor.set_trigger_flag(axis_name, HID, false);
+                input_sensor.set_trigger_flag(axis_name, HID, false);
               }
             } else {
               // keystroke mode "maintained".
-              if (!sensor.get_threshold_mode(axis_name)) {
+              if (!input_sensor.get_threshold_mode(axis_name)) {
                 if (sensor_bool_val) {
                   hidio.keyboard_set_press(address);
                   // hidio.mouse_set_press(address);
@@ -203,12 +202,12 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
               } else {
                 //deal with 2 key addresses for true/false when basic threshold mode selected
                 if (!sensor_bool_val) {
-                  if (sensor.get_value(axis_name) >
-                      sensor.get_limit_max(axis_name)) {
+                  if (input_sensor.get_value(axis_name) >
+                      input_sensor.get_limit_max(axis_name)) {
                     hidio.keyboard_set_press(address);
                   }
-                  if (sensor.get_value(axis_name) <
-                      sensor.get_limit_min(axis_name)) {
+                  if (input_sensor.get_value(axis_name) <
+                      input_sensor.get_limit_min(axis_name)) {
                     hidio.keyboard_set_press(address2);
                   }
                   // hidio.mouse_set_press(address);
@@ -226,25 +225,25 @@ void Engine::hid_processor(Sensor& sensor, usb_hid& hidio) {
   }
 }
 
-void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
+void Engine::osc_processor(OSC_handler& osc) {
   // Todo: loop through sensor data -> indentical for 3 processor, should be
   // factorized
 
-  const auto& sensor_dat = sensor.get_sensor_dat_map();
+  const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
-    float sensor_val = sensor.get_value(axis_name);
+    float sensor_val = input_sensor.get_value(axis_name);
     OscTranslator& Osc_translator = Osctranslators[axis_name];
     string address = Osc_translator.get_osc_addr();
 
     if (Osc_translator.get_enabled() &&
-        sensor.test_outside_deadzone(axis_name)) {
-      float sensor_min = sensor.get_limit_min(axis_name);
-      float sensor_max = sensor.get_limit_max(axis_name);
+        input_sensor.test_outside_deadzone(axis_name)) {
+      float sensor_min = input_sensor.get_limit_min(axis_name);
+      float sensor_max = input_sensor.get_limit_max(axis_name);
       osc_val_prev[axis_name] = osc_val[axis_name];
-      if (sensor.get_mode(axis_name) == 0) {  // continuous mode
+      if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
 
-        if (sensor.is_within_range(axis_name)) {
+        if (input_sensor.is_within_range(axis_name)) {
           osc_val[axis_name] = round_to(
               Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 2);
 
@@ -254,7 +253,7 @@ void Engine::osc_processor(Sensor& sensor, OSC_handler& osc) {
         }
       } else  // sensor uses trigger mode
       {
-        if (sensor.get_bool_value(axis_name)) {
+        if (input_sensor.get_bool_value(axis_name)) {
           osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 2);
           if (osc_val[axis_name] != osc_val_prev[axis_name]) {
             osc.send_osc_message(address, osc_val[axis_name]);

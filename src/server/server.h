@@ -18,13 +18,7 @@ using namespace std;
 
 class PipoServer {
  public:
-  PipoServer(Sensor& sensor, Engine& engine, OSC_handler& osc)
-      : server(80),
-        ws("/ws"),
-        events("/events"),
-        input_sens(sensor),
-        engine(engine),
-        osc(osc) {}
+  PipoServer() : server(80), ws("/ws"), events("/events") {}
   void setup();
   void setup_ws();
   void onMessage(AsyncWebSocketClient* client);
@@ -36,9 +30,7 @@ class PipoServer {
   AsyncWebServer server;
   AsyncWebSocket ws;
   AsyncEventSource events;
-  Sensor& input_sens;
-  Engine& engine;
-  OSC_handler& osc;
+
   string received_configData;
   const int ws_max_len = 2048;
   int ws_message_len = 0;

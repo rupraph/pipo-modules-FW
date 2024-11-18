@@ -10,7 +10,7 @@ class Config;
 
 class OSC_handler {
  public:
-  OSC_handler(Config& config) : config(config) {}
+  // OSC_handler();
 
   void setup();
   void set_config();
@@ -20,7 +20,6 @@ class OSC_handler {
   bool get_enabled();
 
  private:
-  Config& config;
   IPAddress dest_ip;
   int out_port;
   bool isStarted = false;
@@ -31,5 +30,7 @@ class OSC_handler {
   void set_dest_ip(string ip);
   void set_out_port(int port);
 };
+
+extern OSC_handler osc;
 
 #endif  // OSC_HANDLER_H

@@ -49,4 +49,6 @@ class AnalogSensor : public Sensor {
   bool touch_adaptative_max;
 };
 
+// extern AnalogSensor input_sensor;
+
 #endif  //ANALOG_SENSOR_H

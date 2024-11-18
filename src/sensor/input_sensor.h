@@ -49,7 +49,7 @@ struct SensorDat {
         offset(0.0),
         invert(false),
         raw_value(0.0),
-        value(0.0),
+        value(0.0),  // contains the value over the full range in sensor unit.
         value_prev(0.0),
         lmax(1000.0),
         lmin(0.0),
@@ -92,8 +92,8 @@ class Sensor {
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();
 
-  // bool get_inverted(const std::string& axis);
-  // void set_inverted(const std::string& axis, bool value);
+  bool get_inverted(const std::string& axis);
+  void set_inverted(const std::string& axis, bool value);
 
   int get_deadzone(const std::string& axis);
   void set_deadzone(const std::string& axis, int value);

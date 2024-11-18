@@ -1,4 +1,6 @@
-#include "osc_handler.h"
+#include "osc/osc_handler.h"
+
+OSC_handler osc;
 
 /// @brief setup the OSC handler
 void OSC_handler::setup() {
