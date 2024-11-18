@@ -1,4 +1,4 @@
-#include <wifi/wifi.h>
+#include <wifi/pipowifi.h>
 PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
@@ -14,7 +14,7 @@ void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 500U);
   for (int i = 0; i < num; i++) {
     int rssiperc = WiFi.RSSI(i);
-    signals[WiFi.SSID(i)] = rssiperc;
+    // signals[WiFi.SSID(i)] = rssiperc;
     Serial.print("Network: ");
     Serial.print(WiFi.SSID(i));
     Serial.print(" RSSI: ");
@@ -49,7 +49,7 @@ bool PipoWifi::connect(String ssid, String password) {
   mode = CONNECTING;
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
-  int result = WiFi.begin(ssid.c_str(), password);
+  int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
     delay(CHECK_TIMEOUT);
