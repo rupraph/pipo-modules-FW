@@ -12,7 +12,7 @@
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
-#include "sensor/sensor.h"
+#include "sensors/sensors.h"
 
 // quick declaration of functions
 void init_filesystem();
@@ -39,8 +39,8 @@ void setup() {
   /////// Init midi and hid
   midiio.setup();
   hidio.setup(config.general_config["HidMode"]);
-  // while (!Serial)
-  //   delay(100);
+  while (!Serial)
+    delay(100);
 
   /////// Init wifi
   setup_wifi();
@@ -79,7 +79,7 @@ void loop() {
 
     monitor_wifi(server.is_running);
     input_sensor.update();
-    engine.update(midiio, hidio, osc);
+    engine.update();
     pipoSocket.loop();
     hwui.update();
 

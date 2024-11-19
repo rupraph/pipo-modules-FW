@@ -10,7 +10,7 @@
 #include "midi/midi_io.h"
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
-#include "sensor/sensor.h"
+#include "sensors/sensors.h"
 #include "hw_ui.h"
 #include "osc/osc_handler.h"
 #include "osc/osc_translators.h"
@@ -61,10 +61,10 @@ class Engine {
   void set_paused(bool value) { paused = value; }
   void toggle_pause();
 
-  void update(midi_io& midiio, usb_hid& hidio, OSC_handler& osc);
-  void midi_processor(midi_io& midiio);
-  void hid_processor(usb_hid& hidio);
-  void osc_processor(OSC_handler& osc);
+  void update();
+  void midi_processor();
+  void hid_processor();
+  void osc_processor();
 
   // config
   JsonDocument get_config(bool debug = false);

@@ -1,6 +1,6 @@
 #ifndef PIPOSOCKET_H
 #define PIPOSOCKET_H
-#include "sensor/sensor.h"
+#include "sensors/sensors.h"
 #include "utils/logs.h"
 #include <ESPAsyncWebServer.h>
 using namespace std;

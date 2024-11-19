@@ -5,7 +5,9 @@ midi_io midiio;
 void midi_io::setup() {
 
   MidiUSBSetup();
+#ifdef INCLUDE_BLE
   midiBLESetup();
+#endif
   // midiRtpSetup();
 }
 // if sustainmil is 0 = infinite sustain from sustain manager
@@ -20,7 +22,9 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
     }
   }
   MidiUSBsendNoteOn(note, velocity, channel);
+#ifdef INCLUDE_BLE
   MidiBLEsendNoteOn(note, velocity, channel);
+#endif
 
   // pipoSocket.sendNoteOn(note, velocity,channel);
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
@@ -42,7 +46,9 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
   if (channel_note_list[channel].find(note) !=
       channel_note_list[channel].end()) {
     MidiUSBsendNoteOff(note, velocity, channel);
+#ifdef INCLUDE_BLE
     MidiBLEsendNoteOff(note, velocity, channel);
+#endif
     // pipoSocket.sendNoteOff(note, velocity,channel);
     channel_note_list[channel].erase(note);
   }
@@ -72,7 +78,9 @@ void midi_io::sendControlChange(int control, int value, int channel,
       sendHiResControlChange(control, value, channel);
     } else {
       MidiUSBsendCC(control, value, channel);
+#ifdef INCLUDE_BLE
       MidiBLEsendCC(control, value, channel);
+#endif
     }
     lastcc[channel][control] = value;
     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);

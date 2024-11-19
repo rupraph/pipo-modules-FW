@@ -1,7 +1,9 @@
 #ifndef MIDI_IO_H
 #define MIDI_IO_H
 
+#ifdef INCLUDE_BLE
 #include "midi/midiBLE.h"
+#endif
 #include "midi/midiRtp.h"
 #include "midi/midiUSB.h"
 #include <vector>

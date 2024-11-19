@@ -10,7 +10,7 @@
 #include <ArduinoJson.h>
 #include "utils/logs.h"
 #include "../engine.h"
-#include "sensor/sensor.h"
+#include "../sensors/sensors.h"
 #include "../osc/osc_handler.h"
 
 using namespace std;

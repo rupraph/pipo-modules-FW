@@ -9,19 +9,19 @@
 Engine engine;
 
 //Todo: could likely reorganise the loop through axis to be in update instead of being in each processor
-void Engine::update(midi_io& midiio, usb_hid& hidio, OSC_handler& osc) {
+void Engine::update() {
   if (paused) {
     return;
   }
   if (config.general_config["MidiEnabled"] == true) {
     midiio.manage_sustain();
-    midi_processor(midiio);
+    midi_processor();
   }
   if (config.general_config["OSC_ENA"] == true) {
-    osc_processor(osc);
+    osc_processor();
   }
   if (config.general_config["HidEnabled"] == true) {
-    hid_processor(hidio);
+    hid_processor();
   }
   // monitor_sensors(sensor);
 }
@@ -30,7 +30,7 @@ void Engine::toggle_pause() {
   paused = !paused;
 }
 
-void Engine::midi_processor(midi_io& midiio) {
+void Engine::midi_processor() {
   // loop through sensor data
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
@@ -143,7 +143,7 @@ void Engine::midi_processor(midi_io& midiio) {
   }
 }
 
-void Engine::hid_processor(usb_hid& hidio) {
+void Engine::hid_processor() {
 
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
 
@@ -225,7 +225,7 @@ void Engine::hid_processor(usb_hid& hidio) {
   }
 }
 
-void Engine::osc_processor(OSC_handler& osc) {
+void Engine::osc_processor() {
   // Todo: loop through sensor data -> indentical for 3 processor, should be
   // factorized
 

@@ -1,8 +1,6 @@
 #include "midiBLE.h"
-#include <Arduino.h>
 
-#include <BLEMIDI_Transport.h>
-#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+#ifdef INCLUDE_BLE
 
 #ifdef PIPO_MOTION
 BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
@@ -52,3 +50,5 @@ void MidiBLEsendNoteOn(int note, int velocity, int channel) {
 void MidiBLEsendNoteOff(int note, int velocity, int channel) {
   MidiBle.sendNoteOff(note, velocity, channel);
 }
+
+#endif  //INCLUDE_BLE
