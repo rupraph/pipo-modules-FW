@@ -44,10 +44,10 @@ void PipoSocket::loop() {
   if (ws == nullptr)
     return;
   unsigned long now = millis();
-  if (now - lastSendTime < 50) {
-    iterations += 1;
-    return;
-  }
+  // if (now - lastSendTime < 50) {
+  //   iterations += 1;
+  //   return;
+  // }
   if (now - lastCleanTime > 1000) {
     ws->cleanupClients(1);
     lastCleanTime = now;

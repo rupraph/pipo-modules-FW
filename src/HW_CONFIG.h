@@ -13,6 +13,7 @@
 #define DEBUG_CONFIG false
 
 // #define INCLUDE_BLE
+// #define ASYNC_TCP_RUNNING_CORE 0
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9

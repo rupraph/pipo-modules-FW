@@ -9,7 +9,7 @@
 #include "osc/osc_handler.h"
 #include "server/server.h"
 #include "utils/config.h"
-#include "utils/fs_tools.h"
+// #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "utils/wifi_tools.h"
 #include "sensors/sensors.h"
@@ -18,6 +18,32 @@
 void init_filesystem();
 void setup_wifi();
 void monitor_wifi();
+
+// Tasks distribution
+// what seems important is to avoid delays in midi and osc handling
+// seems better to keep wifi + networking on core 0
+// core 0: wifi, server, websocket
+// I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
+// core 1: sensor, midi, osc
+
+TaskHandle_t sensorTaskHandle;
+TaskHandle_t websocketTaskHandle;
+TaskHandle_t hwuiTaskHandle;
+
+void sensorTask(void* pvParameters) {
+  for (;;) {
+    input_sensor.update();
+    engine.update();
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+
+void websocketTask(void* pvParameters) {
+  for (;;) {
+    pipoSocket.loop();
+    vTaskDelay(pdMS_TO_TICKS(100));  //crashes if too fast (10 crashes)
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -39,8 +65,8 @@ void setup() {
   /////// Init midi and hid
   midiio.setup();
   hidio.setup(config.general_config["HidMode"]);
-  while (!Serial)
-    delay(100);
+  // while (!Serial)
+  //   delay(100);
 
   /////// Init wifi
   setup_wifi();
@@ -72,20 +98,26 @@ void setup() {
   Serial.print(F("Max Alloc Heap:"));
   Serial.println(ESP.getMaxAllocHeap());
 #endif
+
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+                          &sensorTaskHandle, 1);
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
+                          &websocketTaskHandle, 0);
 }
 
 void loop() {
   try {
 
     monitor_wifi(server.is_running);
-    input_sensor.update();
-    engine.update();
-    pipoSocket.loop();
+    // input_sensor.update();
+    // engine.update();
+    // pipoSocket.loop();
     hwui.update();
 
-  } catch (const std::exception& e) {
-    Serial.println("Exception in main loop");
-    logs.writeLog(e.what());
-    delay(50);
+    // } catch (const std::exception& e) {
+    //   Serial.println("Exception in main loop");
+    //   logs.writeLog(e.what());
+    //   delay(50);
+    // }
   }
 }
