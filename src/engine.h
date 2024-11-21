@@ -3,16 +3,17 @@
 
 #include <Arduino.h>
 #include <unordered_map>
+#include "HW_CONFIG.h"
 #include "midi/midi_translator.h"
 #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
-#include "sensor/input_sensor.h"
+#include "sensors/sensors.h"
 #include "hw_ui.h"
-#include "osc_handler.h"
-#include "osc_translators.h"
+#include "osc/osc_handler.h"
+#include "osc/osc_translators.h"
 
 using namespace std;
 
@@ -60,11 +61,10 @@ class Engine {
   void set_paused(bool value) { paused = value; }
   void toggle_pause();
 
-  void update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
-              OSC_handler& osc);
-  void midi_processor(Sensor& sensor, midi_io& midiio);
-  void hid_processor(Sensor& sensor, usb_hid& hidio);
-  void osc_processor(Sensor& sensor, OSC_handler& osc);
+  void update();
+  void midi_processor();
+  void hid_processor();
+  void osc_processor();
 
   // config
   JsonDocument get_config(bool debug = false);
@@ -81,5 +81,7 @@ class Engine {
   unordered_map<string, float> osc_val;
   unordered_map<string, float> osc_val_prev;
 };
+
+extern Engine engine;
 
 #endif  //ENGINE_H

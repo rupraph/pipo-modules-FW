@@ -268,10 +268,10 @@ void Config::print() {
   serializeJsonPretty(current_config, Serial);
 }
 
-void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
+void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensor");
   current_config["sensor"].clear();
-  current_config["sensor"] = sensor.get_config();
+  current_config["sensor"] = input_sensor.get_config();
   Serial.println("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
@@ -287,9 +287,8 @@ void Config::gather(Sensor& sensor, Engine& engine, bool debug) {
 }
 
 //* @brief propagates the current config content to the sensor, engine, etc...
-void Config::apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
-                   bool debug) {
-  sensor.set_config(current_config["sensor"].as<JsonObject>());
+void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
+  input_sensor.set_config(current_config["sensor"].as<JsonObject>());
   engine.set_config(current_config["engine"].as<JsonObject>());
   general_config.clear();
   general_config = current_config["general"];

@@ -2,6 +2,8 @@
 
 // UNDER CONSTRUCTION
 
+usb_hid hidio;
+
 Adafruit_USBD_HID usb_hid_port;
 // Report payload defined in src/class/hid/hid.h
 // - For Gamepad Button Bit Mask see  hid_gamepad_button_bm_t

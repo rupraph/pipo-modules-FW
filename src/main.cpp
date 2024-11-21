@@ -3,10 +3,10 @@
 #include "engine.h"
 #include "hw_ui.h"
 #include "midi/midi_io.h"
-#include "osc_handler.h"
+#include "osc/osc_handler.h"
 #include "server/server.h"
 #include "utils/config.h"
-#include "utils/fs_tools.h"
+// #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 
@@ -34,6 +34,32 @@ PipoServer server(input_sens, engine, osc);
 // quick declaration of functions
 void init_filesystem();
 
+// Tasks distribution
+// what seems important is to avoid delays in midi and osc handling
+// seems better to keep wifi + networking on core 0
+// core 0: wifi, server, websocket
+// I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
+// core 1: sensor, midi, osc
+
+TaskHandle_t sensorTaskHandle;
+TaskHandle_t websocketTaskHandle;
+TaskHandle_t hwuiTaskHandle;
+
+void sensorTask(void* pvParameters) {
+  for (;;) {
+    input_sensor.update();
+    engine.update();
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+
+void websocketTask(void* pvParameters) {
+  for (;;) {
+    pipoSocket.loop();
+    vTaskDelay(pdMS_TO_TICKS(100));  //crashes if too fast (10 crashes)
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
@@ -49,7 +75,7 @@ void setup() {
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
-  config.apply(input_sens, engine, osc, false);  // input_sens,
+  config.apply(engine, osc, false);  // input_sens,
 
   /////// Init midi and hid
   midiio.setup();
@@ -64,11 +90,11 @@ void setup() {
   listDir(LittleFS, "/", 0);
 
   /////// initialize sensor/inputs
-  input_sens.init();
-  input_sens.setup();
+  input_sensor.init();
+  input_sensor.setup();
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
-  config.gather(input_sens, engine, true);
+  config.gather(engine, true);
   config.save(config.filename);
 
   // Start server
@@ -87,6 +113,11 @@ void setup() {
   Serial.print(F("Max Alloc Heap:"));
   Serial.println(ESP.getMaxAllocHeap());
 #endif
+
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+                          &sensorTaskHandle, 1);
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
+                          &websocketTaskHandle, 0);
 }
 
 void loop() {
@@ -98,9 +129,10 @@ void loop() {
     pipoSocket.loop();
     hwui.update();
 
-  } catch (const std::exception& e) {
-    Serial.println("Exception in main loop");
-    logs.writeLog(e.what());
-    delay(50);
+    // } catch (const std::exception& e) {
+    //   Serial.println("Exception in main loop");
+    //   logs.writeLog(e.what());
+    //   delay(50);
+    // }
   }
 }

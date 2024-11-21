@@ -10,8 +10,8 @@
 #include <ArduinoJson.h>
 #include "utils/logs.h"
 #include "../engine.h"
-#include "sensor/input_sensor.h"
-#include "../osc_handler.h"
+#include "../sensors/sensors.h"
+#include "../osc/osc_handler.h"
 
 using namespace std;
 
@@ -53,9 +53,8 @@ class Config {
   JsonDocument get(string key);  // return current_config[key]
   // void save_for_key(string key, json data);
   void print();
-  void gather(Sensor& sensor, Engine& engine, bool debug = false);
-  void apply(Sensor& sensor, Engine& engine, OSC_handler& osc,
-             bool debug = false);
+  void gather(Engine& engine, bool debug = false);
+  void apply(Engine& engine, OSC_handler& osc, bool debug = false);
   String get_path(String filename, bool add_extension = true);
 
  private:
