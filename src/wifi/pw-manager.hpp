@@ -74,6 +74,13 @@ class PipoPWManager {
     passwords[std::string(ssid.c_str())] = std::string(password.c_str());
   }
 
+  String getPassword(String ssid) {
+    return String(passwords[std::string(ssid.c_str())].c_str());
+  }
+  bool hasSSID(String ssid) {
+    return passwords.find(std::string(ssid.c_str())) != passwords.end();
+  }
+
   static const int MAX_NETWORKS = 10;
   Preferences preferences;
   std::map<std::string, std::string> passwords;

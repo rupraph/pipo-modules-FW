@@ -8,7 +8,7 @@
 #include "utils/config.h"
 #include "utils/fs_tools.h"
 #include "utils/logs.h"
-#include "wifi/wifi.h"
+#include "wifi/pipowifi.h"
 
 #ifdef PIPO_MOTION
 #include "sensor/acc_sensor.h"
@@ -29,7 +29,6 @@ usb_hid hidio;
 PipoWifi wifi;
 Engine engine;
 OSC_handler osc(config);
-PipoWifi wm;
 PipoServer server(input_sens, engine, osc);
 
 // quick declaration of functions

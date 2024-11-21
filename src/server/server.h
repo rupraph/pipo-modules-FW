@@ -2,7 +2,6 @@
 #define PIPOSERVER_H
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "server/midi_socket.h"
 #include "utils/config.h"
 #include <ArduinoJson.h>
 #include "utils/logs.h"
@@ -43,4 +42,4 @@ class PipoServer {
   int ws_message_len = 0;
   char ws_message[2048];
 };
-#endif // WEBSERVER_H
+#endif  // WEBSERVER_H
