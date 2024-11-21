@@ -7,10 +7,7 @@ class Preferences {
 
  public:
   std::map<std::string, std::string>* map;
-  Preferences() {
-    std::cout << "Preferences created" << std::endl;
-    map = new std::map<std::string, std::string>();
-  }
+  Preferences() { map = new std::map<std::string, std::string>(); }
   void begin(const char* name, bool readOnly) {}
   void putString(String key, String value) {
     std::string k = std::string(key.c_str());
@@ -23,6 +20,7 @@ class Preferences {
       return defaultValue;
     return String((*map)[k].c_str());
   }
+  String getString(String key) { return getString(key, ""); }
 };
 
 #endif  // PIPOSTUBPREFERENCES_H

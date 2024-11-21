@@ -24,9 +24,9 @@ class PipoPWManager {
     String indexes = "";
     for (auto const& pair : passwords) {
       indexes += pair.first.length();
-      indexes += ' ';
+      indexes += ',';
       indexes += pair.second.length();
-      indexes += ' ';
+      indexes += ',';
       buffer += String(pair.first.c_str());
       buffer += String(pair.second.c_str());
     }
@@ -35,10 +35,8 @@ class PipoPWManager {
   };
 
   void load() {
-    std::cout << "Loading preferences" << std::endl;
     String indexes = preferences.getString("indexes", "");
     String buffer = preferences.getString("buffer", "");
-    // Serial.println("Indexes: " + indexes);
     int n = 0;
     bool isSSID = true;
     int ssidLen = 0;
@@ -57,26 +55,22 @@ class PipoPWManager {
         n = 0;
       } else {
         pwdLen = n;
-        set(buffer, offset, ssidLen, pwdLen);
+        // set(buffer, offset, ssidLen, pwdLen);
+        int pwdOffset = offset + ssidLen;
+        String ssid = buffer.substring(offset, pwdOffset);
+        String password = buffer.substring(pwdOffset, pwdOffset + pwdLen);
+        passwords[std::string(ssid.c_str())] = std::string(password.c_str());
+
         offset += (ssidLen + pwdLen);
-        std::cout << "offset: " << offset << std::endl;
         isSSID = true;
         ssidLen = 0;
         pwdLen = 0;
         n = 0;
       }
     }
-    pwdLen = n;
-    set(buffer, offset, ssidLen, pwdLen);
-    for (auto const& pair : passwords) {
-      std::cout << pair.first << "->" << pair.second << std::endl;
-    }
   }
 
-  void set(String buffer, int offset, int ssidLen, int pwdLen) {
-    int pwdOffset = offset + ssidLen;
-    String ssid = buffer.substring(offset, pwdOffset);
-    String password = buffer.substring(pwdOffset, pwdOffset + pwdLen);
+  void add(String ssid, String password) {
     passwords[std::string(ssid.c_str())] = std::string(password.c_str());
   }
 
