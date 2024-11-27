@@ -18,6 +18,7 @@ class OSC_handler {
 
   void set_enabled(bool ena);
   bool get_enabled();
+  void receive();
 
  private:
   IPAddress dest_ip;
@@ -27,6 +28,7 @@ class OSC_handler {
   WiFiUDP Udp;
   void start();
   void stop();
+
   void set_dest_ip(string ip);
   void set_out_port(int port);
 };

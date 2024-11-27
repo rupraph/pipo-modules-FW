@@ -29,6 +29,7 @@ void monitor_wifi();
 TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
 TaskHandle_t hwuiTaskHandle;
+TaskHandle_t oscreceiveTaskHandle;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
@@ -42,6 +43,13 @@ void websocketTask(void* pvParameters) {
   for (;;) {
     pipoSocket.loop();
     vTaskDelay(pdMS_TO_TICKS(100));  //crashes if too fast (10 crashes)
+  }
+}
+
+void oscreceiveTask(void* pvParameters) {
+  for (;;) {
+    osc.receive();
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 
@@ -103,6 +111,8 @@ void setup() {
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
                           &websocketTaskHandle, 0);
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 8192, NULL, 1,
+                          &oscreceiveTaskHandle, 0);
 }
 
 void loop() {
@@ -119,5 +129,9 @@ void loop() {
     //   logs.writeLog(e.what());
     //   delay(50);
     // }
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
   }
 }

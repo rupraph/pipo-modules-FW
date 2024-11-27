@@ -61,6 +61,30 @@ void OSC_handler::stop() {
   isStarted = false;
 }
 
+// assume data format is /pwm/1 100
+
+void OSC_handler::receive() {
+  OSCMessage msg;
+  int size = Udp.parsePacket();
+  if (size > 0) {
+    while (size--) {
+      msg.fill(Udp.read());
+    }
+    if (!msg.hasError()) {
+      const char* address = msg.getAddress();
+      if (strstr(address, "/pwm") != nullptr) {
+        Serial.println("PWM message received");
+        // hw_output.set_pwm(address[-1], msg.getInt(0));
+        Serial.println("PWM message received" + msg.getInt(0));
+      }
+    } else {
+      // error = msg.getError();
+      Serial.print("error: ");
+      // Serial.println(error);
+    }
+  }
+}
+
 /// @brief use to update the destination IP
 void OSC_handler::set_dest_ip(string ip) {
   IPAddress new_ip;
