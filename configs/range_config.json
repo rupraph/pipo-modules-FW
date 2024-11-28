@@ -28,7 +28,8 @@
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "/dist"
       }
     }
   },
