@@ -1,12 +1,14 @@
 #ifndef PIPOSERVER_H
 #define PIPOSERVER_H
+#include <ESPmDNS.h>
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "utils/config.h"
 #include <ArduinoJson.h>
+#include "utils/config.h"
 #include "utils/logs.h"
 #include "utils/fs_tools.h"
 #include "server/pipo_socket.h"
+#include "wifi/pipowifi.h"
 #include "HW_CONFIG.h"
 
 #define stringify(s) _stringifyDo(s)

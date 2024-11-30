@@ -10,7 +10,8 @@ void PipoWifi::setup() {
   connect();
 };
 void PipoWifi::scan() {
-  int num = WiFi.scanNetworks(false, false, false, 500U);
+  int num = WiFi.scanNetworks(false, false, false, 300U);
+  Serial.println("scan done");
   for (int i = 0; i < num; i++) {
     int rssiperc = WiFi.RSSI(i);
     signals[WiFi.SSID(i)] = rssiperc;
@@ -53,6 +54,7 @@ bool PipoWifi::connect(String ssid, String password) {
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Connected to " + String(ssid.c_str()));
+    Serial.println("IP " + WiFi.localIP().toString());
     pwm.add(ssid, password);
     pwm.save();
     mode = CONNECTED;
@@ -73,21 +75,38 @@ PipoWifi::PipoWifiMode PipoWifi::getMode() {
 };
 
 String PipoWifi::status() {
-  String res;
-  switch (mode) {
-    case CONNECTING:
-      res = "CONNECTING";
+  String res = "";
+  switch (wifi.getMode()) {
+    case WIFI_MODE_APSTA:
+      res = "APSTA";
       break;
-    case AP:
+    case WIFI_MODE_STA:
+      res = "STA";
+      break;
+    case WIFI_MODE_AP:
       res = "AP";
       break;
+    case WIFI_MODE_NULL:
+      res = "NULL";
+      break;
+    case WIFI_MODE_MAX:
+      res = "MAX";
+      break;
+  }
+
+  switch (mode) {
+    case CONNECTING:
+      res += " CONNECTING";
+      break;
     case CONNECTED:
-      res = "CONNECTED";
-      res += " IP: ";
+      res += " CONNECTED";
+      res += " ";
       res += WiFi.localIP().toString().c_str();
-      res += " SSID: ";
+      res += " ";
       res += WiFi.SSID().c_str();
       break;
+    default:
+      res += " UNKNWON";
   }
   return res;
 }
@@ -103,3 +122,9 @@ String PipoWifi::availableNetworks() {
   }
   return res;
 }
+
+String PipoWifi::ssid() {
+  return WiFi.SSID();
+}
+
+PipoWifi wifi;

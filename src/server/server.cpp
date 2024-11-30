@@ -226,7 +226,7 @@ void PipoServer::setup_requests() {
     ESP.restart();
   });
 
-  server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
+  server.on("/wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (config.general_config["Wifi_mode"] == "AP") {
       // Todo: should use setter
       config.general_config["Wifi_mode"].clear();
@@ -237,9 +237,30 @@ void PipoServer::setup_requests() {
       config.general_config["Wifi_mode"] = "switch to AP";
       return request->send(200, "text/plain", "STA");
     }
-    // config.save(config.filename);
-    // delay(1000);
-    // ESP.restart();
+  });
+  server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("ssid")) {
+      return request->send(400, "text/plain", "Error: no ssid  parameter");
+    }
+    request->send(200, "text/plain", "Try to connect to wifi");
+    String ssid = request->getParam("ssid")->value();
+    String password = request->getParam("password")->value();
+    String previous_ssid = wifi.ssid();
+    bool success = wifi.connect(ssid, password);
+    if (success || !previous_ssid.length()) {
+      return;
+    }
+    wifi.connect(previous_ssid);
+  });
+
+  server.on("/wifi-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    return request->send(200, "text/plain", wifi.status().c_str());
+  });
+
+  server.on("/wifi-networks", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    Serial.println("wifi scan");
+    wifi.scan();
+    return request->send(200, "text/plain", wifi.availableNetworks().c_str());
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {

@@ -1,31 +1,55 @@
 <script lang="ts">
-  import Input from "../form/Input.svelte";
+  import Signal from "./signal.svelte";
   import axios from "axios";
   import { slide } from "svelte/transition";
+  import { addToast, type Toast } from "../toast";
+  type Network = {
+    ssid: string;
+    quality: number;
+    known: boolean;
+    connected: boolean;
+  };
   let editing = "";
   let showPassword = false;
   let password = "";
   let waiting = false;
-  const networks = axios.get("/wifi-networks").then(({ data }) => {
-    return (data as string)
+  let connecting = Promise.resolve();
+  let networks: Network[] = [];
+  $: fetchNetworks();
+
+  async function fetchNetworks() {
+    let { data } = await axios.get("/wifi-networks");
+    data += `Freebox-3443AA_EXT -87 0 0`;
+    console.log("connect", data);
+    networks = (data as string)
       .trim()
       .split("\n")
       .map((line) => {
         const [ssid, signal, known, connected] = line.split(" ");
-        const quality = parseInt(signal);
-        console.log({ ssid, quality });
+        let quality = parseInt(signal);
+        if (isNaN(quality)) {
+          quality = -100;
+        }
+        // TODO: Check this magic numbers from AI,
+        quality = Math.max(-100, Math.min(quality, -50));
+        quality = (-quality - 50) / 50;
+        console.log({ ssid, quality, signal, known, connected });
         return {
           ssid,
           known: known === "1",
           connected: connected === "1",
-          // TODO: Check this magic numbers from AI,
-          // I just have one WIFI around me
-          quality: quality > -65 ? "good" : quality > -55 ? "ok" : "bad",
+          quality,
         };
       })
-      .filter((e) => e.ssid);
-  });
-  let connecting = Promise.resolve();
+      .filter((e) => e.ssid)
+      .sort((a, b) => {
+        if (a.connected) return -1;
+        if (b.connected) return 1;
+        if (a.known && !b.known) return -1;
+        if (!a.known && b.known) return 1;
+        return a.quality - b.quality;
+      });
+  }
   function onInput(evt) {
     password = evt.target.value;
   }
@@ -39,35 +63,69 @@
   function hideShowPassword() {
     showPassword = !showPassword;
   }
-  function onConnect(ssid: string) {
+  async function onConnect(ssid: string) {
     waiting = true;
-    connecting = axios(
-      {
-        method: "post",
-        url: "/wifi-connect",
-        params: { ssid, password },
-      },
-      { timeout: 1000 }
-    )
-      .catch((e) => {
-        return Promise.resolve();
-      })
-      .then(() => new Promise((resolve) => setTimeout(resolve, 2000)))
-      .then(() => axios.get("/wifi-status"))
-      .then(({ data }) => {
-        const [status, info] = data.split(" ");
-        if (status === "connected") {
-          editing = "";
+    let retry = 0;
+    const maxRetry = 5;
+    let toast: Toast = {
+      type: "info",
+      message: `Connecting to ${ssid}...`,
+      timeout: 5000,
+    };
+    try {
+      await axios(
+        {
+          method: "post",
+          url: "/wifi-connect",
+          params: { ssid, password },
+        },
+        { timeout: 1000 }
+      );
+      while (retry++ < maxRetry) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const [mode, status, ...info] = (
+          await axios.get("/wifi-status")
+        ).data.split(" ");
+        if (status === "CONNECTING") continue;
+        if (status === "UNKNOWN") {
+          throw new Error("Unknown status");
         }
-      })
-      .finally(() => {
-        waiting = false;
-        editing = "";
-      });
+        if (status === "CONNECTED") {
+          const [ip, newssid] = info;
+          if (newssid === ssid) {
+            toast = {
+              type: "success",
+              message: `Connected to ${ssid} with IP ${ip}`,
+              timeout: 5000,
+            };
+          } else if (newssid) {
+            toast = {
+              type: "error",
+              message: `Could not connect to ${newssid}, fallback on ${ssid}`,
+              timeout: 5000,
+            };
+          } else {
+            toast = {
+              type: "error",
+              message: `Could not connect to ${ssid}`,
+              timeout: 5000,
+            };
+          }
+          break;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    waiting = false;
+    editing = "";
+    addToast(toast);
+    await fetchNetworks();
   }
 </script>
 
 <section class="connection">
+  <Signal />
   {#await networks}
     <p>Searching for networks...</p>
   {:then networks}
@@ -76,14 +134,13 @@
       {#each networks as { ssid, quality, known, connected }}
         <li on:click={() => onSelect(ssid, known)}>
           <span>{ssid}</span>
-          <div class="signal {quality}"></div>
           <svg
             class="lock"
             height="30"
             width="30"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 100 100"
-            stroke="white"
+            stroke="black"
             stroke-width="6"
           >
             <g>
@@ -110,7 +167,7 @@
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 100 100"
               xml:space="preserve"
-              stroke="white"
+              stroke="#8fbe00"
               stroke-width="6"
             >
               <g>
@@ -124,6 +181,7 @@
           {:else}
             <span></span>
           {/if}
+          <Signal signal={5 - Math.floor(quality * 5)} />
         </li>
         {#if editing === ssid}
           <div
@@ -169,7 +227,7 @@
 
 <style scoped>
   ul {
-    grid-template-columns: auto 3em 3em 1em;
+    grid-template-columns: auto 3em 3em 3em;
     justify-items: start;
     align-items: end;
     display: grid;
@@ -209,31 +267,5 @@
   }
   button.showhide:hover svg {
     fill: var(--main);
-  }
-
-  /* HTML: <div class="signal"></div> */
-  .signal {
-    --n: 5; /* the number of bars */
-    --g: 30%; /* control the gap */
-
-    width: 3em;
-    aspect-ratio: 1.5;
-    mask:
-      linear-gradient(-90deg, #0000 var(--g), #000 0) 0 / calc(100% / var(--n))
-        intersect,
-      linear-gradient(to top left, #000 50%, #0000 0),
-      linear-gradient(to top left, #000 calc(50% + 50% / var(--n)), #0000 0)
-        intersect,
-      repeating-conic-gradient(#000 0 25%, #0000 0 50%) 0 100% /
-        calc(200% / var(--n)) calc(200% / var(--n));
-  }
-  .signal.good {
-    background: #8fbe00;
-  }
-  .signal.ok {
-    background: #f7b500;
-  }
-  .signal.bad {
-    background: #f70000;
   }
 </style>

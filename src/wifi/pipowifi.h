@@ -17,6 +17,7 @@ class PipoWifi {
   bool is_running = false;
   PipoWifiMode getMode();
   String status();
+  String ssid();
   String availableNetworks();
   bool connect(String ssid);
   bool connect(String ssid, String password);
@@ -31,5 +32,7 @@ class PipoWifi {
   void connect();
   void APMode();
 };
+
+extern PipoWifi wifi;
 
 #endif  // PIPOWIFI_H
