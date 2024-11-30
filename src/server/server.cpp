@@ -254,9 +254,8 @@ void PipoServer::setup_requests() {
     } else {
       wifi.APSTAMode();
     }
-    delay(2000);
+    delay(200);
     should_start = true;
-    Serial.println("Done.");
   });
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("ssid")) {
@@ -266,11 +265,15 @@ void PipoServer::setup_requests() {
     String ssid = request->getParam("ssid")->value();
     String password = request->getParam("password")->value();
     String previous_ssid = wifi.ssid();
+    delay(200);
+    stop();
     bool success = wifi.connect(ssid, password);
-    if (success || !previous_ssid.length()) {
-      return;
+    if (!success && previous_ssid.length()) {
+      delay(200);
+      wifi.connect(previous_ssid);
     }
-    wifi.connect(previous_ssid);
+    delay(200);
+    should_start = true;
   });
 
   server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
