@@ -3,8 +3,6 @@ PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
   scan();
   connect();
@@ -45,8 +43,8 @@ bool PipoWifi::connect(String ssid, String password) {
   Serial.print("Connecting to " + ssid);
   Serial.println(" with password " + String(password));
   mode = CONNECTING;
-  WiFi.disconnect();
-  WiFi.mode(WIFI_STA);
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_MODE_STA);
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
@@ -66,9 +64,19 @@ bool PipoWifi::connect(String ssid, String password) {
 };
 
 void PipoWifi::APMode() {
-  WiFi.mode(WIFI_MODE_APSTA);
-  WiFi.softAP("Pipo", "pipo1234");
-  mode = AP;
+  Serial.println("Start AP mode");
+  WiFi.disconnect(true);
+  mode = DISCONNECTED;
+  delay(100);
+  WiFi.mode(WIFI_AP);
+  if (WiFi.softAP("Pipo", "pipo1234")) {
+    Serial.println("AP mode started");
+    Serial.print("AP IP Address: ");
+    Serial.println(WiFi.softAPIP());
+  } else {
+    Serial.println("Failed to start AP mode");
+    return;
+  }
 };
 PipoWifi::PipoWifiMode PipoWifi::getMode() {
   return mode;
@@ -95,6 +103,9 @@ String PipoWifi::status() {
   }
 
   switch (mode) {
+    case DISCONNECTED:
+      res += " DISCONNECTED";
+      break;
     case CONNECTING:
       res += " CONNECTING";
       break;

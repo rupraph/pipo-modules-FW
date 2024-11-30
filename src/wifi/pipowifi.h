@@ -11,7 +11,7 @@
 class PipoWifi {
 
  public:
-  enum PipoWifiMode { CONNECTING, AP, CONNECTED };
+  enum PipoWifiMode { CONNECTING, CONNECTED, DISCONNECTED };
   PipoWifi();
   void setup();
   bool is_running = false;
@@ -26,7 +26,7 @@ class PipoWifi {
 
   static const uint CONNECT_TIMEOUT = 2000;
   static const uint CHECK_TIMEOUT = 50;
-  PipoWifiMode mode = CONNECTING;
+  PipoWifiMode mode = DISCONNECTED;
   PipoPWManager pwm;
   std::map<String, int> signals;
   void connect();
