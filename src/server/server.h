@@ -28,6 +28,7 @@ class PipoServer {
   void stop();
   bool is_running = false;
   bool should_start = false;
+  bool ws_initialized = false;
 
  private:
   AsyncWebServer server;

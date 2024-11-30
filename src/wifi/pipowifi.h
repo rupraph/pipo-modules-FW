@@ -52,7 +52,6 @@ class PipoWifi {
    * @brief Scans for available networks
    */
   void scan();
-
   static const uint CONNECT_TIMEOUT = 2000;
   static const uint CHECK_TIMEOUT = 50;
   PipoWifiStatus status = DISCONNECTED;

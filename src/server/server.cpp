@@ -19,8 +19,7 @@ void PipoServer::setup() {
 #endif
 }
 void PipoServer::start() {
-
-  pipoDebugHeap();
+  DefaultHeaders::Instance().clear();
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods",
                                        "DELETE, POST, GET, OPTIONS");
@@ -41,8 +40,10 @@ void PipoServer::start() {
   server.begin();
   Serial.println("start server");
   is_running = true;
+  should_start = false;
 }
 void PipoServer::stop() {
+  pipoSocket.stop();
   server.end();
   delay(100);
   Serial.println("end server");
@@ -242,6 +243,7 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "Error: invalid mode");
     }
     request->send(200, "text/plain", "Try to switch to mode " + mode);
+    delay(100);
     stop();
     config.general_config["Wifi_mode"] = mode;
     Serial.println("Setting mode: " + mode);
@@ -252,8 +254,7 @@ void PipoServer::setup_requests() {
     } else {
       wifi.APSTAMode();
     }
-    delay(100);
-    // start();
+    delay(2000);
     should_start = true;
     Serial.println("Done.");
   });
@@ -349,6 +350,11 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
   }
 }
 void PipoServer::setup_ws() {
+  if (ws_initialized) {
+    pipoSocket.setup(&ws);
+    return;
+  }
+  ws_initialized = true;
   server.addHandler(&ws);
   pipoSocket.setup(&ws);
   events.onConnect([](AsyncEventSourceClient* client) {});
@@ -361,6 +367,7 @@ void PipoServer::setup_ws() {
     } else if (type == WS_EVT_DISCONNECT) {
       ws.cleanupClients(1);
     } else if (type == WS_EVT_ERROR) {
+      client->close();
       ws.cleanupClients(1);
       Serial.print("ws error");
       Serial.print(server->url());

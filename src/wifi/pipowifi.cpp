@@ -45,7 +45,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   Serial.println(" with password " + String(password));
   status = CONNECTING;
   if (disconnect) {
-    WiFi.disconnect(true);
+    WiFi.disconnect(true, true);
   }
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
@@ -70,7 +70,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
 
 bool PipoWifi::APMode() {
   Serial.println("Start AP mode");
-  WiFi.disconnect(true);
+  WiFi.disconnect(true, true);
   status = DISCONNECTED;
   delay(100);
   WiFi.mode(WIFI_AP);
@@ -91,10 +91,8 @@ bool PipoWifi::APSTAMode() {
   bool success = true;
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
-  if (wasConnected) {
-    WiFi.disconnect(true);
-    delay(100);
-  }
+  WiFi.disconnect(true, true);
+  delay(100);
   WiFi.mode(WIFI_MODE_APSTA);
   success = WiFi.softAP("Pipo", "pipo1234");
   if (wasConnected) {
@@ -109,10 +107,8 @@ bool PipoWifi::STAMode() {
   }
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
-  if (wasConnected) {
-    WiFi.disconnect(true);
-    delay(100);
-  }
+  WiFi.disconnect(true, true);
+  delay(100);
   WiFi.mode(WIFI_MODE_STA);
   if (wasConnected) {
     return connect(previousSsid, pwm.getPassword(previousSsid), false);
@@ -127,7 +123,8 @@ PipoWifi::PipoWifiStatus PipoWifi::getStatus() {
 
 String PipoWifi::state() {
   String res = "";
-  switch (WiFi.getMode()) {
+  wifi_mode_t mode = WiFi.getMode();
+  switch (mode) {
     case WIFI_MODE_APSTA:
       res = "APSTA";
       break;
@@ -170,7 +167,7 @@ String PipoWifi::availableNetworks() {
     res += ssid.first;
     res += " ";
     res += String(ssid.second);
-    res += strcmp(WiFi.SSID().c_str(), ssid.first.c_str()) == 0 ? " 1" : " 0";
+    res += WiFi.SSID() == ssid.first ? " 1" : " 0";
     res += pwm.hasSSID(ssid.first) ? " 1" : " 0";
     res += "\n";
   }

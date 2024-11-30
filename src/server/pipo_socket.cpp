@@ -48,7 +48,7 @@ void PipoSocket::loop() {
   //   iterations += 1;
   //   return;
   // }
-  if (now - lastCleanTime > 1000) {
+  if (now - lastCleanTime > 5000) {
     ws->cleanupClients(1);
     lastCleanTime = now;
   }
@@ -83,4 +83,7 @@ void PipoSocket::loop() {
     message += logs.readLogs(true).c_str();
     ws->textAll(message.c_str());
   }
+}
+void PipoSocket::stop() {
+  this->ws = nullptr;
 }

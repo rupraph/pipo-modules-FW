@@ -13,6 +13,7 @@ class PipoSocket {
   void sendNoteOff(int note, int velocity, int channel);
   void sendSensorValue(std::string axis, float value);
   void loop();
+  void stop();
 
  private:
   AsyncWebSocket* ws;
