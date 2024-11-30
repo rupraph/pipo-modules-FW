@@ -8,7 +8,7 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
   Serial.println(get_path(filename, addJsonExtension).c_str());
   try {
 #ifdef DEBUG_HEAP
-    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    pipoDebugHeap();
 #endif
 
     if (DEBUG_CONFIG) {
@@ -33,7 +33,7 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
     }
 
 #ifdef DEBUG_HEAP
-    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    pipoDebugHeap();
 #endif
     logs.writeLog("load config: " + filename);
   } catch (const std::exception& e) {
@@ -279,7 +279,7 @@ void Config::gather(Engine& engine, bool debug) {
   current_config["general"].clear();
   current_config["general"] = general_config;
 
-  if (debug) {
+  if (debug && false) {
     Serial.println("gathered_config");
     serializeJsonPretty(current_config, Serial);
     Serial.println("gathered_config_end");

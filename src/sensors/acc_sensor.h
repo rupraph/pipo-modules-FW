@@ -5,6 +5,7 @@
 #include "HW_CONFIG.h"
 #include "Arduino-ICM20948.h"
 #include "utils/filters.h"
+#include "utils/debug.h"
 
 class MotionSensor : public Sensor {
  public:

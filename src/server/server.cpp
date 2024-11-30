@@ -4,7 +4,6 @@ PipoServer server;
 
 void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
-
   std::string mdns_name = std::string("pipo-") + PIPO_TYPE;
   if (!MDNS.begin(
           mdns_name.c_str())) {  // Start the mDNS responder for esp.local
@@ -14,7 +13,14 @@ void PipoServer::setup() {
     // Add service to MDNS-SD
     MDNS.addService("http", "tcp", 80);
   }
+  start();
+#ifdef DEBUG_HEAP
+  pipoDebugHeap();
+#endif
+}
+void PipoServer::start() {
 
+  pipoDebugHeap();
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods",
                                        "DELETE, POST, GET, OPTIONS");
@@ -32,17 +38,14 @@ void PipoServer::setup() {
   ws.enable(true);
   setup_requests();
   setup_ws();
-
   server.begin();
-  Serial.println("Server setup donce");
+  Serial.println("start server");
   is_running = true;
-#ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-#endif
 }
-
 void PipoServer::stop() {
   server.end();
+  delay(100);
+  Serial.println("end server");
   is_running = false;
 }
 
@@ -95,7 +98,7 @@ void PipoServer::setup_requests() {
     }
     try {
       String name = request->getParam("name")->value();
-      Serial.println(ESP.getFreeHeap());
+      pipoDebugHeap();
       return request->send(LittleFS, config.get_path(name), "application/json");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -199,16 +202,16 @@ void PipoServer::setup_requests() {
         // after solving other issues, not sure if this has any value after all.
 
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());  // 44k remaining
+            pipoDebugHeap();
 #endif
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
             config.apply(engine, osc, true);
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());
+            pipoDebugHeap();
 #endif
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());
+            pipoDebugHeap();
 #endif
             received_configData.clear();
             return request->send(200, "text/plain", "Config saved");
@@ -226,17 +229,33 @@ void PipoServer::setup_requests() {
     ESP.restart();
   });
 
-  server.on("/wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    if (config.general_config["Wifi_mode"] == "AP") {
-      // Todo: should use setter
-      config.general_config["Wifi_mode"].clear();
-      config.general_config["Wifi_mode"] = "STA";
-      return request->send(200, "text/plain", "switch to STA");
-    } else {
-      config.general_config["Wifi_mode"].clear();
-      config.general_config["Wifi_mode"] = "switch to AP";
-      return request->send(200, "text/plain", "STA");
+  server.on("/wifi-mode", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    Serial.println("POST wifi-mode");
+    if (!request->hasParam("mode")) {
+      Serial.println("no mode");
+
+      return request->send(400, "text/plain", "Error: no mode parameter");
     }
+    String mode = request->getParam("mode")->value();
+    Serial.println("mode: " + mode);
+    if (mode != "AP" && mode != "STA" && mode != "APSTA") {
+      return request->send(400, "text/plain", "Error: invalid mode");
+    }
+    request->send(200, "text/plain", "Try to switch to mode " + mode);
+    stop();
+    config.general_config["Wifi_mode"] = mode;
+    Serial.println("Setting mode: " + mode);
+    if (mode == "AP") {
+      wifi.APMode();
+    } else if (mode == "STA") {
+      wifi.STAMode();
+    } else {
+      wifi.APSTAMode();
+    }
+    delay(100);
+    // start();
+    should_start = true;
+    Serial.println("Done.");
   });
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("ssid")) {
@@ -253,13 +272,13 @@ void PipoServer::setup_requests() {
     wifi.connect(previous_ssid);
   });
 
-  server.on("/wifi-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    return request->send(200, "text/plain", wifi.status().c_str());
+  server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    return request->send(200, "text/plain", wifi.state().c_str());
   });
 
   server.on("/wifi-networks", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    Serial.println("wifi scan");
-    wifi.scan();
+    // Serial.println("wifi scan");
+    // wifi.scan();
     return request->send(200, "text/plain", wifi.availableNetworks().c_str());
   });
 

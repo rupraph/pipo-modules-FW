@@ -56,7 +56,7 @@ void usb_hid::setup(int hid_mode) {
     Serial.println("USB HID mounted");
   }
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 

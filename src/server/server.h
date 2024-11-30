@@ -7,6 +7,7 @@
 #include "utils/config.h"
 #include "utils/logs.h"
 #include "utils/fs_tools.h"
+#include "utils/debug.h"
 #include "server/pipo_socket.h"
 #include "wifi/pipowifi.h"
 #include "HW_CONFIG.h"
@@ -23,8 +24,10 @@ class PipoServer {
   void setup_ws();
   void onMessage(AsyncWebSocketClient* client);
   void setup_requests();
-  void stop();  // Todo: start stop not much tested yet
+  void start();
+  void stop();
   bool is_running = false;
+  bool should_start = false;
 
  private:
   AsyncWebServer server;

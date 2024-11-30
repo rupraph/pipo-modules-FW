@@ -10,6 +10,7 @@
 
 #include "hw_ui.h"
 #include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 void midiBLESetup();
 void OnConnected();
