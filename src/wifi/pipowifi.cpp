@@ -5,7 +5,7 @@ void PipoWifi::setup() {
   pwm.setup();
   WiFi.setAutoReconnect(true);
   scan();
-  connect();
+  STAMode();
 };
 void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 300U);
@@ -15,13 +15,13 @@ void PipoWifi::scan() {
     signals[WiFi.SSID(i)] = rssiperc;
   }
 };
-void PipoWifi::connect() {
+bool PipoWifi::connect() {
   Serial.println("Connect...");
-  mode = CONNECTING;
+  status = CONNECTING;
   for (auto const& ssid : signals) {
     try {
       if (connect(ssid.first)) {
-        return;
+        return true;
       }
     } catch (const std::exception& e) {
       continue;
@@ -30,6 +30,7 @@ void PipoWifi::connect() {
   // if no success, switch to AP mode
   Serial.println("No one to connect to, switching to AP mode");
   APMode();
+  return false;
 };
 
 bool PipoWifi::connect(String ssid) {
@@ -39,12 +40,16 @@ bool PipoWifi::connect(String ssid) {
   return connect(ssid, pwm.getPassword(ssid));
 }
 
-bool PipoWifi::connect(String ssid, String password) {
+bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   Serial.print("Connecting to " + ssid);
   Serial.println(" with password " + String(password));
-  mode = CONNECTING;
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_MODE_STA);
+  status = CONNECTING;
+  if (disconnect) {
+    WiFi.disconnect(true);
+  }
+  if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
+    WiFi.mode(WIFI_MODE_STA);
+  }
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
@@ -55,7 +60,7 @@ bool PipoWifi::connect(String ssid, String password) {
     Serial.println("IP " + WiFi.localIP().toString());
     pwm.add(ssid, password);
     pwm.save();
-    mode = CONNECTED;
+    status = CONNECTED;
     return true;
   }
   Serial.println("Failed to connect to " + String(ssid.c_str()));
@@ -63,28 +68,66 @@ bool PipoWifi::connect(String ssid, String password) {
   return false;
 };
 
-void PipoWifi::APMode() {
+bool PipoWifi::APMode() {
   Serial.println("Start AP mode");
   WiFi.disconnect(true);
-  mode = DISCONNECTED;
+  status = DISCONNECTED;
   delay(100);
   WiFi.mode(WIFI_AP);
-  if (WiFi.softAP("Pipo", "pipo1234")) {
-    Serial.println("AP mode started");
-    Serial.print("AP IP Address: ");
-    Serial.println(WiFi.softAPIP());
-  } else {
+  if (!WiFi.softAP("Pipo", "pipo1234")) {
     Serial.println("Failed to start AP mode");
-    return;
+    return false;
   }
-};
-PipoWifi::PipoWifiMode PipoWifi::getMode() {
-  return mode;
+  Serial.println("AP mode started");
+  Serial.print("AP IP Address: ");
+  Serial.println(WiFi.softAPIP());
+  return true;
 };
 
-String PipoWifi::status() {
+bool PipoWifi::APSTAMode() {
+  if (WiFi.getMode() == WIFI_MODE_APSTA) {
+    return true;
+  }
+  bool success = true;
+  bool wasConnected = status == CONNECTED;
+  String previousSsid = WiFi.SSID();
+  if (wasConnected) {
+    WiFi.disconnect(true);
+    delay(100);
+  }
+  WiFi.mode(WIFI_MODE_APSTA);
+  success = WiFi.softAP("Pipo", "pipo1234");
+  if (wasConnected) {
+    success &= connect(previousSsid, pwm.getPassword(previousSsid), false);
+  }
+  return success;
+};
+
+bool PipoWifi::STAMode() {
+  if (WiFi.getMode() == WIFI_MODE_STA && status == CONNECTED) {
+    return true;
+  }
+  bool wasConnected = status == CONNECTED;
+  String previousSsid = WiFi.SSID();
+  if (wasConnected) {
+    WiFi.disconnect(true);
+    delay(100);
+  }
+  WiFi.mode(WIFI_MODE_STA);
+  if (wasConnected) {
+    return connect(previousSsid, pwm.getPassword(previousSsid), false);
+  } else {
+    return connect();
+  }
+};
+
+PipoWifi::PipoWifiStatus PipoWifi::getStatus() {
+  return status;
+};
+
+String PipoWifi::state() {
   String res = "";
-  switch (wifi.getMode()) {
+  switch (WiFi.getMode()) {
     case WIFI_MODE_APSTA:
       res = "APSTA";
       break;
@@ -102,7 +145,7 @@ String PipoWifi::status() {
       break;
   }
 
-  switch (mode) {
+  switch (status) {
     case DISCONNECTED:
       res += " DISCONNECTED";
       break;
