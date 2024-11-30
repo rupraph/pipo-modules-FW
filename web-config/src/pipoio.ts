@@ -19,6 +19,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private timeout: number = 0;
   private bailTimeout = 0;
   private connected = false;
+  private beforeReconnectTimeout = 0;
   private saveTimeout = 0;
   constructor() {
     super();
@@ -31,6 +32,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     // } catch (e) {
     //   error = "Cannot init webMIDI";
     // }
+    console.log("init");
     this.initWebSocket();
   }
   retryConnection() {
@@ -45,22 +47,26 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       }
     }, 500);
   }
-  onDisconnect() {
+  async onDisconnect() {
     if (this.socket) {
       this.socket.close();
     }
     this.emit("disconnect");
     this.connected = false;
     if (!this.enabled) return;
+    await new Promise((resolve) =>
+      setTimeout(resolve, this.beforeReconnectTimeout)
+    );
+    this.beforeReconnectTimeout = 0;
     this.retryConnection();
   }
   onConnect() {
     this.emit("connect");
     this.connected = true;
   }
-  bailOnNoNews(delay = 1000) {
-    // clearTimeout(this.bailTimeout);
-    // this.bailTimeout = window.setTimeout(() => this.onDisconnect(), delay);
+  bailOnNoNews() {
+    clearTimeout(this.bailTimeout);
+    this.bailTimeout = window.setTimeout(() => this.onDisconnect(), 4000);
   }
   initWebSocket() {
     const url = import.meta.env.VITE_STATIC_IP
@@ -68,15 +74,17 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       : `ws://${location.hostname}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
-    this.bailOnNoNews(2000);
+    this.bailOnNoNews();
     socket.addEventListener("open", () => this.onConnect());
-    socket.addEventListener("error", () => this.onDisconnect());
+    socket.addEventListener("error", () => {
+      this.onDisconnect();
+    });
     socket.addEventListener("close", () => this.onDisconnect());
     socket.addEventListener("message", (e) => {
       if (!this.connected) {
         this.onConnect();
       }
-      this.bailOnNoNews(2000);
+      this.bailOnNoNews();
       const lines = e.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);

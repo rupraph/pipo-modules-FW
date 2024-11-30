@@ -14,9 +14,23 @@
   let password = "";
   let waiting = false;
   let connecting = Promise.resolve();
+  let wifiMode = "";
   let networks: Network[] = [];
   $: fetchNetworks();
+  $: fetchMode();
 
+  async function fetchMode() {
+    let retry = 0;
+    const maxRetry = 5;
+    while (retry++ < maxRetry) {
+      try {
+        wifiMode = (await axios.get("/wifi-state")).data.split(" ")[0];
+        break;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
   async function fetchNetworks() {
     let { data } = await axios.get("/wifi-networks");
     data += `Freebox-3443AA_EXT -87 0 0`;
@@ -25,7 +39,7 @@
       .trim()
       .split("\n")
       .map((line) => {
-        const [ssid, signal, known, connected] = line.split(" ");
+        const [ssid, signal, connected, known] = line.split(" ");
         let quality = parseInt(signal);
         if (isNaN(quality)) {
           quality = -100;
@@ -63,6 +77,20 @@
   function hideShowPassword() {
     showPassword = !showPassword;
   }
+  async function setMode(mode: string) {
+    console.log("Setting mode", mode);
+    await axios(
+      {
+        method: "post",
+        url: "/wifi-mode",
+        params: { mode },
+      },
+      { timeout: 1000 }
+    );
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await fetchNetworks();
+    await fetchMode();
+  }
   async function onConnect(ssid: string) {
     waiting = true;
     let retry = 0;
@@ -81,11 +109,13 @@
         },
         { timeout: 1000 }
       );
+      return;
       while (retry++ < maxRetry) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         const [mode, status, ...info] = (
-          await axios.get("/wifi-status")
+          await axios.get("/wifi-state")
         ).data.split(" ");
+        wifiMode = mode;
         if (status === "CONNECTING") continue;
         if (status === "UNKNOWN") {
           throw new Error("Unknown status");
@@ -120,12 +150,12 @@
     waiting = false;
     editing = "";
     addToast(toast);
-    await fetchNetworks();
+    // await fetchNetworks();
   }
 </script>
 
 <section class="connection">
-  <Signal />
+  <h3>Wifi mode: {wifiMode}</h3>
   {#await networks}
     <p>Searching for networks...</p>
   {:then networks}
@@ -222,6 +252,9 @@
         {/if}
       {/each}
     </ul>
+    <button on:click={() => setMode("AP")}>AP mode</button>
+    <button on:click={() => setMode("STA")}>STA mode</button>
+    <button on:click={() => setMode("APSTA")}>AP_STA mode</button>
   {/await}
 </section>
 
