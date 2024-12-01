@@ -40,12 +40,12 @@ void websocketTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(10));  //crashes if too fast (10 crashes)
   }
 }
-// void dnsTask(void* pvParameters) {
-//   for (;;) {
-//     captivePortal.loop();
-//     vTaskDelay(pdMS_TO_TICKS(1000));
-//   }
-// }
+void dnsTask(void* pvParameters) {
+  for (;;) {
+    captivePortal.loop();
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -88,7 +88,6 @@ void setup() {
   // Start server
   Serial.println("starting config page");
   server.setup();
-  // captivePortal.start();
   // Start OSC
   osc.setup();
 
@@ -100,7 +99,7 @@ void setup() {
   //                         &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
                           &websocketTaskHandle, 0);
-  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 8192, NULL, 1, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 8192, NULL, 1, &dnsTaskHandle, 0);
 }
 
 void loop() {

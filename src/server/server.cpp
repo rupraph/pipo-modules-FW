@@ -27,6 +27,7 @@ void PipoServer::start() {
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
   server.onNotFound([&](AsyncWebServerRequest* request) {
+    Serial.println("not found: " + request->url());
     if (captivePortal.is_active()) {
       auto url = "http://" + WiFi.softAPIP().toString();
       return request->redirect(url);
@@ -40,6 +41,7 @@ void PipoServer::start() {
   server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   ws.enable(true);
   setup_requests();
+  captivePortal.start(&server);
   setup_ws();
   server.begin();
   Serial.println("start server");
@@ -49,6 +51,7 @@ void PipoServer::start() {
 void PipoServer::stop() {
   pipoSocket.stop();
   server.end();
+  captivePortal.stop();
   delay(100);
   Serial.println("end server");
   is_running = false;

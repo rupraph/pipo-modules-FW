@@ -4,19 +4,17 @@
 
 #include <DNSServer.h>
 #include <WiFi.h>
+#include <ESPAsyncWebServer.h>
 
 class CaptivePortal {
  public:
-  WiFiUDP udp;
-
   CaptivePortal();
   bool is_active();
-  void start();
+  void start(AsyncWebServer* server);
   void stop();
   void loop();
 
  protected:
-  bool active = false;
   DNSServer* dns_server = nullptr;
 };
 extern CaptivePortal captivePortal;
