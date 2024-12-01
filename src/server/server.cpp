@@ -26,7 +26,11 @@ void PipoServer::start() {
   DefaultHeaders::Instance().addHeader(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
-  server.onNotFound([](AsyncWebServerRequest* request) {
+  server.onNotFound([&](AsyncWebServerRequest* request) {
+    if (captivePortal.is_active()) {
+      auto url = "http://" + WiFi.softAPIP().toString();
+      return request->redirect(url);
+    }
     if (request->method() == HTTP_OPTIONS) {
       request->send(200);
     } else {

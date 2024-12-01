@@ -4,7 +4,6 @@ void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
   WiFi.setAutoReconnect(true);
-  scan();
   STAMode();
 };
 void PipoWifi::scan() {

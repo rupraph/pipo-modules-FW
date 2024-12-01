@@ -9,6 +9,7 @@
 #include "utils/fs_tools.h"
 #include "utils/debug.h"
 #include "server/pipo_socket.h"
+#include "server/captive-portal.h"
 #include "wifi/pipowifi.h"
 #include "HW_CONFIG.h"
 

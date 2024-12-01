@@ -11,4 +11,8 @@ void pipoDebugHeap() {
                 usedHeap / 1024.0);
   Serial.printf("  Free Heap:  %u bytes (%.2f KB)\n", freeHeap,
                 freeHeap / 1024.0);
+  Serial.printf("  Heap Fragmentation: %.2f%%\n",
+                (freeHeap * 100.0) / totalHeap);
+  Serial.printf(" Max block: %u bytes\n",
+                heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
 }
