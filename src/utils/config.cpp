@@ -279,7 +279,7 @@ void Config::gather(Engine& engine, bool debug) {
   current_config["general"].clear();
   current_config["general"] = general_config;
 
-  if (debug) {
+  if (DEBUG_CONFIG) {
     Serial.println("gathered_config");
     serializeJsonPretty(current_config, Serial);
     Serial.println("gathered_config_end");

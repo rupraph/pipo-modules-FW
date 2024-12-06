@@ -49,6 +49,10 @@ void websocketTask(void* pvParameters) {
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
     osc.receive();
+    // UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    // Serial.print("oscreceiveTask high water mark: ");
+    // Serial.println(highWaterMark);
+    hw_output.update();  // should be in seperate task
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
@@ -58,8 +62,10 @@ void setup() {
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
   Serial.println(ESP.getFreeHeap());
-  hwui.init();
-  hwui.setup();
+
+  // hwui.init();
+  // hwui.setup();
+  hw_output.setup();
 
   /////// Init filesystem
   init_filesystem();
@@ -84,7 +90,8 @@ void setup() {
 
   /////// initialize sensor/inputs
   input_sensor.init();
-  input_sensor.setup();
+  // input_sensor.setup();
+
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
   config.gather(engine, true);
@@ -111,8 +118,10 @@ void setup() {
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
                           &websocketTaskHandle, 0);
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 8192, NULL, 1,
+#ifdef ENA_OSC_OUT_TESTS
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 3000, NULL, 1,
                           &oscreceiveTaskHandle, 0);
+#endif
 }
 
 void loop() {

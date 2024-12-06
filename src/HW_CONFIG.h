@@ -14,6 +14,7 @@
 
 // #define INCLUDE_BLE
 // #define ASYNC_TCP_RUNNING_CORE 0
+#define ENA_OSC_OUT_TESTS
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9

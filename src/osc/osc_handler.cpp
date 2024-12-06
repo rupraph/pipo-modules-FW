@@ -61,26 +61,43 @@ void OSC_handler::stop() {
   isStarted = false;
 }
 
-// assume data format is /pwm/1 100
+// assume data format is /pwm/1. With duty cycle btw 0 and 1
+void servo(OSCMessage& msg, int addrOffset) {
+  String address = msg.getAddress();
+  String deststring = address.substring(addrOffset + 1);
+  int dest = deststring.toInt();
+  Serial.print("servo: ");
+  Serial.print(dest);
+  Serial.print("value:  ");
+  Serial.println(msg.getFloat(0));
+#ifdef PIPO_ANALOG
+  hw_output.set_servo(dest, msg.getFloat(0));
+#endif
+}
 
 void OSC_handler::receive() {
-  OSCMessage msg;
-  int size = Udp.parsePacket();
-  if (size > 0) {
-    while (size--) {
-      msg.fill(Udp.read());
-    }
-    if (!msg.hasError()) {
-      const char* address = msg.getAddress();
-      if (strstr(address, "/pwm") != nullptr) {
-        Serial.println("PWM message received");
-        // hw_output.set_pwm(address[-1], msg.getInt(0));
-        Serial.println("PWM message received" + msg.getInt(0));
-      }
+  // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
+  // keep using as much as possible the library to receive the OSC data.
+  OSCBundle bundleIN;
+  int size;
+
+  if ((size = Udp.parsePacket()) > 0) {
+    while (size--)
+      bundleIN.fill(Udp.read());
+
+    if (!bundleIN.hasError()) {
+#ifdef PIPO_ANALOG
+      // this will require translators I think
+      // bundleIN.route("/pwm", pwm);
+      bundleIN.route("/servo", servo);
+      // bundleIN.route("/digi", digi);
+#endif
+
+      // bundleIN.dispatch("/servo", pwm);
     } else {
-      // error = msg.getError();
-      Serial.print("error: ");
-      // Serial.println(error);
+      int error = bundleIN.getError();
+      Serial.print("Error: ");
+      Serial.println(error);
     }
   }
 }

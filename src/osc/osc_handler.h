@@ -2,9 +2,12 @@
 #define OSC_HANDLER_H
 
 #include <OSCMessage.h>
+#include <OSCBundle.h>
+#include <OSCData.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include "utils/config.h"
+#include "hw_output.h"
 
 class Config;
 
