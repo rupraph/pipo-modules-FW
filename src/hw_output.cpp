@@ -22,6 +22,7 @@ void HwOutput::update() {
 // Serial.println("Updating HW output");
 #ifdef PIPO_ANALOG
   Serial.println(output_map[A01].value * 180.0f);
+  // data ok. but not sure if lib does not work, or if hw was nok.
   servo1.write(output_map[A01].pin, output_map[A01].value * 180.0f);
   servo2.write(output_map[A02].pin, output_map[A02].value * 180.0f);
   servo3.write(output_map[A03].pin, output_map[A03].value * 180.0f);

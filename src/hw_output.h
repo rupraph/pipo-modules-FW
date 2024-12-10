@@ -11,7 +11,7 @@
 #include <Servo.h>
 #endif
 
-//This class will handle output data to the hardware. For now, lets have PWM, and servo
+//This class will handle output data to the hardware. For now, lets have PWM, servo. then PDM ?
 // I should likley do like for sensor, having a higher output clas, with specifics children for each output type
 
 //will not use for first tests
