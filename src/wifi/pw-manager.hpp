@@ -32,6 +32,7 @@ class PipoPWManager {
       indexes += ',';
       buffer += String(pair.first.c_str());
       buffer += String(pair.second.c_str());
+      buffer += (char)scores[pair.first];
     }
     preferences.putString("indexes", indexes);
     preferences.putString("buffer", buffer);
@@ -64,13 +65,12 @@ class PipoPWManager {
         n = 0;
       } else {
         pwdLen = n;
-        // set(buffer, offset, ssidLen, pwdLen);
         int pwdOffset = offset + ssidLen;
         String ssid = buffer.substring(offset, pwdOffset);
         String password = buffer.substring(pwdOffset, pwdOffset + pwdLen);
         passwords[std::string(ssid.c_str())] = std::string(password.c_str());
-
-        offset += (ssidLen + pwdLen);
+        scores[std::string(ssid.c_str())] = buffer[pwdOffset + pwdLen];
+        offset += (ssidLen + pwdLen + 1);
         isSSID = true;
         ssidLen = 0;
         pwdLen = 0;
@@ -83,7 +83,47 @@ class PipoPWManager {
   * @brief Adds a ssid and password to the list (do not saves it)
   */
   void add(String ssid, String password) {
-    passwords[std::string(ssid.c_str())] = std::string(password.c_str());
+    std::string c_ssid = std::string(ssid.c_str());
+
+    if (passwords.size() == MAX_NETWORKS) {
+      unsigned char minScore = MAX_SCORE;
+      std::string minSSID = "";
+      for (auto const& pair : scores) {
+        if (pair.second > minScore)
+          continue;
+        minScore = pair.second;
+        minSSID = pair.first;
+      }
+      passwords.erase(minSSID);
+      scores.erase(minSSID);
+    }
+    passwords[c_ssid] = std::string(password.c_str());
+    // check if score exists already
+    if (scores.find(c_ssid) == scores.end())
+      return;
+    scores[c_ssid] = BASE_SCORE;
+  }
+
+  /**
+   * @brief Updates the score of a given ssid
+   * @param ssid the ssid of the network
+   * 
+   */
+  void promote(String ssid) {
+    std::string c_ssid = std::string(ssid.c_str());
+    if (scores.find(c_ssid) == scores.end()) {
+      return;
+    }
+    unsigned char score = scores[std::string(ssid.c_str())];
+    // downgrade all other scores
+    for (auto& pair : scores) {
+      if (pair.first == c_ssid) {
+        pair.second =
+            std::min(MAX_SCORE, (unsigned char)(pair.second + MAX_NETWORKS));
+      } else {
+        pair.second = std::max(MIN_SCORE, (unsigned char)(pair.second - 1));
+      }
+    }
   }
 
   /**
@@ -102,10 +142,17 @@ class PipoPWManager {
   bool hasSSID(String ssid) {
     return passwords.find(std::string(ssid.c_str())) != passwords.end();
   }
+
+  /**
+   * @brief Min possible score for a network, cannot be 0 because of string encoding
+   */
+  const unsigned char MIN_SCORE = 1;
+  const unsigned char MAX_SCORE = 255;
+  const unsigned char BASE_SCORE = 128;
   /**
    * @brief Maximum number of networks to remember
    */
-  static const int MAX_NETWORKS = 10;
+  const unsigned char MAX_NETWORKS = 5;
   Preferences preferences;
   /**
    * @brief The passwords
@@ -113,6 +160,10 @@ class PipoPWManager {
    * value: password
    */
   std::map<std::string, std::string> passwords;
+  /**
+   * @brief score for each wifi (higher is more used) 
+   */
+  std::map<std::string, unsigned char> scores;
 };
 
 #endif  // PIPOPWMANAGER_H

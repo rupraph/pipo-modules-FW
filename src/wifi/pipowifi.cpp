@@ -5,6 +5,7 @@ void PipoWifi::setup() {
   pwm.setup();
   WiFi.setAutoReconnect(true);
   STAMode();
+  // APMode();
 };
 void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 300U);
@@ -58,6 +59,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
     Serial.println("Connected to " + String(ssid.c_str()));
     Serial.println("IP " + WiFi.localIP().toString());
     pwm.add(ssid, password);
+    pwm.promote(ssid);
     pwm.save();
     status = CONNECTED;
     return true;
