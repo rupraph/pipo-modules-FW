@@ -109,15 +109,14 @@ void loop() {
   try {
 
     monitor_wifi(server.is_running);
-    // input_sensor.update();
-    // engine.update();
-    // pipoSocket.loop();
+    input_sensor.update();
+    engine.update();
+    pipoSocket.loop();
     hwui.update();
 
-    // } catch (const std::exception& e) {
-    //   Serial.println("Exception in main loop");
-    //   logs.writeLog(e.what());
-    //   delay(50);
-    // }
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
   }
 }

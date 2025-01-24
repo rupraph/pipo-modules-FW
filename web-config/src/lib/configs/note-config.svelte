@@ -9,6 +9,12 @@
   export let config: NoteConfig & BaseMidiConfig;
   export let isThresholdMode = false;
 
+  const patternTypes = [
+    { label: "Scale", value: "scale" },
+    { label: "Arpeggio", value: "arpeggio" },
+    { label: "Interval", value: "inter" },
+  ];
+
   // this is currently defined both on pipo and config side.
   const scaleTypes = [
     { label: "Major", value: "major", notes: [0, 2, 4, 5, 7, 9, 11] },
@@ -55,16 +61,67 @@
     { label: "Ionian", value: "ionian", notes: [0, 2, 4, 5, 7, 9, 11] },
     { label: "Aeolian", value: "aeolian", notes: [0, 2, 3, 5, 7, 8, 1] },
   ];
+
+  const arpeggioTypes = [
+    { label: "major", value: "major", notes: [0, 4, 7] },
+    { label: "minor", value: "minor", notes: [0, 3, 7] },
+    { label: "diminished", value: "diminished", notes: [0, 3, 6] },
+    { label: "augmented", value: "augmented", notes: [0, 4, 8] },
+    { label: "suspended", value: "suspended", notes: [0, 5, 7] },
+    { label: "dominant", value: "dominant", notes: [0, 4, 7, 10] },
+    { label: "major 7", value: "major 7", notes: [0, 4, 7, 11] },
+    { label: "minor 7", value: "minor 7", notes: [0, 3, 7, 10] },
+    { label: "diminished 7", value: "diminished 7", notes: [0, 3, 6, 9] },
+    { label: "augmented 7", value: "augmented 7", notes: [0, 4, 8, 10] },
+    { label: "suspended 7", value: "suspended 7", notes: [0, 5, 7, 10] },
+    { label: "dominant 7", value: "dominant 7", notes: [0, 4, 7, 10] },
+    { label: "major 9", value: "major 9", notes: [0, 4, 7, 11, 14] },
+    { label: "minor 9", value: "minor 9", notes: [0, 3, 7, 10, 14] },
+    { label: "diminished 9", value: "diminished 9", notes: [0, 3, 6, 9, 13] },
+    { label: "augmented 9", value: "augmented 9", notes: [0, 4, 8, 10, 14] },
+  ];
+
+  const intervals = [
+    { label: "second", value: "second", notes: [0, 2] },
+    { label: "third", value: "third", notes: [0, 4] },
+    { label: "fourth", value: "fourth", notes: [0, 5] },
+    { label: "fifth", value: "fifth", notes: [0, 7] },
+    { label: "sixth", value: "sixth", notes: [0, 9] },
+    { label: "seventh", value: "seventh", notes: [0, 11] },
+    { label: "octave", value: "octave", notes: [0, 12] },
+    { label: "ninth", value: "ninth", notes: [0, 14] },
+    { label: "tenth", value: "tenth", notes: [0, 16] },
+    { label: "eleventh", value: "eleventh", notes: [0, 17] },
+    { label: "twelfth", value: "twelfth", notes: [0, 19] },
+  ];
 </script>
 
 {#if $pipoType !== "analog"}
   <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
     <Select
-      class={isThresholdMode ? "disabled" : ""}
-      label="Scale type"
-      options={scaleTypes}
-      bind:value={config.scaleType}
+      label="Pattern"
+      options={patternTypes}
+      bind:value={config.patternType}
     />
+    {#if config.patternType === "scale"}
+      <Select
+        label="Scale type"
+        options={scaleTypes}
+        bind:value={config.scaleType}
+      />
+    {:else if config.patternType === "arpeggio"}
+      <Select
+        label="Arpeggio type"
+        options={arpeggioTypes}
+        bind:value={config.scaleType}
+      />
+    {:else if config.patternType === "interval"}
+      <Select
+        label="Interval type"
+        options={intervals}
+        bind:value={config.scaleType}
+      />
+    {/if}
   </Tooltip>
 {/if}
 

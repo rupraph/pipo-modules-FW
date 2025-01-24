@@ -2,7 +2,7 @@
 
 MidiTranslator::MidiTranslator() {
   current_scale.clear();
-  current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+  current_scale = generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
   if (hires) {
     cc_max = 16383;
   } else {
@@ -50,7 +50,7 @@ void MidiTranslator::set_scale_type(string scaleType) {
     cout << "Invalid scale type." << endl;
   }
   current_scale.clear();
-  current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+  current_scale = generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
 }
 
 void MidiTranslator::set_root_note(string rootNote) {
@@ -61,7 +61,8 @@ void MidiTranslator::set_root_note(string rootNote) {
   } else {
     rootNotenb = rootNotenb;
     current_scale.clear();
-    current_scale = generate_full_scale(rootNotenb, nbOfNotes, scaleType);
+    current_scale =
+        generate_full_scale(rootNotenb, nbOfNotes, pattern, scaleType);
   }
 }
 
@@ -72,7 +73,8 @@ void MidiTranslator::set_number_of_notes(int nbOfNotes) {
   } else {
     this->nbOfNotes = nbOfNotes;
     current_scale.clear();
-    current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+    current_scale =
+        generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
   }
 }
 
@@ -109,9 +111,10 @@ bool MidiTranslator::is_a_note(string noteName) {
 }
 
 vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
+                                                string pattern,
                                                 string scaleType) {
 
-  vector<int> scale = generate_base_scale(rootNote, scaleType);
+  vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
   vector<int> expandedScale;
 
   int baseScaleSize = scale.size();
@@ -127,17 +130,46 @@ vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   return expandedScale;
 }
 
-vector<int> MidiTranslator::generate_base_scale(int rootNote,
+vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
                                                 string scaleType) {
-  auto it = scales.find(scaleType);
-  if (it != scales.end()) {
-    vector<int> scale = it->second;
-    for (int i = 0; i < scale.size(); i++) {
-      scale[i] += rootNote;
+  if (pattern == "scale") {
+    auto it = scales.find(scaleType);
+    if (it != scales.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      cout << "Invalid scale type." << endl;
+      return {};
     }
-    return scale;
+  } else if (pattern == "arpegio") {
+    auto it = arpegios.find(scaleType);
+    if (it != arpegios.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      cout << "Invalid arpegio type." << endl;
+      return {};
+    }
+  } else if (pattern == "interval") {
+    auto it = intervals.find(scaleType);
+    if (it != intervals.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      cout << "Invalid interval type." << endl;
+      return {};
+    }
   } else {
-    cout << "Invalid scale type." << endl;
+    cout << "Invalid pattern type." << endl;
     return {};
   }
 }
@@ -152,8 +184,8 @@ vector<string> MidiTranslator::get_scale_names() {
 
 void MidiTranslator::update_scale() {
   current_scale.clear();
-  current_scale =
-      generate_full_scale(this->rootNote, this->nbOfNotes, this->scaleType);
+  current_scale = generate_full_scale(this->rootNote, this->nbOfNotes,
+                                      this->pattern, this->scaleType);
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
@@ -196,6 +228,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["channel"] = channel;
   j["cc_nb"] = cc_nb;
   j["tl_mode"] = tl_mode;
+  j["pattern"] = pattern;
   j["scaleType"] = scaleType;
   j["rootNote"] = rootNote;
   j["nbOfNotes"] = nbOfNotes;
@@ -212,6 +245,7 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     channel = j["channel"];
     cc_nb = j["cc_nb"];
     tl_mode = j["tl_mode"];
+    pattern = j["pattern"].as<string>();
     scaleType = j["scaleType"].as<string>();
     rootNote = j["rootNote"];
     nbOfNotes = j["nbOfNotes"];
