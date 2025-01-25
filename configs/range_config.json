@@ -40,7 +40,8 @@
       "lmax": 60.0,
       "lmin": 5.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {

@@ -145,6 +145,7 @@ JsonDocument Sensor::get_config(bool debug) {
       config[axis_name]["lmin"] = sensor_dat[axis_name].lmin;
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
       config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
+      config[axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -170,6 +171,7 @@ void Sensor::set_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].lmin = config[axis_name]["lmin"];
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
     sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
+    sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
   }
   if (debug) {
     Serial.println("set_sensor_config");
@@ -462,6 +464,20 @@ void Sensor::set_threshold_mode(const std::string& axis, bool value) {
 void Sensor::set_bool_value(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     sensor_dat[axis].bool_value = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_cyclic(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    sensor_dat[axis].cyclic = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+bool Sensor::get_cyclic(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].cyclic;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

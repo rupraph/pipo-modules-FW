@@ -165,7 +165,8 @@
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "accY": {
       "deadzone": 0.05,
@@ -174,7 +175,8 @@
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "accZ": {
       "deadzone": 0.05,
@@ -183,7 +185,8 @@
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "pitch": {
       "deadzone": 2,
@@ -192,7 +195,8 @@
       "lmax": 90,
       "lmin": -90,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "roll": {
       "deadzone": 2,
@@ -201,7 +205,8 @@
       "lmax": 180,
       "lmin": -180,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "yaw": {
       "deadzone": 2,
@@ -210,7 +215,8 @@
       "lmax": 180,
       "lmin": -180,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {

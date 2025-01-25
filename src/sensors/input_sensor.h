@@ -27,6 +27,9 @@ struct SensorDat {
   bool mode;     // 0 = continuous, 1 = trigger
   bool th_mode;  // 0 = basic, 1 = window trigger
 
+  bool
+      cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
+
   // Live attributes
   float raw_value;  // raw value from sensor
   float value;  // should distinguish raw value from output value and have both
@@ -131,6 +134,9 @@ class Sensor {
 
   bool get_bool_value(const std::string& axis);
   void set_bool_value(const std::string& axis, bool value);
+
+  bool get_cyclic(const std::string& axis);
+  void set_cyclic(const std::string& axis, bool value);
 
  protected:
   unordered_map<string, SensorDat> sensor_dat;

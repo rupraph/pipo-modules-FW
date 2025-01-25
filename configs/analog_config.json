@@ -327,7 +327,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "A2": {
       "deadzone": 0.0,
@@ -336,7 +337,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "A3": {
       "deadzone": 0.0,
@@ -345,7 +347,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "A4": {
       "deadzone": 0.0,
@@ -354,7 +357,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "A5": {
       "deadzone": 0.0,
@@ -363,7 +367,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "A6": {
       "deadzone": 0.0,
@@ -372,7 +377,8 @@
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T1": {
       "deadzone": 0.0,
@@ -381,7 +387,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T2": {
       "deadzone": 0.0,
@@ -390,7 +397,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T3": {
       "deadzone": 0.0,
@@ -399,7 +407,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T4": {
       "deadzone": 0.0,
@@ -408,7 +417,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T5": {
       "deadzone": 0.0,
@@ -417,7 +427,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "T6": {
       "deadzone": 0.0,
@@ -426,7 +437,8 @@
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {

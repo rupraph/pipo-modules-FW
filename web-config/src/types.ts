@@ -42,6 +42,7 @@ export type SensorConfig = {
   lmin: number;
   offset: number;
   invert: boolean;
+  cyclic: boolean;
 };
 
 export type OscConfig = {

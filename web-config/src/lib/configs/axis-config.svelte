@@ -65,6 +65,7 @@
 >
   <Switch label="Inverted" bind:value={sensor.invert} design="slider" />
   {#if aschema.cat !== "Touch"}
+    <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
     <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
     <!-- {#if sensor.mode === true} -->
     <div class:disabled={!sensor.mode}>
