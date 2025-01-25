@@ -109,9 +109,9 @@ void loop() {
   try {
 
     monitor_wifi(server.is_running);
-    input_sensor.update();
-    engine.update();
-    pipoSocket.loop();
+    // input_sensor.update();
+    // engine.update();
+    // pipoSocket.loop();
     hwui.update();
 
   } catch (const std::exception& e) {

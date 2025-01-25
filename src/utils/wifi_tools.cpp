@@ -84,7 +84,7 @@ void monitor_wifi(bool is_server_runing) {
       config.save(config.filename);
       ESP.restart();
     }
-    if (c == 'a') {
+    if (c == 's') {
       Serial.println(F("Switching to STA mode"));
       config.general_config["Wifi_mode"] = "STA";
       config.save(config.filename);

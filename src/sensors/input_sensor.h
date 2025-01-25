@@ -20,7 +20,7 @@ struct SensorDat {
   // Config attributes
   float deadzone;  // supposed to be % of the total range. value for now
   float offset;
-  bool invert;
+  bool inverted;
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
   float lmin;
 
@@ -50,7 +50,7 @@ struct SensorDat {
   SensorDat()
       : deadzone(0.0),
         offset(0.0),
-        invert(false),
+        inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
         value_prev(0.0),

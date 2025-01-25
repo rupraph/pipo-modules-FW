@@ -323,7 +323,7 @@
     "A1": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -333,7 +333,7 @@
     "A2": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -343,7 +343,7 @@
     "A3": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -353,7 +353,7 @@
     "A4": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -363,7 +363,7 @@
     "A5": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -373,7 +373,7 @@
     "A6": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
@@ -383,7 +383,7 @@
     "T1": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
@@ -393,7 +393,7 @@
     "T2": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
@@ -403,7 +403,7 @@
     "T3": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
@@ -413,7 +413,7 @@
     "T4": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
@@ -423,7 +423,7 @@
     "T5": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
@@ -433,7 +433,7 @@
     "T6": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,

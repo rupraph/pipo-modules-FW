@@ -41,7 +41,7 @@ export type SensorConfig = {
   lmax: number;
   lmin: number;
   offset: number;
-  invert: boolean;
+  inverted: boolean;
   cyclic: boolean;
 };
 
