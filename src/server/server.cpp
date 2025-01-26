@@ -365,6 +365,8 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
       config.apply(engine, osc, true);
     } else if (strcmp("save", command) == 0) {
       config.save();
+    } else if (strcmp("monitor", command) == 0) {
+      input_sensor.monitor_axis(ws_message + offset + 1);
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -372,6 +374,7 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
     Serial.println(e.what());
   }
 }
+
 void PipoServer::setup_ws() {
   if (ws_initialized) {
     pipoSocket.setup(&ws);
@@ -382,57 +385,47 @@ void PipoServer::setup_ws() {
   pipoSocket.setup(&ws);
   events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
-  String msg = "";
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-      Serial.println("ws connect");
-      client->ping();
+      Serial.printf("Client connected: ID = %u, URL = %s\n", client->id(),
+                    server->url());
     } else if (type == WS_EVT_DISCONNECT) {
-      Serial.println("ws disconnect");
-      ws.cleanupClients(1);
+      Serial.printf("Client disconnected: ID = %u, URL = %s\n", client->id(),
+                    server->url());
     } else if (type == WS_EVT_ERROR) {
-      client->close();
-      ws.cleanupClients(1);
-      Serial.print("ws error");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.print(*((uint16_t*)arg));
-      Serial.println((char*)data);
+      uint16_t errorCode = *((uint16_t*)arg);
+      Serial.printf(
+          "WebSocket error: URL = %s, Client ID = %u, Error Code = %d, Data = "
+          "%s\n",
+          server->url(), client->id(), errorCode, (char*)data);
     } else if (type == WS_EVT_PONG) {
-      Serial.print("ws pong");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.print(len);
-      Serial.println((len) ? (char*)data : "");
+      Serial.printf("Pong received: URL = %s, Client ID = %u, Data = %s\n",
+                    server->url(), client->id(),
+                    (len) ? (char*)data : "No Data");
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
-      if (info->final && info->index == 0 && info->len == len) {
-        memcpy((void*)ws_message, data, info->len);
-        ws_message_len = info->len;
-        ws_message[ws_message_len] = 0;
-        onMessage(client);
-        return;
-      }
-      if (info->len >= ws_max_len - 1) {
+
+      if (info->index == 0 && !info->final) {
+        // Start of a fragmented message
         ws_message_len = 0;
-        ws_message[0] = 0;
-        return;
       }
-      if (info->index == 0) {
-        if (info->len + ws_message_len >= ws_max_len - 1) {
-          ws_message_len = 0;
-          ws_message[0] = 0;
-          return;
+
+      if (info->index + len <= ws_max_len - 1) {
+        // Append the current fragment to the message buffer
+        memcpy(ws_message + info->index, data, len);
+        ws_message_len = info->index + len;
+
+        if (info->final) {
+          // Message is complete
+          ws_message[ws_message_len] = '\0';  // Null-terminate the message
+          onMessage(client);                  // Process the complete message
+          ws_message_len = 0;                 // Reset for the next message
         }
-        memcpy((void*)(ws_message + ws_message_len), data, info->len);
-        ws_message_len += info->len;
-        if (info->index + len == info->len && info->final) {
-          ws_message[ws_message_len] = 0;
-          onMessage(client);
-          ws_message_len = 0;
-          ws_message[0] = 0;
-        }
+      } else {
+        // Message too large or buffer overflow
+        Serial.println("Error: Message exceeds buffer size");
+        ws_message_len = 0;
       }
     }
   });

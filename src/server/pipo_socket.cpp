@@ -43,15 +43,29 @@ void PipoSocket::sendSensorValue(std::string axis, float value) {
 void PipoSocket::loop() {
   if (ws == nullptr)
     return;
-  unsigned long now = millis();
-  // if (now - lastSendTime < 50) {
-  //   iterations += 1;
-  //   return;
-  // }
-  if (now - lastCleanTime > 5000) {
-    ws->cleanupClients(1);
-    lastCleanTime = now;
+  auto clients = ws->getClients();
+  if (clients.length() == 0)
+    return;
+  bool canSend = true;
+  for (AsyncWebSocketClient* c : clients) {
+    if (c->status() != WS_CONNECTED)
+      continue;
+    canSend = canSend && c->canSend();
   }
+  // Do not try to send if any client is not ready
+  // Because the lib still allocates memory for the message
+  if (!canSend)
+    return;
+  unsigned long now = millis();
+  // if (now - lastCleanTime > 500) {
+  //   for (AsyncWebSocketClient* c : ws->getClients()) {
+  //     if (c->freeSpace() < 30) {
+  //       Serial.printf("Client ID = %u, Queue Length = %u\n",
+  //                     c->id(), c->freeSpace());
+  //     }
+  //   }
+  //   lastCleanTime = now;
+  // }
   std::string message = "fps,";
   message += std::to_string((float)iterations);
   message += ",";
@@ -60,6 +74,8 @@ void PipoSocket::loop() {
   lastSendTime = now;
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
+    if (!pair.second.ws_monitor)
+      continue;
     string axis_name = pair.first;
     float sensor_val = input_sensor.get_value(axis_name);
     bool sensor_bool = input_sensor.get_bool_value(axis_name);

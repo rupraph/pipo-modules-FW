@@ -1,5 +1,7 @@
 #include "utils/debug.h"
 void pipoDebugHeap() {
+#ifdef DEBUG_HEAP
+
   size_t freeHeap = ESP.getFreeHeap();
   size_t totalHeap = ESP.getHeapSize();
   size_t usedHeap = totalHeap - freeHeap;
@@ -15,4 +17,5 @@ void pipoDebugHeap() {
                 (freeHeap * 100.0) / totalHeap);
   Serial.printf(" Max block: %u bytes\n",
                 heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+#endif
 }

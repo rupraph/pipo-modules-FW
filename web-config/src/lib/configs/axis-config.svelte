@@ -52,11 +52,13 @@
   animateSensor();
 
   function cal_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/offsetcal",
-      params: { axis },
-    }).then(() => console.log("DONE"));
+    pipoio
+      .request({
+        method: "post",
+        url: "/offsetcal",
+        params: { axis },
+      })
+      .then(() => console.log("DONE"));
   }
 </script>
 

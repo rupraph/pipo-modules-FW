@@ -10,6 +10,8 @@
 
 class PipoWifi {
 
+  const int WIFI_DELAY = 2000;
+
  public:
   /**
   * @brief The current status of the wifi
@@ -40,7 +42,7 @@ class PipoWifi {
    * @param ssid the ssid of the network to connect to. Takes the remembered password if it exists
    * @return true if successfully connected to a WIFI network, false otherwise
    */
-  bool connect(String ssid);
+  bool connect(String ssid, bool disconnect = true);
   /**
    * @brief Tries to Connects to a WIFI network, fallback to AP if it fails
    * @param ssid the ssid of the network to connect to
@@ -61,7 +63,7 @@ class PipoWifi {
    * @brief Tries to connect to a WIFI network, fallback to AP if it fails
    * @return true if successfully connected to a WIFI network, false otherwise
    */
-  bool connect();
+  bool connect(bool disconnect = true);
   /**
    * @brief Switches to AP mode
    * @return true if AP mode is successfully set, false otherwise

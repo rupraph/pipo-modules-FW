@@ -1,11 +1,11 @@
 <script lang="ts">
+  import { pipoio } from "../../pipoio";
   import Select from "../form/Select.svelte";
-  import axios from "axios";
 
   export let wifiMode: string;
 
   function reboot() {
-    axios.get("/reboot").then(() => {
+    pipoio.get("/reboot").then(() => {
       console.log("Rebooting...");
     });
   }

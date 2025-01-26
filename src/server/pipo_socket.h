@@ -4,7 +4,6 @@
 #include "utils/logs.h"
 #include <ESPAsyncWebServer.h>
 using namespace std;
-
 class PipoSocket {
  public:
   PipoSocket();

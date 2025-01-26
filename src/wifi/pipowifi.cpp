@@ -4,7 +4,10 @@ void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
   WiFi.setAutoReconnect(true);
+  // allow to connect to (WHY SO WEAK?) wep networks
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
+  // prevent from the Wifi to sleep: avoid latency in websockets
+  WiFi.setSleep(false);
   scan();
   APSTAMode();
 };
@@ -15,11 +18,11 @@ void PipoWifi::scan() {
     signals[WiFi.SSID(i)] = rssiperc;
   }
 };
-bool PipoWifi::connect() {
+bool PipoWifi::connect(bool disconnect) {
   status = CONNECTING;
   for (auto const& ssid : signals) {
     try {
-      if (connect(ssid.first)) {
+      if (connect(ssid.first, disconnect)) {
         return true;
       }
     } catch (const std::exception& e) {
@@ -32,11 +35,11 @@ bool PipoWifi::connect() {
   return false;
 };
 
-bool PipoWifi::connect(String ssid) {
+bool PipoWifi::connect(String ssid, bool disconnect) {
   if (!pwm.hasSSID(ssid)) {
     return false;
   }
-  return connect(ssid, pwm.getPassword(ssid));
+  return connect(ssid, pwm.getPassword(ssid), disconnect);
 }
 
 bool PipoWifi::connect(String ssid, String password, bool disconnect) {
@@ -45,7 +48,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   status = CONNECTING;
   if (disconnect) {
     WiFi.disconnect(true, true);
-    // vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
   }
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
@@ -53,8 +56,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
-    // vTaskDelay(pdMS_TO_TICKS(CHECK_TIMEOUT));
-    delay(CHECK_TIMEOUT);
+    vTaskDelay(pdMS_TO_TICKS(CHECK_TIMEOUT));
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Connected to " + String(ssid.c_str()));
@@ -73,9 +75,9 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
 bool PipoWifi::APMode() {
   Serial.println("Start AP mode");
   WiFi.disconnect(true, true);
-  status = DISCONNECTED;
-  vTaskDelay(pdMS_TO_TICKS(100));
   WiFi.mode(WIFI_AP);
+  status = DISCONNECTED;
+  vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
   if (!WiFi.softAP("Pipo", "pipo1234")) {
     Serial.println("Failed to start AP mode");
     return false;
@@ -91,16 +93,31 @@ bool PipoWifi::APSTAMode() {
     return true;
   }
   bool success = true;
+  bool successConnect = true;
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
   WiFi.disconnect(true, true);
-  vTaskDelay(pdMS_TO_TICKS(100));
   WiFi.mode(WIFI_MODE_APSTA);
-  success = WiFi.softAP("Pipo", "pipo1234");
+  vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
   if (wasConnected) {
-    success &= connect(previousSsid, pwm.getPassword(previousSsid), false);
+    successConnect =
+        connect(previousSsid, pwm.getPassword(previousSsid), false);
+  } else {
+    successConnect = connect(false);
   }
-  return success;
+  if (!successConnect) {
+    Serial.println("APSTA: Failed to connect to network");
+  }
+  vTaskDelay(pdMS_TO_TICKS(500));
+  success = WiFi.softAP("Pipo", "pipo1234");
+  if (success) {
+    Serial.println("APSTA mode started");
+    Serial.print("AP IP Address: ");
+    Serial.println(WiFi.softAPIP());
+  } else {
+    Serial.println("Failed to start APSTA mode");
+  }
+  return success & successConnect;
 };
 
 bool PipoWifi::STAMode() {
@@ -110,7 +127,7 @@ bool PipoWifi::STAMode() {
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
   WiFi.disconnect(true, true);
-  vTaskDelay(pdMS_TO_TICKS(100));
+  vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
   WiFi.mode(WIFI_MODE_STA);
   if (wasConnected) {
     return connect(previousSsid, pwm.getPassword(previousSsid), false);

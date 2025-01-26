@@ -1,12 +1,9 @@
 import EventEmitter from "eventemitter3";
 import type { PipoEvents } from "./lib/vis/types";
-import axios from "axios";
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
 import type { PipoConfig, PipoTypes } from "./types";
 import { formatNumbers } from "./utils";
-const NOTE_ON = 0x90;
-const NOTE_OFF = 0x80;
 export let error = "";
-let last = 0;
 function parse(msg: string) {
   const [command, ...args] = msg.split(",");
   const isSensor = command.startsWith("sensor");
@@ -15,81 +12,67 @@ function parse(msg: string) {
 }
 class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private socket?: WebSocket;
-  private enabled: boolean = true;
-  private timeout: number = 0;
-  private bailTimeout = 0;
-  private connected = false;
-  private beforeReconnectTimeout = 0;
+  private paused: boolean = false;
+  private busy: boolean = false;
+  private heartbeat = 0;
   private saveTimeout = 0;
+  private isConnecting = false;
+  private resurect = 0;
+  private lastMsgDate = Date.now();
   constructor() {
     super();
-    this.init();
+    this.connect();
+    this.resurect = setInterval(() => {
+      const now = Date.now();
+      if (
+        this.busy ||
+        this.paused ||
+        now - this.lastMsgDate < 2000 ||
+        this.isConnecting
+      ) {
+        return;
+      }
+      this.onDisconnect();
+      if (this.paused) return;
+      this.connect();
+    }, 5000) as any as number;
   }
 
-  async init() {
-    if (!this.enabled) return;
-    this.initWebSocket();
-  }
   async pause() {
-    this.enabled = false;
-    await this.onDisconnect();
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    this.paused = true;
+    this.onDisconnect();
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  resume() {
-    this.enabled = true;
-    this.initWebSocket();
+  async resume() {
+    this.paused = false;
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  retryConnection() {
-    if (this.timeout) window.clearTimeout(this.timeout);
-    this.timeout = window.setTimeout(() => {
-      try {
-        this.initWebSocket();
-        error = "";
-      } catch (e) {
-        this.retryConnection();
-        error = "Cannot init webSocket";
-      }
-    }, 500);
-  }
-  async onDisconnect() {
+  private cleanup() {
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat);
+      this.heartbeat = 0;
+    }
     if (this.socket) {
       this.socket.close();
+      this.socket = undefined;
     }
+  }
+  async onDisconnect() {
     this.emit("disconnect");
-    this.connected = false;
-    if (!this.enabled) return;
-    await new Promise((resolve) =>
-      setTimeout(resolve, this.beforeReconnectTimeout)
-    );
-    this.beforeReconnectTimeout = 0;
-    this.retryConnection();
+    this.cleanup();
   }
-  onConnect() {
-    this.emit("connect");
-    this.connected = true;
+  private onOpen() {
+    setTimeout(() => {
+      this.emit("connect");
+    }, 100);
   }
-  bailOnNoNews() {
-    clearTimeout(this.bailTimeout);
-    this.bailTimeout = window.setTimeout(() => this.onDisconnect(), 4000);
+  private onError(e: Event) {
+    console.error(`WebSocket error: ${e}`);
   }
-  initWebSocket() {
-    const url = import.meta.env.VITE_STATIC_IP
-      ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
-      : `ws://${location.hostname}/ws`;
-    const socket = new WebSocket(url);
-    this.socket = socket;
-    this.bailOnNoNews();
-    socket.addEventListener("open", () => this.onConnect());
-    socket.addEventListener("error", () => {
-      this.onDisconnect();
-    });
-    socket.addEventListener("close", () => this.onDisconnect());
-    socket.addEventListener("message", (e) => {
-      if (!this.connected) {
-        this.onConnect();
-      }
-      this.bailOnNoNews();
-      const lines = e.data.split("\n");
+  private onMessage(m: MessageEvent<string>) {
+    try {
+      this.lastMsgDate = Date.now();
+      const lines = m.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
@@ -122,19 +105,49 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
           return this.emit("logs", { entries });
         }
       });
-    });
+    } catch (e) {
+      console.error(`NON UTF-8 frame: `, e);
+    }
+  }
+
+  private connect() {
+    this.isConnecting = true;
+    const url = import.meta.env.VITE_STATIC_IP
+      ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
+      : `ws://${location.hostname}/ws`;
+    const socket = new WebSocket(url);
+    this.socket = socket;
+    socket.addEventListener("open", () => this.onOpen());
+    socket.addEventListener("error", (e) => this.onError(e));
+    socket.addEventListener("close", () => this.onDisconnect());
+    socket.addEventListener("message", (m) => this.onMessage(m));
+    setTimeout(() => {
+      this.isConnecting = false;
+    }, 1000);
+  }
+
+  // asserts that this.socket is not null
+  private canSendWSMessage() {
+    return this.socket && !this.paused && !this.busy;
+  }
+  private setBusy(busy: boolean) {
+    this.busy = busy;
+    // reset lastMsgDate after a busy period
+    if (!this.busy) this.lastMsgDate = Date.now();
+  }
+  monitorAxis(axis: string) {
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send(`monitor:${axis}`);
   }
 
   setValue(path: string, value: unknown) {
-    if (!this.socket) return;
-
-    this.socket.send(`config:${path}:${formatNumbers(value, 4)}`);
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send(`config:${path}:${formatNumbers(value, 4)}`);
   }
 
   setValues(pathvalues: { path: string; value: unknown }[]) {
-    if (!this.socket) return;
-    last = Date.now();
-    this.socket.send(
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send(
       `configs:${pathvalues
         .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
         .join("\n")}`
@@ -146,17 +159,62 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       this.saveTimeout = 0;
     }
     this.saveTimeout = window.setTimeout(async () => {
-      if (!this.socket) return;
-      this.socket.send("save: ");
+      if (!this.canSendWSMessage()) return;
+      this.socket!.send("save: ");
       this.saveTimeout = 0;
     }, 1000);
   }
+
+  private _wrap(p: Promise<any>) {
+    return new Promise((resolve, reject) => {
+      this.setBusy(true);
+      setTimeout(resolve, 100);
+    })
+      .then(() => p)
+      .finally(() => this.setBusy(false));
+  }
+  get<T = any, R = AxiosResponse<T>, D = any>(
+    url: string,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> {
+    return this._wrap(axios.get<T, R, D>(url, config));
+  }
+
+  post<T = any, R = AxiosResponse<T>, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>
+  ): Promise<R> {
+    return this._wrap(axios.post<T, R, D>(url, data, config));
+  }
+
+  request<T = any, R = AxiosResponse<T>, D = any>(
+    config: AxiosRequestConfig<D>
+  ): Promise<R> {
+    return this._wrap(axios<T, R, D>(config));
+  }
+
   getDebug() {
-    return axios.get("/conf-debug").then((res) => {
+    return this.get("/conf-debug").then((res) => {
       console.log(res.data);
     });
+  }
+
+  destroy() {
+    this.cleanup();
+    clearInterval(this.resurect);
   }
 }
 
 export const pipoio = new PipoIO();
 window.pipio = pipoio;
+
+// Handle cleanup during HMR
+if (import.meta.hot) {
+  // hook before the page reloads
+  import.meta.hot.accept(); // Accept HMR updates for this module
+  import.meta.hot.dispose(() => {
+    clearInterval(pipoio.resurect); // Clear the interval when the module is replaced
+    pipoio.resurect = null;
+  });
+}

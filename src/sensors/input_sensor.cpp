@@ -176,6 +176,19 @@ void Sensor::set_config(JsonObject config, bool debug) {
   }
 }
 
+void Sensor::monitor_axis(const std::string& axis) {
+  // iterate through sensor_dat, set the ws_monitor flag to true for the
+  // specified axis and false for all others
+  for (auto& dat : sensor_dat) {
+    string axis_name = dat.first;
+    if (axis_name == axis) {
+      dat.second.ws_monitor = true;
+    } else {
+      dat.second.ws_monitor = false;
+    }
+  }
+}
+
 //getter / setters
 
 unordered_map<string, SensorDat> Sensor::get_sensor_dat_map() {

@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import { pipoio } from "../../pipoio";
+
   import HidGlobalConfig from "./hid-global-config.svelte";
 
   import { createEventDispatcher, onMount } from "svelte";
@@ -74,7 +76,7 @@
     formData.append("file", blob, name);
     Promise.all([
       new Promise((resolve) => setTimeout(resolve, 1000)),
-      axios({
+      pipoio.request({
         method: "post",
         url: "/save",
         data: formData,
@@ -108,21 +110,21 @@
 
   let isPaused = false;
   function pause() {
-    axios.post("/pause").then(() => {
+    pipoio.post("/pause").then(() => {
       console.log("Pausing...");
     });
     isPaused = !isPaused;
   }
 
   function setAxis(axis: PipoKeys[T]) {
+    if (axis === currentAxis) return;
     currentAxis = axis;
     midi = configByAxis[axis].midi;
-
-    console.log("Setting axis", axis, midi.rootNote);
     osc = configByAxis[axis].osc;
     hid = configByAxis[axis].hid;
     aschema = schema[$type as T][axis];
     sensor = configByAxis[axis].sensor;
+    pipoio.monitorAxis(axis);
   }
   function setCategory(cat: string) {
     currentCat = cat;

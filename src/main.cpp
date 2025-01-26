@@ -68,8 +68,7 @@ void setup() {
   midiio.setup();
   hidio.setup(config.general_config["HidMode"]);
   // while (!Serial)
-  // delay(100);
-
+  //   delay(100);
   /////// Init wifi
   wifi.setup();
   /////// print filesystem files list
@@ -102,9 +101,9 @@ void setup() {
 
 void loop() {
 
-  // input_sensor.update();
-  // engine.update();
-  // hwui.update();
+  input_sensor.update();
+  engine.update();
+  hwui.update();
 
   // } catch (const std::exception& e) {
   //   Serial.println("Exception in main loop");

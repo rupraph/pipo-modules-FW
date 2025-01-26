@@ -12,9 +12,6 @@
   let wifiOpen = false;
   wifiState.subscribe((value) => {
     wifiSignal = value.signal;
-    if (!value.ssid.length) {
-      wifiOpen = true;
-    }
   });
   function toggleWifi() {
     wifiOpen = !wifiOpen;
@@ -38,7 +35,7 @@
 </script>
 
 <nav>
-  <span>FPS: {fps}</span>
+  <!-- <span>FPS: {fps}</span> -->
   <span class="status {live ? 'live' : ''}"> </span>
 
   <span class="wifi" on:click={toggleWifi}>

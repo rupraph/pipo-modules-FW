@@ -26,7 +26,7 @@
     const maxRetry = 5;
     while (retry++ < maxRetry) {
       try {
-        wifiMode = (await axios.get("/wifi-state")).data.split(" ")[0];
+        wifiMode = (await pipoio.get("/wifi-state")).data.split(" ")[0];
         break;
       } catch (e) {
         console.error(e);
@@ -34,12 +34,7 @@
     }
   }
   async function fetchNetworks() {
-    // debugger;
-    // await axios.get("/wifi-scan", { timeout: 5000 });
-    let { data } = await axios.get("/wifi-networks");
-    // let data = "";
-    // data += `Freebox-3443AA_EXT -87 0 0`;
-    console.log("connect", data);
+    let { data } = await pipoio.get("/wifi-networks");
     networks = (data as string)
       .trim()
       .split("\n")
@@ -87,13 +82,10 @@
     };
     addToast(toast);
     try {
-      await axios(
-        {
-          method: "post",
-          url: "/wifi-scan",
-        },
-        { timeout: 1000 }
-      );
+      await pipoio.request({
+        method: "post",
+        url: "/wifi-scan",
+      });
       await fetchNetworks();
     } catch (e) {
       console.error(e);
@@ -104,7 +96,6 @@
   }
   function onLockClick(ssid: string, known: boolean) {
     if (!known) return;
-    // axios.post("/wifi-forget", { ssid });
     password = "";
     editing = ssid;
     fetchNetworks();
@@ -132,14 +123,12 @@
     };
     addToast(toast);
     try {
-      await axios(
-        {
-          method: "post",
-          url: "/wifi-mode",
-          params: { mode },
-        },
-        { timeout: 1000 }
-      );
+      await pipoio.request({
+        method: "post",
+        url: "/wifi-mode",
+        params: { mode },
+        timeout: 1000,
+      });
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await fetchNetworks();
       await fetchMode();
@@ -161,14 +150,12 @@
     addToast(toast);
     await pipoio.pause();
     try {
-      await axios(
-        {
-          method: "post",
-          url: "/wifi-connect",
-          params: { ssid, password },
-        },
-        { timeout: 1000 }
-      );
+      await pipoio.request({
+        method: "post",
+        url: "/wifi-connect",
+        params: { ssid, password },
+        timeout: 1000,
+      });
       await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (e) {
       console.error(e);
@@ -176,7 +163,7 @@
     while (retry++ < maxRetry) {
       try {
         const [mode, status, ...info] = (
-          await axios.get("/wifi-state")
+          await pipoio.get("/wifi-state")
         ).data.split(" ");
         wifiMode = mode;
         if (status === "CONNECTING") continue;
@@ -197,7 +184,6 @@
               timeout: 5000,
             };
           } else if (newssid) {
-            console.log("Fallback to", newssid);
             toast = {
               type: "warning",
               message: `Could not connect to ${ssid}, fallback on ${newssid}`,
@@ -226,7 +212,6 @@
     pipoio.resume();
     waiting = false;
     editing = "";
-    console.log("END TOAST", toast);
     addToast(toast);
     // await fetchNetworks();
   }

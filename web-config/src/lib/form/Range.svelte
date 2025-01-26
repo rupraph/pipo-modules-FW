@@ -6,7 +6,7 @@
   export let max: number = Infinity;
   export let step: number = 1;
   export let value: number = 0;
-  export let tooltip: string | undefined;
+  export let tooltip: string | undefined = undefined;
   let id = uid();
   let interval = 0;
   let timeout = 0;

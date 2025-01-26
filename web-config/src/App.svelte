@@ -5,12 +5,10 @@
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
-  import axios, { AxiosError } from "axios";
+  import { AxiosError } from "axios";
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
-
-  // import Piano from "./lib/vis/Piano.svelte";
 
   // this likely causes slow load as it loads image first. -> "eager"
   // only the image from the right type should be loaded by the client
@@ -43,7 +41,7 @@
     console.error("Error fetching info:", e);
   }
   function fetch() {
-    return axios
+    return pipoio
       .get<PipoInfo>("/info", { timeout: 5000 })
       .then(({ data, status, statusText }) => {
         type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
@@ -61,12 +59,12 @@
   $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
 
   function reboot() {
-    axios.get("/reboot").then(() => {
+    pipoio.get("/reboot").then(() => {
       console.log("Rebooting...");
     });
   }
 
-  const batt = axios.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
+  const batt = pipoio.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
     console.log("Batt voltage:", data);
     return data / 1000;
   });
@@ -113,7 +111,7 @@
       </article>
     {/await}
   {/if}
-  <!-- <OfflineOverlay /> -->
+  <OfflineOverlay />
 </main>
 
 <style>
