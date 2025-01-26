@@ -3,6 +3,8 @@
   import axios from "axios";
   import { slide } from "svelte/transition";
   import { addToast, type Toast } from "../toast";
+  import { pipoio } from "../../pipoio";
+  import { wifiState } from "./store";
   type Network = {
     ssid: string;
     quality: number;
@@ -11,7 +13,7 @@
   };
   let editing = "";
   let showPassword = false;
-  let password = "";
+  let password: string | undefined = undefined;
   let waiting = false;
   let connecting = Promise.resolve();
   let wifiMode = "";
@@ -32,14 +34,20 @@
     }
   }
   async function fetchNetworks() {
+    // debugger;
+    // await axios.get("/wifi-scan", { timeout: 5000 });
     let { data } = await axios.get("/wifi-networks");
-    data += `Freebox-3443AA_EXT -87 0 0`;
+    // let data = "";
+    // data += `Freebox-3443AA_EXT -87 0 0`;
     console.log("connect", data);
     networks = (data as string)
       .trim()
       .split("\n")
       .map((line) => {
-        const [ssid, signal, connected, known] = line.split(" ");
+        const [_, ssid, signal, connected, known] = line.match(
+          /"(.*)" (-?\d+) (\d+) (\d+)/
+        );
+
         let quality = parseInt(signal);
         if (isNaN(quality)) {
           quality = -100;
@@ -47,7 +55,6 @@
         // TODO: Check this magic numbers from AI,
         quality = Math.max(-100, Math.min(quality, -50));
         quality = (-quality - 50) / 50;
-        console.log({ ssid, quality, signal, known, connected });
         return {
           ssid,
           known: known === "1",
@@ -63,35 +70,86 @@
         if (!a.known && b.known) return 1;
         return a.quality - b.quality;
       });
+    const connected = networks.find((n) => n.connected);
+    if (connected) {
+      wifiState.set({ signal: connected.quality, ssid: connected.ssid });
+    } else {
+      wifiState.set({ signal: 0, ssid: "" });
+    }
+  }
+  async function scan() {
+    if (waiting) return;
+    waiting = true;
+    let toast = {
+      type: "info" as const,
+      message: `Scanning for networks...`,
+      timeout: 5000,
+    };
+    addToast(toast);
+    try {
+      await axios(
+        {
+          method: "post",
+          url: "/wifi-scan",
+        },
+        { timeout: 1000 }
+      );
+      await fetchNetworks();
+    } catch (e) {
+      console.error(e);
+    }
   }
   function onInput(evt) {
     password = evt.target.value;
   }
+  function onLockClick(ssid: string, known: boolean) {
+    if (!known) return;
+    // axios.post("/wifi-forget", { ssid });
+    password = "";
+    editing = ssid;
+    fetchNetworks();
+  }
   function onSelect(ssid: string, known: boolean) {
+    const current = networks.find((n) => n.connected);
+    if (waiting || (current && ssid === current.ssid)) return;
     if (known) {
+      password = undefined;
       return onConnect(ssid);
     }
+    password = "";
     editing = ssid;
-    console.log("Editing", ssid);
   }
   function hideShowPassword() {
     showPassword = !showPassword;
   }
   async function setMode(mode: string) {
-    console.log("Setting mode", mode);
-    await axios(
-      {
-        method: "post",
-        url: "/wifi-mode",
-        params: { mode },
-      },
-      { timeout: 1000 }
-    );
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await fetchNetworks();
-    await fetchMode();
+    if (waiting) return;
+    waiting = true;
+    let toast = {
+      type: "info" as const,
+      message: `Setting mode to ${mode}...`,
+      timeout: 5000,
+    };
+    addToast(toast);
+    try {
+      await axios(
+        {
+          method: "post",
+          url: "/wifi-mode",
+          params: { mode },
+        },
+        { timeout: 1000 }
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await fetchNetworks();
+      await fetchMode();
+    } catch (e) {
+      console.error(e);
+    }
+    waiting = false;
   }
   async function onConnect(ssid: string) {
+    if (waiting) return;
     waiting = true;
     let retry = 0;
     const maxRetry = 5;
@@ -100,6 +158,8 @@
       message: `Connecting to ${ssid}...`,
       timeout: 5000,
     };
+    addToast(toast);
+    await pipoio.pause();
     try {
       await axios(
         {
@@ -109,16 +169,24 @@
         },
         { timeout: 1000 }
       );
-      return;
-      while (retry++ < maxRetry) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    } catch (e) {
+      console.error(e);
+    }
+    while (retry++ < maxRetry) {
+      try {
         const [mode, status, ...info] = (
           await axios.get("/wifi-state")
         ).data.split(" ");
         wifiMode = mode;
         if (status === "CONNECTING") continue;
         if (status === "UNKNOWN") {
-          throw new Error("Unknown status");
+          toast = {
+            type: "error",
+            message: `Connection to ${ssid} return unexpected error, please restart PIPO`,
+            timeout: 5000,
+          };
+          break;
         }
         if (status === "CONNECTED") {
           const [ip, newssid] = info;
@@ -129,33 +197,42 @@
               timeout: 5000,
             };
           } else if (newssid) {
+            console.log("Fallback to", newssid);
             toast = {
-              type: "error",
-              message: `Could not connect to ${newssid}, fallback on ${ssid}`,
+              type: "warning",
+              message: `Could not connect to ${ssid}, fallback on ${newssid}`,
               timeout: 5000,
             };
           } else {
             toast = {
               type: "error",
-              message: `Could not connect to ${ssid}`,
+              message: `Could not connect to ${ssid}, fallback on AP mode`,
               timeout: 5000,
             };
           }
           break;
         }
+      } catch (e) {
+        console.error(e);
       }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+    try {
+      await fetchMode();
+      await fetchNetworks();
     } catch (e) {
       console.error(e);
     }
+    pipoio.resume();
     waiting = false;
     editing = "";
+    console.log("END TOAST", toast);
     addToast(toast);
     // await fetchNetworks();
   }
 </script>
 
-<section class="connection">
-  <h3>Wifi mode: {wifiMode}</h3>
+<section class="connection" class:waiting>
   {#await networks}
     <p>Searching for networks...</p>
   {:then networks}
@@ -172,6 +249,7 @@
             viewBox="0 0 100 100"
             stroke="black"
             stroke-width="6"
+            on:click={() => onLockClick(ssid, known)}
           >
             <g>
               <path
@@ -252,14 +330,45 @@
         {/if}
       {/each}
     </ul>
-    <button on:click={() => setMode("AP")}>AP mode</button>
-    <button on:click={() => setMode("STA")}>STA mode</button>
-    <button on:click={() => setMode("APSTA")}>AP_STA mode</button>
+    {#if 0}
+      <div class="buttons">
+        <button
+          class:enabled={wifiMode == "AP"}
+          class:disabled={waiting}
+          on:click={() => setMode("AP")}>AP mode</button
+        >
+        <button
+          class:enabled={wifiMode == "STA"}
+          class:disabled={waiting}
+          on:click={() => setMode("STA")}>STA mode</button
+        >
+        <button
+          class:enabled={wifiMode == "APSTA"}
+          class:disabled={waiting}
+          on:click={() => setMode("APSTA")}>AP_STA mode</button
+        >
+      </div>
+    {/if}
   {/await}
 </section>
 
 <style scoped>
+  .connection {
+    position: relative;
+    display: grid;
+    gap: 1em;
+    margin-bottom: 2em;
+  }
+  .connection.waiting,
+  .connection.waiting * {
+    cursor: wait;
+    color: var(--bg-lighter);
+  }
+  .connection > h3 {
+    margin: 1em 0;
+  }
   ul {
+    margin: 0;
     grid-template-columns: auto 3em 3em 3em;
     justify-items: start;
     align-items: end;
@@ -272,7 +381,7 @@
     list-style: none;
     cursor: pointer;
   }
-  li:hover > span {
+  section:not(.waiting) li:hover > span {
     text-decoration: underline;
   }
   .connect {
@@ -300,5 +409,14 @@
   }
   button.showhide:hover svg {
     fill: var(--main);
+  }
+  button.enabled {
+    background-color: var(--main);
+    color: var(--bg-lighter);
+  }
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
   }
 </style>

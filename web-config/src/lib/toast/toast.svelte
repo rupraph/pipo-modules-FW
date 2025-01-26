@@ -51,6 +51,9 @@
   .info {
     background: SkyBlue;
   }
+  .warning {
+    background: DarkOrange;
+  }
   .text {
     margin-left: 1rem;
   }

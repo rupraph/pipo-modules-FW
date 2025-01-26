@@ -1,9 +1,9 @@
 <script lang="ts">
   import Logs from "./lib/logs.svelte";
+  import Toasts from "./lib/toast/toasts.svelte";
   import type { PipoInfo, PipoTypes } from "./types";
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
-  import WifiConnect from "./lib/wifi/connect.svelte";
   import Configs from "./lib/configs/index.svelte";
   import axios, { AxiosError } from "axios";
   import { pipoio } from "./pipoio";
@@ -44,7 +44,7 @@
   }
   function fetch() {
     return axios
-      .get<PipoInfo>("/info", { timeout: 2000 })
+      .get<PipoInfo>("/info", { timeout: 5000 })
       .then(({ data, status, statusText }) => {
         type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
         ip.set(data.ip);
@@ -73,6 +73,7 @@
 </script>
 
 <main>
+  <Toasts />
   <Menu />
   <div class="title-container">
     <h1>Pipo {type}</h1>
@@ -83,9 +84,7 @@
     />
   </div>
 
-  {#if error}
-    <!-- <p class="error">{error}</p> -->
-  {/if}
+  {#if error}{/if}
   <Configs />
 
   <article>
@@ -111,11 +110,10 @@
             {/await}
           {/if}
         </Collapse>
-        <!-- <Piano /> -->
       </article>
     {/await}
   {/if}
-  <OfflineOverlay />
+  <!-- <OfflineOverlay /> -->
 </main>
 
 <style>

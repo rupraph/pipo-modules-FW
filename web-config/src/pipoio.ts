@@ -27,12 +27,16 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   }
 
   async init() {
-    // try {
-    //   await this.initWebMidi();
-    // } catch (e) {
-    //   error = "Cannot init webMIDI";
-    // }
-    console.log("init");
+    if (!this.enabled) return;
+    this.initWebSocket();
+  }
+  async pause() {
+    this.enabled = false;
+    await this.onDisconnect();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  resume() {
+    this.enabled = true;
     this.initWebSocket();
   }
   retryConnection() {
@@ -147,39 +151,6 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       this.saveTimeout = 0;
     }, 1000);
   }
-  // async initWebMidi() {
-  //   const access = await navigator.permissions.query({
-  //     name: "midi",
-  //     sysex: true,
-  //   });
-
-  //   if (access.state === "prompt") {
-  //     throw new Error("Please allow MIDI access in your browser settings");
-  //   }
-  //   if (!navigator.requestMIDIAccess) {
-  //     throw new Error("Cant access MIDI: not a secure context");
-  //   }
-  //   const midi = await navigator.requestMIDIAccess();
-  //   const input = [...midi.inputs.values()].find((input) => {
-  //     if (input.name?.match(/PipoUSB/)) {
-  //       return true;
-  //     }
-  //   });
-  //   if (!input) {
-  //     throw new Error("Could not find PipoUSB MIDI device");
-  //   }
-
-  //   input.addEventListener("midimessage", (e) => {
-  //     const [cmd, note, velocity] = e.data;
-  //     if (cmd === NOTE_ON) {
-  //       this.emit("noteOn", { note, velocity });
-  //     } else if (cmd === NOTE_OFF) {
-  //       this.emit("noteOff", { note });
-  //     } else if (cmd === 0xb0) {
-  //       this.emit("controlChange", { control: note, value: velocity });
-  //     }
-  //   });
-  // }
   getDebug() {
     return axios.get("/conf-debug").then((res) => {
       console.log(res.data);

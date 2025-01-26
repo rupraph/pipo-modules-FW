@@ -114,12 +114,6 @@
     isPaused = !isPaused;
   }
 
-  function switchwifimode() {
-    axios.post("/wifimode").then(() => {
-      console.log("Switching wifi mode...");
-    });
-  }
-
   function setAxis(axis: PipoKeys[T]) {
     currentAxis = axis;
     midi = configByAxis[axis].midi;
@@ -133,11 +127,6 @@
   function setCategory(cat: string) {
     currentCat = cat;
   }
-  const wifimodes = [
-    { label: "Create Access Point", value: "AP" },
-    { label: "Station (Connect to others)", value: "STA" },
-  ];
-
   let interval = 0;
   // onMount(() => {
   //   interval = window.setInterval(() => {
@@ -311,12 +300,6 @@
     flex-direction: column;
     justify-content: left;
   }
-  /* :global(.axis-select .selected-item) {
-    font-weight: bold;
-    font-size: 27.2px;
-    margin-block-start: 27.2px;
-    margin-block-end: 27.2px;
-  } */
   .buttonbar {
     display: flex;
     flex-direction: row-reverse;
@@ -340,13 +323,6 @@
     margin: 10px 0;
   }
 
-  /* .Download {
-    background-color: rgba(106, 106, 106, 0.263);
-  }
-  .Download:hover {
-    background-color: rgba(0.2, 0.1, 0.2, 0.3);
-  } */
-
   .Pause {
     background-color: rgb(211, 211, 211);
   }
@@ -365,8 +341,5 @@
     justify-content: center;
     margin-bottom: 1.5em;
     gap: 1em;
-    /* background-color: var(--bg-tabs); */
-    /* padding-top: 0.4em;
-    padding-bottom: 0.4em;*/
   }
 </style>
