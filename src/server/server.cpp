@@ -19,7 +19,7 @@ void PipoServer::setup() {
 #endif
 }
 void PipoServer::start() {
-  DefaultHeaders::Instance().clear();
+  Serial.println("Start server");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods",
                                        "DELETE, POST, GET, OPTIONS");
@@ -30,7 +30,8 @@ void PipoServer::start() {
     Serial.println("not found: " + request->url());
     if (captivePortal.is_active()) {
       auto url = "http://" + WiFi.softAPIP().toString();
-      return request->redirect(url);
+      // return request->redirect(url);
+      return request->redirect("/");
     }
     if (request->method() == HTTP_OPTIONS) {
       request->send(200);
@@ -44,15 +45,17 @@ void PipoServer::start() {
   captivePortal.start(&server);
   setup_ws();
   server.begin();
-  Serial.println("start server");
   is_running = true;
   should_start = false;
 }
 void PipoServer::stop() {
   pipoSocket.stop();
   server.end();
+  server.reset();
+  ws_initialized = false;
+  DefaultHeaders::Instance().clear();
   captivePortal.stop();
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   Serial.println("end server");
   is_running = false;
 }
@@ -233,7 +236,7 @@ void PipoServer::setup_requests() {
 
   server.on("/reboot", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Rebooting");
-    delay(3000);
+    vTaskDelay(pdMS_TO_TICKS(3000));
     ESP.restart();
   });
 
@@ -250,7 +253,7 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "Error: invalid mode");
     }
     request->send(200, "text/plain", "Try to switch to mode " + mode);
-    delay(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
     stop();
     config.general_config["Wifi_mode"] = mode;
     Serial.println("Setting mode: " + mode);
@@ -261,7 +264,7 @@ void PipoServer::setup_requests() {
     } else {
       wifi.APSTAMode();
     }
-    delay(200);
+    vTaskDelay(pdMS_TO_TICKS(200));
     should_start = true;
   });
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
@@ -270,16 +273,23 @@ void PipoServer::setup_requests() {
     }
     request->send(200, "text/plain", "Try to connect to wifi");
     String ssid = request->getParam("ssid")->value();
-    String password = request->getParam("password")->value();
+    String password = "";
+    if (request->hasParam("password")) {
+      password = request->getParam("password")->value();
+    }
     String previous_ssid = wifi.ssid();
-    delay(200);
+    vTaskDelay(pdMS_TO_TICKS(200));
     stop();
-    bool success = wifi.connect(ssid, password);
+    bool success = false;
+    success =
+        password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
+    Serial.println("Connected ? ");
     if (!success && previous_ssid.length()) {
-      delay(200);
+      vTaskDelay(pdMS_TO_TICKS(200));
+      Serial.println("Not Connected!, reconnect to previous");
       wifi.connect(previous_ssid);
     }
-    delay(200);
+    vTaskDelay(pdMS_TO_TICKS(200));
     should_start = true;
   });
 
@@ -288,9 +298,12 @@ void PipoServer::setup_requests() {
   });
 
   server.on("/wifi-networks", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    // Serial.println("wifi scan");
-    // wifi.scan();
     return request->send(200, "text/plain", wifi.availableNetworks().c_str());
+  });
+
+  server.on("/wifi-scan", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    wifi.scan();
+    return request->send(200, "text/plain", "wifi scan done");
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -373,8 +386,10 @@ void PipoServer::setup_ws() {
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
+      Serial.println("ws connect");
       client->ping();
     } else if (type == WS_EVT_DISCONNECT) {
+      Serial.println("ws disconnect");
       ws.cleanupClients(1);
     } else if (type == WS_EVT_ERROR) {
       client->close();

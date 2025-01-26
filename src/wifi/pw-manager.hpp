@@ -16,6 +16,9 @@ class PipoPWManager {
 
   void setup() {
     preferences.begin("pipo-wifi", false);
+    size_t whatsLeft = preferences.freeEntries();
+    Serial.println("There are:" + (String)whatsLeft +
+                   "entries available wifi table");
     load();
   };
 
@@ -102,6 +105,7 @@ class PipoPWManager {
     if (scores.find(c_ssid) == scores.end())
       return;
     scores[c_ssid] = BASE_SCORE;
+    // save();
   }
 
   /**

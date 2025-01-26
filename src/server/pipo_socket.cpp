@@ -56,7 +56,7 @@ void PipoSocket::loop() {
   message += std::to_string((float)iterations);
   message += ",";
   message += std::to_string((float)now - lastSendTime);
-  iterations = 0;
+  iterations = 1;
   lastSendTime = now;
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {

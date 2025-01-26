@@ -4,19 +4,18 @@ void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
   WiFi.setAutoReconnect(true);
-  STAMode();
-  // APMode();
+  WiFi.setMinSecurity(WIFI_AUTH_WEP);
+  scan();
+  APSTAMode();
 };
 void PipoWifi::scan() {
-  int num = WiFi.scanNetworks(false, false, false, 300U);
-  Serial.println("scan done");
+  int num = WiFi.scanNetworks(false, false, false, 500U);
   for (int i = 0; i < num; i++) {
     int rssiperc = WiFi.RSSI(i);
     signals[WiFi.SSID(i)] = rssiperc;
   }
 };
 bool PipoWifi::connect() {
-  Serial.println("Connect...");
   status = CONNECTING;
   for (auto const& ssid : signals) {
     try {
@@ -46,6 +45,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   status = CONNECTING;
   if (disconnect) {
     WiFi.disconnect(true, true);
+    // vTaskDelay(pdMS_TO_TICKS(1000));
   }
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
@@ -53,6 +53,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
+    // vTaskDelay(pdMS_TO_TICKS(CHECK_TIMEOUT));
     delay(CHECK_TIMEOUT);
   }
   if (WiFi.status() == WL_CONNECTED) {
@@ -73,7 +74,7 @@ bool PipoWifi::APMode() {
   Serial.println("Start AP mode");
   WiFi.disconnect(true, true);
   status = DISCONNECTED;
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   WiFi.mode(WIFI_AP);
   if (!WiFi.softAP("Pipo", "pipo1234")) {
     Serial.println("Failed to start AP mode");
@@ -93,7 +94,7 @@ bool PipoWifi::APSTAMode() {
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
   WiFi.disconnect(true, true);
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   WiFi.mode(WIFI_MODE_APSTA);
   success = WiFi.softAP("Pipo", "pipo1234");
   if (wasConnected) {
@@ -109,7 +110,7 @@ bool PipoWifi::STAMode() {
   bool wasConnected = status == CONNECTED;
   String previousSsid = WiFi.SSID();
   WiFi.disconnect(true, true);
-  delay(100);
+  vTaskDelay(pdMS_TO_TICKS(100));
   WiFi.mode(WIFI_MODE_STA);
   if (wasConnected) {
     return connect(previousSsid, pwm.getPassword(previousSsid), false);
@@ -165,7 +166,9 @@ String PipoWifi::state() {
 String PipoWifi::availableNetworks() {
   String res;
   for (auto const& ssid : signals) {
+    res += "\"";
     res += ssid.first;
+    res += "\"";
     res += " ";
     res += String(ssid.second);
     res += WiFi.SSID() == ssid.first ? " 1" : " 0";

@@ -4,12 +4,14 @@
 
 #include <DNSServer.h>
 #include <WiFi.h>
+#include <wifi/pipowifi.h>
 #include <ESPAsyncWebServer.h>
 
 class CaptivePortal {
  public:
   CaptivePortal();
   bool is_active();
+  bool canEnable();
   void start(AsyncWebServer* server);
   void stop();
   void loop();

@@ -52,8 +52,8 @@ class PipoWifi {
    * @brief Scans for available networks
    */
   void scan();
-  static const uint CONNECT_TIMEOUT = 2000;
-  static const uint CHECK_TIMEOUT = 50;
+  static const uint CONNECT_TIMEOUT = 5000;
+  static const uint CHECK_TIMEOUT = 200;
   PipoWifiStatus status = DISCONNECTED;
   PipoPWManager pwm;
   std::map<String, int> signals;
