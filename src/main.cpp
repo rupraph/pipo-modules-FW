@@ -13,7 +13,6 @@
 
 // quick declaration of functions
 void init_filesystem();
-long lastPrint = 0;
 // Tasks distribution
 // what seems important is to avoid delays in midi and osc handling
 // seems better to keep wifi + networking on core 0
@@ -37,7 +36,7 @@ void sensorTask(void* pvParameters) {
 void websocketTask(void* pvParameters) {
   for (;;) {
     pipoSocket.loop();
-    vTaskDelay(pdMS_TO_TICKS(10));  //crashes if too fast (10 crashes)
+    vTaskDelay(pdMS_TO_TICKS(40));  //crashes if too fast (10 crashes)
   }
 }
 void dnsTask(void* pvParameters) {
@@ -69,11 +68,10 @@ void setup() {
   midiio.setup();
   hidio.setup(config.general_config["HidMode"]);
   // while (!Serial)
-  //   delay(100);
+  // delay(100);
 
   /////// Init wifi
   wifi.setup();
-
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
 
@@ -97,17 +95,15 @@ void setup() {
 #endif
   // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
   //                         &sensorTaskHandle, 1);
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
-  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 8192, NULL, 1, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
 }
 
 void loop() {
 
-  // monitor_wifi(server.is_running);
   // input_sensor.update();
   // engine.update();
-  // pipoSocket.loop();
   // hwui.update();
 
   // } catch (const std::exception& e) {
@@ -119,12 +115,7 @@ void loop() {
   // I dont understand why, but the server cannot restart from a
   // response to a request. It crashes. So I need to restart it from the main loop
   if (server.should_start) {
-    delay(1000);
+    vTaskDelay(pdMS_TO_TICKS(1000));
     server.start();
-  }
-  long now = millis();
-  if (now - lastPrint > 2000) {
-    lastPrint = now;
-    Serial.println("loop: " + String(now));
   }
 }
