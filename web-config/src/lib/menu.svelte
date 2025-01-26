@@ -9,10 +9,12 @@
   import Signal from "./wifi/signal.svelte";
 
   let wifiSignal = 0;
-  let wifiOpen = true;
+  let wifiOpen = false;
   wifiState.subscribe((value) => {
-    debugger;
     wifiSignal = value.signal;
+    if (!value.ssid.length) {
+      wifiOpen = true;
+    }
   });
   function toggleWifi() {
     wifiOpen = !wifiOpen;
