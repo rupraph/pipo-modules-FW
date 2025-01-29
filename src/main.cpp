@@ -102,22 +102,21 @@ void setup() {
 void loop() {
   try {
 
-    monitor_wifi(server.is_running);
+    // monitor_wifi(server.is_running);
     // input_sensor.update();
     // engine.update();
     // pipoSocket.loop();
     hwui.update();
-
-    // } catch (const std::exception& e) {
-    //   Serial.println("Exception in main loop");
-    //   logs.writeLog(e.what());
-    //   delay(50);
-    // }
-
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop
     if (server.should_start) {
       vTaskDelay(pdMS_TO_TICKS(1000));
       server.start();
     }
+
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
   }
+}
