@@ -40,7 +40,7 @@ void sensorTask(void* pvParameters) {
 
 void websocketTask(void* pvParameters) {
   for (;;) {
-    pipoSocket.loop();
+    // pipoSocket.loop();
     vTaskDelay(pdMS_TO_TICKS(100));  //crashes if too fast (10 crashes)
   }
 }
@@ -60,6 +60,7 @@ void setup() {
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
+
   config.apply(engine, osc, false);  // input_sens,
 
   /////// Init midi and hid
@@ -70,6 +71,9 @@ void setup() {
 
   /////// Init wifi
   setup_wifi();
+
+  Serial.println("current");
+  config.print();
 
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
@@ -89,7 +93,6 @@ void setup() {
   // Start OSC
   osc.setup();
 
-  Serial.println("Setup done");
 #ifdef DEBUG_HEAP
   Serial.print(F("Remaining Heap:"));
   Serial.println(String(ESP.getFreeHeap()));
@@ -99,7 +102,9 @@ void setup() {
   Serial.println(ESP.getMaxAllocHeap());
 #endif
 
-  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+  Serial.println("Setup done");
+
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 8192, NULL, 1,
                           &websocketTaskHandle, 0);
@@ -109,9 +114,7 @@ void loop() {
   try {
 
     monitor_wifi(server.is_running);
-    // input_sensor.update();
-    // engine.update();
-    // pipoSocket.loop();
+
     hwui.update();
 
   } catch (const std::exception& e) {

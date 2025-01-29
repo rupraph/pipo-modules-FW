@@ -12,6 +12,7 @@
 
 #define DEBUG_CONFIG false
 
+#define DISABLE_USB_COMM
 // #define INCLUDE_BLE
 // #define ASYNC_TCP_RUNNING_CORE 0
 

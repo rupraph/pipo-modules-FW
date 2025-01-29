@@ -22,10 +22,10 @@ void Engine::update() {
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     float sensor_val = input_sensor.get_value(axis_name);
-    float sensor_invert = input_sensor.get_inverted(axis_name);
-    float sensor_cycle = input_sensor.get_cyclic(axis_name);
-    float sensor_min;
-    float sensor_max;
+    bool sensor_invert = false;  //input_sensor.get_inverted(axis_name);
+    bool sensor_cycle = input_sensor.get_cyclic(axis_name);
+    float sensor_min = input_sensor.get_limit_min(axis_name);
+    float sensor_max = input_sensor.get_limit_max(axis_name);
     float sensor_midpoint;
 
     if (sensor_invert == false) {
@@ -40,15 +40,19 @@ void Engine::update() {
         }
       }
     } else {
-      sensor_max = input_sensor.get_limit_min(axis_name);
-      sensor_min = input_sensor.get_limit_max(axis_name);
-      sensor_midpoint = sensor_max + (sensor_min - sensor_max) / 2.0f;
-      if (sensor_cycle) {
-        if (sensor_val < sensor_midpoint) {
-          sensor_min = sensor_midpoint;
-        } else {
-          sensor_max = sensor_midpoint;
+      try {
+        sensor_max = input_sensor.get_limit_min(axis_name);
+        sensor_min = input_sensor.get_limit_max(axis_name);
+        sensor_midpoint = sensor_max + (sensor_min - sensor_max) / 2.0f;
+        if (sensor_cycle) {
+          if (sensor_val < sensor_midpoint) {
+            sensor_min = sensor_midpoint;
+          } else {
+            sensor_max = sensor_midpoint;
+          }
         }
+      } catch (const std::exception& e) {
+        Serial.println("failed invert sensor");
       }
     }
     if (config.general_config["MidiEnabled"] == true) {
