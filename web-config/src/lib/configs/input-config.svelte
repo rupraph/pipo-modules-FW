@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { minMax } from "../../constants";
   import { pipoType as type } from "../../services";
   import type { Axis, BaseMidiConfig } from "../../types";
@@ -7,9 +6,6 @@
   import Collapse from "../collapse.svelte";
   export let config: BaseMidiConfig;
   export let axis: Axis<typeof $type>;
-  onMount(() => {
-    console.log(config.max_input, config.min_input);
-  });
 </script>
 
 <Collapse title="Input">

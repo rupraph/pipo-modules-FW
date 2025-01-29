@@ -17,9 +17,8 @@ void midiBLESetup() {
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
 
-  Serial.println("Midi BLE setup done");
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -27,7 +26,7 @@ void OnConnected() {
   Serial.println("Ble Connected!");
   hwui.set_led(BT_LED, 80);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -35,7 +34,7 @@ void OnDisconnected() {
   Serial.println("Ble Disconnected!");
   hwui.set_led(BT_LED, 0);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 

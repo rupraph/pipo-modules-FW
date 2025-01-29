@@ -29,7 +29,6 @@
     if (isNaN(value)) return;
     note = nOptions[value % 12].value;
     octave = Math.floor(value / 12) - 1;
-    console.log(`onChange: value=${value}, note=${note}, octave=${octave}`);
   }
   onMount(() => {
     onChange();

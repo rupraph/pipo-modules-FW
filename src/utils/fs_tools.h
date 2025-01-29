@@ -5,6 +5,7 @@
 #include "FS.h"
 #include <LittleFS.h>
 #include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 void init_filesystem();
 void createDir(fs::FS& fs, const char* path);
