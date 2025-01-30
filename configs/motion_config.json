@@ -91,6 +91,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },

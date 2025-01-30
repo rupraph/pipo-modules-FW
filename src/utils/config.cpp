@@ -288,8 +288,8 @@ void Config::gather(Engine& engine, bool debug) {
 
 //* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
-  input_sensor.set_config(current_config["sensor"].as<JsonObject>());
-  engine.set_config(current_config["engine"].as<JsonObject>());
+  input_sensor.set_config(current_config["sensor"].as<JsonObject>(), debug);
+  engine.set_config(current_config["engine"].as<JsonObject>(), debug);
   general_config.clear();
   general_config = current_config["general"];
   /*TODO: improve:

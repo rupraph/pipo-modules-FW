@@ -141,10 +141,10 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       }
       return scale;
     } else {
-      cout << "Invalid scale type." << endl;
+      Serial.println("Invalid scale type");
       return {};
     }
-  } else if (pattern == "arpegio") {
+  } else if (pattern == "arpeggio") {
     auto it = arpegios.find(scaleType);
     if (it != arpegios.end()) {
       vector<int> scale = it->second;
@@ -153,7 +153,7 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       }
       return scale;
     } else {
-      cout << "Invalid arpegio type." << endl;
+      Serial.println("Invalid arpeggio type");
       return {};
     }
   } else if (pattern == "interval") {
@@ -165,11 +165,11 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       }
       return scale;
     } else {
-      cout << "Invalid interval type." << endl;
+      Serial.println("Invalid interval type");
       return {};
     }
   } else {
-    cout << "Invalid pattern type." << endl;
+    Serial.println("Invalid pattern type");
     return {};
   }
 }
@@ -253,13 +253,12 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_max = j["cc_max"];
     cc_min = j["cc_min"];
     hires = j["hires"];
+    this->update_scale();
 
   } catch (const std::exception& e) {
     Serial.print("Error: ");
     Serial.println(e.what());
   }
-
-  this->update_scale();
 }
 
 //Getter setters

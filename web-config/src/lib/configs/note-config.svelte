@@ -12,7 +12,7 @@
   const patternTypes = [
     { label: "Scale", value: "scale" },
     { label: "Arpeggio", value: "arpeggio" },
-    { label: "Interval", value: "inter" },
+    { label: "Interval", value: "interval" },
   ];
 
   // this is currently defined both on pipo and config side.
@@ -69,16 +69,16 @@
     { label: "augmented", value: "augmented", notes: [0, 4, 8] },
     { label: "suspended", value: "suspended", notes: [0, 5, 7] },
     { label: "dominant", value: "dominant", notes: [0, 4, 7, 10] },
-    { label: "major 7", value: "major 7", notes: [0, 4, 7, 11] },
-    { label: "minor 7", value: "minor 7", notes: [0, 3, 7, 10] },
-    { label: "diminished 7", value: "diminished 7", notes: [0, 3, 6, 9] },
-    { label: "augmented 7", value: "augmented 7", notes: [0, 4, 8, 10] },
-    { label: "suspended 7", value: "suspended 7", notes: [0, 5, 7, 10] },
-    { label: "dominant 7", value: "dominant 7", notes: [0, 4, 7, 10] },
-    { label: "major 9", value: "major 9", notes: [0, 4, 7, 11, 14] },
-    { label: "minor 9", value: "minor 9", notes: [0, 3, 7, 10, 14] },
-    { label: "diminished 9", value: "diminished 9", notes: [0, 3, 6, 9, 13] },
-    { label: "augmented 9", value: "augmented 9", notes: [0, 4, 8, 10, 14] },
+    { label: "major 7", value: "major7", notes: [0, 4, 7, 11] },
+    { label: "minor 7", value: "minor7", notes: [0, 3, 7, 10] },
+    { label: "diminished 7", value: "diminished7", notes: [0, 3, 6, 9] },
+    { label: "augmented 7", value: "augmented7", notes: [0, 4, 8, 10] },
+    { label: "suspended 7", value: "suspended7", notes: [0, 5, 7, 10] },
+    { label: "dominant 7", value: "dominant7", notes: [0, 4, 7, 10] },
+    { label: "major 9", value: "major9", notes: [0, 4, 7, 11, 14] },
+    { label: "minor 9", value: "minor9", notes: [0, 3, 7, 10, 14] },
+    { label: "diminished 9", value: "diminished9", notes: [0, 3, 6, 9, 13] },
+    { label: "augmented 9", value: "augmented9", notes: [0, 4, 8, 10, 14] },
   ];
 
   const intervals = [
@@ -101,21 +101,21 @@
     <Select
       label="Pattern"
       options={patternTypes}
-      bind:value={config.patternType}
+      bind:value={config.pattern}
     />
-    {#if config.patternType === "scale"}
+    {#if config.pattern === "scale"}
       <Select
         label="Scale type"
         options={scaleTypes}
         bind:value={config.scaleType}
       />
-    {:else if config.patternType === "arpeggio"}
+    {:else if config.pattern === "arpeggio"}
       <Select
         label="Arpeggio type"
         options={arpeggioTypes}
         bind:value={config.scaleType}
       />
-    {:else if config.patternType === "interval"}
+    {:else if config.pattern === "interval"}
       <Select
         label="Interval type"
         options={intervals}

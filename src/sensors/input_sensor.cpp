@@ -160,6 +160,9 @@ JsonDocument Sensor::get_config(bool debug) {
 }
 
 void Sensor::set_config(JsonObject config, bool debug) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
     sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
@@ -170,8 +173,6 @@ void Sensor::set_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
   }
   if (debug) {
-    Serial.println("set_sensor_config");
-
     Serial.println("set_sensor_config_end");
   }
 }

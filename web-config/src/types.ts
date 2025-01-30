@@ -12,7 +12,7 @@ export type CCConfig = {
 };
 export type NoteConfig = {
   scaleType: string;
-  patternType: string;
+  pattern: string;
   rootNote: number;
   sustain: number;
   nbOfNotes: number;

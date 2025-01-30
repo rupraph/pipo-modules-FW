@@ -207,7 +207,7 @@
       />
     </div>
 
-    <AxisConfig {sensor} {aschema} {currentAxis} />
+    <AxisConfig bind:sensor bind:aschema bind:currentAxis />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
     <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />

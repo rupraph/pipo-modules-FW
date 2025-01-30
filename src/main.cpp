@@ -62,7 +62,11 @@ void setup() {
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
-  config.apply(engine, osc, false);  // input_sens,
+  try {
+    config.apply(engine, osc, DEBUG_CONFIG);  // input_sens,
+  } catch (const std::exception& e) {
+    Serial.println("failed setting conf");
+  }
 
   /////// Init midi and hid
   midiio.setup();
@@ -92,8 +96,8 @@ void setup() {
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
-  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
-  //                         &sensorTaskHandle, 1);
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+                          &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);

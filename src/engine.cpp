@@ -295,7 +295,7 @@ JsonDocument Engine::get_config(bool debug) {
 
 void Engine::set_config(JsonObject config, bool debug) {
   if (debug) {
-    Serial.println("will set config");
+    Serial.println("will set engine config:");
     serializeJsonPretty(config, Serial);
     Serial.println();
   }
@@ -303,6 +303,8 @@ void Engine::set_config(JsonObject config, bool debug) {
   JsonDocument jmidi = config["engine-midi"];
 
   // set midi config from main config
+  if (debug)
+    Serial.println("set engine midi");
   for (auto const& pair : Miditranslators) {
     if (jmidi[pair.first].is<JsonVariant>()) {
       // Serial.println(jmidi[pair.first].dump().c_str());
@@ -311,6 +313,8 @@ void Engine::set_config(JsonObject config, bool debug) {
     }
   }
   // set hid config from general config
+  if (debug)
+    Serial.println("set engine hid");
   JsonDocument jhid = config["engine-hid"];
   for (auto const& pair : HID_translators) {
     if (jhid[pair.first].is<JsonVariant>()) {
@@ -318,9 +322,14 @@ void Engine::set_config(JsonObject config, bool debug) {
     }
   }
   JsonDocument josc = config["engine-osc"];
+  if (debug)
+    Serial.println("set engine osc");
   for (auto const& pair : Osctranslators) {
     if (josc[pair.first].is<JsonVariant>()) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
+  }
+  if (debug) {
+    Serial.println("engine config set");
   }
 }

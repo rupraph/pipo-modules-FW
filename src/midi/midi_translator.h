@@ -30,7 +30,7 @@ class MidiTranslator
   //notes variables
   int tl_mode = 0;  //0=cc, 1 note, 2 both
 
-  string pattern = "scale";    //can be scale, arpegio or inter (note interval
+  string pattern = "scale";  //can be scale, arpegio or interval (note interval
   string scaleType = "major";  // see maps below for keywords
   int rootNote = 45;
   int nbOfNotes = 25;
