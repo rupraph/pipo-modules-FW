@@ -6,6 +6,7 @@
 // #include "utils/config.h"
 #include <vector>
 #include <unordered_map>
+#include "utils/debug.h"
 
 //some interesting stuff here: https://arduino-pico.readthedocs.io/en/latest/usb.html
 

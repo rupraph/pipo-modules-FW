@@ -4,12 +4,7 @@
   import Range from "../form/Range.svelte";
   import Checkbox from "../form/Checkbox.svelte";
   import DisabledWarning from "./disabled-warning.svelte";
-  import Input from "../form/Input.svelte";
-
   export let osc: OscConfig;
-  export let oscEnabled: boolean;
-  export let ip: string;
-  export let port: number;
 </script>
 
 <Text label="Adress" bind:value={osc.osc_addr} maxlength={255} />

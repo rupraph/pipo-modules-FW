@@ -1,8 +1,8 @@
 <script lang="ts">
   export let label: string;
   export let id: string;
-  export let valid: "valid" | "invalid" | string | undefined;
-  export let validationError: string | undefined;
+  export let valid: "valid" | "invalid" | string | undefined = undefined;
+  export let validationError: string | undefined = undefined;
 </script>
 
 <span class="input {$$restProps.class || ''} ${valid}">

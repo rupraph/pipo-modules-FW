@@ -131,10 +131,6 @@
   <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
     <Range
       class={isThresholdMode ? "disabled" : ""}
-      on:mousemove={() => console.log("hover")}
-      on:click={() => console.log("click")}
-      on:mouseenter={() => console.log("enter")}
-      on:mouseleave={() => console.log("leave")}
       label="Number of Notes"
       tooltip="You are in threshold mode, this value is ignored."
       bind:value={config.nbOfNotes}

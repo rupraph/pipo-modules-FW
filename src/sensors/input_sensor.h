@@ -42,6 +42,7 @@ struct SensorDat {
 
   trigger_flag trigger_flags;
   trigger_flag untrigger_flags;
+  bool ws_monitor = false;
 
   // should split in structs for config items and live data.
   SensorDat()
@@ -131,6 +132,8 @@ class Sensor {
 
   bool get_bool_value(const std::string& axis);
   void set_bool_value(const std::string& axis, bool value);
+
+  void monitor_axis(const std::string& axis);
 
  protected:
   unordered_map<string, SensorDat> sensor_dat;

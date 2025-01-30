@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import { pipoio } from "../../pipoio";
+
   import HidGlobalConfig from "./hid-global-config.svelte";
 
   import { createEventDispatcher, onMount } from "svelte";
@@ -74,7 +76,7 @@
     formData.append("file", blob, name);
     Promise.all([
       new Promise((resolve) => setTimeout(resolve, 1000)),
-      axios({
+      pipoio.request({
         method: "post",
         url: "/save",
         data: formData,
@@ -108,36 +110,25 @@
 
   let isPaused = false;
   function pause() {
-    axios.post("/pause").then(() => {
+    pipoio.post("/pause").then(() => {
       console.log("Pausing...");
     });
     isPaused = !isPaused;
   }
 
-  function switchwifimode() {
-    axios.post("/wifimode").then(() => {
-      console.log("Switching wifi mode...");
-    });
-  }
-
   function setAxis(axis: PipoKeys[T]) {
+    if (axis === currentAxis) return;
     currentAxis = axis;
     midi = configByAxis[axis].midi;
-
-    console.log("Setting axis", axis, midi.rootNote);
     osc = configByAxis[axis].osc;
     hid = configByAxis[axis].hid;
     aschema = schema[$type as T][axis];
     sensor = configByAxis[axis].sensor;
+    pipoio.monitorAxis(axis);
   }
   function setCategory(cat: string) {
     currentCat = cat;
   }
-  const wifimodes = [
-    { label: "Create Access Point", value: "AP" },
-    { label: "Station (Connect to others)", value: "STA" },
-  ];
-
   let interval = 0;
   // onMount(() => {
   //   interval = window.setInterval(() => {
@@ -311,12 +302,6 @@
     flex-direction: column;
     justify-content: left;
   }
-  /* :global(.axis-select .selected-item) {
-    font-weight: bold;
-    font-size: 27.2px;
-    margin-block-start: 27.2px;
-    margin-block-end: 27.2px;
-  } */
   .buttonbar {
     display: flex;
     flex-direction: row-reverse;
@@ -340,13 +325,6 @@
     margin: 10px 0;
   }
 
-  /* .Download {
-    background-color: rgba(106, 106, 106, 0.263);
-  }
-  .Download:hover {
-    background-color: rgba(0.2, 0.1, 0.2, 0.3);
-  } */
-
   .Pause {
     background-color: rgb(211, 211, 211);
   }
@@ -365,8 +343,5 @@
     justify-content: center;
     margin-bottom: 1.5em;
     gap: 1em;
-    /* background-color: var(--bg-tabs); */
-    /* padding-top: 0.4em;
-    padding-bottom: 0.4em;*/
   }
 </style>

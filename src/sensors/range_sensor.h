@@ -5,6 +5,7 @@
 #include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
 #include "utils/filters.h"
+#include "utils/debug.h"
 
 class RangeSensor : public Sensor {
  public:

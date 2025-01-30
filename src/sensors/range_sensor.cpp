@@ -32,7 +32,7 @@ void RangeSensor::setup() {
   ma_filter = MovingAverageFilter(3);
   km_filter = KalmanFilter(1, 1);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
