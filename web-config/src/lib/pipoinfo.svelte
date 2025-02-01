@@ -24,7 +24,7 @@
 
 <style>
   .pipo-info {
-    padding: 1rem;
+    margin: 1rem;
     font-size: 1.1em;
     display: grid;
     grid-template-columns: auto auto;
