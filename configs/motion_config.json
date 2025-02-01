@@ -49,6 +49,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -62,6 +63,7 @@
         "nbOfNotes": 18,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "blues major",
         "tl_mode": 0
       },
@@ -75,6 +77,7 @@
         "nbOfNotes": 10,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -88,6 +91,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -101,6 +105,7 @@
         "nbOfNotes": 15,
         "sustain": 0.8,
         "rootNote": 55,
+        "pattern": "scale",
         "scaleType": "blues minor",
         "tl_mode": 1
       },
@@ -114,6 +119,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       }
