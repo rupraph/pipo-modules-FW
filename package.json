@@ -8,6 +8,9 @@
     "test": "test"
   },
   "scripts": {
+    "clean:motion": "./scripts/pio.sh run -t clean -e motion",
+    "clean:analog": "./scripts/pio.sh run -t clean -e analog",
+    "clean:range": "./scripts/pio.sh run -t clean -e range",
     "build:motion": "./scripts/pio.sh run -e motion",
     "build:analog": "./scripts/pio.sh run -e analog",
     "build:range": "./scripts/pio.sh run -e range",
