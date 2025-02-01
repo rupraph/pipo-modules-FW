@@ -71,13 +71,12 @@
 <style>
   .configs {
     width: 100%;
-    display: grid;
-    grid-template-rows: 2em auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   .tabs {
-    gap: 20px;
-    margin-left: 25px;
-    max-height: 2em;
+    max-width: calc(100% - 30px);
   }
   .tab {
     display: grid;
@@ -85,19 +84,21 @@
     grid-template-rows: 100%;
     border: 0;
     line-height: 2em;
+    height: 2em;
   }
 
   .tab.active {
     z-index: 12;
     cursor: text;
-    color: rgb(2, 141, 176);
+    padding-bottom: 4px;
+    color: var(--main);
   }
 
   .tab.active > span[contenteditable] {
     outline: 0px solid transparent;
   }
   .tab.active > span {
-    padding-bottom: 5%;
+    padding-bottom: 2px;
   }
   .tab > span {
     background-color: var(--bg-color);
@@ -115,6 +116,10 @@
     border-top: 2px solid rgb(80, 80, 80);
     min-width: 16px;
     background: var(--bg-color);
+  }
+  .tab.active::before,
+  .tab.active::after {
+    padding-bottom: 2px;
   }
   .tab:after {
     grid-area: 1 / 4 / 2 / 6;
@@ -139,10 +144,10 @@
     z-index: 10;
     border-radius: 12px;
     border: 2px solid rgb(80, 80, 80);
-    margin-top: 6px;
     padding-top: 1.5em;
     background: var(--bg-color);
-    transform: translate(0, -1px);
+    transform: translate(0, -3px);
+    width: 100%;
   }
   :global(.tab .delete) {
     background: transparent;
