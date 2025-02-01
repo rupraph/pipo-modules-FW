@@ -10,7 +10,7 @@
 
 #define DEBUG_HEAP true
 
-#define DEBUG_CONFIG false
+#define DEBUG_CONFIG true
 
 #define DISABLE_USB_COMM
 // #define INCLUDE_BLE

@@ -321,10 +321,9 @@ float Sensor::get_offset(const std::string& axis) {
 
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    if (sensor_dat[axis].inverted == false) {
-      return sensor_dat[axis].value;
-    } else
-      throw std::invalid_argument("Axis not found: " + axis);
+    return sensor_dat[axis].value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
 }
 
 float Sensor::get_value_prev(const std::string& axis) {

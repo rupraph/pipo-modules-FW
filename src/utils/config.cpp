@@ -179,6 +179,7 @@ void Config::set(const String& config) {
       return;
     }
     // current_config = config;
+    Serial.println("config set");
     logs.writeLog("config set");
   } catch (const std::exception& e) {
     Serial.println("error setting current_config from a json object");

@@ -21,8 +21,9 @@ void Engine::update() {
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
+    // Serial.println(axis_name.c_str());
     float sensor_val = input_sensor.get_value(axis_name);
-    bool sensor_invert = false;  //input_sensor.get_inverted(axis_name);
+    bool sensor_invert = input_sensor.get_inverted(axis_name);
     bool sensor_cycle = input_sensor.get_cyclic(axis_name);
     float sensor_min = input_sensor.get_limit_min(axis_name);
     float sensor_max = input_sensor.get_limit_max(axis_name);
