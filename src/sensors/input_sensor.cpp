@@ -161,6 +161,9 @@ JsonDocument Sensor::get_config(bool debug) {
 }
 
 void Sensor::set_config(JsonObject config, bool debug) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
     // should likely use getter/setter here
@@ -174,9 +177,20 @@ void Sensor::set_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
   }
   if (debug) {
-    Serial.println("set_sensor_config");
-
     Serial.println("set_sensor_config_end");
+  }
+}
+
+void Sensor::monitor_axis(const std::string& axis) {
+  // iterate through sensor_dat, set the ws_monitor flag to true for the
+  // specified axis and false for all others
+  for (auto& dat : sensor_dat) {
+    string axis_name = dat.first;
+    if (axis_name == axis) {
+      dat.second.ws_monitor = true;
+    } else {
+      dat.second.ws_monitor = false;
+    }
   }
 }
 

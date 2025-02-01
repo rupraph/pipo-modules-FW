@@ -4,6 +4,7 @@
 #include "sensors/input_sensor.h"
 #include "HW_CONFIG.h"
 #include "utils/filters.h"
+#include "utils/debug.h"
 
 using namespace std;
 

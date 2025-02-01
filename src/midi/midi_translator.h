@@ -30,7 +30,8 @@ class MidiTranslator
   //notes variables
   int tl_mode = 0;  //0=cc, 1 note, 2 both
 
-  string scaleType = "major";
+  string pattern = "scale";  //can be scale, arpegio or interval (note interval
+  string scaleType = "major";  // see maps below for keywords
   int rootNote = 45;
   int nbOfNotes = 25;
   vector<int> current_scale;
@@ -45,10 +46,7 @@ class MidiTranslator
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
   void print_scale(vector<int> scale);
-  void set_scale_type(string scaleType);
-  void set_root_note(string rootNote);
-  void set_root_note(int notenb);
-  void set_number_of_notes(int nbOfNotes);
+
   int convert_note_name_to_number(string noteName);
   string convert_number_to_note_name(int noteNumber);
   bool is_a_note(string noteName);
@@ -67,23 +65,38 @@ class MidiTranslator
   // Getter setters
   bool get_hires() const;
   void set_hires(bool h);
+
   int get_channel();
   void set_channel(int c);
+
   int get_cc_number();
   void set_cc_number(int c);
+
   int get_translator_mode();
   void set_translator_mode(int t);
+
   string get_scale_type();
+  void set_scale_type(string scaleType);
+
   int get_root_note();
+  void set_root_note(string rootNote);
+  void set_root_note(int notenb);
+
   int get_number_of_notes();
+  void set_number_of_notes(int nbOfNotes);
+
   float get_sustain();
   void set_sustain(float s);
+
   int get_max_output();
   void set_max_output(int m);
+
   int get_min_output();
   void set_min_output(int m);
+
   int get_interpolation_type();
   void set_interpolation_type(int i);
+
   bool get_enabled();
   void set_enabled(bool e);
 
@@ -128,6 +141,7 @@ class MidiTranslator
   // }
 
   // Notes scale variables
+  // could be replaced by enums to speed up things
   // Todo: add arpegios // chords
   unordered_map<string, vector<int>> scales = {
       {"major", {0, 2, 4, 5, 7, 9, 11}},
@@ -152,9 +166,35 @@ class MidiTranslator
       //Turkish ??
   };
 
+  unordered_map<string, vector<int>> arpegios = {
+      {"major", {0, 4, 7}},
+      {"minor", {0, 3, 7}},
+      {"diminished", {0, 3, 6}},
+      {"augmented", {0, 4, 8}},
+      {"suspended", {0, 5, 7}},
+      {"dominant", {0, 4, 7, 10}},
+      {"major7", {0, 4, 7, 11}},
+      {"minor7", {0, 3, 7, 10}},
+      {"diminished7", {0, 3, 6, 9}},
+      {"augmented7", {0, 4, 8, 10}},
+      {"suspended7", {0, 5, 7, 10}},
+      {"dominant7", {0, 4, 7, 10}},
+      {"major9", {0, 4, 7, 11, 14}},
+      {"minor9", {0, 3, 7, 10, 14}},
+      {"diminished9", {0, 3, 6, 9, 13}},
+      {"augmented9", {0, 4, 8, 10, 14}}};
+
+  unordered_map<string, vector<int>> intervals = {
+      {"second", {0, 2}},    {"third", {0, 4}},    {"fourth", {0, 5}},
+      {"fifth", {0, 7}},     {"sixth", {0, 9}},    {"seventh", {0, 11}},
+      {"octave", {0, 12}},   {"ninth", {0, 14}},   {"tenth", {0, 16}},
+      {"eleventh", {0, 17}}, {"twelveth", {0, 19}}};
+
  private:
-  vector<int> generate_full_scale(int rootNote, int nb_notes, string scaleType);
-  vector<int> generate_base_scale(int rootNote, string scaleType);
+  vector<int> generate_full_scale(int rootNote, int nb_notes, string pattern,
+                                  string scaleType);
+  vector<int> generate_base_scale(int rootNote, string pattern,
+                                  string scaleType);
 };
 
 #endif  //MIDI_TRANSLATOR_H

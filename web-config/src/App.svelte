@@ -1,15 +1,14 @@
 <script lang="ts">
   import Logs from "./lib/logs.svelte";
+  import Toasts from "./lib/toast/toasts.svelte";
   import type { PipoInfo, PipoTypes } from "./types";
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
-  import axios, { AxiosError } from "axios";
+  import { AxiosError } from "axios";
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
-
-  // import Piano from "./lib/vis/Piano.svelte";
 
   // this likely causes slow load as it loads image first. -> "eager"
   // only the image from the right type should be loaded by the client
@@ -42,8 +41,8 @@
     console.error("Error fetching info:", e);
   }
   function fetch() {
-    return axios
-      .get<PipoInfo>("/info", { timeout: 2000 })
+    return pipoio
+      .get<PipoInfo>("/info", { timeout: 5000 })
       .then(({ data, status, statusText }) => {
         type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
         ip.set(data.ip);
@@ -60,18 +59,19 @@
   $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
 
   function reboot() {
-    axios.get("/reboot").then(() => {
+    pipoio.get("/reboot").then(() => {
       console.log("Rebooting...");
     });
   }
 
-  const batt = axios.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
+  const batt = pipoio.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
     console.log("Batt voltage:", data);
     return data / 1000;
   });
 </script>
 
 <main>
+  <Toasts />
   <Menu />
   <div class="title-container">
     <h1>Pipo {type}</h1>
@@ -82,9 +82,7 @@
     />
   </div>
 
-  {#if error}
-    <!-- <p class="error">{error}</p> -->
-  {/if}
+  {#if error}{/if}
   <Configs />
 
   <article>
@@ -110,7 +108,6 @@
             {/await}
           {/if}
         </Collapse>
-        <!-- <Piano /> -->
       </article>
     {/await}
   {/if}

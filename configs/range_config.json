@@ -19,6 +19,7 @@
         "nbOfNotes": 15,
         "sustain": 0.8,
         "rootNote": 55,
+        "pattern": "scale",
         "scaleType": "major pentatonic",
         "tl_mode": 1
       }

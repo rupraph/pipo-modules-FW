@@ -85,6 +85,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -98,6 +99,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -111,6 +113,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -124,6 +127,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -137,6 +141,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -150,6 +155,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -163,6 +169,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 1
       },
@@ -176,6 +183,7 @@
         "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 79,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 1
       },
@@ -189,6 +197,7 @@
         "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 75,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 1
       },
@@ -202,6 +211,7 @@
         "nbOfNotes": 1,
         "sustain": 0.8,
         "rootNote": 72,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 1
       },
@@ -215,6 +225,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       },
@@ -228,6 +239,7 @@
         "nbOfNotes": 25,
         "sustain": 0.8,
         "rootNote": 45,
+        "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
       }

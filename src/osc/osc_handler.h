@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include "utils/config.h"
+#include "utils/debug.h"
 
 class Config;
 

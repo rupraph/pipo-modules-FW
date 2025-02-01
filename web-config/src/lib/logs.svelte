@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import axios from "axios";
   import Collapse from "./collapse.svelte";
   import { pipoio } from "../pipoio";
   type Log = {
@@ -31,12 +30,10 @@
     logs = append ? [...logs, ...news] : news;
   }
   pipoio.on("logs", ({ entries }) => {
-    console.log("entries", entries);
     parse(entries, true);
   });
   function fetch() {
-    axios.get("/logs").then(({ data }) => {
-      console.log("ICI", logs);
+    pipoio.get("/logs").then(({ data }) => {
       parse(data.split("--"));
     });
   }

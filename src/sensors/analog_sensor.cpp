@@ -14,7 +14,7 @@ void AnalogSensor::setup() {
 
   measure_offset_all();
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
