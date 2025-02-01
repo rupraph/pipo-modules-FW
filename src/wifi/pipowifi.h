@@ -9,14 +9,33 @@
 #include <string>
 
 class PipoWifi {
-
+  static const uint CONNECT_TIMEOUT = 5000;
+  static const uint CHECK_TIMEOUT = 200;
   const int WIFI_DELAY = 2000;
+  const int MIN_SUBNET = 10;
+  int subnetBase = MIN_SUBNET;
+  IPAddress apIP = IPAddress(192, 168, subnetBase, 1);
+  IPAddress apMask = IPAddress(255, 255, 255, 0);
+
+  unsigned long lastScan = 0;
+  bool scanning = false;
+  PipoPWManager pwm;
+  std::map<String, int> signals;
+  int8_t rssi;
+  /**
+   * @brief Scan (blocking) for available networks
+   */
+  void scan();
+  void saveScanResult();
+  void getFreeSubNet();
+  bool configureAP();
 
  public:
   /**
   * @brief The current status of the wifi
   */
   enum PipoWifiStatus { CONNECTING, CONNECTED, DISCONNECTED };
+  PipoWifiStatus status = DISCONNECTED;
   PipoWifi();
   void setup();
   /**
@@ -51,15 +70,6 @@ class PipoWifi {
    */
   bool connect(String ssid, String password, bool disconnect = true);
   /**
-   * @brief Scans for available networks
-   */
-  void scan();
-  static const uint CONNECT_TIMEOUT = 5000;
-  static const uint CHECK_TIMEOUT = 200;
-  PipoWifiStatus status = DISCONNECTED;
-  PipoPWManager pwm;
-  std::map<String, int> signals;
-  /**
    * @brief Tries to connect to a WIFI network, fallback to AP if it fails
    * @return true if successfully connected to a WIFI network, false otherwise
    */
@@ -79,6 +89,18 @@ class PipoWifi {
    * @return true if successfully connected to a WIFI network, false otherwise
    */
   bool STAMode();
+  /*
+  * @brief Starts a non blocking scan for available networks
+  * @return true if effectively started
+  */
+  bool startScan();
+  /*
+  * @brief Returns true if a scan is currently running
+  */
+  bool isScanning();
+
+  void refreshRSSI();
+  int8_t getRSSI();
 };
 
 extern PipoWifi wifi;

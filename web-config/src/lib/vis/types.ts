@@ -9,4 +9,5 @@ export type PipoEvents<T extends PipoTypes> = {
   logs: { entries: string[] };
   connect: void;
   disconnect: void;
+  rssi: number;
 };

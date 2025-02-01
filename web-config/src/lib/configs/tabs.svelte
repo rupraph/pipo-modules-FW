@@ -24,12 +24,9 @@
       renaming = false;
     }
   }
-  function onDeleteClick() {
+  function onDeleteClick(toDelete: string) {
     deleting = true;
-    Promise.all([
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      // onDelete(active),
-    ]).finally(() => (deleting = false));
+    Promise.all([onDelete(toDelete)]).finally(() => (deleting = false));
   }
 </script>
 
@@ -49,7 +46,7 @@
             <span>
               {item}
               <LoadingButton
-                onClick={onDeleteClick}
+                onClick={() => onDeleteClick(item)}
                 class="delete"
                 loading={deleting}
                 title="Delete"
@@ -94,13 +91,6 @@
     z-index: 12;
     cursor: text;
     color: rgb(2, 141, 176);
-  }
-  .tab > input {
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    height: unset;
-    width: 0;
   }
 
   .tab.active > span[contenteditable] {

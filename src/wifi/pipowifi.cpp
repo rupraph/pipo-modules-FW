@@ -13,10 +13,24 @@ void PipoWifi::setup() {
 };
 void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 500U);
-  for (int i = 0; i < num; i++) {
-    int rssiperc = WiFi.RSSI(i);
-    signals[WiFi.SSID(i)] = rssiperc;
+  saveScanResult();
+};
+bool PipoWifi::startScan() {
+  if (scanning)
+    return false;
+  scanning = true;
+  return WiFi.scanNetworks(true, false, false, 500U) == WIFI_SCAN_RUNNING;
+};
+void PipoWifi::saveScanResult() {
+  signals.clear();
+  Serial.print("Saving scan results: ");
+  Serial.println(WiFi.scanComplete());
+  Serial.println(floor(rand() * 10000.));
+  for (int i = 0; i < WiFi.scanComplete(); i++) {
+    signals[WiFi.SSID(i)] = WiFi.RSSI(i);
   }
+  WiFi.scanDelete();
+  lastScan = millis();
 };
 bool PipoWifi::connect(bool disconnect) {
   status = CONNECTING;
@@ -64,6 +78,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
     pwm.add(ssid, password);
     pwm.promote(ssid);
     pwm.save();
+    rssi = signals[ssid];
     status = CONNECTED;
     return true;
   }
@@ -78,7 +93,7 @@ bool PipoWifi::APMode() {
   WiFi.mode(WIFI_AP);
   status = DISCONNECTED;
   vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
-  if (!WiFi.softAP("Pipo", "pipo1234")) {
+  if (!configureAP()) {
     Serial.println("Failed to start AP mode");
     return false;
   }
@@ -109,7 +124,7 @@ bool PipoWifi::APSTAMode() {
     Serial.println("APSTA: Failed to connect to network");
   }
   vTaskDelay(pdMS_TO_TICKS(500));
-  success = WiFi.softAP("Pipo", "pipo1234");
+  success = configureAP();
   if (success) {
     Serial.println("APSTA mode started");
     Serial.print("AP IP Address: ");
@@ -119,6 +134,13 @@ bool PipoWifi::APSTAMode() {
   }
   return success & successConnect;
 };
+
+bool PipoWifi::configureAP() {
+  getFreeSubNet();
+  // apIP = IPAddress(192, 168, subnetBase, 1);
+  // WiFi.softAPConfig(apIP, apIP, apMask);
+  return WiFi.softAP("Pipo", "pipo1234");
+}
 
 bool PipoWifi::STAMode() {
   if (WiFi.getMode() == WIFI_MODE_STA && status == CONNECTED) {
@@ -181,7 +203,18 @@ String PipoWifi::state() {
   return res;
 }
 String PipoWifi::availableNetworks() {
-  String res;
+  if (scanning) {
+    if (WiFi.scanComplete() == WIFI_SCAN_RUNNING)
+      return "Scanning";
+    scanning = false;
+    if (WiFi.scanComplete() == WIFI_SCAN_FAILED) {
+      return "Scan failed";
+    }
+    saveScanResult();
+  }
+  String res = "lastScan:";
+  res += String(lastScan);
+  res += "\n";
   for (auto const& ssid : signals) {
     res += "\"";
     res += ssid.first;
@@ -197,6 +230,26 @@ String PipoWifi::availableNetworks() {
 
 String PipoWifi::ssid() {
   return WiFi.SSID();
+}
+
+bool PipoWifi::isScanning() {
+  return scanning;
+}
+
+void PipoWifi::refreshRSSI() {
+  rssi = WiFi.RSSI();
+}
+int8_t PipoWifi::getRSSI() {
+  return rssi;
+}
+
+void PipoWifi::getFreeSubNet() {
+  subnetBase = MIN_SUBNET;
+  for (auto const& ssid : signals) {
+    if (!ssid.first.startsWith("Pipo"))
+      continue;
+    subnetBase++;
+  }
 }
 
 PipoWifi wifi;

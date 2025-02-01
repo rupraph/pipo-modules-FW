@@ -297,23 +297,6 @@
 >
 
 <style>
-  .board-settings {
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
-  }
-  .buttonbar {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: space-between;
-    margin-top: 2em;
-    text-align: start;
-    position: sticky;
-    top: 5px;
-    background-color: var(--bg-color);
-    z-index: 100;
-  }
-
   button:hover {
     background-color: var(--main-darker);
   }

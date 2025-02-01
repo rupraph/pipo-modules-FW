@@ -1,24 +1,22 @@
 <script lang="ts">
-  import { slide } from "svelte/transition";
-  import { cubicOut } from "svelte/easing";
-
   import { pipoio } from "../pipoio";
   import { isLive } from "../services";
   import WifiConnect from "./wifi/connect.svelte";
-  import { wifiState } from "./wifi/store";
   import Signal from "./wifi/signal.svelte";
+  import Modal from "./modal.svelte";
+  import { wifiState } from "./wifi/store";
 
-  let wifiSignal = 0;
+  let wifiSignal = 4;
   let wifiOpen = false;
-  wifiState.subscribe((value) => {
-    wifiSignal = value.signal;
-  });
   function toggleWifi() {
     wifiOpen = !wifiOpen;
   }
   let live = false;
   isLive.subscribe((value) => {
     live = value;
+  });
+  wifiState.subscribe((value) => {
+    wifiSignal = value.signal;
   });
   let fps = 0;
   const max = 10;
@@ -35,25 +33,14 @@
 </script>
 
 <nav>
-  <!-- <span>FPS: {fps}</span> -->
   <span class="status {live ? 'live' : ''}"> </span>
-
   <span class="wifi" on:click={toggleWifi}>
-    <Signal signal={5 - Math.floor(wifiSignal * 5)} />
+    <Signal signal={wifiSignal} />Wi-Fi
   </span>
 </nav>
-{#if wifiOpen}
-  <section
-    class={$$restProps.class}
-    transition:slide={{
-      duration: 300,
-      easing: cubicOut,
-      axis: "y",
-    }}
-  >
-    <WifiConnect />
-  </section>
-{/if}
+<Modal bind:open={wifiOpen}>
+  <WifiConnect />
+</Modal>
 
 <style>
   nav {
@@ -80,6 +67,5 @@
   .wifi {
     cursor: pointer;
     height: 1em;
-    width: 2em;
   }
 </style>

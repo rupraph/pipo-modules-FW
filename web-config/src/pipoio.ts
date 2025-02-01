@@ -76,6 +76,10 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
+        if (command === "rssi") {
+          console.log("rssi", numargs[0]);
+          return this.emit("rssi", { rssi: numargs[0] });
+        }
         if (isSensor) {
           return this.emit("sensor", {
             axis,
@@ -152,6 +156,11 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
         .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
         .join("\n")}`
     );
+  }
+
+  requestRSSI() {
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send("rssi:0");
   }
   saveConfig<T extends PipoTypes>(config: PipoConfig<T>) {
     if (this.saveTimeout) {

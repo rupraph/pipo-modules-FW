@@ -11,7 +11,6 @@
   }
 </script>
 
-<!-- <h4 class="title">Output conversion settings</h4> -->
 <div class="cat-tabs hero">
   {#each items as { value, label }}
     <span
@@ -24,12 +23,6 @@
 </div>
 
 <style>
-  .title {
-    text-align: center;
-    height: 0em;
-    background-color: var(--bg-tertiary);
-  }
-
   .cat-tabs {
     width: 100%;
     display: grid;
@@ -52,21 +45,6 @@
     border-top-left-radius: 0.8em;
     border-top-right-radius: 0.8em;
   }
-
-  /* .cat-tabs > .tab::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1px;
-    height: 100%;
-    background-color: black;
-  }
-
-  .cat-tabs > .tab:last-child::after {
-    display: none;
-  } */
-
   .cat-tabs > .tab.active {
     cursor: text;
     color: var(--main-darker);

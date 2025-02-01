@@ -134,10 +134,4 @@
   .configs {
     width: 100%;
   }
-  .delete {
-    position: fixed;
-    right: 0;
-    top: 0;
-    margin: 1em;
-  }
 </style>

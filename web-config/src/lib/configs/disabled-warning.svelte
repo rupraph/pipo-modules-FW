@@ -1,6 +1,5 @@
 <script lang="ts">
   export let enabled: boolean;
-  export let feature: string;
 </script>
 
 {#if enabled}

@@ -24,6 +24,7 @@ TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
 TaskHandle_t hwuiTaskHandle;
 TaskHandle_t dnsTaskHandle;
+TaskHandle_t rssiTaskHandle;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
@@ -42,6 +43,12 @@ void websocketTask(void* pvParameters) {
 void dnsTask(void* pvParameters) {
   for (;;) {
     captivePortal.loop();
+    vTaskDelay(pdMS_TO_TICKS(100));
+  }
+}
+void rssiTask(void* pvParameters) {
+  for (;;) {
+    wifi.refreshRSSI();
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
@@ -92,29 +99,29 @@ void setup() {
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
-  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
-  //                         &sensorTaskHandle, 1);
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+                          &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
-  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
+  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(rssiTask, "rssiTask", 2048, NULL, 0, &rssiTaskHandle,
+                          0);
 }
 
 void loop() {
+  try {
 
-  input_sensor.update();
-  engine.update();
-  hwui.update();
+    hwui.update();
+    // I dont understand why, but the server cannot restart from a
+    // response to a request. It crashes. So I need to restart it from the main loop
+    if (server.should_start) {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      server.start();
+    }
 
-  // } catch (const std::exception& e) {
-  //   Serial.println("Exception in main loop");
-  //   logs.writeLog(e.what());
-  //   delay(50);
-  // }
-
-  // I dont understand why, but the server cannot restart from a
-  // response to a request. It crashes. So I need to restart it from the main loop
-  if (server.should_start) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    server.start();
+  } catch (const std::exception& e) {
+    Serial.println("Exception in main loop");
+    logs.writeLog(e.what());
+    delay(50);
   }
 }
