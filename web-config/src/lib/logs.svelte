@@ -69,7 +69,7 @@
     min-height: 50px;
     overflow-y: auto;
   }
-  .log > span:nth-child(2n + 1) {
+  .logs > span:nth-child(2n + 1) {
     font-weight: bold;
   }
   .log.info {
