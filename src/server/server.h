@@ -33,8 +33,6 @@ class PipoServer {
  private:
   AsyncWebServer server;
   AsyncWebSocket ws;
-  // AsyncEventSource events;
-
   string received_configData;
 };
 
