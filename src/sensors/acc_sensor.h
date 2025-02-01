@@ -16,6 +16,9 @@ class MotionSensor : public Sensor {
     sensor_dat["roll"] = SensorDat();
     sensor_dat["pitch"] = SensorDat();
     sensor_dat["yaw"] = SensorDat();
+    sensor_dat["magX"] = SensorDat();
+    sensor_dat["magY"] = SensorDat();
+    sensor_dat["magZ"] = SensorDat();
   };
 
   void init() override;
@@ -73,6 +76,10 @@ class MotionSensor : public Sensor {
   float raw_accX;
   float raw_accY;
   float raw_accZ;
+
+  float raw_magX;
+  float raw_magY;
+  float raw_magZ;
 };
 
 #endif  //ACC_SENSOR_H

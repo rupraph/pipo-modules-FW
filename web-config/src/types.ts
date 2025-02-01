@@ -71,7 +71,7 @@ export type HidConfig = {
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
 export type PipoKeys = {
-  motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw";
+  motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw"| "magX" | "magY" | "magZ";
   range: "dist";
   analog:
     | "A1"

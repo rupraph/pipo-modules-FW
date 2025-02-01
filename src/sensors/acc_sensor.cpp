@@ -34,6 +34,10 @@ void MotionSensor::update() {
     convert_accell();
   }
 
+  if (icm20948.magDataIsReady()) {
+    icm20948.readMagData(&raw_magX, &raw_magY, &raw_magZ);
+  }
+
   process_sensor_triggers();
 
   //Todo: try read additional data from sensor
