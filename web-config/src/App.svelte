@@ -8,6 +8,7 @@
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
+  import Pipoinfo from "./lib/pipoinfo.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -20,49 +21,22 @@
         return data;
       });
   }
-  let info = fetch();
-  pipoio.on("connect", () => {
-    info = fetch();
-  });
-  // TODO: do this via websockets
-  const batt = pipoio.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
-    return data / 1000;
-  });
 </script>
 
 <main>
   <Toasts />
   <Menu />
-  <div class="title-container">
-    <h1>Pipo {type}</h1>
-    <img
-      src={`./assets/pattern-${type}.svg`}
-      alt="Pattern"
-      class="pattern-image"
-    />
-  </div>
-
-  <Configs />
-  <article>
-    <Logs />
-  </article>
-  {#await info}
+  {#await fetch()}
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
+    <div class="title-container">
+      <h1>Pipo {type}</h1>
+      <img src={`/pattern-${type}.svg`} alt="Pattern" class="pattern-image" />
+    </div>
+    <Configs />
     <article>
-      <Collapse title="Info" class="info">
-        <span><bold>MAC</bold>{resp.mac}</span>
-        <span><bold>IP</bold>{resp.ip}</span>
-        <span><bold>Type</bold>{resp.type}</span>
-        <span><bold>Name</bold>{resp.name}</span>
-        <span><bold>Version</bold>{resp.version}</span>
-        {#if batt}
-          {#await batt}
-            <p>Waiting for Pipo to respond...</p>
-          {:then resp}
-            <span><bold>Batt Voltage: </bold>{resp} V</span>
-          {/await}
-        {/if}
+      <Collapse title="Info">
+        <Pipoinfo info={resp} />
       </Collapse>
     </article>
   {:catch e}
@@ -76,6 +50,9 @@
       <p>{e}</p>
     </article>
   {/await}
+  <article>
+    <Logs />
+  </article>
   <OfflineOverlay />
 </main>
 
@@ -109,13 +86,5 @@
     position: relative;
     z-index: 1; /* Ensure the title is above the image */
     color: rgb(60, 60, 60); /* Adjust the text color for better visibility */
-  }
-
-  :global(.info) span {
-    font-size: 1.1em;
-    display: grid;
-    grid-template-columns: 6em auto;
-    grid-auto-flow: column;
-    justify-items: start;
   }
 </style>

@@ -156,5 +156,6 @@ export type PipoInfo = {
   mac: string;
   ip: string;
   type: string;
+  version: string;
   name: string;
 };

@@ -43,7 +43,7 @@ void midiRtpLoop() {
     MidiRtp.sendNoteOn(69, 127, 1);
     // delay(100);
     // Serial.println("Rtp Note on");
-    delay(1000);
+    // delay(1000);
   }
 }
 

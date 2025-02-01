@@ -74,6 +74,8 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
       input_sensor.monitor_axis(ws_message + offset + 1);
+    } else if (strcmp("scanrssi", command) == 0) {
+      wifi.triggerRefreshRSSI();
     } else if (strcmp("rssi", command) == 0) {
       toSend[0] = true;
     }

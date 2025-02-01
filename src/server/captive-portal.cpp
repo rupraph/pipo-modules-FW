@@ -9,7 +9,6 @@ void CaptivePortal::start(AsyncWebServer* server) {
     Serial.println("Nope");
     return;
   }
-  return;
   Serial.println("Yes");
   dns_server = new DNSServer();
   dns_server->setErrorReplyCode(DNSReplyCode::NoError);
@@ -35,22 +34,7 @@ void CaptivePortal::stop() {
 void CaptivePortal::loop() {
   if (dns_server == nullptr)
     return;
-
-  // // Get the domain name of the incoming DNS request
-  // String requestedDomain = dns_server->getDomainName();
-
-  // if (requestedDomain.equalsIgnoreCase("pipo-motion.local")) {
-  //   Serial.println("Ignoring DNS request for pipo-motion.local");
-  //   return;  // Skip DNS processing, let mDNS handle this request
-  // }
-
-  // // Log other requests for debugging purposes
-  // Serial.print("Processing DNS request for: ");
-  // Serial.println(requestedDomain);
-
-  // Process DNS requests normally if not pipo-motion.local
   dns_server->processNextRequest();
-  // dns_server->processNextRequest();
 }
 
 bool CaptivePortal::canEnable() {

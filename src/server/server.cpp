@@ -28,12 +28,11 @@ void PipoServer::start() {
       "Origin, X-Requested-With, Content-Type, Accept");
   server.onNotFound([&](AsyncWebServerRequest* request) {
     Serial.println("not found: " + request->url());
-    return request->redirect("/");
-    // if (request->method() == HTTP_OPTIONS) {
-    //   request->send(200);
-    // } else {
-    //   request->send(404);
-    // }
+    if (request->method() == HTTP_OPTIONS) {
+      request->send(200);
+    } else {
+      request->send(404);
+    }
   });
   server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   ws.enable(true);

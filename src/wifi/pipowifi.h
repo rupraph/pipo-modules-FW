@@ -16,7 +16,7 @@ class PipoWifi {
   int subnetBase = MIN_SUBNET;
   IPAddress apIP = IPAddress(192, 168, subnetBase, 1);
   IPAddress apMask = IPAddress(255, 255, 255, 0);
-
+  bool shouldRefreshRSSI = true;
   unsigned long lastScan = 0;
   bool scanning = false;
   PipoPWManager pwm;
@@ -91,6 +91,8 @@ class PipoWifi {
   bool STAMode();
   /*
   * @brief Starts a non blocking scan for available networks
+  * Performs a SOFT scan, because it seems live active scans are
+  * messing up with AP connection stability.
   * @return true if effectively started
   */
   bool startScan();
@@ -99,6 +101,7 @@ class PipoWifi {
   */
   bool isScanning();
 
+  void triggerRefreshRSSI();
   void refreshRSSI();
   int8_t getRSSI();
 };

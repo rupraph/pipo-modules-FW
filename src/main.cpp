@@ -49,7 +49,7 @@ void dnsTask(void* pvParameters) {
 void rssiTask(void* pvParameters) {
   for (;;) {
     wifi.refreshRSSI();
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(10000));
   }
 }
 
@@ -103,7 +103,7 @@ void setup() {
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
-  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
   xTaskCreatePinnedToCore(rssiTask, "rssiTask", 2048, NULL, 0, &rssiTaskHandle,
                           0);
 }

@@ -4,23 +4,27 @@
   import { slide } from "svelte/transition";
   import { addToast, type Toast } from "../toast";
   import { pipoio } from "../../pipoio";
-  import { setLastScan, setSignal, setSSID, wifiState } from "./store";
+  import {
+    setLastScan,
+    setNetworks,
+    setSignal,
+    setSSID,
+    wifiState,
+  } from "./store";
   import Spinner from "../spinner.svelte";
   import { rssiToSignalStrength } from "./utils";
-  type Network = {
-    ssid: string;
-    quality: number;
-    known: boolean;
-    connected: boolean;
-  };
+  import type { Network } from "./types";
+
   let editing = "";
   let showPassword = false;
   let password: string | undefined = undefined;
   let waiting = false;
   let wifiMode = "";
-  let networks: Network[] = [];
+  let networks: Network[];
+  wifiState.subscribe((v) => {
+    networks = v.networks;
+  });
   $: onShow();
-
   async function onShow() {
     const now = Date.now();
     if (get(wifiState).lastScan < now - 30000) {
@@ -47,7 +51,7 @@
         continue;
       }
       const [_, ...lines] = data.trim().split("\n");
-      networks = lines
+      const networks = lines
         .map((line) => {
           const [_, ssid, signal, connected, known] = line.match(
             /"(.*)" (-?\d+) (\d+) (\d+)/
@@ -70,6 +74,7 @@
           return b.quality - a.quality;
         });
       const connected = networks.find((n) => n.connected);
+      setNetworks(networks);
       if (connected) {
         setSignal(connected.quality);
         setSSID(connected.ssid);
@@ -82,6 +87,7 @@
   }
   export async function scan() {
     if (waiting) return;
+    pipoio.pause();
     waiting = true;
     let toast = {
       type: "info" as const,
@@ -102,9 +108,11 @@
       // wait for the scan to complete
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await fetchNetworks();
+      pipoio.resume();
       setLastScan(Date.now());
       waiting = false;
     } catch (e) {
+      pipoio.resume();
       console.error(e);
     }
   }

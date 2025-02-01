@@ -40,7 +40,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
 
   async pause() {
     this.paused = true;
-    this.onDisconnect();
+    this.onDisconnect(false);
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   async resume() {
@@ -57,8 +57,10 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       this.socket = undefined;
     }
   }
-  async onDisconnect() {
-    this.emit("disconnect");
+  async onDisconnect(sendEvent = true) {
+    if (sendEvent && !this.paused) {
+      this.emit("disconnect");
+    }
     this.cleanup();
   }
   private onOpen() {
@@ -77,7 +79,6 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
         const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
         if (command === "rssi") {
-          console.log("rssi", numargs[0]);
           return this.emit("rssi", { rssi: numargs[0] });
         }
         if (isSensor) {
@@ -132,7 +133,12 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
 
   // asserts that this.socket is not null
   private canSendWSMessage() {
-    return this.socket && !this.paused && !this.busy;
+    return (
+      this.socket &&
+      this.socket.readyState === WebSocket.OPEN &&
+      !this.paused &&
+      !this.busy
+    );
   }
   private setBusy(busy: boolean) {
     this.busy = busy;

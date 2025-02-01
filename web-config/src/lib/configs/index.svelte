@@ -1,6 +1,5 @@
 <script lang="ts">
   import Config from "./config.svelte";
-  import { configSave } from "../../services/config";
   import Tabs from "./tabs.svelte";
   import { formatNumbers, onError } from "../../utils";
   import type { PipoConfig } from "../../types";

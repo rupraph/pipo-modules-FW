@@ -13,6 +13,7 @@ pipoio
     isLive.set(true);
   })
   .on("disconnect", () => {
+    console.log("Disconnect");
     timeout = setTimeout(() => {
       isLive.set(false);
     }, 2000);

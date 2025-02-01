@@ -19,7 +19,7 @@ bool PipoWifi::startScan() {
   if (scanning)
     return false;
   scanning = true;
-  return WiFi.scanNetworks(true, false, false, 500U) == WIFI_SCAN_RUNNING;
+  return WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
 };
 void PipoWifi::saveScanResult() {
   signals.clear();
@@ -137,9 +137,9 @@ bool PipoWifi::APSTAMode() {
 
 bool PipoWifi::configureAP() {
   getFreeSubNet();
-  // apIP = IPAddress(192, 168, subnetBase, 1);
-  // WiFi.softAPConfig(apIP, apIP, apMask);
-  return WiFi.softAP("Pipo", "pipo1234");
+  apIP = IPAddress(192, 168, subnetBase, 1);
+  WiFi.softAPConfig(apIP, apIP, apMask);
+  return WiFi.softAP("Pipo", "pipo1234", 6, false, 6);
 }
 
 bool PipoWifi::STAMode() {
@@ -236,7 +236,12 @@ bool PipoWifi::isScanning() {
   return scanning;
 }
 
+void PipoWifi::triggerRefreshRSSI() {
+  shouldRefreshRSSI = true;
+}
 void PipoWifi::refreshRSSI() {
+  // if (!shouldRefreshRSSI)
+  //   return;
   rssi = WiFi.RSSI();
 }
 int8_t PipoWifi::getRSSI() {
