@@ -319,9 +319,18 @@ float Sensor::get_offset(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
+/**
+ @brief get the value of the sensor clipped to min/max
+ */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].value;
+    if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+      return sensor_dat[axis].lmin;
+    } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+      return sensor_dat[axis].lmax;
+    } else {
+      return sensor_dat[axis].value;
+    }
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

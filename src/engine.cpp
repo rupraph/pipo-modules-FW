@@ -22,7 +22,8 @@ void Engine::update() {
   for (auto const& pair : sensor_dat) {
     string axis_name = pair.first;
     // Serial.println(axis_name.c_str());
-    float sensor_val = input_sensor.get_value(axis_name);
+    float sensor_val = input_sensor.get_value(
+        axis_name);  // could add invert here so that I get the inverted value here.
     bool sensor_invert = input_sensor.get_inverted(axis_name);
     bool sensor_cycle = input_sensor.get_cyclic(axis_name);
     float sensor_min = input_sensor.get_limit_min(axis_name);
@@ -78,9 +79,16 @@ void Engine::midi_processor(string axis_name, float sensor_val,
   MidiTranslator& Midi_translator = Miditranslators[axis_name];
   // check if axis is enabled, outside deadzone and not disabled
   int channel = Midi_translator.channel;
+
   if (input_sensor.test_outside_deadzone(axis_name) &&
       Midi_translator.get_enabled() == true) {
-    // if CC MODE
+    // Serial.print("min:");
+    // Serial.print(sensor_min);
+    // Serial.print(" max:");
+    // Serial.print(sensor_max);
+    // Serial.print("val");
+    // Serial.println(sensor_val);
+    // if CC MODE:
     if (Midi_translator.tl_mode == 0) {
       int cc_nb = Midi_translator.cc_nb;
 
@@ -100,6 +108,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                 max(0, min(Midi_translator.get_cc_val(sensor_val, sensor_min,
                                                       sensor_max, 0),
                            127));
+
+            // Serial.println(cc_val);
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
             //Serial.println(sensor_min);
           }

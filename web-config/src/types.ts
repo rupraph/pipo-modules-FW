@@ -38,7 +38,7 @@ export function isBasicThresholdMode(config: SensorConfig): boolean {
 export type SensorConfig = {
   mode: boolean;
   th_mode: boolean;
-  deadzone: number;
+  deadzone: number; 
   lmax: number;
   lmin: number;
   offset: number;
