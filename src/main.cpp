@@ -49,6 +49,10 @@ void dnsTask(void* pvParameters) {
 void setup() {
   Serial.begin(115200);
 
+  // Disable watchdog timer for debug
+  disableCore0WDT();
+  disableCore1WDT();
+
   // while (!Serial)
   //   delay(100);  // putting wait serial here breaks usb mid/hid init
 

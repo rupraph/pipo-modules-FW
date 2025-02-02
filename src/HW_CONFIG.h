@@ -12,7 +12,7 @@
 
 #define DEBUG_CONFIG false
 
-// #define DISABLE_USB_COMM // only disable midi usb setup for now
+#define DISABLE_USB_COMM  // only disable midi usb setup for now
 // #define INCLUDE_BLE
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)

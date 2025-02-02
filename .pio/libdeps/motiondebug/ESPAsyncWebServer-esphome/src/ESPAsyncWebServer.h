@@ -564,7 +564,7 @@ class DefaultHeaders {
   void addHeader(const String& name, const String& value) {
     _headers.add(new AsyncWebHeader(name, value));
   }
-
+  void clear() { _headers.free(); }
   ConstIterator begin() const { return _headers.begin(); }
   ConstIterator end() const { return _headers.end(); }
 
