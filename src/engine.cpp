@@ -30,33 +30,22 @@ void Engine::update() {
     float sensor_max = input_sensor.get_limit_max(axis_name);
     float sensor_midpoint;
 
-    if (sensor_invert == false) {
-      sensor_min = input_sensor.get_limit_min(axis_name);
-      sensor_max = input_sensor.get_limit_max(axis_name);
-      sensor_midpoint = sensor_min + (sensor_max - sensor_min) / 2.0f;
-      if (sensor_cycle) {
-        if (sensor_val < sensor_midpoint) {
-          sensor_max = sensor_midpoint;
-        } else {
-          sensor_min = sensor_midpoint;
-        }
-      }
-    } else {
-      try {
-        sensor_max = input_sensor.get_limit_min(axis_name);
-        sensor_min = input_sensor.get_limit_max(axis_name);
-        sensor_midpoint = sensor_max + (sensor_min - sensor_max) / 2.0f;
-        if (sensor_cycle) {
-          if (sensor_val < sensor_midpoint) {
-            sensor_min = sensor_midpoint;
-          } else {
-            sensor_max = sensor_midpoint;
-          }
-        }
-      } catch (const std::exception& e) {
-        Serial.println("failed invert sensor");
+    sensor_midpoint = sensor_min + (sensor_max - sensor_min) / 2.0f;
+    if (sensor_cycle) {
+      if (sensor_val < sensor_midpoint) {
+        sensor_max = sensor_midpoint;
+      } else {
+        sensor_min = sensor_max;
+        sensor_max = sensor_midpoint;
       }
     }
+
+    if (sensor_invert == true) {
+      float temp = sensor_max;
+      sensor_max = sensor_min;
+      sensor_min = temp;
+    }
+
     if (config.general_config["MidiEnabled"] == true) {
       midi_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
@@ -82,12 +71,12 @@ void Engine::midi_processor(string axis_name, float sensor_val,
 
   if (input_sensor.test_outside_deadzone(axis_name) &&
       Midi_translator.get_enabled() == true) {
-    // Serial.print("min:");
-    // Serial.print(sensor_min);
-    // Serial.print(" max:");
-    // Serial.print(sensor_max);
-    // Serial.print("val");
-    // Serial.println(sensor_val);
+    Serial.print("min:");
+    Serial.print(sensor_min);
+    Serial.print(" max:");
+    Serial.print(sensor_max);
+    Serial.print("val");
+    Serial.println(sensor_val);
     // if CC MODE:
     if (Midi_translator.tl_mode == 0) {
       int cc_nb = Midi_translator.cc_nb;
@@ -109,7 +98,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                                                       sensor_max, 0),
                            127));
 
-            // Serial.println(cc_val);
+            Serial.println(cc_val);
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
             //Serial.println(sensor_min);
           }
