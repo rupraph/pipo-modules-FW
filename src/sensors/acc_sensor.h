@@ -28,6 +28,13 @@ class MotionSensor : public Sensor {
   void calc_euler_angles();
   void convert_accell();
 
+  void get_quat(float& w, float& x, float& y, float& z) {
+    w = quat_w;
+    x = quat_x;
+    y = quat_y;
+    z = quat_z;
+  }
+
   bool enable_send_vizualizer =
       false;  //set on/off serial messages for vizualizer
 
@@ -48,7 +55,7 @@ class MotionSensor : public Sensor {
       .enable_gyroscope = false,     // Enables gyroscope output
       .enable_accelerometer = true,  // Enables accelerometer output
       .enable_magnetometer =
-          false,  // Enables magnetometer output // Enables quaternion output
+          true,  // Enables magnetometer output // Enables quaternion output
       .enable_gravity = false,            // Enables gravity vector output
       .enable_linearAcceleration = true,  // Enables linear acceleration output
       .enable_quaternion6 = true,         // Enables quaternion 6DOF output
@@ -57,12 +64,12 @@ class MotionSensor : public Sensor {
       .enable_steps = false,              // Enables step counter
       .gyroscope_frequency = 1,      // Max frequency = 225, min frequency = 1
       .accelerometer_frequency = 1,  // Max frequency = 225, min frequency = 1
-      .magnetometer_frequency = 1,   // Max frequency = 70, min frequency = 1
+      .magnetometer_frequency = 60,  // Max frequency = 70, min frequency = 1
       .gravity_frequency = 1,        // Max frequency = 225, min frequency = 1
       .linearAcceleration_frequency =
           225,                       // Max frequency = 225, min frequency = 1
       .quaternion6_frequency = 100,  // Max frequency = 225, min frequency = 50
-      .quaternion9_frequency = 50,   // Max frequency = 225, min frequency = 50
+      .quaternion9_frequency = 100,  // Max frequency = 225, min frequency = 50
       .har_frequency = 50,           // Max frequency = 225, min frequency = 50
       .steps_frequency = 50          // Max frequency = 225, min frequency = 50
   };

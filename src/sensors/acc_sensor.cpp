@@ -36,7 +36,22 @@ void MotionSensor::update() {
 
   if (icm20948.magDataIsReady()) {
     icm20948.readMagData(&raw_magX, &raw_magY, &raw_magZ);
+    sensor_dat["magX"].value = raw_magX;
+    sensor_dat["magY"].value = raw_magY;
+    sensor_dat["magZ"].value = raw_magZ;
+    // unit seems to be (mT)
   }
+
+  //activity recog
+  // d = drive
+  // w = walk
+  // r = run
+  // b = bike
+  // s = still
+  // t = tilt
+  // icm20948.readHarData(&har);
+
+  //should add step counter
 
   process_sensor_triggers();
 

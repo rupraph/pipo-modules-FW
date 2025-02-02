@@ -297,7 +297,7 @@
       "th_mode": false
     },
     "magX": {
-      "deadzone": 2,
+      "deadzone": 0,
       "offset": 0.0,
       "invert": false,
       "lmax": 90,
@@ -306,7 +306,7 @@
       "th_mode": false
     },
     "magY": {
-      "deadzone": 2,
+      "deadzone": 0,
       "offset": 0.0,
       "invert": false,
       "lmax": 180,
@@ -315,7 +315,7 @@
       "th_mode": false
     },
     "magZ": {
-      "deadzone": 2,
+      "deadzone": 0,
       "offset": 0.0,
       "invert": false,
       "lmax": 180,
