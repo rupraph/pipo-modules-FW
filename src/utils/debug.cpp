@@ -1,4 +1,5 @@
 #include "utils/debug.h"
+#include "HW_CONFIG.h"
 void pipoDebugHeap() {
 #ifdef DEBUG_HEAP
 

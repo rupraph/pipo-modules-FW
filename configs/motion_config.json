@@ -129,37 +129,43 @@
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/accX"
       },
       "accY": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/accY"
       },
       "accZ": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/accZ"
       },
       "pitch": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/pitch"
       },
       "roll": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/roll"
       },
       "yaw": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/yaw"
       }
     }
   },
@@ -167,56 +173,62 @@
     "accX": {
       "deadzone": 0.05,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "accY": {
       "deadzone": 0.05,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "accZ": {
       "deadzone": 0.05,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 8.0,
       "lmin": -8.0,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "pitch": {
       "deadzone": 2,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 90,
       "lmin": -90,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "roll": {
       "deadzone": 2,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 180,
       "lmin": -180,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     },
     "yaw": {
       "deadzone": 2,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 180,
       "lmin": -180,
       "mode": false,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {

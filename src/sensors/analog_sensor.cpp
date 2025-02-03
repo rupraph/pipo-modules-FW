@@ -67,7 +67,7 @@ void AnalogSensor::update() {
 
     sensor_dat[pair.first].raw_value = analogRead(pair.second);
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-    sensor_dat[pair.first].value = sensor_dat[pair.first].raw_value * 0.000806;
+    sensor_dat[pair.first].value = sensor_dat[pair.first].raw_value * 0.000806f;
   }
 
   for (auto const& pair : touch_map) {

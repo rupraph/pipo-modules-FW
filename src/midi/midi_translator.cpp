@@ -11,13 +11,6 @@ MidiTranslator::MidiTranslator() {
 }
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
-  // cap value to input range
-  float out_value = value;
-  if (value < min_input) {
-    out_value = min_input + 1;
-  } else if (value > max_input) {
-    out_value = max_input;
-  }
 
   float input_range = max_input - min_input;
   if (input_range == 0) {
@@ -27,7 +20,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
 
   // scale value from 0 to 1 to the range of the current scale
   // map value from input range to 0-1
-  float scaled_value = (out_value - min_input) / (max_input - min_input);
+  float scaled_value = (value - min_input) / (max_input - min_input);
   int index = round(scaled_value * (nbOfNotes - 1));
   index = constrain(index, 0, nbOfNotes - 1);
   return current_scale[index];
@@ -193,12 +186,6 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
   // this returns a scaled value from the input range (max_input/min_input) to
   // the output range (max_output/min_output)
 
-  // cap value to input range
-  if (value < min_input) {
-    value = min_input;
-  } else if (value > max_input) {
-    value = max_input;
-  }
   if (hires) {
     cc_max = 16383;
   } else {
