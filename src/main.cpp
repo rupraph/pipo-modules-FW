@@ -58,6 +58,14 @@ void debug_monitor(void* pvParameters) {
 
 void setup() {
   Serial.begin(115200);
+
+  // Disable watchdog timer for debug
+  disableCore0WDT();
+  disableCore1WDT();
+
+  // while (!Serial)
+  //   delay(100);  // putting wait serial here breaks usb mid/hid init
+
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
   pipoDebugHeap();
@@ -89,12 +97,23 @@ void setup() {
   listDir(LittleFS, "/", 0);
 
   /////// initialize sensor/inputs
+  Serial.println("init sensor");
   input_sensor.init();
   input_sensor.setup();
+
+#ifdef DEBUG_HEAP
+  pipoDebugHeap();
+#endif
+
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
+  Serial.println("gather and save config");
   config.gather(engine, true);
   config.save(config.filename);
+
+#ifdef DEBUG_HEAP
+  pipoDebugHeap();
+#endif
 
   // Start server
   Serial.println("starting config page");
@@ -102,26 +121,26 @@ void setup() {
   // Start OSC
   osc.setup();
 
-  Serial.println("Setup done");
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
-  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8192, NULL, 1,
+
+  Serial.println("starting tasks");
+
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
                           &sensorTaskHandle, 1);
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
   xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
                           &debugMonitorTaskHandle, 1);
+
+  Serial.println("Setup done");
 }
 
 void loop() {
   try {
 
-    // monitor_wifi(server.is_running);
-    // input_sensor.update();
-    // engine.update();
-    // pipoSocket.loop();
     hwui.update();
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop

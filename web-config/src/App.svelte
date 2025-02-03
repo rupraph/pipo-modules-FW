@@ -111,7 +111,7 @@
       </article>
     {/await}
   {/if}
-  <OfflineOverlay />
+  <!-- <OfflineOverlay /> -->
 </main>
 
 <style>

@@ -20,12 +20,15 @@ struct SensorDat {
   // Config attributes
   float deadzone;  // supposed to be % of the total range. value for now
   float offset;
-  bool invert;
+  bool inverted;
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
   float lmin;
 
   bool mode;     // 0 = continuous, 1 = trigger
   bool th_mode;  // 0 = basic, 1 = window trigger
+
+  bool
+      cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
 
   // Live attributes
   float raw_value;  // raw value from sensor
@@ -48,7 +51,7 @@ struct SensorDat {
   SensorDat()
       : deadzone(0.0),
         offset(0.0),
-        invert(false),
+        inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
         value_prev(0.0),
@@ -132,6 +135,9 @@ class Sensor {
 
   bool get_bool_value(const std::string& axis);
   void set_bool_value(const std::string& axis, bool value);
+
+  bool get_cyclic(const std::string& axis);
+  void set_cyclic(const std::string& axis, bool value);
 
   void monitor_axis(const std::string& axis);
 

@@ -93,6 +93,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.set(request->getParam("config")->value());
+      pipoDebugHeap();
       config.apply(engine, osc, true);
       config.save();
       return request->send(200, "text/plain", "Config set");

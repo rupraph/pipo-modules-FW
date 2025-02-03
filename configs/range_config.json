@@ -29,7 +29,8 @@
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "range/dist"
       }
     }
   },
@@ -37,11 +38,12 @@
     "dist": {
       "deadzone": 0.0,
       "offset": 0.0,
-      "invert": false,
+      "inverted": false,
       "lmax": 60.0,
       "lmin": 5.0,
       "mode": true,
-      "th_mode": false
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {

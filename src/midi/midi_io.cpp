@@ -3,8 +3,9 @@
 midi_io midiio;
 
 void midi_io::setup() {
-
+#ifndef DISABLE_USB_COMM
   MidiUSBSetup();
+#endif
 #ifdef INCLUDE_BLE
   midiBLESetup();
 #endif

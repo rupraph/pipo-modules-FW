@@ -45,9 +45,12 @@ class Engine {
   void toggle_pause();
 
   void update();
-  void midi_processor();
-  void hid_processor();
-  void osc_processor();
+  void midi_processor(string axis_name, float sensor_val, float sensor_min,
+                      float sensor_max);
+  void hid_processor(string axis_name, float sensor_val, float sensor_min,
+                     float sensor_max);
+  void osc_processor(string axis_name, float sensor_val, float sensor_min,
+                     float sensor_max);
 
   // config
   JsonDocument get_config(bool debug = false);

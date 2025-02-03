@@ -67,6 +67,7 @@ void Config::load_config() {
 String Config::get_list() {
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
+    Serial.print("failed to open config root");
     throw std::runtime_error("failed to open configs root");
   }
   String list;
@@ -178,6 +179,7 @@ void Config::set(const String& config) {
       return;
     }
     // current_config = config;
+    Serial.println("config set");
     logs.writeLog("config set");
   } catch (const std::exception& e) {
     Serial.println("error setting current_config from a json object");
