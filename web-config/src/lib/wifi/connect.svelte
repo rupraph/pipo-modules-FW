@@ -255,124 +255,125 @@
   {:else if waiting}
     <Spinner />
     <p>Waiting for networks...</p>
-  {:else if !waiting && networks.length === 0}
-    <p>No networks found</p>
   {:else}
-    <ul>
-      {#each networks as { ssid, quality, known, connected }}
-        <li on:click={() => onSelect(ssid, known)}>
-          <span class="ssid">{ssid}</span>
-          <svg
-            class="lock"
-            height="30"
-            width="30"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 100 100"
-            stroke="black"
-            stroke-width="6"
-            on:click={() => onLockClick(ssid, known)}
-          >
-            <g>
-              <path
-                stroke-linecap="round"
-                fill="none"
-                d="M25 50 L75 50 75 95 25 95 25 50"
-              />
-              <circle cx="50" cy="75" r="5" fill="none" />
-              <path
-                stroke-linecap="round"
-                fill="none"
-                d={known
-                  ? "M40 50 L40 30 C 40 0 3 0 3 30 L 3 35"
-                  : "M30 50 L30 30 C 30 0 70 0 70 30 L 70 50"}
-              />
-            </g>
-          </svg>
-          {#if connected}
+    {#if networks.length === 0}
+      <p>No networks found</p>
+    {:else}
+      <ul>
+        {#each networks as { ssid, quality, known, connected }}
+          <li on:click={() => onSelect(ssid, known)}>
+            <span class="ssid">{ssid}</span>
             <svg
-              class="checkmark"
+              class="lock"
               height="30"
               width="30"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 100 100"
-              xml:space="preserve"
-              stroke="#8fbe00"
+              stroke="black"
               stroke-width="6"
+              on:click={() => onLockClick(ssid, known)}
             >
               <g>
                 <path
                   stroke-linecap="round"
                   fill="none"
-                  d="M30 75 L50 90 90 30"
+                  d="M25 50 L75 50 75 95 25 95 25 50"
+                />
+                <circle cx="50" cy="75" r="5" fill="none" />
+                <path
+                  stroke-linecap="round"
+                  fill="none"
+                  d={known
+                    ? "M40 50 L40 30 C 40 0 3 0 3 30 L 3 35"
+                    : "M30 50 L30 30 C 30 0 70 0 70 30 L 70 50"}
                 />
               </g>
             </svg>
-          {:else}
-            <span></span>
-          {/if}
-          <Signal signal={quality} bars={5} />
-        </li>
-        {#if editing === ssid}
-          <div
-            class="connect"
-            transition:slide={{
-              delay: 0,
-              duration: 300,
-              axis: "y",
-            }}
-          >
-            <label> password </label>
-            <input
-              class="input-wrapper"
-              on:input={onInput}
-              type={showPassword ? "text" : "password"}
-              id="network-password"
-            />
-            <button class="showhide stroke" on:click={hideShowPassword}>
-              <icon>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="30"
-                  height="30"
-                  viewBox="0 0 24 24"
-                  ><path
-                    d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"
+            {#if connected}
+              <svg
+                class="checkmark"
+                height="30"
+                width="30"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                xml:space="preserve"
+                stroke="#8fbe00"
+                stroke-width="6"
+              >
+                <g>
+                  <path
+                    stroke-linecap="round"
+                    fill="none"
+                    d="M30 75 L50 90 90 30"
                   />
-                  {#if !showPassword}
-                    <path stroke-width="3" d="M0 0 L24 24" stroke="black"
-                    ></path>
-                  {/if}
-                </svg>
-              </icon>
-            </button>
+                </g>
+              </svg>
+            {:else}
+              <span></span>
+            {/if}
+            <Signal signal={quality} bars={5} />
+          </li>
+          {#if editing === ssid}
+            <div
+              class="connect"
+              transition:slide={{
+                delay: 0,
+                duration: 300,
+                axis: "y",
+              }}
+            >
+              <label> password </label>
+              <input
+                class="input-wrapper"
+                on:input={onInput}
+                type={showPassword ? "text" : "password"}
+                id="network-password"
+              />
+              <button class="showhide stroke" on:click={hideShowPassword}>
+                <icon>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="30"
+                    height="30"
+                    viewBox="0 0 24 24"
+                    ><path
+                      d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"
+                    />
+                    {#if !showPassword}
+                      <path stroke-width="3" d="M0 0 L24 24" stroke="black"
+                      ></path>
+                    {/if}
+                  </svg>
+                </icon>
+              </button>
 
-            <button on:click={onConnect(editing)}>connect</button>
-          </div>
-        {/if}
-      {/each}
-    </ul>
+              <button on:click={onConnect(editing)}>connect</button>
+            </div>
+          {/if}
+        {/each}
+      </ul>
+    {/if}
     <button class="primary" class:disabled={waiting} on:click={() => scan()}
       >Scan</button
     >
-    {#if 0}
-      <div class="buttons">
-        <button
-          class:enabled={wifiMode == "AP"}
-          class:disabled={waiting}
-          on:click={() => setMode("AP")}>AP mode</button
-        >
-        <button
-          class:enabled={wifiMode == "STA"}
-          class:disabled={waiting}
-          on:click={() => setMode("STA")}>STA mode</button
-        >
-        <button
-          class:enabled={wifiMode == "APSTA"}
-          class:disabled={waiting}
-          on:click={() => setMode("APSTA")}>AP_STA mode</button
-        >
-      </div>
-    {/if}
+    <!-- {:else if 0}
+    <div class="buttons">
+      <button
+        class:enabled={wifiMode == "AP"}
+        class:disabled={waiting}
+        on:click={() => setMode("AP")}>AP mode</button
+      >
+      <button
+        class:enabled={wifiMode == "STA"}
+        class:disabled={waiting}
+        on:click={() => setMode("STA")}>STA mode</button
+      >
+      <button
+        class:enabled={wifiMode == "APSTA"}
+        class:disabled={waiting}
+        on:click={() => setMode("APSTA")}>AP_STA mode</button
+      >
+    </div> -->
   {/if}
 </section>
 
@@ -411,9 +412,6 @@
     width: 100%;
     list-style: none;
     cursor: pointer;
-  }
-  section:not(.waiting) li:hover > span {
-    text-decoration: underline;
   }
   .connect {
     margin-bottom: 2em;

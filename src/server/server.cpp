@@ -35,9 +35,8 @@ void PipoServer::start() {
     }
   });
   server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
-  ws.enable(true);
   setup_requests();
-  captivePortal.start(&server);
+  // captivePortal.start(&server);
   setup_ws();
   server.begin();
   is_running = true;
@@ -45,16 +44,30 @@ void PipoServer::start() {
 }
 void PipoServer::stop() {
   pipoSocket.stop();
-  server.end();
-  server.reset();
-  ws_initialized = false;
-  DefaultHeaders::Instance().clear();
   captivePortal.stop();
-  vTaskDelay(pdMS_TO_TICKS(100));
-  Serial.println("end server");
+  DefaultHeaders::Instance().clear();
+  server.reset();
+  server.end();
+
+  close(80);
+  ws_initialized = false;
   is_running = false;
 }
-
+bool PipoServer::isRunning() {
+  return is_running;
+}
+bool PipoServer::shouldStart() {
+  return should_start;
+}
+bool PipoServer::canStart() {
+  Serial.print("can start?");
+  Serial.print(should_start);
+  Serial.print(" ");
+  Serial.print(!is_running);
+  Serial.print(" ");
+  Serial.println(millis() - stopDate > 2000);
+  return should_start && !is_running && millis() - stopDate > 2000;
+}
 void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
     Serial.println("info request");
@@ -80,6 +93,18 @@ void PipoServer::setup_requests() {
     info += "\"}";
     return request->send(200, "text/json", info.c_str());
   });
+
+  server.on("/generate_204", HTTP_GET,
+            [](AsyncWebServerRequest* request) { request->redirect("/"); });
+
+  server.on("/hotspot-detect.html", HTTP_GET,
+            [](AsyncWebServerRequest* request) { request->redirect("/"); });
+
+  server.on("/success.html", HTTP_GET,
+            [](AsyncWebServerRequest* request) { request->redirect("/"); });
+
+  server.on("/success.txt", HTTP_GET,
+            [](AsyncWebServerRequest* request) { request->redirect("/"); });
 
   // recevies and apply config
   server.on("/config", HTTP_POST, [&](AsyncWebServerRequest* request) {
@@ -259,8 +284,6 @@ void PipoServer::setup_requests() {
     } else {
       wifi.APSTAMode();
     }
-    vTaskDelay(pdMS_TO_TICKS(200));
-    should_start = true;
   });
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("ssid")) {
@@ -272,20 +295,31 @@ void PipoServer::setup_requests() {
     if (request->hasParam("password")) {
       password = request->getParam("password")->value();
     }
+    bool isAPSTA = WiFi.getMode() == WIFI_MODE_APSTA;
     String previous_ssid = wifi.ssid();
     vTaskDelay(pdMS_TO_TICKS(200));
     stop();
-    bool success = false;
-    success =
-        password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
-    Serial.println("Connected ? ");
-    if (!success && previous_ssid.length()) {
-      vTaskDelay(pdMS_TO_TICKS(200));
-      Serial.println("Not Connected!, reconnect to previous");
-      success = wifi.connect(previous_ssid);
-    }
-    vTaskDelay(pdMS_TO_TICKS(200));
+
+    // bool success = false;
+    // success =
+    //     password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
+    // Serial.println("Connected ? ");
+    // if (!success && previous_ssid.length()) {
+    //   vTaskDelay(pdMS_TO_TICKS(200));
+    //   Serial.println("Not Connected!, reconnect to previous");
+    //   success = wifi.connect(previous_ssid);
+    // }
+    // Serial.print("MODE AFTER ");
+    // Serial.println(WiFi.getMode());
+    // Serial.print("Is AP_STA ");
+    // Serial.println(isAPSTA);
+    // if (isAPSTA) {
+    //   success = wifi.configureAP();
+    //   Serial.print("Configured AP?  ");
+    //   Serial.println(success);
+    // }
     should_start = true;
+    stopDate = millis();
   });
 
   server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -356,4 +390,9 @@ void PipoServer::setup_ws() {
   pipoSocket.setup();
   // events.onConnect([](AsyncEventSourceClient* client) {});
   // server.addHandler(&events);
+}
+
+bool pipoNetworkReady() {
+  return WiFi.status() == WL_CONNECTED && wifi.status == PipoWifi::CONNECTED &&
+         server.isRunning();
 }

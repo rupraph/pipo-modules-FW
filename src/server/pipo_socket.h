@@ -5,6 +5,8 @@
 #include "utils/config.h"
 #include "wifi/pipowifi.h"
 #include "engine.h"
+#define SO_REUSE 1
+#define SO_REUSE_RXTOALL 1  // Enable reuse of addresses for multicast as well
 #include <ESPAsyncWebServer.h>
 using namespace std;
 class PipoSocket {

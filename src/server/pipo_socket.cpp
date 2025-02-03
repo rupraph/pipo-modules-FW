@@ -88,6 +88,7 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
 
 void PipoSocket::start(AsyncWebSocket* ws) {
   this->ws = ws;
+  this->ws->enable(true);
 }
 void PipoSocket::sendNoteOn(int note, int velocity, int channel) {
   if (ws == nullptr)
@@ -189,5 +190,10 @@ void PipoSocket::loop() {
   }
 }
 void PipoSocket::stop() {
+  Serial.print("Closing with clients: ");
+  Serial.println(ws->count());
+  this->ws->cleanupClients();
+  this->ws->closeAll();
+  this->ws->enable(false);
   this->ws = nullptr;
 }

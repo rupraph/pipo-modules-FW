@@ -10,18 +10,10 @@ void CaptivePortal::start(AsyncWebServer* server) {
     return;
   }
   Serial.println("Yes");
-  dns_server = new DNSServer();
-  dns_server->setErrorReplyCode(DNSReplyCode::NoError);
+  // dns_server = new DNSServer();
+  // dns_server->setErrorReplyCode(DNSReplyCode::NoError);
   // TODO: if Pipo changes IP ip, we need to update this
-  dns_server->start(53, "*", WiFi.softAPIP());
-  server->on("/generate_204", HTTP_GET,
-             [](AsyncWebServerRequest* request) { request->redirect("/"); });
-
-  server->on("/hotspot-detect.html", HTTP_GET,
-             [](AsyncWebServerRequest* request) { request->redirect("/"); });
-
-  server->on("/success.html", HTTP_GET,
-             [](AsyncWebServerRequest* request) { request->redirect("/"); });
+  // dns_server->start(53, "*", WiFi.softAPIP());
 }
 void CaptivePortal::stop() {
   if (dns_server != nullptr) {

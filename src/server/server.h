@@ -26,15 +26,24 @@ class PipoServer {
   void setup_requests();
   void start();
   void stop();
-  bool is_running = false;
-  bool should_start = false;
-  bool ws_initialized = false;
+  bool isRunning();
+  bool shouldStart();
+  bool canStart();
 
  private:
+  bool ws_initialized = false;
+  bool should_start = false;
+  bool is_running = false;
+  unsigned long stopDate = 0;
   AsyncWebServer server;
   AsyncWebSocket ws;
   string received_configData;
 };
+
+/**
+ * @brief Check if the WiFi is connected and the server is running
+ */
+bool pipoNetworkReady();
 
 extern PipoServer server;
 

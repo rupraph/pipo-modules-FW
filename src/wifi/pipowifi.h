@@ -28,9 +28,9 @@ class PipoWifi {
   void scan();
   void saveScanResult();
   void getFreeSubNet();
-  bool configureAP();
 
  public:
+  bool configureAP();
   /**
   * @brief The current status of the wifi
   */

@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "hw_ui.h"
 #include "midi/midi_io.h"
+#include "task-handles.h"
 #include "osc/osc_handler.h"
 #include "server/server.h"
 #include "utils/config.h"
@@ -20,12 +21,6 @@ void init_filesystem();
 // I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
 
-TaskHandle_t sensorTaskHandle;
-TaskHandle_t websocketTaskHandle;
-TaskHandle_t hwuiTaskHandle;
-TaskHandle_t dnsTaskHandle;
-TaskHandle_t rssiTaskHandle;
-
 void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
@@ -36,18 +31,30 @@ void sensorTask(void* pvParameters) {
 
 void websocketTask(void* pvParameters) {
   for (;;) {
+    if (!pipoNetworkReady()) {
+      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
+      continue;
+    }
     pipoSocket.loop();
     vTaskDelay(pdMS_TO_TICKS(40));  //crashes if too fast (10 crashes)
   }
 }
 void dnsTask(void* pvParameters) {
   for (;;) {
+    if (!pipoNetworkReady()) {
+      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
+      continue;
+    }
     captivePortal.loop();
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
 void rssiTask(void* pvParameters) {
   for (;;) {
+    if (!pipoNetworkReady()) {
+      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
+      continue;
+    }
     wifi.refreshRSSI();
     vTaskDelay(pdMS_TO_TICKS(10000));
   }
@@ -118,8 +125,7 @@ void loop() {
     hwui.update();
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop
-    if (server.should_start) {
-      vTaskDelay(pdMS_TO_TICKS(1000));
+    if (server.canStart()) {
       server.start();
     }
 
@@ -128,4 +134,5 @@ void loop() {
     logs.writeLog(e.what());
     delay(50);
   }
+  vTaskDelay(pdMS_TO_TICKS(500));
 }

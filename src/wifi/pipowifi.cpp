@@ -82,6 +82,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
     status = CONNECTED;
     return true;
   }
+  status = DISCONNECTED;
   Serial.println("Failed to connect to " + String(ssid.c_str()));
   Serial.println("Error: " + String(result));
   return false;
@@ -240,8 +241,6 @@ void PipoWifi::triggerRefreshRSSI() {
   shouldRefreshRSSI = true;
 }
 void PipoWifi::refreshRSSI() {
-  // if (!shouldRefreshRSSI)
-  //   return;
   rssi = WiFi.RSSI();
 }
 int8_t PipoWifi::getRSSI() {
