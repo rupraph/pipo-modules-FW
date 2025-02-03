@@ -224,26 +224,29 @@
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/yaw"
       },
       "magX": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/magX"
       },
       "magY": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
-        "osc_min": 0
+        "osc_min": 0,
+        "osc_addr": "motion/magY"
       },
       "magZ": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/yaw"
+        "osc_addr": "motion/magZ"
       }
     }
   },
@@ -304,6 +307,46 @@
       "inverted": false,
       "lmax": 180,
       "lmin": -180,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "magX": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "magY": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "magZ": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "quat": {
+      "deadzone": 0.0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 1.0,
+      "lmin": -1.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false
