@@ -4,7 +4,6 @@
 #include "utils/logs.h"
 #include <ESPAsyncWebServer.h>
 using namespace std;
-
 class PipoSocket {
  public:
   PipoSocket();
@@ -13,6 +12,7 @@ class PipoSocket {
   void sendNoteOff(int note, int velocity, int channel);
   void sendSensorValue(std::string axis, float value);
   void loop();
+  void stop();
 
  private:
   AsyncWebSocket* ws;

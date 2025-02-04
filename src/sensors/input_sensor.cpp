@@ -131,13 +131,13 @@ unsigned long Sensor::end_duration() {
 }
 
 //config
-JsonDocument Sensor::get_config(bool debug) {
+JsonDocument Sensor::get_axis_config(bool debug) {
   JsonDocument config;
   try {
     for (auto const& pair : sensor_dat) {
       string axis_name = pair.first;
       // config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
-      // config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
+      config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
       config[axis_name]["deadzone"] = sensor_dat[axis_name].deadzone;
       // config[axis_name]["value"] = sensor_dat[axis_name].value;
       config[axis_name]["offset"] = sensor_dat[axis_name].offset;
@@ -145,6 +145,7 @@ JsonDocument Sensor::get_config(bool debug) {
       config[axis_name]["lmin"] = sensor_dat[axis_name].lmin;
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
       config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
+      config[axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -159,20 +160,37 @@ JsonDocument Sensor::get_config(bool debug) {
   return config;
 }
 
-void Sensor::set_config(JsonObject config, bool debug) {
+void Sensor::set_axis_config(JsonObject config, bool debug) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
+    // should likely use getter/setter here
     sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
+    sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
     sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
     sensor_dat[axis_name].lmin = config[axis_name]["lmin"];
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
     sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
+    sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
   }
   if (debug) {
-    Serial.println("set_sensor_config");
-
     Serial.println("set_sensor_config_end");
+  }
+}
+
+void Sensor::monitor_axis(const std::string& axis) {
+  // iterate through sensor_dat, set the ws_monitor flag to true for the
+  // specified axis and false for all others
+  for (auto& dat : sensor_dat) {
+    string axis_name = dat.first;
+    if (axis_name == axis) {
+      dat.second.ws_monitor = true;
+    } else {
+      dat.second.ws_monitor = false;
+    }
   }
 }
 
@@ -280,12 +298,12 @@ bool Sensor::get_untrigger_flag(const std::string& axis, Protocol protocol) {
   }
 }
 
-// bool Sensor::get_inverted(const std::string& axis) {
-//   if (sensor_dat.find(axis) != sensor_dat.end())
-//     return sensor_dat[axis].inverted;
-//   else
-//     throw std::invalid_argument("Axis not found: " + axis);
-// }
+bool Sensor::get_inverted(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].inverted;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
 
 int Sensor::get_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
@@ -301,9 +319,40 @@ float Sensor::get_offset(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
+/**
+@brief get the value of the axis
+ */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+/**
+ @brief get the value of the sensor clipped to min/max
+ */
+float Sensor::get_value_constrained(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    // wrap value for circular axis, clip for others.
+    if (axis == "pitch" || axis == " yaw" || axis == "roll") {
+      float range = sensor_dat[axis].lmax - sensor_dat[axis].lmin;
+      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].value + range;
+      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].value - range;
+      } else {
+        return sensor_dat[axis].value;
+      }
+    } else {
+      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].lmin;
+      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].lmax;
+      } else {
+        return sensor_dat[axis].value;
+      }
+    }
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -358,10 +407,15 @@ bool Sensor::get_threshold_mode(const std::string& axis) {
 }
 
 bool Sensor::get_bool_value(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].bool_value;
-  else
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
+    if (sensor_dat[axis].inverted == false) {
+      return sensor_dat[axis].bool_value;
+    } else {
+      return !sensor_dat[axis].bool_value;
+    }
+  } else {
     throw std::invalid_argument("Axis not found: " + axis);
+  }
 }
 
 //Setters
@@ -373,12 +427,12 @@ bool Sensor::get_bool_value(const std::string& axis) {
 //         throw std::invalid_argument("Axis not found: " + axis);
 // }
 
-// void Sensor::set_inverted(const std::string& axis, bool value) {
-//     if(sensor_dat.find(axis) != sensor_dat.end())
-//         sensor_dat[axis].inverted = value;
-//     else
-//         throw std::invalid_argument("Axis not found: " + axis);
-// }
+void Sensor::set_inverted(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    sensor_dat[axis].inverted = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
 
 void Sensor::set_deadzone(const std::string& axis, int value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
@@ -454,6 +508,20 @@ void Sensor::set_threshold_mode(const std::string& axis, bool value) {
 void Sensor::set_bool_value(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     sensor_dat[axis].bool_value = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_cyclic(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    sensor_dat[axis].cyclic = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+bool Sensor::get_cyclic(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].cyclic;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

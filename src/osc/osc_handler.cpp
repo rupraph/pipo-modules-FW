@@ -13,7 +13,7 @@ void OSC_handler::setup() {
     Serial.println(String(out_port));
   }
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 

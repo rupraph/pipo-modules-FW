@@ -18,7 +18,7 @@ void init_filesystem() {
   Serial.print("Used filesystem bytes: ");
   Serial.println(LittleFS.usedBytes());
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 

@@ -8,6 +8,7 @@
 #include <WiFiUdp.h>
 #include "utils/config.h"
 #include "hw_output.h"
+#include "utils/debug.h"
 
 class Config;
 

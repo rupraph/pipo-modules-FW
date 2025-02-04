@@ -9,6 +9,7 @@
 #include "fs_tools.h"
 #include <ArduinoJson.h>
 #include "utils/logs.h"
+#include "utils/debug.h"
 #include "../engine.h"
 #include "../sensors/sensors.h"
 #include "../osc/osc_handler.h"
@@ -29,8 +30,8 @@ class Config {
     general_config["HidEnabled"] = true;
     general_config["HidMode"] = 2;
   }
-  String filename;  // raw config file name (no extension)
-  JsonDocument current_config;
+  String filename;              // raw config file name (no extension)
+  JsonDocument current_config;  // stores all configs (gather)
   JsonDocument general_config;
 
   // load config from files into current_config

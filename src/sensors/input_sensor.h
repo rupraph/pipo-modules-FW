@@ -20,12 +20,15 @@ struct SensorDat {
   // Config attributes
   float deadzone;  // supposed to be % of the total range. value for now
   float offset;
-  bool invert;
+  bool inverted;
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
   float lmin;
 
   bool mode;     // 0 = continuous, 1 = trigger
   bool th_mode;  // 0 = basic, 1 = window trigger
+
+  bool
+      cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
 
   // Live attributes
   float raw_value;  // raw value from sensor
@@ -42,12 +45,13 @@ struct SensorDat {
 
   trigger_flag trigger_flags;
   trigger_flag untrigger_flags;
+  bool ws_monitor = false;
 
   // should split in structs for config items and live data.
   SensorDat()
       : deadzone(0.0),
         offset(0.0),
-        invert(false),
+        inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
         value_prev(0.0),
@@ -65,6 +69,8 @@ class Sensor {
   virtual void setup() = 0;
   virtual void update() = 0;
   virtual void measure_offset(const string& sensor_name);
+  virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
+  virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
   bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);
@@ -86,8 +92,8 @@ class Sensor {
   unsigned long measured_interval_duration = 0;  //ms
 
   //config
-  JsonDocument get_config(bool debug = false);
-  void set_config(JsonObject config, bool debug = false);
+  JsonDocument get_axis_config(bool debug = false);
+  void set_axis_config(JsonObject config, bool debug = false);
 
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();
@@ -102,6 +108,7 @@ class Sensor {
   void set_offset(const std::string& axis, float value);
 
   float get_value(const std::string& axis);
+  float get_value_constrained(const std::string& axis);
   void set_value(const std::string& axis, float value);
 
   float get_value_prev(const std::string& axis);
@@ -131,6 +138,11 @@ class Sensor {
 
   bool get_bool_value(const std::string& axis);
   void set_bool_value(const std::string& axis, bool value);
+
+  bool get_cyclic(const std::string& axis);
+  void set_cyclic(const std::string& axis, bool value);
+
+  void monitor_axis(const std::string& axis);
 
  protected:
   unordered_map<string, SensorDat> sensor_dat;

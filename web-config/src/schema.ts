@@ -56,6 +56,33 @@ export const schema: Schema = {
       step: 1,
       index: 0,
     },
+    magX:{
+      label: "X-axis MAG",
+      cat: "Magnetometer",
+      unit: "uT",
+      min: -100,
+      max: 100,
+      step: 0.1,
+      index: 6
+    },
+    magY:{
+      label: "Y-axis MAG",
+      cat: "Magnetometer",
+      unit: "uT",
+      min: -100,
+      max: 100,
+      step: 0.1,
+      index: 7
+    },
+    magZ:{
+      label: "Z-axis MAG",
+      cat: "Magnetometer",
+      unit: "uT",
+      min: -100,
+      max: 100,
+      step: 0.1,
+      index: 8
+    },
   },
   range: {
     dist: {

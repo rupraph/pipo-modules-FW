@@ -8,7 +8,7 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
   Serial.println(get_path(filename, addJsonExtension).c_str());
   try {
 #ifdef DEBUG_HEAP
-    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    pipoDebugHeap();
 #endif
 
     if (DEBUG_CONFIG) {
@@ -33,7 +33,7 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
     }
 
 #ifdef DEBUG_HEAP
-    Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+    pipoDebugHeap();
 #endif
     logs.writeLog("load config: " + filename);
   } catch (const std::exception& e) {
@@ -67,6 +67,7 @@ void Config::load_config() {
 String Config::get_list() {
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
+    Serial.print("failed to open config root");
     throw std::runtime_error("failed to open configs root");
   }
   String list;
@@ -178,6 +179,7 @@ void Config::set(const String& config) {
       return;
     }
     // current_config = config;
+    Serial.println("config set");
     logs.writeLog("config set");
   } catch (const std::exception& e) {
     Serial.println("error setting current_config from a json object");
@@ -268,18 +270,22 @@ void Config::print() {
   serializeJsonPretty(current_config, Serial);
 }
 
+//* @brief This gathers from all classes the config. does not save it.
 void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensor");
   current_config["sensor"].clear();
-  current_config["sensor"] = input_sensor.get_config();
+  current_config["sensor"] = input_sensor.get_axis_config();
   Serial.println("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
   Serial.println("gatherconfig general");
   current_config["general"].clear();
   current_config["general"] = general_config;
+  Serial.println("gatherconfig sensorconf");
+  current_config["sensorconf"].clear();
+  current_config["sensorconf"] = input_sensor.get_sensor_config();
 
-  if (DEBUG_CONFIG) {
+  if (debug && false) {
     Serial.println("gathered_config");
     serializeJsonPretty(current_config, Serial);
     Serial.println("gathered_config_end");
@@ -288,8 +294,11 @@ void Config::gather(Engine& engine, bool debug) {
 
 //* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
-  input_sensor.set_config(current_config["sensor"].as<JsonObject>());
-  engine.set_config(current_config["engine"].as<JsonObject>());
+  input_sensor.set_axis_config(current_config["sensor"].as<JsonObject>(),
+                               debug);
+  input_sensor.set_sensor_config(current_config["sensorconf"].as<JsonObject>(),
+                                 debug);
+  engine.set_config(current_config["engine"].as<JsonObject>(), debug);
   general_config.clear();
   general_config = current_config["general"];
   /*TODO: improve:

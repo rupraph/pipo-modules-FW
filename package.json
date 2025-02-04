@@ -9,23 +9,32 @@
   },
   "scripts": {
     "build:motion": "./scripts/pio.sh run -e motion",
+    "build:motiondebug": "./scripts/pio.sh run -e motiondebug",
     "build:analog": "./scripts/pio.sh run -e analog",
     "build:range": "./scripts/pio.sh run -e range",
     "build:web": "./scripts/build-web.sh",
     "upload:range": "./scripts/pio.sh run -t upload -e range",
     "upload:motion": "./scripts/pio.sh run -t upload -e motion",
+    "upload:motiondebug": "./scripts/pio.sh run -t upload -e motiondebug",
     "upload:analog": "./scripts/pio.sh run -t upload -e analog",
     "upload": "npm run upload:range",
     "build:fs:motion": "./scripts/pio.sh run -t buildfs -e motion",
+    "build:fs:motiondebug": "./scripts/pio.sh run -t buildfs -e motion",
     "build:fs:analog": "./scripts/pio.sh run -t buildfs -e analog",
     "build:fs:range": "./scripts/pio.sh run -t buildfs -e range",
     "build:fs": "./scripts/pio.sh run -t buildfs",
     "upload:fs": "./scripts/pio.sh run -t uploadfs",
+    "test": "./scripts/pio.sh test -vvv -e native",
+    "test:websockets": "vitest -c vitest.config.ts",
     "TO BE DOUBLE CHECKED  upload:all": "npm run upload &&npm run build:fs &&npm run upload:fs",
     "updload-web": "npm run build:web && npm run build:fs && npm run upload:fs",
     "serial": "./scripts/pio.sh device monitor",
     "all": "npm run build:fs && npm run upload:all"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^3.0.4",
+    "ws": "^8.18.0"
+  }
 }

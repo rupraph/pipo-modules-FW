@@ -4,10 +4,11 @@
 #include <Arduino.h>
 #include <unordered_map>
 #include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 class HwUi {
  public:
-  HwUi() {};
+  HwUi(){};
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;

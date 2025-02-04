@@ -4,7 +4,6 @@ PipoServer server;
 
 void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
-
   std::string mdns_name = std::string("pipo-") + PIPO_TYPE;
   if (!MDNS.begin(
           mdns_name.c_str())) {  // Start the mDNS responder for esp.local
@@ -14,14 +13,26 @@ void PipoServer::setup() {
     // Add service to MDNS-SD
     MDNS.addService("http", "tcp", 80);
   }
-
+  start();
+#ifdef DEBUG_HEAP
+  pipoDebugHeap();
+#endif
+}
+void PipoServer::start() {
+  Serial.println("Start server");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods",
                                        "DELETE, POST, GET, OPTIONS");
   DefaultHeaders::Instance().addHeader(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
-  server.onNotFound([](AsyncWebServerRequest* request) {
+  server.onNotFound([&](AsyncWebServerRequest* request) {
+    Serial.println("not found: " + request->url());
+    if (captivePortal.is_active()) {
+      auto url = "http://" + WiFi.softAPIP().toString();
+      // return request->redirect(url);
+      return request->redirect("/");
+    }
     if (request->method() == HTTP_OPTIONS) {
       request->send(200);
     } else {
@@ -31,18 +42,21 @@ void PipoServer::setup() {
   server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   ws.enable(true);
   setup_requests();
+  captivePortal.start(&server);
   setup_ws();
-
   server.begin();
-  Serial.println("Server setup donce");
   is_running = true;
-#ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
-#endif
+  should_start = false;
 }
-
 void PipoServer::stop() {
+  pipoSocket.stop();
   server.end();
+  server.reset();
+  ws_initialized = false;
+  DefaultHeaders::Instance().clear();
+  captivePortal.stop();
+  vTaskDelay(pdMS_TO_TICKS(100));
+  Serial.println("end server");
   is_running = false;
 }
 
@@ -79,6 +93,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.set(request->getParam("config")->value());
+      pipoDebugHeap();
       config.apply(engine, osc, true);
       config.save();
       return request->send(200, "text/plain", "Config set");
@@ -95,7 +110,7 @@ void PipoServer::setup_requests() {
     }
     try {
       String name = request->getParam("name")->value();
-      Serial.println(ESP.getFreeHeap());
+      pipoDebugHeap();
       return request->send(LittleFS, config.get_path(name), "application/json");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -199,16 +214,16 @@ void PipoServer::setup_requests() {
         // after solving other issues, not sure if this has any value after all.
 
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());  // 44k remaining
+            pipoDebugHeap();
 #endif
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
             config.apply(engine, osc, true);
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());
+            pipoDebugHeap();
 #endif
 #ifdef DEBUG_HEAP
-            Serial.println(ESP.getFreeHeap());
+            pipoDebugHeap();
 #endif
             received_configData.clear();
             return request->send(200, "text/plain", "Config saved");
@@ -222,24 +237,74 @@ void PipoServer::setup_requests() {
 
   server.on("/reboot", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Rebooting");
-    delay(3000);
+    vTaskDelay(pdMS_TO_TICKS(3000));
     ESP.restart();
   });
 
-  server.on("wifimode", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    if (config.general_config["Wifi_mode"] == "AP") {
-      // Todo: should use setter
-      config.general_config["Wifi_mode"].clear();
-      config.general_config["Wifi_mode"] = "STA";
-      return request->send(200, "text/plain", "switch to STA");
-    } else {
-      config.general_config["Wifi_mode"].clear();
-      config.general_config["Wifi_mode"] = "switch to AP";
-      return request->send(200, "text/plain", "STA");
+  server.on("/wifi-mode", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    Serial.println("POST wifi-mode");
+    if (!request->hasParam("mode")) {
+      Serial.println("no mode");
+
+      return request->send(400, "text/plain", "Error: no mode parameter");
     }
-    // config.save(config.filename);
-    // delay(1000);
-    // ESP.restart();
+    String mode = request->getParam("mode")->value();
+    Serial.println("mode: " + mode);
+    if (mode != "AP" && mode != "STA" && mode != "APSTA") {
+      return request->send(400, "text/plain", "Error: invalid mode");
+    }
+    request->send(200, "text/plain", "Try to switch to mode " + mode);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    stop();
+    config.general_config["Wifi_mode"] = mode;
+    Serial.println("Setting mode: " + mode);
+    if (mode == "AP") {
+      wifi.APMode();
+    } else if (mode == "STA") {
+      wifi.STAMode();
+    } else {
+      wifi.APSTAMode();
+    }
+    vTaskDelay(pdMS_TO_TICKS(200));
+    should_start = true;
+  });
+  server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("ssid")) {
+      return request->send(400, "text/plain", "Error: no ssid  parameter");
+    }
+    request->send(200, "text/plain", "Try to connect to wifi");
+    String ssid = request->getParam("ssid")->value();
+    String password = "";
+    if (request->hasParam("password")) {
+      password = request->getParam("password")->value();
+    }
+    String previous_ssid = wifi.ssid();
+    vTaskDelay(pdMS_TO_TICKS(200));
+    stop();
+    bool success = false;
+    success =
+        password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
+    Serial.println("Connected ? ");
+    if (!success && previous_ssid.length()) {
+      vTaskDelay(pdMS_TO_TICKS(200));
+      Serial.println("Not Connected!, reconnect to previous");
+      wifi.connect(previous_ssid);
+    }
+    vTaskDelay(pdMS_TO_TICKS(200));
+    should_start = true;
+  });
+
+  server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    return request->send(200, "text/plain", wifi.state().c_str());
+  });
+
+  server.on("/wifi-networks", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    return request->send(200, "text/plain", wifi.availableNetworks().c_str());
+  });
+
+  server.on("/wifi-scan", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    wifi.scan();
+    return request->send(200, "text/plain", "wifi scan done");
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -259,6 +324,8 @@ void PipoServer::setup_requests() {
                          String(hwui.get_bat_voltage()).c_str());
   });
 
+  // Todo: this is too long to be executed in the server reauest
+  // this should be offloaded to a task and a monitoring task setup to  handle and send the pending response when the action if finished
   server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("axis")) {
       return request->send(400, "text/plain", "No sensor provided");
@@ -267,6 +334,20 @@ void PipoServer::setup_requests() {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
       input_sensor.measure_offset(axis);
+      config.gather(engine);
+      config.save();
+      return request->send(200, "text/plain", "Offset measured");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
+
+  server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    try {
+      input_sensor.measure_offset_all_touch();
+      config.gather(engine);
+      config.save();
       return request->send(200, "text/plain", "Offset measured");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
@@ -301,6 +382,8 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
       config.apply(engine, osc, true);
     } else if (strcmp("save", command) == 0) {
       config.save();
+    } else if (strcmp("monitor", command) == 0) {
+      input_sensor.monitor_axis(ws_message + offset + 1);
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -308,59 +391,59 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
     Serial.println(e.what());
   }
 }
+
 void PipoServer::setup_ws() {
+  if (ws_initialized) {
+    pipoSocket.setup(&ws);
+    return;
+  }
+  ws_initialized = true;
   server.addHandler(&ws);
   pipoSocket.setup(&ws);
   events.onConnect([](AsyncEventSourceClient* client) {});
   server.addHandler(&events);
-  String msg = "";
   ws.onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                  AwsEventType type, void* arg, uint8_t* data, size_t len) {
     if (type == WS_EVT_CONNECT) {
-      client->ping();
+      Serial.printf("Client connected: ID = %u, URL = %s\n", client->id(),
+                    server->url());
     } else if (type == WS_EVT_DISCONNECT) {
-      ws.cleanupClients(1);
+      Serial.printf("Client disconnected: ID = %u, URL = %s\n", client->id(),
+                    server->url());
     } else if (type == WS_EVT_ERROR) {
-      ws.cleanupClients(1);
-      Serial.print("ws error");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.print(*((uint16_t*)arg));
-      Serial.println((char*)data);
+      uint16_t errorCode = *((uint16_t*)arg);
+      Serial.printf(
+          "WebSocket error: URL = %s, Client ID = %u, Error Code = %d, Data "
+          "= "
+          "%s\n",
+          server->url(), client->id(), errorCode, (char*)data);
     } else if (type == WS_EVT_PONG) {
-      Serial.print("ws pong");
-      Serial.print(server->url());
-      Serial.print(client->id());
-      Serial.print(len);
-      Serial.println((len) ? (char*)data : "");
+      Serial.printf("Pong received: URL = %s, Client ID = %u, Data = %s\n",
+                    server->url(), client->id(),
+                    (len) ? (char*)data : "No Data");
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
-      if (info->final && info->index == 0 && info->len == len) {
-        memcpy((void*)ws_message, data, info->len);
-        ws_message_len = info->len;
-        ws_message[ws_message_len] = 0;
-        onMessage(client);
-        return;
-      }
-      if (info->len >= ws_max_len - 1) {
+
+      if (info->index == 0 && !info->final) {
+        // Start of a fragmented message
         ws_message_len = 0;
-        ws_message[0] = 0;
-        return;
       }
-      if (info->index == 0) {
-        if (info->len + ws_message_len >= ws_max_len - 1) {
-          ws_message_len = 0;
-          ws_message[0] = 0;
-          return;
+
+      if (info->index + len <= ws_max_len - 1) {
+        // Append the current fragment to the message buffer
+        memcpy(ws_message + info->index, data, len);
+        ws_message_len = info->index + len;
+
+        if (info->final) {
+          // Message is complete
+          ws_message[ws_message_len] = '\0';  // Null-terminate the message
+          onMessage(client);                  // Process the complete message
+          ws_message_len = 0;                 // Reset for the next message
         }
-        memcpy((void*)(ws_message + ws_message_len), data, info->len);
-        ws_message_len += info->len;
-        if (info->index + len == info->len && info->final) {
-          ws_message[ws_message_len] = 0;
-          onMessage(client);
-          ws_message_len = 0;
-          ws_message[0] = 0;
-        }
+      } else {
+        // Message too large or buffer overflow
+        Serial.println("Error: Message exceeds buffer size");
+        ws_message_len = 0;
       }
     }
   });

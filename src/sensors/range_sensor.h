@@ -5,6 +5,7 @@
 #include "HW_CONFIG.h"
 #include <vl53l4cx_class.h>
 #include "utils/filters.h"
+#include "utils/debug.h"
 
 class RangeSensor : public Sensor {
  public:
@@ -13,6 +14,8 @@ class RangeSensor : public Sensor {
   void init() override;
   void setup() override;
   void update() override;
+  void set_sensor_config(JsonObject config, bool debug = false) override;
+  JsonDocument get_sensor_config(bool debug = false) override;
 
  private:
   bool within_range = false;

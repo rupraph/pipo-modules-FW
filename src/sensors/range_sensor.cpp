@@ -32,7 +32,7 @@ void RangeSensor::setup() {
   ma_filter = MovingAverageFilter(3);
   km_filter = KalmanFilter(1, 1);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -75,6 +75,13 @@ void RangeSensor::update() {
   }
   end_duration();
   measured_loop_duration();
+}
+
+void RangeSensor::set_sensor_config(JsonObject config, bool debug) {}
+
+JsonDocument RangeSensor::get_sensor_config(bool debug) {
+  JsonDocument config;
+  return config;
 }
 
 #endif
