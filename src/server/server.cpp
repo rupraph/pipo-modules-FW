@@ -343,6 +343,18 @@ void PipoServer::setup_requests() {
     }
   });
 
+  server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    try {
+      input_sensor.measure_offset_all_touch();
+      config.gather(engine);
+      config.save();
+      return request->send(200, "text/plain", "Offset measured");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
+
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     engine.toggle_pause();
     return request->send(200, "text/plain", "Engine paused");
@@ -401,7 +413,8 @@ void PipoServer::setup_ws() {
     } else if (type == WS_EVT_ERROR) {
       uint16_t errorCode = *((uint16_t*)arg);
       Serial.printf(
-          "WebSocket error: URL = %s, Client ID = %u, Error Code = %d, Data = "
+          "WebSocket error: URL = %s, Client ID = %u, Error Code = %d, Data "
+          "= "
           "%s\n",
           server->url(), client->id(), errorCode, (char*)data);
     } else if (type == WS_EVT_PONG) {

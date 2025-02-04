@@ -168,6 +168,19 @@
       {/if}
     {/if}
   {/if}
+  {#if $type === "analog"}
+    <button
+      class="primary"
+      on:click={() => {
+        pipoio.post("/offsetAllTouch").then(() => {
+          console.log("zero all touch");
+        });
+      }}
+      title="Zero the touch"
+      >Zero All Touch
+    </button>
+  {/if}
+
   <button
     class="primary Pause"
     on:click={pause}

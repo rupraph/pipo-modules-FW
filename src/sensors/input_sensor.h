@@ -108,6 +108,7 @@ class Sensor {
   void set_offset(const std::string& axis, float value);
 
   float get_value(const std::string& axis);
+  float get_value_constrained(const std::string& axis);
   void set_value(const std::string& axis, float value);
 
   float get_value_prev(const std::string& axis);
