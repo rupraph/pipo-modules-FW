@@ -24,6 +24,7 @@ TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
 TaskHandle_t hwuiTaskHandle;
 TaskHandle_t dnsTaskHandle;
+TaskHandle_t debugMonitorTaskHandle;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
@@ -43,6 +44,15 @@ void dnsTask(void* pvParameters) {
   for (;;) {
     captivePortal.loop();
     vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
+
+void debug_monitor(void* pvParameters) {
+  for (;;) {
+    // input_sensor.teleplot_data("magX");
+    // input_sensor.teleplot_data("magY");
+    // input_sensor.teleplot_data("magZ");
+    vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
 
@@ -122,6 +132,8 @@ void setup() {
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
+  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
+  //                         &debugMonitorTaskHandle, 1);
 
   Serial.println("Setup done");
 }

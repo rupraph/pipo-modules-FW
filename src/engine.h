@@ -25,28 +25,11 @@ class OSC_handler;  // why do I need forward declaration here??
 class Engine {
  public:
   Engine() {
-#if defined(PIPO_MOTION)
-    string axis_list[] = {"roll", "pitch", "yaw", "accX", "accY", "accZ"};
-    for (auto axis : axis_list) {
-      Miditranslators[axis] = MidiTranslator();
-      Osctranslators[axis] = OscTranslator();
-      HID_translators[axis] = HidTranslator();
+    for (const auto& axis : input_sensor.get_sensor_dat_map()) {
+      Miditranslators[axis.first] = MidiTranslator();
+      Osctranslators[axis.first] = OscTranslator();
+      HID_translators[axis.first] = HidTranslator();
     }
-
-#elif defined(PIPO_RANGE)
-    Miditranslators = {{"dist", MidiTranslator()}};
-    Osctranslators = {{"dist", OscTranslator()}};
-    HID_translators = {{"dist", HidTranslator()}};
-
-#elif defined(PIPO_ANALOG)
-    string axis_list[] = {"A1", "A2", "A3", "A4", "A5", "A6",
-                          "T1", "T2", "T3", "T4", "T5", "T6"};
-    for (auto axis : axis_list) {
-      Miditranslators[axis] = MidiTranslator();
-      Osctranslators[axis] = OscTranslator();
-      HID_translators[axis] = HidTranslator();
-    }
-#endif
   }
 
   unordered_map<string, MidiTranslator> Miditranslators;
@@ -75,6 +58,13 @@ class Engine {
 
   //utils
   float round_to(float value, int decimal);
+
+//special functions (not of axis type)
+#ifdef PIPO_MOTION
+  void motion_quat_to_osc();
+  bool enable_quat_to_osc = false;
+  string quat_to_osc_address = "motion/quat";
+#endif
 
  private:
   uint8_t note_val[128];
