@@ -3,13 +3,14 @@
 
 //  Fubarino MINI
 
-#include <SLIPEncodedSerial.h>
-
 #ifdef BOARD_HAS_USB_SERIAL
+#include <SLIPEncodedUSBSerial.h>
 SLIPEncodedUSBSerial SLIPSerial( thisBoardsSerialUSB );
 #else
- SLIPEncodedSerial SLIPSerial(Serial); // Change to Serial1 or Serial2 etc. for boards with multiple serial ports that don’t have Serial
+#include <SLIPEncodedSerial.h>
+ SLIPEncodedSerial SLIPSerial(Serial);
 #endif
+
 OSCBundle bundleOUT;
 
 //converts the pin to an osc address

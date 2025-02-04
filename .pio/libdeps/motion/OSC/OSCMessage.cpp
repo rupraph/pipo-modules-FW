@@ -85,7 +85,7 @@ OSCMessage& OSCMessage::empty(){
     error = OSC_OK;
     //free each of the data in the array
     for (int i = 0; i < dataCount; i++){
-        const auto datum = getOSCData(i);
+        OSCData * datum = getOSCData(i);
         //explicitly destruct the data
         //datum->~OSCData();
         delete datum;
@@ -116,24 +116,28 @@ OSCMessage::OSCMessage(OSCMessage * msg){
 
 OSCData * OSCMessage::getOSCData(int position){
 	if (position < dataCount){
-		const auto datum = data[position];
+		OSCData * datum = data[position];
 		return datum;
 	} else {
 		error = INDEX_OUT_OF_BOUNDS;
-        return nullptr;
+        return NULL;
 	}
 }
 
 int32_t OSCMessage::getInt(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->getInt();
     } else {
-        return 0;
+        #ifndef ESPxx
+            return (int32_t)NULL;
+        #else
+            return -1;
+        #endif
     }
 }
 osctime_t OSCMessage::getTime(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->getTime();
     } else {
@@ -141,124 +145,167 @@ osctime_t OSCMessage::getTime(int position){
     }
 }
 float OSCMessage::getFloat(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->getFloat();
     } else {
-        return 0.0f;
+        #ifndef ESPxx
+            return (float)NULL;
+        #else
+            return -1;
+        #endif
     }
 }
 
 double OSCMessage::getDouble(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->getDouble();
     } else {
-
-        return 0.0;
+        #ifndef ESPxx
+            return (double)NULL;
+        #else
+            return -1;
+        #endif
     }
 }
 
 bool  OSCMessage::getBoolean(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->getBoolean();
     } else {
-        return false;
+        #ifndef ESPxx
+            return (bool)NULL;
+        #else
+            return -1;
+        #endif
     }
 }
 
 
 int OSCMessage::getString(int position, char * buffer){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         return datum->getString(buffer, datum->bytes);
     } else {
-    return -1;
+        #ifndef ESPxx
+            return (int)NULL;
+        #else
+            return -1;
+        #endif
     }
 }
 
 int OSCMessage::getString(int position, char * buffer, int bufferSize){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
         //the number of bytes to copy is the smaller between the buffer size and the datum's byte length
         int copyBytes = bufferSize < datum->bytes? bufferSize : datum->bytes;
 		return datum->getString(buffer, copyBytes);
     } else {
-    return -1;
+        #ifndef ESPxx
+            return 0;
+        #else
+            return -1;
+        #endif
     }
 }
 
 int OSCMessage::getString(int position, char * buffer, int bufferSize, int offset, int size){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         //the number of bytes to copy is the smaller between the buffer size and the datum's byte length
         int copyBytes = bufferSize < datum->bytes? bufferSize : datum->bytes;
         return datum->getString(buffer, copyBytes, offset, size);
     } else {
-    return -1;
+        #ifndef ESPxx
+            return 0;
+        #else
+            return -1;
+        #endif
     }
 }
 
 
 int OSCMessage::getBlob(int position, uint8_t * buffer){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         return datum->getBlob(buffer);
   } else {
-    return -1;
+    #ifndef ESPxx
+        return 0;
+    #else
+        return -1;
+    #endif
   }
 }
 
 int OSCMessage::getBlob(int position, uint8_t * buffer, int bufferSize){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         return datum->getBlob(buffer, bufferSize);
   } else {
-    return -1;
+    #ifndef ESPxx
+        return 0;
+    #else
+        return -1;
+    #endif
   }
 }
 
 int OSCMessage::getBlob(int position, uint8_t * buffer, int bufferSize, int offset, int size){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         return datum->getBlob(buffer, bufferSize, offset, size);
   } else {
-    return -1;
+    #ifndef ESPxx
+        return 0;
+    #else
+        return -1;
+    #endif
   }
 }
 
-const uint8_t*  OSCMessage::getBlob(int position) {
-	const auto datum = getOSCData(position);
+const uint8_t* OSCMessage::getBlob(int position) {
+	OSCData* datum = getOSCData(position);
 	if(!hasError()) {
 		return datum->getBlob();
 	} else {
-		return nullptr;
+		return NULL;
 	}
 }
 
 uint32_t OSCMessage::getBlobLength(int position)
 {
-  const auto datum = getOSCData(position);
+  OSCData * datum = getOSCData(position);
   if (!hasError()){
     return datum->getBlobLength();
   } else {
-    return 0;
+    #ifndef ESPxx
+        return 0;
+    #else
+        return -1;
+    #endif
   }
 
 }
 
 char OSCMessage::getType(int position){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->type;
 	} else {
+        #ifndef ESPxx
+            return (int)NULL;
+        #else
             return '\0';
+        #endif
     }
 }
 
 int OSCMessage::getDataLength(int position){
-    const auto datum = getOSCData(position);
+    OSCData * datum = getOSCData(position);
     if (!hasError()){
         return datum->bytes;
     } else {
@@ -271,7 +318,7 @@ int OSCMessage::getDataLength(int position){
 =============================================================================*/
 
 bool OSCMessage::testType(int position, char type){
-	const auto datum = getOSCData(position);
+	OSCData * datum = getOSCData(position);
 	if (!hasError()){
 		return datum->type == type;
 	} else {
@@ -337,7 +384,7 @@ bool OSCMessage::fullMatch( const char * pattern, int addr_offset){
 	return (ret==3);
 }
 
-bool OSCMessage::dispatch(const char * pattern, void (*callback)(OSCMessage &), int addr_offset){
+bool OSCMessage::dispatch(const char * pattern, std::function<void(OSCMessage &)> callback, int addr_offset){
 	if (fullMatch(pattern, addr_offset)){
 		callback(*this);
 		return true;
@@ -346,7 +393,7 @@ bool OSCMessage::dispatch(const char * pattern, void (*callback)(OSCMessage &), 
 	}
 }
 
-bool OSCMessage::route(const char * pattern, void (*callback)(OSCMessage &, int), int initial_offset){
+bool OSCMessage::route(const char * pattern, std::function<void(OSCMessage &, int)> callback, int initial_offset){
 	int match_offset = match(pattern, initial_offset);
 	if (match_offset>0){
 		callback(*this, match_offset + initial_offset);
@@ -447,7 +494,7 @@ int OSCMessage::bytes(){
     messageSize+=typePad;
     //then the data
     for (int i = 0; i < dataCount; i++){
-        const auto datum = getOSCData(i);
+        OSCData * datum = getOSCData(i);
         messageSize+=datum->bytes;
         messageSize += padSize(datum->bytes);
     }
@@ -521,7 +568,7 @@ OSCMessage& OSCMessage::send(Print &p){
     }
     //write the data
     for (int i = 0; i < dataCount; i++){
-        const auto datum = getOSCData(i);
+        OSCData * datum = getOSCData(i);
         if ((datum->type == 's') || (datum->type == 'b')){
             p.write(datum->data.b, datum->bytes);
             int dataPad = padSize(datum->bytes);
@@ -587,7 +634,7 @@ void OSCMessage::decodeType(uint8_t incomingByte){
 void OSCMessage::decodeData(uint8_t incomingByte){
     //get the first OSCData to re-set
     for (int i = 0; i < dataCount; i++){
-        const auto datum = getOSCData(i);
+        OSCData * datum = getOSCData(i);
         if (datum->error == INVALID_OSC){
             //set the contents of datum with the data received
             switch (datum->type){
@@ -731,7 +778,7 @@ void OSCMessage::decode(uint8_t incomingByte){
 		case DATA_PADDING:{
                 //get the last valid data
                 for (int i = dataCount - 1; i >= 0; i--){
-                    const auto datum = getOSCData(i);
+                    OSCData * datum = getOSCData(i);
                     if (datum->error == OSC_OK){
                         //compute the padding size for the data
                         int dataPad = padSize(datum->bytes);

@@ -6,13 +6,14 @@ This example can be extended to build routers and forwarders of OSC packets
 */
 
 #include <OSCBundle.h>
-
-#include <SLIPEncodedSerial.h>
+#include <OSCBoards.h>
 
 #ifdef BOARD_HAS_USB_SERIAL
+#include <SLIPEncodedUSBSerial.h>
 SLIPEncodedUSBSerial SLIPSerial( thisBoardsSerialUSB );
 #else
- SLIPEncodedSerial SLIPSerial(Serial); // Change to Serial1 or Serial2 etc. for boards with multiple serial ports that don’t have Serial
+#include <SLIPEncodedSerial.h>
+ SLIPEncodedSerial SLIPSerial(Serial1);
 #endif
 
 void setup() {

@@ -2,7 +2,6 @@
 #include <OSCBundle.h>
 #include <OSCBoards.h>
 #include "Adafruit_FreeTouch.h"
-#include <SLIPEncodedSerial.h>
 
 Adafruit_FreeTouch qt_0 = Adafruit_FreeTouch(A0, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
 Adafruit_FreeTouch qt_1 = Adafruit_FreeTouch(A1, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
@@ -14,9 +13,8 @@ Adafruit_FreeTouch qt_2 = Adafruit_FreeTouch(A2, OVERSAMPLE_4, RESISTOR_50K, FRE
 #undef NUM_ANALOG_PINS
 #define NUM_ANALOG_PINS 3
 
+#include <SLIPEncodedUSBSerial.h>
 SLIPEncodedUSBSerial SLIPSerial( Serial );
-
-
 
 //outgoing messages
 
