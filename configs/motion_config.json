@@ -248,6 +248,12 @@
         "osc_min": 0,
         "osc_addr": "motion/magZ"
       }
+    },
+    "engine-special": {
+      "quat": {
+        "enabled": true,
+        "osc_addr": "motion/quat"
+      }
     }
   },
   "sensor": {
@@ -337,16 +343,6 @@
       "inverted": false,
       "lmax": 8.0,
       "lmin": -8.0,
-      "mode": false,
-      "th_mode": false,
-      "cyclic": false
-    },
-    "quat": {
-      "deadzone": 0.0,
-      "offset": 0.0,
-      "inverted": false,
-      "lmax": 1.0,
-      "lmin": -1.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false

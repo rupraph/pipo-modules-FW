@@ -46,15 +46,21 @@ void Engine::update() {
       sensor_min = temp;
     }
 
-    if (config.general_config["MidiEnabled"] == true) {
+    if (config.general_config["MidiEnabled"] == true &&
+        Miditranslators.find(axis_name) != Miditranslators.end()) {
       midi_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
-    if (config.general_config["OSC_ENA"] == true) {
+    if (config.general_config["OSC_ENA"] == true &&
+        Osctranslators.find(axis_name) != Osctranslators.end()) {
       osc_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
-    if (config.general_config["HidEnabled"] == true) {
+    if (config.general_config["HidEnabled"] == true &&
+        HID_translators.find(axis_name) != HID_translators.end()) {
       hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
+  }
+  if (enable_quat_to_osc) {
+    motion_quat_to_osc();
   }
   // monitor_sensors(sensor);
 }
@@ -311,6 +317,10 @@ JsonDocument Engine::get_config(bool debug) {
   for (auto const& pair : Osctranslators) {
     j["engine-osc"][pair.first] = pair.second.get_json();
   }
+#ifdef PIPO_MOTION
+  j["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
+  j["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
+#endif
   if (debug) {
     Serial.println("engine_get_config");
     serializeJsonPretty(j, Serial);
@@ -356,7 +366,32 @@ void Engine::set_config(JsonObject config, bool debug) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
   }
+#ifdef PIPO_MOTION
+  JsonObject jspecial = config["engine-special"].as<JsonObject>();
+  if (debug)
+    Serial.println("set engine special");
+  // check how many elements are in the json object
+  if (jspecial.size() > 0) {
+    for (JsonPair pair : jspecial) {
+      if (pair.key() == "quat") {
+        enable_quat_to_osc = jspecial["quat"]["enabled"].as<bool>();
+        quat_to_osc_address = jspecial["quat"]["osc_addr"].as<string>();
+      }
+    }
+  } else {
+    Serial.println("no special config found");
+  }
+#endif
   if (debug) {
     Serial.println("engine config set");
   }
+}
+
+void Engine::motion_quat_to_osc() {
+  float quats[4];
+  input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
+  osc.send_osc_message(quat_to_osc_address + "w", quats[0]);
+  osc.send_osc_message(quat_to_osc_address + "x", quats[1]);
+  osc.send_osc_message(quat_to_osc_address + "y", quats[2]);
+  osc.send_osc_message(quat_to_osc_address + "z", quats[3]);
 }

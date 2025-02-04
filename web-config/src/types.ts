@@ -118,6 +118,10 @@ export type PipoConfig<T extends PipoTypes> = {
     "engine-osc": {
       [Key in PipoKeys[T]]: OscConfig;
     };
+    "engine-special"?: {
+      quat?: QuatConfig;
+    }
+
   };
   general: GeneralConfig;
   sensor: {
@@ -161,3 +165,8 @@ export type PipoInfo = {
   type: string;
   name: string;
 };
+
+export type QuatConfig = {
+  enabled: boolean;
+  osc_addr: string;
+}

@@ -59,6 +59,13 @@ class Engine {
   //utils
   float round_to(float value, int decimal);
 
+//special functions (not of axis type)
+#ifdef PIPO_MOTION
+  void motion_quat_to_osc();
+  bool enable_quat_to_osc = false;
+  string quat_to_osc_address = "motion/quat";
+#endif
+
  private:
   uint8_t note_val[128];
   uint8_t note_val_prev[128];
