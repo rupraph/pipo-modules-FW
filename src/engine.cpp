@@ -59,9 +59,11 @@ void Engine::update() {
       hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
   }
+#ifdef PIPO_MOTION
   if (enable_quat_to_osc) {
     motion_quat_to_osc();
   }
+#endif
   // monitor_sensors(sensor);
 }
 
@@ -386,7 +388,7 @@ void Engine::set_config(JsonObject config, bool debug) {
     Serial.println("engine config set");
   }
 }
-
+#ifdef PIPO_MOTION
 void Engine::motion_quat_to_osc() {
   float quats[4];
   input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
@@ -395,3 +397,4 @@ void Engine::motion_quat_to_osc() {
   osc.send_osc_message(quat_to_osc_address + "y", quats[2]);
   osc.send_osc_message(quat_to_osc_address + "z", quats[3]);
 }
+#endif
