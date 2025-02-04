@@ -14,6 +14,8 @@ class RangeSensor : public Sensor {
   void init() override;
   void setup() override;
   void update() override;
+  void set_sensor_config(JsonObject config, bool debug = false) override;
+  JsonDocument get_sensor_config(bool debug = false) override;
 
  private:
   bool within_range = false;

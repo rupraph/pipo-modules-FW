@@ -106,6 +106,18 @@ export type Schema = {
   };
 };
 
+export type SensorSettings = {
+  motion: {
+    relative_mode: boolean;
+  };
+  range: {
+  };
+  analog: {
+  };
+  unknown: {
+  };
+};
+
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {
@@ -127,6 +139,7 @@ export type PipoConfig<T extends PipoTypes> = {
   sensor: {
     [Key in PipoKeys[T]]: SensorConfig;
   };
+  sensorconf: SensorSettings[T];
 };
 export type AxisConfig = {
   sensor: SensorConfig;
@@ -170,3 +183,5 @@ export type QuatConfig = {
   enabled: boolean;
   osc_addr: string;
 }
+
+

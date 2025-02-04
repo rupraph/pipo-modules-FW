@@ -260,7 +260,16 @@
 </Collapse>
 
 <hr class="separator" />
-
+{#if $type === "motion"}
+  <Collapse title="Sensor settings">
+    <Switch
+      label="Relative (on) or absolute orientation"
+      bind:value={config.sensorconf.relative_mode}
+      design="slider"
+    />
+  </Collapse>
+  <hr class="separator" />
+{/if}
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig
     bind:ip={config.general.OSC_IP}

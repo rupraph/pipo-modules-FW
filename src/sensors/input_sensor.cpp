@@ -131,7 +131,7 @@ unsigned long Sensor::end_duration() {
 }
 
 //config
-JsonDocument Sensor::get_config(bool debug) {
+JsonDocument Sensor::get_axis_config(bool debug) {
   JsonDocument config;
   try {
     for (auto const& pair : sensor_dat) {
@@ -160,7 +160,7 @@ JsonDocument Sensor::get_config(bool debug) {
   return config;
 }
 
-void Sensor::set_config(JsonObject config, bool debug) {
+void Sensor::set_axis_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("set_sensor_config");
   }
@@ -324,12 +324,24 @@ float Sensor::get_offset(const std::string& axis) {
  */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
-      return sensor_dat[axis].lmin;
-    } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
-      return sensor_dat[axis].lmax;
+    // wrap value for circular axis, clip for others.
+    if (axis == "pitch" || axis == " yaw" || axis == "roll") {
+      float range = sensor_dat[axis].lmax - sensor_dat[axis].lmin;
+      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].value + range;
+      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].value - range;
+      } else {
+        return sensor_dat[axis].value;
+      }
     } else {
-      return sensor_dat[axis].value;
+      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].lmin;
+      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].lmax;
+      } else {
+        return sensor_dat[axis].value;
+      }
     }
   else
     throw std::invalid_argument("Axis not found: " + axis);

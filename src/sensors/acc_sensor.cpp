@@ -23,9 +23,16 @@ void MotionSensor::setup() {
 void MotionSensor::update() {
   icm20948.task();
   /////////  Read Quat6 orientation data
-  if (icm20948.quat6DataIsReady()) {
-    icm20948.readQuat6Data(&quat_w, &quat_x, &quat_y, &quat_z);
-    calc_euler_angles();
+  if (relative_mode) {
+    if (icm20948.quat6DataIsReady()) {
+      icm20948.readQuat6Data(&quat_w, &quat_x, &quat_y, &quat_z);
+      calc_euler_angles();
+    }
+  } else {
+    if (icm20948.quat9DataIsReady()) {
+      icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
+      calc_euler_angles();
+    }
   }
 
   //////////  Read acceleration data
@@ -78,6 +85,28 @@ void MotionSensor::update() {
     // Serial.print(q3, 3);
     // Serial.println(F("}"));
   }
+
+  //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
+  // each class should control its own update task ? (so that it can be paused)
+  if (!measure_offset_flag) {
+    for (auto const& pair : sensor_dat) {
+      sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
+    }
+  }
+
+  if (measure_offset_flag) {
+    measure_offset_counter++;
+    offset += sensor_dat[axis_to_measure_offset].value;
+    if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+      sensor_dat[axis_to_measure_offset].offset =
+          offset / OFFSET_CAL_SAMPLES_NB;
+      measure_offset_flag = false;
+      Serial.print("offset of ");
+      Serial.print(axis_to_measure_offset.c_str());
+      Serial.print(" is: ");
+      Serial.println(sensor_dat[axis_to_measure_offset].offset);
+    }
+  }
 }
 
 void MotionSensor::calc_euler_angles() {
@@ -104,6 +133,34 @@ void MotionSensor::convert_accell() {
   sensor_dat["accX"].value = raw_accX;
   sensor_dat["accY"].value = raw_accY;
   sensor_dat["accZ"].value = raw_accZ;
+}
+
+void MotionSensor::measure_offset(const string& axis_name) {
+  if (!measure_offset_flag) {
+    measure_offset_flag = true;
+    axis_to_measure_offset = axis_name;
+    measure_offset_counter = 0;
+    Serial.println("start offset measurement");
+  }
+}
+
+void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
+  if (config["relative_mode"].is<bool>()) {
+    relative_mode = config["relative_mode"];
+    Serial.println(relative_mode);
+  }
+  if (debug) {
+    Serial.println("set_sensor_config_end");
+  }
+}
+
+JsonDocument MotionSensor::get_sensor_config(bool debug = false) {
+  JsonDocument config;
+  config["relative_mode"] = relative_mode;
+  return config;
 }
 
 #endif  // PIPO_MOTION

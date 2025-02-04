@@ -19,7 +19,7 @@ void AnalogSensor::setup() {
 }
 
 // Todo: add function to perform individual offset or of provided list
-
+// change delay into vtaskdelay ??
 void AnalogSensor::measure_offset(const string& sensor_name) {
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   float offset = 0;
@@ -88,6 +88,13 @@ void AnalogSensor::update() {
   }
 
   process_sensor_triggers();
+}
+
+void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {}
+
+JsonDocument AnalogSensor::get_sensor_config(bool debug) {
+  JsonDocument config;
+  return config;
 }
 
 #endif

@@ -69,6 +69,8 @@ class Sensor {
   virtual void setup() = 0;
   virtual void update() = 0;
   virtual void measure_offset(const string& sensor_name);
+  virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
+  virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
   bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);
@@ -90,8 +92,8 @@ class Sensor {
   unsigned long measured_interval_duration = 0;  //ms
 
   //config
-  JsonDocument get_config(bool debug = false);
-  void set_config(JsonObject config, bool debug = false);
+  JsonDocument get_axis_config(bool debug = false);
+  void set_axis_config(JsonObject config, bool debug = false);
 
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();

@@ -24,6 +24,10 @@ class MotionSensor : public Sensor {
   void init() override;
   void setup() override;
   void update() override;
+  void set_sensor_config(JsonObject config, bool debug = false) override;
+  JsonDocument get_sensor_config(bool debug = false) override;
+  void measure_offset(const std::string& axis_name) override;
+  void measure_offset_all();
 
   void calc_euler_angles();
   void convert_accell();
@@ -39,6 +43,10 @@ class MotionSensor : public Sensor {
       false;  //set on/off serial messages for vizualizer
 
  private:
+  //config
+  bool relative_mode =
+      true;  //uses quat6 or quat9 (6 = relative to start, 9 = absolute - corection to north is slow)
+
   unordered_map<string, LowPassFilter> lp_filter_map = {
       {"roll", LowPassFilter(10)},
       {"pitch", LowPassFilter(10)},
@@ -59,7 +67,7 @@ class MotionSensor : public Sensor {
       .enable_gravity = false,            // Enables gravity vector output
       .enable_linearAcceleration = true,  // Enables linear acceleration output
       .enable_quaternion6 = true,         // Enables quaternion 6DOF output
-      .enable_quaternion9 = false,        // Enables quaternion 9DOF output
+      .enable_quaternion9 = true,         // Enables quaternion 9DOF output
       .enable_har = false,                // Enables activity recognition
       .enable_steps = false,              // Enables step counter
       .gyroscope_frequency = 1,      // Max frequency = 225, min frequency = 1
@@ -87,6 +95,11 @@ class MotionSensor : public Sensor {
   float raw_magX;
   float raw_magY;
   float raw_magZ;
+
+  bool measure_offset_flag = false;
+  string axis_to_measure_offset;
+  int measure_offset_counter = 0;
+  float offset = 0;
 };
 
 #endif  //ACC_SENSOR_H

@@ -356,5 +356,8 @@
     "MidiEnabled": true,
     "HidEnabled": true,
     "HidMode": 2
+  },
+  "sensorconf": {
+    "relative_mode": true
   }
 }
