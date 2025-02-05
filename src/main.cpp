@@ -57,7 +57,10 @@ void debug_monitor(void* pvParameters) {
 }
 
 void setup() {
+
   Serial.begin(115200);
+
+  Serial.setDebugOutput(true);  // allow to print esp logs, like wifi stuff
 
   // Disable watchdog timer for debug
   // disableCore0WDT();
@@ -86,9 +89,11 @@ void setup() {
     Serial.println("failed setting conf");
   }
 
+#ifndef DISABLE_USB_COMM
   /////// Init midi and hid
   midiio.setup();
   hidio.setup(config.general_config["HidMode"]);
+#endif
   // while (!Serial)
   //   delay(100);
   /////// Init wifi
@@ -136,6 +141,24 @@ void setup() {
   //                         &debugMonitorTaskHandle, 1);
 
   Serial.println("Setup done");
+
+#ifdef DISABLE_USB_COMM
+  Serial.println("USB COMM DISABLED");
+#endif
+
+  // https:  //github.com/platformio/platform-espressif8266/issues/31
+  // Serial.println("Testing exceptions now!!");
+  // // Intentionally crash by dereferencing a null pointer
+  // int* ptr = nullptr;
+  // *ptr = 42;  // This will cause a crash
+  // try {
+  //   Serial.println("Throwing exception on purpose.");
+  //   float a = 1.0 / 0.0;
+  // } catch (const std::exception& e) {
+  //   Serial.printf("Exception thrown: \"%s\"", e.what());
+  // } catch (...) {
+  //   Serial.println("Other exception thrown.");
+  // }
 }
 
 void loop() {
