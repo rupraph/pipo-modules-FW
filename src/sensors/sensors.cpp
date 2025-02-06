@@ -1,4 +1,5 @@
 #include "sensors/sensors.h"
+
 #ifdef PIPO_MOTION
 #include "sensors/acc_sensor.h"
 MotionSensor input_sensor;
@@ -11,5 +12,7 @@ RangeSensor input_sensor;
 
 #ifdef PIPO_ANALOG
 #include "sensors/analog_sensor.h"
+#include "sensors/analog_out.h"
 AnalogSensor input_sensor;
+AnalogOut analog_out;
 #endif

@@ -1,7 +1,8 @@
-fortyseveneffects/MIDI Library@ 5.0.2
-cnmat/OSC@1.0.0
-adafruit/Adafruit TinyUSB Library@ 3.1.0
-esphome/AsyncTCP-esphome@2.1.1
 esphome/ESPAsyncWebServer-esphome@3.1.0
-bblanchon/ArduinoJson @ 7.2.0
+esphome/AsyncTCP-esphome@2.1.1
 lathoub/AppleMIDI@ 3.3.0
+https://github.com/Dlloydev/ESP32-ESP32S2-AnalogWrite.git
+https://github.com/CNMAT/OSC.git#3.5.8
+bblanchon/ArduinoJson @ 7.2.0
+fortyseveneffects/MIDI Library@ 5.0.2
+adafruit/Adafruit TinyUSB Library@ 3.1.0

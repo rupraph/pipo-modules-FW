@@ -31,6 +31,7 @@ void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
     engine.update();
+    analog_out.update();  // should be in seperate task
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
@@ -63,7 +64,6 @@ void oscreceiveTask(void* pvParameters) {
     // UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);
     // Serial.print("oscreceiveTask high water mark: ");
     // Serial.println(highWaterMark);
-    hw_output.update();  // should be in seperate task
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
@@ -84,7 +84,7 @@ void setup() {
 
   // hwui.init();
   // hwui.setup();
-  hw_output.setup();
+  analog_out.setup();
 
   /////// Init filesystem
   init_filesystem();

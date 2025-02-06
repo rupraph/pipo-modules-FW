@@ -7,7 +7,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include "utils/config.h"
-#include "hw_output.h"
+// #include "sensors/analog_out.h"
 #include "utils/debug.h"
 
 class Config;

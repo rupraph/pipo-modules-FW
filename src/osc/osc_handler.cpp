@@ -65,13 +65,13 @@ void OSC_handler::stop() {
 void servo(OSCMessage& msg, int addrOffset) {
   String address = msg.getAddress();
   String deststring = address.substring(addrOffset + 1);
-  int dest = deststring.toInt();
+  // int dest = deststring.toInt();
   Serial.print("servo: ");
-  Serial.print(dest);
+  Serial.print(deststring);
   Serial.print("value:  ");
   Serial.println(msg.getFloat(0));
 #ifdef PIPO_ANALOG
-  hw_output.set_servo(dest, msg.getFloat(0));
+  analog_out.set_value(deststring.c_str(), msg.getFloat(0));
 #endif
 }
 

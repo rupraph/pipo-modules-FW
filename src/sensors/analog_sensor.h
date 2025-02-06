@@ -6,6 +6,10 @@
 #include "utils/filters.h"
 #include "utils/debug.h"
 
+#ifdef PIPO_ANALOG
+#include "sensors/analog_out.h"
+#endif
+
 using namespace std;
 
 class AnalogSensor : public Sensor {
