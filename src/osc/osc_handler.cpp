@@ -71,7 +71,7 @@ void servo(OSCMessage& msg, int addrOffset) {
   Serial.print("value:  ");
   Serial.println(msg.getFloat(0));
 #ifdef PIPO_ANALOG
-  analog_out.set_value(deststring.c_str(), msg.getFloat(0));
+  // analog_out.set_value(deststring.c_str(), msg.getFloat(0));
 #endif
 }
 
@@ -82,16 +82,17 @@ void OSC_handler::receive() {
   int size;
 
   if ((size = Udp.parsePacket()) > 0) {
+    Serial.print("Packet size: ");
+    Serial.println(size);
     while (size--)
       bundleIN.fill(Udp.read());
 
     if (!bundleIN.hasError()) {
-#ifdef PIPO_ANALOG
+
       // this will require translators I think
       // bundleIN.route("/pwm", pwm);
       bundleIN.route("/servo", servo);
       // bundleIN.route("/digi", digi);
-#endif
 
       // bundleIN.dispatch("/servo", pwm);
     } else {

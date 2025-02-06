@@ -60,6 +60,7 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magX");
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
+    Serial.println(uxTaskGetStackHighWaterMark2(oscreceiveTaskHandle));
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -67,11 +68,14 @@ void debug_monitor(void* pvParameters) {
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
-    osc.receive();
-    // UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);
-    // Serial.print("oscreceiveTask high water mark: ");
-    // Serial.println(highWaterMark);
-    vTaskDelay(pdMS_TO_TICKS(1));
+    if (WiFi.status() == WL_CONNECTED) {
+
+      osc.receive();
+      // UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);
+      // Serial.print("oscreceiveTask high water mark: ");
+      // Serial.println(highWaterMark);
+    }
+    vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 #endif
@@ -83,8 +87,8 @@ void setup() {
   // disableCore0WDT();
   // disableCore1WDT();
 
-  // while (!Serial)
-  //   delay(100);  // putting wait serial here breaks usb mid/hid init
+  while (!Serial)
+    delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
@@ -155,7 +159,7 @@ void setup() {
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
 #ifdef PIPO_ANALOG
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 3000, NULL, 1,
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 8000, NULL, 1,
                           &oscreceiveTaskHandle, 0);
 #endif
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);

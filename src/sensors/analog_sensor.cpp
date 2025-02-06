@@ -98,8 +98,9 @@ void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("set_sensor_config");
   }
-  if (config["analog_out"].is<JsonObject>()) {
-    analog_out.set_config(config["analog_out"]);
+  if (config["analogout"].is<JsonObject>()) {
+    analog_out.set_config(config["analogout"]);
+    Serial.println("analog_out config set");
   } else {
     Serial.println("no analog_out config found");
   }

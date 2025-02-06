@@ -76,12 +76,12 @@ export type PipoKeys = {
   motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw"| "magX" | "magY" | "magZ";
   range: "dist";
   analog:
-    | "A1"
-    | "A2"
-    | "A3"
-    | "A4"
-    | "A5"
-    | "A6"
+    | "A01"
+    | "A02"
+    | "A03"
+    | "A04"
+    | "A05"
+    | "A06"
     | "T1"
     | "T2"
     | "T3"

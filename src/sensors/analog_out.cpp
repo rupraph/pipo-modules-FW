@@ -12,7 +12,7 @@ void AnalogOut::setup() {
 
 void AnalogOut::update() {
   // Serial.println("Updating HW output");
-  Serial.println(output_map[A01].value * 180.0f);
+  // Serial.println(output_map[A01].value * 180.0f);
   // data ok. but not sure if lib does not work, or if hw was nok.
   for (size_t i = 0; i < 6; i++) {
     OutputData out = output_map[i];
@@ -36,11 +36,14 @@ void AnalogOut::set_value(string name, float value) {
 void AnalogOut::set_config(JsonObject config) {
   // Serial.println("Setting config");
   for (size_t i = 0; i < 6; i++) {
-    if (config[output_map[i].name].is<JsonObject>()) {
-      string key = output_map[i].name;
+    string key = "A0" + to_string(i + 1);
+    Serial.println(key.c_str());
+    if (config[key].is<JsonObject>()) {
       set_pin_mode(i, config[key]["pinmode"]);
       //Todo: setter for changing out mode
-      output_map[i].out_mode = config[key]["out_mode"];
+      output_map[i].out_mode = config[key]["outmode"];
+    } else {
+      Serial.println("key not found");
     }
   }
 }
@@ -50,13 +53,13 @@ JsonDocument AnalogOut::get_config() {
   for (size_t i = 0; i < 6; i++) {
     JsonObject obj;
     obj["pinmode"] = output_map[i].pinmode;
-    obj["out_mode"] = output_map[i].out_mode;
+    obj["outmode"] = output_map[i].out_mode;
     obj["lmax"] = output_map[i].lmax;
     obj["lmin"] = output_map[i].lmin;
   }
 }
 
-void AnalogOut::set_pin_mode(int index, int mode) {
+void AnalogOut::set_pin_mode(int index, PinMode mode) {
   output_map[index].pinmode = mode;
   if (mode == PinMode::OUT) {
     if (output_map[index].out_mode == SERVO) {
@@ -77,12 +80,13 @@ bool AnalogOut::get_pin_mode(int index) {
 }
 
 bool AnalogOut::get_pin_mode(string name) {
-  for (size_t i = 0; i < 6; i++) {
-    if (output_map[i].name == name) {
-      return output_map[i].pinmode;
-    }
-  }
-  Serial.println("Pin not found");
+
+  int position = stoi(name.substr(1)) - 1;
+  // Serial.print(name.c_str());
+  // Serial.print(" ");
+  // Serial.println(position);
+
+  return output_map[position].pinmode;
 }
 
 #endif

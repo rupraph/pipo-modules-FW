@@ -162,7 +162,7 @@ JsonDocument Sensor::get_axis_config(bool debug) {
 
 void Sensor::set_axis_config(JsonObject config, bool debug) {
   if (debug) {
-    Serial.println("set_sensor_config");
+    Serial.println("set_sensor_axis_config");
   }
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
@@ -177,7 +177,7 @@ void Sensor::set_axis_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
   }
   if (debug) {
-    Serial.println("set_sensor_config_end");
+    Serial.println("set_sensor_axis_config_end");
   }
 }
 

@@ -15,7 +15,7 @@ using namespace std;
 //will not use for first tests
 struct OutputData {
   string name;
-  int pinmode;
+  bool pinmode;
   int out_mode;
   float value;
   float lmax;
@@ -38,7 +38,7 @@ class AnalogOut {
   // void set_pwm(int pin, int value);
   void set_value(string name, float value);
 
-  void set_pin_mode(int index, int mode);
+  void set_pin_mode(int index, PinMode mode);
   void set_out_mode(int index, int mode);
 
   bool get_pin_mode(int index);
