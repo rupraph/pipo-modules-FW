@@ -27,7 +27,7 @@ class MotionSensor : public Sensor {
   void set_sensor_config(JsonObject config, bool debug = false) override;
   JsonDocument get_sensor_config(bool debug = false) override;
   void measure_offset(const std::string& axis_name) override;
-  void measure_offset_all();
+  //   void measure_offset_all();
 
   void calc_euler_angles();
   void convert_accell();

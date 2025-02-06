@@ -2,7 +2,7 @@
 
 #include "sensors/analog_out.h"
 
-// AnalogOut analog_out;
+AnalogOut analog_out;
 
 // LedC controller used for controlling the leds conflicts with the servo library
 
@@ -36,7 +36,7 @@ void AnalogOut::set_value(string name, float value) {
 void AnalogOut::set_config(JsonObject config) {
   // Serial.println("Setting config");
   for (size_t i = 0; i < 6; i++) {
-    if (config.containsKey(output_map[i].name)) {
+    if (config[output_map[i].name].is<JsonObject>()) {
       string key = output_map[i].name;
       set_pin_mode(i, config[key]["pinmode"]);
       //Todo: setter for changing out mode

@@ -15,9 +15,9 @@
 #include "osc/osc_handler.h"
 #include "osc/osc_translators.h"
 
-// #ifdef PIPO_ANALOG
-// #include "sensors/analog_out.h"
-// #endif
+#ifdef PIPO_ANALOG
+#include "sensors/analog_out.h"
+#endif
 
 using namespace std;
 

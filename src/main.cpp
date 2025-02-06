@@ -11,6 +11,10 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 
+#ifdef PIPO_ANALOG
+#include "sensors/analog_out.h"
+#endif
+
 // quick declaration of functions
 void init_filesystem();
 // Tasks distribution
@@ -31,7 +35,9 @@ void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
     engine.update();
+#ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
+#endif
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
@@ -58,6 +64,7 @@ void debug_monitor(void* pvParameters) {
   }
 }
 
+#ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
     osc.receive();
@@ -67,6 +74,7 @@ void oscreceiveTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
+#endif
 
 void setup() {
   Serial.begin(115200);
@@ -82,9 +90,11 @@ void setup() {
   /////// Init hardware user interface (leds and switches)
   pipoDebugHeap();
 
-  // hwui.init();
-  // hwui.setup();
+// hwui.init();
+// hwui.setup();
+#ifdef PIPO_ANALOG
   analog_out.setup();
+#endif
 
   /////// Init filesystem
   init_filesystem();
@@ -144,7 +154,7 @@ void setup() {
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
-#ifdef ENA_OSC_OUT_TESTS
+#ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 3000, NULL, 1,
                           &oscreceiveTaskHandle, 0);
 #endif

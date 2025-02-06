@@ -342,10 +342,10 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
-
+#ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
     try {
-      input_sensor.measure_offset_all_touch();
+      input_sensor.measure_offset_all();
       config.gather(engine);
       config.save();
       return request->send(200, "text/plain", "Offset measured");
@@ -354,6 +354,7 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
+#endif
 
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     engine.toggle_pause();

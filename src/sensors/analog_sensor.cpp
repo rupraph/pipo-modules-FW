@@ -12,7 +12,7 @@ void AnalogSensor::setup() {
     pinMode(pair.second, INPUT);
   }
 
-  measure_offset_all_touch();
+  measure_offset_all();
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
@@ -36,7 +36,7 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
       round((offset / num_samples) * 1000.0) / 1000.0;
 }
 
-void AnalogSensor::measure_offset_all_touch() {
+void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   unordered_map<string, float> offset;
@@ -98,7 +98,7 @@ void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("set_sensor_config");
   }
-  if (config.containsKey("analog_out")) {
+  if (config["analog_out"].is<JsonObject>()) {
     analog_out.set_config(config["analog_out"]);
   } else {
     Serial.println("no analog_out config found");

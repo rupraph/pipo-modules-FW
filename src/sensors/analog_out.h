@@ -3,13 +3,14 @@
 
 #include <Arduino.h>
 #include "HW_CONFIG.h"
-#include "utils/config.h"
 #include <unordered_map>
-// #include "sensors/sensors.h"
 #include <Servo.h>
+#include <ArduinoJson.h>
 
 //This class will handle output data to the hardware. For now, lets have PWM, servo. then PDM ?
 // I should likley do like for sensor, having a higher output clas, with specifics children for each output type
+
+using namespace std;
 
 //will not use for first tests
 struct OutputData {
@@ -49,6 +50,6 @@ class AnalogOut {
   int pin_map[6] = {16, 15, 14, 13, 12, 11};
 };
 
-// extern AnalogOut analog_out;
+extern AnalogOut analog_out;
 
 #endif
