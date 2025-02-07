@@ -24,7 +24,7 @@ void AnalogOut::update() {
         Serial.print(out.value);
         Serial.print("pin ");
         Serial.println(pin_map[i]);
-        // out.servo.write(pin_map[i], out.value * 90.0f + 90.0f);
+        // out.servo.write(pin_map[i], out.value);
         out.servo.write(16, out.value);
       }
     }
@@ -39,7 +39,6 @@ void AnalogOut::set_value(string name, float value) {
     return;
   }
   int index = get_index_from_name(name);
-  output_map[index].value_prev = output_map[index].value;
   output_map[index].value = value;
 }
 
@@ -86,7 +85,7 @@ void AnalogOut::set_pin_dir(int index, bool dir) {
       Serial.print(output_map[index].name.c_str());
       Serial.print(" on pin ");
       Serial.println(pin_map[index]);
-      // Seems like for servo write attach is not mandatory from the lib exemples ??
+      // Seems like for attach for servo does not work
       // output_map[index].servo.attach(pin_map[index]);
     }
     // Todo: add pwm mode there

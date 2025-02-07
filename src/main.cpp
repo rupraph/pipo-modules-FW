@@ -1,7 +1,7 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "hw_ui.h"
+// #include "hw_ui.h"
 #include "midi/midi_io.h"
 #include "osc/osc_handler.h"
 #include "server/server.h"
@@ -33,15 +33,12 @@ TaskHandle_t debugMonitorTaskHandle;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
-    unsigned long start = millis();
-    // input_sensor.update();
-    // engine.update();
+    input_sensor.update();
+    engine.update();
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    unsigned long duration = millis() - start;
-    Serial.print("sensor task duration: ");
-    Serial.println(duration);
+
     vTaskDelay(pdMS_TO_TICKS(50));
   }
 }

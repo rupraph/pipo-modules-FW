@@ -23,10 +23,9 @@ struct OutputData {
   bool pindir;
   int out_mode;
   float value;
-  float value_prev;
   float lmax;
   float lmin;
-  Pwm servo = Pwm();
+  Servo servo = Servo();
 };
 
 class AnalogOut {
