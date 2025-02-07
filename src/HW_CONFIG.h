@@ -10,7 +10,9 @@
 
 #define DEBUG_HEAP false
 
-#define DEBUG_CONFIG true
+#define DEBUG_CONFIG false
+
+#define LOG_RECEIVED_OSC false
 
 #define DISABLE_USB_COMM  // only disable midi usb setup for now
 // #define INCLUDE_BLE

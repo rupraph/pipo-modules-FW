@@ -12,21 +12,22 @@
 
 using namespace std;
 
-//will not use for first tests
-struct OutputData {
-  string name;
-  bool pinmode;
-  int out_mode;
-  float value;
-  float lmax;
-  float lmin;
-  Servo servo;
-};
-
 // Trying if enum are more practical than unordered in this case
 enum PinMode { IN, OUT };
 enum OutputMode { PWM, SERVO };
 enum AnalogOutput { A01, A02, A03, A04, A05, A06 };
+
+//will not use for first tests
+struct OutputData {
+  string name;
+  bool pindir;
+  int out_mode;
+  float value;
+  float value_prev;
+  float lmax;
+  float lmin;
+  Pwm servo = Pwm();
+};
 
 class AnalogOut {
 
@@ -38,11 +39,13 @@ class AnalogOut {
   // void set_pwm(int pin, int value);
   void set_value(string name, float value);
 
-  void set_pin_mode(int index, PinMode mode);
+  void set_pin_dir(int index, bool dir);
   void set_out_mode(int index, int mode);
 
-  bool get_pin_mode(int index);
-  bool get_pin_mode(string name);
+  bool get_pin_dir(int index);
+  bool get_pin_dir(string name);
+
+  int get_index_from_name(string name);
 
   OutputData output_map[6];
 

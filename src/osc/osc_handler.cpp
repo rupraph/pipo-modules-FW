@@ -7,6 +7,7 @@ void OSC_handler::setup() {
 
   set_config();
   if (config.general_config["OSC_ENA"]) {
+    osc.start();
     Serial.print("OSC sending to IP: ");
     Serial.println(dest_ip.toString());
     Serial.print("on port:");
@@ -62,16 +63,28 @@ void OSC_handler::stop() {
 }
 
 // assume data format is /pwm/1. With duty cycle btw 0 and 1
-void servo(OSCMessage& msg, int addrOffset) {
+void send_to_analog(OSCMessage& msg, int addrOffset) {
   String address = msg.getAddress();
   String deststring = address.substring(addrOffset + 1);
   // int dest = deststring.toInt();
-  Serial.print("servo: ");
-  Serial.print(deststring);
-  Serial.print("value:  ");
-  Serial.println(msg.getFloat(0));
+  if (LOG_RECEIVED_OSC) {
+    Serial.print("address: ");
+    Serial.print(address);
+    Serial.print(" offset");
+    Serial.println(addrOffset);
+    Serial.print("dest: ");
+    Serial.println(deststring);
+    Serial.print("value:  ");
+    if (msg.isFloat(0)) {
+      Serial.println(msg.getFloat(0));
+    } else if (msg.isInt(0)) {
+      Serial.println(msg.getInt(0));
+    } else {
+      Serial.println("not a float or int");
+    }
+  }
 #ifdef PIPO_ANALOG
-  // analog_out.set_value(deststring.c_str(), msg.getFloat(0));
+  analog_out.set_value(deststring.c_str(), msg.getFloat(0));
 #endif
 }
 
@@ -82,21 +95,21 @@ void OSC_handler::receive() {
   int size;
 
   if ((size = Udp.parsePacket()) > 0) {
-    Serial.print("Packet size: ");
-    Serial.println(size);
+    // Serial.print("Packet size: ");
+    // Serial.println(size);
     while (size--)
       bundleIN.fill(Udp.read());
 
     if (!bundleIN.hasError()) {
-
+      // Serial.println("OSC route");
       // this will require translators I think
       // bundleIN.route("/pwm", pwm);
-      bundleIN.route("/servo", servo);
+      bundleIN.route("/out", send_to_analog);
       // bundleIN.route("/digi", digi);
 
       // bundleIN.dispatch("/servo", pwm);
     } else {
-      int error = bundleIN.getError();
+      OSCErrorCode error = bundleIN.getError();
       Serial.print("Error: ");
       Serial.println(error);
     }

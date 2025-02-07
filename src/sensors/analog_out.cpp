@@ -15,10 +15,17 @@ void AnalogOut::update() {
   // Serial.println(output_map[A01].value * 180.0f);
   // data ok. but not sure if lib does not work, or if hw was nok.
   for (size_t i = 0; i < 6; i++) {
-    OutputData out = output_map[i];
-    if (out.pinmode == PinMode::OUT) {
+    OutputData& out = output_map[i];
+    if (out.pindir == PinMode::OUT) {
       if (out.out_mode == SERVO) {
-        out.servo.write(pin_map[i], output_map[i].value * 180.0f);
+        Serial.print("Servo ");
+        Serial.print(i);
+        Serial.print(" ");
+        Serial.print(out.value);
+        Serial.print("pin ");
+        Serial.println(pin_map[i]);
+        // out.servo.write(pin_map[i], out.value * 90.0f + 90.0f);
+        out.servo.write(16, out.value);
       }
     }
   }
@@ -26,22 +33,32 @@ void AnalogOut::update() {
 
 void AnalogOut::set_value(string name, float value) {
   // Serial.println("Setting servo");
-  for (size_t i = 0; i < 6; i++) {
-    if (output_map[i].name == name) {
-      output_map[i].value = value;
-    }
+  if (name.substr(0, 1) != "A") {
+    Serial.print("can't set value to analog out, wrong name ");
+    Serial.println(name.c_str());
+    return;
   }
+  int index = get_index_from_name(name);
+  output_map[index].value_prev = output_map[index].value;
+  output_map[index].value = value;
 }
 
 void AnalogOut::set_config(JsonObject config) {
   // Serial.println("Setting config");
+  Serial.println("Setting sensor config");
+  serializeJsonPretty(config, Serial);
   for (size_t i = 0; i < 6; i++) {
     string key = "A0" + to_string(i + 1);
-    Serial.println(key.c_str());
+    // Serial.println(key.c_str());
     if (config[key].is<JsonObject>()) {
-      set_pin_mode(i, config[key]["pinmode"]);
-      //Todo: setter for changing out mode
+      // Serial.print("key");
+      // Serial.print(key.c_str());
+      // Serial.print(" ");
+      // Serial.println(config[key]["pindir"].as<bool>());
       output_map[i].out_mode = config[key]["outmode"];
+      set_pin_dir(i, config[key]["pindir"].as<bool>());
+      //Todo: setter for changing out mode
+
     } else {
       Serial.println("key not found");
     }
@@ -50,20 +67,27 @@ void AnalogOut::set_config(JsonObject config) {
 
 JsonDocument AnalogOut::get_config() {
   // Serial.println("Getting config");
+  JsonDocument obj;
   for (size_t i = 0; i < 6; i++) {
-    JsonObject obj;
-    obj["pinmode"] = output_map[i].pinmode;
-    obj["outmode"] = output_map[i].out_mode;
-    obj["lmax"] = output_map[i].lmax;
-    obj["lmin"] = output_map[i].lmin;
+    string key = "A0" + to_string(i + 1);
+    obj[key]["pindir"] = output_map[i].pindir;
+    obj[key]["outmode"] = output_map[i].out_mode;
+    obj[key]["lmax"] = output_map[i].lmax;
+    obj[key]["lmin"] = output_map[i].lmin;
   }
+  return obj;
 }
 
-void AnalogOut::set_pin_mode(int index, PinMode mode) {
-  output_map[index].pinmode = mode;
-  if (mode == PinMode::OUT) {
+void AnalogOut::set_pin_dir(int index, bool dir) {
+  output_map[index].pindir = dir;
+  if (dir) {
     if (output_map[index].out_mode == SERVO) {
-      output_map[index].servo.attach(pin_map[index]);
+      Serial.print("Attaching servo ");
+      Serial.print(output_map[index].name.c_str());
+      Serial.print(" on pin ");
+      Serial.println(pin_map[index]);
+      // Seems like for servo write attach is not mandatory from the lib exemples ??
+      // output_map[index].servo.attach(pin_map[index]);
     }
     // Todo: add pwm mode there
   } else {
@@ -75,18 +99,23 @@ void AnalogOut::set_pin_mode(int index, PinMode mode) {
 
 //Todo: set
 
-bool AnalogOut::get_pin_mode(int index) {
-  return output_map[index].pinmode;
+bool AnalogOut::get_pin_dir(int index) {
+  return output_map[index].pindir;
 }
 
-bool AnalogOut::get_pin_mode(string name) {
+bool AnalogOut::get_pin_dir(string name) {
 
-  int position = stoi(name.substr(1)) - 1;
+  int position = get_index_from_name(name);
   // Serial.print(name.c_str());
   // Serial.print(" ");
   // Serial.println(position);
 
-  return output_map[position].pinmode;
+  return output_map[position].pindir;
+}
+
+int AnalogOut::get_index_from_name(string name) {
+  // This wont work above 9
+  return stoi(name.substr(2)) - 1;
 }
 
 #endif

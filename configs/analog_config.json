@@ -455,7 +455,7 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": false,
+    "OSC_ENA": true,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
@@ -465,37 +465,37 @@
   "sensorconf": {
     "analogout": {
       "A01": {
-        "pinmode": 0,
+        "pindir": 1,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0
       },
       "A02": {
-        "pinmode": 0,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0
       },
       "A03": {
-        "pinmode": 0,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0
       },
       "A04": {
-        "pinmode": 0,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0
       },
       "A05": {
-        "pinmode": 0,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0
       },
       "A06": {
-        "pinmode": 0,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0

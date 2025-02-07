@@ -7,6 +7,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "osc/osc_handler.h"
 
 class PipoWifi {
 
@@ -64,6 +65,10 @@ class PipoWifi {
    * @return true if successfully connected to a WIFI network, false otherwise
    */
   bool connect(bool disconnect = true);
+  /**
+   * @brief Call back to Initializes OSC Udp connection
+   */
+  static void onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info);
   /**
    * @brief Switches to AP mode
    * @return true if AP mode is successfully set, false otherwise

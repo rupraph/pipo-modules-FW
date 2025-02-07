@@ -25,7 +25,7 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
   float offset = 0;
   for (int i = 0; i < num_samples; i++) {
     if (analog_map.find(sensor_name) != analog_map.end() &&
-        analog_out.get_pin_mode(sensor_name) == PinMode::IN) {
+        analog_out.get_pin_dir(sensor_name) == PinMode::IN) {
       offset += analogRead(analog_map[sensor_name]) * 0.000806;
     } else if (touch_map.find(sensor_name) != touch_map.end()) {
       offset += touchRead(touch_map[sensor_name]);
@@ -65,7 +65,7 @@ void AnalogSensor::measure_offset_all() {
 void AnalogSensor::update() {
 
   for (auto const& pair : analog_map) {
-    if (analog_out.get_pin_mode(pair.first) == PinMode::IN) {
+    if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
       sensor_dat[pair.first].raw_value = analogRead(pair.second);
       sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
       sensor_dat[pair.first].value =
@@ -108,6 +108,8 @@ void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
 
 JsonDocument AnalogSensor::get_sensor_config(bool debug) {
   JsonDocument config;
+  // only analog out to be configured for now
+  config["analogout"] = analog_out.get_config();
   return config;
 }
 

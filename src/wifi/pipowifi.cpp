@@ -1,5 +1,10 @@
 #include <wifi/pipowifi.h>
-PipoWifi::PipoWifi(){};
+
+void PipoWifi::onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
+  osc.start();
+};
+
+PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -10,7 +15,10 @@ void PipoWifi::setup() {
   WiFi.setSleep(false);
   scan();
   APSTAMode();
+
+  WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
 };
+
 void PipoWifi::scan() {
   int num = WiFi.scanNetworks(false, false, false, 500U);
   for (int i = 0; i < num; i++) {

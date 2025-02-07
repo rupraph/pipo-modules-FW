@@ -91,6 +91,8 @@ export type PipoKeys = {
   unknown: "";
 };
 
+export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06";
+
 export type AxisSchema = {
   label: string;
   cat: string;
@@ -113,10 +115,19 @@ export type SensorSettings = {
   range: {
   };
   analog: {
+    analogout: {[Key in AnalogOutKeys]: AnalogOut};
   };
   unknown: {
   };
 };
+
+export type AnalogOut = {
+  pindir: boolean;
+  outmode: number;
+  lmax: number;
+  lmin: number;
+}
+
 
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {

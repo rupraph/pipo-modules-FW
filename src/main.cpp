@@ -33,12 +33,16 @@ TaskHandle_t debugMonitorTaskHandle;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
-    input_sensor.update();
-    engine.update();
+    unsigned long start = millis();
+    // input_sensor.update();
+    // engine.update();
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    vTaskDelay(pdMS_TO_TICKS(1));
+    unsigned long duration = millis() - start;
+    Serial.print("sensor task duration: ");
+    Serial.println(duration);
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 
@@ -60,7 +64,7 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magX");
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
-    Serial.println(uxTaskGetStackHighWaterMark2(oscreceiveTaskHandle));
+    Serial.println(uxTaskGetStackHighWaterMark(oscreceiveTaskHandle));
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -68,27 +72,24 @@ void debug_monitor(void* pvParameters) {
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
-    if (WiFi.status() == WL_CONNECTED) {
-
+    if (WiFi.status() == WL_CONNECTED && osc.get_enabled()) {
       osc.receive();
-      // UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);
-      // Serial.print("oscreceiveTask high water mark: ");
-      // Serial.println(highWaterMark);
     }
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 #endif
 
 void setup() {
   Serial.begin(115200);
+  Serial.setDebugOutput(true);
 
   // Disable watchdog timer for debug
   // disableCore0WDT();
   // disableCore1WDT();
 
-  while (!Serial)
-    delay(100);  // putting wait serial here breaks usb mid/hid init
+  // while (!Serial)
+  //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
@@ -135,7 +136,7 @@ void setup() {
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
   Serial.println("gather and save config");
-  config.gather(engine, true);
+  config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
 #ifdef DEBUG_HEAP
@@ -159,7 +160,7 @@ void setup() {
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
 #ifdef PIPO_ANALOG
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 8000, NULL, 1,
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
                           &oscreceiveTaskHandle, 0);
 #endif
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
@@ -172,7 +173,7 @@ void setup() {
 void loop() {
   try {
 
-    hwui.update();
+    // hwui.update();
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop
     if (server.should_start) {

@@ -27,14 +27,15 @@ class OSC_handler {
   bool get_enabled();
   void receive();
 
+  void start();
+  void stop();
+
  private:
   IPAddress dest_ip;
   int out_port;
   bool isStarted = false;
   bool enabled = false;
   WiFiUDP Udp;
-  void start();
-  void stop();
 
   void set_dest_ip(string ip);
   void set_out_port(int port);
