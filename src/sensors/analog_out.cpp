@@ -18,14 +18,16 @@ void AnalogOut::update() {
     OutputData& out = output_map[i];
     if (out.pindir == PinMode::OUT) {
       if (out.out_mode == SERVO) {
-        Serial.print("Servo ");
-        Serial.print(i);
-        Serial.print(" ");
-        Serial.print(out.value);
-        Serial.print("pin ");
-        Serial.println(pin_map[i]);
-        // out.servo.write(pin_map[i], out.value);
-        out.servo.write(16, out.value);
+        // Serial.print("Servo ");
+        // Serial.print(i);
+        // Serial.print(" ");
+        // Serial.print(out.value);
+        // Serial.print("pin ");
+        // Serial.println(pin_map[i]);
+        out.servo.write(pin_map[i], out.value);
+        // out.servo.write(16, out.value);
+      } else if (out.out_mode == PWM) {
+        out.pwm.write(pin_map[i], out.value * 255);
       }
     }
   }
@@ -81,17 +83,18 @@ void AnalogOut::set_pin_dir(int index, bool dir) {
   output_map[index].pindir = dir;
   if (dir) {
     if (output_map[index].out_mode == SERVO) {
-      Serial.print("Attaching servo ");
-      Serial.print(output_map[index].name.c_str());
-      Serial.print(" on pin ");
-      Serial.println(pin_map[index]);
-      // Seems like for attach for servo does not work
+      // Seems like attach for servo causes servo not to work
+      // Serial.print("Attaching servo ");
+      // Serial.print(output_map[index].name.c_str());
+      // Serial.print(" on pin ");
+      // Serial.println(pin_map[index]);
+
       // output_map[index].servo.attach(pin_map[index]);
     }
     // Todo: add pwm mode there
   } else {
     if (output_map[index].out_mode == SERVO) {
-      output_map[index].servo.detach(pin_map[index]);
+      // output_map[index].servo.detach(pin_map[index]);
     }
   }
 }

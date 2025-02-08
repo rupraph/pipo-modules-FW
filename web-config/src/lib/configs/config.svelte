@@ -27,6 +27,7 @@
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
   import QuickConfig from "./quick-config.svelte";
+  import AnalogOutForm from "./analog-out.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
   import BoardConfig from "./board-config.svelte";
   import Switch from "../form/Switch.svelte";
@@ -283,6 +284,13 @@
   </Collapse>
   <hr class="separator" />
 {/if}
+
+{#if $type === "analog"}
+  <Collapse title="HW Output">
+    <AnalogOutForm bind:outconfig={config.sensorconf} />
+  </Collapse>
+{/if}
+<hr class="separator" />
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig
     bind:ip={config.general.OSC_IP}

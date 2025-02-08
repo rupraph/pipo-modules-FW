@@ -26,6 +26,7 @@ struct OutputData {
   float lmax;
   float lmin;
   Servo servo = Servo();
+  Pwm pwm = Pwm();
 };
 
 class AnalogOut {
