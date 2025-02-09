@@ -8,9 +8,12 @@
 #define PIPO_TYPE "unknown"
 #endif
 
-#define DEBUG_HEAP true
+#define DEBUG_HEAP false
 
 #define DEBUG_CONFIG false
+
+#define DISABLE_USB_COMM  // only disable midi usb setup for now
+// #define INCLUDE_BLE
 
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9

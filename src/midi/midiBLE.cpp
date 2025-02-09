@@ -1,8 +1,6 @@
 #include "midiBLE.h"
-#include <Arduino.h>
 
-#include <BLEMIDI_Transport.h>
-#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+#ifdef INCLUDE_BLE
 
 #ifdef PIPO_MOTION
 BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
@@ -19,9 +17,8 @@ void midiBLESetup() {
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
 
-  Serial.println("Midi BLE setup done");
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -29,7 +26,7 @@ void OnConnected() {
   Serial.println("Ble Connected!");
   hwui.set_led(BT_LED, 80);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -37,7 +34,7 @@ void OnDisconnected() {
   Serial.println("Ble Disconnected!");
   hwui.set_led(BT_LED, 0);
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 
@@ -52,3 +49,5 @@ void MidiBLEsendNoteOn(int note, int velocity, int channel) {
 void MidiBLEsendNoteOff(int note, int velocity, int channel) {
   MidiBle.sendNoteOff(note, velocity, channel);
 }
+
+#endif  //INCLUDE_BLE

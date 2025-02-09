@@ -152,4 +152,27 @@ class KalmanFilter {
   }
 };
 
+class MedianFilter {
+ private:
+  std::vector<float> buffer;
+  size_t windowSize;
+
+ public:
+  MedianFilter(size_t windowSize = 20) : windowSize(windowSize) {
+    buffer.reserve(windowSize);
+  }
+
+  float process(float rawValue) {
+    if (buffer.size() >= windowSize) {
+      buffer.erase(buffer.begin());
+    }
+    buffer.push_back(rawValue);
+
+    std::vector<float> sortedBuffer = buffer;
+    std::sort(sortedBuffer.begin(), sortedBuffer.end());
+
+    return sortedBuffer[sortedBuffer.size() / 2];
+  }
+};
+
 #endif  //hp_filter_h

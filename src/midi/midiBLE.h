@@ -1,8 +1,16 @@
 #ifndef MIDIBLE_H
 #define MIDIBLE_H
 
+#include <Arduino.h>
+
+#ifdef INCLUDE_BLE
+#include <BLEMIDI_Transport.h>
+#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+#endif
+
 #include "hw_ui.h"
 #include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 void midiBLESetup();
 void OnConnected();

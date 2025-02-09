@@ -2,7 +2,7 @@
 
 MidiTranslator::MidiTranslator() {
   current_scale.clear();
-  current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+  current_scale = generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
   if (hires) {
     cc_max = 16383;
   } else {
@@ -11,13 +11,6 @@ MidiTranslator::MidiTranslator() {
 }
 
 int MidiTranslator::get_note(float value, float min_input, float max_input) {
-  // cap value to input range
-  float out_value = value;
-  if (value < min_input) {
-    out_value = min_input + 1;
-  } else if (value > max_input) {
-    out_value = max_input;
-  }
 
   float input_range = max_input - min_input;
   if (input_range == 0) {
@@ -27,7 +20,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
 
   // scale value from 0 to 1 to the range of the current scale
   // map value from input range to 0-1
-  float scaled_value = (out_value - min_input) / (max_input - min_input);
+  float scaled_value = (value - min_input) / (max_input - min_input);
   int index = round(scaled_value * (nbOfNotes - 1));
   index = constrain(index, 0, nbOfNotes - 1);
   return current_scale[index];
@@ -50,7 +43,7 @@ void MidiTranslator::set_scale_type(string scaleType) {
     cout << "Invalid scale type." << endl;
   }
   current_scale.clear();
-  current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+  current_scale = generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
 }
 
 void MidiTranslator::set_root_note(string rootNote) {
@@ -61,7 +54,8 @@ void MidiTranslator::set_root_note(string rootNote) {
   } else {
     rootNotenb = rootNotenb;
     current_scale.clear();
-    current_scale = generate_full_scale(rootNotenb, nbOfNotes, scaleType);
+    current_scale =
+        generate_full_scale(rootNotenb, nbOfNotes, pattern, scaleType);
   }
 }
 
@@ -72,7 +66,8 @@ void MidiTranslator::set_number_of_notes(int nbOfNotes) {
   } else {
     this->nbOfNotes = nbOfNotes;
     current_scale.clear();
-    current_scale = generate_full_scale(rootNote, nbOfNotes, scaleType);
+    current_scale =
+        generate_full_scale(rootNote, nbOfNotes, pattern, scaleType);
   }
 }
 
@@ -109,9 +104,10 @@ bool MidiTranslator::is_a_note(string noteName) {
 }
 
 vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
+                                                string pattern,
                                                 string scaleType) {
 
-  vector<int> scale = generate_base_scale(rootNote, scaleType);
+  vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
   vector<int> expandedScale;
 
   int baseScaleSize = scale.size();
@@ -127,17 +123,46 @@ vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   return expandedScale;
 }
 
-vector<int> MidiTranslator::generate_base_scale(int rootNote,
+vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
                                                 string scaleType) {
-  auto it = scales.find(scaleType);
-  if (it != scales.end()) {
-    vector<int> scale = it->second;
-    for (int i = 0; i < scale.size(); i++) {
-      scale[i] += rootNote;
+  if (pattern == "scale") {
+    auto it = scales.find(scaleType);
+    if (it != scales.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      Serial.println("Invalid scale type");
+      return {};
     }
-    return scale;
+  } else if (pattern == "arpeggio") {
+    auto it = arpegios.find(scaleType);
+    if (it != arpegios.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      Serial.println("Invalid arpeggio type");
+      return {};
+    }
+  } else if (pattern == "interval") {
+    auto it = intervals.find(scaleType);
+    if (it != intervals.end()) {
+      vector<int> scale = it->second;
+      for (int i = 0; i < scale.size(); i++) {
+        scale[i] += rootNote;
+      }
+      return scale;
+    } else {
+      Serial.println("Invalid interval type");
+      return {};
+    }
   } else {
-    cout << "Invalid scale type." << endl;
+    Serial.println("Invalid pattern type");
     return {};
   }
 }
@@ -152,8 +177,8 @@ vector<string> MidiTranslator::get_scale_names() {
 
 void MidiTranslator::update_scale() {
   current_scale.clear();
-  current_scale =
-      generate_full_scale(this->rootNote, this->nbOfNotes, this->scaleType);
+  current_scale = generate_full_scale(this->rootNote, this->nbOfNotes,
+                                      this->pattern, this->scaleType);
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
@@ -161,12 +186,6 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
   // this returns a scaled value from the input range (max_input/min_input) to
   // the output range (max_output/min_output)
 
-  // cap value to input range
-  if (value < min_input) {
-    value = min_input;
-  } else if (value > max_input) {
-    value = max_input;
-  }
   if (hires) {
     cc_max = 16383;
   } else {
@@ -196,6 +215,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["channel"] = channel;
   j["cc_nb"] = cc_nb;
   j["tl_mode"] = tl_mode;
+  j["pattern"] = pattern;
   j["scaleType"] = scaleType;
   j["rootNote"] = rootNote;
   j["nbOfNotes"] = nbOfNotes;
@@ -212,6 +232,7 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     channel = j["channel"];
     cc_nb = j["cc_nb"];
     tl_mode = j["tl_mode"];
+    pattern = j["pattern"].as<string>();
     scaleType = j["scaleType"].as<string>();
     rootNote = j["rootNote"];
     nbOfNotes = j["nbOfNotes"];
@@ -219,13 +240,12 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_max = j["cc_max"];
     cc_min = j["cc_min"];
     hires = j["hires"];
+    this->update_scale();
 
   } catch (const std::exception& e) {
     Serial.print("Error: ");
     Serial.println(e.what());
   }
-
-  this->update_scale();
 }
 
 //Getter setters

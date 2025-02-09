@@ -52,18 +52,22 @@
   animateSensor();
 
   function cal_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/offsetcal",
-      params: { axis },
-    }).then(() => console.log("DONE"));
+    pipoio
+      .request({
+        method: "post",
+        url: "/offsetcal",
+        params: { axis },
+      })
+      .then(() => console.log("DONE"));
   }
 </script>
 
 <div
   style="display: flex; align-items: left; justify-content: space-around; margin-bottom:1.5em"
 >
+  <Switch label="Inverted" bind:value={sensor.inverted} design="slider" />
   {#if aschema.cat !== "Touch"}
+    <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
     <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
     <!-- {#if sensor.mode === true} -->
     <div class:disabled={!sensor.mode}>
@@ -93,11 +97,12 @@
   maxLabel={`max (${aschema.unit})`}
 />
 
-{#if aschema.cat === "Touch"}
-  <button class="primary" on:click={() => cal_offset(currentAxis)}
-    >Zero offset calibration</button
-  >
-{/if}
+<!-- {#if aschema.cat === "Touch"  } -->
+<button class="primary" on:click={() => cal_offset(currentAxis)}
+  >Zero offset calibration</button
+>
+
+<!-- {/if} -->
 
 <style>
   :global(.disabled) {

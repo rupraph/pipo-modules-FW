@@ -1,5 +1,4 @@
 <script lang="ts">
-  import axios from "axios";
   import Config from "./config.svelte";
   import { configSave } from "../../services/config";
   import Tabs from "./tabs.svelte";
@@ -12,10 +11,10 @@
 
   async function fetch() {
     try {
-      const names = (await axios.get<string>("/configs")).data.split(",");
-      const active = (await axios.get<string>("/config-active")).data;
+      const names = (await pipoio.get<string>("/configs")).data.split(",");
+      const active = (await pipoio.get<string>("/config-active")).data;
       let config = (
-        await axios.get<PipoConfig<"unknown">>("/configs", {
+        await pipoio.get<PipoConfig<"unknown">>("/configs", {
           params: { name: active },
         })
       ).data;
@@ -42,13 +41,13 @@
   });
 
   function onClick(name: string) {
-    return axios({
-      method: "post",
-      url: "/active-config",
-      params: { name },
-    })
+    return pipoio
+      .request({
+        method: "post",
+        url: "/active-config",
+        params: { name },
+      })
       .catch((e) => {
-        console.log(e);
         error = e;
       })
       .then(() => fetch())
@@ -59,13 +58,13 @@
   async function onCreate() {
     const { names } = await state;
     const index = names.length + 1;
-    return axios({
-      method: "post",
-      url: "/config-new",
-      params: { name: `config-${index}` },
-    })
+    return pipoio
+      .request({
+        method: "post",
+        url: "/config-new",
+        params: { name: `config-${index}` },
+      })
       .catch((e) => {
-        console.log(e);
         error = e;
       })
       .then(() => fetch())
@@ -75,13 +74,13 @@
   }
 
   function onRename(oldname: string, newname: string) {
-    return axios({
-      method: "post",
-      url: "/config-rename",
-      params: { oldname, newname },
-    })
+    return pipoio
+      .request({
+        method: "post",
+        url: "/config-rename",
+        params: { oldname, newname },
+      })
       .catch((e) => {
-        console.log(e);
         error = e;
       })
       .then(() => fetch())
@@ -90,13 +89,13 @@
       });
   }
   function onDelete(name: string) {
-    return axios({
-      method: "post",
-      url: "/config-delete",
-      params: { name },
-    })
+    return pipoio
+      .request({
+        method: "post",
+        url: "/config-delete",
+        params: { name },
+      })
       .catch((e) => {
-        console.log(e);
         error = e;
       })
       .then(() => fetch())

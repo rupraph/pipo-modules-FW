@@ -3,16 +3,17 @@
 
 #include <Arduino.h>
 #include <unordered_map>
+#include "HW_CONFIG.h"
 #include "midi/midi_translator.h"
 #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
-#include "sensor/input_sensor.h"
+#include "sensors/sensors.h"
 #include "hw_ui.h"
-#include "osc_handler.h"
-#include "osc_translators.h"
+#include "osc/osc_handler.h"
+#include "osc/osc_translators.h"
 
 using namespace std;
 
@@ -24,28 +25,11 @@ class OSC_handler;  // why do I need forward declaration here??
 class Engine {
  public:
   Engine() {
-#if defined(PIPO_MOTION)
-    string axis_list[] = {"roll", "pitch", "yaw", "accX", "accY", "accZ"};
-    for (auto axis : axis_list) {
-      Miditranslators[axis] = MidiTranslator();
-      Osctranslators[axis] = OscTranslator();
-      HID_translators[axis] = HidTranslator();
+    for (const auto& axis : input_sensor.get_sensor_dat_map()) {
+      Miditranslators[axis.first] = MidiTranslator();
+      Osctranslators[axis.first] = OscTranslator();
+      HID_translators[axis.first] = HidTranslator();
     }
-
-#elif defined(PIPO_RANGE)
-    Miditranslators = {{"dist", MidiTranslator()}};
-    Osctranslators = {{"dist", OscTranslator()}};
-    HID_translators = {{"dist", HidTranslator()}};
-
-#elif defined(PIPO_ANALOG)
-    string axis_list[] = {"A1", "A2", "A3", "A4", "A5", "A6",
-                          "T1", "T2", "T3", "T4", "T5", "T6"};
-    for (auto axis : axis_list) {
-      Miditranslators[axis] = MidiTranslator();
-      Osctranslators[axis] = OscTranslator();
-      HID_translators[axis] = HidTranslator();
-    }
-#endif
   }
 
   unordered_map<string, MidiTranslator> Miditranslators;
@@ -60,11 +44,13 @@ class Engine {
   void set_paused(bool value) { paused = value; }
   void toggle_pause();
 
-  void update(Sensor& sensor, midi_io& midiio, usb_hid& hidio,
-              OSC_handler& osc);
-  void midi_processor(Sensor& sensor, midi_io& midiio);
-  void hid_processor(Sensor& sensor, usb_hid& hidio);
-  void osc_processor(Sensor& sensor, OSC_handler& osc);
+  void update();
+  void midi_processor(string axis_name, float sensor_val, float sensor_min,
+                      float sensor_max);
+  void hid_processor(string axis_name, float sensor_val, float sensor_min,
+                     float sensor_max);
+  void osc_processor(string axis_name, float sensor_val, float sensor_min,
+                     float sensor_max);
 
   // config
   JsonDocument get_config(bool debug = false);
@@ -72,6 +58,13 @@ class Engine {
 
   //utils
   float round_to(float value, int decimal);
+
+//special functions (not of axis type)
+#ifdef PIPO_MOTION
+  void motion_quat_to_osc();
+  bool enable_quat_to_osc = false;
+  string quat_to_osc_address = "motion/quat";
+#endif
 
  private:
   uint8_t note_val[128];
@@ -81,5 +74,7 @@ class Engine {
   unordered_map<string, float> osc_val;
   unordered_map<string, float> osc_val_prev;
 };
+
+extern Engine engine;
 
 #endif  //ENGINE_H

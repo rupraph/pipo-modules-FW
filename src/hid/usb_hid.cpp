@@ -2,6 +2,8 @@
 
 // UNDER CONSTRUCTION
 
+usb_hid hidio;
+
 Adafruit_USBD_HID usb_hid_port;
 // Report payload defined in src/class/hid/hid.h
 // - For Gamepad Button Bit Mask see  hid_gamepad_button_bm_t
@@ -54,7 +56,7 @@ void usb_hid::setup(int hid_mode) {
     Serial.println("USB HID mounted");
   }
 #ifdef DEBUG_HEAP
-  Serial.println("Remaining Heap:" + String(ESP.getFreeHeap()));
+  pipoDebugHeap();
 #endif
 }
 

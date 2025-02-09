@@ -4,9 +4,7 @@
     // const device = await navigator.hid.requestDevice({ filters: [] });
     let devices = await navigator.hid.getDevices();
     console.log(devices);
-    devices.forEach((device) => {
-      console.log(`HID: ${device.productName}`);
-    });
+    devices.forEach((device) => {});
   });
 
   onDestroy(() => {});

@@ -4,6 +4,7 @@
 #include <Adafruit_TinyUSB.h>
 #include <MIDI.h>
 #include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 void MidiUSBSetup();
 void MidiUSBsendCC(int control, int value, int channel);
