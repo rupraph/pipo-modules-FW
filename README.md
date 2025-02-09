@@ -1,30 +1,41 @@
-This repo contains the code for pipo motion, analog, and range with the UI.
+This repo contains the code for Pipo _motion_, _analog_, and _range_ with the UI.
 
 # Minimal Quick Start guide
 
+## Embedded software
+
 To run the project, you need:
 
-- VS with PlatformIO extension
-- install the espressif32 platform in PIO
-- optionally, install npm (to compile the UI, and be able to use the compile upload scripts)
-- optionally install vite in the web-config folder(for UI):`npm install vite --save-dev`
+- VSCode with PlatformIO extension
+- Install the `espressif32` platform in PIO
 
-The project is configured to deal with seprate environments for each module so don't use the usual PIO build/upload buttons at the bootom of vscode, these will likely not work.
+The project is configured to deal with separate environments for each module so don't use the usual PIO build/upload buttons at the bottom of vscode, these will likely not work.
 
 To compile/upload, there are 2 options:
 
-- using npm scripts from vs code terminal (which are just shortcuts for pio cli commands, see package.json)
-- directly use pio commands from the pio cli
+- [optional] Using `npm` commands from vs code terminal (which are just shortcuts for pio CLI commands, see `package.json`)
+- Directly use pio commands from the pio CLI
 
 Use module build flags when necessary: "motion", "analog", "range"
 
-Compilation/upload Steps for motion as an e.g:
-(optional) - rebuild UI web page files: `npm run build:web`
+## UI
 
-- build module filesystem: `npm run build:fs:motion`
-- build firmware: `npm run build:motion`
-- put the module in receive mode: maintain boot clicked while clicking reset, then release boot.
-- upload firmware: `npm run upload:motion`
-- upload filsystem: `npm run upload:fs`
-- hit reset on the module.
-  (Other combinations of scripts command are possible, this is the most detailed one)
+The UI is built with web technologies so that it can run in any browser.
+To develop or compile the UI, install `node` and `npm`.
+
+- From the `web-config` directory, install the dependencies: `npm install`
+- Run development or build commands (see `package.json`)
+
+## Example
+
+Compilation/upload Steps for "motion":
+
+- [optional] Rebuild UI web page files: `npm run build:web`
+- Build module filesystem: `npm run build:fs:motion`
+- Build firmware: `npm run build:motion`
+- Put the module in receive mode: maintain boot clicked while clicking reset, then release boot.
+- Upload firmware: `npm run upload:motion`
+- Upload filesystem: `npm run upload:fs`
+- Hit reset on the module.
+
+(Other combinations of scripts command are possible, this is the most detailed one)
