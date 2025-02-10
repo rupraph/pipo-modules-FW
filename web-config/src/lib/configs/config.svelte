@@ -286,7 +286,7 @@
 {/if}
 
 {#if $type === "analog"}
-  <Collapse title="HW Output">
+  <Collapse title="HW Output (from OSC only)">
     <AnalogOutForm bind:outconfig={config.sensorconf} />
   </Collapse>
 {/if}

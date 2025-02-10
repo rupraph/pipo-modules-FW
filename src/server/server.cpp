@@ -94,7 +94,7 @@ void PipoServer::setup_requests() {
     try {
       config.set(request->getParam("config")->value());
       pipoDebugHeap();
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       config.save();
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
@@ -130,7 +130,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.load_config(request->getParam("name")->value().c_str(), true);
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       return request->send(200, "text/plain", "Active config set");
     } catch (const std::exception e) {
       Serial.println("error loading config");
@@ -145,7 +145,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.delete_config(request->getParam("name")->value());
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       return request->send(200, "text/plain", "Config deleted");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -218,7 +218,7 @@ void PipoServer::setup_requests() {
 #endif
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
-            config.apply(engine, osc, true);
+            config.apply(engine, osc, DEBUG_CONFIG);
 #ifdef DEBUG_HEAP
             pipoDebugHeap();
 #endif
@@ -377,10 +377,10 @@ void PipoServer::onMessage(AsyncWebSocketClient* client) {
 
     if (strcmp("config", command) == 0) {
       config.setValue(ws_message + offset + 1, ws_message_len - offset - 1);
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
     } else if (strcmp("configs", command) == 0) {
       config.setValues(ws_message + offset + 1, ws_message_len - offset - 1);
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
     } else if (strcmp("save", command) == 0) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
