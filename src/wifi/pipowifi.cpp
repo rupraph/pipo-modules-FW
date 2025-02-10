@@ -1,8 +1,15 @@
 #include <wifi/pipowifi.h>
 
 void PipoWifi::onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
+  Serial.println("Wifi connect event OSC/LED");
   osc.start();
+  hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, 255);
 };
+
+void PipoWifi::onWifiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
+  osc.stop();
+  hwui.stop_pulse(WIFI_LED);
+}
 
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
@@ -11,12 +18,13 @@ void PipoWifi::setup() {
   WiFi.setAutoReconnect(true);
   // allow to connect to (WHY SO WEAK?) wep networks
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
+  WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
   // prevent from the Wifi to sleep: avoid latency in websockets
   WiFi.setSleep(false);
   scan();
   APSTAMode();
 
-  WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
+  //Todo add management of wifi disconnect, AP client connect, etc...
 };
 
 void PipoWifi::scan() {
@@ -60,6 +68,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   }
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
+    hwui.start_blink(WIFI_LED, 1000, 0.2);
   }
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
@@ -125,6 +134,7 @@ bool PipoWifi::APSTAMode() {
   } else {
     Serial.println("Failed to start APSTA mode");
   }
+  // hwui.start_blink(WIFI_LED, 500, 0.2);
   return success & successConnect;
 };
 

@@ -26,19 +26,20 @@ void init_filesystem();
 
 TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
-TaskHandle_t hwuiTaskHandle;
+TaskHandle_t hwuiSoftPwmTaskHandle;
 TaskHandle_t oscreceiveTaskHandle;
 TaskHandle_t dnsTaskHandle;
 TaskHandle_t debugMonitorTaskHandle;
+unsigned long last_time = 0;
 
 void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
     engine.update();
+    hwui.update();
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-
     vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
@@ -75,6 +76,12 @@ void oscreceiveTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
+// void hwuiSoftPwmTask(void* pvParameters) {
+//   for (;;) {
+//     hwui.update_soft_pwm();
+//     vTaskDelay(pdMS_TO_TICKS(1) / 10);
+//   }
+// }
 #endif
 
 void setup() {
@@ -92,8 +99,8 @@ void setup() {
   /////// Init hardware user interface (leds and switches)
   pipoDebugHeap();
 
-// hwui.init();
-// hwui.setup();
+  hwui.init();
+  hwui.setup();
 #ifdef PIPO_ANALOG
   analog_out.setup();
 #endif
@@ -152,6 +159,7 @@ void setup() {
 
   Serial.println("starting tasks");
 
+  // Todo move task to their own files
   xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
@@ -159,11 +167,13 @@ void setup() {
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
                           &oscreceiveTaskHandle, 0);
+  // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
+  //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
   xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
-
+  // hwui.start_blink(WIFI_LED, 2000, 0.5);
   Serial.println("Setup done");
 }
 
@@ -173,6 +183,7 @@ void loop() {
     // hwui.update();
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop
+    hwui.update_soft_pwm();
     if (server.should_start) {
       vTaskDelay(pdMS_TO_TICKS(1000));
       server.start();
