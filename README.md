@@ -1,6 +1,6 @@
 This repo contains the code for pipo motion, analog, and range with the UI.
 
-# The last stable and tested version of the code is in bramch "main"
+# The last stable and tested version of the code is in branch "main"
 
 # Minimal Quick Start guide (linux/mac)
 
