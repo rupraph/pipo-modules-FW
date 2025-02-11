@@ -68,7 +68,7 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   }
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
-    hwui.start_blink(WIFI_LED, 1000, 0.2);
+    // hwui.start_blink(WIFI_LED, 500, 0.2);
   }
   int result = WiFi.begin(ssid, password);
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;

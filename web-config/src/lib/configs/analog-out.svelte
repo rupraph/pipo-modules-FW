@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { AnalogOut, AnalogOutKeys } from "../../types";
   import Checkbox from "../form/Checkbox.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
   export let outconfig;
 </script>
 
@@ -19,6 +20,7 @@
           <span class="checkmark"></span>
         </label>
       </div>
+
       <div class="cell">
         <label class="checkbox">
           <input type="checkbox" bind:checked={value.outmode} />
@@ -28,6 +30,12 @@
     </div>
   {/each}
 </div>
+<div class="out-help">
+  <p>Out mode: unticked = PWM, ticked = servo</p>
+  <p>OSC address pattern: "/out/A0x"</p>
+  <p>OSC range: PWM: 0-1, Servo: 0-180</p>
+  <p>OSC port: same as receive</p>
+</div>
 
 <style>
   .analog-out {
@@ -35,6 +43,17 @@
     flex-direction: row;
     justify-items: center;
     margin-bottom: 1.5em;
+  }
+
+  .out-help {
+    font-size: 12px;
+    text-align: left;
+    margin-bottom: 1.5em;
+  }
+
+  .out-help p {
+    line-height: 0.5; /* Adjust the line height as needed */
+    margin-bottom: 0.5em; /* Adjust the margin as needed */
   }
 
   .row {
