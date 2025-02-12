@@ -12,14 +12,14 @@ void AnalogSensor::setup() {
     pinMode(pair.second, INPUT);
   }
 
-  measure_offset_all();
+  measure_offset_all_touch();
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
 }
 
 // Todo: add function to perform individual offset or of provided list
-
+// change delay into vtaskdelay ??
 void AnalogSensor::measure_offset(const string& sensor_name) {
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   float offset = 0;
@@ -35,16 +35,16 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
       round((offset / num_samples) * 1000.0) / 1000.0;
 }
 
-void AnalogSensor::measure_offset_all() {
+void AnalogSensor::measure_offset_all_touch() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   unordered_map<string, float> offset;
   for (int i = 0; i < num_samples; i++) {
 
     // measure values without corretcing for offset
-    for (auto const& pair : analog_map) {
-      sensor_dat[pair.first].value = analogRead(pair.second) * 0.000806;
-    }
+    // for (auto const& pair : analog_map) {
+    //   sensor_dat[pair.first].value = analogRead(pair.second) * 0.000806;
+    // }
     for (auto const& pair : touch_map) {
       sensor_dat[pair.first].value = touchRead(pair.second);
     }
@@ -78,7 +78,8 @@ void AnalogSensor::update() {
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
 
     sensor_dat[pair.first].value =
-        sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset;
+        filter_map[pair.first].process(sensor_dat[pair.first].raw_value) -
+        sensor_dat[pair.first].offset;
 
     if (sensor_dat[pair.first].value > MAX_TOUCH_VALUE) {
       sensor_dat[pair.first].value = MAX_TOUCH_VALUE;
@@ -88,6 +89,13 @@ void AnalogSensor::update() {
   }
 
   process_sensor_triggers();
+}
+
+void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {}
+
+JsonDocument AnalogSensor::get_sensor_config(bool debug) {
+  JsonDocument config;
+  return config;
 }
 
 #endif

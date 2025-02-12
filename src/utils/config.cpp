@@ -270,16 +270,20 @@ void Config::print() {
   serializeJsonPretty(current_config, Serial);
 }
 
+//* @brief This gathers from all classes the config. does not save it.
 void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensor");
   current_config["sensor"].clear();
-  current_config["sensor"] = input_sensor.get_config();
+  current_config["sensor"] = input_sensor.get_axis_config();
   Serial.println("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
   Serial.println("gatherconfig general");
   current_config["general"].clear();
   current_config["general"] = general_config;
+  Serial.println("gatherconfig sensorconf");
+  current_config["sensorconf"].clear();
+  current_config["sensorconf"] = input_sensor.get_sensor_config();
 
   if (debug && false) {
     Serial.println("gathered_config");
@@ -290,7 +294,10 @@ void Config::gather(Engine& engine, bool debug) {
 
 //* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
-  input_sensor.set_config(current_config["sensor"].as<JsonObject>(), debug);
+  input_sensor.set_axis_config(current_config["sensor"].as<JsonObject>(),
+                               debug);
+  input_sensor.set_sensor_config(current_config["sensorconf"].as<JsonObject>(),
+                                 debug);
   engine.set_config(current_config["engine"].as<JsonObject>(), debug);
   general_config.clear();
   general_config = current_config["general"];

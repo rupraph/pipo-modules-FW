@@ -30,8 +30,8 @@ class Config {
     general_config["HidEnabled"] = true;
     general_config["HidMode"] = 2;
   }
-  String filename;  // raw config file name (no extension)
-  JsonDocument current_config;
+  String filename;              // raw config file name (no extension)
+  JsonDocument current_config;  // stores all configs (gather)
   JsonDocument general_config;
 
   // load config from files into current_config

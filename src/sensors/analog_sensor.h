@@ -34,17 +34,19 @@ class AnalogSensor : public Sensor {
   void init() override;
   void setup() override;
   void update() override;
+  void set_sensor_config(JsonObject config, bool debug = false) override;
+  JsonDocument get_sensor_config(bool debug = false) override;
   void measure_offset(const string& sensor_name) override;
-  void measure_offset_all();
+  void measure_offset_all_touch();
 
  private:
-  unordered_map<string, LowPassFilter> lp_filter_map = {
-      {"A1", LowPassFilter(10)},  {"A2", LowPassFilter(10)},
-      {"A3", LowPassFilter(10)},  {"A4", LowPassFilter(10)},
-      {"A5", LowPassFilter(10)},  {"A6", LowPassFilter(10)},
-      {"T1", LowPassFilter(100)}, {"T2", LowPassFilter(100)},
-      {"T3", LowPassFilter(100)}, {"T4", LowPassFilter(100)},
-      {"T5", LowPassFilter(100)}, {"T6", LowPassFilter(100)}};
+  unordered_map<string, MedianFilter> filter_map = {
+      {"A1", MedianFilter(5)},  {"A2", MedianFilter(5)},
+      {"A3", MedianFilter(5)},  {"A4", MedianFilter(5)},
+      {"A5", MedianFilter(5)},  {"A6", MedianFilter(5)},
+      {"T1", MedianFilter(20)}, {"T2", MedianFilter(20)},
+      {"T3", MedianFilter(20)}, {"T4", MedianFilter(20)},
+      {"T5", MedianFilter(20)}, {"T6", MedianFilter(20)}};
 
   bool touch_adaptative_max;
 };

@@ -36,6 +36,24 @@
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
+      },
+      "magX": {
+        "enabled": false,
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
+        "stroke_mode": true
+      },
+      "magY": {
+        "enabled": false,
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
+        "stroke_mode": true
+      },
+      "magZ": {
+        "enabled": false,
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
+        "stroke_mode": true
       }
     },
     "engine-midi": {
@@ -122,6 +140,48 @@
         "pattern": "scale",
         "scaleType": "major",
         "tl_mode": 0
+      },
+      "magX": {
+        "cc_nb": 3,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0
+      },
+      "magY": {
+        "cc_nb": 3,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0
+      },
+      "magZ": {
+        "cc_nb": 3,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0
       }
     },
     "engine-osc": {
@@ -166,6 +226,33 @@
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "motion/yaw"
+      },
+      "magX": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "motion/magX"
+      },
+      "magY": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "motion/magY"
+      },
+      "magZ": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "motion/magZ"
+      }
+    },
+    "engine-special": {
+      "quat": {
+        "enabled": true,
+        "osc_addr": "motion/quat"
       }
     }
   },
@@ -229,6 +316,36 @@
       "mode": false,
       "th_mode": false,
       "cyclic": false
+    },
+    "magX": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "magY": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
+    },
+    "magZ": {
+      "deadzone": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false
     }
   },
   "general": {
@@ -239,5 +356,8 @@
     "MidiEnabled": true,
     "HidEnabled": true,
     "HidMode": 2
+  },
+  "sensorconf": {
+    "relative_mode": true
   }
 }

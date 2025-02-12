@@ -77,4 +77,11 @@ void RangeSensor::update() {
   measured_loop_duration();
 }
 
+void RangeSensor::set_sensor_config(JsonObject config, bool debug) {}
+
+JsonDocument RangeSensor::get_sensor_config(bool debug) {
+  JsonDocument config;
+  return config;
+}
+
 #endif

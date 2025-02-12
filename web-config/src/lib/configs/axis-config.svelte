@@ -98,11 +98,12 @@
   maxLabel={`max (${aschema.unit})`}
 />
 
-{#if aschema.cat === "Touch"}
-  <button class="primary" on:click={() => cal_offset(currentAxis)}
-    >Zero offset calibration</button
-  >
-{/if}
+<!-- {#if aschema.cat === "Touch"  } -->
+<button class="primary" on:click={() => cal_offset(currentAxis)}
+  >Zero offset calibration</button
+>
+
+<!-- {/if} -->
 
 <style>
   :global(.disabled) {

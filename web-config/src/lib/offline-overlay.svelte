@@ -10,37 +10,35 @@
   <div class="overlay">
     <article class="scroll">
       <h2>Pipo is offline, waiting for reconnection</h2>
-      <h3>Troubleshooting:</h3>
+      <!-- <h3>Troubleshooting:</h3> -->
       <ul>
         <li>
-          <h4>
-            Pipo could not connect to Wifi and switched to Access Point mode
-          </h4>
-          <ul class="instruction">
+          <!-- <h4>Pipo could not be reached</h4> -->
+          <!-- <ul class="instruction">
             <li>Check if you see the Pipo network in your wifi list</li>
             <li>Connect to the Pipo network</li>
             <li>Reconfigure wifi and switch back to your wifi</li>
-          </ul>
+          </ul> -->
         </li>
         <li>
-          <h4>
+          <!-- <h4>
             You were connected to pipo in Access Point mode and configured wifi
-          </h4>
-          <ul class="instruction">
+          </h4> -->
+          <!-- <ul class="instruction">
             <li>
               Pipo connected to your Wifi and no longer provides axxess point:
               just connect to wifi
             </li>
-          </ul>
+          </ul> -->
         </li>
         <li>
-          <h4>None of the above and it disconnected</h4>
+          <!-- <h4>None of the above and it disconnected</h4>
           <ul class="instruction">
             <li>
               Pipo must have crashed, just reboot your Pipo by pressing the
               reset button. If it does not solve the problem, contact support.
             </li>
-          </ul>
+          </ul> -->
         </li>
       </ul>
       <p class="padding"></p>

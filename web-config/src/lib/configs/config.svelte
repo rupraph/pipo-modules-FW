@@ -5,7 +5,7 @@
 
   import { createEventDispatcher, onMount } from "svelte";
   import { schema } from "../../schema";
-  import { pipoType as type } from "../../services";
+  import { pipoType, pipoType as type } from "../../services";
   import Select from "svelte-select";
   import {
     type SensorConfig,
@@ -28,6 +28,8 @@
   import QuickConfig from "./quick-config.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
   import BoardConfig from "./board-config.svelte";
+  import Switch from "../form/Switch.svelte";
+  import Text from "../form/Text.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
@@ -150,6 +152,34 @@
 
 <Collapse title="Quick settings">
   <QuickConfig bind:config />
+  {#if $type === "motion"}
+    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
+      <Switch
+        label="Quaternions to OSC"
+        bind:value={config.engine["engine-special"]["quat"].enabled}
+        design="slider"
+      />
+      {#if config.engine["engine-special"]["quat"].enabled}
+        <Text
+          label="Address"
+          bind:value={config.engine["engine-special"]["quat"].osc_addr}
+        />
+      {/if}
+    {/if}
+  {/if}
+  {#if $type === "analog"}
+    <button
+      class="primary"
+      on:click={() => {
+        pipoio.post("/offsetAllTouch").then(() => {
+          console.log("zero all touch");
+        });
+      }}
+      title="Zero the touch"
+      >Zero All Touch
+    </button>
+  {/if}
+
   <button
     class="primary Pause"
     on:click={pause}
@@ -237,7 +267,16 @@
 </Collapse>
 
 <hr class="separator" />
-
+{#if $type === "motion"}
+  <Collapse title="Sensor settings">
+    <Switch
+      label="Relative (on) or absolute orientation"
+      bind:value={config.sensorconf.relative_mode}
+      design="slider"
+    />
+  </Collapse>
+  <hr class="separator" />
+{/if}
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig
     bind:ip={config.general.OSC_IP}

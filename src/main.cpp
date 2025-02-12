@@ -21,6 +21,12 @@ void init_filesystem();
 // I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
 
+TaskHandle_t sensorTaskHandle;
+TaskHandle_t websocketTaskHandle;
+TaskHandle_t hwuiTaskHandle;
+TaskHandle_t dnsTaskHandle;
+TaskHandle_t debugMonitorTaskHandle;
+
 void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
@@ -60,12 +66,21 @@ void rssiTask(void* pvParameters) {
   }
 }
 
+void debug_monitor(void* pvParameters) {
+  for (;;) {
+    // input_sensor.teleplot_data("magX");
+    // input_sensor.teleplot_data("magY");
+    // input_sensor.teleplot_data("magZ");
+    vTaskDelay(pdMS_TO_TICKS(200));
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
   // Disable watchdog timer for debug
-  disableCore0WDT();
-  disableCore1WDT();
+  // disableCore0WDT();
+  // disableCore1WDT();
 
   // while (!Serial)
   //   delay(100);  // putting wait serial here breaks usb mid/hid init

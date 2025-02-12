@@ -54,5 +54,6 @@
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 2
-  }
+  },
+  "sensor-conf": {}
 }

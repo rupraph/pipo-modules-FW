@@ -7,7 +7,7 @@
   export let osc: OscConfig;
 </script>
 
-<Text label="Adress" bind:value={osc.osc_addr} maxlength={255} />
+<Text label="Address" bind:value={osc.osc_addr} maxlength={255} />
 <Checkbox label="Raw Mode" bind:value={osc.mode_raw} />
 {#if !osc.mode_raw}
   <Range label="Min" bind:value={osc.osc_min} min={0} max={osc.osc_max} />

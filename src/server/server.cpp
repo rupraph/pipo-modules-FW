@@ -368,6 +368,8 @@ void PipoServer::setup_requests() {
                          String(hwui.get_bat_voltage()).c_str());
   });
 
+  // Todo: this is too long to be executed in the server reauest
+  // this should be offloaded to a task and a monitoring task setup to  handle and send the pending response when the action if finished
   server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("axis")) {
       return request->send(400, "text/plain", "No sensor provided");
@@ -376,12 +378,28 @@ void PipoServer::setup_requests() {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
       input_sensor.measure_offset(axis);
+      config.gather(engine);
+      config.save();
       return request->send(200, "text/plain", "Offset measured");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
     }
   });
+
+#ifdef PIPO_ANALOG
+  server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    try {
+      input_sensor.measure_offset_all_touch();
+      config.gather(engine);
+      config.save();
+      return request->send(200, "text/plain", "Offset measured");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
+#endif
 
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     engine.toggle_pause();
@@ -397,8 +415,6 @@ void PipoServer::setup_ws() {
   ws_initialized = true;
   server.addHandler(&ws);
   pipoSocket.setup();
-  // events.onConnect([](AsyncEventSourceClient* client) {});
-  // server.addHandler(&events);
 }
 
 bool pipoNetworkReady() {
