@@ -3,7 +3,6 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-package-lock.json
 node_modules/
 .DS_Store
 */.DS_Store
