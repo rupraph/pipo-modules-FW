@@ -61,17 +61,23 @@ bool PipoWifi::connect(String ssid, String password, bool disconnect) {
   Serial.println(" with password " + String(password));
   status = CONNECTING;
   if (disconnect) {
+    Serial.println("A");
     WiFi.disconnect(true, true);
     vTaskDelay(pdMS_TO_TICKS(WIFI_DELAY));
   }
+  Serial.println("B");
   if (WiFi.getMode() != WIFI_MODE_STA && WiFi.getMode() != WIFI_MODE_APSTA) {
     WiFi.mode(WIFI_MODE_STA);
+    Serial.println("C");
   }
   int result = WiFi.begin(ssid, password);
+  Serial.println("D");
   uint8_t timeoutClick = CONNECT_TIMEOUT / CHECK_TIMEOUT;
   while ((WiFi.status() != WL_CONNECTED) and --timeoutClick > 0) {
     vTaskDelay(pdMS_TO_TICKS(CHECK_TIMEOUT));
+    Serial.println("Handshake...");
   }
+  Serial.println("D");
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("Connected to " + String(ssid.c_str()));
     Serial.println("IP " + WiFi.localIP().toString());

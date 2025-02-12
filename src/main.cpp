@@ -147,7 +147,7 @@ void loop() {
     // I dont understand why, but the server cannot restart from a
     // response to a request. It crashes. So I need to restart it from the main loop
     if (server.canStart()) {
-      server.start();
+      server.resume();
     }
 
   } catch (const std::exception& e) {

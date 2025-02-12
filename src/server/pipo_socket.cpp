@@ -53,6 +53,8 @@ void PipoSocket::setup() {
 }
 
 void PipoSocket::onMessage(AsyncWebSocketClient* client) {
+  if (paused)
+    return;
   try {
     char command[16];
     int offset = 0;
@@ -91,7 +93,7 @@ void PipoSocket::start(AsyncWebSocket* ws) {
   this->ws->enable(true);
 }
 void PipoSocket::sendNoteOn(int note, int velocity, int channel) {
-  if (ws == nullptr)
+  if (ws == nullptr || paused)
     return;
   String msg = "noteon";
   msg += channel;
@@ -102,7 +104,7 @@ void PipoSocket::sendNoteOn(int note, int velocity, int channel) {
   ws->textAll(msg.c_str());
 }
 void PipoSocket::sendNoteOff(int note, int velocity, int channel) {
-  if (ws == nullptr)
+  if (ws == nullptr || paused)
     return;
   String msg = "noteoff";
   msg += channel;
@@ -114,7 +116,7 @@ void PipoSocket::sendNoteOff(int note, int velocity, int channel) {
 }
 
 void PipoSocket::sendSensorValue(std::string axis, float value) {
-  if (ws == nullptr)
+  if (ws == nullptr || paused)
     return;
   String msg = "sensor";
   msg += axis.c_str();
@@ -124,7 +126,7 @@ void PipoSocket::sendSensorValue(std::string axis, float value) {
 }
 
 void PipoSocket::loop() {
-  if (ws == nullptr)
+  if (ws == nullptr || paused)
     return;
   auto clients = ws->getClients();
   if (clients.length() == 0)
@@ -196,4 +198,14 @@ void PipoSocket::stop() {
   this->ws->closeAll();
   this->ws->enable(false);
   this->ws = nullptr;
+}
+void PipoSocket::pause() {
+  // TODO: check if necessary
+  this->ws->cleanupClients();
+  this->ws->closeAll();
+
+  paused = true;
+}
+void PipoSocket::resume() {
+  paused = false;
 }

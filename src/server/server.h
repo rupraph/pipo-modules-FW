@@ -26,6 +26,9 @@ class PipoServer {
   void setup_requests();
   void start();
   void stop();
+  void pause();
+  void resume();
+
   bool isRunning();
   bool shouldStart();
   bool canStart();

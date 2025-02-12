@@ -53,6 +53,14 @@ void PipoServer::stop() {
   ws_initialized = false;
   is_running = false;
 }
+void PipoServer::pause() {
+  pipoSocket.pause();
+  is_running = false;
+}
+void PipoServer::resume() {
+  pipoSocket.resume();
+  is_running = true;
+}
 bool PipoServer::isRunning() {
   return is_running;
 }
@@ -275,7 +283,7 @@ void PipoServer::setup_requests() {
     }
     request->send(200, "text/plain", "Try to switch to mode " + mode);
     vTaskDelay(pdMS_TO_TICKS(100));
-    stop();
+    pause();
     config.general_config["Wifi_mode"] = mode;
     Serial.println("Setting mode: " + mode);
     if (mode == "AP") {
@@ -299,26 +307,26 @@ void PipoServer::setup_requests() {
     bool isAPSTA = WiFi.getMode() == WIFI_MODE_APSTA;
     String previous_ssid = wifi.ssid();
     vTaskDelay(pdMS_TO_TICKS(200));
-    stop();
+    pause();
 
-    // bool success = false;
-    // success =
-    //     password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
-    // Serial.println("Connected ? ");
-    // if (!success && previous_ssid.length()) {
-    //   vTaskDelay(pdMS_TO_TICKS(200));
-    //   Serial.println("Not Connected!, reconnect to previous");
-    //   success = wifi.connect(previous_ssid);
-    // }
-    // Serial.print("MODE AFTER ");
-    // Serial.println(WiFi.getMode());
-    // Serial.print("Is AP_STA ");
-    // Serial.println(isAPSTA);
-    // if (isAPSTA) {
-    //   success = wifi.configureAP();
-    //   Serial.print("Configured AP?  ");
-    //   Serial.println(success);
-    // }
+    bool success = false;
+    success =
+        password.length() ? wifi.connect(ssid, password) : wifi.connect(ssid);
+    Serial.println("Connected ? ");
+    if (!success && previous_ssid.length()) {
+      vTaskDelay(pdMS_TO_TICKS(200));
+      Serial.println("Not Connected!, reconnect to previous");
+      success = wifi.connect(previous_ssid);
+    }
+    Serial.print("MODE AFTER ");
+    Serial.println(WiFi.getMode());
+    Serial.print("Is AP_STA ");
+    Serial.println(isAPSTA);
+    if (isAPSTA) {
+      success = wifi.configureAP();
+      Serial.print("Configured AP?  ");
+      Serial.println(success);
+    }
     should_start = true;
     stopDate = millis();
   });

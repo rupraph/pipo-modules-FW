@@ -19,6 +19,8 @@ class PipoSocket {
   void loop();
   void stop();
   void start(AsyncWebSocket* ws);
+  void pause();
+  void resume();
 
  private:
   void onMessage(AsyncWebSocketClient* client);
@@ -30,6 +32,7 @@ class PipoSocket {
   int ws_message_len = 0;
   char ws_message[2048];
   bool toSend[1] = {true};
+  bool paused = false;
 };
 extern PipoSocket pipoSocket;
 #endif  // PIPOSOCKET_H
