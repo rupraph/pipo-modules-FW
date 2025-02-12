@@ -18,7 +18,6 @@
     type OscConfig,
     type HidConfig,
   } from "../../types";
-  import axios from "axios";
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
   import AxisConfig from "./axis-config.svelte";
@@ -60,10 +59,10 @@
         };
         return acc;
       }, {} as ConfigByAxis<T>);
-    axisSelect = Object.keys(configByAxis).map((axis) => {
+    axisSelect = (Object.keys(configByAxis) as PipoKeys[T][]).map((axis) => {
       return { value: axis, label: schema[$type as T][axis].label };
     });
-    setAxis(Object.keys(configByAxis)[0]);
+    setAxis(Object.keys(configByAxis)[0] as PipoKeys[T]);
   });
 
   function submit() {
@@ -98,7 +97,7 @@
   }
 
   function download() {
-    const data = JSON.stringify(config, 0, 2);
+    const data = JSON.stringify(config, null, 2);
     const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -150,7 +149,7 @@
 </script>
 
 <Collapse title="Quick settings">
-  <QuickConfig bind:config schema={schema[$type]} />
+  <QuickConfig bind:config />
   <button
     class="primary Pause"
     on:click={pause}
@@ -216,12 +215,7 @@
         <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
       {/if}
       {#if currentCat === "HID"}
-        <HidConfigForm
-          bind:hidEnabled={config.general.HidEnabled}
-          bind:hidMode={config.general.HidMode}
-          {sensor}
-          {hid}
-        />
+        <HidConfigForm bind:hidMode={config.general.HidMode} {sensor} {hid} />
       {/if}
       {#if currentCat === "OSC"}
         <OscConfigForm {osc} />
@@ -293,8 +287,8 @@
           : "primary"}
       title="Apply and save the config in pipo">Save</LoadingButton
     >
-  </div></Collapse
->
+  </div>
+</Collapse>
 
 <style>
   button:hover {

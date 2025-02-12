@@ -10,12 +10,14 @@ class ConfigSave<T extends PipoTypes> {
   diff(prev: PipoConfig<T>, next: PipoConfig<T>) {
     const diff: { path: string; value: unknown }[] = [];
     const Q: [string, string, unknown, unknown][] = Object.entries(next).map(
+      // @ts-expect-error Object.entries
       ([key, value]) => [key, key, value, prev[key]]
     );
     while (Q.length) {
       const [key, path, value, prevValue] = Q.shift()!;
       if (typeof value === "object") {
         Object.entries(value as Object).forEach(([k, v]) => {
+          // @ts-expect-error Object.entries
           Q.push([k, `${path}/${k}`, v, prevValue[k]]);
         });
       } else {

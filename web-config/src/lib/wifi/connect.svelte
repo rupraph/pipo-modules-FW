@@ -116,8 +116,8 @@
       console.error(e);
     }
   }
-  function onInput(evt: unknown) {
-    password = evt.target.value;
+  function onInput(evt: Event) {
+    password = (evt.target as HTMLInputElement).value;
   }
   function onLockClick(ssid: string, known: boolean) {
     if (!known) return;
@@ -347,7 +347,7 @@
                 </icon>
               </button>
 
-              <button on:click={onConnect(editing)}>connect</button>
+              <button on:click={() => onConnect(editing)}>connect</button>
             </div>
           {/if}
         {/each}

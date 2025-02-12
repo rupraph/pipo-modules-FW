@@ -1,4 +1,5 @@
 <script lang="ts">
+  /*
   import { onMount } from "svelte";
   import r from "regl";
   import mat4 from "gl-mat4";
@@ -21,18 +22,17 @@
       if (!config) return;
       const axes = config.engine["engine-midi"];
       const index =
-        control === axes.yaw.cc_number
+        control === axes.yaw.cc_nb
           ? 0
-          : control === axes.pitch.cc_number
+          : control === axes.pitch.cc_nb
             ? 1
-            : control === axes.roll.cc_number
+            : control === axes.roll.cc_nb
               ? 2
               : -1;
       if (index === -1) return;
       // if (index !== 0) return;
       angles[index] =
-        ((value - axes.yaw.min_input) /
-          (axes.yaw.max_output - axes.yaw.min_output)) *
+        ((value - axes.yaw.cc_min) / (axes.yaw.cc_min - axes.yaw.cc_max)) *
         Math.PI;
       drawCube();
     });
@@ -40,7 +40,7 @@
       getComputedStyle(document.body).getPropertyValue("--bg-color")
     );
     const regl = r({
-      canvas: document.getElementById("cube"),
+      canvas: document.getElementById("cube") as HTMLCanvasElement,
     });
 
     const drawCube = regl({
@@ -102,7 +102,7 @@
       },
     });
     drawCube();
-  });
+  });*/
 </script>
 
 <canvas id="cube"></canvas>

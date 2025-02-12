@@ -6,7 +6,7 @@ export function tooltip(element: HTMLElement) {
   function mouseOver(event: MouseEvent) {
     // NOTE: remove the `title` attribute, to prevent showing the default browser tooltip
     // remember to set it back on `mouseleave`
-    title = element.getAttribute("title");
+    title = element.getAttribute("title")!;
     element.removeAttribute("title");
 
     tooltip = new Tooltip({
@@ -43,8 +43,8 @@ export function tooltip(element: HTMLElement) {
   };
 }
 
-export function teleport(node, name = 'teleport-container') {
+export function teleport(node: HTMLElement, name = "teleport-container") {
   let teleportContainer = document.getElementById(name);
   teleportContainer?.appendChild(node);
-  teleportContainer.focus(); // optional
+  teleportContainer?.focus(); // optional
 }

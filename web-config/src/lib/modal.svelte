@@ -25,7 +25,6 @@
     transition:scale={{
       duration: 300,
       easing: cubicOut,
-      x: 0,
     }}
   >
     <slot></slot>

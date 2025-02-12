@@ -1,15 +1,15 @@
-<script>
+<script lang="ts">
   export let title = "";
   let isHovered = false;
-  let x;
-  let y;
+  let x = 0;
+  let y = 0;
 
-  function mouseOver(event) {
+  function mouseOver(event: MouseEvent) {
     isHovered = true;
     x = event.pageX + 5;
     y = event.pageY + 5;
   }
-  function mouseMove(event) {
+  function mouseMove(event: MouseEvent) {
     x = event.pageX + 5;
     y = event.pageY + 5;
   }

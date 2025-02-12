@@ -8,8 +8,8 @@
   export let value: number = 0;
   export let tooltip: string | undefined = undefined;
   let id = uid();
-  let interval = 0;
-  let timeout = 0;
+  let interval: ReturnType<typeof setInterval> | 0 = 0;
+  let timeout: ReturnType<typeof setTimeout> | 0 = 0;
   let keyupTimeout = 0;
 
   function onmousedown(delta: number) {

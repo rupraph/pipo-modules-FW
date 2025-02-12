@@ -5,7 +5,6 @@
   import type { PipoConfig } from "../../types";
   import { pipoio } from "../../pipoio";
 
-  let fetchError: string;
   let error: string;
 
   async function fetch() {
@@ -25,7 +24,6 @@
         config,
       };
     } catch (e) {
-      fetchError = onError(e);
       return {
         names: [],
         active: "",

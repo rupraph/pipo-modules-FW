@@ -19,4 +19,4 @@
   />
 {/if}
 
-<DisabledWarning enabled={!osc.enabled} feature="OSC" />
+<DisabledWarning enabled={!osc.enabled} />

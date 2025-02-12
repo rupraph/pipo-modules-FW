@@ -1,7 +1,7 @@
 <script lang="ts">
   import CCConfig from "./cc-config.svelte";
   import NoteConfig from "./note-config.svelte";
-  import type { MidiConfig, SensorConfig } from "../../types";
+  import type { MidiConfig } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Range from "../form/Range.svelte";
   import DisabledWarning from "./disabled-warning.svelte";
@@ -31,4 +31,4 @@
   <NoteConfig config={midi} bind:isThresholdMode={sensormode} />
 {/if}
 
-<DisabledWarning enabled={!midi.enabled} feature="MIDI" />
+<DisabledWarning enabled={!midi.enabled} />

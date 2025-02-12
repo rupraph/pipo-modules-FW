@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pipoio } from "../pipoio";
+  import { PipoIO, pipoio } from "../pipoio";
   import { isLive } from "../services";
   import WifiConnect from "./wifi/connect.svelte";
   import Signal from "./wifi/signal.svelte";

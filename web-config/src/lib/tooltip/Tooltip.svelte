@@ -11,9 +11,8 @@
     const {
       x: bx,
       y: by,
-      width,
       height,
-    } = event.currentTarget!.getBoundingClientRect();
+    } = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
     x = bx;
     y = by + height + 5;
   }
@@ -23,7 +22,7 @@
       y: by,
       width,
       height,
-    } = event.currentTarget!.getBoundingClientRect();
+    } = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
     x = bx;
     y = by + height + 5;
   }

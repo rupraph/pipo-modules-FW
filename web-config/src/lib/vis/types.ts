@@ -5,9 +5,9 @@ export type PipoEvents<T extends PipoTypes> = {
   noteOff: { note: number };
   sensor: { axis: PipoKeys[T]; value: number; withinWindow: boolean };
   controlChange: { control: number; value: number };
-  fps: { drames: number; dt: number };
+  fps: { frames: number; dt: number };
   logs: { entries: string[] };
   connect: void;
   disconnect: void;
-  rssi: number;
+  rssi: { rssi: number };
 };

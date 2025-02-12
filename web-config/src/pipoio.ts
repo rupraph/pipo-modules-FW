@@ -10,7 +10,9 @@ function parse(msg: string) {
   const axis = isSensor ? command.replace("sensor", "") : "";
   return { command, args, axis, isSensor };
 }
-class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
+export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
+  PipoEvents<T>
+> {
   private socket?: WebSocket;
   private paused: boolean = false;
   private busy: boolean = false;
@@ -32,10 +34,9 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       ) {
         return;
       }
-      this.onDisconnect();
       if (this.paused) return;
       this.connect();
-    }, 5000) as any as number;
+    }, 500) as any as number;
   }
 
   async pause() {
@@ -116,6 +117,7 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   }
 
   private connect() {
+    if (this.socket?.readyState === WebSocket.OPEN) return;
     this.isConnecting = true;
     const url = import.meta.env.VITE_STATIC_IP
       ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
@@ -219,9 +221,17 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     this.cleanup();
     clearInterval(this.resurect);
   }
-}
 
+  on<K extends keyof PipoEvents<T>>(
+    event: K,
+    listener: (evt: PipoEvents<T>[K]) => void
+  ): this {
+    // @ts-expect-error
+    return super.on(event, listener);
+  }
+}
 export const pipoio = new PipoIO();
+// @ts-expect-error global
 window.pipio = pipoio;
 
 // Handle cleanup during HMR
@@ -229,7 +239,9 @@ if (import.meta.hot) {
   // hook before the page reloads
   import.meta.hot.accept(); // Accept HMR updates for this module
   import.meta.hot.dispose(() => {
+    // @ts-expect-error private
     clearInterval(pipoio.resurect); // Clear the interval when the module is replaced
+    // @ts-expect-error private
     pipoio.resurect = null;
   });
 }

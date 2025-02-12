@@ -13,6 +13,12 @@ const analogMinMax = {
   max: 1023,
 };
 export const minMax: InputMinMax = {
+  unknown: {
+    "": {
+      min: 0,
+      max: 0,
+    },
+  },
   range: {
     dist: {
       // distance in cm
@@ -42,5 +48,7 @@ export const minMax: InputMinMax = {
     T2: analogMinMax,
     T3: analogMinMax,
     T4: analogMinMax,
+    T5: analogMinMax,
+    T6: analogMinMax,
   },
 };

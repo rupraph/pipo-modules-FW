@@ -112,4 +112,4 @@
   PROBLEM !
 {/if}
 
-<DisabledWarning enabled={!hid.enabled} feature="HID" />
+<DisabledWarning enabled={!hid.enabled} />

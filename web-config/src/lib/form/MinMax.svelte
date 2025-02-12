@@ -15,12 +15,16 @@
   const minId = uid();
   const maxId = uid();
 
-  function onMinChange(v: number) {
+  function onMinChange(evt: Event) {
+    const target = evt.target as HTMLInputElement;
+    const v = +target.value;
     low = Math.min(v, high);
     color = fillColor();
   }
 
-  function onMaxChange(v: number) {
+  function onMaxChange(evt: Event) {
+    const target = evt.target as HTMLInputElement;
+    const v = +target.value;
     high = Math.max(v, low);
     color = fillColor();
   }
@@ -56,7 +60,7 @@
         {max}
         {step}
         bind:value={low}
-        on:input={(v) => onMinChange(v.target.value)}
+        on:input={onMinChange}
       />
       {#if mode === "double"}
         <input
@@ -65,7 +69,7 @@
           {max}
           {step}
           bind:value={high}
-          on:input={(v) => onMaxChange(v.target.value)}
+          on:input={onMaxChange}
         />
       {/if}
       <span
@@ -86,7 +90,7 @@
       {max}
       {step}
       bind:value={low}
-      on:change={(v) => onMinChange(v.target.value)}
+      on:change={onMinChange}
     />
     <label class="max" for={maxId}>{maxLabel}:</label>
     <input
@@ -97,7 +101,7 @@
       {max}
       {step}
       bind:value={high}
-      on:change={(v) => onMaxChange(v.target.value)}
+      on:change={onMaxChange}
     />
   </div>
 </div>

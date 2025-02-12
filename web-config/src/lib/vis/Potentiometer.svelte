@@ -2,7 +2,6 @@
   import { onMount, onDestroy } from "svelte";
   import { sound } from "./sound";
   import { pipoio } from "../../pipoio";
-  let error: string;
   let angle = 0;
   let value = 0;
   export let ccNumber = 0;
@@ -26,22 +25,16 @@
 </script>
 
 <div class="layout">
-  {#if error}
-    <div class="error">
-      <p>{error}</p>
+  <div class="pote-layout">
+    <div class="pote" style="transform: rotate({angle + 135}deg)">
+      <span></span>
     </div>
-  {:else}
-    <div class="pote-layout">
-      <div class="pote" style="transform: rotate({angle + 135}deg)">
-        <span></span>
-      </div>
-      <div class="deg bl">{min}</div>
-      <div class="deg tl">{interp(0.33)}</div>
-      <div class="deg tr">{interp(0.66)}</div>
-      <div class="deg br">{max}</div>
-      <div class="value">{value}</div>
-    </div>
-  {/if}
+    <div class="deg bl">{min}</div>
+    <div class="deg tl">{interp(0.33)}</div>
+    <div class="deg tr">{interp(0.66)}</div>
+    <div class="deg br">{max}</div>
+    <div class="value">{value}</div>
+  </div>
 </div>
 
 <style>
