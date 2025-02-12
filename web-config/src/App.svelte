@@ -9,6 +9,7 @@
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
+  import { onMount, onDestroy } from "svelte";
 
   // this likely causes slow load as it loads image first. -> "eager"
   // only the image from the right type should be loaded by the client
@@ -63,10 +64,26 @@
       console.log("Rebooting...");
     });
   }
-
-  const batt = pipoio.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
-    console.log("Batt voltage:", data);
+  //Battery level stuff
+  let batt: Promise<number>;
+  let intervalId: number;
+  async function fetchBatteryLevel() {
+    const { data } = await pipoio.get("/battlevel", { timeout: 2000 });
     return data / 1000;
+  }
+  onMount(() => {
+    // Fetch battery level immediately
+    batt = fetchBatteryLevel();
+
+    // Set up interval to fetch battery level every 5 seconds
+    intervalId = setInterval(() => {
+      batt = fetchBatteryLevel();
+    }, 5000);
+  });
+
+  onDestroy(() => {
+    // Clear the interval when the component is destroyed
+    clearInterval(intervalId);
   });
 </script>
 
@@ -105,6 +122,12 @@
               <p>Waiting for Pipo to respond...</p>
             {:then resp}
               <span><bold>Batt Voltage: </bold>{resp} V</span>
+              <span
+                ><bold>Batt Level: </bold>{Math.max(
+                  0,
+                  Math.min(100, resp * 125 - 412.5)
+                )} %</span
+              >
             {/await}
           {/if}
         </Collapse>

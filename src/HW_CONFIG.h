@@ -44,7 +44,10 @@
 
 #define LOW_BAT_VOLTAGE 3300  // in mV
 #define BAT_SAMPLE_SIZE 20
-#define BATT_COEF 2.56
+#define BATT_COEF 2.0  //2.56
+// battery drops hard after 3.3v -> 0%
+// max at 4.1.
+// perc = volt * 125 -412.5
 
 //analog sensor specific definitions
 #define OFFSET_CAL_SAMPLES_NB 50
