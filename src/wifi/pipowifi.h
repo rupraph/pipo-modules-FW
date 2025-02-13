@@ -8,26 +8,47 @@
 #include <map>
 #include <string>
 
+// enum WiFiTransition {
+//   NONE,
+//   AP_TO_STA,
+//   STA_TO_AP,
+//   STA_TO_APSTA,
+//   APSTA_TO_STA,
+//   AP_TO_APSTA,
+//   APSTA_TO_AP
+// };
+struct PipoWState {
+  // WiFiTransition transition = NONE;
+  wifi_mode_t mode = WIFI_MODE_APSTA;
+  String ssid = "";
+  String password = "";
+  bool shouldScan = false;
+  bool shouldRSSI = false;
+  bool shouldDisconnect = false;
+};
+
 class PipoWifi {
-  static const uint CONNECT_TIMEOUT = 5000;
-  static const uint CHECK_TIMEOUT = 200;
+  static const uint CONNECT_TIMEOUT = 10000;
+  static const uint CHECK_TIMEOUT = 1000;
   const int WIFI_DELAY = 2000;
   const int MIN_SUBNET = 10;
+  PipoWState next;
   int subnetBase = MIN_SUBNET;
   IPAddress apIP = IPAddress(192, 168, subnetBase, 1);
   IPAddress apMask = IPAddress(255, 255, 255, 0);
-  bool shouldRefreshRSSI = true;
   unsigned long lastScan = 0;
+  bool shouldRefreshRSSI = true;
   bool scanning = false;
+  bool apStarted = false;
+  bool staStarted = false;
+  bool wifiReady = false;
+  bool isChangingAP = false;
   PipoPWManager pwm;
   std::map<String, int> signals;
   int8_t rssi;
-  /**
-   * @brief Scan (blocking) for available networks
-   */
-  void scan();
   void saveScanResult();
   void getFreeSubNet();
+  void handleWiFiEvent(arduino_event_id_t event, arduino_event_info_t info);
 
  public:
   bool configureAP();
@@ -61,49 +82,36 @@ class PipoWifi {
    * @param ssid the ssid of the network to connect to. Takes the remembered password if it exists
    * @return true if successfully connected to a WIFI network, false otherwise
    */
-  bool connect(String ssid, bool disconnect = true);
+  bool connect(String ssid);
   /**
    * @brief Tries to Connects to a WIFI network, fallback to AP if it fails
    * @param ssid the ssid of the network to connect to
    * @param password the password of the network to connect to
    * @param disconnect if true, disconnects from the current network before connecting
    */
-  bool connect(String ssid, String password, bool disconnect = true);
+  bool connect(String ssid, String password);
   /**
    * @brief Tries to connect to a WIFI network, fallback to AP if it fails
    * @return true if successfully connected to a WIFI network, false otherwise
    */
-  bool connect(bool disconnect = true);
+  bool connect();
   /**
    * @brief Switches to AP mode
    * @return true if AP mode is successfully set, false otherwise
    */
-  bool APMode();
-  /**
-   * @brief Tries to switch to AP mode, fallback to AP if it fails
-   * @return true if successfully connected to a WIFI network, false otherwise
-   */
-  bool APSTAMode();
-  /**
-   * @brief Tries to switch to STA mode, fallback to AP if it fails
-   * @return true if successfully connected to a WIFI network, false otherwise
-   */
-  bool STAMode();
-  /*
-  * @brief Starts a non blocking scan for available networks
-  * Performs a SOFT scan, because it seems live active scans are
-  * messing up with AP connection stability.
-  * @return true if effectively started
-  */
-  bool startScan();
   /*
   * @brief Returns true if a scan is currently running
   */
   bool isScanning();
-
-  void triggerRefreshRSSI();
-  void refreshRSSI();
+  bool ready();
   int8_t getRSSI();
+  void step();
+  void refresh();
+  void setMode(wifi_mode_t mode);
+  void setSSID(String ssid);
+  void setPassword(String password);
+  void requestScan();
+  void requestRSSI();
 };
 
 extern PipoWifi wifi;

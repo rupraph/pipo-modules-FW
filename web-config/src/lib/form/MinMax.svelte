@@ -73,7 +73,8 @@
         />
       {/if}
       <span
-        class="value {cursorActive ? 'cursorActive' : ''}"
+        class="value"
+        class:cursorActive
         style="--left:{toPercent(value, min, max)}"
       ></span>
     </div>

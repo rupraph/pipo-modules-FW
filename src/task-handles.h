@@ -6,5 +6,7 @@ TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
 TaskHandle_t hwuiTaskHandle;
 TaskHandle_t dnsTaskHandle;
-TaskHandle_t rssiTaskHandle;
+TaskHandle_t wifiTaskHandle;
+TaskHandle_t debugMonitorTaskHandle;
+
 #endif  // PIPO_TASK_HANDLES_H

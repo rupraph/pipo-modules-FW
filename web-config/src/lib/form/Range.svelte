@@ -57,7 +57,7 @@
   <input type="number" {id} name={label} {min} {max} {step} bind:value />
 
   <button
-    class={value <= min ? "disabled" : ""}
+    class:disabled={value <= min}
     style="padding:10px;"
     on:click={() => {
       value -= step;
@@ -72,7 +72,7 @@
     on:focusout={onmouseup}>-</button
   >
   <button
-    class={value >= max ? "disabled" : ""}
+    class:disabled={value >= max}
     style="padding:10px;"
     on:click={() => {
       value += step;

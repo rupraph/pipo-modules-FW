@@ -22,22 +22,13 @@ class PipoServer {
  public:
   PipoServer() : server(80), ws("/ws") {}
   void setup();
-  void setup_ws();
   void setup_requests();
-  void start();
-  void stop();
   void pause();
   void resume();
-
   bool isRunning();
-  bool shouldStart();
-  bool canStart();
 
  private:
-  bool ws_initialized = false;
-  bool should_start = false;
   bool is_running = false;
-  unsigned long stopDate = 0;
   AsyncWebServer server;
   AsyncWebSocket ws;
   string received_configData;

@@ -14,7 +14,8 @@
 <div class="cat-tabs hero">
   {#each items as { value, label }}
     <span
-      class="tab {value === active ? 'active' : ''}"
+      class="tab"
+      class:active={value === active}
       on:click={() => itemClick(value)}
     >
       {label}

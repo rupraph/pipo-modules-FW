@@ -25,7 +25,7 @@ export const setNetworks = (networks: Network[]) => {
 
 const refreshInterval = setInterval(() => {
   pipoio.requestRSSI();
-}, 2000);
+}, 30000);
 
 pipoio.on("rssi", ({ rssi }) => {
   setSignal(rssiToSignalStrength(rssi));

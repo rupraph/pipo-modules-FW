@@ -27,10 +27,16 @@ class PipoSocket {
   AsyncWebSocket* ws;
   unsigned long lastSendTime = 0;
   unsigned long lastCleanTime = 0;
+  unsigned long lastPingTime = 0;
+  unsigned long PING_INTERVAL = 1000;
   unsigned long iterations = 0;
-  const int ws_max_len = 2048;
-  int ws_message_len = 0;
-  char ws_message[2048];
+  const int inMaxLen = 2048;
+  int inMsgL = 0;
+  char inMsg[2048];
+  const int outMaxLen = 256;
+  int outMsgL = 0;
+  char outMsg[256];
+
   bool toSend[1] = {true};
   bool paused = false;
 };

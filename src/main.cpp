@@ -21,16 +21,10 @@ void init_filesystem();
 // I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
 
-TaskHandle_t sensorTaskHandle;
-TaskHandle_t websocketTaskHandle;
-TaskHandle_t hwuiTaskHandle;
-TaskHandle_t dnsTaskHandle;
-TaskHandle_t debugMonitorTaskHandle;
-
 void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
-    engine.update();
+    // engine.update();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
@@ -38,31 +32,44 @@ void sensorTask(void* pvParameters) {
 void websocketTask(void* pvParameters) {
   for (;;) {
     if (!pipoNetworkReady()) {
-      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
+      vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
+
+    int rssi = wifi.getRSSI();
+    int taskDelay;
+    // Adjust task delay based on RSSI
+    if (rssi > -60) {
+      taskDelay = 40;  // Strong signal → High frequency
+    } else if (rssi > -70) {
+      taskDelay = 100;  // Medium signal → Reduce frequency
+    } else if (rssi > -80) {
+      taskDelay = 250;  // Weak signal → Send less often
+    } else {
+      taskDelay = 500;  // Very poor signal → Minimize WebSocket activity
+    }
+
     pipoSocket.loop();
-    vTaskDelay(pdMS_TO_TICKS(40));  //crashes if too fast (10 crashes)
+    vTaskDelay(pdMS_TO_TICKS(taskDelay));
   }
 }
 void dnsTask(void* pvParameters) {
   for (;;) {
     if (!pipoNetworkReady()) {
-      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
+      vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
-    captivePortal.loop();
+    // captivePortal.loop();
     vTaskDelay(pdMS_TO_TICKS(100));
   }
 }
-void rssiTask(void* pvParameters) {
+void wifiTask(void* pvParameters) {
   for (;;) {
-    if (!pipoNetworkReady()) {
-      vTaskDelay(pdMS_TO_TICKS(500));  //crashes if too fast (10 crashes)
-      continue;
+    wifi.refresh();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    if (!server.isRunning() && wifi.ready()) {
+      server.resume();
     }
-    wifi.refreshRSSI();
-    vTaskDelay(pdMS_TO_TICKS(10000));
   }
 }
 
@@ -77,13 +84,14 @@ void debug_monitor(void* pvParameters) {
 
 void setup() {
   Serial.begin(115200);
+  // Serial.setDebugOutput(true);
 
   // Disable watchdog timer for debug
   // disableCore0WDT();
   // disableCore1WDT();
 
   // while (!Serial)
-  //   delay(100);  // putting wait serial here breaks usb mid/hid init
+  // delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
   /////// Init hardware user interface (leds and switches)
@@ -150,8 +158,8 @@ void setup() {
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
-  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
-  xTaskCreatePinnedToCore(rssiTask, "rssiTask", 2048, NULL, 0, &rssiTaskHandle,
+  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 0, &wifiTaskHandle,
                           0);
 }
 
@@ -159,11 +167,6 @@ void loop() {
   try {
 
     hwui.update();
-    // I dont understand why, but the server cannot restart from a
-    // response to a request. It crashes. So I need to restart it from the main loop
-    if (server.canStart()) {
-      server.resume();
-    }
 
   } catch (const std::exception& e) {
     Serial.println("Exception in main loop");
