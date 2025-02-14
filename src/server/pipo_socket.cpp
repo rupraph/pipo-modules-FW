@@ -9,24 +9,24 @@ void PipoSocket::setup() {
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
     if (type == WS_EVT_CONNECT) {
-      Serial.printf("WS Client connected");
-      // if more than 3 clients, delete the oldest one
-      if (server->count() > 3) {
-        auto clients = server->getClients();
-        for (auto* c : clients) {
-          if (c != client) {
-            c->close();
-            break;
-          }
-        }
-        ws->cleanupClients();
-      }
+      // Serial.printf("WS Client connected");
+      // // if more than 3 clients, delete the oldest one
+      // if (server->count() > 3) {
+      //   auto clients = server->getClients();
+      //   for (auto* c : clients) {
+      //     if (c != client) {
+      //       c->close();
+      //       break;
+      //     }
+      //   }
+      //   ws->cleanupClients();
+      // }
     } else if (type == WS_EVT_DISCONNECT) {
       Serial.printf("WS Client disconnected");
-      client->close();
+      // client->close();
     } else if (type == WS_EVT_ERROR) {
       uint16_t errorCode = *((uint16_t*)arg);
-      client->close(true);
+      // client->close(true);
     } else if (type == WS_EVT_PONG) {
     } else if (type == WS_EVT_DATA) {
       AwsFrameInfo* info = (AwsFrameInfo*)arg;

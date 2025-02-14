@@ -1,5 +1,5 @@
 #include <wifi/pipowifi.h>
-PipoWifi::PipoWifi(){};
+PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -16,7 +16,7 @@ void PipoWifi::setup() {
   // prevent from the Wifi to sleep: avoid latency in websockets
   WiFi.setSleep(false);
   scanning = true;
-  int num = WiFi.scanNetworks(false, false, false, 500U);
+  int num = WiFi.scanNetworks(true, false, false, 300U);
 };
 void PipoWifi::saveScanResult() {
   signals.clear();
@@ -266,8 +266,10 @@ void PipoWifi::getFreeSubNet() {
   }
 }
 void PipoWifi::step() {
-  if (scanning)
+  if (scanning || status == CONNECTING) {
+    Serial.println("Step scanning");
     return;
+  }
 
   Serial.println("Step");
   wifi_mode_t mode = WiFi.getMode();

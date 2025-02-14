@@ -33,7 +33,11 @@
 <div class="configs">
   <ul class="tabs">
     {#each items as item}
-      <li class:active={item === active} on:click={() => itemClick(item)}>
+      <li
+        class="tab"
+        class:active={item === active}
+        on:click={() => itemClick(item)}
+      >
         {#if item === active}
           {#if renaming}
             <span contenteditable bind:textContent={newname} on:keyup={onkeyup}>
