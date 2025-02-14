@@ -39,7 +39,7 @@
 </script>
 
 <nav>
-  <span class="status" class:live> </span>
+  <!-- <span class="status" class:live> </span> -->
   <span class="wifi" on:click={toggleWifi}>
     <Signal signal={wifiSignal} />
   </span>

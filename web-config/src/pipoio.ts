@@ -32,8 +32,8 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       if (this.busy || this.paused || n > 1 || this.isConnecting) {
         return;
       }
-      if (this.paused) return;
       this.socket?.close();
+      this.onDisconnect(true);
     }, 10000) as any as number;
   }
 

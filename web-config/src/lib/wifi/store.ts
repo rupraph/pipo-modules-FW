@@ -6,7 +6,7 @@ import { rssiToSignalStrength } from "./utils";
 export const wifiState = writable<WifiState>({
   ssid: "",
   signal: 0,
-  lastScan: 0,
+  lastScan: Date.now(),
   networks: [],
 });
 
