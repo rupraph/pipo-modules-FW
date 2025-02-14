@@ -22,27 +22,6 @@
         return data;
       });
   }
-  //Battery level stuff
-  let batt: Promise<number>;
-  let intervalId: number;
-  async function fetchBatteryLevel() {
-    const { data } = await pipoio.get("/battlevel", { timeout: 2000 });
-    return data / 1000;
-  }
-  onMount(() => {
-    // Fetch battery level immediately
-    batt = fetchBatteryLevel();
-
-    // Set up interval to fetch battery level every 5 seconds
-    intervalId = setInterval(() => {
-      batt = fetchBatteryLevel();
-    }, 5000);
-  });
-
-  onDestroy(() => {
-    // Clear the interval when the component is destroyed
-    clearInterval(intervalId);
-  });
 </script>
 
 <main>

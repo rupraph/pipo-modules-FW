@@ -1,11 +1,38 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
   import type { PipoInfo } from "../types";
+  import { onMount, onDestroy } from "svelte";
 
   export let info: PipoInfo;
-  const batt = pipoio.get("/battlevel", { timeout: 2000 }).then(({ data }) => {
-    return data / 1000;
+
+  let batt: number | null = null;
+  let intervalId: number;
+
+  async function fetchBatteryLevel() {
+    try {
+      const { data } = await pipoio.get("/battlevel", { timeout: 2000 });
+      batt = data / 1000;
+    } catch (error) {
+      console.error("Failed to fetch battery level:", error);
+    }
+  }
+
+  onMount(() => {
+    // Fetch battery level immediately
+    fetchBatteryLevel();
+
+    // Set up interval to fetch battery level every 5 seconds
+    intervalId = setInterval(fetchBatteryLevel, 5000);
   });
+
+  onDestroy(() => {
+    // Clear the interval when the component is destroyed
+    clearInterval(intervalId);
+  });
+
+  function capValue(value: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, value));
+  }
 </script>
 
 <div class="pipo-info">
@@ -15,11 +42,15 @@
   <span>Name</span> <span>{info.name}</span>
   <span>Version</span> <span>{info.version}</span>
   <span>Battery</span>
-  {#await batt}
+  {#if batt === null}
     <span>Waiting for Pipo to respond...</span>
-  {:then resp}
-    <span>{resp} V</span>
-  {/await}
+  {:else}
+    <span>{batt} V</span>
+    <span><bold>Batt Voltage: </bold>{batt} V</span>
+    <span
+      ><bold>Batt Level: </bold>{capValue(batt * 125 - 412.5, 0, 100)} %</span
+    >
+  {/if}
 </div>
 
 <style>
