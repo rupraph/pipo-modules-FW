@@ -14,6 +14,7 @@
   import Spinner from "../spinner.svelte";
   import { rssiToSignalStrength } from "./utils";
   import type { Network } from "./types";
+  import { fetchNetworks } from "../../services/wifi";
 
   let editing = "";
   let showPassword = false;
@@ -43,48 +44,7 @@
       }
     }
   }
-  async function fetchNetworks() {
-    for (let i = 0; i < 5; i++) {
-      const { data } = await pipoio.get<string>("/wifi-networks");
-      if (!data || data === "Scanning") {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        continue;
-      }
-      const [_, ...lines] = data.trim().split("\n");
-      const networks = lines
-        .map((line) => {
-          const [_, ssid, signal, connected, known] = line.match(
-            /"(.*)" (-?\d+) (\d+) (\d+)/
-          )!;
 
-          const quality = rssiToSignalStrength(parseInt(signal));
-          return {
-            ssid,
-            known: known === "1",
-            connected: connected === "1",
-            quality,
-          };
-        })
-        .filter((e) => e.ssid)
-        .sort((a, b) => {
-          if (a.connected) return -1;
-          if (b.connected) return 1;
-          if (a.known && !b.known) return -1;
-          if (!a.known && b.known) return 1;
-          return b.quality - a.quality;
-        });
-      const connected = networks.find((n) => n.connected);
-      setNetworks(networks);
-      if (connected) {
-        setSignal(connected.quality);
-        setSSID(connected.ssid);
-      } else {
-        setSignal(0);
-        setSSID("");
-      }
-      break;
-    }
-  }
   export async function scan() {
     if (waiting) return;
     pipoio.pause();
@@ -249,6 +209,9 @@
 
 <section class="connection" class:waiting>
   <h3>Networks</h3>
+  <button class="primary" class:disabled={waiting} on:click={() => scan()}
+    >Scan</button
+  >
   {#if waiting && networks.length === 0}
     <Spinner />
     <p>Scanning for networks...</p>
@@ -353,9 +316,7 @@
         {/each}
       </ul>
     {/if}
-    <button class="primary" class:disabled={waiting} on:click={() => scan()}
-      >Scan</button
-    >
+
     <!-- {:else if 0}
     <div class="buttons">
       <button
@@ -386,6 +347,8 @@
     gap: 1em;
     font-size: 1em;
     padding: 0 0.5em 0.5em 0.5em;
+    max-height: calc(100vh - 10em);
+    overflow-y: auto;
   }
   .connection.waiting,
   .connection.waiting * {

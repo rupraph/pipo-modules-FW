@@ -5,9 +5,11 @@
   import Signal from "./wifi/signal.svelte";
   import Modal from "./modal.svelte";
   import { wifiState } from "./wifi/store";
+  import { fetchNetworks } from "../services/wifi";
 
   let wifiSignal = 4;
   let wifiOpen = false;
+  let wifiSsid = "";
   function toggleWifi() {
     wifiOpen = !wifiOpen;
   }
@@ -17,7 +19,11 @@
   });
   wifiState.subscribe((value) => {
     wifiSignal = value.signal;
+    wifiSsid = value.ssid;
   });
+
+  $: fetchNetworks();
+
   let fps = 0;
   const max = 10;
   let last = 0;
@@ -35,8 +41,9 @@
 <nav>
   <span class="status" class:live> </span>
   <span class="wifi" on:click={toggleWifi}>
-    <Signal signal={wifiSignal} />Wi-Fi
+    <Signal signal={wifiSignal} />
   </span>
+  <span class="ssid" on:click={toggleWifi}>{wifiSsid} </span>
 </nav>
 <Modal bind:open={wifiOpen}>
   <WifiConnect />
@@ -46,7 +53,6 @@
   nav {
     width: 100%;
     display: flex;
-    justify-content: flex-end;
     padding: 0.5em;
     gap: 1em;
     align-items: center;
@@ -65,7 +71,12 @@
     filter: drop-shadow(0 0 0.5em var(--green));
   }
   .wifi {
+    margin-left: auto;
     cursor: pointer;
     height: 1em;
+    width: 2em;
+  }
+  .ssid {
+    cursor: pointer;
   }
 </style>
