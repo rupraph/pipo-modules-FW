@@ -98,7 +98,7 @@ void PipoServer::setup_requests() {
     try {
       config.set(request->getParam("config")->value());
       pipoDebugHeap();
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       config.save();
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
@@ -134,7 +134,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.load_config(request->getParam("name")->value().c_str(), true);
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       return request->send(200, "text/plain", "Active config set");
     } catch (const std::exception e) {
       Serial.println("error loading config");
@@ -149,7 +149,7 @@ void PipoServer::setup_requests() {
     }
     try {
       config.delete_config(request->getParam("name")->value());
-      config.apply(engine, osc, true);
+      config.apply(engine, osc, DEBUG_CONFIG);
       return request->send(200, "text/plain", "Config deleted");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -222,7 +222,7 @@ void PipoServer::setup_requests() {
 #endif
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
-            config.apply(engine, osc, true);
+            config.apply(engine, osc, DEBUG_CONFIG);
 #ifdef DEBUG_HEAP
             pipoDebugHeap();
 #endif
@@ -341,11 +341,10 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
-
 #ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
     try {
-      input_sensor.measure_offset_all_touch();
+      input_sensor.measure_offset_all();
       config.gather(engine);
       config.save();
       return request->send(200, "text/plain", "Offset measured");
@@ -354,6 +353,7 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
+#endif
 #endif
 
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {

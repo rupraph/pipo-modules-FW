@@ -78,12 +78,12 @@ export type PipoKeys = {
   motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw"| "magX" | "magY" | "magZ";
   range: "dist";
   analog:
-    | "A1"
-    | "A2"
-    | "A3"
-    | "A4"
-    | "A5"
-    | "A6"
+    | "A01"
+    | "A02"
+    | "A03"
+    | "A04"
+    | "A05"
+    | "A06"
     | "T1"
     | "T2"
     | "T3"
@@ -92,6 +92,8 @@ export type PipoKeys = {
     | "T6";
   unknown: "";
 };
+
+export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06";
 
 export type AxisSchema = {
   label: string;
@@ -115,10 +117,19 @@ export type SensorSettings = {
   range: {
   };
   analog: {
+    analogout: {[Key in AnalogOutKeys]: AnalogOut};
   };
   unknown: {
   };
 };
+
+export type AnalogOut = {
+  pindir: boolean;
+  outmode: number;
+  lmax: number;
+  lmin: number;
+}
+
 
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {

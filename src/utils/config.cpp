@@ -285,7 +285,7 @@ void Config::gather(Engine& engine, bool debug) {
   current_config["sensorconf"].clear();
   current_config["sensorconf"] = input_sensor.get_sensor_config();
 
-  if (debug && false) {
+  if (debug) {
     Serial.println("gathered_config");
     serializeJsonPretty(current_config, Serial);
     Serial.println("gathered_config_end");

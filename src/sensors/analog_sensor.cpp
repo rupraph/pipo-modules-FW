@@ -12,7 +12,7 @@ void AnalogSensor::setup() {
     pinMode(pair.second, INPUT);
   }
 
-  measure_offset_all_touch();
+  measure_offset_all();
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
@@ -24,7 +24,8 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   float offset = 0;
   for (int i = 0; i < num_samples; i++) {
-    if (analog_map.find(sensor_name) != analog_map.end()) {
+    if (analog_map.find(sensor_name) != analog_map.end() &&
+        analog_out.get_pin_dir(sensor_name) == PinMode::IN) {
       offset += analogRead(analog_map[sensor_name]) * 0.000806;
     } else if (touch_map.find(sensor_name) != touch_map.end()) {
       offset += touchRead(touch_map[sensor_name]);
@@ -35,7 +36,7 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
       round((offset / num_samples) * 1000.0) / 1000.0;
 }
 
-void AnalogSensor::measure_offset_all_touch() {
+void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   unordered_map<string, float> offset;
@@ -64,10 +65,12 @@ void AnalogSensor::measure_offset_all_touch() {
 void AnalogSensor::update() {
 
   for (auto const& pair : analog_map) {
-
-    sensor_dat[pair.first].raw_value = analogRead(pair.second);
-    sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-    sensor_dat[pair.first].value = sensor_dat[pair.first].raw_value * 0.000806f;
+    if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
+      sensor_dat[pair.first].raw_value = analogRead(pair.second);
+      sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+      sensor_dat[pair.first].value =
+          sensor_dat[pair.first].raw_value * 0.000806f;
+    }
   }
 
   for (auto const& pair : touch_map) {
@@ -91,10 +94,22 @@ void AnalogSensor::update() {
   process_sensor_triggers();
 }
 
-void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {}
+void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
+  if (config["analogout"].is<JsonObject>()) {
+    analog_out.set_config(config["analogout"]);
+    Serial.println("analog_out config set");
+  } else {
+    Serial.println("no analog_out config found");
+  }
+}
 
 JsonDocument AnalogSensor::get_sensor_config(bool debug) {
   JsonDocument config;
+  // only analog out to be configured for now
+  config["analogout"] = analog_out.get_config();
   return config;
 }
 

@@ -23,9 +23,14 @@ void HwUi::init() {
                      {BT_LED, {false, 500, 0.5, 0, 0, false, 30}},
                      {SEND_LED, {false, 500, 0.5, 0, 0, false, 100}},
                      {LOW_BAT_LED, {false, 500, 0.5, 0, 0, false, 100}}};
+  soft_pwm_table = {{WIFI_LED, {true, 0, 255}},
+                    {BT_LED, {true, 0, 255}},
+                    {SEND_LED, {true, 0, 255}},
+                    {LOW_BAT_LED, {true, 0, 255}}};
 }
 
 void HwUi::setup() {
+#ifndef PIPO_ANALOG
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
@@ -35,11 +40,14 @@ void HwUi::setup() {
   ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
   ledcSetup(3, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+#endif
+
   set_led(WIFI_LED, 0);
   set_led(BT_LED, 0);
   set_led(SEND_LED, 0);
   set_led(LOW_BAT_LED, 0);
   Serial.println("HW UI setup done");
+
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
@@ -52,8 +60,40 @@ void HwUi::update() {
   monitor_battery();
 }
 
+/**
+ * @brief sets brightness of led
+ */
 void HwUi::set_led(int led_name, int value) {
+#ifdef PIPO_ANALOG
+  soft_pwm_table[led_name].brightness = value;
+#else
   ledcWrite(led_channel_map[led_name], value);
+#endif
+}
+
+/**
+ * @brief this writes the soft_pwm to the led pin 
+ */
+void HwUi::update_soft_pwm() {
+  unsigned long current_micros = micros();
+  for (auto& pair : soft_pwm_table) {
+    int led_pin = pair.first;
+    soft_pwm& led = pair.second;
+    if (led.enabled) {
+      unsigned long toggle_time =
+          (led.brightness * soft_pwm_prediod_micros) / 255;
+
+      if (current_micros > (led.start_cycle + soft_pwm_prediod_micros)) {
+        led.start_cycle = current_micros;
+        continue;
+      }
+      if (current_micros > (led.start_cycle + toggle_time)) {
+        digitalWrite(led_pin, 0);
+      } else {
+        digitalWrite(led_pin, 1);
+      }
+    }
+  }
 }
 
 bool HwUi::is_pulsing(int led_name) {

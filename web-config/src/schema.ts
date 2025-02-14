@@ -96,7 +96,7 @@ export const schema: Schema = {
     },
   },
   analog: {
-    A1: {
+    A01: {
       label: "Analog 1",
       cat: "Voltage",
       unit: "V",
@@ -105,7 +105,7 @@ export const schema: Schema = {
       step: 0.1,
       index: 0,
     },
-    A2: {
+    A02: {
       label: "Analog 2",
       cat: "Voltage",
       unit: "V",
@@ -114,7 +114,7 @@ export const schema: Schema = {
       step: 0.1,
       index: 1,
     },
-    A3: {
+    A03: {
       label: "Analog 3",
       cat: "Voltage",
       unit: "V",
@@ -123,7 +123,7 @@ export const schema: Schema = {
       step: 0.1,
       index: 2,
     },
-    A4: {
+    A04: {
       label: "Analog 4",
       cat: "Voltage",
       unit: "V",
@@ -132,7 +132,7 @@ export const schema: Schema = {
       step: 0.1,
       index: 3,
     },
-    A5: {
+    A05: {
       label: "Analog 5",
       cat: "Voltage",
       unit: "V",
@@ -141,7 +141,7 @@ export const schema: Schema = {
       step: 0.1,
       index: 4,
     },
-    A6: {
+    A06: {
       label: "Analog 6",
       cat: "Voltage",
       unit: "V",

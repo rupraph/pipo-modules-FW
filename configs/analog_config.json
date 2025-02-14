@@ -1,37 +1,37 @@
 {
   "engine": {
     "engine-hid": {
-      "A1": {
+      "A01": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_DOWN",
         "stroke_mode": true
       },
-      "A2": {
+      "A02": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A3": {
+      "A03": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A4": {
+      "A04": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A5": {
+      "A05": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A6": {
+      "A06": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
@@ -75,7 +75,7 @@
       }
     },
     "engine-midi": {
-      "A1": {
+      "A01": {
         "cc_nb": 1,
         "channel": 1,
         "enabled": true,
@@ -89,7 +89,7 @@
         "scaleType": "major",
         "tl_mode": 0
       },
-      "A2": {
+      "A02": {
         "cc_nb": 2,
         "channel": 1,
         "enabled": false,
@@ -103,7 +103,7 @@
         "scaleType": "major",
         "tl_mode": 0
       },
-      "A3": {
+      "A03": {
         "cc_nb": 3,
         "channel": 1,
         "enabled": false,
@@ -117,7 +117,7 @@
         "scaleType": "major",
         "tl_mode": 0
       },
-      "A4": {
+      "A04": {
         "cc_nb": 4,
         "channel": 1,
         "enabled": false,
@@ -131,7 +131,7 @@
         "scaleType": "major",
         "tl_mode": 0
       },
-      "A5": {
+      "A05": {
         "cc_nb": 5,
         "channel": 1,
         "enabled": false,
@@ -145,7 +145,7 @@
         "scaleType": "major",
         "tl_mode": 0
       },
-      "A6": {
+      "A06": {
         "cc_nb": 6,
         "channel": 1,
         "enabled": false,
@@ -245,42 +245,42 @@
       }
     },
     "engine-osc": {
-      "A1": {
+      "A01": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "analog/A1"
       },
-      "A2": {
+      "A02": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "analog/A2"
       },
-      "A3": {
+      "A03": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "analog/A3"
       },
-      "A4": {
+      "A04": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "analog/A4"
       },
-      "A5": {
+      "A05": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "analog/A5"
       },
-      "A6": {
+      "A06": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
@@ -332,7 +332,7 @@
     }
   },
   "sensor": {
-    "A1": {
+    "A01": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -342,7 +342,7 @@
       "th_mode": false,
       "cyclic": false
     },
-    "A2": {
+    "A02": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -352,7 +352,7 @@
       "th_mode": false,
       "cyclic": false
     },
-    "A3": {
+    "A03": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -362,7 +362,7 @@
       "th_mode": false,
       "cyclic": false
     },
-    "A4": {
+    "A04": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -372,7 +372,7 @@
       "th_mode": false,
       "cyclic": false
     },
-    "A5": {
+    "A05": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -382,7 +382,7 @@
       "th_mode": false,
       "cyclic": false
     },
-    "A6": {
+    "A06": {
       "deadzone": 0.0,
       "offset": 0.0,
       "inverted": false,
@@ -455,12 +455,51 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": false,
+    "OSC_ENA": true,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1
   },
-  "sensor-conf": {}
+  "sensorconf": {
+    "analogout": {
+      "A01": {
+        "pindir": 1,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      },
+      "A02": {
+        "pindir": 0,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      },
+      "A03": {
+        "pindir": 0,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      },
+      "A04": {
+        "pindir": 0,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      },
+      "A05": {
+        "pindir": 0,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      },
+      "A06": {
+        "pindir": 0,
+        "outmode": 1,
+        "lmax": 180.0,
+        "lmin": 0.0
+      }
+    }
+  }
 }

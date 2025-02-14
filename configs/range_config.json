@@ -55,5 +55,5 @@
     "HidEnabled": false,
     "HidMode": 2
   },
-  "sensor-conf": {}
+  "sensorconf": {}
 }

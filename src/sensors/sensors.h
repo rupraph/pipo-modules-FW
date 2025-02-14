@@ -16,7 +16,6 @@ extern RangeSensor input_sensor;
 #ifdef PIPO_ANALOG
 #include "sensors/analog_sensor.h"
 extern AnalogSensor input_sensor;
-// string sensor_type = "analog";
 #endif
 
 #endif  // PIPO_SENSORS

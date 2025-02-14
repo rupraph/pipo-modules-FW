@@ -1,4 +1,5 @@
 #include "sensors/sensors.h"
+
 #ifdef PIPO_MOTION
 #include "sensors/acc_sensor.h"
 MotionSensor input_sensor;

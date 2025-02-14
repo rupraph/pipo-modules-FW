@@ -1,7 +1,7 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "hw_ui.h"
+// #include "hw_ui.h"
 #include "midi/midi_io.h"
 #include "task-handles.h"
 #include "osc/osc_handler.h"
@@ -12,6 +12,10 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 
+#ifdef PIPO_ANALOG
+#include "sensors/analog_out.h"
+#endif
+
 // quick declaration of functions
 void init_filesystem();
 // Tasks distribution
@@ -21,11 +25,23 @@ void init_filesystem();
 // I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
 
+TaskHandle_t sensorTaskHandle;
+TaskHandle_t websocketTaskHandle;
+TaskHandle_t hwuiSoftPwmTaskHandle;
+TaskHandle_t oscreceiveTaskHandle;
+TaskHandle_t dnsTaskHandle;
+TaskHandle_t debugMonitorTaskHandle;
+unsigned long last_time = 0;
+
 void sensorTask(void* pvParameters) {
   for (;;) {
     input_sensor.update();
-    // engine.update();
-    vTaskDelay(pdMS_TO_TICKS(1));
+    engine.update();
+    hwui.update();
+#ifdef PIPO_ANALOG
+    analog_out.update();  // should be in seperate task
+#endif
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 
@@ -78,9 +94,27 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magX");
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
+    Serial.println(uxTaskGetStackHighWaterMark(oscreceiveTaskHandle));
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
+
+#ifdef PIPO_ANALOG
+void oscreceiveTask(void* pvParameters) {
+  for (;;) {
+    if (WiFi.status() == WL_CONNECTED && osc.get_enabled()) {
+      osc.receive();
+    }
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+// void hwuiSoftPwmTask(void* pvParameters) {
+//   for (;;) {
+//     hwui.update_soft_pwm();
+//     vTaskDelay(pdMS_TO_TICKS(1) / 10);
+//   }
+// }
+#endif
 
 void setup() {
   Serial.begin(115200);
@@ -99,6 +133,9 @@ void setup() {
 
   hwui.init();
   hwui.setup();
+#ifdef PIPO_ANALOG
+  analog_out.setup();
+#endif
 
   /////// Init filesystem
   init_filesystem();
@@ -135,7 +172,7 @@ void setup() {
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
   Serial.println("gather and save config");
-  config.gather(engine, true);
+  config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
 #ifdef DEBUG_HEAP
@@ -154,19 +191,35 @@ void setup() {
 
   Serial.println("starting tasks");
 
+  // Todo move task to their own files
   xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
                           &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
                           &websocketTaskHandle, 0);
-  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 2048, NULL, 0, &dnsTaskHandle, 0);
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 0, &wifiTaskHandle,
-                          0);
+#ifdef PIPO_ANALOG
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
+                          &oscreceiveTaskHandle, 0);
+  // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
+  //                         &hwuiSoftPwmTaskHandle, 0);
+#endif
+  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
+  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
+  //                         &debugMonitorTaskHandle, 1);
+  // hwui.start_blink(WIFI_LED, 2000, 0.5);
+  Serial.println("Setup done");
 }
 
 void loop() {
   try {
 
-    hwui.update();
+    // hwui.update();
+    // I dont understand why, but the server cannot restart from a
+    // response to a request. It crashes. So I need to restart it from the main loop
+    hwui.update_soft_pwm();
+    if (server.should_start) {
+      vTaskDelay(pdMS_TO_TICKS(1000));
+      server.start();
+    }
 
   } catch (const std::exception& e) {
     Serial.println("Exception in main loop");

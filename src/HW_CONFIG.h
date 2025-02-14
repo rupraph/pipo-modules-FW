@@ -12,9 +12,14 @@
 
 #define DEBUG_CONFIG false
 
-#define DISABLE_USB_COMM  // only disable midi usb setup for now
-// #define INCLUDE_BLE
+#define LOG_RECEIVED_OSC false
 
+// #define DISABLE_USB_COMM  // only disable midi usb setup for now
+// #define INCLUDE_BLE
+// #define ASYNC_TCP_RUNNING_CORE 0
+// #define ENA_OSC_OUT_TESTS
+
+//HW PINS
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9
 #define BT_LED 10
@@ -37,11 +42,14 @@
 
 #endif
 
+//LEDS SETTINGS
 // general constants definitions
 #define NOTE_BLINK_TIME 20
 #define NOTE_BLINK_BRIGHTNESS 80
+#define WIFI_STA_PULSE_TIME 2000
 // #define ANALOG_TO_VOLTS 0.000806
 
+//ANALOG SETTINGS
 #define LOW_BAT_VOLTAGE 3300  // in mV
 #define BAT_SAMPLE_SIZE 20
 #define BATT_COEF 2.0  //2.56

@@ -106,7 +106,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                                                       sensor_max, 0),
                            127));
 
-            Serial.println(cc_val);
+            // Serial.println(cc_val);
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
             //Serial.println(sensor_min);
           }

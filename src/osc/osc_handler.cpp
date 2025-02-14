@@ -7,6 +7,7 @@ void OSC_handler::setup() {
 
   set_config();
   if (config.general_config["OSC_ENA"]) {
+    osc.start();
     Serial.print("OSC sending to IP: ");
     Serial.println(dest_ip.toString());
     Serial.print("on port:");
@@ -59,6 +60,60 @@ void OSC_handler::stop() {
   }
   Udp.stop();
   isStarted = false;
+}
+
+// assume data format is /pwm/1. With duty cycle btw 0 and 1
+void send_to_analog(OSCMessage& msg, int addrOffset) {
+  String address = msg.getAddress();
+  String deststring = address.substring(addrOffset + 1);
+  // int dest = deststring.toInt();
+  if (LOG_RECEIVED_OSC) {
+    Serial.print("address: ");
+    Serial.print(address);
+    Serial.print(" offset");
+    Serial.println(addrOffset);
+    Serial.print("dest: ");
+    Serial.println(deststring);
+    Serial.print("value:  ");
+    if (msg.isFloat(0)) {
+      Serial.println(msg.getFloat(0));
+    } else if (msg.isInt(0)) {
+      Serial.println(msg.getInt(0));
+    } else {
+      Serial.println("not a float or int");
+    }
+  }
+#ifdef PIPO_ANALOG
+  analog_out.set_value(deststring.c_str(), msg.getFloat(0));
+#endif
+}
+
+void OSC_handler::receive() {
+  // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
+  // keep using as much as possible the library to receive the OSC data.
+  OSCBundle bundleIN;
+  int size;
+
+  if ((size = Udp.parsePacket()) > 0) {
+    // Serial.print("Packet size: ");
+    // Serial.println(size);
+    while (size--)
+      bundleIN.fill(Udp.read());
+
+    if (!bundleIN.hasError()) {
+      // Serial.println("OSC route");
+      // this will require translators I think
+      // bundleIN.route("/pwm", pwm);
+      bundleIN.route("/out", send_to_analog);
+      // bundleIN.route("/digi", digi);
+
+      // bundleIN.dispatch("/servo", pwm);
+    } else {
+      OSCErrorCode error = bundleIN.getError();
+      Serial.print("Error: ");
+      Serial.println(error);
+    }
+  }
 }
 
 /// @brief use to update the destination IP

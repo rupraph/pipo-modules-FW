@@ -26,6 +26,7 @@
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
   import QuickConfig from "./quick-config.svelte";
+  import AnalogOutForm from "./analog-out.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
   import BoardConfig from "./board-config.svelte";
   import Switch from "../form/Switch.svelte";
@@ -277,6 +278,7 @@
   </Collapse>
   <hr class="separator" />
 {/if}
+
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig
     bind:ip={config.general.OSC_IP}
@@ -295,24 +297,32 @@
     >
   </div>
 </Collapse>
-<hr class="separator" />
-<Collapse title="HID settings" bind:value={config.general.HidEnabled}
-  ><HidGlobalConfig bind:mode={config.general.HidMode} />
-  <div style="display:flex; margin-top:1em; justify-content:right;">
-    <LoadingButton
-      onClick={submit}
-      loading={savingStatus === "loading"}
-      class={savingStatus === "success"
-        ? "success"
-        : savingStatus === "error"
-          ? "error"
-          : "primary"}
-      title="Apply and save the config in pipo">Save</LoadingButton
-    >
-  </div></Collapse
->
 
 <hr class="separator" />
+<Collapse title="Beta Features">
+  {#if $type === "analog"}
+    <Collapse title="HW Output (from OSC only)">
+      <AnalogOutForm bind:outconfig={config.sensorconf} />
+    </Collapse>
+  {/if}
+  <Collapse title="HID settings" bind:value={config.general.HidEnabled}
+    ><HidGlobalConfig bind:mode={config.general.HidMode} />
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div></Collapse
+  >
+</Collapse>
+
+<!-- <hr class="separator" />
 <Collapse title="Board settings"
   ><BoardConfig bind:wifiMode={config.general.Wifi_mode} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
