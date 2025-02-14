@@ -39,20 +39,16 @@
         <Pipoinfo info={resp} />
       </Collapse>
     </article>
+    <article>
+      <Logs />
+    </article>
   {:catch e}
     <article>
       <h3>Network error</h3>
-      <p>Maybe pipo is not connected to WiFi?</p>
-      <p>
-        Please try to connect to the Pipo network, check if the problem
-        persists.
-      </p>
       <p>{e}</p>
     </article>
   {/await}
-  <article>
-    <Logs />
-  </article>
+
   <OfflineOverlay />
 </main>
 
