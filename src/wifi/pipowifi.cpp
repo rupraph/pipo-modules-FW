@@ -1,16 +1,5 @@
 #include <wifi/pipowifi.h>
 
-void PipoWifi::onWifiConnect(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("Wifi connect event OSC/LED");
-  osc.start();
-  hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, 255);
-};
-
-void PipoWifi::onWifiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
-  osc.stop();
-  hwui.stop_pulse(WIFI_LED);
-}
-
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
@@ -25,7 +14,6 @@ void PipoWifi::setup() {
   WiFi.setAutoReconnect(true);
   // allow to connect to (WHY SO WEAK?) wep networks
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
-  WiFi.onEvent(onWifiConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
   // prevent from the Wifi to sleep: avoid latency in websockets
   WiFi.setSleep(false);
   scanning = true;
@@ -67,6 +55,9 @@ void PipoWifi::handleWiFiEvent(arduino_event_id_t event,
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
+      Serial.println("Wifi connect event OSC/LED");
+      osc.start();
+      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, 255);
       pwm.add(next.ssid, next.password);
       pwm.promote(next.ssid);
       pwm.save();
@@ -78,6 +69,8 @@ void PipoWifi::handleWiFiEvent(arduino_event_id_t event,
       break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
       Serial.println("STA DISCONNECTED!");
+      osc.stop();
+      hwui.stop_pulse(WIFI_LED);
       uint8_t reason = info.wifi_sta_disconnected.reason;
       // we disconnected from the asked AP: means wrong credentials,
       // erase the ssid and password to allow fallback to other APs

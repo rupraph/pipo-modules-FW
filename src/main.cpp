@@ -1,7 +1,7 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-// #include "hw_ui.h"
+#include "hw_ui.h"
 #include "midi/midi_io.h"
 #include "task-handles.h"
 #include "osc/osc_handler.h"
@@ -25,12 +25,6 @@ void init_filesystem();
 // I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
 
-TaskHandle_t sensorTaskHandle;
-TaskHandle_t websocketTaskHandle;
-TaskHandle_t hwuiSoftPwmTaskHandle;
-TaskHandle_t oscreceiveTaskHandle;
-TaskHandle_t dnsTaskHandle;
-TaskHandle_t debugMonitorTaskHandle;
 unsigned long last_time = 0;
 
 void sensorTask(void* pvParameters) {
@@ -41,7 +35,7 @@ void sensorTask(void* pvParameters) {
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(2));
   }
 }
 
@@ -212,19 +206,16 @@ void setup() {
 void loop() {
   try {
 
-    // hwui.update();
-    // I dont understand why, but the server cannot restart from a
-    // response to a request. It crashes. So I need to restart it from the main loop
+// hwui.update();
+// I dont understand why, but the server cannot restart from a
+// response to a request. It crashes. So I need to restart it from the main loop
+#ifdef PIPO_ANALOG
     hwui.update_soft_pwm();
-    if (server.should_start) {
-      vTaskDelay(pdMS_TO_TICKS(1000));
-      server.start();
-    }
+#endif
 
   } catch (const std::exception& e) {
     Serial.println("Exception in main loop");
     logs.writeLog(e.what());
     delay(50);
   }
-  vTaskDelay(pdMS_TO_TICKS(500));
 }

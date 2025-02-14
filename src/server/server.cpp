@@ -354,7 +354,6 @@ void PipoServer::setup_requests() {
     }
   });
 #endif
-#endif
 
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     engine.toggle_pause();

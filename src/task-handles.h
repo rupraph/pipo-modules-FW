@@ -8,5 +8,6 @@ TaskHandle_t hwuiTaskHandle;
 TaskHandle_t dnsTaskHandle;
 TaskHandle_t wifiTaskHandle;
 TaskHandle_t debugMonitorTaskHandle;
+TaskHandle_t oscreceiveTaskHandle;
 
 #endif  // PIPO_TASK_HANDLES_H
