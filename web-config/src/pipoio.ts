@@ -7,10 +7,12 @@ export let error = "";
 function parse(msg: string) {
   const [command, ...args] = msg.split(",");
   const isSensor = command.startsWith("sensor");
-  const axis = isSensor ? command.replace("sensor", "") : "";
+  const axis = isSensor ? args[0] : "";
   return { command, args, axis, isSensor };
 }
-class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
+export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
+  PipoEvents<T>
+> {
   private socket?: WebSocket;
   private paused: boolean = false;
   private busy: boolean = false;
@@ -18,29 +20,26 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   private saveTimeout = 0;
   private isConnecting = false;
   private resurect = 0;
-  private lastMsgDate = Date.now();
+  private nMsgs = 0;
+  private msgLen = 0;
   constructor() {
     super();
     this.connect();
     this.resurect = setInterval(() => {
-      const now = Date.now();
-      if (
-        this.busy ||
-        this.paused ||
-        now - this.lastMsgDate < 2000 ||
-        this.isConnecting
-      ) {
+      const n = this.nMsgs;
+      this.nMsgs = 0;
+      this.msgLen = 0;
+      if (this.busy || this.paused || n > 1 || this.isConnecting) {
         return;
       }
-      this.onDisconnect();
-      if (this.paused) return;
-      this.connect();
-    }, 5000) as any as number;
+      this.socket?.close();
+      this.onDisconnect(true);
+    }, 10000) as any as number;
   }
 
   async pause() {
     this.paused = true;
-    this.onDisconnect();
+    this.onDisconnect(false);
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   async resume() {
@@ -57,11 +56,14 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
       this.socket = undefined;
     }
   }
-  async onDisconnect() {
-    this.emit("disconnect");
-    this.cleanup();
+  async onDisconnect(sendEvent = true) {
+    if (sendEvent && !this.paused) {
+      this.emit("disconnect");
+    }
+    this.connect();
   }
   private onOpen() {
+    this.isConnecting = false;
     setTimeout(() => {
       this.emit("connect");
     }, 100);
@@ -71,16 +73,20 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
   }
   private onMessage(m: MessageEvent<string>) {
     try {
-      this.lastMsgDate = Date.now();
+      this.nMsgs++;
+      this.msgLen += m.data.length;
       const lines = m.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
         const numargs = args.map(Number);
+        if (command === "rssi") {
+          return this.emit("rssi", { rssi: numargs[0] });
+        }
         if (isSensor) {
           return this.emit("sensor", {
             axis,
-            value: numargs[0],
-            withinWindow: Boolean(numargs[1]),
+            value: numargs[1],
+            withinWindow: Boolean(numargs[2]),
           });
         }
         if (command === "noteon" || command === "noteoff") {
@@ -118,17 +124,25 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     const socket = new WebSocket(url);
     this.socket = socket;
     socket.addEventListener("open", () => this.onOpen());
-    socket.addEventListener("error", (e) => this.onError(e));
-    socket.addEventListener("close", () => this.onDisconnect());
-    socket.addEventListener("message", (m) => this.onMessage(m));
-    setTimeout(() => {
+    socket.addEventListener("error", (e) => {
       this.isConnecting = false;
-    }, 1000);
+      this.onError(e);
+    });
+    socket.addEventListener("close", () => {
+      this.isConnecting = false;
+      this.onDisconnect();
+    });
+    socket.addEventListener("message", (m) => this.onMessage(m));
   }
 
   // asserts that this.socket is not null
   private canSendWSMessage() {
-    return this.socket && !this.paused && !this.busy;
+    return (
+      this.socket &&
+      this.socket.readyState === WebSocket.OPEN &&
+      !this.paused &&
+      !this.busy
+    );
   }
   private setBusy(busy: boolean) {
     this.busy = busy;
@@ -152,6 +166,11 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
         .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
         .join("\n")}`
     );
+  }
+
+  requestRSSI() {
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send("rssi:0");
   }
   saveConfig<T extends PipoTypes>(config: PipoConfig<T>) {
     if (this.saveTimeout) {
@@ -204,9 +223,17 @@ class PipoIO<T extends PipoTypes> extends EventEmitter<PipoEvents<T>> {
     this.cleanup();
     clearInterval(this.resurect);
   }
-}
 
+  on<K extends keyof PipoEvents<T>>(
+    event: K,
+    listener: (evt: PipoEvents<T>[K]) => void
+  ): this {
+    // @ts-expect-error
+    return super.on(event, listener);
+  }
+}
 export const pipoio = new PipoIO();
+// @ts-expect-error global
 window.pipio = pipoio;
 
 // Handle cleanup during HMR
@@ -214,7 +241,9 @@ if (import.meta.hot) {
   // hook before the page reloads
   import.meta.hot.accept(); // Accept HMR updates for this module
   import.meta.hot.dispose(() => {
+    // @ts-expect-error private
     clearInterval(pipoio.resurect); // Clear the interval when the module is replaced
+    // @ts-expect-error private
     pipoio.resurect = null;
   });
 }

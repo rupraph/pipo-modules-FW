@@ -46,41 +46,39 @@
 <Collapse title="Logs">
   <div class="logs {logs.length > 6 ? 'scroll' : ''}">
     {#each logs as log}
-      <span class="log {log.type}"
-        ><bold>{log.timestamp}</bold>
-        <p>{log.message} {log.type}</p></span
-      >
+      <span>{log.timestamp}</span>
+      <span class="log {log.type}">{log.message}</span>
     {/each}
   </div>
 </Collapse>
 
 <style>
-  div {
-    width: 100%;
-  }
   .logs {
-    padding: 1rem;
-    border-bottom: 1px solid white;
+    margin: 1rem;
+    font-size: 1.1em;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-columns: 7em auto;
+    grid-auto-flow: column;
+    justify-items: start;
     width: 100%;
+    grid-auto-flow: row;
+    width: 100%;
+    column-gap: 1em;
     max-height: 300px;
     min-height: 50px;
     overflow-y: auto;
   }
-  .log {
-    display: grid;
-    grid-template-columns: 9em auto;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-content: start;
-    line-height: 1rem;
+  .logs > span:nth-child(2n + 1) {
+    font-weight: bold;
   }
-  .log.info p {
+  .log.info {
     color: #55ff55;
   }
-  .log.warning p {
+  .log.warning {
     color: #f5f500;
   }
-  .log.error p {
+  .log.error {
     background-color: #f55555;
   }
 </style>

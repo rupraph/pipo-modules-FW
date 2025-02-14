@@ -1,5 +1,5 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import { pipoio } from "../../pipoio";
+  import { pipoio, PipoIO } from "../../pipoio";
   import {
     isContinuousMode,
     isHisteresisMode,
@@ -8,21 +8,21 @@
     type SensorValues,
     type SmoothSensorValues,
     type PipoKeys,
+    type PipoTypes,
+    type SmoothSensorValue,
   } from "../../types";
-  import Checkbox from "../form/Checkbox.svelte";
   import Switch from "../form/Switch.svelte";
   import MinMax from "../form/MinMax.svelte";
-  import axios from "axios";
 
   export let sensor: SensorConfig;
   export let aschema: AxisSchema;
-  export let currentAxis: string;
-  const smoothValues: SmoothSensorValues<T> = {};
-  const withinWindowValues: SensorValues<T> = {};
-  const sensorValues: SensorValues<T> = {};
+  export let currentAxis: PipoKeys[T];
+  const smoothValues: Partial<SmoothSensorValues<T>> = {};
+  const withinWindowValues: Partial<SensorValues<T>> = {};
+  const sensorValues: Partial<SensorValues<T>> = {};
 
-  pipoio.on("sensor", ({ axis, value, withinWindow }) => {
-    withinWindowValues[axis] = withinWindow;
+  (pipoio as PipoIO<T>).on("sensor", ({ axis, value, withinWindow }) => {
+    withinWindowValues[axis] = +withinWindow;
     const now = Date.now();
     if (!smoothValues[axis]) {
       smoothValues[axis] = {
@@ -41,7 +41,11 @@
   });
 
   function animateSensor() {
-    Object.entries(smoothValues).forEach(([axis, value]) => {
+    (
+      Object.entries(smoothValues) as unknown as Array<
+        [PipoKeys[T], SmoothSensorValue]
+      >
+    ).forEach(([axis, value]) => {
       if (value.dt > 0) {
         sensorValues[axis] =
           value.old + (value.new - value.old) * (value.dt / 1000);
@@ -69,7 +73,6 @@
   {#if aschema.cat !== "Touch"}
     <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
     <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
-    <!-- {#if sensor.mode === true} -->
     <div class:disabled={!sensor.mode}>
       <Switch
         label="2-level threshold"
@@ -77,19 +80,17 @@
         design="slider"
       />
     </div>
-    <!-- {/if} -->
   {/if}
 </div>
 
 <MinMax
-  label="Sensor Range"
   bind:low={sensor.lmin}
   bind:high={sensor.lmax}
   value={sensorValues[currentAxis]}
   mode={isContinuousMode(sensor) || isHisteresisMode(sensor)
     ? "double"
     : "single"}
-  cursorActive={withinWindowValues[currentAxis]}
+  cursorActive={Boolean(withinWindowValues[currentAxis])}
   min={aschema.min}
   max={aschema.max}
   step={aschema.step}

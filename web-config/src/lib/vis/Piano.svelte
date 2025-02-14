@@ -6,8 +6,7 @@
   import { sound } from "./sound";
   import Checkbox from "../form/Checkbox.svelte";
   import { pipoio } from "../../pipoio";
-  let midi;
-  let error: string;
+  let error: string = "";
   let isMute = true;
   let autoScroll = true;
   const notes = new Array(127).fill(0).map((_, i) => i);
@@ -26,7 +25,7 @@
     "AS",
   ];
   const playing = new Array(notes.length).fill(false);
-  let timeout: number;
+  let timeout: ReturnType<typeof setTimeout>;
   function scrollTo(note: number) {
     if (!autoScroll) return;
     const element = document.querySelector(

@@ -16,11 +16,13 @@ class PipoPWManager {
 
   void setup() {
     preferences.begin("pipo-wifi", false);
-    size_t whatsLeft = preferences.freeEntries();
-    Serial.println("There are:" + (String)whatsLeft +
-                   "entries available wifi table");
     load();
   };
+
+  void clear() {
+    passwords.clear();
+    scores.clear();
+  }
 
   /**
   * @brief Saves the passwords to the preferences
@@ -87,7 +89,6 @@ class PipoPWManager {
   */
   void add(String ssid, String password) {
     std::string c_ssid = std::string(ssid.c_str());
-
     if (passwords.size() == MAX_NETWORKS) {
       unsigned char minScore = MAX_SCORE;
       std::string minSSID = "";
@@ -105,7 +106,6 @@ class PipoPWManager {
     if (scores.find(c_ssid) == scores.end())
       return;
     scores[c_ssid] = BASE_SCORE;
-    // save();
   }
 
   /**

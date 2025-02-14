@@ -10,19 +10,10 @@ void CaptivePortal::start(AsyncWebServer* server) {
     return;
   }
   Serial.println("Yes");
-  dns_server = new DNSServer();
-  dns_server->setErrorReplyCode(DNSReplyCode::NoError);
-  dns_server->start(53, "*", WiFi.softAPIP());
-  // Handle common captive portal probe URLs
-  server->on("/generate_204", HTTP_GET,
-             [](AsyncWebServerRequest* request) { request->redirect("/"); });
-
-  server->on("/hotspot-detect.html", HTTP_GET,
-             [](AsyncWebServerRequest* request) { request->redirect("/"); });
-
-  // Catch-all handler for unhandled routes (302 redirect to root)
-  // server->onNotFound(
-  //     [](AsyncWebServerRequest* request) { request->redirect("/"); });
+  // dns_server = new DNSServer();
+  // dns_server->setErrorReplyCode(DNSReplyCode::NoError);
+  // TODO: if Pipo changes IP ip, we need to update this
+  // dns_server->start(53, "*", WiFi.softAPIP());
 }
 void CaptivePortal::stop() {
   if (dns_server != nullptr) {
@@ -39,10 +30,6 @@ void CaptivePortal::loop() {
 }
 
 bool CaptivePortal::canEnable() {
-  Serial.println("canEnable " + (String)(wifi.getStatus() == WL_CONNECTED) +
-                 " " +
-                 (String)(WiFi.getMode() == WIFI_MODE_AP ||
-                          WiFi.getMode() == WIFI_MODE_APSTA));
   return wifi.getStatus() == PipoWifi::CONNECTED &&
          (WiFi.getMode() == WIFI_MODE_AP || WiFi.getMode() == WIFI_MODE_APSTA);
 }

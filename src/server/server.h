@@ -20,27 +20,24 @@ using namespace std;
 
 class PipoServer {
  public:
-  PipoServer() : server(80), ws("/ws"), events("/events") {}
+  PipoServer() : server(80), ws("/ws") {}
   void setup();
-  void setup_ws();
-  void onMessage(AsyncWebSocketClient* client);
   void setup_requests();
-  void start();
-  void stop();
-  bool is_running = false;
-  bool should_start = false;
-  bool ws_initialized = false;
+  void pause();
+  void resume();
+  bool isRunning();
 
  private:
+  bool is_running = false;
   AsyncWebServer server;
   AsyncWebSocket ws;
-  AsyncEventSource events;
-
   string received_configData;
-  const int ws_max_len = 2048;
-  int ws_message_len = 0;
-  char ws_message[2048];
 };
+
+/**
+ * @brief Check if the WiFi is connected and the server is running
+ */
+bool pipoNetworkReady();
 
 extern PipoServer server;
 

@@ -55,10 +55,6 @@
   h3:hover {
     text-decoration: underline;
   }
-  .title-container > input {
-    height: 1.5em;
-    width: 1.5em;
-  }
   .arrow {
     margin-right: 1em;
     border-radius: 3px;

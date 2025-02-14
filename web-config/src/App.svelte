@@ -5,42 +5,13 @@
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
-  import { AxiosError } from "axios";
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
   import { onMount, onDestroy } from "svelte";
-
-  // this likely causes slow load as it loads image first. -> "eager"
-  // only the image from the right type should be loaded by the client
-  // (for later: also, while we migh want to keep all images when running in dev to develop on al three pipo, only the right image could be uploaded to the board.
-  const images = import.meta.glob("./assets/pattern-*.svg", {
-    eager: true,
-    as: "url",
-  });
+  import Pipoinfo from "./lib/pipoinfo.svelte";
 
   let type: PipoTypes = "unknown";
-  let error: string;
-  function onError(e: AxiosError) {
-    if (!e.config || !e.config.url) {
-      error = `Error fetching info: ${e}`;
-      console.error("Error fetching info:", e);
-      return;
-    }
-    const url = new URL(e.config.url);
-    if (
-      e.code === "ECONNABORTED" ||
-      e.code === "ERR_ADDRESS_UNREACHABLE" ||
-      e.code === "ERR_NETWORK"
-    ) {
-      error = `Error fetching ${url.pathname}: Maybe Pipo is not connected to the network?
-      \nPlease connect Pipo to the network and refresh the page.\n
-      Tried to from ${url.origin}`;
-    } else {
-      error = `Error fetching info: ${e}`;
-    }
-    console.error("Error fetching info:", e);
-  }
   function fetch() {
     return pipoio
       .get<PipoInfo>("/info", { timeout: 5000 })
@@ -49,20 +20,7 @@
         ip.set(data.ip);
         pipoType.set(type);
         return data;
-      })
-      .catch((e) => onError(e));
-  }
-  let info = fetch();
-  pipoio.on("connect", () => {
-    info = fetch();
-  });
-
-  $: PatternUrl = type ? `/assets/pattern-${type}.svg` : `/sheep.jpg`;
-
-  function reboot() {
-    pipoio.get("/reboot").then(() => {
-      console.log("Rebooting...");
-    });
+      });
   }
   //Battery level stuff
   let batt: Promise<number>;
@@ -90,50 +48,29 @@
 <main>
   <Toasts />
   <Menu />
-  <div class="title-container">
-    <h1>Pipo {type}</h1>
-    <img
-      src={images[`./assets/pattern-${type}.svg`]}
-      alt="Pattern"
-      class="pattern-image"
-    />
-  </div>
+  {#await fetch()}
+    <p>Waiting for Pipo to respond...</p>
+  {:then resp}
+    <div class="title-container">
+      <h1>Pipo {type}</h1>
+      <img src={`/pattern-${type}.svg`} alt="Pattern" class="pattern-image" />
+    </div>
+    <Configs />
+    <article>
+      <Collapse title="Info">
+        <Pipoinfo info={resp} />
+      </Collapse>
+    </article>
+    <article>
+      <Logs />
+    </article>
+  {:catch e}
+    <article>
+      <h3>Network error</h3>
+      <p>{e}</p>
+    </article>
+  {/await}
 
-  {#if error}{/if}
-  <Configs />
-
-  <article>
-    <Logs />
-  </article>
-
-  {#if !error && info}
-    {#await info}
-      <p>Waiting for Pipo to respond...</p>
-    {:then resp}
-      <article>
-        <Collapse title="Info" class="info">
-          <span><bold>MAC</bold>{resp.mac}</span>
-          <span><bold>IP</bold>{resp.ip}</span>
-          <span><bold>Type</bold>{resp.type}</span>
-          <span><bold>Name</bold>{resp.name}</span>
-          <span><bold>Version</bold>{resp.version}</span>
-          {#if !error && batt}
-            {#await batt}
-              <p>Waiting for Pipo to respond...</p>
-            {:then resp}
-              <span><bold>Batt Voltage: </bold>{resp} V</span>
-              <span
-                ><bold>Batt Level: </bold>{Math.max(
-                  0,
-                  Math.min(100, resp * 125 - 412.5)
-                )} %</span
-              >
-            {/await}
-          {/if}
-        </Collapse>
-      </article>
-    {/await}
-  {/if}
   <OfflineOverlay />
 </main>
 
@@ -145,7 +82,6 @@
     align-items: center;
     max-width: 600px;
   }
-
   .pattern-image {
     position: absolute;
     top: 50%;
@@ -168,13 +104,5 @@
     position: relative;
     z-index: 1; /* Ensure the title is above the image */
     color: rgb(60, 60, 60); /* Adjust the text color for better visibility */
-  }
-
-  :global(.info) span {
-    font-size: 1.1em;
-    display: grid;
-    grid-template-columns: 6em auto;
-    grid-auto-flow: column;
-    justify-items: start;
   }
 </style>

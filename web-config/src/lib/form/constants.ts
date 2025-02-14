@@ -34,7 +34,7 @@ export const colors = [
 ].reduce((colors, color) => {
   colors.push(color, color, color, color);
   return colors;
-}, []);
+}, [] as number[][]);
 export const cubeElements = [
   [2, 1, 0],
   [2, 0, 3], // positive z face.

@@ -1,3 +1,5 @@
+import type { AxiosError } from "axios";
+
 export function throttle(fn: Function, delay: number) {
   let last = 0;
   return function (...args: any[]) {

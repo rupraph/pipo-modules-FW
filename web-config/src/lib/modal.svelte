@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { scale } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
   export let open = false;
 
   function close(e: KeyboardEvent) {
@@ -18,7 +20,13 @@
     on:keyup={close}
     tabindex="0"
   ></div>
-  <div class="modal">
+  <div
+    class="modal"
+    transition:scale={{
+      duration: 300,
+      easing: cubicOut,
+    }}
+  >
     <slot></slot>
     <div class="close" on:click={() => (open = false)}>✖</div>
   </div>
@@ -29,9 +37,9 @@
     top: 50%;
     left: 50%;
     z-index: 21;
-    width: calc(50vw - 2em);
-    height: calc(100vh - 2em);
-    background-color: var(--bg-lighter);
+    width: calc(100vw - 8px);
+    max-width: 600px;
+    background-color: var(--bg-tertiary);
     position: fixed;
     border-style: solid;
     overflow: hidden;
@@ -44,9 +52,6 @@
     padding: 5px;
     font-size: 2em;
     cursor: pointer;
-  }
-  .trigger.open {
-    opacity: 0;
   }
   .overlay {
     top: 0;

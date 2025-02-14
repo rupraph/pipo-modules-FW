@@ -1,6 +1,5 @@
 <script lang="ts">
   import { uid } from "../../utils";
-  export let label: string;
   export let min: number = 0;
   export let max: number = 1;
   export let mode: "double" | "single" = "double";
@@ -16,12 +15,16 @@
   const minId = uid();
   const maxId = uid();
 
-  function onMinChange(v: number) {
+  function onMinChange(evt: Event) {
+    const target = evt.target as HTMLInputElement;
+    const v = +target.value;
     low = Math.min(v, high);
     color = fillColor();
   }
 
-  function onMaxChange(v: number) {
+  function onMaxChange(evt: Event) {
+    const target = evt.target as HTMLInputElement;
+    const v = +target.value;
     high = Math.max(v, low);
     color = fillColor();
   }
@@ -57,7 +60,7 @@
         {max}
         {step}
         bind:value={low}
-        on:input={(v) => onMinChange(v.target.value)}
+        on:input={onMinChange}
       />
       {#if mode === "double"}
         <input
@@ -66,11 +69,12 @@
           {max}
           {step}
           bind:value={high}
-          on:input={(v) => onMaxChange(v.target.value)}
+          on:input={onMaxChange}
         />
       {/if}
       <span
-        class="value {cursorActive ? 'cursorActive' : ''}"
+        class="value"
+        class:cursorActive
         style="--left:{toPercent(value, min, max)}"
       ></span>
     </div>
@@ -87,7 +91,7 @@
       {max}
       {step}
       bind:value={low}
-      on:change={(v) => onMinChange(v.target.value)}
+      on:change={onMinChange}
     />
     <label class="max" for={maxId}>{maxLabel}:</label>
     <input
@@ -98,7 +102,7 @@
       {max}
       {step}
       bind:value={high}
-      on:change={(v) => onMaxChange(v.target.value)}
+      on:change={onMaxChange}
     />
   </div>
 </div>

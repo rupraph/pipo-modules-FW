@@ -37,13 +37,9 @@ h4{
   padding: 2em;
 }
 
-label {
-  cursor: pointer;
+main> article > .title-container > h3{
+  font-size: 1.6em;
 }
-.input:hover > label {
-  text-decoration: underline;
-}
-
 input {
   border: none;
   padding: 1rem;
@@ -57,7 +53,6 @@ input {
   font-family: inherit;
   border: none;
   outline: none;
-  background-color: #0000;
   text-align: inherit;
   height: 44px;
   scrollbar-width: none;

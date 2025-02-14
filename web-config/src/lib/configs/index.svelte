@@ -1,12 +1,10 @@
 <script lang="ts">
   import Config from "./config.svelte";
-  import { configSave } from "../../services/config";
   import Tabs from "./tabs.svelte";
   import { formatNumbers, onError } from "../../utils";
   import type { PipoConfig } from "../../types";
   import { pipoio } from "../../pipoio";
 
-  let fetchError: string;
   let error: string;
 
   async function fetch() {
@@ -26,7 +24,6 @@
         config,
       };
     } catch (e) {
-      fetchError = onError(e);
       return {
         names: [],
         active: "",
@@ -133,11 +130,5 @@
 <style>
   .configs {
     width: 100%;
-  }
-  .delete {
-    position: fixed;
-    right: 0;
-    top: 0;
-    margin: 1em;
   }
 </style>

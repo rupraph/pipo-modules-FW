@@ -2,7 +2,7 @@
   export let bars = 5;
   export let signal = 4;
 
-  function getHeight(i: number) {
+  function getHeight(i: number, signal: number) {
     return i > signal ? 0 : ((i + 1) / bars) * 100;
   }
 </script>
@@ -11,7 +11,7 @@
   {#each Array(bars) as _, i}
     <div
       class="bar"
-      style="height: {getHeight(i)}%;
+      style="height: {getHeight(i, signal)}%;
             background: color-mix(in oklab, #f70000 {(1 - signal / bars) *
         100}%, #8fbe00);
     "

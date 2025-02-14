@@ -2,6 +2,8 @@ export type BaseMidiConfig = {
   channel: number;
   tl_mode: number; // 0=cc, 1 note
   enabled: boolean;
+  min_input: number;
+  max_input: number;
 };
 export type CCConfig = {
   cc_nb: number;
@@ -38,7 +40,7 @@ export function isBasicThresholdMode(config: SensorConfig): boolean {
 export type SensorConfig = {
   mode: boolean;
   th_mode: boolean;
-  deadzone: number; 
+  deadzone: number;
   lmax: number;
   lmin: number;
   offset: number;
@@ -176,6 +178,7 @@ export type PipoInfo = {
   mac: string;
   ip: string;
   type: string;
+  version: string;
   name: string;
 };
 

@@ -1,8 +1,8 @@
 <script lang="ts" generics="T extends PipoTypes">
   import type { Schema, PipoConfig, PipoKeys, PipoTypes } from "../../types";
-
+  import { pipoType as type } from "../../services";
+  import { schema } from "../../schema";
   export let config: PipoConfig<T>;
-  export let schema: Schema<T>;
   let columns: number = 0;
   let headers: PipoKeys[T][] = [];
   const rows: {
@@ -25,7 +25,11 @@
   $: {
     if (config) {
       columns = Object.keys(schema).length + 1;
-      headers = Object.entries(schema)
+      headers = (
+        Object.entries(schema[$type]) as unknown as Array<
+          [keyof Schema[T], Schema[T][keyof Schema[T]]]
+        >
+      )
         .sort((a, b) => a[1].index - b[1].index)
         .map(([key]) => key) as PipoKeys[T][];
     }

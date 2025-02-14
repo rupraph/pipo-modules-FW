@@ -8,6 +8,7 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "build": "vite build",
+    "type-check": "svelte-check --threshold error --ignore src/*",
     "upload": "./scripts/upload.sh",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },

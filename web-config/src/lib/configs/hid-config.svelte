@@ -4,9 +4,6 @@
   import Text from "../form/Text.svelte";
   import type { SensorConfig, HidConfig } from "../../types";
   import DisabledWarning from "./disabled-warning.svelte";
-  import { onMount } from "svelte";
-
-  export let hidEnabled: boolean;
   export let hidMode: number;
   export let sensor: SensorConfig;
   export let hid: HidConfig;
@@ -115,4 +112,4 @@
   PROBLEM !
 {/if}
 
-<DisabledWarning enabled={!hid.enabled} feature="HID" />
+<DisabledWarning enabled={!hid.enabled} />

@@ -28,11 +28,6 @@
 </span>
 
 <style>
-  .radio {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: auto;
-  }
   .radio-wrapper {
     display: grid;
     grid-template-rows: auto;
