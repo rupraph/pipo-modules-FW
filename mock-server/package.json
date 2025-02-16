@@ -1,0 +1,19 @@
+{
+  "name": "pipo-mock-server",
+  "version": "1.0.0",
+  "description": "A server to mock a Pipo board",
+  "main": "index.js",
+  "scripts": {
+    "start": "vite-node src/index.ts"
+  },
+  "author": "",
+  "dependencies": {
+    "express": "^4.21.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/ws": "^8.5.14",
+    "vite-node": "^3.0.5"
+  }
+}
