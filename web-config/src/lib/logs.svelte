@@ -2,37 +2,52 @@
   import { onDestroy, onMount } from "svelte";
   import Collapse from "./collapse.svelte";
   import { pipoio } from "../pipoio";
+  import { addToast, toasts } from "./toast";
   type Log = {
     type: "error" | "warning" | "info";
     message: string;
-    timestamp: string;
+    timestamp: number;
   };
   let logs: Log[] = [];
   let interval = 0;
-  function format(timestamp: string) {
-    const date = new Date(parseInt(timestamp));
+  function format(timestamp: number) {
+    const date = new Date(timestamp);
     date.setHours(date.getHours() - 1);
     return `${date.toTimeString().split(" ")[0]}:${date.getMilliseconds()}`;
   }
 
   function parse(entries: string[], append = false) {
+    const lastLog = logs[logs.length - 1];
+    let minNewTimeStamp = -Infinity;
     const news = entries
       .map((entry) => {
         const match = entry.match(/(\d+):\((\d)\)(.*)/);
         if (!match) return null;
+        const timestamp = parseInt(match[1]);
+        minNewTimeStamp = Math.max(minNewTimeStamp, timestamp);
         return {
-          timestamp: format(match[1]),
+          timestamp,
           type: ["info", "warning", "error"][parseInt(match[2])],
           message: match[3],
         };
       })
       .filter(Boolean) as Log[];
+
+    if (lastLog && lastLog.timestamp > minNewTimeStamp) {
+      addToast({
+        type: "error",
+        message: "Pipo has reboot",
+        timeout: 5000,
+      });
+    }
     logs = append ? [...logs, ...news] : news;
   }
   pipoio.on("logs", ({ entries }) => {
+    console.log("socket logs");
     parse(entries, true);
   });
   function fetch() {
+    console.log("get logs");
     pipoio.get("/logs").then(({ data }) => {
       parse(data.split("--"));
     });
@@ -46,7 +61,7 @@
 <Collapse title="Logs">
   <div class="logs {logs.length > 6 ? 'scroll' : ''}">
     {#each logs as log}
-      <span>{log.timestamp}</span>
+      <span>{format(log.timestamp)}</span>
       <span class="log {log.type}">{log.message}</span>
     {/each}
   </div>
