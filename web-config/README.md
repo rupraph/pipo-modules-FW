@@ -59,18 +59,4 @@ npm run upload
 
 ### Working without a Pipo
 
-If you dont have a Pipo board or if you want to quickly develop and test without having to upload the code to your pipo all the time, you can simply run:
-
-```bash
-motion=1 npm run dev
-```
-or 
-```bash
-analog=1 npm run dev
-```
-or
-```bash
-range=1 npm run dev
-```
-
-Thoose three commands will start a mock-server imitating Pipo's behavior. -->
+If you dont have a Pipo board or if you want to quickly develop and test without having to upload the code to your pipo all the time, read the instructions in the mock-server/README.md file.
