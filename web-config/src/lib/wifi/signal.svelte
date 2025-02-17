@@ -1,9 +1,21 @@
 <script lang="ts">
   export let bars = 5;
   export let signal = 4;
-
-  function getHeight(i: number, signal: number) {
-    return i > signal ? 0 : ((i + 1) / bars) * 100;
+  export let disconnected = false;
+  function getHeight(disconnected: boolean, i: number, signal: number) {
+    return i > signal && !disconnected ? 0 : ((i + 1) / bars) * 100;
+  }
+  function getBorder(disconnected: boolean) {
+    return disconnected ? "1px solid var(--bg-lighter)" : "none";
+  }
+  function getColor(disconnected: boolean, signal: number, bars: number) {
+    return disconnected
+      ? "transparent"
+      : signal / bars < 0.33
+        ? "var(--red)"
+        : signal / bars < 0.66
+          ? "var(--main-darker)"
+          : "var(--green)";
   }
 </script>
 
@@ -11,10 +23,10 @@
   {#each Array(bars) as _, i}
     <div
       class="bar"
-      style="height: {getHeight(i, signal)}%;
-            background: color-mix(in oklab, #f70000 {(1 - signal / bars) *
-        100}%, #8fbe00);
-    "
+      style="height: {getHeight(disconnected, i, signal)}%;
+            background: {getColor(disconnected, signal, bars)};
+            border:{getBorder(disconnected)}; 
+            "
     ></div>
   {/each}
 </div>
