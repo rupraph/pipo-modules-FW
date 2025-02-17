@@ -28,6 +28,7 @@ button:hover {
 button.primary {
   color: black;
   background-color: var(--main);
+  padding: 18px
 }
 button.error{
   color: white;
