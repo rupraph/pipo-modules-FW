@@ -35,12 +35,12 @@
       <img src={`/pattern-${type}.svg`} alt="Pattern" class="pattern-image" />
     </div>
     <Configs />
-    <article>
+    <article class="content section-borders">
       <Collapse title="Info">
         <Pipoinfo info={resp} />
       </Collapse>
     </article>
-    <article>
+    <article class="content section-borders">
       <Logs />
     </article>
   {:catch e}
@@ -60,6 +60,7 @@
     justify-content: space-around;
     align-items: center;
     max-width: 600px;
+    gap: 1em;
   }
   .pattern-image {
     position: absolute;
