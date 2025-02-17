@@ -333,7 +333,7 @@
   },
   "sensor": {
     "A01": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -343,7 +343,7 @@
       "cyclic": false
     },
     "A02": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -353,7 +353,7 @@
       "cyclic": false
     },
     "A03": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -363,7 +363,7 @@
       "cyclic": false
     },
     "A04": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -373,7 +373,7 @@
       "cyclic": false
     },
     "A05": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -383,7 +383,7 @@
       "cyclic": false
     },
     "A06": {
-      "deadzone": 0.0,
+      "deadzone": 0.1,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
