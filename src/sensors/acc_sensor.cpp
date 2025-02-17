@@ -37,15 +37,22 @@ void MotionSensor::update() {
 
   //////////  Read acceleration data
   if (icm20948.linearAccelDataIsReady()) {
-    icm20948.readLinearAccelData(&raw_accX, &raw_accY, &raw_accZ);
+    icm20948.readLinearAccelData(&sensor_dat["accX"].raw_value,
+                                 &sensor_dat["accY"].raw_value,
+                                 &sensor_dat["accZ"].raw_value);
     convert_accell();
   }
 
   if (icm20948.magDataIsReady()) {
-    icm20948.readMagData(&raw_magX, &raw_magY, &raw_magZ);
-    sensor_dat["magX"].value = raw_magX;
-    sensor_dat["magY"].value = raw_magY;
-    sensor_dat["magZ"].value = raw_magZ;
+    icm20948.readMagData(&sensor_dat["magX"].raw_value,
+                         &sensor_dat["magY"].raw_value,
+                         &sensor_dat["magZ"].raw_value);
+    sensor_dat["magX"].value =
+        filter_map["magX"].process(sensor_dat["magX"].raw_value);
+    sensor_dat["magY"].value =
+        filter_map["magY"].process(sensor_dat["magY"].raw_value);
+    sensor_dat["magZ"].value =
+        filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
   }
 
@@ -59,7 +66,7 @@ void MotionSensor::update() {
   // icm20948.readHarData(&har);
 
   //should add step counter
-
+  process_sensor_neutral_filter();
   process_sensor_triggers();
 
   //Todo: try read additional data from sensor
@@ -113,26 +120,39 @@ void MotionSensor::calc_euler_angles() {
   //Todo: make order of euler angles configurable
   double siny_cosp = +2.0 * (quat_w * quat_z + quat_x * quat_y);
   double cosy_cosp = +1.0 - 2.0 * (quat_y * quat_y + quat_z * quat_z);
-  sensor_dat["yaw"].value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+  sensor_dat["yaw"].raw_value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+
+  sensor_dat["yaw"].value =
+      filter_map["yaw"].process(sensor_dat["yaw"].raw_value);
 
   // pitch (y-axis rotation)
   double sinp = +2.0 * (quat_w * quat_y - quat_z * quat_x);
   if (fabs(sinp) >= 1)
-    sensor_dat["pitch"].value =
+    sensor_dat["pitch"].raw_value =
         copysign(PI / 2, sinp) * 180.0 / PI;  // use 90 degrees if out of range
   else
-    sensor_dat["pitch"].value = asin(sinp) * 180.0 / PI;
+    sensor_dat["pitch"].raw_value = asin(sinp) * 180.0 / PI;
+
+  sensor_dat["pitch"].value =
+      filter_map["pitch"].process(sensor_dat["pitch"].raw_value);
 
   // roll (x-axis rotation)
   double sinr_cosp = +2.0 * (quat_w * quat_x + quat_y * quat_z);
   double cosr_cosp = +1.0 - 2.0 * (quat_x * quat_x + quat_y * quat_y);
-  sensor_dat["roll"].value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+  sensor_dat["roll"].raw_value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+
+  sensor_dat["roll"].value =
+      filter_map["roll"].process(sensor_dat["roll"].raw_value);
 }
 
 void MotionSensor::convert_accell() {
-  sensor_dat["accX"].value = raw_accX;
-  sensor_dat["accY"].value = raw_accY;
-  sensor_dat["accZ"].value = raw_accZ;
+  //no conversion here
+  sensor_dat["accX"].value =
+      filter_map["accX"].process(sensor_dat["accX"].raw_value);
+  sensor_dat["accY"].value =
+      filter_map["accY"].process(sensor_dat["accY"].raw_value);
+  sensor_dat["accZ"].value =
+      filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
 void MotionSensor::measure_offset(const string& axis_name) {

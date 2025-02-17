@@ -94,6 +94,104 @@ class MovingAverageFilter {
   }
 };
 
+//Exponential Moving Average filter
+class EMAFilter {
+ private:
+  float alpha;  // Smoothing factor
+  float prevValue;
+  bool initialized;
+
+ public:
+  EMAFilter(float alpha = 0.1)
+      : alpha(alpha), prevValue(0.0f), initialized(false) {}
+
+  void setAlpha(float newAlpha) { alpha = newAlpha; }
+
+  float process(float rawValue) {
+    if (!initialized) {
+      prevValue = rawValue;
+      initialized = true;
+    }
+    float emaValue = alpha * rawValue + (1 - alpha) * prevValue;
+    prevValue = emaValue;
+    return emaValue;
+  }
+};
+
+// this is a deadband filter. returns new value if it is outside of the deadband, else returns prevValue
+// can work for creating a neutral band, but not good when moving
+class DeadBandFilter {
+ private:
+  float deadband;
+  float prevValue;
+
+ public:
+  DeadBandFilter(float deadband = 0.1) : deadband(deadband), prevValue(0.0f) {}
+
+  void setDeadband(float newDeadband) { deadband = newDeadband; }
+
+  float process(float rawValue) {
+    if (abs(rawValue - prevValue) > deadband) {
+      prevValue = rawValue;
+    }
+    return prevValue;
+  }
+};
+
+//
+class StateBasedFilter {
+ private:
+  float deadband;
+  float prevValue;
+  bool isMoving;
+  int stableCount;
+  int stableThreshold;
+
+ public:
+  StateBasedFilter(float deadband = 0.1, int stableThreshold = 10)
+      : deadband(deadband),
+        prevValue(0.0f),
+        isMoving(false),
+        stableCount(0),
+        stableThreshold(stableThreshold) {}
+
+  void setDeadband(float newDeadband) {
+    deadband = newDeadband;
+    Serial.print("deadband: ");
+    Serial.println(deadband);
+  }
+  void setStableThreshold(int newStableThreshold) {
+    stableThreshold = newStableThreshold;
+  }
+
+  float process(float rawValue) {
+    if (deadband == 0) {
+      return rawValue;
+    }
+    if (isMoving) {
+      // If moving, follow the input closely
+      prevValue = rawValue;
+      // Check if the signal has stabilized
+      if (abs(rawValue - prevValue) <= deadband) {
+        stableCount++;
+        if (stableCount >= stableThreshold) {
+          isMoving = false;
+          stableCount = 0;
+        }
+      } else {
+        stableCount = 0;
+      }
+    } else {
+      // If stable, apply deadband filter
+      if (abs(rawValue - prevValue) > deadband) {
+        prevValue = rawValue;
+        isMoving = true;
+      }
+    }
+    return prevValue;
+  }
+};
+
 // To be tested (copilot proposal)
 // class KalmannFilter {
 //     private:

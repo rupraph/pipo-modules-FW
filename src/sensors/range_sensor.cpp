@@ -66,7 +66,7 @@ void RangeSensor::update() {
 
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-
+      process_sensor_neutral_filter();
       process_sensor_triggers();
     }
     if (status == 0) {

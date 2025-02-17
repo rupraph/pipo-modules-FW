@@ -32,6 +32,7 @@ void sensorTask(void* pvParameters) {
     input_sensor.update();
     engine.update();
     hwui.update();
+    input_sensor.teleplot_data("magX");
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
@@ -112,7 +113,7 @@ void oscreceiveTask(void* pvParameters) {
 
 void setup() {
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
+  // Serial.setDebugOutput(true);
 
   // Disable watchdog timer for debug
   // disableCore0WDT();

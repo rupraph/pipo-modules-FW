@@ -47,11 +47,13 @@ class MotionSensor : public Sensor {
   bool relative_mode =
       true;  //uses quat6 or quat9 (6 = relative to start, 9 = absolute - corection to north is slow)
 
-  unordered_map<string, LowPassFilter> lp_filter_map = {
-      {"roll", LowPassFilter(10)},
-      {"pitch", LowPassFilter(10)},
-      {"yaw", LowPassFilter(10)},
-  };
+  //theses filters are for noise reduction.
+  unordered_map<string, EMAFilter> filter_map = {
+      {"roll", EMAFilter(0.7)}, {"pitch", EMAFilter(0.7)},
+      {"yaw", EMAFilter(0.7)},  {"accX", EMAFilter(0.7)},
+      {"accY", EMAFilter(0.7)}, {"accZ", EMAFilter(0.7)},
+      {"magX", EMAFilter(0.7)}, {"magY", EMAFilter(0.7)},
+      {"magZ", EMAFilter(0.7)}};
 
   ArduinoICM20948 icm20948;
   ArduinoICM20948Settings icmSettings = {
@@ -88,13 +90,13 @@ class MotionSensor : public Sensor {
   float quat_z;
 
   // holds raw data from sensor
-  float raw_accX;
-  float raw_accY;
-  float raw_accZ;
+  //   float raw_accX;
+  //   float raw_accY;
+  //   float raw_accZ;
 
-  float raw_magX;
-  float raw_magY;
-  float raw_magZ;
+  //   float raw_magX;
+  //   float raw_magY;
+  //   float raw_magZ;
 
   bool measure_offset_flag = false;
   string axis_to_measure_offset;

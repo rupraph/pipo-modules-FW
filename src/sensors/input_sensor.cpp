@@ -102,6 +102,16 @@ void Sensor::process_sensor_triggers() {
     }
   }
 }
+/**
+ * @brief This applies the dynamic dead band filter to the sensor data
+ */
+void Sensor::process_sensor_neutral_filter() {
+  for (auto& dat : sensor_dat) {
+    string axis = dat.first;
+    SensorDat& axis_data = dat.second;
+    axis_data.value = axis_data.NeutralFilter.process(axis_data.value);
+  }
+}
 
 void Sensor::teleplot_data(string axis) {
   if (sensor_dat.find(axis) == sensor_dat.end()) {
@@ -110,7 +120,11 @@ void Sensor::teleplot_data(string axis) {
   } else {
     Serial.print(">");
     Serial.print(axis.c_str());
-    Serial.print(": ");
+    Serial.print("raw_value: ");
+    Serial.println(sensor_dat[axis].raw_value);
+    Serial.print(">");
+    Serial.print(axis.c_str());
+    Serial.print("value: ");
     Serial.println(sensor_dat[axis].value);
   }
 }
@@ -167,7 +181,7 @@ void Sensor::set_axis_config(JsonObject config, bool debug) {
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
     // should likely use getter/setter here
-    sensor_dat[axis_name].deadzone = config[axis_name]["deadzone"];
+    set_deadzone(axis_name, config[axis_name]["deadzone"]);
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
     sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
     sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
@@ -305,7 +319,7 @@ bool Sensor::get_inverted(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-int Sensor::get_deadzone(const std::string& axis) {
+float Sensor::get_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].deadzone;
   else
@@ -434,10 +448,11 @@ void Sensor::set_inverted(const std::string& axis, bool value) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-void Sensor::set_deadzone(const std::string& axis, int value) {
-  if (sensor_dat.find(axis) != sensor_dat.end())
+void Sensor::set_deadzone(const std::string& axis, float value) {
+  if (sensor_dat.find(axis) != sensor_dat.end()) {
     sensor_dat[axis].deadzone = value;
-  else
+    sensor_dat[axis].NeutralFilter.setDeadband(value);
+  } else
     throw std::invalid_argument("Axis not found: " + axis);
 }
 

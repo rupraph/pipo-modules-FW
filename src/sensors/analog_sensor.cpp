@@ -90,7 +90,7 @@ void AnalogSensor::update() {
 
     //Todo: try to have an adaptative max ? -> when no touch on, min can be adapted.
   }
-
+  process_sensor_neutral_filter();
   process_sensor_triggers();
 }
 

@@ -15,10 +15,13 @@ enum Protocol { OSC, MIDI, HID };
 //This is a generic class for sensors.
 //It defines the basic structure of a sensor to make it adaptable with the engine and various translators classes
 
+//todo should have a class axis instead of a struct to hold the sensor data
+
 struct SensorDat {
 
   // Config attributes
-  float deadzone;  // supposed to be % of the total range. value for now
+  float
+      deadzone;  // supposed to be % of the total range. value for now. is used to set a deadzone around zero + dynamic neutral band filter
   float offset;
   bool inverted;
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
@@ -47,6 +50,8 @@ struct SensorDat {
   trigger_flag untrigger_flags;
   bool ws_monitor = false;
 
+  StateBasedFilter NeutralFilter;
+
   // should split in structs for config items and live data.
   SensorDat()
       : deadzone(0.0),
@@ -60,7 +65,8 @@ struct SensorDat {
         mode(false),
         th_mode(false),
         bool_value(false),
-        bool_value_prev(false) {}
+        bool_value_prev(false),
+        NeutralFilter(0) {}
 };
 
 class Sensor {
@@ -76,6 +82,7 @@ class Sensor {
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
   void process_sensor_triggers();
+  void process_sensor_neutral_filter();
   float clip(float value, float min, float max);
 
   void teleplot_data(string axis);
@@ -101,8 +108,8 @@ class Sensor {
   bool get_inverted(const std::string& axis);
   void set_inverted(const std::string& axis, bool value);
 
-  int get_deadzone(const std::string& axis);
-  void set_deadzone(const std::string& axis, int value);
+  float get_deadzone(const std::string& axis);
+  void set_deadzone(const std::string& axis, float value);
 
   float get_offset(const std::string& axis);
   void set_offset(const std::string& axis, float value);
