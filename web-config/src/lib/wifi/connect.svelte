@@ -4,17 +4,10 @@
   import { slide } from "svelte/transition";
   import { addToast, type Toast } from "../toast";
   import { pipoio } from "../../pipoio";
-  import {
-    setLastScan,
-    setNetworks,
-    setSignal,
-    setSSID,
-    wifiState,
-  } from "./store";
+  import { setLastScan, wifiState } from "./store";
   import Spinner from "../spinner.svelte";
-  import { rssiToSignalStrength } from "./utils";
   import type { Network } from "./types";
-  import { fetchNetworks, fetchState, fetchState } from "../../services/wifi";
+  import { fetchNetworks, fetchState } from "../../services/wifi";
 
   let editing = "";
   let showPassword = false;
