@@ -45,6 +45,7 @@ export type WifiState = {
   ssid: string;
   password: string;
   ip: string;
+  apIP: string;
 };
 
 export type Info = {
