@@ -21,7 +21,7 @@
     tabindex="0"
   ></div>
   <div
-    class="modal"
+    class="modal section-borders"
     transition:scale={{
       duration: 300,
       easing: cubicOut,
@@ -41,7 +41,6 @@
     max-width: 600px;
     background-color: var(--bg-tertiary);
     position: fixed;
-    border-style: solid;
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
@@ -50,7 +49,7 @@
     top: 0;
     right: 0;
     padding: 5px;
-    font-size: 2em;
+    font-size: 1.6em;
     cursor: pointer;
   }
   .overlay {
