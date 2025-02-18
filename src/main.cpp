@@ -118,8 +118,8 @@ void setup() {
   // disableCore0WDT();
   // disableCore1WDT();
 
-  while (!Serial)
-    delay(100);  // putting wait serial here breaks usb mid/hid init
+  // while (!Serial)
+  //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
 // setCpuFrequencyMhz(80); will be usefull to save power on battery
 /////// Init hardware user interface (leds and switches)

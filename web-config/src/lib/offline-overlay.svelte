@@ -10,7 +10,7 @@
   <div class="overlay">
     <article class="scroll">
       <h2>Pipo is offline, waiting for reconnection</h2>
-      <!-- <h3>Troubleshooting:</h3> -->
+      <h3>Check your connection to Pipo</h3>
       <ul>
         <li>
           <!-- <h4>Pipo could not be reached</h4> -->
@@ -54,7 +54,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(50, 50, 50, 0.95);
+    background-color: rgba(50, 50, 50, 0.99);
     z-index: 1000;
     cursor: wait;
     display: flex;
@@ -64,7 +64,14 @@
     cursor: wait;
   }
   h2 {
+    padding-top: 10vw;
     margin: 0;
+    font-size: x-large;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: large;
   }
   article {
     padding: 1em;
