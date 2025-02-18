@@ -41,7 +41,7 @@ export async function fetchNetworks() {
         setSSID(connected.ssid);
       } else {
         setSignal(0);
-        setSSID("Disconected");
+        setSSID("Disconnected");
       }
       break;
     }

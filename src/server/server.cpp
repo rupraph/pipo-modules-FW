@@ -20,15 +20,9 @@ void PipoServer::setup() {
   }
   Serial.println("Start server");
   //Todo: check lib exemple. can be improved
-  server.onNotFound([&](AsyncWebServerRequest* request) {
-    Serial.println("not found: " + request->url());
-    if (request->method() == HTTP_OPTIONS) {
-      request->send(200);
-    } else {
-      request->send(404);
-    }
-  });
+
   server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
+
   setup_requests();
   // captivePortal.start(&server);
   pipoSocket.start(&ws);
@@ -60,7 +54,6 @@ void PipoServer::setup_requests() {
 #else
     const char* version = "unknown";
 #endif
-
     String info = "{";
     info += "\"name\":\"unnamed Pipo\",";
     info += "\"version\":\"";
@@ -97,7 +90,10 @@ void PipoServer::setup_requests() {
     }
     try {
       config.set(request->getParam("config")->value());
+#ifdef DEBUG_HEAP
       pipoDebugHeap();
+#endif
+
       config.apply(engine, osc, DEBUG_CONFIG);
       config.save();
       return request->send(200, "text/plain", "Config set");
@@ -114,7 +110,9 @@ void PipoServer::setup_requests() {
     }
     try {
       String name = request->getParam("name")->value();
+#ifdef DEBUG_HEAP
       pipoDebugHeap();
+#endif
       return request->send(LittleFS, config.get_path(name), "application/json");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -303,6 +301,7 @@ void PipoServer::setup_requests() {
       return request->send(503, "text/plain", "Scanning");
     }
     wifi.requestScan();
+
     return request->send(200, "text/plain", "Scan started");
   });
 
@@ -358,6 +357,15 @@ void PipoServer::setup_requests() {
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     engine.toggle_pause();
     return request->send(200, "text/plain", "Engine paused");
+  });
+
+  server.onNotFound([&](AsyncWebServerRequest* request) {
+    Serial.println("not found: " + request->url());
+    if (request->method() == HTTP_OPTIONS) {
+      request->send(200);
+    } else {
+      request->send(404);
+    }
   });
 }
 
