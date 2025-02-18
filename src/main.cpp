@@ -32,7 +32,6 @@ void sensorTask(void* pvParameters) {
     input_sensor.update();
     engine.update();
     hwui.update();
-    input_sensor.teleplot_data("magX");
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
@@ -113,7 +112,7 @@ void oscreceiveTask(void* pvParameters) {
 
 void setup() {
   Serial.begin(115200);
-  // Serial.setDebugOutput(true);
+  Serial.setDebugOutput(true);
 
   // Disable watchdog timer for debug
   // disableCore0WDT();
@@ -122,9 +121,11 @@ void setup() {
   while (!Serial)
     delay(100);  // putting wait serial here breaks usb mid/hid init
 
-  // setCpuFrequencyMhz(80); will be usefull to save power on battery
-  /////// Init hardware user interface (leds and switches)
+// setCpuFrequencyMhz(80); will be usefull to save power on battery
+/////// Init hardware user interface (leds and switches)
+#ifdef DEBUG_HEAP
   pipoDebugHeap();
+#endif
 
   hwui.init();
   hwui.setup();
@@ -197,7 +198,9 @@ void setup() {
   // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
+  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 0, &wifiTaskHandle,
+                          0);
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
   // hwui.start_blink(WIFI_LED, 2000, 0.5);
