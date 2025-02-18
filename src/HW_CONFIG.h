@@ -8,7 +8,7 @@
 #define PIPO_TYPE "unknown"
 #endif
 
-#define DEBUG_HEAP false
+// #define DEBUG_HEAP
 
 #define DEBUG_CONFIG false
 
@@ -47,6 +47,7 @@
 #define NOTE_BLINK_TIME 20
 #define NOTE_BLINK_BRIGHTNESS 80
 #define WIFI_STA_PULSE_TIME 2000
+#define WIFI_PULSE_BRIGHTNESS 80
 // #define ANALOG_TO_VOLTS 0.000806
 
 //ANALOG SETTINGS

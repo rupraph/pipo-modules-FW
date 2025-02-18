@@ -155,11 +155,7 @@ class StateBasedFilter {
         stableCount(0),
         stableThreshold(stableThreshold) {}
 
-  void setDeadband(float newDeadband) {
-    deadband = newDeadband;
-    Serial.print("deadband: ");
-    Serial.println(deadband);
-  }
+  void setDeadband(float newDeadband) { deadband = newDeadband; }
   void setStableThreshold(int newStableThreshold) {
     stableThreshold = newStableThreshold;
   }

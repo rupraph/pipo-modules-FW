@@ -152,6 +152,7 @@ void setup() {
   // while (!Serial)
   //   delay(100);
   /////// Init wifi
+  osc.setup();
   wifi.setup();
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);

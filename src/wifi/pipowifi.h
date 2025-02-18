@@ -49,7 +49,7 @@ class PipoWifi {
   int8_t rssi;
   void saveScanResult();
   void getFreeSubNet();
-  void handleWiFiEvent(arduino_event_id_t event, arduino_event_info_t info);
+  void handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info);
 
  public:
   bool configureAP();

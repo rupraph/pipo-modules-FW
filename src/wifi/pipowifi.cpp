@@ -30,34 +30,33 @@ void PipoWifi::saveScanResult() {
   lastScan = millis();
 };
 
-void PipoWifi::handleWiFiEvent(arduino_event_id_t event,
-                               arduino_event_info_t info) {
+void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
   switch (event) {
-    case ARDUINO_EVENT_WIFI_READY:
+    case ARDUINO_EVENT_WIFI_READY:  //ESP32 WiFi ready
       Serial.println("WiFi Ready!");
       break;
-    case ARDUINO_EVENT_WIFI_SCAN_DONE:
+    case ARDUINO_EVENT_WIFI_SCAN_DONE:  //ESP32 finish scanning AP
       Serial.println("WiFi Scan completed");
       scanning = false;
       saveScanResult();
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_START:
+    case ARDUINO_EVENT_WIFI_STA_START:  //ESP32 station start
       staStarted = true;
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_STOP:
+    case ARDUINO_EVENT_WIFI_STA_STOP:  //ESP32 station stop
       staStarted = false;
       next.ssid = "";
       next.password = "";
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_CONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_CONNECTED:  //ESP32 station connected to AP
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
       Serial.println("Wifi connect event OSC/LED");
       osc.start();
-      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, 255);
+      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, WIFI_PULSE_BRIGHTNESS);
       pwm.add(next.ssid, next.password);
       pwm.promote(next.ssid);
       pwm.save();
@@ -67,7 +66,7 @@ void PipoWifi::handleWiFiEvent(arduino_event_id_t event,
       isChangingAP = false;
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:  //ESP32 station disconnected from AP
       Serial.println("STA DISCONNECTED!");
       osc.stop();
       hwui.stop_pulse(WIFI_LED);
@@ -83,50 +82,49 @@ void PipoWifi::handleWiFiEvent(arduino_event_id_t event,
       status = DISCONNECTED;
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE:
+    case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE:  //the auth mode of AP connected by ESP32 station changed
       Serial.println("STA AUTHMODE CHANGE!");
       break;
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:  //ESP32 station got IP from connected AP
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP6:  //ESP32 station interface v6IP addr is preferred
       Serial.println("STA GOT IP!");
       status = CONNECTED;
       Serial.print("IP Address: ");
       Serial.println(WiFi.localIP());
       step();
       break;
-    case ARDUINO_EVENT_WIFI_STA_LOST_IP:
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:  //ESP32 station lost IP and the IP is reset to 0
       Serial.println("STA LOST IP!");
       Serial.println("WiFi disconnected!");
       status = DISCONNECTED;
       step();
       break;
-    case ARDUINO_EVENT_WIFI_AP_START:
+    case ARDUINO_EVENT_WIFI_AP_START:  //ESP32 soft-AP start
       apStarted = true;
       Serial.println("AP START!");
       step();
       break;
-    case ARDUINO_EVENT_WIFI_AP_STOP:
+    case ARDUINO_EVENT_WIFI_AP_STOP:  //ESP32 soft-AP stop
       apStarted = false;
       Serial.println("AP STOP!");
       step();
       break;
-    case ARDUINO_EVENT_WIFI_AP_STACONNECTED:
+    case ARDUINO_EVENT_WIFI_AP_STACONNECTED:  //a station connected to ESP32 soft-AP
       Serial.println("APSTA CONNECTED!");
       break;
-    case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:
+    case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:  //a station disconnected from ESP32 soft-AP
       Serial.println("APSTA DISCONNECTED!");
+      osc.stop();
       break;
-    case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:
+    case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:  //ESP32 soft-AP assign an IP to a connected station
       Serial.println("APSTA IPASSIGNED!");
+      osc.start();  //seems not to work when AP started but no sta connected
       break;
-    case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:
+    case ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED:  //Receive probe request packet in soft-AP interface
       Serial.println("STA PROB!");
       break;
-    case ARDUINO_EVENT_WIFI_AP_GOT_IP6:
-      Serial.println("STA AP GOT IPV6!");
-      break;
-    case ARDUINO_EVENT_WIFI_FTM_REPORT:
-      Serial.println("STA WIFI FTM REPORT!");
+    case ARDUINO_EVENT_WIFI_AP_GOT_IP6:  //ESP32 ap interface v6IP addr is preferred
+      Serial.println("AP GOT IPV6!");
       break;
     default:
       Serial.print("Unknown event ");
@@ -335,7 +333,7 @@ void PipoWifi::refresh() {
   wifi_mode_t prevMode = WiFi.getMode();
 
   if (!scanning && next.shouldScan) {
-    Serial.println("Scan");
+    Serial.println("Wifi Scan");
     scanning = WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     next.shouldScan = false;
   } else if (next.shouldRSSI && !scanning) {

@@ -6,13 +6,13 @@ OSC_handler osc;
 void OSC_handler::setup() {
 
   set_config();
-  if (config.general_config["OSC_ENA"]) {
-    osc.start();
-    Serial.print("OSC sending to IP: ");
-    Serial.println(dest_ip.toString());
-    Serial.print("on port:");
-    Serial.println(String(out_port));
-  }
+  // if (config.general_config["OSC_ENA"]) {
+  //   // osc.start();
+  //   // Serial.print("OSC sending to IP: ");
+  //   // Serial.println(dest_ip.toString());
+  //   // Serial.print("on port:");
+  //   // Serial.println(String(out_port));
+  // }
 #ifdef DEBUG_HEAP
   pipoDebugHeap();
 #endif
@@ -38,16 +38,20 @@ void OSC_handler::set_config() {
 
 /// @brief start the UDP connection.
 void OSC_handler::start() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("Can't start OSC, WiFi is not connected"));
-    return;
-  }
+  // if (WiFi.status() != WL_CONNECTED) {
+  //   Serial.println(F("Can't start OSC, WiFi is not connected"));
+  //   return;
+  // }
 
   if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-    Serial.println(F("Can't start OSC, No destination IP or port set"));
+    Serial.println(F("Can't start OSC, No destination IP or port defined"));
     return;
   } else {
     Serial.println(F("Starting OSC"));
+    Serial.print("OSC sending to IP: ");
+    Serial.println(dest_ip.toString());
+    Serial.print("on port:");
+    Serial.println(String(out_port));
     Udp.begin(out_port);
     isStarted = true;
     Serial.println(F("OSC started"));
@@ -89,6 +93,9 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
 }
 
 void OSC_handler::receive() {
+  if (isStarted == false || !enabled) {
+    return;
+  }
   // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
   // keep using as much as possible the library to receive the OSC data.
   OSCBundle bundleIN;
@@ -143,6 +150,9 @@ void OSC_handler::set_out_port(int port) {
 }
 
 void OSC_handler::send_osc_message(string address, float value) {
+  if (!isStarted || !enabled) {
+    return;
+  }
   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
 
@@ -164,13 +174,8 @@ void OSC_handler::send_osc_message(string address, float value) {
 void OSC_handler::set_enabled(bool ena) {
   if (ena) {
     enabled = true;
-    if (!isStarted) {
-      start();
-    }
-
   } else {
     enabled = false;
-    stop();
   }
 }
 
