@@ -251,7 +251,7 @@
     },
     "engine-special": {
       "quat": {
-        "enabled": true,
+        "enabled": false,
         "osc_addr": "motion/quat"
       }
     }

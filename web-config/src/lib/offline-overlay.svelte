@@ -9,8 +9,9 @@
 {#if !live}
   <div class="overlay">
     <article class="scroll">
-      <h2>Pipo is offline, waiting for reconnection</h2>
-      <h3>Check your connection to Pipo</h3>
+      <h2>Pipo is offline, waiting for reconnection...</h2>
+      <p style="font-size: x-large;">¯\_(ツ)_/¯</p>
+      <p>Check your WiFi connection to Pipo</p>
       <ul>
         <li>
           <!-- <h4>Pipo could not be reached</h4> -->
@@ -41,7 +42,6 @@
           </ul> -->
         </li>
       </ul>
-      <p class="padding"></p>
     </article>
   </div>
 {/if}
@@ -54,7 +54,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(50, 50, 50, 0.99);
+    background-color: rgba(50, 50, 50, 1);
     z-index: 1000;
     cursor: wait;
     display: flex;

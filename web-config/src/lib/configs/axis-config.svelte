@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import Tooltip from "../tooltip/Tooltip.svelte";
+
   import { pipoio, PipoIO } from "../../pipoio";
   import {
     isContinuousMode,
@@ -66,23 +68,6 @@
   }
 </script>
 
-<div
-  style="display: flex; align-items: left; justify-content: space-around; margin-bottom:1.5em"
->
-  <Switch label="Inverted" bind:value={sensor.inverted} design="slider" />
-  {#if aschema.cat !== "Touch"}
-    <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
-    <Switch label="Threshold mode" bind:value={sensor.mode} design="slider" />
-    <div class:disabled={!sensor.mode}>
-      <Switch
-        label="2-level threshold"
-        bind:value={sensor.th_mode}
-        design="slider"
-      />
-    </div>
-  {/if}
-</div>
-
 <MinMax
   bind:low={sensor.lmin}
   bind:high={sensor.lmax}
@@ -102,6 +87,36 @@
 <button class="primary" on:click={() => cal_offset(currentAxis)}
   >Zero offset calibration</button
 >
+<div class="container">
+  {#if aschema.cat !== "Touch"}
+    <div class="item">
+      <Tooltip title="On/Off output above/below level">
+        <Switch
+          label="Use Threshold"
+          bind:value={sensor.mode}
+          design="slider"
+        />
+      </Tooltip>
+    </div>
+    <div class="item" class:disabled={!sensor.mode}>
+      <Switch
+        label="2-level threshold"
+        bind:value={sensor.th_mode}
+        design="slider"
+      />
+    </div>
+    <div class="item">
+      <Tooltip title="Output will loop to min" enabled>
+        <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
+      </Tooltip>
+    </div>
+  {/if}
+  <div class="item">
+    <Tooltip title="Invert the sensor output" enabled={true}>
+      <Switch label="Invert" bind:value={sensor.inverted} design="slider" />
+    </Tooltip>
+  </div>
+</div>
 
 <!-- {/if} -->
 
@@ -109,5 +124,17 @@
   :global(.disabled) {
     opacity: 0.2;
     pointer-events: none;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around; /* Adjust as needed: space-between, space-evenly, etc. */
+    align-items: center;
+  }
+  .item {
+    flex: 1 1 20%; /* Adjust the basis percentage to control item width */
+    margin: 10px; /* Adjust margin as needed */
+    text-align: center; /* Center text horizontally */
   }
 </style>

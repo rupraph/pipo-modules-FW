@@ -1,7 +1,7 @@
 <script lang="ts">
   import { teleport } from "./index";
   export let title = "";
-  export let enabled = false;
+  export let enabled = true;
   let isHovered = false;
   let x: number;
   let y: number;

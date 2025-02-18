@@ -31,6 +31,7 @@
   import BoardConfig from "./board-config.svelte";
   import Switch from "../form/Switch.svelte";
   import Text from "../form/Text.svelte";
+  import Tooltip from "../tooltip/Tooltip.svelte";
   export let config: PipoConfig<T>;
   export let name: string;
   const dispatch = createEventDispatcher();
@@ -159,21 +160,7 @@
 
 <Collapse title="Quick settings">
   <QuickConfig bind:config />
-  {#if $type === "motion"}
-    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
-      <Switch
-        label="Quaternions to OSC"
-        bind:value={config.engine["engine-special"]["quat"].enabled}
-        design="slider"
-      />
-      {#if config.engine["engine-special"]["quat"].enabled}
-        <Text
-          label="Address"
-          bind:value={config.engine["engine-special"]["quat"].osc_addr}
-        />
-      {/if}
-    {/if}
-  {/if}
+
   {#if $type === "analog"}
     <button
       class="primary"
@@ -290,6 +277,21 @@
     bind:ip={config.general.OSC_IP}
     bind:port={config.general.OSC_PORT}
   />
+  {#if $type === "motion"}
+    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
+      <Switch
+        label="MOTION: Quaternions to OSC"
+        bind:value={config.engine["engine-special"]["quat"].enabled}
+        design="slider"
+      />
+      {#if config.engine["engine-special"]["quat"].enabled}
+        <Text
+          label="Address"
+          bind:value={config.engine["engine-special"]["quat"].osc_addr}
+        />
+      {/if}
+    {/if}
+  {/if}
   <div style="display:flex; margin-top:1em; justify-content:right;">
     <LoadingButton
       onClick={submit}
