@@ -22,7 +22,7 @@ class OSC_handler;
 class Config {
  public:
   Config() {
-    general_config["Wifi_mode"] = "STA";
+    general_config["Wifi_mode"] = "STA";  // AP, STA, APSTA
     general_config["OSC_ENA"] = true;
     general_config["OSC_PORT"] = 8000;
     general_config["OSC_IP"] = "0.0.0.0";

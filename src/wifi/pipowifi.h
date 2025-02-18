@@ -44,7 +44,7 @@ class PipoWifi {
   bool apStarted = false;
   bool staStarted = false;
   bool wifiReady = false;
-  bool isChangingAP = false;
+  bool isChangingAP = false;  // means switching from one AP to another ?
   PipoPWManager pwm;
   std::map<String, int> signals;
   int8_t rssi;

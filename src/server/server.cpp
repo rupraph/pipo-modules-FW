@@ -279,11 +279,12 @@ void PipoServer::setup_requests() {
     if (request->hasParam("password")) {
       password = request->getParam("password")->value();
     }
-    String previous_ssid = wifi.ssid();
-    bool isAPSTA = WiFi.getMode() == WIFI_MODE_APSTA;
+    // String previous_ssid = wifi.ssid(); //unused
+    // bool isAPSTA = WiFi.getMode() == WIFI_MODE_APSTA; //unused
     pause();
     if (WiFi.getMode() == WIFI_MODE_AP) {
-      wifi.setMode(WIFI_AP_STA);
+      wifi.setMode(
+          WIFI_AP_STA);  // should likely be APSTA or STA depending on chosen mode.
     }
     wifi.setSSID(ssid);
     wifi.setPassword(password);
