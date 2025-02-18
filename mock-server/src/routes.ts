@@ -154,7 +154,8 @@ export const setupRoutes = (app: Express) => {
     state.wifi.password = password;
   });
   app.get("/wifi-state", (req, res) => {
-    const wifistate = `${state.wifi.mode} CONNECTED ${state.wifi.ip} ${state.wifi.ssid}`;
+    const wifistate = `${state.wifi.mode}\nCONNECTED ${state.wifi.ip} ${state.wifi.ssid}\nAP ${state.wifi.apIP}`;
+    // const wifistate = `${state.wifi.mode}\nDISCONNECTED\nAP ${state.wifi.apIP}`;
     res.status(200).send(wifistate);
   });
   app.get("/wifi-networks", (req, res) => {

@@ -4,6 +4,10 @@ export type WifiState = {
   signal: number;
   lastScan: number;
   networks: Network[];
+  status: "DISCONNECTED" | "CONNECTING" | "CONNECTED";
+  apIP: string;
+  staIP: string;
+  mode: "AP" | "STA" | "APSTA";
 };
 
 export type Network = {

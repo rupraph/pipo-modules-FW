@@ -36,20 +36,20 @@
   article {
     color: white;
     padding: 0.75rem 1.5rem;
-    border-radius: 0.2rem;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     margin: 0 auto 0.5rem auto;
     width: 20rem;
   }
   .error {
-    background: IndianRed;
+    background: var(--red);
   }
   .success {
-    background: MediumSeaGreen;
+    background: var(--green);
   }
   .info {
-    background: SkyBlue;
+    background: var(--main-darker);
   }
   .warning {
     background: DarkOrange;

@@ -64,7 +64,7 @@
     {/each}
     <li class="tab new" on:click={() => onCreate()}><span>+</span></li>
   </ul>
-  <div class="content">
+  <div class="content section-borders">
     <slot />
   </div>
 </div>
@@ -143,8 +143,6 @@
   }
   .content {
     z-index: 10;
-    border-radius: 12px;
-    border: 2px solid rgb(80, 80, 80);
     padding-top: 1.5em;
     background: var(--bg-color);
     transform: translate(0, -3px);

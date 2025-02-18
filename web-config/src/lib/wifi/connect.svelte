@@ -4,17 +4,10 @@
   import { slide } from "svelte/transition";
   import { addToast, type Toast } from "../toast";
   import { pipoio } from "../../pipoio";
-  import {
-    setLastScan,
-    setNetworks,
-    setSignal,
-    setSSID,
-    wifiState,
-  } from "./store";
+  import { setLastScan, wifiState } from "./store";
   import Spinner from "../spinner.svelte";
-  import { rssiToSignalStrength } from "./utils";
   import type { Network } from "./types";
-  import { fetchNetworks } from "../../services/wifi";
+  import { fetchNetworks, fetchState } from "../../services/wifi";
 
   let editing = "";
   let showPassword = false;
@@ -22,8 +15,12 @@
   let waiting = false;
   let wifiMode = "";
   let networks: Network[];
+  let apIP = "";
+  let staIP = "";
   wifiState.subscribe((v) => {
     networks = v.networks;
+    apIP = v.apIP;
+    staIP = v.staIP;
   });
   $: onShow();
   async function onShow() {
@@ -32,19 +29,6 @@
       await scan();
     }
   }
-  async function fetchMode() {
-    let retry = 0;
-    const maxRetry = 5;
-    while (retry++ < maxRetry) {
-      try {
-        wifiMode = (await pipoio.get("/wifi-state")).data.split(" ")[0];
-        break;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }
-
   export async function scan() {
     if (waiting) return;
     pipoio.pause();
@@ -115,7 +99,7 @@
       });
       await new Promise((resolve) => setTimeout(resolve, 5000));
       await fetchNetworks();
-      await fetchMode();
+      await fetchState();
     } catch (e) {
       console.error(e);
     }
@@ -195,7 +179,6 @@
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
     try {
-      await fetchMode();
       await fetchNetworks();
     } catch (e) {
       console.error(e);
@@ -209,6 +192,10 @@
 
 <section class="connection" class:waiting>
   <h3>Networks</h3>
+  <div class="ips">
+    <span><strong>APIP:</strong> {apIP}</span>
+    <span><strong>STAIP:</strong> {staIP}</span>
+  </div>
   <button class="primary" class:disabled={waiting} on:click={() => scan()}
     >Scan</button
   >
@@ -356,13 +343,13 @@
     color: var(--bg-lighter);
   }
   .connection > h3 {
-    margin: 1em 0;
+    margin: 0.5em 0;
   }
   ul {
     width: 100%;
     padding: 0;
     margin: 0;
-    grid-template-columns: auto 1em 1em 2em;
+    grid-template-columns: minmax(0, 1fr) 1em 1em 2em;
     grid-template-rows: repeat(auto-fill, 2em);
     justify-items: start;
     align-items: end;
@@ -386,10 +373,10 @@
     align-items: center;
   }
   .ssid {
-    max-width: -webkit-fill-available;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+    max-width: 100%;
   }
   svg.lock {
     fill: var(--bg-lighter);
@@ -416,6 +403,12 @@
   .buttons {
     display: flex;
     flex-direction: row;
+    gap: 1em;
+  }
+  .ips {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 1em;
   }
 </style>

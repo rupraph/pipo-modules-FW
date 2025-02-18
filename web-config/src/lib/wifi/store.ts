@@ -8,6 +8,10 @@ export const wifiState = writable<WifiState>({
   signal: 0,
   lastScan: Date.now(),
   networks: [],
+  mode: "APSTA",
+  status: "DISCONNECTED",
+  apIP: "unknown",
+  staIP: "none",
 });
 
 export const setLastScan = (lastScan: number) => {
@@ -21,6 +25,21 @@ export const setSSID = (ssid: string) => {
 };
 export const setNetworks = (networks: Network[]) => {
   wifiState.update((state) => ({ ...state, networks }));
+};
+export const setMode = (mode: "AP" | "APSTA" | "STA") => {
+  wifiState.update((state) => ({ ...state, mode }));
+};
+export const setConnecting = (connecting: boolean) => {
+  wifiState.update((state) => ({ ...state, connecting }));
+};
+export const setApIP = (apIP: string) => {
+  wifiState.update((state) => ({ ...state, apIP }));
+};
+export const setSTAIP = (staIP: string) => {
+  wifiState.update((state) => ({ ...state, staIP }));
+};
+export const setStatus = (status: WifiState["status"]) => {
+  wifiState.update((state) => ({ ...state, status }));
 };
 
 const refreshInterval = setInterval(() => {

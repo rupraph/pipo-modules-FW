@@ -26,10 +26,12 @@ class State<T extends PipoTypes = "motion"> {
     this.type = type;
     this.wifi = {
       scanning: false,
+      rssi: -70,
       mode: "APSTA",
       ssid: "ESP32",
       password: "123",
-      ip: "",
+      ip: "192.168.1.1",
+      apIP: "192.127.127.126",
     };
     this.info = {
       name: "unnamed Pipo",

@@ -1,6 +1,6 @@
 #include <wifi/pipowifi.h>
 
-PipoWifi::PipoWifi() {};
+PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -195,23 +195,27 @@ String PipoWifi::state() {
       res = "MAX";
       break;
   }
-
+  res += "\n";
   switch (status) {
     case DISCONNECTED:
-      res += " DISCONNECTED";
+      res += "DISCONNECTED";
       break;
     case CONNECTING:
-      res += " CONNECTING";
+      res += "CONNECTING";
       break;
     case CONNECTED:
-      res += " CONNECTED";
+      res += "CONNECTED";
       res += " ";
       res += WiFi.localIP().toString().c_str();
       res += " ";
       res += WiFi.SSID().c_str();
       break;
     default:
-      res += " UNKNWON";
+      res += "UNKNWON";
+  }
+  if ((mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA) && apStarted) {
+    res += "\nAP ";
+    res += apIP.toString();
   }
   return res;
 }
