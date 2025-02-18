@@ -9,7 +9,8 @@ void PipoServer::setup() {
   DefaultHeaders::Instance().addHeader(
       "Access-Control-Allow-Headers",
       "Origin, X-Requested-With, Content-Type, Accept");
-  std::string mdns_name = std::string("pipo-") + PIPO_TYPE;
+  string mdns_name =
+      string("pipo-") + config.general_config["PipoName"].as<string>();
   if (!MDNS.begin(
           mdns_name.c_str())) {  // Start the mDNS responder for esp.local
     Serial.println("Error setting up MDNS responder!");

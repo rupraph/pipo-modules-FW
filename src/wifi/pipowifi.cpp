@@ -1,6 +1,6 @@
 #include <wifi/pipowifi.h>
 
-PipoWifi::PipoWifi(){};
+PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -167,7 +167,15 @@ bool PipoWifi::configureAP() {
   getFreeSubNet();
   apIP = IPAddress(192, 168, subnetBase, 1);
   WiFi.softAPConfig(apIP, apIP, apMask);
-  apStarted = WiFi.softAP("Pipo", "pipo1234", 6, false, 6);
+  string apName = "Pipo" + config.general_config["PipoName"].as<string>();
+  Serial.print("Starting AP: ");
+  Serial.println(apName.c_str());
+  apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
+  if (apStarted) {
+    Serial.println("AP started successfully.");
+  } else {
+    Serial.println("Failed to start AP.");
+  }
   return apStarted;
 }
 
