@@ -1,21 +1,19 @@
 <script lang="ts">
   import { pipoio } from "../../pipoio";
+  import type { GeneralConfig } from "../../types";
+  import Text from "../form/Text.svelte";
   import Select from "../form/Select.svelte";
 
-  export let wifiMode: string;
+  export let generalconfig: GeneralConfig;
 
-  function reboot() {
-    pipoio.get("/reboot").then(() => {
-      console.log("Rebooting...");
-    });
-  }
   const options = [
     { label: "Acces Point", value: "AP" },
     { label: "Station", value: "STA" },
   ];
 </script>
 
-<Select label="Wifi Mode" {options} bind:value={wifiMode} />
-<button class="primary" on:click={reboot} style="width: fit-content"
+<!-- <Select label="Wifi Mode" {options} bind:value={generalconfig.Wifi_mode} /> -->
+<Text label="Pipo Name" bind:value={generalconfig.PipoName} maxlength={255} />
+<!-- <button class="primary" on:click={reboot} style="width: fit-content"
   >Reboot</button
->
+> -->

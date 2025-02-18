@@ -53,7 +53,8 @@
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
-    "HidMode": 2
+    "HidMode": 2,
+    "PipoName": "range"
   },
   "sensorconf": {}
 }

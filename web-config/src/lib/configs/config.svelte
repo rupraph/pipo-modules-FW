@@ -110,6 +110,12 @@
     a.click();
   }
 
+  function reboot() {
+    pipoio.get("/reboot").then(() => {
+      console.log("Rebooting...");
+    });
+  }
+
   let isPaused = false;
   function pause() {
     pipoio.post("/pause").then(() => {
@@ -322,9 +328,9 @@
   >
 </Collapse>
 
-<!-- <hr class="separator" />
-<Collapse title="Board settings"
-  ><BoardConfig bind:wifiMode={config.general.Wifi_mode} />
+<hr class="separator" />
+<Collapse title="Board settings">
+  <BoardConfig bind:generalconfig={config.general} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
     <LoadingButton
       onClick={submit}
@@ -337,7 +343,10 @@
       title="Apply and save the config in pipo">Save</LoadingButton
     >
   </div>
-</Collapse>-->
+  <button class="primary" on:click={reboot} style="width: fit-content"
+    >Reboot</button
+  >
+</Collapse>
 
 <style>
   button:hover {

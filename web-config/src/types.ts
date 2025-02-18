@@ -64,6 +64,7 @@ export type GeneralConfig = {
   MidiEnabled: boolean;
   HidEnabled: boolean;
   HidMode: number;
+  PipoName: string;
 };
 
 export type HidConfig = {

@@ -29,6 +29,7 @@ class Config {
     general_config["MidiEnabled"] = true;
     general_config["HidEnabled"] = true;
     general_config["HidMode"] = 2;
+    general_config["PipoName"] = "default";
   }
   String filename;              // raw config file name (no extension)
   JsonDocument current_config;  // stores all configs (gather)

@@ -460,7 +460,8 @@
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
-    "HidMode": 1
+    "HidMode": 1,
+    "PipoName": "analog"
   },
   "sensorconf": {
     "analogout": {

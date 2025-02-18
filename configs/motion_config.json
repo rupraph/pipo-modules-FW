@@ -355,7 +355,8 @@
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": true,
-    "HidMode": 2
+    "HidMode": 2,
+    "PipoName": "motion"
   },
   "sensorconf": {
     "relative_mode": true
