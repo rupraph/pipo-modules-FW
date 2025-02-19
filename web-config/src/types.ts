@@ -116,6 +116,7 @@ export type SensorSettings = {
     relative_mode: boolean;
   };
   range: {
+    hold_mode: boolean;
   };
   analog: {
     analogout: {[Key in AnalogOutKeys]: AnalogOut};
