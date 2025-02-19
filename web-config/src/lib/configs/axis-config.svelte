@@ -56,16 +56,6 @@
     requestAnimationFrame(animateSensor);
   }
   animateSensor();
-
-  function cal_offset(axis: PipoKeys[T]) {
-    pipoio
-      .request({
-        method: "post",
-        url: "/offsetcal",
-        params: { axis },
-      })
-      .then(() => console.log("DONE"));
-  }
 </script>
 
 <MinMax
@@ -84,9 +74,7 @@
 />
 
 <!-- {#if aschema.cat === "Touch"  } -->
-<button class="primary" on:click={() => cal_offset(currentAxis)}
-  >Zero offset calibration</button
->
+
 <div class="container">
   {#if aschema.cat !== "Touch"}
     <div class="item">

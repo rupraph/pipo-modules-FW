@@ -153,6 +153,17 @@
 
 
  */
+
+  function cal_offset(axis: PipoKeys[T]) {
+    pipoio
+      .request({
+        method: "post",
+        url: "/offsetcal",
+        params: { axis },
+      })
+      .then(() => console.log("DONE"));
+  }
+
   $: if (config && currentAxis) {
     setAxis(currentAxis);
   }
@@ -228,6 +239,16 @@
         --background="var(--bg-tabs)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
+
+      <Tooltip title="Make current value the zero offset">
+        <button
+          class="primary"
+          on:click={() => cal_offset(currentAxis)}
+          style="border-radius: 2vw; cursor: pointer;"
+        >
+          Zero
+        </button>
+      </Tooltip>
     </div>
 
     <AxisConfig bind:sensor bind:aschema bind:currentAxis />
