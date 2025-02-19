@@ -170,9 +170,9 @@ void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
   }
   if (config["relative_mode"].is<bool>()) {
     relative_mode = config["relative_mode"];
-    Serial.println(relative_mode);
   }
   if (debug) {
+    Serial.println(relative_mode);
     Serial.println("set_sensor_config_end");
   }
 }

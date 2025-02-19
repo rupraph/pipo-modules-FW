@@ -25,19 +25,19 @@ export const BASIC = false;
 export const HISTERESIS = true;
 export const CONTINUOUS = false;
 export const THRESHOLD = true;
-export function isContinuousMode(config: SensorConfig): boolean {
+export function isContinuousMode(config: InputSettings): boolean {
   return config.mode === CONTINUOUS;
 }
-export function isThresholdMode(config: SensorConfig): boolean {
+export function isThresholdMode(config: InputSettings): boolean {
   return config.th_mode === THRESHOLD;
 }
-export function isHisteresisMode(config: SensorConfig): boolean {
+export function isHisteresisMode(config: InputSettings): boolean {
   return config.th_mode === HISTERESIS;
 }
-export function isBasicThresholdMode(config: SensorConfig): boolean {
+export function isBasicThresholdMode(config: InputSettings): boolean {
   return config.th_mode === THRESHOLD;
 }
-export type SensorConfig = {
+export type InputSettings = {
   mode: boolean;
   th_mode: boolean;
   deadzone: number;
@@ -116,6 +116,7 @@ export type SensorSettings = {
     relative_mode: boolean;
   };
   range: {
+    hold_mode: boolean;
   };
   analog: {
     analogout: {[Key in AnalogOutKeys]: AnalogOut};
@@ -151,18 +152,18 @@ export type PipoConfig<T extends PipoTypes> = {
   };
   general: GeneralConfig;
   inputs: {
-    [Key in PipoKeys[T]]: SensorConfig;
+    [Key in PipoKeys[T]]: InputSettings;
   };
   sensorconf: SensorSettings[T];
 };
-export type AxisConfig = {
-  input: SensorConfig;
+export type ChannelConfig = {
+  input: InputSettings;
   hid: HidConfig;
   midi: MidiConfig;
   osc: OscConfig;
 };
-export type ConfigByAxis<T extends PipoTypes> = {
-  [Key in PipoKeys[T]]: AxisConfig;
+export type ConfigByChannel<T extends PipoTypes> = {
+  [Key in PipoKeys[T]]: ChannelConfig;
 };
 export type SmoothSensorValue = {
   old: number;

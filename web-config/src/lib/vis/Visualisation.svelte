@@ -1,22 +1,22 @@
 <script lang="ts" generics="T extends PipoTypes">
   import Config from "../configs/config.svelte";
 
-  import type { ConfigByAxis, PipoTypes } from "../../types";
+  import type { ConfigByChannel, PipoTypes } from "../../types";
   import { schema } from "../../schema";
   import { pipoType as type } from "../../services";
   import Potentiometer from "./Potentiometer.svelte";
   import Cube from "./Cube.svelte";
 
-  export let configByAxis: ConfigByAxis<T>;
+  export let configByChannel: ConfigByChannel<T>;
   function getConfig() {
-    return (Object.keys(configByAxis) as Array<keyof ConfigByAxis<T>>).map(
-      (axis) => {
-        return {
-          label: schema[$type as T][axis].label,
-          ...configByAxis[axis].midi,
-        };
-      }
-    );
+    return (
+      Object.keys(configByChannel) as Array<keyof ConfigByChannel<T>>
+    ).map((axis) => {
+      return {
+        label: schema[$type as T][axis].label,
+        ...configByChannel[axis].midi,
+      };
+    });
   }
 </script>
 

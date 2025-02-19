@@ -56,5 +56,7 @@
     "HidMode": 2,
     "PipoName": "range"
   },
-  "sensorconf": {}
+  "sensorconf": {
+    "hold_mode": true
+  }
 }

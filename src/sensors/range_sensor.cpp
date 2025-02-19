@@ -53,34 +53,59 @@ void RangeSensor::update() {
         pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
 
     // process result
+    // when out of range
     if (sensor_dat["dist"].raw_value < 0 ||
         !pMultiRangingData->RangeData[0].RangeStatus ==
             VL53L4CX_RANGESTATUS_RANGE_VALID) {
+      if (!hold_mode) {
+        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        sensor_dat["dist"].value = sensor_dat["dist"].lmax;
+      }
+
     }
     // not sure if capping is optimal to be here in sensor class or better in engine/translators
+    // when in range
     else {
-      sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-      sensor_dat["dist"].value =
-          ma_filter.process(sensor_dat["dist"].raw_value);
-      //  ma_filter.process(lp_filter.process(dist));
 
-      //Todo: optimize filter choices
-      //sensor_dat["dist"].value = km_filter.process(dist);
-      process_sensor_neutral_filter();
-      process_sensor_triggers();
+      if ((hold_mode &&
+           sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
+          !hold_mode) {
+        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        sensor_dat["dist"].value =
+            ma_filter.process(sensor_dat["dist"].raw_value);
+      }
     }
-    if (status == 0) {
-      status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
-    }
+
+    //  ma_filter.process(lp_filter.process(dist));
+
+    //Todo: optimize filter choices
+    //sensor_dat["dist"].value = km_filter.process(dist);
+    process_sensor_neutral_filter();
+    process_sensor_triggers();
+  }
+  if (status == 0) {
+    status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
   }
   end_duration();
   measured_loop_duration();
 }
 
-void RangeSensor::set_sensor_config(JsonObject config, bool debug) {}
+void RangeSensor::set_sensor_config(JsonObject config, bool debug) {
+  if (debug) {
+    Serial.println("set_sensor_config");
+  }
+  if (config["hold_mode"].is<bool>()) {
+    hold_mode = config["hold_mode"];
+  }
+  if (debug) {
+    Serial.println(hold_mode);
+    Serial.println("set_sensor_config_end");
+  }
+}
 
 JsonDocument RangeSensor::get_sensor_config(bool debug) {
   JsonDocument config;
+  config["hold_mode"] = hold_mode;
   return config;
 }
 
