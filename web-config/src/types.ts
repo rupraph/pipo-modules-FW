@@ -150,13 +150,13 @@ export type PipoConfig<T extends PipoTypes> = {
 
   };
   general: GeneralConfig;
-  sensor: {
+  inputs: {
     [Key in PipoKeys[T]]: SensorConfig;
   };
   sensorconf: SensorSettings[T];
 };
 export type AxisConfig = {
-  sensor: SensorConfig;
+  input: SensorConfig;
   hid: HidConfig;
   midi: MidiConfig;
   osc: OscConfig;

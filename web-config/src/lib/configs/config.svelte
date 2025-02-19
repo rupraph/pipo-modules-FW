@@ -42,21 +42,21 @@
   let midi: MidiConfig;
   let osc: OscConfig;
   let hid: HidConfig;
-  let sensor: SensorConfig;
+  let input: SensorConfig;
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   onMount(() => {
     configByAxis = (
-      Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
+      Object.entries(config.inputs) as [PipoKeys[T], SensorConfig][]
     )
       .sort(
         (a, b) =>
           schema[$type as T][a[0]].index - schema[$type as T][b[0]].index
       )
-      .reduce((acc, [axis, sensor]) => {
+      .reduce((acc, [axis, input]) => {
         acc[axis] = {
-          sensor,
+          input,
           hid: config.engine["engine-hid"][axis],
           midi: config.engine["engine-midi"][axis],
           osc: config.engine["engine-osc"][axis],
@@ -132,7 +132,7 @@
     osc = configByAxis[axis].osc;
     hid = configByAxis[axis].hid;
     aschema = schema[$type as T][axis];
-    sensor = configByAxis[axis].sensor;
+    input = configByAxis[axis].input;
     pipoio.monitorAxis(axis);
   }
   function setCategory(cat: string) {
@@ -230,16 +230,16 @@
       />
     </div>
 
-    <AxisConfig bind:sensor bind:aschema bind:currentAxis />
+    <AxisConfig bind:input bind:aschema bind:currentAxis />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
     <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
     <section class="translator-settings">
       {#if currentCat === "MIDI"}
-        <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
+        <MidiConfigForm {midi} bind:sensormode={input.mode} />
       {/if}
       {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} {sensor} {hid} />
+        <HidConfigForm bind:hidMode={config.general.HidMode} {input} {hid} />
       {/if}
       {#if currentCat === "OSC"}
         <OscConfigForm {osc} />

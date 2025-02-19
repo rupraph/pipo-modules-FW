@@ -174,7 +174,7 @@ JsonDocument Sensor::get_axis_config(bool debug) {
   return config;
 }
 
-void Sensor::set_axis_config(JsonObject config, bool debug) {
+void Sensor::set_input_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("set_sensor_axis_config");
   }

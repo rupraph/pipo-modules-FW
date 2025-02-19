@@ -100,7 +100,7 @@ class Sensor {
 
   //config
   JsonDocument get_axis_config(bool debug = false);
-  void set_axis_config(JsonObject config, bool debug = false);
+  void set_input_config(JsonObject config, bool debug = false);
 
   //Getter setters
   unordered_map<string, SensorDat> get_sensor_dat_map();
