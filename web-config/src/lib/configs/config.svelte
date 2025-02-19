@@ -20,7 +20,7 @@
   } from "../../types";
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
-  import InputConfig from "./axis-config.svelte";
+  import InputConfig from "./input-panel.svelte";
   import CategoryTab from "./category-tab.svelte";
   import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
