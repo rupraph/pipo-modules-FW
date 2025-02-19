@@ -167,7 +167,7 @@ bool PipoWifi::configureAP() {
   getFreeSubNet();
   apIP = IPAddress(192, 168, subnetBase, 1);
   WiFi.softAPConfig(apIP, apIP, apMask);
-  string apName = "Pipo" + config.general_config["PipoName"].as<string>();
+  string apName = "Pipo-" + config.general_config["PipoName"].as<string>();
   Serial.print("Starting AP: ");
   Serial.println(apName.c_str());
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
