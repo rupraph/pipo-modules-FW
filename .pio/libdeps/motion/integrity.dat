@@ -1,9 +1,8 @@
-lathoub/BLE-MIDI@ 2.2
-esphome/AsyncTCP-esphome@2.1.1
-https://github.com/CNMAT/OSC.git#3.5.8
 esphome/ESPAsyncWebServer-esphome@3.1.0
-adafruit/Adafruit TinyUSB Library@ 3.1.0
-lathoub/AppleMIDI@ 3.3.0
 bblanchon/ArduinoJson @ 7.2.0
-https://github.com/isouriadakis/Arduino_ICM20948_DMP_Full-Function
+esphome/AsyncTCP-esphome@2.1.1
+lathoub/AppleMIDI@ 3.3.0
+adafruit/Adafruit TinyUSB Library@ 3.1.0
 fortyseveneffects/MIDI Library@ 5.0.2
+https://github.com/isouriadakis/Arduino_ICM20948_DMP_Full-Function
+https://github.com/CNMAT/OSC.git#3.5.8
