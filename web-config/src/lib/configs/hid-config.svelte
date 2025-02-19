@@ -2,10 +2,10 @@
   import Select from "../form/Select.svelte";
   import Checkbox from "../form/Checkbox.svelte";
   import Text from "../form/Text.svelte";
-  import type { SensorConfig, HidConfig } from "../../types";
+  import type { InputSettings, HidConfig } from "../../types";
   import DisabledWarning from "./disabled-warning.svelte";
   export let hidMode: number;
-  export let sensor: SensorConfig;
+  export let sensor: InputSettings;
   export let hid: HidConfig;
 
   const modes = [

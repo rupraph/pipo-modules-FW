@@ -8,11 +8,11 @@
   import { pipoType, pipoType as type } from "../../services";
   import Select from "svelte-select";
   import {
-    type SensorConfig,
+    type InputSettings,
     type PipoConfig,
     type PipoTypes,
     type PipoKeys,
-    type ConfigByAxis,
+    type ConfigByChannel,
     type AxisSchema,
     type MidiConfig,
     type OscConfig,
@@ -20,7 +20,7 @@
   } from "../../types";
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
-  import AxisConfig from "./axis-config.svelte";
+  import InputConfig from "./input-panel.svelte";
   import CategoryTab from "./category-tab.svelte";
   import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
@@ -38,18 +38,18 @@
   const dispatch = createEventDispatcher();
   let savingStatus = "none";
 
-  let configByAxis: ConfigByAxis<T>;
+  let configByChannel: ConfigByChannel<T>;
   let currentAxis: PipoKeys[T];
   let midi: MidiConfig;
   let osc: OscConfig;
   let hid: HidConfig;
-  let sensor: SensorConfig;
+  let sensor: InputSettings;
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   onMount(() => {
-    configByAxis = (
-      Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
+    configByChannel = (
+      Object.entries(config.sensor) as [PipoKeys[T], InputSettings][]
     )
       .sort(
         (a, b) =>
@@ -63,11 +63,11 @@
           osc: config.engine["engine-osc"][axis],
         };
         return acc;
-      }, {} as ConfigByAxis<T>);
-    axisSelect = (Object.keys(configByAxis) as PipoKeys[T][]).map((axis) => {
+      }, {} as ConfigByChannel<T>);
+    axisSelect = (Object.keys(configByChannel) as PipoKeys[T][]).map((axis) => {
       return { value: axis, label: schema[$type as T][axis].label };
     });
-    setAxis(Object.keys(configByAxis)[0] as PipoKeys[T]);
+    setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
   });
 
   function submit() {
@@ -129,11 +129,11 @@
   function setAxis(axis: PipoKeys[T]) {
     if (axis === currentAxis) return;
     currentAxis = axis;
-    midi = configByAxis[axis].midi;
-    osc = configByAxis[axis].osc;
-    hid = configByAxis[axis].hid;
+    midi = configByChannel[axis].midi;
+    osc = configByChannel[axis].osc;
+    hid = configByChannel[axis].hid;
     aschema = schema[$type as T][axis];
-    sensor = configByAxis[axis].sensor;
+    sensor = configByChannel[axis].sensor;
     pipoio.monitorAxis(axis);
   }
   function setCategory(cat: string) {
@@ -203,7 +203,7 @@
 
 <hr class="separator" />
 
-<Collapse title="Axis settings" open>
+<Collapse title="Input settings" open>
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
@@ -231,7 +231,7 @@
       />
     </div>
 
-    <AxisConfig bind:sensor bind:aschema bind:currentAxis />
+    <InputConfig bind:sensor bind:aschema bind:currentAxis />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
     <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />

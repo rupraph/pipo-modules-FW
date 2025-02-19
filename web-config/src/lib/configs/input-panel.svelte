@@ -6,7 +6,7 @@
     isContinuousMode,
     isHisteresisMode,
     type AxisSchema,
-    type SensorConfig,
+    type InputSettings,
     type SensorValues,
     type SmoothSensorValues,
     type PipoKeys,
@@ -16,7 +16,7 @@
   import Switch from "../form/Switch.svelte";
   import MinMax from "../form/MinMax.svelte";
 
-  export let sensor: SensorConfig;
+  export let sensor: InputSettings;
   export let aschema: AxisSchema;
   export let currentAxis: PipoKeys[T];
   const smoothValues: Partial<SmoothSensorValues<T>> = {};
