@@ -2,6 +2,9 @@
 
 #ifdef INCLUDE_BLE
 
+#include <BLEMIDI_Transport.h>
+#include <hardware/BLEMIDI_ESP32_NimBLE.h>
+
 #ifdef PIPO_MOTION
 BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
 #elif PIPO_RANGE

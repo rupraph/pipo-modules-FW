@@ -1,6 +1,7 @@
 #ifndef MIDI_IO_H
 #define MIDI_IO_H
 
+#include "HW_CONFIG.h"
 #ifdef INCLUDE_BLE
 #include "midi/midiBLE.h"
 #endif
