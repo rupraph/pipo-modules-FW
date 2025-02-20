@@ -21,6 +21,9 @@ class RangeSensor : public Sensor {
   bool within_range = false;
   bool within_range_prev = false;
 
+  bool hold_mode =
+      false;  // define wether to hold the last value or max when no object is detected. true->hold, false->max
+
   VL53L4CX vl53l4cx;
   VL53L4CX_MultiRangingData_t MultiRangingData;
   VL53L4CX_MultiRangingData_t* pMultiRangingData = &MultiRangingData;

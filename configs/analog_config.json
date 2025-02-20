@@ -331,7 +331,7 @@
       }
     }
   },
-  "sensor": {
+  "inputs": {
     "A01": {
       "deadzone": 0.1,
       "offset": 0.0,

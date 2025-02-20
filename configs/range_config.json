@@ -2,7 +2,7 @@
   "engine": {
     "engine-hid": {
       "dist": {
-        "enabled": true,
+        "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
@@ -34,14 +34,14 @@
       }
     }
   },
-  "sensor": {
+  "inputs": {
     "dist": {
-      "deadzone": 0.0,
+      "deadzone": 0.4,
       "offset": 0.0,
       "inverted": false,
       "lmax": 60.0,
       "lmin": 5.0,
-      "mode": true,
+      "mode": false,
       "th_mode": false,
       "cyclic": false
     }
@@ -56,5 +56,7 @@
     "HidMode": 2,
     "PipoName": "range"
   },
-  "sensorconf": {}
+  "sensorconf": {
+    "hold_mode": true
+  }
 }

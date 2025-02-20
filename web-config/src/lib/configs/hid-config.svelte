@@ -2,10 +2,10 @@
   import Select from "../form/Select.svelte";
   import Checkbox from "../form/Checkbox.svelte";
   import Text from "../form/Text.svelte";
-  import type { SensorConfig, HidConfig } from "../../types";
+  import type { InputSettings, HidConfig } from "../../types";
   import DisabledWarning from "./disabled-warning.svelte";
   export let hidMode: number;
-  export let sensor: SensorConfig;
+  export let input: InputSettings;
   export let hid: HidConfig;
 
   const modes = [
@@ -47,12 +47,12 @@
 
 <h4>Current HID mode is {currentMode ? currentMode.label : "Unknown"}</h4>
 <!-- <p>
-  NOTE: The available mapping options below will depend on the sensor and Hid
+  NOTE: The available mapping options below will depend on the input and Hid
   mode
 </p> -->
 
 <!-- Thresh + keyboard -->
-{#if sensor.mode === true && hidMode === 2}
+{#if input.mode === true && hidMode === 2}
   <!-- <h4>
     Map a keyboard key. Address format for "u" would be: "KEY_u" (or
     KEY_UP,KEY_ENTER,...)
@@ -70,7 +70,7 @@
     <Select label="Map to" options={KB_special_keys} bind:value={hid.addr} />
   {/if}
   <Checkbox label="Stroke mode" bind:value={hid.stroke_mode} />
-  {#if hid.stroke_mode && sensor.th_mode === false}
+  {#if hid.stroke_mode && input.th_mode === false}
     <h4>Map a key when false</h4>
     <Select
       label="Choose mapping type"
@@ -87,27 +87,27 @@
       />
     {/if}
   {/if}
-{:else if sensor.mode === false && hidMode === 2}
+{:else if input.mode === false && hidMode === 2}
   <p>
-    Not possible to map a sensor in continuous mode to a key stoke (must change
+    Not possible to map a input in continuous mode to a key stoke (must change
     to Threshold mode)
   </p>
   <!-- Thresh + mouse -->
-{:else if sensor.mode === true && hidMode === 1}
+{:else if input.mode === true && hidMode === 1}
   <!-- <Checkbox label="Stroke continuous" bind:value={hid.stroke_mode} /> -->
   <Select
     label="Map to mouse button"
     options={Mouse_buttons}
     bind:value={hid.addr}
   />
-  <p>Note: to map to mouses axis, switch sensor to continuous</p>
-{:else if sensor.mode === false && hidMode === 1}
+  <p>Note: to map to mouses axis, switch input to continuous</p>
+{:else if input.mode === false && hidMode === 1}
   <Select
     label="Map to mouse axis"
     options={Mouse_axes}
     bind:value={hid.addr}
   />
-  <p>Note: to map to mouses buttons, switch sensor to threshold</p>
+  <p>Note: to map to mouses buttons, switch input to threshold</p>
 {:else}
   PROBLEM !
 {/if}

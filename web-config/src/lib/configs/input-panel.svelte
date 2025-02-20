@@ -6,7 +6,7 @@
     isContinuousMode,
     isHisteresisMode,
     type AxisSchema,
-    type SensorConfig,
+    type InputSettings,
     type SensorValues,
     type SmoothSensorValues,
     type PipoKeys,
@@ -16,7 +16,7 @@
   import Switch from "../form/Switch.svelte";
   import MinMax from "../form/MinMax.svelte";
 
-  export let sensor: SensorConfig;
+  export let input: InputSettings;
   export let aschema: AxisSchema;
   export let currentAxis: PipoKeys[T];
   const smoothValues: Partial<SmoothSensorValues<T>> = {};
@@ -59,10 +59,10 @@
 </script>
 
 <MinMax
-  bind:low={sensor.lmin}
-  bind:high={sensor.lmax}
+  bind:low={input.lmin}
+  bind:high={input.lmax}
   value={sensorValues[currentAxis]}
-  mode={isContinuousMode(sensor) || isHisteresisMode(sensor)
+  mode={isContinuousMode(input) || isHisteresisMode(input)
     ? "double"
     : "single"}
   cursorActive={Boolean(withinWindowValues[currentAxis])}
@@ -79,29 +79,25 @@
   {#if aschema.cat !== "Touch"}
     <div class="item">
       <Tooltip title="On/Off output above/below level">
-        <Switch
-          label="Use Threshold"
-          bind:value={sensor.mode}
-          design="slider"
-        />
+        <Switch label="Use Threshold" bind:value={input.mode} design="slider" />
       </Tooltip>
     </div>
-    <div class="item" class:disabled={!sensor.mode}>
+    <div class="item" class:disabled={!input.mode}>
       <Switch
         label="2-level threshold"
-        bind:value={sensor.th_mode}
+        bind:value={input.th_mode}
         design="slider"
       />
     </div>
     <div class="item">
       <Tooltip title="Output will loop to min" enabled>
-        <Switch label="Cyclic" bind:value={sensor.cyclic} design="slider" />
+        <Switch label="Cyclic" bind:value={input.cyclic} design="slider" />
       </Tooltip>
     </div>
   {/if}
   <div class="item">
     <Tooltip title="Invert the sensor output" enabled={true}>
-      <Switch label="Invert" bind:value={sensor.inverted} design="slider" />
+      <Switch label="Invert" bind:value={input.inverted} design="slider" />
     </Tooltip>
   </div>
 </div>

@@ -281,7 +281,7 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
 
       if (input_sensor.is_within_range(axis_name)) {
         osc_val[axis_name] = round_to(
-            Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 2);
+            Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
 
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
@@ -290,12 +290,12 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
     } else  // sensor uses trigger mode
     {
       if (input_sensor.get_bool_value(axis_name)) {
-        osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 2);
+        osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
         }
       } else {
-        osc_val[axis_name] = round_to(Osc_translator.get_output_min(), 2);
+        osc_val[axis_name] = round_to(Osc_translator.get_output_min(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
         }

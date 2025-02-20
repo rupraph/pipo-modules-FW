@@ -8,11 +8,11 @@
   import { pipoType, pipoType as type } from "../../services";
   import Select from "svelte-select";
   import {
-    type SensorConfig,
+    type InputSettings,
     type PipoConfig,
     type PipoTypes,
     type PipoKeys,
-    type ConfigByAxis,
+    type ConfigByChannel,
     type AxisSchema,
     type MidiConfig,
     type OscConfig,
@@ -20,7 +20,7 @@
   } from "../../types";
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
-  import AxisConfig from "./axis-config.svelte";
+  import InputConfig from "./input-panel.svelte";
   import CategoryTab from "./category-tab.svelte";
   import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
@@ -28,6 +28,7 @@
   import QuickConfig from "./quick-config.svelte";
   import AnalogOutForm from "./analog-out.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
+  import SensorModes from "./sensor-modes.svelte";
   import BoardConfig from "./board-config.svelte";
   import Switch from "../form/Switch.svelte";
   import Text from "../form/Text.svelte";
@@ -37,36 +38,36 @@
   const dispatch = createEventDispatcher();
   let savingStatus = "none";
 
-  let configByAxis: ConfigByAxis<T>;
+  let configByChannel: ConfigByChannel<T>;
   let currentAxis: PipoKeys[T];
   let midi: MidiConfig;
   let osc: OscConfig;
   let hid: HidConfig;
-  let sensor: SensorConfig;
+  let input: InputSettings;
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   onMount(() => {
-    configByAxis = (
-      Object.entries(config.sensor) as [PipoKeys[T], SensorConfig][]
+    configByChannel = (
+      Object.entries(config.inputs) as [PipoKeys[T], InputSettings][]
     )
       .sort(
         (a, b) =>
           schema[$type as T][a[0]].index - schema[$type as T][b[0]].index
       )
-      .reduce((acc, [axis, sensor]) => {
+      .reduce((acc, [axis, input]) => {
         acc[axis] = {
-          sensor,
+          input,
           hid: config.engine["engine-hid"][axis],
           midi: config.engine["engine-midi"][axis],
           osc: config.engine["engine-osc"][axis],
         };
         return acc;
-      }, {} as ConfigByAxis<T>);
-    axisSelect = (Object.keys(configByAxis) as PipoKeys[T][]).map((axis) => {
+      }, {} as ConfigByChannel<T>);
+    axisSelect = (Object.keys(configByChannel) as PipoKeys[T][]).map((axis) => {
       return { value: axis, label: schema[$type as T][axis].label };
     });
-    setAxis(Object.keys(configByAxis)[0] as PipoKeys[T]);
+    setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
   });
 
   function submit() {
@@ -128,11 +129,11 @@
   function setAxis(axis: PipoKeys[T]) {
     if (axis === currentAxis) return;
     currentAxis = axis;
-    midi = configByAxis[axis].midi;
-    osc = configByAxis[axis].osc;
-    hid = configByAxis[axis].hid;
+    midi = configByChannel[axis].midi;
+    osc = configByChannel[axis].osc;
+    hid = configByChannel[axis].hid;
     aschema = schema[$type as T][axis];
-    sensor = configByAxis[axis].sensor;
+    input = configByChannel[axis].input;
     pipoio.monitorAxis(axis);
   }
   function setCategory(cat: string) {
@@ -213,7 +214,7 @@
 
 <hr class="separator" />
 
-<Collapse title="Axis settings" open>
+<Collapse title="Input settings" open>
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
@@ -251,16 +252,16 @@
       </Tooltip>
     </div>
 
-    <AxisConfig bind:sensor bind:aschema bind:currentAxis />
+    <InputConfig bind:input bind:aschema bind:currentAxis />
     <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
 
     <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
     <section class="translator-settings">
       {#if currentCat === "MIDI"}
-        <MidiConfigForm {midi} bind:sensormode={sensor.mode} />
+        <MidiConfigForm {midi} bind:sensormode={input.mode} />
       {/if}
       {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} {sensor} {hid} />
+        <HidConfigForm bind:hidMode={config.general.HidMode} {input} {hid} />
       {/if}
       {#if currentCat === "OSC"}
         <OscConfigForm {osc} />
@@ -282,16 +283,8 @@
 </Collapse>
 
 <hr class="separator" />
-{#if $type === "motion"}
-  <Collapse title="Sensor settings">
-    <Switch
-      label="Relative (on) or absolute orientation"
-      bind:value={config.sensorconf.relative_mode}
-      design="slider"
-    />
-  </Collapse>
-  <hr class="separator" />
-{/if}
+<SensorModes bind:config={config.sensorconf} />
+<hr class="separator" />
 
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig

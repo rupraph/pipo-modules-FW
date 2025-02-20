@@ -273,8 +273,8 @@ void Config::print() {
 //* @brief This gathers from all classes the config. does not save it.
 void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensor");
-  current_config["sensor"].clear();
-  current_config["sensor"] = input_sensor.get_axis_config();
+  current_config["inputs"].clear();
+  current_config["inputs"] = input_sensor.get_axis_config();
   Serial.println("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
@@ -294,8 +294,8 @@ void Config::gather(Engine& engine, bool debug) {
 
 //* @brief propagates the current config content to the sensor, engine, etc...
 void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
-  input_sensor.set_axis_config(current_config["sensor"].as<JsonObject>(),
-                               debug);
+  input_sensor.set_input_config(current_config["inputs"].as<JsonObject>(),
+                                debug);
   input_sensor.set_sensor_config(current_config["sensorconf"].as<JsonObject>(),
                                  debug);
   engine.set_config(current_config["engine"].as<JsonObject>(), debug);
