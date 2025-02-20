@@ -74,17 +74,17 @@ void RangeSensor::update() {
         sensor_dat["dist"].value =
             ma_filter.process(sensor_dat["dist"].raw_value);
       }
+
+      //  ma_filter.process(lp_filter.process(dist));
+
+      //Todo: optimize filter choices
+      //sensor_dat["dist"].value = km_filter.process(dist);
+      process_sensor_neutral_filter();
+      process_sensor_triggers();
     }
-
-    //  ma_filter.process(lp_filter.process(dist));
-
-    //Todo: optimize filter choices
-    //sensor_dat["dist"].value = km_filter.process(dist);
-    process_sensor_neutral_filter();
-    process_sensor_triggers();
-  }
-  if (status == 0) {
-    status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
+    if (status == 0) {
+      status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
+    }
   }
   end_duration();
   measured_loop_duration();

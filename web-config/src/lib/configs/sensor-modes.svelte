@@ -17,7 +17,7 @@
       />
     {/if}
     {#if $type === "range"}
-      <Tooltip text="Hold mode will hold the last value if nothing in range">
+      <Tooltip title="Hold mode will hold the last value if nothing in range">
         <Switch
           label="Hold mode"
           bind:value={config.hold_mode}
