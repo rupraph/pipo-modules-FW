@@ -145,7 +145,7 @@ unsigned long Sensor::end_duration() {
 }
 
 //config
-JsonDocument Sensor::get_axis_config(bool debug) {
+JsonDocument Sensor::get_inputs_config(bool debug) {
   JsonDocument config;
   try {
     for (auto const& pair : sensor_dat) {

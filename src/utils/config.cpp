@@ -274,7 +274,7 @@ void Config::print() {
 void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensor");
   current_config["inputs"].clear();
-  current_config["inputs"] = input_sensor.get_axis_config();
+  current_config["inputs"] = input_sensor.get_inputs_config();
   Serial.println("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
