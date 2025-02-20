@@ -36,12 +36,12 @@
   },
   "inputs": {
     "dist": {
-      "deadzone": 0.2,
+      "deadzone": 0.4,
       "offset": 0.0,
       "inverted": false,
       "lmax": 60.0,
       "lmin": 5.0,
-      "mode": true,
+      "mode": false,
       "th_mode": false,
       "cyclic": false
     }
