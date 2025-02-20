@@ -17,7 +17,9 @@ void PipoWifi::setup() {
   // prevent from the Wifi to sleep: avoid latency in websockets
   WiFi.setSleep(false);
   scanning = true;
+  Serial.println("Wifi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
+  Serial.println("Scan done, wifi setup ");
 };
 void PipoWifi::saveScanResult() {
   signals.clear();

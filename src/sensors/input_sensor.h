@@ -99,7 +99,7 @@ class Sensor {
   unsigned long measured_interval_duration = 0;  //ms
 
   //config
-  JsonDocument get_axis_config(bool debug = false);
+  JsonDocument get_inputs_config(bool debug = false);
   void set_input_config(JsonObject config, bool debug = false);
 
   //Getter setters
