@@ -103,7 +103,7 @@ class PipoPWManager {
     }
     passwords[c_ssid] = std::string(password.c_str());
     // check if score exists already
-    if (scores.find(c_ssid) == scores.end())
+    if (scores.find(c_ssid) != scores.end())
       return;
     scores[c_ssid] = BASE_SCORE;
   }
