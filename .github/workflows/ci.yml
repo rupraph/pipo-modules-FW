@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+
+  platformio-build:
+    if: github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    container: infinitecoding/platformio-for-ci:latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build Motion
+        run: platformio run -e motion
+      - name: Build range
+        run: platformio run -e range
+      - name: Build Analog
+        run: platformio run -e analog
+      - name: Tests 
+        run: platformio test -e native
+
+  svelte_build:
+    name: Svelte Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: web-config/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('web-config/package-lock.json') }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Svelte Dependencies
+        working-directory: web-config
+        run: npm ci
+
+      - name: Build Svelte App
+        working-directory: web-config
+        run: npm run build
