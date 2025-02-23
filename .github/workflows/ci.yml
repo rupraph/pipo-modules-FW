@@ -18,6 +18,10 @@ jobs:
 
       - name: Build Motion
         run: platformio run -e motion
+      - name: Build range
+        run: platformio run -e range
+      - name: Build Analog
+        run: platformio run -e analog
       - name: Tests 
         run: platformio test -e native
 
