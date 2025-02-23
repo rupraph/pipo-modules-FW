@@ -6,21 +6,35 @@ on:
       - '**'
   pull_request:
     branches:
-      - '*'
+      - '**'
+
 jobs:
   platformio_build:
-    name: PlatformIO Build
+    name: PlatformIO Build & Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [ motion, range, analog, native ]
+        environment: [motion, range, analog, native]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup PlatformIO
-        uses: platformio/platformio-action@v2
-        
+      - name: Cache pip and PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+
       - name: Run Unit Tests for native environment
         if: matrix.environment == 'native'
         run: pio test -e native
@@ -34,10 +48,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: web-config/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('web-config/package-lock.json') }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
 
