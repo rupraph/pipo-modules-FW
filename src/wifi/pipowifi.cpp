@@ -1,6 +1,6 @@
 #include <wifi/pipowifi.h>
 
-PipoWifi::PipoWifi() {};
+PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -56,8 +56,6 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:  //ESP32 station connected to AP
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
-      Serial.println("Wifi connect event OSC/LED");
-      osc.start();
       hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, WIFI_PULSE_BRIGHTNESS);
       pwm.add(next.ssid, next.password);
       pwm.promote(next.ssid);
@@ -253,7 +251,6 @@ String PipoWifi::ssid() {
 bool PipoWifi::isScanning() {
   return scanning;
 }
-
 bool PipoWifi::ready() {
   wifi_mode_t mode = WiFi.getMode();
   bool notScanningOrConnecting = !scanning && status != CONNECTING;
@@ -354,9 +351,15 @@ void PipoWifi::refresh() {
     Serial.println("RSSI");
     rssi = WiFi.RSSI();
     next.shouldRSSI = false;
-  } else if (isChangingAP && status == CONNECTED) {
+  } else if (isChangingAP) {
     Serial.println("Disconnect");
-    WiFi.disconnect();
+    if (status == CONNECTED) {
+      WiFi.disconnect();
+    } else if (status == DISCONNECTED) {
+      // handle case when we are not connected to any STA
+      // we cannot trigger step via events on disconnect
+      step();
+    }
   }
 }
 void PipoWifi::setMode(wifi_mode_t mode) {

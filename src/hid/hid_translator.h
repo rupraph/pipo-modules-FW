@@ -25,7 +25,7 @@ class HidTranslator {
   void set_from_json(const JsonDocument& j);
 
   // getter/setters
-  bool get_enabled();
+  bool is_enabled();
   void set_enabled(bool value);
 
   string get_map_address();

@@ -24,7 +24,8 @@ class OSC_handler {
   void send_osc_message(string address, float value);
 
   void set_enabled(bool ena);
-  bool get_enabled();
+  bool is_enabled();
+  bool is_started();
   void receive();
 
   void start();

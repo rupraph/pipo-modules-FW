@@ -328,7 +328,7 @@ void MidiTranslator::set_min_output(int m) {
 //   interpolation_type = i;
 // }
 
-bool MidiTranslator::get_enabled() {
+bool MidiTranslator::is_enabled() {
   return enabled;
 }
 void MidiTranslator::set_enabled(bool e) {

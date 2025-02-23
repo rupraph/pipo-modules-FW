@@ -73,12 +73,12 @@ void Engine::toggle_pause() {
 
 void Engine::midi_processor(string axis_name, float sensor_val,
                             float sensor_min, float sensor_max) {
-  MidiTranslator& Midi_translator = Miditranslators[axis_name];
+  MidiTranslator& midi_translator = Miditranslators[axis_name];
   // check if axis is enabled, outside deadzone and not disabled
-  int channel = Midi_translator.channel;
+  int channel = midi_translator.channel;
 
   if (input_sensor.test_outside_deadzone(axis_name) &&
-      Midi_translator.get_enabled() == true) {
+      midi_translator.is_enabled() == true) {
     // Serial.print("min:");
     // Serial.print(sensor_min);
     // Serial.print(" max:");
@@ -86,23 +86,23 @@ void Engine::midi_processor(string axis_name, float sensor_val,
     // Serial.print("val");
     // Serial.println(sensor_val);
     // if CC MODE:
-    if (Midi_translator.tl_mode == 0) {
-      int cc_nb = Midi_translator.cc_nb;
+    if (midi_translator.tl_mode == 0) {
+      int cc_nb = midi_translator.cc_nb;
 
       // sensor uses continuous mode
       if (input_sensor.get_mode(axis_name) == 0) {
         if (input_sensor.is_within_range(axis_name)) {
           // Todo: hires not tested
-          if (Midi_translator.get_hires()) {
+          if (midi_translator.get_hires()) {
             uint16_t cc_val =
-                max(0, min(Midi_translator.get_cc_val(sensor_val, sensor_min,
+                max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
                                                       sensor_max, 1),
                            16383));
 
             midiio.sendControlChange(cc_nb, cc_val, channel, true);
           } else {
             uint8_t cc_val =
-                max(0, min(Midi_translator.get_cc_val(sensor_val, sensor_min,
+                max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
                                                       sensor_max, 0),
                            127));
 
@@ -115,15 +115,15 @@ void Engine::midi_processor(string axis_name, float sensor_val,
       {
 
         if (input_sensor.get_bool_value(axis_name)) {
-          uint16_t cc_val = Midi_translator.get_max_output();
-          if (Midi_translator.get_hires()) {
+          uint16_t cc_val = midi_translator.get_max_output();
+          if (midi_translator.get_hires()) {
             midiio.sendControlChange(cc_nb, cc_val, channel, true);
           } else {
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
           }
         } else {
-          uint16_t cc_val = Midi_translator.get_min_output();
-          if (Midi_translator.get_hires()) {
+          uint16_t cc_val = midi_translator.get_min_output();
+          if (midi_translator.get_hires()) {
             midiio.sendControlChange(cc_nb, cc_val, channel, true);
           } else {
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
@@ -138,16 +138,16 @@ void Engine::midi_processor(string axis_name, float sensor_val,
     else {
       // getting note for continuous mode
       note_val_prev[channel] = note_val[channel];
-      int note = (Midi_translator.get_note(sensor_val, sensor_min, sensor_max));
+      int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
       note_val[channel] = max(0, min(note, 127));  // clip between 0 and 127
 
-      int sustain_ms = int(Midi_translator.get_sustain() *
+      int sustain_ms = int(midi_translator.get_sustain() *
                            1000.0);  // 0 means sustain manager will not
                                      // shutoff note after delay
 
       // mode is threshold
       if (input_sensor.get_mode(axis_name) == 1) {
-        int thresh_note = Midi_translator.get_root_note();
+        int thresh_note = midi_translator.get_root_note();
         // midiio.printNoteList(channel);
         if (input_sensor.get_bool_value(axis_name)) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
@@ -188,7 +188,7 @@ void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
 
   HidTranslator& HID_translator = HID_translators[axis_name];
   bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
-  if (HID_translator.get_enabled() == true) {
+  if (HID_translator.is_enabled() == true) {
     if (HID_translators.find(axis_name) != HID_translators.end()) {
 
       string address = HID_translator.get_map_address();
@@ -262,10 +262,10 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
   // Todo: loop through sensor data -> indentical for 3 processor, should be
   // factorized
 
-  OscTranslator& Osc_translator = Osctranslators[axis_name];
-  string address = Osc_translator.get_osc_addr();
+  OscTranslator& osc_translator = Osctranslators[axis_name];
+  string address = osc_translator.get_osc_addr();
 
-  if (Osc_translator.get_enabled() &&
+  if (osc_translator.is_enabled() &&
       input_sensor.test_outside_deadzone(axis_name)) {
     bool sensor_invert = input_sensor.get_inverted(axis_name);
     if (sensor_invert == false) {
@@ -281,7 +281,7 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
 
       if (input_sensor.is_within_range(axis_name)) {
         osc_val[axis_name] = round_to(
-            Osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
+            osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
 
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
@@ -290,12 +290,12 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
     } else  // sensor uses trigger mode
     {
       if (input_sensor.get_bool_value(axis_name)) {
-        osc_val[axis_name] = round_to(Osc_translator.get_output_max(), 3);
+        osc_val[axis_name] = round_to(osc_translator.get_output_max(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
         }
       } else {
-        osc_val[axis_name] = round_to(Osc_translator.get_output_min(), 3);
+        osc_val[axis_name] = round_to(osc_translator.get_output_min(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
           osc.send_osc_message(address, osc_val[axis_name]);
         }

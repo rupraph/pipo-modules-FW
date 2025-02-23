@@ -7,7 +7,6 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include "osc/osc_handler.h"
 #include "utils/config.h"
 
 // enum WiFiTransition {

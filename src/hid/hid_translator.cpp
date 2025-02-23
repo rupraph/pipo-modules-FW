@@ -69,7 +69,7 @@ void HidTranslator::set_from_json(const JsonDocument& j) {
   }
 }
 
-bool HidTranslator::get_enabled() {
+bool HidTranslator::is_enabled() {
   return enabled;
 }
 

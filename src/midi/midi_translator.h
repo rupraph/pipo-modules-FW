@@ -97,7 +97,7 @@ class MidiTranslator
   int get_interpolation_type();
   void set_interpolation_type(int i);
 
-  bool get_enabled();
+  bool is_enabled();
   void set_enabled(bool e);
 
   // template <typename T>

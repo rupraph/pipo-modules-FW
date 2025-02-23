@@ -34,7 +34,7 @@ class usb_hid {
   //Getter//setters
   void set_hid_mode(int mode);
   void set_enabled(bool ena);
-  bool get_enabled();
+  bool is_enabled();
   int get_hid_mode();
 
  private:

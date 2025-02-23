@@ -12,7 +12,7 @@ class OscTranslator {
   float get_value(float value, float min_input, float max_input);
 
   // Getter/setter
-  bool get_enabled();
+  bool is_enabled();
   float get_output_max();
   float get_output_min();
   void set_enabled(bool value);

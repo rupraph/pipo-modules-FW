@@ -2,8 +2,8 @@
   import { type SensorSettings } from "../../types";
   import { pipoType, pipoType as type } from "../../services";
   import Switch from "../form/Switch.svelte";
-  import Collapse from "../Collapse.svelte";
-  import Tooltip from "../Tooltip.svelte";
+  import Collapse from "../collapse.svelte";
+  import Tooltip from "../tooltip.svelte";
   export let config: SensorSettings;
 </script>
 

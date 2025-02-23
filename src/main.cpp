@@ -77,8 +77,13 @@ void wifiTask(void* pvParameters) {
   for (;;) {
     wifi.refresh();
     vTaskDelay(pdMS_TO_TICKS(500));
-    if (!server.isRunning() && wifi.ready()) {
-      server.resume();
+    if (wifi.ready()) {
+      if (!server.isRunning()) {
+        server.resume();
+      }
+      if (osc.is_enabled()) {
+        osc.start();
+      }
     }
   }
 }
@@ -96,7 +101,7 @@ void debug_monitor(void* pvParameters) {
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
-    if (WiFi.status() == WL_CONNECTED && osc.get_enabled()) {
+    if (WiFi.status() == WL_CONNECTED && osc.is_enabled()) {
       osc.receive();
     }
     vTaskDelay(pdMS_TO_TICKS(1));

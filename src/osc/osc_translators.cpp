@@ -58,6 +58,6 @@ void OscTranslator::set_from_json(const JsonDocument& j) {
   }
 }
 
-bool OscTranslator::get_enabled() {
+bool OscTranslator::is_enabled() {
   return enabled;
 }
