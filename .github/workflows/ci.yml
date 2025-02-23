@@ -8,16 +8,18 @@ on:
 jobs:
 
   platformio-build:
+    if: github.base_ref == 'master'
     runs-on: ubuntu-latest
     container: infinitecoding/platformio-for-ci:latest
-
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Build firmware
+      - name: Build Motion
         run: platformio run -e motion
+      - name: Tests 
+        run: platformio test -e native
 
   svelte_build:
     name: Svelte Build
