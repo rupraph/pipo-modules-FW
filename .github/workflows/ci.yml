@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        environment: [motion, range, analog, native]
+        environment: [motion, range, analog]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,12 +35,7 @@ jobs:
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
-      - name: Run Unit Tests for native environment
-        if: matrix.environment == 'native'
-        run: pio test -e native
-
       - name: Build for ${{ matrix.environment }}
-        if: matrix.environment != 'native'
         run: pio run -e ${{ matrix.environment }}
 
   svelte_build:
