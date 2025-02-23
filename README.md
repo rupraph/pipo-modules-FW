@@ -42,3 +42,8 @@ Compilation/upload Steps for "motion":
 - Hit reset on the module.
 
 (Other combinations of scripts command are possible, this is the most detailed one)
+
+## CI
+
+By default the CI runs only the web tests, full tests are run only on PRs pointing at main. 
+If you which to run full tests on the CI, add the `ci:piotest` tag to the PR.
