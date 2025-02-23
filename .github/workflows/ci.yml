@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  platformio_build:
+    name: PlatformIO Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [ motion, range, analog, native ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup PlatformIO
+        uses: platformio/platformio-action@v2
+        
+      - name: Run Unit Tests for native environment
+        if: matrix.environment == 'native'
+        run: pio test -e native
+
+      - name: Build for ${{ matrix.environment }}
+        if: matrix.environment != 'native'
+        run: pio run -e ${{ matrix.environment }}
+
+  svelte_build:
+    name: Svelte Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Svelte Dependencies
+        working-directory: web-config
+        run: npm ci
+
+      - name: Build Svelte App
+        working-directory: web-config
+        run: npm run build
