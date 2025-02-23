@@ -6,42 +6,24 @@ on:
       - '**'
 
 jobs:
-
-  platformio-build:
-    name: PlatformIO Build & Test
+  platformio:
+    if: github.base_ref == 'main' || contains(github.event.pull_request.labels.*.name, 'ci:piotest')
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [motion, range, analog, native]
+    container: infinitecoding/platformio-for-ci:latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
         with:
           fetch-depth: 0
 
-      - name: Cache pip and PlatformIO
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio-${{ hashFiles('**/platformio.ini') }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
-
-      - name: Run Unit Tests for native environment
-        if: matrix.environment == 'native'
-        run: pio test -e native
-
-      - name: Build for ${{ matrix.environment }}
-        if: matrix.environment != 'native'
-        run: pio run -e ${{ matrix.environment }}
+      - name: Build Motion
+        run: platformio run -e motion
+      - name: Build Range
+        run: platformio run -e range
+      - name: Build Analaog
+        run: platformio run -e analog
+      - name: Run Native Tests
+        run: platformio test -e native
 
   svelte_build:
     name: Svelte Build
