@@ -6,29 +6,6 @@ on:
       - '**'
 
 jobs:
-  platformio_build:
-    name: PlatformIO Build & Test
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [motion, range, analog]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.platformio/.cache
-          key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install PlatformIO Core
-        run: pip install --upgrade platformio
-
-      - name: Build PlatformIO Project
-        run: pio run -e ${{ matrix.environment }}
-
   svelte_build:
     name: Svelte Build
     runs-on: ubuntu-latest
