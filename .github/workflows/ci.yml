@@ -27,7 +27,7 @@ jobs:
         run: pip install --upgrade platformio
 
       - name: Build PlatformIO Project
-        run: pio run build -e ${{ matrix.environment }}
+        run: pio run -e ${{ matrix.environment }}
 
   svelte_build:
     name: Svelte Build
