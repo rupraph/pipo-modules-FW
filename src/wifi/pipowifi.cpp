@@ -1,6 +1,6 @@
 #include <wifi/pipowifi.h>
 
-PipoWifi::PipoWifi(){};
+PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -159,6 +159,8 @@ bool PipoWifi::connect(String ssid, String password) {
   status = CONNECTING;
   next.ssid = ssid;
   next.password = password;
+  Serial.print("Connecting to ");
+  Serial.println(ssid.c_str());
   WiFi.begin(ssid.c_str(), password.c_str());
   return true;
 };
@@ -343,22 +345,22 @@ void PipoWifi::refresh() {
     return;
   wifi_mode_t prevMode = WiFi.getMode();
 
-  if (!scanning && next.shouldScan) {
+  if (next.shouldScan) {
     Serial.println("Wifi Scan");
     scanning = WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     next.shouldScan = false;
-  } else if (next.shouldRSSI && !scanning) {
+  } else if (next.shouldRSSI) {
     Serial.println("RSSI");
     rssi = WiFi.RSSI();
     next.shouldRSSI = false;
   } else if (isChangingAP) {
-    Serial.println("Disconnect");
+    isChangingAP = false;
     if (status == CONNECTED) {
+      Serial.println("Disconnect 1");
       WiFi.disconnect();
-    } else if (status == DISCONNECTED) {
-      // handle case when we are not connected to any STA
-      // we cannot trigger step via events on disconnect
-      step();
+    } else if (status == DISCONNECTED && apStarted) {
+      scanning =
+          WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     }
   }
 }

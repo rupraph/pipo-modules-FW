@@ -120,12 +120,53 @@ void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
-  // Disable watchdog timer for debug
-  // disableCore0WDT();
-  // disableCore1WDT();
+  while (!Serial)
+    delay(100);
 
-  // while (!Serial)
-  //   delay(100);  // putting wait serial here breaks usb mid/hid init
+  esp_reset_reason_t reason = esp_reset_reason();
+
+  Serial.print("Reset reason: ");
+  switch (reason) {
+    case ESP_RST_POWERON:
+      Serial.println("Power-on reset");
+      break;
+    case ESP_RST_EXT:
+      Serial.println("External reset");
+      break;
+    case ESP_RST_SW:
+      Serial.println("Software reset");
+      break;
+    case ESP_RST_PANIC:
+      Serial.println("Exception/Panic reset");
+      break;
+    case ESP_RST_INT_WDT:
+      Serial.println("Interrupt watchdog reset");
+      break;
+    case ESP_RST_TASK_WDT:
+      Serial.println("Task watchdog reset");
+      break;
+    case ESP_RST_WDT:
+      Serial.println("Other watchdog reset");
+      break;
+    case ESP_RST_DEEPSLEEP:
+      Serial.println("Wakeup from deep sleep");
+      break;
+    case ESP_RST_BROWNOUT:
+      Serial.println("Brownout reset");
+      break;
+    case ESP_RST_SDIO:
+      Serial.println("SDIO reset");
+      break;
+    default:
+      Serial.println("Unknown reset reason");
+  }
+
+    // Disable watchdog timer for debug
+    // disableCore0WDT();
+    // disableCore1WDT();
+
+    // while (!Serial)
+    //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
 // setCpuFrequencyMhz(80); will be usefull to save power on battery
 /////// Init hardware user interface (leds and switches)
