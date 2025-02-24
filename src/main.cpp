@@ -39,13 +39,13 @@ void sensorTask(void* pvParameters) {
   }
 }
 
+// takes 2-3 ms for motion
 void websocketTask(void* pvParameters) {
   for (;;) {
     if (!pipoNetworkReady()) {
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
-
     int rssi = wifi.getRSSI();
     int taskDelay;
     // Adjust task delay based on RSSI
@@ -115,6 +115,7 @@ void oscreceiveTask(void* pvParameters) {
 // }
 #endif
 
+// by default runs on core 1
 void setup() {
   Serial.begin(115200);
   // Serial.setDebugOutput(true);
@@ -205,7 +206,7 @@ void setup() {
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
   // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 0, &wifiTaskHandle,
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
@@ -213,6 +214,7 @@ void setup() {
   Serial.println("Setup done");
 }
 
+// by default runs on core 1
 void loop() {
   try {
 

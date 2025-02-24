@@ -38,20 +38,22 @@ void OSC_handler::set_config() {
 
 /// @brief start the UDP connection.
 void OSC_handler::start() {
-  if (isStarted)
+  if (isStarted) {
     return;
+  }
+
   if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-    Serial.println(F("Can't start OSC, No destination IP or port defined"));
+    Serial.println("Can't start OSC, No destination IP or port defined");
     return;
   } else {
-    Serial.println(F("Starting OSC"));
+    Serial.println("Starting OSC");
     Serial.print("OSC sending to IP: ");
     Serial.println(dest_ip.toString());
     Serial.print("on port:");
     Serial.println(String(out_port));
     Udp.begin(out_port);
     isStarted = true;
-    Serial.println(F("OSC started"));
+    Serial.println("OSC started");
   }
 }
 
@@ -169,7 +171,7 @@ void OSC_handler::send_osc_message(string address, float value) {
 }
 
 void OSC_handler::set_enabled(bool ena) {
-  this->enabled = enabled;
+  this->enabled = ena;
 }
 
 bool OSC_handler::is_enabled() {
