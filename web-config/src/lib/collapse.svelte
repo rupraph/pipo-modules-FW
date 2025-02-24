@@ -83,4 +83,8 @@
     transform: rotate(45deg);
     -webkit-transform: rotate(45deg);
   }
+
+  section {
+    overflow-x: auto;
+  }
 </style>

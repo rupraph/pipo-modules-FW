@@ -171,7 +171,9 @@
 </script>
 
 <Collapse title="Quick settings">
-  <QuickConfig bind:config />
+  <div style="overflow-x: auto;">
+    <QuickConfig bind:config />
+  </div>
 
   {#if $type === "analog"}
     <button
