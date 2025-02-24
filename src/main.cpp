@@ -118,7 +118,7 @@ void oscreceiveTask(void* pvParameters) {
 // by default runs on core 1
 void setup() {
   Serial.begin(115200);
-  // Serial.setDebugOutput(true);
+  Serial.setDebugOutput(true);
 
   // Disable watchdog timer for debug
   // disableCore0WDT();
