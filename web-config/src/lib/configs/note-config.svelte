@@ -63,37 +63,55 @@
   ];
 
   const arpeggioTypes = [
-    { label: "major", value: "major", notes: [0, 4, 7] },
-    { label: "minor", value: "minor", notes: [0, 3, 7] },
-    { label: "diminished", value: "diminished", notes: [0, 3, 6] },
-    { label: "augmented", value: "augmented", notes: [0, 4, 8] },
-    { label: "suspended", value: "suspended", notes: [0, 5, 7] },
-    { label: "dominant", value: "dominant", notes: [0, 4, 7, 10] },
-    { label: "major 7", value: "major7", notes: [0, 4, 7, 11] },
-    { label: "minor 7", value: "minor7", notes: [0, 3, 7, 10] },
-    { label: "diminished 7", value: "diminished7", notes: [0, 3, 6, 9] },
-    { label: "augmented 7", value: "augmented7", notes: [0, 4, 8, 10] },
-    { label: "suspended 7", value: "suspended7", notes: [0, 5, 7, 10] },
-    { label: "dominant 7", value: "dominant7", notes: [0, 4, 7, 10] },
-    { label: "major 9", value: "major9", notes: [0, 4, 7, 11, 14] },
-    { label: "minor 9", value: "minor9", notes: [0, 3, 7, 10, 14] },
-    { label: "diminished 9", value: "diminished9", notes: [0, 3, 6, 9, 13] },
-    { label: "augmented 9", value: "augmented9", notes: [0, 4, 8, 10, 14] },
+    { label: "Major", value: "major", notes: [0, 4, 7] },
+    { label: "Minor", value: "minor", notes: [0, 3, 7] },
+    { label: "Diminished", value: "diminished", notes: [0, 3, 6] },
+    { label: "Augmented", value: "augmented", notes: [0, 4, 8] },
+    { label: "Suspended", value: "suspended", notes: [0, 5, 7] },
+    { label: "Dominant", value: "dominant", notes: [0, 4, 7, 10] },
+    { label: "Major 7", value: "major7", notes: [0, 4, 7, 11] },
+    { label: "Minor 7", value: "minor7", notes: [0, 3, 7, 10] },
+    { label: "Diminished 7", value: "diminished7", notes: [0, 3, 6, 9] },
+    { label: "Augmented 7", value: "augmented7", notes: [0, 4, 8, 10] },
+    { label: "Suspended 7", value: "suspended7", notes: [0, 5, 7, 10] },
+    { label: "Dominant 7", value: "dominant7", notes: [0, 4, 7, 10] },
+    { label: "Major 9", value: "major9", notes: [0, 4, 7, 11, 14] },
+    { label: "Minor 9", value: "minor9", notes: [0, 3, 7, 10, 14] },
+    { label: "Diminished 9", value: "diminished9", notes: [0, 3, 6, 9, 13] },
+    { label: "Augmented 9", value: "augmented9", notes: [0, 4, 8, 10, 14] },
   ];
 
   const intervals = [
-    { label: "second", value: "second", notes: [0, 2] },
-    { label: "third", value: "third", notes: [0, 4] },
-    { label: "fourth", value: "fourth", notes: [0, 5] },
-    { label: "fifth", value: "fifth", notes: [0, 7] },
-    { label: "sixth", value: "sixth", notes: [0, 9] },
-    { label: "seventh", value: "seventh", notes: [0, 11] },
-    { label: "octave", value: "octave", notes: [0, 12] },
-    { label: "ninth", value: "ninth", notes: [0, 14] },
-    { label: "tenth", value: "tenth", notes: [0, 16] },
-    { label: "eleventh", value: "eleventh", notes: [0, 17] },
-    { label: "twelfth", value: "twelfth", notes: [0, 19] },
+    { label: "Second", value: "second", notes: [0, 2] },
+    { label: "Third", value: "third", notes: [0, 4] },
+    { label: "Fourth", value: "fourth", notes: [0, 5] },
+    { label: "Fifth", value: "fifth", notes: [0, 7] },
+    { label: "Sixth", value: "sixth", notes: [0, 9] },
+    { label: "Seventh", value: "seventh", notes: [0, 11] },
+    { label: "Octave", value: "octave", notes: [0, 12] },
+    { label: "Ninth", value: "ninth", notes: [0, 14] },
+    { label: "Tenth", value: "tenth", notes: [0, 16] },
+    { label: "Eleventh", value: "eleventh", notes: [0, 17] },
+    { label: "Twelfth", value: "twelfth", notes: [0, 19] },
   ];
+  $: {
+    if (
+      config.pattern === "scale" &&
+      !scaleTypes.find((type) => type.value === config.scaleType)
+    ) {
+      config.scaleType = scaleTypes[0].value;
+    } else if (
+      config.pattern === "arpeggio" &&
+      !arpeggioTypes.find((type) => type.value === config.scaleType)
+    ) {
+      config.scaleType = arpeggioTypes[0].value;
+    } else if (
+      config.pattern === "interval" &&
+      !intervals.find((type) => type.value === config.scaleType)
+    ) {
+      config.scaleType = intervals[0].value;
+    }
+  }
 </script>
 
 {#if $pipoType !== "analog"}
