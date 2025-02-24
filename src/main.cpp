@@ -49,10 +49,10 @@ void websocketTask(void* pvParameters) {
     int rssi = wifi.getRSSI();
     int taskDelay;
     // Adjust task delay based on RSSI
-    if (rssi > -60) {
+    if (rssi > -65) {
       taskDelay = 40;  // Strong signal → High frequency
     } else if (rssi > -70) {
-      taskDelay = 100;  // Medium signal → Reduce frequency
+      taskDelay = 80;  // Medium signal → Reduce frequency
     } else if (rssi > -80) {
       taskDelay = 250;  // Weak signal → Send less often
     } else {
@@ -119,9 +119,6 @@ void oscreceiveTask(void* pvParameters) {
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-
-  while (!Serial)
-    delay(100);
 
   esp_reset_reason_t reason = esp_reset_reason();
 
@@ -252,6 +249,8 @@ void setup() {
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
   // hwui.start_blink(WIFI_LED, 2000, 0.5);
+  hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
+                   0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
 }
 

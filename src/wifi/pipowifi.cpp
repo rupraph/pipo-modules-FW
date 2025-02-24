@@ -56,7 +56,8 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:  //ESP32 station connected to AP
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
-      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 0, WIFI_PULSE_BRIGHTNESS);
+      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 30,
+                       WIFI_PULSE_BRIGHTNESS);
       pwm.add(next.ssid, next.password);
       pwm.promote(next.ssid);
       pwm.save();
@@ -68,9 +69,8 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:  //ESP32 station disconnected from AP
       Serial.println("STA DISCONNECTED!");
-      osc.stop();
       hwui.stop_pulse(WIFI_LED);
-      uint8_t reason = info.wifi_sta_disconnected.reason;
+      // uint8_t reason = info.wifi_sta_disconnected.reason;
       // we disconnected from the asked AP: means wrong credentials,
       // erase the ssid and password to allow fallback to other APs
       if (strcmp((char*)info.wifi_sta_disconnected.ssid, next.ssid.c_str()) ==
@@ -165,16 +165,19 @@ bool PipoWifi::connect(String ssid, String password) {
   return true;
 };
 
+//Todo: context issue. leds cannot be started from there
 bool PipoWifi::configureAP() {
   getFreeSubNet();
   apIP = IPAddress(192, 168, subnetBase, 1);
   WiFi.softAPConfig(apIP, apIP, apMask);
   string apName = "Pipo-" + config.general_config["PipoName"].as<string>();
   Serial.print("Starting AP: ");
+  log_i("Starting AP:");
   Serial.println(apName.c_str());
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
   if (apStarted) {
     Serial.println("AP started successfully.");
+    hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     Serial.println("Failed to start AP.");
   }

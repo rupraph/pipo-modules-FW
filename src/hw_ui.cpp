@@ -101,6 +101,9 @@ bool HwUi::is_pulsing(int led_name) {
 }
 
 void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
+  if (led_pulse_table[led_name].enabled) {
+    stop_pulse(led_name);
+  }
   led_blink_table[led_name].enabled = true;
   led_blink_table[led_name].blink_period = blink_time;
   led_blink_table[led_name].duty_cycle = duty_cycle;
@@ -115,6 +118,9 @@ void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
 
 void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
                        int max_brightness) {
+  if (led_blink_table[led_name].enabled) {
+    stop_blink(led_name);
+  }
   led_pulse_table[led_name].enabled = true;
   led_pulse_table[led_name].pulse_period = pulse_period;
   led_pulse_table[led_name].min_brightness = min_brightness;
