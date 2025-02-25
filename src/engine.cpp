@@ -234,6 +234,7 @@ void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
               }
             } else {
               //deal with 2 key addresses for true/false when basic threshold mode selected
+              //Todo: should not fetch input sensor value here I guess. like other processors
               if (!sensor_bool_val) {
                 if (input_sensor.get_value(axis_name) >
                     input_sensor.get_limit_max(axis_name)) {
@@ -267,14 +268,6 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
 
   if (osc_translator.is_enabled() &&
       input_sensor.test_outside_deadzone(axis_name)) {
-    bool sensor_invert = input_sensor.get_inverted(axis_name);
-    if (sensor_invert == false) {
-      sensor_min = input_sensor.get_limit_min(axis_name);
-      sensor_max = input_sensor.get_limit_max(axis_name);
-    } else {
-      sensor_max = input_sensor.get_limit_min(axis_name);
-      sensor_min = input_sensor.get_limit_max(axis_name);
-    }
 
     osc_val_prev[axis_name] = osc_val[axis_name];
     if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
