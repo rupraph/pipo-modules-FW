@@ -19,4 +19,4 @@
   />
 {/if}
 
-<DisabledWarning enabled={!osc.enabled} />
+<DisabledWarning bind:enabled={osc.enabled} />

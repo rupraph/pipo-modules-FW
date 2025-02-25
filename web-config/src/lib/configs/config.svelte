@@ -260,13 +260,13 @@
     <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
     <section class="translator-settings">
       {#if currentCat === "MIDI"}
-        <MidiConfigForm {midi} bind:sensormode={input.mode} />
+        <MidiConfigForm bind:midi bind:sensormode={input.mode} />
       {/if}
       {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} {input} {hid} />
+        <HidConfigForm bind:hidMode={config.general.HidMode} bind:input {hid} />
       {/if}
       {#if currentCat === "OSC"}
-        <OscConfigForm {osc} />
+        <OscConfigForm bind:osc />
       {/if}
     </section>
     <div style="display:flex; margin-top:1em; justify-content:right;">

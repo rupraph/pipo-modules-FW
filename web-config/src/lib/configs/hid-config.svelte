@@ -89,8 +89,8 @@
   {/if}
 {:else if input.mode === false && hidMode === 2}
   <p>
-    Not possible to map a input in continuous mode to a key stoke (must change
-    to Threshold mode)
+    Not possible to map an input set in continuous mode to a key stroke (must
+    change to threshold mode)
   </p>
   <!-- Thresh + mouse -->
 {:else if input.mode === true && hidMode === 1}
@@ -112,4 +112,4 @@
   PROBLEM !
 {/if}
 
-<DisabledWarning enabled={!hid.enabled} />
+<DisabledWarning bind:enabled={hid.enabled} />

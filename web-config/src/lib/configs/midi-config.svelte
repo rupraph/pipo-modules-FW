@@ -12,6 +12,8 @@
     { label: "Note", value: "1" },
     { label: "CC", value: "0" },
   ];
+
+  $: console.log(midi.enabled);
 </script>
 
 <Range label="Midi Channel" bind:value={midi.channel} min={1} max={16} />
@@ -31,4 +33,4 @@
   <NoteConfig config={midi} bind:isThresholdMode={sensormode} />
 {/if}
 
-<DisabledWarning enabled={!midi.enabled} />
+<DisabledWarning bind:enabled={midi.enabled} />

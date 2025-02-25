@@ -2,7 +2,7 @@
   export let enabled: boolean;
 </script>
 
-{#if enabled}
+{#if !enabled}
   <p class="warning">Note: Disabled in quick config</p>
 {/if}
 
