@@ -172,7 +172,7 @@ bool PipoWifi::configureAP() {
   WiFi.softAPConfig(apIP, apIP, apMask);
   string apName = "Pipo-" + config.general_config["PipoName"].as<string>();
   Serial.print("Starting AP: ");
-  log_i("Starting AP:");
+  // log_i("Starting AP:");
   Serial.println(apName.c_str());
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
   if (apStarted) {
