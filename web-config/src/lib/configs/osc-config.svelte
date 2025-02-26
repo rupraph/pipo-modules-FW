@@ -18,5 +18,4 @@
     max={Infinity}
   />
 {/if}
-
-<DisabledWarning bind:enabled={osc.enabled} />
+<DisabledWarning enabled={osc.enabled} />

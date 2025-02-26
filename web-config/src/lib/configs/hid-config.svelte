@@ -111,5 +111,4 @@
 {:else}
   PROBLEM !
 {/if}
-
-<DisabledWarning bind:enabled={hid.enabled} />
+<DisabledWarning enabled={hid.enabled} />
