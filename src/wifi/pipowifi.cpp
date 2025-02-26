@@ -1,6 +1,6 @@
 #include <wifi/pipowifi.h>
 
-PipoWifi::PipoWifi() {};
+PipoWifi::PipoWifi(){};
 void PipoWifi::setup() {
   Serial.println("Wifi setup");
   pwm.setup();
@@ -15,11 +15,11 @@ void PipoWifi::setup() {
   // allow to connect to (WHY SO WEAK?) wep networks
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
   // prevent from the Wifi to sleep: avoid latency in websockets
+  configureAP();
   WiFi.setSleep(false);
   scanning = true;
   Serial.println("Wifi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
-  Serial.println("Scan done, wifi setup ");
 };
 void PipoWifi::saveScanResult() {
   signals.clear();
@@ -162,6 +162,16 @@ bool PipoWifi::connect(String ssid, String password) {
   Serial.print("Connecting to ");
   Serial.println(ssid.c_str());
   WiFi.begin(ssid.c_str(), password.c_str());
+  uint32_t startAttemptTime = millis();
+  while (WiFi.status() != WL_CONNECTED) {
+    if (millis() - startAttemptTime > 20000) {  // Timeout after 10 seconds
+      Serial.println("Connection timed out.");
+      WiFi.disconnect();
+      return false;
+    }
+    vTaskDelay(
+        pdMS_TO_TICKS(100));  // Yield to FreeRTOS to prevent watchdog resets
+  }
   return true;
 };
 
@@ -287,23 +297,9 @@ void PipoWifi::getFreeSubNet() {
 }
 void PipoWifi::step() {
   if (scanning || status == CONNECTING) {
-    Serial.println("Step scanning");
     return;
   }
-
-  Serial.println("Step");
   wifi_mode_t mode = WiFi.getMode();
-  Serial.print("Change mode? ");
-  Serial.print(next.mode);
-  Serial.print(" mode ");
-  Serial.print(mode);
-  Serial.print(" apStarted ");
-  Serial.print(apStarted);
-  Serial.print(" staStarted ");
-  Serial.print(staStarted);
-  Serial.print(" status ");
-  Serial.println(status);
-
   if (next.mode != WiFi.getMode()) {
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_MODE_NULL);
@@ -324,22 +320,10 @@ void PipoWifi::step() {
     if (connect()) {
       return;
     }
-    // There might have been no one to connect to, we need to start AP anyway
-    Serial.println("No one to connect to, starting AP");
   }
-  Serial.print("Should AP? ");
-  Serial.print(mode);
-  Serial.print(" apStarted ");
-  Serial.print(apStarted);
-  Serial.print(" staStarted ");
-  Serial.print(staStarted);
-  Serial.print(" status ");
-  Serial.println(status);
-
   if (!apStarted && (mode == WIFI_MODE_AP ||
                      mode == WIFI_MODE_APSTA && status != CONNECTING)) {
     // we are in AP mode, need to configure it
-    Serial.println("Configure AP");
     configureAP();
   }
 }
@@ -359,11 +343,9 @@ void PipoWifi::refresh() {
   } else if (isChangingAP) {
     isChangingAP = false;
     if (status == CONNECTED) {
-      Serial.println("Disconnect 1");
       WiFi.disconnect();
     } else if (status == DISCONNECTED && apStarted) {
-      scanning =
-          WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
+      step();
     }
   }
 }

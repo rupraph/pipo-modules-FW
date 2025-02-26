@@ -244,7 +244,7 @@ void setup() {
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
   // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 1, &wifiTaskHandle,
                           0);
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
