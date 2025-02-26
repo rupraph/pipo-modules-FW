@@ -1,11 +1,9 @@
 <script lang="ts" generics="T extends PipoTypes">
   import { pipoio } from "../../pipoio";
-
   import HidGlobalConfig from "./hid-global-config.svelte";
-
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { schema } from "../../schema";
-  import { pipoType, pipoType as type } from "../../services";
+  import { pipoType as type } from "../../services";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -33,12 +31,12 @@
   import Switch from "../form/Switch.svelte";
   import Text from "../form/Text.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
+
   export let config: PipoConfig<T>;
   export let name: string;
-  const dispatch = createEventDispatcher();
   let savingStatus = "none";
 
-  let configByChannel: ConfigByChannel<T>;
+  let configByChannel: ConfigByChannel<T> = {} as ConfigByChannel<T>;
   let currentAxis: PipoKeys[T];
   let midi: MidiConfig;
   let osc: OscConfig;
@@ -47,7 +45,20 @@
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
+
   onMount(() => {
+    if (config) {
+      updateConfigByChannel();
+      setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
+    }
+  });
+
+  // Ensures configByChannel updates reactively
+  $: if (config) {
+    updateConfigByChannel();
+  }
+
+  function updateConfigByChannel() {
     configByChannel = (
       Object.entries(config.inputs) as [PipoKeys[T], InputSettings][]
     )
@@ -64,11 +75,34 @@
         };
         return acc;
       }, {} as ConfigByChannel<T>);
-    axisSelect = (Object.keys(configByChannel) as PipoKeys[T][]).map((axis) => {
-      return { value: axis, label: schema[$type as T][axis].label };
-    });
-    setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
-  });
+
+    axisSelect = (Object.keys(configByChannel) as PipoKeys[T][]).map(
+      (axis) => ({
+        value: axis,
+        label: schema[$type as T][axis].label,
+      })
+    );
+  }
+
+  // Ensures `midi`, `osc`, `hid`, etc. update when `currentAxis` changes
+  $: if (configByChannel && currentAxis) {
+    midi = configByChannel[currentAxis].midi;
+    osc = configByChannel[currentAxis].osc;
+    hid = configByChannel[currentAxis].hid;
+    aschema = schema[$type as T][currentAxis];
+    input = configByChannel[currentAxis].input;
+  }
+
+  function setAxis(axis: PipoKeys[T]) {
+    if (axis !== currentAxis) {
+      currentAxis = axis;
+      pipoio.monitorAxis(axis);
+    }
+  }
+
+  function setCategory(cat: string) {
+    currentCat = cat;
+  }
 
   function submit() {
     console.log("Saving...");
@@ -101,23 +135,9 @@
       });
   }
 
-  function download() {
-    const data = JSON.stringify(config, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.download = "config.json";
-    a.target = "_blank";
-    a.href = url;
-    a.click();
-  }
-
   function reboot() {
-    pipoio.get("/reboot").then(() => {
-      console.log("Rebooting...");
-    });
+    pipoio.get("/reboot").then(() => console.log("Rebooting..."));
   }
-
   let isPaused = false;
   function pause() {
     pipoio.post("/pause").then(() => {
@@ -125,56 +145,12 @@
     });
     isPaused = !isPaused;
   }
-
-  function setAxis(axis: PipoKeys[T]) {
-    if (axis === currentAxis) return;
-    currentAxis = axis;
-    midi = configByChannel[axis].midi;
-    osc = configByChannel[axis].osc;
-    hid = configByChannel[axis].hid;
-    aschema = schema[$type as T][axis];
-    input = configByChannel[axis].input;
-    pipoio.monitorAxis(axis);
-  }
-  function setCategory(cat: string) {
-    currentCat = cat;
-  }
-  let interval = 0;
-  // onMount(() => {
-  //   interval = window.setInterval(() => {
-  //     configSave.update(JSON.parse(JSON.stringify(config)));
-  //   }, 1000);
-  // });
-  // onDestroy(() => {
-  //   clearInterval(interval);
-  // });
-
-  /**
- 
-
-
- */
-
-  function cal_offset(axis: PipoKeys[T]) {
-    pipoio
-      .request({
-        method: "post",
-        url: "/offsetcal",
-        params: { axis },
-      })
-      .then(() => console.log("DONE"));
-  }
-
-  $: if (config && currentAxis) {
-    setAxis(currentAxis);
-  }
 </script>
 
 <Collapse title="Quick settings">
   <div style="overflow-x: auto;">
     <QuickConfig bind:config />
   </div>
-
   {#if $type === "analog"}
     <button
       class="primary"
@@ -213,7 +189,6 @@
     title="Apply and save the config in pipo">Save</LoadingButton
   >
 </Collapse>
-
 <hr class="separator" />
 
 <Collapse title="Input settings" open>
@@ -255,9 +230,8 @@
     </div>
 
     <InputConfig bind:input bind:aschema bind:currentAxis />
-    <!-- <Checkbox label="Inverted" bind:value={sensorconf.inverted} /> -->
+    <CategoryTab active={currentCat} onClick={setCategory} />
 
-    <CategoryTab active={currentCat} onClick={(cat) => setCategory(cat)} />
     <section class="translator-settings">
       {#if currentCat === "MIDI"}
         <MidiConfigForm bind:midi bind:sensormode={input.mode} />
@@ -283,11 +257,9 @@
     </div>
   {/if}
 </Collapse>
-
 <hr class="separator" />
 <SensorModes bind:config={config.sensorconf} />
 <hr class="separator" />
-
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
   <OscGlobalConfig
     bind:ip={config.general.OSC_IP}

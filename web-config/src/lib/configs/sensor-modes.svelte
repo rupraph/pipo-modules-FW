@@ -1,6 +1,6 @@
 <script lang="ts">
   import { type SensorSettings } from "../../types";
-  import { pipoType, pipoType as type } from "../../services";
+  import { pipoType as type } from "../../services";
   import Switch from "../form/Switch.svelte";
   import Collapse from "../collapse.svelte";
   import Tooltip from "../tooltip.svelte";

@@ -32,5 +32,4 @@
 {:else}
   <NoteConfig config={midi} bind:isThresholdMode={sensormode} />
 {/if}
-
-<DisabledWarning bind:enabled={midi.enabled} />
+<DisabledWarning enabled={midi.enabled} />
