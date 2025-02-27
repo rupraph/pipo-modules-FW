@@ -31,6 +31,7 @@
   import Switch from "../form/Switch.svelte";
   import Text from "../form/Text.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
+  import axios from "axios";
 
   export let config: PipoConfig<T>;
   export let name: string;
@@ -153,6 +154,14 @@
       console.log("Pausing...");
     });
     isPaused = !isPaused;
+  }
+
+  function cal_offset(axis: PipoKeys[T]) {
+    axios({
+      method: "post",
+      url: "/offsetcal",
+      params: { axis },
+    }).then(() => console.log("DONE"));
   }
 </script>
 

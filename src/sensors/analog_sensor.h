@@ -49,9 +49,9 @@ class AnalogSensor : public Sensor {
       {"A01", MedianFilter(5)}, {"A02", MedianFilter(5)},
       {"A03", MedianFilter(5)}, {"A04", MedianFilter(5)},
       {"A05", MedianFilter(5)}, {"A06", MedianFilter(5)},
-      {"T1", MedianFilter(20)}, {"T2", MedianFilter(20)},
-      {"T3", MedianFilter(20)}, {"T4", MedianFilter(20)},
-      {"T5", MedianFilter(20)}, {"T6", MedianFilter(20)}};
+      {"T1", MedianFilter(10)}, {"T2", MedianFilter(10)},
+      {"T3", MedianFilter(10)}, {"T4", MedianFilter(10)},
+      {"T5", MedianFilter(10)}, {"T6", MedianFilter(10)}};
 
   bool touch_adaptative_max;
 };
