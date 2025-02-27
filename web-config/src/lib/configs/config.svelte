@@ -83,7 +83,7 @@
       })
     );
   }
-
+  let hide_on_out = false;
   // Ensures `midi`, `osc`, `hid`, etc. update when `currentAxis` changes
   $: if (configByChannel && currentAxis) {
     midi = configByChannel[currentAxis].midi;
@@ -91,6 +91,15 @@
     hid = configByChannel[currentAxis].hid;
     aschema = schema[$type as T][currentAxis];
     input = configByChannel[currentAxis].input;
+    if (aschema.cat === "Voltage") {
+      if (config.sensorconf.analogout[currentAxis].pindir) {
+        hide_on_out = true;
+      } else {
+        hide_on_out = false;
+      }
+    } else {
+      hide_on_out = false;
+    }
   }
 
   function setAxis(axis: PipoKeys[T]) {
@@ -228,33 +237,41 @@
         </button>
       </Tooltip>
     </div>
+    {#if hide_on_out}
+      <p>This channel is currently used for output</p>
+      <p>Check beta section below</p>
+    {:else}
+      <InputConfig bind:input bind:aschema bind:currentAxis />
+      <CategoryTab active={currentCat} onClick={setCategory} />
 
-    <InputConfig bind:input bind:aschema bind:currentAxis />
-    <CategoryTab active={currentCat} onClick={setCategory} />
-
-    <section class="translator-settings">
-      {#if currentCat === "MIDI"}
-        <MidiConfigForm bind:midi bind:sensormode={input.mode} />
-      {/if}
-      {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} bind:input {hid} />
-      {/if}
-      {#if currentCat === "OSC"}
-        <OscConfigForm bind:osc />
-      {/if}
-    </section>
-    <div style="display:flex; margin-top:1em; justify-content:right;">
-      <LoadingButton
-        onClick={submit}
-        loading={savingStatus === "loading"}
-        class={savingStatus === "success"
-          ? "success"
-          : savingStatus === "error"
-            ? "error"
-            : "primary"}
-        title="Apply and save the config in pipo">Save</LoadingButton
-      >
-    </div>
+      <section class="translator-settings">
+        {#if currentCat === "MIDI"}
+          <MidiConfigForm bind:midi bind:sensormode={input.mode} />
+        {/if}
+        {#if currentCat === "HID"}
+          <HidConfigForm
+            bind:hidMode={config.general.HidMode}
+            bind:input
+            {hid}
+          />
+        {/if}
+        {#if currentCat === "OSC"}
+          <OscConfigForm bind:osc />
+        {/if}
+      </section>
+      <div style="display:flex; margin-top:1em; justify-content:right;">
+        <LoadingButton
+          onClick={submit}
+          loading={savingStatus === "loading"}
+          class={savingStatus === "success"
+            ? "success"
+            : savingStatus === "error"
+              ? "error"
+              : "primary"}
+          title="Apply and save the config in pipo">Save</LoadingButton
+        >
+      </div>
+    {/if}
   {/if}
 </Collapse>
 <hr class="separator" />

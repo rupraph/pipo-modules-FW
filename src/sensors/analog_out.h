@@ -20,7 +20,7 @@ enum AnalogOutput { A01, A02, A03, A04, A05, A06 };
 //will not use for first tests
 struct OutputData {
   string name;
-  bool pindir;
+  bool pindir;  // 0 input 1 output
   int out_mode;
   float value;
   float lmax;

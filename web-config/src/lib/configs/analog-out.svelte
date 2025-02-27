@@ -2,7 +2,7 @@
   import type { AnalogOut, AnalogOutKeys } from "../../types";
   import Checkbox from "../form/Checkbox.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
-  export let outconfig;
+  export let outconfig = {} as AnalogOut;
   console.log(outconfig);
 </script>
 

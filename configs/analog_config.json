@@ -466,7 +466,7 @@
   "sensorconf": {
     "analogout": {
       "A01": {
-        "pindir": 1,
+        "pindir": 0,
         "outmode": 1,
         "lmax": 180.0,
         "lmin": 0.0

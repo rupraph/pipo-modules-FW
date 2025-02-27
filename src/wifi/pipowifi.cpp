@@ -70,7 +70,7 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:  //ESP32 station disconnected from AP
       Serial.println("STA DISCONNECTED!");
       hwui.stop_pulse(WIFI_LED);
-      uint8_t reason = info.wifi_sta_disconnected.reason;
+      uint8_t reason = info.wifi_sta_disconnected.reason; // for some reason if commented it seem to impact setting the custom AP name..... 
       // we disconnected from the asked AP: means wrong credentials,
       // erase the ssid and password to allow fallback to other APs
       if (strcmp((char*)info.wifi_sta_disconnected.ssid, next.ssid.c_str()) ==

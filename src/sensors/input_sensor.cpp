@@ -198,9 +198,11 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
 void Sensor::monitor_axis(const std::string& axis) {
   // iterate through sensor_dat, set the ws_monitor flag to true for the
   // specified axis and false for all others
+
   for (auto& dat : sensor_dat) {
     string axis_name = dat.first;
     if (axis_name == axis) {
+      log_i("set monitor_axis: %s", axis.c_str());
       dat.second.ws_monitor = true;
     } else {
       dat.second.ws_monitor = false;
