@@ -36,32 +36,39 @@
   }
 </script>
 
-<div class="quick-settings" style="--columns: {columns}">
-  <span class="row-header" style="grid-row=1">Axis</span>
-  {#each headers as header, i}
-    <div class="header" style="grid-column:{i + 2}">{header}</div>
-  {/each}
-  {#each rows as row, i}
-    <span class="row-header" style="grid-row={i + 2}">{row.key}</span>
-    {#each headers as header, j}
-      <label class="checkbox" style="grid-row:{i + 2}; grid-column:{j + 2}">
-        <input
-          type="checkbox"
-          class="checkbox__input"
-          bind:checked={config.engine[row.value][header].enabled}
-        />
-      </label>
+<div class="wrapper">
+  <div class="quick-settings" style="--columns: {columns}">
+    <span class="row-header" style="grid-row=1">Axis</span>
+    {#each headers as header, i}
+      <div class="header" style="grid-column:{i + 2}">{header}</div>
     {/each}
-  {/each}
+    {#each rows as row, i}
+      <span class="row-header" style="grid-row={i + 2}">{row.key}</span>
+      {#each headers as header, j}
+        <label class="checkbox" style="grid-row:{i + 2}; grid-column:{j + 2}">
+          <input
+            type="checkbox"
+            class="checkbox__input"
+            bind:checked={config.engine[row.value][header].enabled}
+          />
+        </label>
+      {/each}
+    {/each}
+  </div>
 </div>
 
 <style>
+  .wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+  }
   .quick-settings {
     display: grid;
     justify-items: center;
     grid-template-columns: repeat(var(--columns), 1fr);
     grid-template-rows: 4;
     grid-gap: 1em;
+    padding-bottom: 1em;
   }
 
   .header {
