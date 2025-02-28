@@ -69,6 +69,8 @@
     grid-template-rows: 4;
     grid-gap: 1em;
     padding-bottom: 1em;
+    padding-right: 1em;
+    width: max-content;
   }
 
   .header {
