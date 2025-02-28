@@ -144,9 +144,11 @@ article {
   display: grid;
   grid-auto-flow: row;
   gap: 0.5em;
-  grid-template-columns: 1em auto 1em;
+  grid-template-columns: 1em calc(100% - 2em) 1em;
   @include phone {
-  grid-template-columns: 0 auto 0;
+  gap: 0.5em 0;
+
+  grid-template-columns: 0 100% 0;
   }
 }
 .content>*,
