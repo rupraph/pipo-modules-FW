@@ -4,7 +4,6 @@
   import type { MidiConfig } from "../../types";
   import Radio from "../form/Radio.svelte";
   import Range from "../form/Range.svelte";
-  import DisabledWarning from "./disabled-warning.svelte";
 
   export let midi: MidiConfig;
   export let sensormode: boolean;
@@ -32,4 +31,3 @@
 {:else}
   <NoteConfig config={midi} bind:isThresholdMode={sensormode} />
 {/if}
-<DisabledWarning enabled={midi.enabled} />

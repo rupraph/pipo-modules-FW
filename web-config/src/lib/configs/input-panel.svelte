@@ -105,11 +105,6 @@
 <!-- {/if} -->
 
 <style>
-  :global(.disabled) {
-    opacity: 0.2;
-    pointer-events: none;
-  }
-
   .container {
     display: flex;
     flex-wrap: wrap;

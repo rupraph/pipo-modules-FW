@@ -124,12 +124,6 @@
         params: { ssid, password },
         timeout: 1000,
       });
-      // let toast: Toast = {
-      //   type: "info",
-      //   message: `ESP might reboot, refreshing the page...`,
-      //   timeout: 5000,
-      // };
-      // addToast(toast);
       await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (e) {
       console.error(e);

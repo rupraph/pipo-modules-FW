@@ -3,7 +3,6 @@
   import Checkbox from "../form/Checkbox.svelte";
   import Text from "../form/Text.svelte";
   import type { InputSettings, HidConfig } from "../../types";
-  import DisabledWarning from "./disabled-warning.svelte";
   export let hidMode: number;
   export let input: InputSettings;
   export let hid: HidConfig;
@@ -111,4 +110,3 @@
 {:else}
   PROBLEM !
 {/if}
-<DisabledWarning enabled={hid.enabled} />

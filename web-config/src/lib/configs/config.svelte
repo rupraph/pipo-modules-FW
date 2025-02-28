@@ -83,6 +83,15 @@
       })
     );
   }
+  function isDisabled(
+    currentCat: string,
+    midi: MidiConfig,
+    hid: HidConfig,
+    osc: OscConfig
+  ) {
+    const cat = currentCat === "MIDI" ? midi : currentCat === "HID" ? hid : osc;
+    return !cat.enabled;
+  }
 
   // Ensures `midi`, `osc`, `hid`, etc. update when `currentAxis` changes
   $: if (configByChannel && currentAxis) {
@@ -229,18 +238,31 @@
 
     <InputConfig bind:input bind:aschema bind:currentAxis />
     <CategoryTab active={currentCat} onClick={setCategory} />
+    <Tooltip
+      title="Disabled in Quick config"
+      followCursor={true}
+      enabled={isDisabled(currentCat, midi, hid, osc)}
+    >
+      <section
+        class="translator-settings"
+        class:not-allowed={isDisabled(currentCat, midi, hid, osc)}
+      >
+        {#if currentCat === "MIDI"}
+          <MidiConfigForm bind:midi bind:sensormode={input.mode} />
+        {/if}
+        {#if currentCat === "HID"}
+          <HidConfigForm
+            bind:hidMode={config.general.HidMode}
+            bind:input
+            {hid}
+          />
+        {/if}
+        {#if currentCat === "OSC"}
+          <OscConfigForm bind:osc />
+        {/if}
+      </section>
+    </Tooltip>
 
-    <section class="translator-settings">
-      {#if currentCat === "MIDI"}
-        <MidiConfigForm bind:midi bind:sensormode={input.mode} />
-      {/if}
-      {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} bind:input {hid} />
-      {/if}
-      {#if currentCat === "OSC"}
-        <OscConfigForm bind:osc />
-      {/if}
-    </section>
     <div style="display:flex; margin-top:1em; justify-content:right;">
       <LoadingButton
         onClick={submit}
