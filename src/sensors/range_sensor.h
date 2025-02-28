@@ -21,6 +21,8 @@ class RangeSensor : public Sensor {
   bool within_range = false;
   bool within_range_prev = false;
 
+  float abs_max = 400.0;
+
   bool hold_mode =
       false;  // define wether to hold the last value or max when no object is detected. true->hold, false->max
 

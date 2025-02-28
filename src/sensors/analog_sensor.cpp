@@ -38,6 +38,7 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
       round((offset / num_samples) * 1000.0) / 1000.0;
 }
 
+// measure offset of touch. name is wrong
 void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;

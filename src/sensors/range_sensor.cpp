@@ -59,7 +59,7 @@ void RangeSensor::update() {
             VL53L4CX_RANGESTATUS_RANGE_VALID) {
       if (!hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-        sensor_dat["dist"].value = sensor_dat["dist"].lmax;
+        sensor_dat["dist"].value = abs_max;
       }
 
     }
