@@ -36,7 +36,7 @@
   }
 </script>
 
-<div class="wrapper">
+<div class="wrapper scroll">
   <div class="quick-settings" style="--columns: {columns}">
     <span class="row-header" style="grid-row=1">Axis</span>
     {#each headers as header, i}
