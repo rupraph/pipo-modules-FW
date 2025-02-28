@@ -1,6 +1,7 @@
 #ifdef PIPO_ANALOG
 
 #include "sensors/analog_sensor.h"
+#include <algorithm>
 
 void AnalogSensor::init() {}
 
@@ -69,8 +70,8 @@ void AnalogSensor::update() {
 
   for (auto const& pair : analog_map) {
     if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
-      sensor_dat[pair.first].raw_value =
-          analogReadMilliVolts(pair.second) / 1000.0f;
+      sensor_dat[pair.first].raw_value = std::min(
+          std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
       sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
       sensor_dat[pair.first].value =
           filter_map[pair.first].process(sensor_dat[pair.first].raw_value) -
