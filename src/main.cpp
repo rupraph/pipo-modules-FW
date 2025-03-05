@@ -192,7 +192,9 @@ void setup() {
 
   /////// Init midi and hid
   midiio.setup();
+#ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
+#endif
   // while (!Serial)
   //   delay(100);
   /////// Init wifi
