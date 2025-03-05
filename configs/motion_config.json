@@ -200,7 +200,7 @@
         "osc_addr": "motion/accY"
       },
       "accZ": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
@@ -228,21 +228,21 @@
         "osc_addr": "motion/yaw"
       },
       "magX": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "motion/magX"
       },
       "magY": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "motion/magY"
       },
       "magZ": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
