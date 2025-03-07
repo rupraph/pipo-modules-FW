@@ -38,9 +38,8 @@ void PipoServer::setup() {
   server.begin();
   is_running = true;
 
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 void PipoServer::pause() {
   pipoSocket.pause();
@@ -97,9 +96,8 @@ void PipoServer::setup_requests() {
     }
     try {
       config.set(request->getParam("config")->value());
-#ifdef DEBUG_HEAP
-      pipoDebugHeap();
-#endif
+      if (DEBUG_HEAP)
+        pipoDebugHeap();
 
       config.apply(engine, osc, DEBUG_CONFIG);
       config.save();
@@ -117,9 +115,8 @@ void PipoServer::setup_requests() {
     }
     try {
       String name = request->getParam("name")->value();
-#ifdef DEBUG_HEAP
-      pipoDebugHeap();
-#endif
+      if (DEBUG_HEAP)
+        pipoDebugHeap();
       return request->send(LittleFS, config.get_path(name), "application/json");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -217,23 +214,20 @@ void PipoServer::setup_requests() {
           received_configData.append((char*)data, len);
 
           if (final) {
-        // This is the end of the file upload
-        // Here I am doing save first then load. so parsing happen with load function.
-        // this avoids parsing in here and trying to pass the json to config.set().
-        // after solving other issues, not sure if this has any value after all.
+            // This is the end of the file upload
+            // Here I am doing save first then load. so parsing happen with load function.
+            // this avoids parsing in here and trying to pass the json to config.set().
+            // after solving other issues, not sure if this has any value after all.
 
-#ifdef DEBUG_HEAP
-            pipoDebugHeap();
-#endif
+            if (DEBUG_HEAP)
+              pipoDebugHeap();
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
             config.apply(engine, osc, DEBUG_CONFIG);
-#ifdef DEBUG_HEAP
-            pipoDebugHeap();
-#endif
-#ifdef DEBUG_HEAP
-            pipoDebugHeap();
-#endif
+            if (DEBUG_HEAP)
+              pipoDebugHeap();
+            if (DEBUG_HEAP)
+              pipoDebugHeap();
             received_configData.clear();
             return request->send(200, "text/plain", "Config saved");
           }

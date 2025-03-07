@@ -48,9 +48,8 @@ void HwUi::setup() {
   set_led(LOW_BAT_LED, 0);
   Serial.println("HW UI setup done");
 
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void HwUi::update() {

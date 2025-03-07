@@ -15,9 +15,8 @@ void MotionSensor::init() {
 }
 
 void MotionSensor::setup() {
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void MotionSensor::update() {

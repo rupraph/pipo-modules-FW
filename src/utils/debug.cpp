@@ -1,8 +1,7 @@
 #include "utils/debug.h"
 #include "HW_CONFIG.h"
-#define DEBUG_HEAP 1
+// #define DEBUG_HEAP 1
 void pipoDebugHeap() {
-#ifdef DEBUG_HEAP
 
   size_t freeHeap = ESP.getFreeHeap();
   size_t totalHeap = ESP.getHeapSize();
@@ -19,5 +18,45 @@ void pipoDebugHeap() {
                 (freeHeap * 100.0) / totalHeap);
   Serial.printf(" Max block: %u bytes\n",
                 heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
-#endif
+}
+
+void print_reset_reason() {
+
+  esp_reset_reason_t reason = esp_reset_reason();
+
+  Serial.print("Reset reason: ");
+  switch (reason) {
+    case ESP_RST_POWERON:
+      Serial.println("Power-on reset");
+      break;
+    case ESP_RST_EXT:
+      Serial.println("External reset");
+      break;
+    case ESP_RST_SW:
+      Serial.println("Software reset");
+      break;
+    case ESP_RST_PANIC:
+      Serial.println("Exception/Panic reset");
+      break;
+    case ESP_RST_INT_WDT:
+      Serial.println("Interrupt watchdog reset");
+      break;
+    case ESP_RST_TASK_WDT:
+      Serial.println("Task watchdog reset");
+      break;
+    case ESP_RST_WDT:
+      Serial.println("Other watchdog reset");
+      break;
+    case ESP_RST_DEEPSLEEP:
+      Serial.println("Wakeup from deep sleep");
+      break;
+    case ESP_RST_BROWNOUT:
+      Serial.println("Brownout reset");
+      break;
+    case ESP_RST_SDIO:
+      Serial.println("SDIO reset");
+      break;
+    default:
+      Serial.println("Unknown reset reason");
+  }
 }

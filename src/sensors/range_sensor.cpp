@@ -31,9 +31,8 @@ void RangeSensor::setup() {
   lp_filter.set_cutoffFrequency(18.0);
   ma_filter = MovingAverageFilter(3);
   km_filter = KalmanFilter(1, 1);
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void RangeSensor::update() {

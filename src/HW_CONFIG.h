@@ -8,7 +8,7 @@
 #define PIPO_TYPE "unknown"
 #endif
 
-// #define DEBUG_HEAP
+#define DEBUG_HEAP false
 
 #define DEBUG_CONFIG false
 

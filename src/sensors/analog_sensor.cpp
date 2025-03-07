@@ -14,9 +14,8 @@ void AnalogSensor::setup() {
   }
 
   measure_offset_all();
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 // Todo: offset measurement to rework for all sensors.
