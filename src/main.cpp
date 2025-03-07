@@ -80,7 +80,9 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magX");
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
-    Serial.println(uxTaskGetStackHighWaterMark(oscreceiveTaskHandle));
+    // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
+    if (DEBUG_HEAP)
+      pipoDebugHeap();
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -179,10 +181,16 @@ void setup() {
   Serial.println("starting tasks");
 
   // Todo move task to their own files
-  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
                           &sensorTaskHandle, 1);
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
                           &oscreceiveTaskHandle, 0);
@@ -191,8 +199,8 @@ void setup() {
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
-  //                         &debugMonitorTaskHandle, 1);
+  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
+                          &debugMonitorTaskHandle, 1);
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");

@@ -19,9 +19,6 @@ void midiBLESetup() {
 
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
-
-  if (DEBUG_HEAP)
-    pipoDebugHeap();
 }
 
 void OnConnected() {
