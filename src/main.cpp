@@ -16,16 +16,13 @@
 #include "sensors/analog_out.h"
 #endif
 
-// quick declaration of functions
-void init_filesystem();
 // Tasks distribution
-// what seems important is to avoid delays in midi and osc handling
-// seems better to keep wifi + networking on core 0
+// wifi + networking on core 0
 // core 0: wifi, server, websocket
-// I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
+// #define ASYNC_TCP_RUNNING_CORE 0
 
-unsigned long last_time = 0;
+void init_filesystem();
 
 void sensorTask(void* pvParameters) {
   for (;;) {
@@ -63,16 +60,6 @@ void websocketTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
   }
 }
-void dnsTask(void* pvParameters) {
-  for (;;) {
-    if (!pipoNetworkReady()) {
-      vTaskDelay(pdMS_TO_TICKS(500));
-      continue;
-    }
-    // captivePortal.loop();
-    vTaskDelay(pdMS_TO_TICKS(100));
-  }
-}
 void wifiTask(void* pvParameters) {
   for (;;) {
     wifi.refresh();
@@ -107,6 +94,7 @@ void oscreceiveTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
+// hwuiSoftPwmTask temporarily in the main loop. not smooth when in task
 // void hwuiSoftPwmTask(void* pvParameters) {
 //   for (;;) {
 //     hwui.update_soft_pwm();
@@ -119,17 +107,16 @@ void oscreceiveTask(void* pvParameters) {
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-
   print_reset_reason();
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 
   // while (!Serial)
   //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
-  /////// Init hardware user interface (leds and switches)
-  if (DEBUG_HEAP)
-    pipoDebugHeap();
 
+  /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
 
@@ -155,11 +142,11 @@ void setup() {
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif
-  // while (!Serial)
-  //   delay(100);
+
   /////// Init wifi
   osc.setup();
   wifi.setup();
+
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
 
@@ -202,12 +189,10 @@ void setup() {
   // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
   // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
   //                         &debugMonitorTaskHandle, 1);
-  // hwui.start_blink(WIFI_LED, 2000, 0.5);
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
