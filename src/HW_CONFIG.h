@@ -9,10 +9,10 @@
 #endif
 
 // DEBUG FLAGS
-#define DEBUG_HEAP false
+#define DEBUG_HEAP true
 #define DEBUG_CONFIG false
 #define LOG_RECEIVED_OSC false
-// #define INCLUDE_BLE
+#define INCLUDE_BLE
 
 //HW PINS
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)

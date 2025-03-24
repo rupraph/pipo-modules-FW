@@ -1,13 +1,18 @@
 #include "utils/debug.h"
 #include "HW_CONFIG.h"
 // #define DEBUG_HEAP 1
-void pipoDebugHeap() {
+void pipoDebugHeapFull(const char* stepName = nullptr) {
 
   size_t freeHeap = ESP.getFreeHeap();
   size_t totalHeap = ESP.getHeapSize();
   size_t usedHeap = totalHeap - freeHeap;
 
-  Serial.println("Heap Memory Usage:");
+  if (stepName) {
+    Serial.printf("Heap Memory Usage at %s:\n", stepName);
+  } else {
+    Serial.println("Heap Memory Usage:");
+  }
+
   Serial.printf("  Total Heap: %u bytes (%.2f KB)\n", totalHeap,
                 totalHeap / 1024.0);
   Serial.printf("  Used Heap:  %u bytes (%.2f KB)\n", usedHeap,
@@ -18,6 +23,17 @@ void pipoDebugHeap() {
                 (freeHeap * 100.0) / totalHeap);
   Serial.printf(" Max block: %u bytes\n",
                 heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+}
+
+void pipoDebugHeap(const char* stepName = nullptr) {
+  size_t freeHeap = ESP.getFreeHeap();
+  if (stepName) {
+    Serial.printf("FREEHEAP at %s:", stepName);
+  } else {
+    Serial.println("FREEHEAP:");
+  }
+  Serial.printf("  Free Heap:  %u bytes (%.2f KB)\n", freeHeap,
+                freeHeap / 1024.0);
 }
 
 void print_reset_reason() {
