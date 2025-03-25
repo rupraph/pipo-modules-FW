@@ -3,7 +3,7 @@
   import HidGlobalConfig from "./hid-global-config.svelte";
   import { onMount } from "svelte";
   import { schema } from "../../schema";
-  import { pipoType as type } from "../../services";
+  import { configSave, configValid, pipoType as type } from "../../services";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -45,7 +45,11 @@
   let aschema: AxisSchema;
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
-
+  let isConfigValid = false;
+  configValid.subscribe((valid) => {
+    isConfigValid = valid;
+  });
+  //  subscribe to the confgiValid store
   onMount(() => {
     if (config) {
       updateConfigByChannel();
@@ -56,6 +60,8 @@
   // Ensures configByChannel updates reactively
   $: if (config) {
     updateConfigByChannel();
+    // @ts-expect-error
+    configSave.update(config);
   }
 
   function updateConfigByChannel() {
@@ -181,6 +187,7 @@
   <LoadingButton
     onClick={submit}
     loading={savingStatus === "loading"}
+    disabled={!isConfigValid}
     class={savingStatus === "success"
       ? "success"
       : savingStatus === "error"
@@ -247,6 +254,7 @@
       <LoadingButton
         onClick={submit}
         loading={savingStatus === "loading"}
+        disabled={!isConfigValid}
         class={savingStatus === "success"
           ? "success"
           : savingStatus === "error"
@@ -284,6 +292,7 @@
     <LoadingButton
       onClick={submit}
       loading={savingStatus === "loading"}
+      disabled={!isConfigValid}
       class={savingStatus === "success"
         ? "success"
         : savingStatus === "error"
@@ -307,6 +316,7 @@
       <LoadingButton
         onClick={submit}
         loading={savingStatus === "loading"}
+        disabled={!isConfigValid}
         class={savingStatus === "success"
           ? "success"
           : savingStatus === "error"
@@ -325,6 +335,7 @@
     <LoadingButton
       onClick={submit}
       loading={savingStatus === "loading"}
+      disabled={!isConfigValid}
       class={savingStatus === "success"
         ? "success"
         : savingStatus === "error"
