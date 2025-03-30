@@ -107,20 +107,25 @@ void oscreceiveTask(void* pvParameters) {
 
 // by default runs on core 1
 void setup() {
+  delay(2000);
   Serial.begin(115200);
+  delay(2000);
   Serial.setDebugOutput(true);
   print_reset_reason();
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeap("Start setup");
+  // Free Heap : 215k (total 277k)
+  delay(2000);
 
-  // while (!Serial)
-  //   delay(100);  // putting wait serial here breaks usb mid/hid init
+  while (!Serial)
+    delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
 
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
+  //Free Heap : 214k
 
 #ifdef PIPO_ANALOG
   analog_out.setup();
@@ -128,11 +133,13 @@ void setup() {
 
   /////// Init filesystem
   init_filesystem();
+  //Free Heap : 212k
 
   /////// Load config
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
+  //Free Heap : 205k
   try {
     config.apply(engine, osc, DEBUG_CONFIG);  // input_sens,
   } catch (const std::exception& e) {
@@ -141,13 +148,16 @@ void setup() {
 
   /////// Init midi and hid
   midiio.setup();
+  //Free Heap : 156k
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif
-
+  //Free Heap : 156k
   /////// Init wifi
   osc.setup();
+  //Free Heap : 156k
   wifi.setup();
+  //Free Heap : 101k
 
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
@@ -156,9 +166,9 @@ void setup() {
   Serial.println("init sensor");
   input_sensor.init();
   input_sensor.setup();
-
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeap("End setup sensor");
+  //Free Heap : 98k
 
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
@@ -168,12 +178,16 @@ void setup() {
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
+  //Free Heap : 99k
 
   // Start server
   Serial.println("starting config page");
   server.setup();
+  //Free Heap : 71k
+
   // Start OSC
   osc.setup();
+  //Free Heap : 71k
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
@@ -191,6 +205,7 @@ void setup() {
                           &websocketTaskHandle, 0);
   if (DEBUG_HEAP)
     pipoDebugHeap();
+    //Free Heap : 61k
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
                           &oscreceiveTaskHandle, 0);
@@ -199,8 +214,8 @@ void setup() {
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
-                          &debugMonitorTaskHandle, 1);
+  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
+  //                         &debugMonitorTaskHandle, 1);
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");

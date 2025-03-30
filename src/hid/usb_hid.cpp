@@ -56,7 +56,7 @@ void usb_hid::setup(int hid_mode) {
     Serial.println("USB HID mounted");
   }
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeap("End setup usb_hid");
 }
 
 void usb_hid::update() {

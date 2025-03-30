@@ -2,7 +2,7 @@
 
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
-  Serial.println("Wifi setup");
+  Serial.println("Pipo Wifi setup");
   pwm.setup();
   WiFi.onEvent(std::bind(&PipoWifi::handleWiFiEvent, this,
                          std::placeholders::_1, std::placeholders::_2));
@@ -19,6 +19,8 @@ void PipoWifi::setup() {
   Serial.println("Wifi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
   Serial.println("Scan done, wifi setup ");
+  if (DEBUG_HEAP)
+    pipoDebugHeap("End setup pipowifi");
 };
 void PipoWifi::saveScanResult() {
   signals.clear();

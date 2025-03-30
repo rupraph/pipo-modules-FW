@@ -4,23 +4,21 @@ PipoSocket pipoSocket;
 PipoSocket::PipoSocket() {
   this->ws = nullptr;
 }
-void PipoSocket::setup() {
+void PipoSocket::setup(AsyncWebServer* server) {
+  // When a thrid client wants to connect, the first one disconnects
+  Serial.println("Closing First client (" + String(ws->count()) +
+                 ") to allow new connection");
+
+  server->addHandler(ws).addMiddleware(
+      [&](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+        ws->cleanupClients();
+        next();
+      });
+
   this->ws->onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
     if (type == WS_EVT_CONNECT) {
-      // Serial.printf("WS Client connected");
-      // // if more than 3 clients, delete the oldest one
-      // if (server->count() > 3) {
-      //   auto clients = server->getClients();
-      //   for (auto* c : clients) {
-      //     if (c != client) {
-      //       c->close();
-      //       break;
-      //     }
-      //   }
-      //   ws->cleanupClients();
-      // }
     } else if (type == WS_EVT_DISCONNECT) {
       Serial.printf("WS Client disconnected");
       // client->close();
@@ -29,6 +27,8 @@ void PipoSocket::setup() {
       // client->close(true);
     } else if (type == WS_EVT_PONG) {
     } else if (type == WS_EVT_DATA) {
+      if (DEBUG_HEAP)
+        pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
 
       if (info->index == 0 && !info->final) {
@@ -52,6 +52,8 @@ void PipoSocket::setup() {
         Serial.println("Error: Message exceeds buffer size");
         inMsgL = 0;
       }
+      if (DEBUG_HEAP)
+        pipoDebugHeap("WS : End Data");
     }
   });
 }
@@ -130,18 +132,15 @@ void PipoSocket::sendSensorValue(std::string axis, float value) {
 }
 
 void PipoSocket::loop() {
-  if (ws == nullptr || paused)
+  if (ws == nullptr || paused || ws->count() == 0)
     return;
 
   // Handle low memory case
   if (ESP.getFreeHeap() < 30000) {
     Serial.println("⚠️ Low Memory: Skipping WebSocket Messages");
+    Serial.println("Clients: " + ws->count());
     return;
   }
-
-  auto clients = ws->getClients();
-  if (clients.length() == 0)
-    return;
 
   unsigned long now = millis();
 
@@ -189,15 +188,15 @@ void PipoSocket::loop() {
              logs.readLogs(true));
   }
 
-  // Send to connected clients
-  for (AsyncWebSocketClient* c : clients) {
-    if (!c->canSend()) {
-      // Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
-      //               c->status());
-      continue;
-    }
-    c->text(outMsg);
-  }
+  ws->textAll(outMsg);
+  // auto& clients = ws->getClients();  // référence, pas de copie
+  // for (auto& client : clients) {
+  //   if (client.status() != WS_CONNECTED)
+  //     continue;
+  //   if (client.queueLen() > 30)
+  //     continue;
+  //   client.text(outMsg, strlen(outMsg));
+  // }
 }
 
 void PipoSocket::stop() {

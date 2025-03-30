@@ -1,0 +1,20 @@
+from build idedata
+{"name": "uploadfs", "title": "Upload Filesystem Image", "description": null, "group": "Platform"}, 
+{"name": "uploadfsota", "title": "Upload Filesystem Image OTA", "description": null, "group": "Platform"}, 
+{"name": "erase", "title": "Erase Flash", "description": null, "group": "Platform"}], "extra": 
+{"flash_images": [{"offset": "0x0000", "path": "/Users/rup/Documents/GitHub/pipo-single/.pio/build/motion/bootloader.bin"}, 
+{"offset": "0x8000", "path": "/Users/rup/Documents/GitHub/pipo-single/.pio/build/motion/partitions.bin"}, 
+{"offset": "0xe000", "path": "/Users/rup/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin"}], "application_offset": "0x10000"}}
+
+when running pio upload in verbose
+"/Users/rup/.platformio/penv/bin/python" "/Users/rup/.platformio/packages/tool-esptoolpy/esptool.py" --chip esp32s3 --port "/dev/cu.usbmodem1101" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 8Mm
+0x0000 /Users/rup/Documents/GitHub/pipo-single/.pio/build/motion/bootloader.bin 
+0x8000 /Users/rup/Documents/GitHub/pipo-single/.pio/build/motion/partitions.bin 
+0xe000 /Users/rup/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin 
+0x10000 .pio/build/motion/firmware.bin
+
+when running uploadfs
+"/Users/rup/.platformio/penv/bin/python" "/Users/rup/.platformio/packages/tool-esptoolpy/esptool.py" --chip esp32s3 --port "/dev/cu.usbmodem1101" --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 8MB 
+4259840 .pio/build/motion/littlefs.bin
+
+esptool --chip esp32 merge_bin -o merged.bin --flash_mode dio --flash_freq 40m --flash_size 8MB 0x0000 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app0.bin 0x10000 firmware.bin 0x410000 littlefs.bin
