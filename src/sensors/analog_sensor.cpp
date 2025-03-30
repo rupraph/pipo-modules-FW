@@ -67,6 +67,8 @@ void AnalogSensor::measure_offset_all() {
 
 void AnalogSensor::update() {
 
+  //WARNING ADC2 pins are not fully usable when wifi is on
+
   for (auto const& pair : analog_map) {
     if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
       sensor_dat[pair.first].raw_value = std::min(
