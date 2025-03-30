@@ -34,7 +34,7 @@ void PipoServer::setup() {
 
   pipoSocket.start(&ws);
   server.addHandler(&ws);
-  pipoSocket.setup();
+  pipoSocket.setup(&server);
   server.begin();
   is_running = true;
 
@@ -137,6 +137,7 @@ void PipoServer::setup_requests() {
 
   // sends active config filename
   server.on("/config-active", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("config active");
     return request->send(200, "text/plain", config.filename.c_str());
   });
 
@@ -221,6 +222,8 @@ void PipoServer::setup_requests() {
       },
       [&](AsyncWebServerRequest* request, String filename, size_t index,
           uint8_t* data, size_t len, bool final) {
+        pipoDebugHeap("BEGIN POST save");
+
         try {
           if (index == 0) {
             // This is the start of the file upload
@@ -306,14 +309,19 @@ void PipoServer::setup_requests() {
   });
 
   server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET wifi state");
     return request->send(200, "text/plain", wifi.state().c_str());
   });
 
   server.on("/wifi-networks", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET wifi networks");
+
     return request->send(200, "text/plain", wifi.availableNetworks().c_str());
   });
 
   server.on("/wifi-start-scan", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET wifi scan");
+
     if (wifi.isScanning()) {
       return request->send(503, "text/plain", "Scanning");
     }
@@ -323,10 +331,12 @@ void PipoServer::setup_requests() {
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET logs");
     request->send(200, "text/plain", logs.readLogs());
   });
 
   server.on("/ping", HTTP_GET, [](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET ping");
     request->send(200, "text/plain", "Pong");
   });
   server.on("/conf-debug", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -335,6 +345,7 @@ void PipoServer::setup_requests() {
 
   // batt is temporarily as a request since I don't want it to be polled as fast as the pipo data
   server.on("/battlevel", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    pipoDebugHeap("BEGIN GET battlevel");
     return request->send(200, "text/plain",
                          String(hwui.get_bat_voltage()).c_str());
   });
