@@ -69,6 +69,7 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       step();
       break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:  //ESP32 station disconnected from AP
+    {
       Serial.println("STA DISCONNECTED!");
       hwui.stop_pulse(WIFI_LED);
       uint8_t reason =
@@ -85,10 +86,12 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       status = DISCONNECTED;
       step();
       break;
+    }
     case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE:  //the auth mode of AP connected by ESP32 station changed
       Serial.println("STA AUTHMODE CHANGE!");
       break;
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:  //ESP32 station got IP from connected AP
+      break;
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:  //ESP32 station interface v6IP addr is preferred
       Serial.println("STA GOT IP!");
       status = CONNECTED;

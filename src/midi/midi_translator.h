@@ -8,7 +8,7 @@
 #include <MIDI.h>
 #include <ArduinoJson.h>
 
-using namespace std;
+// using namespace std;
 
 //This class is used to convert sensor value to usable midi messages
 
@@ -30,11 +30,12 @@ class MidiTranslator
   //notes variables
   int tl_mode = 0;  //0=cc, 1 note, 2 both
 
-  string pattern = "scale";  //can be scale, arpegio or interval (note interval
-  string scaleType = "major";  // see maps below for keywords
+  std::string pattern =
+      "scale";  //can be scale, arpegio or interval (note interval
+  std::string scaleType = "major";  // see maps below for keywords
   int rootNote = 45;
   int nbOfNotes = 25;
-  vector<int> current_scale;
+  std::vector<int> current_scale;
   float sustain = 1.0;  //in seconds. 0 for infinite
 
   //CC variables
@@ -45,12 +46,12 @@ class MidiTranslator
 
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
-  void print_scale(vector<int> scale);
+  void print_scale(std::vector<int> scale);
 
-  int convert_note_name_to_number(string noteName);
-  string convert_number_to_note_name(int noteNumber);
-  bool is_a_note(string noteName);
-  vector<string> get_scale_names();
+  int convert_note_name_to_number(std::string noteName);
+  std::string convert_number_to_note_name(int noteNumber);
+  bool is_a_note(std::string noteName);
+  std::vector<std::string> get_scale_names();
   void update_scale();
 
   //cc methods
@@ -75,11 +76,11 @@ class MidiTranslator
   int get_translator_mode();
   void set_translator_mode(int t);
 
-  string get_scale_type();
-  void set_scale_type(string scaleType);
+  std::string get_scale_type();
+  void set_scale_type(std::string scaleType);
 
   int get_root_note();
-  void set_root_note(string rootNote);
+  void set_root_note(std::string rootNote);
   void set_root_note(int notenb);
 
   int get_number_of_notes();
@@ -143,7 +144,7 @@ class MidiTranslator
   // Notes scale variables
   // could be replaced by enums to speed up things
   // Todo: add arpegios // chords
-  unordered_map<string, vector<int>> scales = {
+  std::unordered_map<std::string, std::vector<int>> scales = {
       {"major", {0, 2, 4, 5, 7, 9, 11}},
       {"minor", {0, 2, 3, 5, 7, 8, 10}},
       {"minor pentatonic", {0, 3, 5, 6, 10}},
@@ -166,7 +167,7 @@ class MidiTranslator
       //Turkish ??
   };
 
-  unordered_map<string, vector<int>> arpegios = {
+  std::unordered_map<std::string, std::vector<int>> arpegios = {
       {"major", {0, 4, 7}},
       {"minor", {0, 3, 7}},
       {"diminished", {0, 3, 6}},
@@ -184,17 +185,18 @@ class MidiTranslator
       {"diminished9", {0, 3, 6, 9, 13}},
       {"augmented9", {0, 4, 8, 10, 14}}};
 
-  unordered_map<string, vector<int>> intervals = {
+  std::unordered_map<std::string, std::vector<int>> intervals = {
       {"second", {0, 2}},    {"third", {0, 4}},    {"fourth", {0, 5}},
       {"fifth", {0, 7}},     {"sixth", {0, 9}},    {"seventh", {0, 11}},
       {"octave", {0, 12}},   {"ninth", {0, 14}},   {"tenth", {0, 16}},
       {"eleventh", {0, 17}}, {"twelveth", {0, 19}}};
 
  private:
-  vector<int> generate_full_scale(int rootNote, int nb_notes, string pattern,
-                                  string scaleType);
-  vector<int> generate_base_scale(int rootNote, string pattern,
-                                  string scaleType);
+  std::vector<int> generate_full_scale(int rootNote, int nb_notes,
+                                       std::string pattern,
+                                       std::string scaleType);
+  std::vector<int> generate_base_scale(int rootNote, std::string pattern,
+                                       std::string scaleType);
 };
 
 #endif  //MIDI_TRANSLATOR_H
