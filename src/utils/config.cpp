@@ -1,4 +1,4 @@
-#include "config.h"
+#include "utils/config.h"
 
 Config config;  // global config object so it can be accessed from anywhere
 

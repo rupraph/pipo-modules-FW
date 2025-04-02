@@ -1,7 +1,7 @@
 
 #include "HW_CONFIG.h"
 #include "engine.h"
-#include "hw_ui.h"
+#include "utils/hw_ui.h"
 #include "midi/midi_io.h"
 #include "task-handles.h"
 #include "osc/osc_handler.h"

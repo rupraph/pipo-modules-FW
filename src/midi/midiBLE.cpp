@@ -1,4 +1,4 @@
-#include "midiBLE.h"
+#include "midi/midiBLE.h"
 
 #ifdef INCLUDE_BLE
 

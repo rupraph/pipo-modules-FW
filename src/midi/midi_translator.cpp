@@ -1,4 +1,4 @@
-#include "midi_translator.h"
+#include "midi/midi_translator.h"
 
 MidiTranslator::MidiTranslator() {
   current_scale.clear();

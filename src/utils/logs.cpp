@@ -1,4 +1,4 @@
-#include "logs.h"
+#include "utils/logs.h"
 
 LittleLogs logs;
 

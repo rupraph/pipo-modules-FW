@@ -1,4 +1,4 @@
-#include "midi_io.h"
+#include "midi/midi_io.h"
 
 midi_io midiio;
 

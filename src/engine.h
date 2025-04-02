@@ -11,7 +11,7 @@
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensors/sensors.h"
-#include "hw_ui.h"
+#include "utils/hw_ui.h"
 #include "osc/osc_handler.h"
 #include "osc/osc_translators.h"
 

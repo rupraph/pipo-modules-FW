@@ -1,4 +1,4 @@
-#include "hid_translator.h"
+#include "hid/hid_translator.h"
 
 // UNDER CONSTRUCTION
 

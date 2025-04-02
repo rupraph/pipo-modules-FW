@@ -6,7 +6,7 @@
 
 #ifdef INCLUDE_BLE
 
-#include "hw_ui.h"
+#include "utils/hw_ui.h"
 
 #include "utils/debug.h"
 
