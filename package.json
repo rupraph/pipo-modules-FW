@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "cli": "./scripts/cli.js"
+  },
   "directories": {
     "lib": "lib",
     "test": "test"
@@ -16,11 +19,14 @@
     "build:analog": "./scripts/pio.sh run -e analog",
     "build:range": "./scripts/pio.sh run -e range",
     "build:web": "./scripts/build-web.sh",
+    "build:cli": "node cli/build-cli.mjs",
+    "build": "./scripts/build-web.sh",
+    "cli": "./scripts/cli.js",
+    "upload": "./scripts/build-web.sh",
     "upload:range": "./scripts/pio.sh run -t upload -e range",
     "upload:motion": "./scripts/pio.sh run -t upload -e motion",
     "upload:motiondebug": "./scripts/pio.sh run -t upload -e motiondebug",
     "upload:analog": "./scripts/pio.sh run -t upload -e analog",
-    "upload": "npm run upload:range",
     "build:fs:motion": "./scripts/pio.sh run -t buildfs -e motion",
     "build:fs:motiondebug": "./scripts/pio.sh run -t buildfs -e motion",
     "build:fs:analog": "./scripts/pio.sh run -t buildfs -e analog",
@@ -37,6 +43,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "dotenv": "^16.4.7",
+    "esbuild": "^0.25.2",
+    "inquirer": "^12.5.2",
     "vitest": "^3.0.4",
     "ws": "^8.18.0"
   }
