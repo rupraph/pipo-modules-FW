@@ -5,16 +5,14 @@
 #include "utils/config.h"
 #include "wifi/pipowifi.h"
 #include "engine.h"
-// #define SO_REUSE 1
-// #define SO_REUSE_RXTOALL 1  // Enable reuse of addresses for multicast as well
-#include <AsyncTCP.h>
-#include <WiFi.h>
+#define SO_REUSE 1
+#define SO_REUSE_RXTOALL 1  // Enable reuse of addresses for multicast as well
 #include <ESPAsyncWebServer.h>
 using namespace std;
 class PipoSocket {
  public:
   PipoSocket();
-  void setup(AsyncWebServer* server);
+  void setup();
   void sendNoteOn(int note, int velocity, int channel);
   void sendNoteOff(int note, int velocity, int channel);
   void sendSensorValue(std::string axis, float value);
@@ -32,9 +30,6 @@ class PipoSocket {
   unsigned long lastPingTime = 0;
   unsigned long PING_INTERVAL = 1000;
   unsigned long iterations = 0;
-  static const int MAX_WS_MSG = 16;
-  AsyncWebSocketMessageBuffer msgs[MAX_WS_MSG];
-  int msgIndex = 0;
   const int inMaxLen = 2048;
   int inMsgL = 0;
   char inMsg[2048];
