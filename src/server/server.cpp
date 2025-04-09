@@ -39,7 +39,7 @@ void PipoServer::setup() {
   is_running = true;
 
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeap("End server setup");
 }
 void PipoServer::pause() {
   pipoSocket.pause();
@@ -55,6 +55,8 @@ bool PipoServer::isRunning() {
 void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
     Serial.println("info request");
+    if (DEBUG_HEAP)
+      pipoDebugHeap("info request");
 #ifdef PIPO_FW_VERSION
     const char* version = stringify(PIPO_FW_VERSION);
 #else
@@ -74,6 +76,8 @@ void PipoServer::setup_requests() {
     info += "\"mac\":\"";
     info += WiFi.macAddress();
     info += "\"}";
+    if (DEBUG_HEAP)
+      pipoDebugHeap("end info request");
     return request->send(200, "text/json", info.c_str());
   });
 
@@ -95,12 +99,14 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "No config received");
     }
     try {
-      config.set(request->getParam("config")->value());
       if (DEBUG_HEAP)
-        pipoDebugHeap();
+        pipoDebugHeap("config request");
+      config.set(request->getParam("config")->value());
 
       config.apply(engine, osc, DEBUG_CONFIG);
       config.save();
+      if (DEBUG_HEAP)
+        pipoDebugHeap("end config request");
       return request->send(200, "text/plain", "Config set");
     } catch (std::exception e) {
       return request->send(500, "text/plain",
@@ -111,12 +117,17 @@ void PipoServer::setup_requests() {
   // sends config-list and config file based on provided filename
   server.on("/configs", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("name")) {
-      return request->send(200, "text/plain", config.get_list());
+      if (DEBUG_HEAP)
+        pipoDebugHeap("request: retrieving config list");
+      String list = config.get_list();
+      if (DEBUG_HEAP)
+        pipoDebugHeap("retrived config list");
+      return request->send(200, "text/plain", list);
     }
     try {
       String name = request->getParam("name")->value();
       if (DEBUG_HEAP)
-        pipoDebugHeap();
+        pipoDebugHeap("request: start send config file ");
       return request->send(LittleFS, config.get_path(name), "application/json");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -135,8 +146,12 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
     try {
+      if (DEBUG_HEAP)
+        pipoDebugHeap("request: set active config");
       config.load_config(request->getParam("name")->value().c_str(), true);
       config.apply(engine, osc, DEBUG_CONFIG);
+      if (DEBUG_HEAP)
+        pipoDebugHeap("end set ctive config");
       return request->send(200, "text/plain", "Active config set");
     } catch (const std::exception e) {
       Serial.println("error loading config");
@@ -210,6 +225,8 @@ void PipoServer::setup_requests() {
           if (index == 0) {
             // This is the start of the file upload
             received_configData.clear();
+            if (DEBUG_HEAP)
+              pipoDebugHeap("Request: receive config data start");
           }
           received_configData.append((char*)data, len);
 
@@ -220,15 +237,13 @@ void PipoServer::setup_requests() {
             // after solving other issues, not sure if this has any value after all.
 
             if (DEBUG_HEAP)
-              pipoDebugHeap();
+              pipoDebugHeap("Request: config data received");
             config.save(config.filename, received_configData.c_str());
             config.load_config(config.filename);
             config.apply(engine, osc, DEBUG_CONFIG);
-            if (DEBUG_HEAP)
-              pipoDebugHeap();
-            if (DEBUG_HEAP)
-              pipoDebugHeap();
             received_configData.clear();
+            if (DEBUG_HEAP)
+              pipoDebugHeap("Request: config saved");
             return request->send(200, "text/plain", "Config saved");
           }
         } catch (const std::exception& e) {

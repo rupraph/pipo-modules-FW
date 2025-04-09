@@ -49,7 +49,7 @@ void HwUi::setup() {
   Serial.println("HW UI setup done");
 
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeap("End setup hwui");
 }
 
 void HwUi::update() {

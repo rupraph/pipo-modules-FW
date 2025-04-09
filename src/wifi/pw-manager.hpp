@@ -4,15 +4,19 @@
 #include <Preferences.h>
 #include <map>
 #include <string>
+#include "HW_CONFIG.h"
+#include "utils/debug.h"
 
 class PipoPWManager {
 
  public:
-  PipoPWManager(){};
+  PipoPWManager() {};
 
   void setup() {
     preferences.begin("pipo-wifi", false);
     load();
+    if (DEBUG_HEAP)
+      pipoDebugHeap("End setup PipoPWManager");
   };
 
   void clear() {
