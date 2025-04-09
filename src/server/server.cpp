@@ -23,14 +23,76 @@ void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
 
   setup_requests();
-  server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
+  // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   // captivePortal.start(&server);
 
-  // Add a custom 404 handler
-  server.onNotFound([&](AsyncWebServerRequest* request) {
-    Serial.println("File not found: " + request->url());
-    request->send(404, "text/plain", "File Not Found");
+  server.onNotFound([](AsyncWebServerRequest* request) {
+    pipoDebugHeap("enter debug");
+    String fileName = "/webpage" + request->url();
+    if (fileName.endsWith("/")) {
+      fileName += "index.html";  // Default to index.html if URL ends with /
+    }
+
+    if (!LittleFS.exists(fileName)) {
+      Serial.printf("File not found: %s\n", fileName.c_str());
+      request->send(404, "text/plain", "File not found");
+      return;
+    }
+
+    Serial.printf("Serving file: %s\n", fileName.c_str());
+
+    File file = LittleFS.open(fileName, "r");
+    size_t fileSize = file.size();
+
+    // Determine MIME type
+    String mimeType = "text/plain";
+    if (fileName.endsWith(".html"))
+      mimeType = "text/html";
+    else if (fileName.endsWith(".css"))
+      mimeType = "text/css";
+    else if (fileName.endsWith(".js"))
+      mimeType = "application/javascript";
+    else if (fileName.endsWith(".json"))
+      mimeType = "application/json";
+    else if (fileName.endsWith(".png"))
+      mimeType = "image/png";
+    else if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
+      mimeType = "image/jpeg";
+    else if (fileName.endsWith(".gif"))
+      mimeType = "image/gif";
+    else if (fileName.endsWith(".svg"))
+      mimeType = "image/svg+xml";
+    else if (fileName.endsWith(".woff"))
+      mimeType = "font/woff";
+    else if (fileName.endsWith(".woff2"))
+      mimeType = "font/woff2";
+    else if (fileName.endsWith(".ttf"))
+      mimeType = "font/ttf";
+
+    // Create a shared pointer to keep the File alive
+    std::shared_ptr<File> sharedFile = std::make_shared<File>(file);
+
+    AsyncWebServerResponse* response = request->beginChunkedResponse(
+        mimeType,
+        [sharedFile, fileSize](uint8_t* buffer, size_t maxLen,
+                               size_t index) -> size_t {
+          if (index >= fileSize) {
+            sharedFile->close();
+            return 0;
+          }
+
+          size_t chunkSize = min((size_t)2048, min(maxLen, fileSize - index));
+          return sharedFile->read(buffer, chunkSize);
+        });
+
+    request->send(response);
   });
+
+  // Add a custom 404 handler
+  // server.onNotFound([&](AsyncWebServerRequest* request) {
+  //   Serial.println("File not found: " + request->url());
+  //   request->send(404, "text/plain", "File Not Found");
+  // });
 
   pipoSocket.start(&ws);
   server.addHandler(&ws);
