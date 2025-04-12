@@ -17,8 +17,6 @@ const plugins = [
   }),
 ];
 
-console.log(process.env.motion);
-
 if (pipoType) {
   plugins.push(
     mockServer({
@@ -29,5 +27,8 @@ if (pipoType) {
 }
 export default defineConfig(({ mode }) => ({
   plugins,
+  build: {
+    manifest: true,
+  },
   envDir: pipoType ? "mocks" : ".",
 }));
