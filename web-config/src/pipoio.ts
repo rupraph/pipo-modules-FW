@@ -16,6 +16,7 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private socket?: WebSocket;
   private paused: boolean = false;
   private busy: boolean = false;
+  private _currentPromise: Promise<any> = Promise.resolve();
   private heartbeat = 0;
   private saveTimeout = 0;
   private isConnecting = false;
@@ -184,19 +185,28 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     }, 1000);
   }
 
-  private _wrap(p: Promise<any>) {
-    return new Promise((resolve, reject) => {
+  private _wrap<T>(fn: () => Promise<T>): Promise<T> {
+    this._currentPromise = this._currentPromise.then(async () => {
       this.setBusy(true);
-      setTimeout(resolve, 100);
-    })
-      .then(() => p)
-      .finally(() => this.setBusy(false));
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
+        return await fn();
+      } finally {
+        this.setBusy(false);
+      }
+    });
+
+    return this._currentPromise;
   }
+
   get<T = any, R = AxiosResponse<T>, D = any>(
     url: string,
     config?: AxiosRequestConfig<D>
   ): Promise<R> {
-    return this._wrap(axios.get<T, R, D>(url, config));
+    return this._wrap(() => axios.get<T, R, D>(url, config)).then(async (r) => {
+      await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
+      return r;
+    });
   }
 
   post<T = any, R = AxiosResponse<T>, D = any>(
@@ -204,13 +214,13 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     data?: D,
     config?: AxiosRequestConfig<D>
   ): Promise<R> {
-    return this._wrap(axios.post<T, R, D>(url, data, config));
+    return this._wrap(() => axios.post<T, R, D>(url, data, config));
   }
 
   request<T = any, R = AxiosResponse<T>, D = any>(
     config: AxiosRequestConfig<D>
   ): Promise<R> {
-    return this._wrap(axios<T, R, D>(config));
+    return this._wrap(() => axios<T, R, D>(config));
   }
 
   getDebug() {
