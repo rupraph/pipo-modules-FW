@@ -21,6 +21,7 @@ void PipoServer::setup() {
   }
   Serial.println("Start server");
   //Todo: check lib exemple. can be improved
+  fileServer = new PipoFileServer("/", LittleFS, "/webpage");
 
   setup_requests();
   // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
@@ -374,7 +375,10 @@ void PipoServer::setup_requests() {
     engine.toggle_pause();
     return request->send(200, "text/plain", "Engine paused");
   });
-  file_server.setup(&server);
+  // file_server.setup(&server);
+  // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
+  fileServer->setDefaultFile("index.html");
+  server.addHandler(fileServer);
 }
 
 bool pipoNetworkReady() {

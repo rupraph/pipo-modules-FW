@@ -2,79 +2,73 @@
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
+#include "FS.h"
+#include <LittleFS.h>
 
-class PipoFileServer {
+class AsyncChunkedFileResponse : public AsyncFileResponse {
+  using File = fs::File;
+  using FS = fs::FS;
+
  public:
-  void setup(AsyncWebServer* server) {
-    // Set up the server to serve static files from LittleFS
-    server->onNotFound([](AsyncWebServerRequest* request) {
-      // pipoDebugHeap("enter debug");
-      Serial.println(request->url());
-      String path = "/webpage" + request->url();
+  AsyncChunkedFileResponse(FS& fs, const String& path,
+                           const String& contentType, bool download,
+                           AwsTemplateProcessor callback)
+      : AsyncFileResponse(fs, path, contentType, download, callback) {
+    _chunked = true;
+  }
 
-      if (path.endsWith("/")) {
-        path += "index.html";  // Default to index.html if URL ends with /
+  AsyncChunkedFileResponse(File content, const String& path,
+                           const String& contentType = String(),
+                           bool download = false,
+                           AwsTemplateProcessor callback = nullptr)
+      : AsyncFileResponse(content, path, contentType, download, callback) {
+    _chunked = true;
+  }
+};
+
+class PipoFileServer : public AsyncStaticWebHandler {
+  using File = fs::File;
+  using FS = fs::FS;
+
+ public:
+  PipoFileServer(const char* uri, FS& fs, const char* path,
+                 const char* cache_control = nullptr)
+      : AsyncStaticWebHandler(uri, fs, path, cache_control) {}
+
+  void handleRequest(AsyncWebServerRequest* request) override {
+    // Get the filename from request->_tempObject and free it
+    String filename = String((char*)request->_tempObject);
+    free(request->_tempObject);
+    request->_tempObject = NULL;
+
+    if (request->_tempFile == true) {
+      String etag = String(request->_tempFile.size());
+
+      if (_last_modified.length() &&
+          _last_modified == request->header("If-Modified-Since")) {
+        request->_tempFile.close();
+        request->send(304);
+      } else if (_cache_control.length() &&
+                 request->hasHeader("If-None-Match") &&
+                 request->header("If-None-Match").equals(etag)) {
+        request->_tempFile.close();
+        AsyncWebServerResponse* response = new AsyncBasicResponse(304);
+        response->addHeader("Cache-Control", _cache_control);
+        response->addHeader("ETag", etag);
+        request->send(response);
+      } else {
+        AsyncChunkedFileResponse* response = new AsyncChunkedFileResponse(
+            request->_tempFile, filename, String(), false, _callback);
+        if (_last_modified.length())
+          response->addHeader("Last-Modified", _last_modified);
+        if (_cache_control.length()) {
+          response->addHeader("Cache-Control", _cache_control);
+          response->addHeader("ETag", etag);
+        }
+        request->send(response);
       }
-
-      // Determine MIME type
-      String mimeType = "text/plain";
-      if (path.endsWith(".html"))
-        mimeType = "text/html";
-      else if (path.endsWith(".css"))
-        mimeType = "text/css";
-      else if (path.endsWith(".js"))
-        mimeType = "application/javascript";
-      else if (path.endsWith(".json"))
-        mimeType = "application/json";
-      else if (path.endsWith(".png"))
-        mimeType = "image/png";
-      else if (path.endsWith(".jpg") || path.endsWith(".jpeg"))
-        mimeType = "image/jpeg";
-      else if (path.endsWith(".gif"))
-        mimeType = "image/gif";
-      else if (path.endsWith(".svg"))
-        mimeType = "image/svg+xml";
-      else if (path.endsWith(".woff"))
-        mimeType = "font/woff";
-      else if (path.endsWith(".woff2"))
-        mimeType = "font/woff2";
-      else if (path.endsWith(".ttf"))
-        mimeType = "font/ttf";
-
-      String gzPath = path + ".gz";
-
-      if (LittleFS.exists(gzPath)) {
-        path = gzPath;  // Use the original path if .gz version doesn't exist
-      } else if (!LittleFS.exists(path)) {
-        Serial.printf("File not found: %s\n", path.c_str());
-        request->send(404, "text/plain", "File not found");
-        return;
-      }
-
-      Serial.printf("Serving file: %s\n", path.c_str());
-
-      File file = LittleFS.open(path, "r");
-      size_t fileSize = file.size();
-
-      // Create a shared pointer to keep the File alive
-      std::shared_ptr<File> sharedFile = std::make_shared<File>(file);
-
-      AsyncWebServerResponse* response = request->beginChunkedResponse(
-          mimeType,
-          [sharedFile, fileSize](uint8_t* buffer, size_t maxLen,
-                                 size_t index) -> size_t {
-            if (index >= fileSize) {
-              sharedFile->close();
-              return 0;
-            }
-
-            size_t chunkSize = min((size_t)2048, min(maxLen, fileSize - index));
-            return sharedFile->read(buffer, chunkSize);
-          });
-      if (path.endsWith(".gz")) {
-        response->addHeader("Content-Encoding", "gzip");
-      }
-      request->send(response);
-    });
+    } else {
+      request->send(404);
+    }
   }
 };

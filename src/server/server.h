@@ -32,7 +32,7 @@ class PipoServer {
   bool is_running = false;
   AsyncWebServer server;
   AsyncWebSocket ws;
-  PipoFileServer file_server;
+  PipoFileServer* fileServer;
   string received_configData;
 };
 
