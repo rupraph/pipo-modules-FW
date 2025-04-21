@@ -22,6 +22,16 @@
         return data;
       });
   }
+  function fetchImage() {
+    // debugger;
+    return pipoio
+      .get(`/pattern-${type}.svg`, { responseType: "arraybuffer" })
+      .then(({ data }) => {
+        const blob = new Blob([data], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        return url;
+      });
+  }
 </script>
 
 <main>
@@ -32,7 +42,12 @@
   {:then resp}
     <div class="title-container">
       <h1>Pipo {type}</h1>
-      <img src={`/pattern-${type}.svg`} alt="Pattern" class="pattern-image" />
+      {#await fetchImage()}
+        <p>Loading image...</p>
+      {:then imageDataUrl}
+        <!-- Use the imageDataUrl as the src for the image -->
+        <img src={imageDataUrl} alt="Pattern" class="pattern-image" />
+      {/await}
     </div>
     <Configs />
     <article class="content section-borders">

@@ -18,15 +18,6 @@ const jsFile = entry.file;
 const cssFiles = entry.css || [];
 
 const resourceList = [
-  {
-    shouldRace: true,
-    tag: "link",
-    attrs: {
-      rel: "icon",
-      type: "image/svg+xml",
-      href: "/favicon.ico",
-    },
-  },
   ...cssFiles.map((css) => ({
     tag: "link",
     attrs: { rel: "stylesheet", href: `/${css}` },
@@ -48,10 +39,8 @@ let indexHtml = fs.readFileSync(indexPath, "utf-8");
 // Replace Vite's injected <script type="module"> and remove <link rel="stylesheet">
 indexHtml = indexHtml
   .replace(/<script type="module"[^>]+><\/script>/, customLoader)
-  .replaceAll(/<link rel="stylesheet"[^>]+>/g, "")
-  .replaceAll(/<link rel="icon"[^>]+>/g, "");
+  .replaceAll(/<link rel="stylesheet"[^>]+>/g, "");
 
 // Save updated index.html
 fs.writeFileSync(indexPath, indexHtml);
-console.log(indexHtml);
 console.log("✅ index.html patched with sequential loader and favicon");
