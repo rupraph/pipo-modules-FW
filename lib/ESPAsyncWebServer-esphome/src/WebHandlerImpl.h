@@ -50,7 +50,7 @@ class AsyncStaticWebHandler: public AsyncWebHandler {
   public:
     AsyncStaticWebHandler(const char* uri, FS& fs, const char* path, const char* cache_control);
     virtual bool canHandle(AsyncWebServerRequest *request) override final;
-    virtual void handleRequest(AsyncWebServerRequest *request) override final;
+    virtual void handleRequest(AsyncWebServerRequest *request) override;
     AsyncStaticWebHandler& setIsDir(bool isDir);
     AsyncStaticWebHandler& setDefaultFile(const char* filename);
     AsyncStaticWebHandler& setCacheControl(const char* cache_control);
