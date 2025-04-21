@@ -7,10 +7,10 @@ const manifestPath = path.join(distDir, ".vite", "manifest.json");
 const indexPath = path.join(distDir, "index.html");
 const loaderPath = path.resolve("scripts", "loader.js");
 
+// Read files
 const loaderCode = fs.readFileSync(loaderPath, "utf-8");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
-// Find the main JS and CSS for your entry point (usually 'src/main.js' or 'main.ts')
 const entry = Object.values(manifest).find((m) => m.isEntry);
 if (!entry) throw new Error("No entry found in manifest");
 
@@ -18,25 +18,40 @@ const jsFile = entry.file;
 const cssFiles = entry.css || [];
 
 const resourceList = [
+  {
+    shouldRace: true,
+    tag: "link",
+    attrs: {
+      rel: "icon",
+      type: "image/svg+xml",
+      href: "/favicon.ico",
+    },
+  },
   ...cssFiles.map((css) => ({
     tag: "link",
     attrs: { rel: "stylesheet", href: `/${css}` },
   })),
-  { tag: "script", attrs: { src: `/${jsFile}`, defer: false } },
+  {
+    tag: "script",
+    attrs: { src: `/${jsFile}`, defer: false },
+  },
 ];
 
 const customLoader = `
     <script>
-     ${loaderCode}
-     loadSequentially(JSON.parse(\`${JSON.stringify(resourceList, null, 2)}\`))
+${loaderCode}
+loadSequentially(JSON.parse(\`${JSON.stringify(resourceList, null, 2)}\`))
     </script>`;
 
 let indexHtml = fs.readFileSync(indexPath, "utf-8");
 
-// Replace the auto-injected <script type="module"> line (from Vite)
+// Replace Vite's injected <script type="module"> and remove <link rel="stylesheet">
 indexHtml = indexHtml
   .replace(/<script type="module"[^>]+><\/script>/, customLoader)
-  .replaceAll(/<link rel="stylesheet"[^>]+>/g, "");
-// Save the modified file
+  .replaceAll(/<link rel="stylesheet"[^>]+>/g, "")
+  .replaceAll(/<link rel="icon"[^>]+>/g, "");
+
+// Save updated index.html
 fs.writeFileSync(indexPath, indexHtml);
-console.log("✅ index.html patched with sequential loader");
+console.log(indexHtml);
+console.log("✅ index.html patched with sequential loader and favicon");
