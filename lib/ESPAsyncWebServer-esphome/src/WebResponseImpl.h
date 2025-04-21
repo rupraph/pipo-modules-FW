@@ -41,16 +41,16 @@ class AsyncBasicResponse: public AsyncWebServerResponse {
 
 class AsyncAbstractResponse: public AsyncWebServerResponse {
   private:
-    String _head;
     // Data is inserted into cache at begin(). 
     // This is inefficient with vector, but if we use some other container, 
     // we won't be able to access it as contiguous array of bytes when reading from it,
     // so by gaining performance in one place, we'll lose it in another.
     std::vector<uint8_t> _cache;
+    protected:
+    String _head;
+    AwsTemplateProcessor _callback;
     size_t _readDataFromCacheOrContent(uint8_t* data, const size_t len);
     size_t _fillBufferAndProcessTemplates(uint8_t* buf, size_t maxLen);
-  protected:
-    AwsTemplateProcessor _callback;
   public:
     AsyncAbstractResponse(AwsTemplateProcessor callback=nullptr);
     void _respond(AsyncWebServerRequest *request);
@@ -67,7 +67,7 @@ class AsyncAbstractResponse: public AsyncWebServerResponse {
 class AsyncFileResponse: public AsyncAbstractResponse {
   using File = fs::File;
   using FS = fs::FS;
-  private:
+  protected:
     File _content;
     String _path;
     void _setContentType(const String& path);

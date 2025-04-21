@@ -8,6 +8,7 @@
 class AsyncChunkedFileResponse : public AsyncFileResponse {
   using File = fs::File;
   using FS = fs::FS;
+  const size_t MAX_CHUNK_SIZE = 2048;
 
  public:
   AsyncChunkedFileResponse(FS& fs, const String& path,
@@ -23,6 +24,115 @@ class AsyncChunkedFileResponse : public AsyncFileResponse {
                            AwsTemplateProcessor callback = nullptr)
       : AsyncFileResponse(content, path, contentType, download, callback) {
     _chunked = true;
+  }
+
+  size_t AsyncChunkedFileResponse::_ack(AsyncWebServerRequest* request,
+                                        size_t len, uint32_t time) {
+    (void)time;
+    if (!_sourceValid()) {
+      _state = RESPONSE_FAILED;
+      request->client()->close();
+      return 0;
+    }
+    _ackedLength += len;
+    size_t space = min(request->client()->space(), MAX_CHUNK_SIZE);
+
+    size_t headLen = _head.length();
+    if (_state == RESPONSE_HEADERS) {
+      if (space >= headLen) {
+        _state = RESPONSE_CONTENT;
+        space -= headLen;
+      } else {
+        String out = _head.substring(0, space);
+        _head = _head.substring(space);
+        _writtenLength += request->client()->write(out.c_str(), out.length());
+        return out.length();
+      }
+    }
+
+    if (_state == RESPONSE_CONTENT) {
+      size_t outLen;
+      if (_chunked) {
+        if (space <= 8) {
+          return 0;
+        }
+        outLen = space;
+      } else if (!_sendContentLength) {
+        outLen = space;
+      } else {
+        outLen = ((_contentLength - _sentLength) > space)
+                     ? space
+                     : (_contentLength - _sentLength);
+      }
+
+      uint8_t* buf = (uint8_t*)malloc(outLen + headLen);
+      if (!buf) {
+        // os_printf("_ack malloc %d failed\n", outLen+headLen);
+        return 0;
+      }
+
+      if (headLen) {
+        memcpy(buf, _head.c_str(), _head.length());
+      }
+      String msg = "Sending Chunks of " + String(_content.name());
+      pipoDebugHeap(msg.c_str());
+      size_t readLen = 0;
+
+      if (_chunked) {
+        // HTTP 1.1 allows leading zeros in chunk length. Or spaces may be added.
+        // See RFC2616 sections 2, 3.6.1.
+        readLen = _fillBufferAndProcessTemplates(buf + headLen + 6, outLen - 8);
+        if (readLen == RESPONSE_TRY_AGAIN) {
+          free(buf);
+          return 0;
+        }
+        outLen = sprintf((char*)buf + headLen, "%x", readLen) + headLen;
+        while (outLen < headLen + 4)
+          buf[outLen++] = ' ';
+        buf[outLen++] = '\r';
+        buf[outLen++] = '\n';
+        outLen += readLen;
+        buf[outLen++] = '\r';
+        buf[outLen++] = '\n';
+      } else {
+        readLen = _fillBufferAndProcessTemplates(buf + headLen, outLen);
+        if (readLen == RESPONSE_TRY_AGAIN) {
+          free(buf);
+          return 0;
+        }
+        outLen = readLen + headLen;
+      }
+
+      if (headLen) {
+        _head = String();
+      }
+
+      if (outLen) {
+        _writtenLength += request->client()->write((const char*)buf, outLen);
+      }
+
+      if (_chunked) {
+        _sentLength += readLen;
+      } else {
+        _sentLength += outLen - headLen;
+      }
+
+      free(buf);
+
+      if ((_chunked && readLen == 0) || (!_sendContentLength && outLen == 0) ||
+          (!_chunked && _sentLength == _contentLength)) {
+        _state = RESPONSE_WAIT_ACK;
+      }
+      return outLen;
+
+    } else if (_state == RESPONSE_WAIT_ACK) {
+      if (!_sendContentLength || _ackedLength >= _writtenLength) {
+        _state = RESPONSE_END;
+        if (!_chunked && !_sendContentLength)
+          request->client()->close(true);
+      }
+    }
+    return 0;
   }
 };
 
