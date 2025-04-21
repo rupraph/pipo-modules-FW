@@ -29,6 +29,13 @@ export default defineConfig(({ mode }) => ({
   plugins,
   build: {
     manifest: true,
+    // inline fonts to limit the amount of concurrent requests
+    assetsInlineLimit: 1000 * 1024,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
   envDir: pipoType ? "mocks" : ".",
 }));
