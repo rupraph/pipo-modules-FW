@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "HW_CONFIG.h"
 #include <unordered_map>
-#include <Servo.h>
+#include <pwmWrite.h>
 #include <ArduinoJson.h>
 
 //This class will handle output data to the hardware. For now, lets have PWM, servo. then PDM ?
@@ -25,13 +25,12 @@ struct OutputData {
   float value;
   float lmax;
   float lmin;
-  Servo servo = Servo();
-  Pwm pwm = Pwm();
 };
 
 class AnalogOut {
 
  public:
+  Pwm pwm = Pwm();
   void setup();
   void set_config(JsonObject config);
   JsonDocument get_config();

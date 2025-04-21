@@ -7,6 +7,7 @@ AnalogOut analog_out;
 // LedC controller used for controlling the leds conflicts with the servo library
 
 void AnalogOut::setup() {
+
   // Serial.println("Setting up HW output");
 }
 
@@ -24,10 +25,10 @@ void AnalogOut::update() {
         // Serial.print(out.value);
         // Serial.print("pin ");
         // Serial.println(pin_map[i]);
-        out.servo.write(pin_map[i], out.value);
+        pwm.writeServo(pin_map[i], out.value);
         // out.servo.write(16, out.value);
       } else if (out.out_mode == PWM) {
-        out.pwm.write(pin_map[i], out.value * 255);
+        pwm.write(pin_map[i], out.value * 255);
       }
     }
   }
