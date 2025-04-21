@@ -127,9 +127,9 @@ void setup() {
   hwui.setup();
   //Free Heap : 214k
 
-#ifdef PIPO_ANALOG
-  analog_out.setup();
-#endif
+  // #ifdef PIPO_ANALOG
+  //   analog_out.setup();
+  // #endif
 
   /////// Init filesystem
   init_filesystem();
@@ -207,7 +207,7 @@ void setup() {
     pipoDebugHeap();
     //Free Heap : 61k
 #ifdef PIPO_ANALOG
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
                           &oscreceiveTaskHandle, 0);
   // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
   //                         &hwuiSoftPwmTaskHandle, 0);
@@ -223,13 +223,13 @@ void setup() {
 
 // by default runs on core 1
 void loop() {
-  try {
+  // try {
 #ifdef PIPO_ANALOG
-    hwui.update_soft_pwm();
+  hwui.update_soft_pwm();
 #endif
-  } catch (const std::exception& e) {
-    Serial.println("Exception in main loop");
-    logs.writeLog(e.what());
-    delay(50);
-  }
+  // } catch (const std::exception& e) {
+  //   Serial.println("Exception in main loop");
+  //   logs.writeLog(e.what());
+  //   delay(50);
+  // }
 }
