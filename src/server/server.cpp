@@ -375,14 +375,6 @@ void PipoServer::setup_requests() {
     return request->send(200, "text/plain", "Engine paused");
   });
   file_server.setup(&server);
-  server.onNotFound([&](AsyncWebServerRequest* request) {
-    Serial.println("not found: " + request->url());
-    if (request->method() == HTTP_OPTIONS) {
-      request->send(200);
-    } else {
-      request->send(404);
-    }
-  });
 }
 
 bool pipoNetworkReady() {

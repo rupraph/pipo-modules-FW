@@ -5,9 +5,9 @@
 
 class PipoFileServer {
  public:
-  void setup(AsyncWebServer& server) {
+  void setup(AsyncWebServer* server) {
     // Set up the server to serve static files from LittleFS
-    server.onNotFound([](AsyncWebServerRequest* request) {
+    server->onNotFound([](AsyncWebServerRequest* request) {
       // pipoDebugHeap("enter debug");
       Serial.println(request->url());
       String path = "/webpage" + request->url();
