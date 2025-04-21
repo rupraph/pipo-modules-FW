@@ -27,10 +27,10 @@ void PipoServer::setup() {
   // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   // captivePortal.start(&server);
   // Add a custom 404 handler
-  // server.onNotFound([&](AsyncWebServerRequest* request) {
-  //   Serial.println("File not found: " + request->url());
-  //   request->send(404, "text/plain", "File Not Found");
-  // });
+  server.onNotFound([&](AsyncWebServerRequest* request) {
+    Serial.println("File not found: " + request->url());
+    request->send(404, "text/plain", "File Not Found");
+  });
 
   pipoSocket.start(&ws);
   server.addHandler(&ws);
