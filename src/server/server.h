@@ -10,6 +10,7 @@
 #include "utils/debug.h"
 #include "server/pipo_socket.h"
 #include "server/captive-portal.h"
+#include "server/serve-files.hpp"
 #include "wifi/pipowifi.h"
 #include "HW_CONFIG.h"
 
@@ -31,6 +32,7 @@ class PipoServer {
   bool is_running = false;
   AsyncWebServer server;
   AsyncWebSocket ws;
+  PipoFileServer file_server;
   string received_configData;
 };
 
