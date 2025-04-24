@@ -107,18 +107,17 @@ void oscreceiveTask(void* pvParameters) {
 
 // by default runs on core 1
 void setup() {
-  delay(2000);
+
   Serial.begin(115200);
-  delay(2000);
+
   Serial.setDebugOutput(true);
   print_reset_reason();
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup");
   // Free Heap : 215k (total 277k)
-  delay(2000);
 
-  while (!Serial)
-    delay(100);  // putting wait serial here breaks usb mid/hid init
+  // while (!Serial)
+  //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
   // setCpuFrequencyMhz(80); will be usefull to save power on battery
 
@@ -127,9 +126,9 @@ void setup() {
   hwui.setup();
   //Free Heap : 214k
 
-  // #ifdef PIPO_ANALOG
-  //   analog_out.setup();
-  // #endif
+#ifdef PIPO_ANALOG
+  analog_out.setup();
+#endif
 
   /////// Init filesystem
   init_filesystem();

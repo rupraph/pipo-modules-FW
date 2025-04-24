@@ -48,7 +48,9 @@ void AnalogOut::set_value(string name, float value) {
 void AnalogOut::set_config(JsonObject config) {
   // Serial.println("Setting config");
   Serial.println("Setting sensor config");
-  serializeJsonPretty(config, Serial);
+  if (DEBUG_CONFIG == true) {
+    serializeJsonPretty(config, Serial);
+  }
   for (size_t i = 0; i < 6; i++) {
     string key = "A0" + to_string(i + 1);
     // Serial.println(key.c_str());

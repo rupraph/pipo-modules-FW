@@ -140,61 +140,15 @@ class MidiTranslator
   //     }
   // }
 
-  // Notes scale variables
-  // could be replaced by enums to speed up things
-  // Todo: add arpegios // chords
-  unordered_map<string, vector<int>> scales = {
-      {"major", {0, 2, 4, 5, 7, 9, 11}},
-      {"minor", {0, 2, 3, 5, 7, 8, 10}},
-      {"minor pentatonic", {0, 3, 5, 6, 10}},
-      {"major pentatonic", {0, 2, 4, 7, 9}},
-      {"blues minor", {0, 3, 5, 6, 7, 10}},
-      {"blues major", {0, 2, 3, 5, 6, 7}},
-      {"chromatic", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
-      {"whole tone", {0, 2, 4, 6, 8, 10}},
-      {"octatonic", {0, 1, 3, 4, 6, 7, 9, 10}},
-      {"diatonic", {0, 2, 4, 5, 7, 9, 11}},
-      {"harmonic minor", {0, 2, 3, 5, 7, 8, 11}},
-      {"melodic minor", {0, 2, 3, 5, 7, 9, 11}},
-      {"dorian", {0, 2, 3, 5, 7, 9, 10}},
-      {"phrygian", {0, 1, 3, 5, 7, 8, 10}},
-      {"lydian", {0, 2, 4, 6, 7, 9, 11}},
-      {"mixolydian", {0, 2, 4, 5, 7, 9, 10}},
-      {"locrian", {0, 1, 3, 5, 6, 8, 10}},
-      {"ionian", {0, 2, 4, 5, 7, 9, 11}},
-      {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
-      //Turkish ??
-  };
-
-  unordered_map<string, vector<int>> arpegios = {
-      {"major", {0, 4, 7}},
-      {"minor", {0, 3, 7}},
-      {"diminished", {0, 3, 6}},
-      {"augmented", {0, 4, 8}},
-      {"suspended", {0, 5, 7}},
-      {"dominant", {0, 4, 7, 10}},
-      {"major7", {0, 4, 7, 11}},
-      {"minor7", {0, 3, 7, 10}},
-      {"diminished7", {0, 3, 6, 9}},
-      {"augmented7", {0, 4, 8, 10}},
-      {"suspended7", {0, 5, 7, 10}},
-      {"dominant7", {0, 4, 7, 10}},
-      {"major9", {0, 4, 7, 11, 14}},
-      {"minor9", {0, 3, 7, 10, 14}},
-      {"diminished9", {0, 3, 6, 9, 13}},
-      {"augmented9", {0, 4, 8, 10, 14}}};
-
-  unordered_map<string, vector<int>> intervals = {
-      {"second", {0, 2}},    {"third", {0, 4}},    {"fourth", {0, 5}},
-      {"fifth", {0, 7}},     {"sixth", {0, 9}},    {"seventh", {0, 11}},
-      {"octave", {0, 12}},   {"ninth", {0, 14}},   {"tenth", {0, 16}},
-      {"eleventh", {0, 17}}, {"twelveth", {0, 19}}};
-
  private:
   vector<int> generate_full_scale(int rootNote, int nb_notes, string pattern,
                                   string scaleType);
   vector<int> generate_base_scale(int rootNote, string pattern,
                                   string scaleType);
+
+  static const unordered_map<string, vector<int>> arpegios;
+  static const unordered_map<string, vector<int>> scales;
+  static const unordered_map<string, vector<int>> intervals;
 };
 
 #endif  //MIDI_TRANSLATOR_H
