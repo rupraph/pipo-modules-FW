@@ -1,5 +1,7 @@
 #include <wifi/pipowifi.h>
 
+//TODO: Should likely move led toggling out of this class
+
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Pipo Wifi setup");
@@ -180,7 +182,7 @@ bool PipoWifi::configureAP() {
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
   if (apStarted) {
     Serial.println("AP started successfully.");
-    hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+    //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     Serial.println("Failed to start AP.");
   }
