@@ -35,13 +35,21 @@ void RangeSensor::setup() {
     pipoDebugHeap();
 }
 
-void RangeSensor::update() {
-  start_duration();
-  int j;
+// void RangeSensor::update() {
+//   bool newdata = measure_sensor();
+//   if (newdata) {
+//     process_sensor_neutral_filter();
+//     process_sensor_triggers();
+//   }
+// }
 
+bool RangeSensor::measure_sensor() {
+  // start_duration();
+  bool newdata = false;
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
 
   if ((!status) && (NewDataReady != 0)) {
+    newdata = true;
     status = vl53l4cx.VL53L4CX_GetMultiRangingData(pMultiRangingData);
     // Todo: add ambient light capture
     // float ambiant = pMultiRangingData->AmbiantPerSpad;
@@ -78,15 +86,14 @@ void RangeSensor::update() {
 
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-      process_sensor_neutral_filter();
-      process_sensor_triggers();
     }
     if (status == 0) {
       status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
     }
   }
-  end_duration();
-  measured_loop_duration();
+  return newdata;
+  // end_duration();
+  // measured_loop_duration();
 }
 
 void RangeSensor::set_sensor_config(JsonObject config, bool debug) {

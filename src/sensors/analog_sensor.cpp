@@ -65,8 +65,13 @@ void AnalogSensor::measure_offset_all() {
   }
 }
 
-void AnalogSensor::update() {
+// void AnalogSensor::update() {
+//   measure_sensor();
+//   process_sensor_neutral_filter();
+//   process_sensor_triggers();
+// }
 
+bool AnalogSensor::measure_sensor() {
   //WARNING ADC2 pins are not fully usable when wifi is on
 
   for (auto const& pair : analog_map) {
@@ -97,8 +102,7 @@ void AnalogSensor::update() {
 
     //Todo: try to have an adaptative max ? -> when no touch on, min can be adapted.
   }
-  process_sensor_neutral_filter();
-  process_sensor_triggers();
+  return true;
 }
 
 void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {

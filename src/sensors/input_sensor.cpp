@@ -8,6 +8,14 @@
 //Todo: deadzone should be in percentage or max or in value ?
 // true if outside deadzone
 
+void Sensor::update() {
+  bool newdata = measure_sensor();
+  if (newdata) {
+    process_sensor_neutral_filter();
+    process_sensor_triggers();
+  }
+}
+
 bool Sensor::test_outside_deadzone(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
 
