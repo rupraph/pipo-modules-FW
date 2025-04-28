@@ -123,6 +123,14 @@ void setup() {
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
+  hwui.measure_battery();
+
+  if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
+    hwui.set_led(LOW_BAT_LED, 100);
+    delay(3000);
+    // esp_deep_sleep_start();
+    while (1) {}
+  }
 
 #ifdef PIPO_ANALOG
   analog_out.setup();

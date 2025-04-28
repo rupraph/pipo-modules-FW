@@ -47,7 +47,10 @@
 // #define ANALOG_TO_VOLTS 0.000806
 
 //ANALOG SETTINGS
-#define LOW_BAT_VOLTAGE 3300  // in mV
+#define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.0
+#define NO_BOOT_VOLTAGE 3100  // in mV
+//for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
+
 #define BAT_SAMPLE_SIZE 20
 #define BATT_COEF 2.0  //2.56
 // battery drops hard after 3.3v -> 0%

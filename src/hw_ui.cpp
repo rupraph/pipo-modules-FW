@@ -201,7 +201,7 @@ void HwUi::stop_blink_once() {
   }
 }
 
-void HwUi::measure_battery() {
+void HwUi::measure_battery_step() {
   if (bat_sampling_index >= BAT_SAMPLE_SIZE) {
     bat_sampling_index = 0;
   }
@@ -216,11 +216,22 @@ void HwUi::measure_battery() {
   bat_voltage = sum / BAT_SAMPLE_SIZE;
 }
 
+void HwUi::measure_battery() {
+  for (int i = 0; i < BAT_SAMPLE_SIZE; i++) {
+    measure_battery_step();
+    delay(1);
+  }
+}
+
 void HwUi::monitor_battery() {
-  measure_battery();
+  measure_battery_step();
   if (bat_voltage < LOW_BAT_VOLTAGE) {
     start_blink(LOW_BAT_LED, 500, 0.5);
   } else {
     stop_blink(LOW_BAT_LED);
   }
+}
+
+int HwUi::get_bat_voltage() {
+  return bat_voltage;
 }
