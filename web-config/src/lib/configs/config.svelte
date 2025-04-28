@@ -173,6 +173,14 @@
       params: { axis },
     }).then(() => console.log("DONE"));
   }
+
+  function reset_offset(axis: PipoKeys[T]) {
+    axios({
+      method: "post",
+      url: "/resetoffset",
+      params: { axis },
+    }).then(() => console.log("DONE"));
+  }
 </script>
 
 <Collapse title="Quick settings">
@@ -252,6 +260,15 @@
             style="border-radius: 2vw; cursor: pointer;"
           >
             Zero
+          </button>
+        </Tooltip>
+        <Tooltip title="Remove offset">
+          <button
+            class="primary"
+            on:click={() => reset_offset(currentAxis)}
+            style="border-radius: 2vw; cursor: pointer;"
+          >
+            Reset
           </button>
         </Tooltip>
       {/if}
