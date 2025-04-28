@@ -13,7 +13,7 @@ void AnalogSensor::setup() {
     pinMode(pair.second, INPUT);
   }
 
-  measure_offset_all();
+  measure_offset_all_touch();
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
@@ -21,25 +21,25 @@ void AnalogSensor::setup() {
 // Todo: offset measurement to rework for all sensors.
 // add function to perform individual offset or of provided list
 // change delay into vtaskdelay ??
-void AnalogSensor::measure_offset(const string& sensor_name) {
-  int num_samples = OFFSET_CAL_SAMPLES_NB;
-  float offset = 0;
-  for (int i = 0; i < num_samples; i++) {
-    if (analog_map.find(sensor_name) != analog_map.end() &&
-        analog_out.get_pin_dir(sensor_name) == PinMode::IN) {
-      offset += analogReadMilliVolts(analog_map[sensor_name]) /
-                1000.0f;  // * 0.000806;
-    } else if (touch_map.find(sensor_name) != touch_map.end()) {
-      offset += touchRead(touch_map[sensor_name]);
-    }
-    delay(20);
-  }
-  sensor_dat[sensor_name].offset =
-      round((offset / num_samples) * 1000.0) / 1000.0;
-}
+// void AnalogSensor::measure_offset(const string& sensor_name) {
+//   int num_samples = OFFSET_CAL_SAMPLES_NB;
+//   float offset = 0;
+//   for (int i = 0; i < num_samples; i++) {
+//     if (analog_map.find(sensor_name) != analog_map.end() &&
+//         analog_out.get_pin_dir(sensor_name) == PinMode::IN) {
+//       offset += analogReadMilliVolts(analog_map[sensor_name]) /
+//                 1000.0f;  // * 0.000806;
+//     } else if (touch_map.find(sensor_name) != touch_map.end()) {
+//       offset += touchRead(touch_map[sensor_name]);
+//     }
+//     delay(20);
+//   }
+//   sensor_dat[sensor_name].offset =
+//       round((offset / num_samples) * 1000.0) / 1000.0;
+// }
 
 // measure offset of touch. name is wrong
-void AnalogSensor::measure_offset_all() {
+void AnalogSensor::measure_offset_all_touch() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;
   unordered_map<string, float> offset;

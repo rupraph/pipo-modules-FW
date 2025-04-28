@@ -157,15 +157,6 @@ void MotionSensor::convert_accell() {
       filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
-void MotionSensor::measure_offset(const string& axis_name) {
-  if (!measure_offset_flag) {
-    measure_offset_flag = true;
-    axis_to_measure_offset = axis_name;
-    measure_offset_counter = 0;
-    Serial.println("start offset measurement");
-  }
-}
-
 void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
   if (debug) {
     Serial.println("set_sensor_config");

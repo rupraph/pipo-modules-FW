@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <ArduinoJson.h>
 #include "utils/filters.h"
+#include "HW_CONFIG.h"
 
 using namespace std;
 
@@ -75,7 +76,11 @@ class Sensor {
   virtual void setup() = 0;
   void update();
   virtual bool measure_sensor() = 0;
-  virtual void measure_offset(const string& sensor_name);
+  void apply_offset();
+  void measure_offset(const string& sensor_name);
+  void measure_offset_all();
+  void reset_offset(const string& sensor_name);
+  void reset_all_offset();
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
@@ -151,6 +156,13 @@ class Sensor {
   void set_cyclic(const std::string& axis, bool value);
 
   void monitor_axis(const std::string& axis);
+
+ private:
+  string axis_to_measure_offset;
+  bool measure_offset_flag = false;
+  bool measure_all = false;  // measure offset for all or for one
+  int measure_offset_counter = 0;
+  float offset = 0;
 
  protected:
   unordered_map<string, SensorDat> sensor_dat;

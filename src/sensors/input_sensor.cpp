@@ -11,8 +11,37 @@
 void Sensor::update() {
   bool newdata = measure_sensor();
   if (newdata) {
-    process_sensor_neutral_filter();
-    process_sensor_triggers();
+    if (measure_offset_flag) {
+      measure_offset_counter++;
+      if (measure_all) {
+        for (auto const& pair : sensor_dat) {
+          sensor_dat[pair.first].offset += sensor_dat[pair.first].value;
+        }
+      } else {
+        sensor_dat[axis_to_measure_offset].offset +=
+            sensor_dat[axis_to_measure_offset].value;
+      }
+      if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+        if (measure_all) {
+          for (auto const& pair : sensor_dat) {
+            sensor_dat[pair.first].offset =
+                sensor_dat[pair.first].offset / OFFSET_CAL_SAMPLES_NB;
+          }
+        } else {
+          sensor_dat[axis_to_measure_offset].offset =
+              sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
+        }
+        measure_offset_flag = false;
+        Serial.print("offset of ");
+        Serial.print(axis_to_measure_offset.c_str());
+        Serial.print(" is: ");
+        Serial.println(sensor_dat[axis_to_measure_offset].offset);
+      }
+    } else {
+      apply_offset();
+      process_sensor_neutral_filter();
+      process_sensor_triggers();
+    }
   }
 }
 
@@ -31,10 +60,68 @@ bool Sensor::test_outside_deadzone(const std::string& axis) {
   }
 }
 
-//provide default implementation
+//measure single axis offset
 void Sensor::measure_offset(const std::string& sensor_name) {
-  Serial.println("default implementation does not measure offset");
+  if (!measure_offset_flag) {
+    measure_offset_flag = true;
+    axis_to_measure_offset = sensor_name;
+    measure_offset_counter = 0;
+    sensor_dat[sensor_name].offset = 0;
+    Serial.println("start offset measurement");
+  }
 }
+void Sensor::measure_offset_all() {
+  if (!measure_offset_flag) {
+    measure_all = true;
+    measure_offset_counter = 0;
+  }
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].offset = 0;
+  }
+  Serial.println("start all offset measurement");
+}
+
+void Sensor::apply_offset() {
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
+  }
+}
+
+void Sensor::reset_offset(const std::string& sensor_name) {
+  if (sensor_dat.find(sensor_name) != sensor_dat.end()) {
+    sensor_dat[sensor_name].offset = 0;
+  } else {
+    Serial.println("error: Axis not found");
+  }
+}
+
+void Sensor::reset_all_offset() {
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].offset = 0;
+  }
+  Serial.println("reset all offset");
+}
+
+// void Sensor::offset_handler() {
+
+//   if (!measure_offset_flag) {
+//     //
+//   }
+
+//   if (measure_offset_flag) {
+//     measure_offset_counter++;
+//     offset += sensor_dat[axis_to_measure_offset].value;
+//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+//       sensor_dat[axis_to_measure_offset].offset =
+//           offset / OFFSET_CAL_SAMPLES_NB;
+//       measure_offset_flag = false;
+//       Serial.print("offset of ");
+//       Serial.print(axis_to_measure_offset.c_str());
+//       Serial.print(" is: ");
+//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
+//     }
+//   }
+// }
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {

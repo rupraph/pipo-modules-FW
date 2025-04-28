@@ -244,15 +244,17 @@
         on:change={(evt) => setAxis(evt.detail.value)}
       />
 
-      <Tooltip title="Make current value the zero offset">
-        <button
-          class="primary"
-          on:click={() => cal_offset(currentAxis)}
-          style="border-radius: 2vw; cursor: pointer;"
-        >
-          Zero
-        </button>
-      </Tooltip>
+      {#if $type !== "motion"}
+        <Tooltip title="Make current value the zero offset">
+          <button
+            class="primary"
+            on:click={() => cal_offset(currentAxis)}
+            style="border-radius: 2vw; cursor: pointer;"
+          >
+            Zero
+          </button>
+        </Tooltip>
+      {/if}
     </div>
     {#if hide_on_out}
       <p>This channel is currently used for output</p>
