@@ -114,7 +114,6 @@ void setup() {
   print_reset_reason();
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup");
-  // Free Heap : 215k (total 277k)
 
   // while (!Serial)
   //   delay(100);  // putting wait serial here breaks usb mid/hid init
@@ -124,7 +123,6 @@ void setup() {
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
-  //Free Heap : 214k
 
 #ifdef PIPO_ANALOG
   analog_out.setup();
@@ -132,13 +130,12 @@ void setup() {
 
   /////// Init filesystem
   init_filesystem();
-  //Free Heap : 212k
 
   /////// Load config
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
-  //Free Heap : 205k
+
   try {
     config.apply(engine, osc, DEBUG_CONFIG);  // input_sens,
   } catch (const std::exception& e) {
@@ -146,17 +143,15 @@ void setup() {
   }
 
   /////// Init midi and hid
-  midiio.setup();
-  //Free Heap : 156k
+  midiio.setup();  //takes 50k heap
+
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif
-  //Free Heap : 156k
+
   /////// Init wifi
   osc.setup();
-  //Free Heap : 156k
-  wifi.setup();
-  //Free Heap : 101k
+  wifi.setup();  // takes 50k heap
 
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
@@ -167,7 +162,6 @@ void setup() {
   input_sensor.setup();
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
-  //Free Heap : 98k
 
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
@@ -177,16 +171,13 @@ void setup() {
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
-  //Free Heap : 99k
 
   // Start server
   Serial.println("starting config page");
-  server.setup();
-  //Free Heap : 71k
+  server.setup();  // takes 30k heap
 
   // Start OSC
   osc.setup();
-  //Free Heap : 71k
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
@@ -204,7 +195,7 @@ void setup() {
                           &websocketTaskHandle, 0);
   if (DEBUG_HEAP)
     pipoDebugHeap();
-    //Free Heap : 61k
+
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
                           &oscreceiveTaskHandle, 0);

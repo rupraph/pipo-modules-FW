@@ -337,7 +337,7 @@ void MidiTranslator::set_enabled(bool e) {
 
 // Notes scale variables
 // Todo: change architecture and add chords
-// the format is inherited from a moment where we would put custom scales in these lists.
+// the format is inherited from a moment where we would put custom scales in these lists. now frozen, should be constant with smaller data types.
 const unordered_map<string, vector<int>> MidiTranslator::scales = {
     {"major", {0, 2, 4, 5, 7, 9, 11}},
     {"minor", {0, 2, 3, 5, 7, 8, 10}},
