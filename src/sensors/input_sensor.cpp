@@ -89,6 +89,8 @@ void Sensor::apply_offset() {
 
 void Sensor::reset_offset(const std::string& sensor_name) {
   if (sensor_dat.find(sensor_name) != sensor_dat.end()) {
+    Serial.print("reset offset of ");
+    Serial.println(sensor_name.c_str());
     sensor_dat[sensor_name].offset = 0;
   } else {
     Serial.println("error: Axis not found");
