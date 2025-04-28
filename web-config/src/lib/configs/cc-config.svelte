@@ -17,7 +17,7 @@
   label="CC Out Max"
   bind:value={config.cc_max}
   min={Math.max(0, config.cc_min)}
-  max={Infinity}
+  max={config.hires ? 16383 : 127}
 />
 <Checkbox label="High Res mode" bind:value={config.hires} />
 
