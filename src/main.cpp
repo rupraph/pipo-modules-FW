@@ -22,17 +22,32 @@
 // core 1: sensor, midi, osc
 // #define ASYNC_TCP_RUNNING_CORE 0
 
+unsigned long lastMillis = 0;
+unsigned long sensor_task_interval = 0;
+unsigned long sensor_task_duration = 0;
+
 void init_filesystem();
 
 void sensorTask(void* pvParameters) {
   for (;;) {
+    sensor_task_interval = millis() - lastMillis;
+    lastMillis = millis();
     input_sensor.update();
+    // input_sensor.teleplot_data("yaw");
     engine.update();
-    hwui.update();
+    // hwui.update();
+    sensor_task_duration = millis() - lastMillis;
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    vTaskDelay(pdMS_TO_TICKS(2));
+    // vTaskDelay(pdMS_TO_TICKS(2));
+  }
+}
+
+void hwuiTask(void* pvParameters) {
+  for (;;) {
+    hwui.update();
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
 
@@ -82,7 +97,11 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magZ");
     // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
     if (DEBUG_HEAP)
-      pipoDebugHeap();
+      // pipoDebugHeap();
+      Serial.print("Sensor task duration: ");
+    Serial.print(sensor_task_duration);
+    Serial.print(" ms, interval: ");
+    Serial.println(sensor_task_interval);
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -203,6 +222,8 @@ void setup() {
                           &websocketTaskHandle, 0);
   if (DEBUG_HEAP)
     pipoDebugHeap();
+  xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
+                          0);
 
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
@@ -212,8 +233,8 @@ void setup() {
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
-  //                         &debugMonitorTaskHandle, 1);
+  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 2048, NULL, 1,
+                          &debugMonitorTaskHandle, 0);
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
