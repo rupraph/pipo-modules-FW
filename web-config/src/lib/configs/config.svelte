@@ -189,7 +189,15 @@
       >Zero All Touch
     </button>
   {/if}
-
+  {#if $type === "motion"}
+    <Tooltip
+      title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
+    >
+      <button class="primary" on:click={reboot} style="width: fit-content"
+        >Reboot to calibrate</button
+      >
+    </Tooltip>
+  {/if}
   <button
     class="primary Pause"
     on:click={pause}
@@ -243,16 +251,17 @@
         --background="var(--bg-tabs)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
-
-      <Tooltip title="Make current value the zero offset">
-        <button
-          class="primary"
-          on:click={() => cal_offset(currentAxis)}
-          style="border-radius: 2vw; cursor: pointer;"
-        >
-          Zero
-        </button>
-      </Tooltip>
+      {#if $type !== "motion"}
+        <Tooltip title="Make current value the zero offset">
+          <button
+            class="primary"
+            on:click={() => cal_offset(currentAxis)}
+            style="border-radius: 2vw; cursor: pointer;"
+          >
+            Zero
+          </button>
+        </Tooltip>
+      {/if}
     </div>
     {#if hide_on_out}
       <p>This channel is currently used for output</p>
