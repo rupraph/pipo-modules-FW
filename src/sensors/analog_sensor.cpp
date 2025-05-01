@@ -74,9 +74,9 @@ void AnalogSensor::update() {
       sensor_dat[pair.first].raw_value = std::min(
           std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
       sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-      sensor_dat[pair.first].value =
-          filter_map[pair.first].process(sensor_dat[pair.first].raw_value) -
-          sensor_dat[pair.first].offset;  // * 0.000806f;
+      sensor_dat[pair.first].value = filter_map[pair.first].process(
+          sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset);
+      ;  // * 0.000806f;
     }
   }
 
@@ -87,9 +87,8 @@ void AnalogSensor::update() {
 
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
 
-    sensor_dat[pair.first].value =
-        filter_map[pair.first].process(sensor_dat[pair.first].raw_value) -
-        sensor_dat[pair.first].offset;
+    sensor_dat[pair.first].value = filter_map[pair.first].process(
+        sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset);
 
     if (sensor_dat[pair.first].value > MAX_TOUCH_VALUE) {
       sensor_dat[pair.first].value = MAX_TOUCH_VALUE;
