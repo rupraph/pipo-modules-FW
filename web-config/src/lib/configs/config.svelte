@@ -167,11 +167,17 @@
   }
 
   function cal_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/offsetcal",
-      params: { axis },
-    }).then(() => console.log("DONE"));
+    pipoio.get("/offsetcal", { params: { axis } }).then(({ data }) => {
+      config.inputs[axis].offset = data;
+    });
+  }
+
+  function offsetalltouch() {
+    pipoio.get("/offsetAllTouch").then(({ data }) => {
+      for (const [axis, offset] of Object.entries(data)) {
+        config.inputs[axis as PipoKeys[T]].offset = Number(offset);
+      }
+    });
   }
 
   function reset_offset(axis: PipoKeys[T]) {
@@ -186,14 +192,7 @@
 <Collapse title="Quick settings">
   <QuickConfig bind:config />
   {#if $type === "analog"}
-    <button
-      class="primary"
-      on:click={() => {
-        pipoio.post("/offsetAllTouch").then(() => {
-          console.log("zero all touch");
-        });
-      }}
-      title="Zero the touch"
+    <button class="primary" on:click={offsetalltouch} title="Zero the touch"
       >Zero All Touch
     </button>
   {/if}

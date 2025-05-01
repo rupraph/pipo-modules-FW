@@ -341,7 +341,7 @@ void PipoServer::setup_requests() {
 
   // Todo: this is too long to be executed in the server reauest
   // this should be offloaded to a task and a monitoring task setup to  handle and send the pending response when the action if finished
-  server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
+  server.on("/offsetcal", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("axis")) {
       return request->send(400, "text/plain", "No sensor provided");
     }
@@ -349,16 +349,19 @@ void PipoServer::setup_requests() {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
       input_sensor.measure_offset(axis);
-      config.gather(engine);
-      config.save();
-      return request->send(200, "text/plain", "Offset measured");
+      // currently config save is always done by fecthing the client.
+      // for now, send the offset to the client so that it can be saved later on
+      // config.gather(engine);
+      // config.save();
+      return request->send(200, "text/plain",
+                           String(input_sensor.get_offset(axis)));
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
     }
   });
 
-  server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
+  server.on("/resetoffset", HTTP_GET, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("axis")) {
       return request->send(400, "text/plain", "No sensor provided");
     }
@@ -366,9 +369,10 @@ void PipoServer::setup_requests() {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
       input_sensor.reset_offset(axis);
-      config.gather(engine);
-      config.save();
-      return request->send(200, "text/plain", "Offset reset");
+      // config.gather(engine);
+      // config.save();
+      return request->send(200, "text/plain",
+                           String(input_sensor.get_offset(axis)));
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error resetting offset: " + String(e.what()));
@@ -376,12 +380,26 @@ void PipoServer::setup_requests() {
   });
 
 #ifdef PIPO_ANALOG
-  server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
+  server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
       input_sensor.measure_offset_all();
-      config.gather(engine);
-      config.save();
-      return request->send(200, "text/plain", "Offset measured");
+      // config.gather(engine);
+      // config.save();
+      String offsetstring = "{";
+      bool first = true;
+      for (auto const& pair : input_sensor.get_sensor_dat_map()) {
+        if (pair.first[0] == 'T') {
+          if (!first) {
+            offsetstring += ",";
+          }
+          first = false;
+          offsetstring += "\"" + String(pair.first.c_str()) +
+                          "\" : " + String(input_sensor.get_offset(pair.first));
+        }
+      }
+      offsetstring += "}";
+
+      return request->send(200, "json", offsetstring.c_str());
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
