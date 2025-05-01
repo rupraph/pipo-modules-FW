@@ -48,10 +48,12 @@
   <!-- <span class="status" class:live> </span> -->
   <span><strong>APIP:</strong> {apIP}</span>
   <span><strong>STAIP:</strong> {staIP}</span>
-  <span class="wifi" on:click={toggleWifi}>
-    <Signal signal={wifiSignal} {disconnected} />
+  <span class="wifi-group">
+    <span class="wifi" on:click={toggleWifi}>
+      <Signal signal={wifiSignal} {disconnected} />
+    </span>
+    <span class="ssid" on:click={toggleWifi}>{wifiSsid} </span>
   </span>
-  <span class="ssid" on:click={toggleWifi}>{wifiSsid} </span>
 </nav>
 <Modal bind:open={wifiOpen}>
   <WifiConnect />
@@ -79,12 +81,21 @@
     background-color: var(--green);
     filter: drop-shadow(0 0 0.5em var(--green));
   }
-  .wifi {
+
+  .wifi-group {
+    display: flex;
     margin-left: auto;
+    /* border: 1px solid var(--main); */
+    padding: 0.3em;
+    padding-inline: 0.7em;
+    border-radius: 0.5em;
+    background-color: rgb(171, 166, 160);
+  }
+  .wifi {
     cursor: pointer;
-    height: 1em;
-    width: 2em;
-    max-height: 1em;
+    height: 1.2em;
+    width: 2.6em;
+    max-height: 1.2em;
   }
   .ssid {
     cursor: pointer;
