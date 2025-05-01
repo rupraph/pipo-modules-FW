@@ -357,6 +357,24 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
+
+  server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("axis")) {
+      return request->send(400, "text/plain", "No sensor provided");
+    }
+    try {
+      string axis = request->getParam("axis")->value().c_str();
+      Serial.println(axis.c_str());
+      input_sensor.reset_offset(axis);
+      config.gather(engine);
+      config.save();
+      return request->send(200, "text/plain", "Offset reset");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error resetting offset: " + String(e.what()));
+    }
+  });
+
 #ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
     try {
