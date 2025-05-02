@@ -106,20 +106,41 @@ bool MidiTranslator::is_a_note(string noteName) {
 vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
                                                 string pattern,
                                                 string scaleType) {
-
-  vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
   vector<int> expandedScale;
+  // expand over octaves for arpeggios and scales
+  if (pattern != "interval") {
+    vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
 
-  int baseScaleSize = scale.size();
-  int baseNoteIndex = 0;
-  int expandedNote = scale[baseNoteIndex];
+    int baseScaleSize = scale.size();
+    int baseNoteIndex = 0;
+    int expandedNote = scale[baseNoteIndex];
 
-  for (int i = 0; i < nb_notes; i++) {
-    expandedScale.push_back(expandedNote);
-    baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
-    expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    for (int i = 0; i < nb_notes; i++) {
+      expandedScale.push_back(expandedNote);
+      baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
+      expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    }
+  } else {
+    // build intervals
+    int expandedNote = rootNote;
+    for (int i = 0; i < nb_notes; i++) {
+
+      if (intervals.find(scaleType) != intervals.end()) {
+        expandedScale.push_back(expandedNote);
+        expandedNote += intervals.at(scaleType)[1];
+        Serial.print("Note: ");
+        Serial.println(expandedNote);
+      } else {
+        Serial.println("Invalid interval type");
+      }
+      Serial.print("Interval: ");
+      for (int i = 0; i < expandedScale.size(); i++) {
+        Serial.print(expandedScale[i]);
+        Serial.print("-");
+      }
+      Serial.println();
+    }
   }
-
   return expandedScale;
 }
 
@@ -147,18 +168,6 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       return scale;
     } else {
       Serial.println("Invalid arpeggio type");
-      return {};
-    }
-  } else if (pattern == "interval") {
-    auto it = intervals.find(scaleType);
-    if (it != intervals.end()) {
-      vector<int> scale = it->second;
-      for (int i = 0; i < scale.size(); i++) {
-        scale[i] += rootNote;
-      }
-      return scale;
-    } else {
-      Serial.println("Invalid interval type");
       return {};
     }
   } else {
