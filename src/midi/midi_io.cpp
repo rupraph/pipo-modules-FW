@@ -28,7 +28,7 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
                          unsigned long sustain_ms) {
   unsigned long time = millis();
   if (is_note_playing(note, channel)) {
-    // don't play notes faster than 10ms
+    // don't play again notes faster than 10ms
     if (channel_note_list[channel][note].starttime + 10 > time) {
       // Serial.println("not playing");
       return;

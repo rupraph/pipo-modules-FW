@@ -45,7 +45,8 @@ struct SensorDat {
     bool midi_trig = false;
     bool hid_trig = false;
   };
-
+  // trigger flags used to pass entering/existing the range to the senders which will reset them once used.
+  // one for each protocol
   trigger_flag trigger_flags;
   trigger_flag untrigger_flags;
   bool ws_monitor = false;

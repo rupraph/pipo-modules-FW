@@ -152,7 +152,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         if (input_sensor.get_bool_value(axis_name)) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
               input_sensor.get_trigger_flag(axis_name, MIDI)) {
-            midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
+            midiio.sendNoteOn(thresh_note, 100, channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
         } else {
@@ -160,11 +160,15 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         }
       } else  // mode is continuous
       {
+        // send note on if:
+        // sensor in range
+        // AND note not already playing
+        // AND (note is diff from previous OR we entered the range)
         if (input_sensor.is_within_range(axis_name) &&
-            !midiio.is_note_playing(note_val[channel], channel) &&
+            // !midiio.is_note_playing(note_val[channel], channel) &&
             (note_val[channel] != note_val_prev[channel] ||
              input_sensor.get_trigger_flag(axis_name, MIDI))) {
-          midiio.sendNoteOn(note_val[channel], 127, channel, sustain_ms);
+          midiio.sendNoteOn(note_val[channel], 100, channel, sustain_ms);
           if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
