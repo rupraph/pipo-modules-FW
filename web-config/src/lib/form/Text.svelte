@@ -6,6 +6,7 @@
   export let readonly: boolean = false;
   export let maxlength: number = 127;
   export let minlength: number = 0;
+  export let validate: (value: string) => string = () => "";
   let validationError: string = "";
   let id = uid();
   // Reactive statement to validate the name length
@@ -15,7 +16,7 @@
     } else if (value.length > maxlength) {
       validationError = `The ${label} must be no more than ${maxlength} characters long.`;
     } else {
-      validationError = "";
+      validationError = validate(value);
     }
   }
 </script>

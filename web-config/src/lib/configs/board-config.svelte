@@ -6,7 +6,18 @@
   import { schema } from "../../schema";
 
   export let generalconfig: GeneralConfig;
-
+  const validate = (name) => {
+    // firbid spaces
+    if (name.includes(" ")) {
+      return "Spaces are not allowed";
+    }
+    // forbid any other character than a-zA-Z0-9
+    const regex = /^[a-zA-Z0-9]+$/;
+    if (!regex.test(name)) {
+      return "Only letters and numbers are allowed";
+    }
+    return "";
+  };
   const options = [
     { label: "Acces Point", value: "AP" },
     { label: "Station", value: "STA" },
@@ -19,6 +30,7 @@
   bind:value={generalconfig.PipoName}
   maxlength={schema.name.max}
   minlength={schema.name.min}
+  {validate}
 />
 <!-- <button class="primary" on:click={reboot} style="width: fit-content"
   >Reboot</button
