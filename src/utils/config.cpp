@@ -7,12 +7,11 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
   Serial.print("load config: ");
   Serial.println(get_path(filename, addJsonExtension).c_str());
   try {
-#ifdef DEBUG_HEAP
-    pipoDebugHeap();
-#endif
+    if (DEBUG_HEAP)
+      pipoDebugHeap("Config: load config");
 
     if (DEBUG_CONFIG) {
-      Serial.println("config: before loading:");
+      Serial.println("config: before loading");
       serializeJsonPretty(current_config, Serial);
     }
 
@@ -31,11 +30,9 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
       Serial.println("loaded config:");
       serializeJsonPretty(current_config, Serial);
     }
-
-#ifdef DEBUG_HEAP
-    pipoDebugHeap();
-#endif
     logs.writeLog("load config: " + filename);
+    if (DEBUG_HEAP)
+      pipoDebugHeap("Config: end load config");
   } catch (const std::exception& e) {
     Serial.println("error loading config");
     Serial.println(e.what());

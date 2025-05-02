@@ -16,26 +16,38 @@
 #include "sensors/analog_out.h"
 #endif
 
-// quick declaration of functions
-void init_filesystem();
 // Tasks distribution
-// what seems important is to avoid delays in midi and osc handling
-// seems better to keep wifi + networking on core 0
+// wifi + networking on core 0
 // core 0: wifi, server, websocket
-// I read contradictin info for the server/asyn tcp core. some say same as application, some say same as wifi
 // core 1: sensor, midi, osc
+// #define ASYNC_TCP_RUNNING_CORE 0
 
-unsigned long last_time = 0;
+unsigned long lastMillis = 0;
+unsigned long sensor_task_interval = 0;
+unsigned long sensor_task_duration = 0;
+
+void init_filesystem();
 
 void sensorTask(void* pvParameters) {
   for (;;) {
+    sensor_task_interval = millis() - lastMillis;
+    lastMillis = millis();
     input_sensor.update();
+    // input_sensor.teleplot_data("yaw");
     engine.update();
-    hwui.update();
+    // hwui.update();
+    sensor_task_duration = millis() - lastMillis;
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    vTaskDelay(pdMS_TO_TICKS(2));
+    // vTaskDelay(pdMS_TO_TICKS(2));
+  }
+}
+
+void hwuiTask(void* pvParameters) {
+  for (;;) {
+    hwui.update();
+    vTaskDelay(pdMS_TO_TICKS(10));
   }
 }
 
@@ -63,16 +75,6 @@ void websocketTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
   }
 }
-void dnsTask(void* pvParameters) {
-  for (;;) {
-    if (!pipoNetworkReady()) {
-      vTaskDelay(pdMS_TO_TICKS(500));
-      continue;
-    }
-    // captivePortal.loop();
-    vTaskDelay(pdMS_TO_TICKS(100));
-  }
-}
 void wifiTask(void* pvParameters) {
   for (;;) {
     wifi.refresh();
@@ -93,7 +95,13 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magX");
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
-    Serial.println(uxTaskGetStackHighWaterMark(oscreceiveTaskHandle));
+    // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
+    if (DEBUG_HEAP)
+      // pipoDebugHeap();
+      Serial.print("Sensor task duration: ");
+    Serial.print(sensor_task_duration);
+    Serial.print(" ms, interval: ");
+    Serial.println(sensor_task_interval);
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -107,6 +115,7 @@ void oscreceiveTask(void* pvParameters) {
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
+// hwuiSoftPwmTask temporarily in the main loop. not smooth when in task
 // void hwuiSoftPwmTask(void* pvParameters) {
 //   for (;;) {
 //     hwui.update_soft_pwm();
@@ -117,62 +126,31 @@ void oscreceiveTask(void* pvParameters) {
 
 // by default runs on core 1
 void setup() {
+
   Serial.begin(115200);
+
   Serial.setDebugOutput(true);
+  print_reset_reason();
+  if (DEBUG_HEAP)
+    pipoDebugHeap("Start setup");
 
-  esp_reset_reason_t reason = esp_reset_reason();
+  // while (!Serial)
+  //   delay(100);  // putting wait serial here breaks usb mid/hid init
 
-  Serial.print("Reset reason: ");
-  switch (reason) {
-    case ESP_RST_POWERON:
-      Serial.println("Power-on reset");
-      break;
-    case ESP_RST_EXT:
-      Serial.println("External reset");
-      break;
-    case ESP_RST_SW:
-      Serial.println("Software reset");
-      break;
-    case ESP_RST_PANIC:
-      Serial.println("Exception/Panic reset");
-      break;
-    case ESP_RST_INT_WDT:
-      Serial.println("Interrupt watchdog reset");
-      break;
-    case ESP_RST_TASK_WDT:
-      Serial.println("Task watchdog reset");
-      break;
-    case ESP_RST_WDT:
-      Serial.println("Other watchdog reset");
-      break;
-    case ESP_RST_DEEPSLEEP:
-      Serial.println("Wakeup from deep sleep");
-      break;
-    case ESP_RST_BROWNOUT:
-      Serial.println("Brownout reset");
-      break;
-    case ESP_RST_SDIO:
-      Serial.println("SDIO reset");
-      break;
-    default:
-      Serial.println("Unknown reset reason");
-  }
+  // setCpuFrequencyMhz(80); will be usefull to save power on battery
 
-    // Disable watchdog timer for debug
-    // disableCore0WDT();
-    // disableCore1WDT();
-
-    // while (!Serial)
-    //   delay(100);  // putting wait serial here breaks usb mid/hid init
-
-// setCpuFrequencyMhz(80); will be usefull to save power on battery
-/////// Init hardware user interface (leds and switches)
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
-
+  /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
+  hwui.measure_battery();
+
+  if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
+    hwui.set_led(LOW_BAT_LED, 100);
+    delay(3000);
+    // esp_deep_sleep_start();
+    while (1) {}
+  }
+
 #ifdef PIPO_ANALOG
   analog_out.setup();
 #endif
@@ -184,6 +162,7 @@ void setup() {
   Serial.print("config list:");
   Serial.println(config.get_list());
   config.load_config();
+
   try {
     config.apply(engine, osc, DEBUG_CONFIG);  // input_sens,
   } catch (const std::exception& e) {
@@ -191,13 +170,16 @@ void setup() {
   }
 
   /////// Init midi and hid
-  midiio.setup();
+  midiio.setup();  //takes 50k heap
+
+#ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
-  // while (!Serial)
-  //   delay(100);
+#endif
+
   /////// Init wifi
   osc.setup();
-  wifi.setup();
+  wifi.setup();  // takes 50k heap
+
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
 
@@ -205,10 +187,8 @@ void setup() {
   Serial.println("init sensor");
   input_sensor.init();
   input_sensor.setup();
-
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap("End setup sensor");
 
   // capturing and storing config at this point
   //(this is a temp solution to store the initial sensor offset measurements)
@@ -216,39 +196,45 @@ void setup() {
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 
   // Start server
   Serial.println("starting config page");
-  server.setup();
+  server.setup();  // takes 30k heap
+
   // Start OSC
   osc.setup();
 
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 
   Serial.println("starting tasks");
 
   // Todo move task to their own files
-  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 20000, NULL, 1,
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
+  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
                           &sensorTaskHandle, 1);
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 10000, NULL, 1,
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
+  xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
+                          0);
+
 #ifdef PIPO_ANALOG
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 4096, NULL, 1,
+  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
                           &oscreceiveTaskHandle, 0);
   // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  // xTaskCreatePinnedToCore(dnsTask, "dnsTask", 4096, NULL, 1, &dnsTaskHandle, 0);
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  // xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
-  //                         &debugMonitorTaskHandle, 1);
-  // hwui.start_blink(WIFI_LED, 2000, 0.5);
+  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 2048, NULL, 1,
+                          &debugMonitorTaskHandle, 0);
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
@@ -256,18 +242,13 @@ void setup() {
 
 // by default runs on core 1
 void loop() {
-  try {
-
-// hwui.update();
-// I dont understand why, but the server cannot restart from a
-// response to a request. It crashes. So I need to restart it from the main loop
+  // try {
 #ifdef PIPO_ANALOG
-    hwui.update_soft_pwm();
+  hwui.update_soft_pwm();
 #endif
-
-  } catch (const std::exception& e) {
-    Serial.println("Exception in main loop");
-    logs.writeLog(e.what());
-    delay(50);
-  }
+  // } catch (const std::exception& e) {
+  //   Serial.println("Exception in main loop");
+  //   logs.writeLog(e.what());
+  //   delay(50);
+  // }
 }

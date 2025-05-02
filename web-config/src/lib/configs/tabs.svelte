@@ -147,6 +147,7 @@
     background: var(--bg-color);
     transform: translate(0, -3px);
     width: 100%;
+    max-width: 100%;
   }
   :global(.tab .delete) {
     background: transparent;

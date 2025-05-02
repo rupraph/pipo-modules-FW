@@ -75,8 +75,11 @@ class Sensor {
   virtual void setup() = 0;
   virtual void update() = 0;
   virtual void measure_offset(const string& sensor_name);
+
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
+
+  void reset_offset(const string& input);
 
   bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);

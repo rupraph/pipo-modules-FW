@@ -114,49 +114,53 @@
   }
 </script>
 
-{#if $pipoType !== "analog"}
-  <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
-    <Select
-      label="Pattern"
-      options={patternTypes}
-      bind:value={config.pattern}
-    />
-    {#if config.pattern === "scale"}
-      <Select
-        label="Scale type"
-        options={scaleTypes}
-        bind:value={config.scaleType}
-      />
-    {:else if config.pattern === "arpeggio"}
-      <Select
-        label="Arpeggio type"
-        options={arpeggioTypes}
-        bind:value={config.scaleType}
-      />
-    {:else if config.pattern === "interval"}
-      <Select
-        label="Interval type"
-        options={intervals}
-        bind:value={config.scaleType}
-      />
-    {/if}
-  </Tooltip>
+<!-- {#if $pipoType !== "analog"} -->
+<!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
+<Select
+  class={isThresholdMode ? "disabled" : ""}
+  label="Pattern"
+  options={patternTypes}
+  bind:value={config.pattern}
+/>
+{#if config.pattern === "scale"}
+  <Select
+    class={isThresholdMode ? "disabled" : ""}
+    label="Scale type"
+    options={scaleTypes}
+    bind:value={config.scaleType}
+  />
+{:else if config.pattern === "arpeggio"}
+  <Select
+    class={isThresholdMode ? "disabled" : ""}
+    label="Arpeggio type"
+    options={arpeggioTypes}
+    bind:value={config.scaleType}
+  />
+{:else if config.pattern === "interval"}
+  <Select
+    class={isThresholdMode ? "disabled" : ""}
+    label="Interval type"
+    options={intervals}
+    bind:value={config.scaleType}
+  />
 {/if}
+<!-- </Tooltip> -->
+<!-- {/if} -->
 
 <NoteInput label="Root Note" bind:value={config.rootNote} />
 
-{#if $pipoType !== "analog"}
-  <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}>
-    <Range
-      class={isThresholdMode ? "disabled" : ""}
-      label="Number of Notes"
-      tooltip="You are in threshold mode, this value is ignored."
-      bind:value={config.nbOfNotes}
-      min={1}
-      max={50}
-    />
-  </Tooltip>
-{/if}
+<!-- {#if $pipoType !== "analog"} -->
+<!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
+<Range
+  class={isThresholdMode ? "disabled" : ""}
+  label="Number of Notes"
+  tooltip="You are in threshold mode, this value is ignored."
+  bind:value={config.nbOfNotes}
+  min={1}
+  max={50}
+/>
+<!-- </Tooltip> -->
+<!-- {/if} -->
 <Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
 
 <style>

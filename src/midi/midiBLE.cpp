@@ -6,7 +6,7 @@
 #include <hardware/BLEMIDI_ESP32_NimBLE.h>
 
 #ifdef PIPO_MOTION
-BLEMIDI_CREATE_INSTANCE("PipoMotioBLE", MidiBle);
+BLEMIDI_CREATE_INSTANCE("PipoMotionBLE", MidiBle);
 #elif PIPO_RANGE
 BLEMIDI_CREATE_INSTANCE("PipoRangeBLE", MidiBle);
 #elif PIPO_ANALOG
@@ -19,26 +19,20 @@ void midiBLESetup() {
 
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
-
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
 }
 
 void OnConnected() {
   Serial.println("Ble Connected!");
   hwui.set_led(BT_LED, 80);
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void OnDisconnected() {
   Serial.println("Ble Disconnected!");
   hwui.set_led(BT_LED, 0);
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void MidiBLEsendCC(int control, int value, int channel) {

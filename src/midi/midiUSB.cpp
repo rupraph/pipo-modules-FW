@@ -12,9 +12,8 @@ void MidiUSBSetup() {
   //     delay(1);
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
   Serial.println("Midi USB setup done");
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void MidiUSBsendCC(int control, int value, int channel) {

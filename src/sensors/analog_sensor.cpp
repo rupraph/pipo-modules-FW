@@ -1,6 +1,7 @@
 #ifdef PIPO_ANALOG
 
 #include "sensors/analog_sensor.h"
+#include <algorithm>
 
 void AnalogSensor::init() {}
 
@@ -13,12 +14,12 @@ void AnalogSensor::setup() {
   }
 
   measure_offset_all();
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
-// Todo: add function to perform individual offset or of provided list
+// Todo: offset measurement to rework for all sensors.
+// add function to perform individual offset or of provided list
 // change delay into vtaskdelay ??
 void AnalogSensor::measure_offset(const string& sensor_name) {
   int num_samples = OFFSET_CAL_SAMPLES_NB;
@@ -26,16 +27,18 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
   for (int i = 0; i < num_samples; i++) {
     if (analog_map.find(sensor_name) != analog_map.end() &&
         analog_out.get_pin_dir(sensor_name) == PinMode::IN) {
-      offset += analogReadMilliVolts(analog_map[sensor_name]);  // * 0.000806;
+      offset += analogReadMilliVolts(analog_map[sensor_name]) /
+                1000.0f;  // * 0.000806;
     } else if (touch_map.find(sensor_name) != touch_map.end()) {
       offset += touchRead(touch_map[sensor_name]);
     }
-    delay(20);
+    delay(2);
   }
   sensor_dat[sensor_name].offset =
       round((offset / num_samples) * 1000.0) / 1000.0;
 }
 
+// measure offset of touch. name is wrong
 void AnalogSensor::measure_offset_all() {
   // perform intial baseline calibration
   int num_samples = OFFSET_CAL_SAMPLES_NB;
@@ -64,12 +67,16 @@ void AnalogSensor::measure_offset_all() {
 
 void AnalogSensor::update() {
 
+  //WARNING ADC2 pins are not fully usable when wifi is on
+
   for (auto const& pair : analog_map) {
     if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
-      sensor_dat[pair.first].raw_value = analogReadMilliVolts(pair.second);
+      sensor_dat[pair.first].raw_value = std::min(
+          std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
       sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-      sensor_dat[pair.first].value =
-          sensor_dat[pair.first].raw_value;  // * 0.000806f;
+      sensor_dat[pair.first].value = filter_map[pair.first].process(
+          sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset);
+      ;  // * 0.000806f;
     }
   }
 
@@ -80,9 +87,8 @@ void AnalogSensor::update() {
 
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
 
-    sensor_dat[pair.first].value =
-        filter_map[pair.first].process(sensor_dat[pair.first].raw_value) -
-        sensor_dat[pair.first].offset;
+    sensor_dat[pair.first].value = filter_map[pair.first].process(
+        sensor_dat[pair.first].raw_value - sensor_dat[pair.first].offset);
 
     if (sensor_dat[pair.first].value > MAX_TOUCH_VALUE) {
       sensor_dat[pair.first].value = MAX_TOUCH_VALUE;

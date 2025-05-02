@@ -31,6 +31,7 @@
   import Switch from "../form/Switch.svelte";
   import Text from "../form/Text.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
+  import axios from "axios";
 
   export let config: PipoConfig<T>;
   export let name: string;
@@ -89,6 +90,16 @@
       })
     );
   }
+  let hide_on_out = false;
+  function isDisabled(
+    currentCat: string,
+    midi: MidiConfig,
+    hid: HidConfig,
+    osc: OscConfig
+  ) {
+    const cat = currentCat === "MIDI" ? midi : currentCat === "HID" ? hid : osc;
+    return !cat.enabled;
+  }
 
   // Ensures `midi`, `osc`, `hid`, etc. update when `currentAxis` changes
   $: if (configByChannel && currentAxis) {
@@ -97,6 +108,15 @@
     hid = configByChannel[currentAxis].hid;
     aschema = schema[$type as T][currentAxis];
     input = configByChannel[currentAxis].input;
+    if (aschema.cat === "Voltage") {
+      if (config.sensorconf.analogout[currentAxis].pindir) {
+        hide_on_out = true;
+      } else {
+        hide_on_out = false;
+      }
+    } else {
+      hide_on_out = false;
+    }
   }
 
   function setAxis(axis: PipoKeys[T]) {
@@ -151,25 +171,46 @@
     });
     isPaused = !isPaused;
   }
+
+  function cal_offset(axis: PipoKeys[T]) {
+    pipoio.get("/offsetcal", { params: { axis } }).then(({ data }) => {
+      config.inputs[axis].offset = data;
+    });
+  }
+
+  function offsetalltouch() {
+    pipoio.get("/offsetAllTouch").then(({ data }) => {
+      for (const [axis, offset] of Object.entries(data)) {
+        config.inputs[axis as PipoKeys[T]].offset = Number(offset);
+      }
+    });
+  }
+
+  function reset_offset(axis: PipoKeys[T]) {
+    axios({
+      method: "post",
+      url: "/resetoffset",
+      params: { axis },
+    }).then(() => console.log("DONE"));
+  }
 </script>
 
 <Collapse title="Quick settings">
-  <div style="overflow-x: auto;">
-    <QuickConfig bind:config />
-  </div>
+  <QuickConfig bind:config />
   {#if $type === "analog"}
-    <button
-      class="primary"
-      on:click={() => {
-        pipoio.post("/offsetAllTouch").then(() => {
-          console.log("zero all touch");
-        });
-      }}
-      title="Zero the touch"
+    <button class="primary" on:click={offsetalltouch} title="Zero the touch"
       >Zero All Touch
     </button>
   {/if}
-
+  {#if $type === "motion"}
+    <Tooltip
+      title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
+    >
+      <button class="primary" on:click={reboot} style="width: fit-content"
+        >Reboot to calibrate</button
+      >
+    </Tooltip>
+  {/if}
   <button
     class="primary Pause"
     on:click={pause}
@@ -224,45 +265,71 @@
         --background="var(--bg-tabs)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
-
-      <Tooltip title="Make current value the zero offset">
-        <button
-          class="primary"
-          on:click={() => cal_offset(currentAxis)}
-          style="border-radius: 2vw; cursor: pointer;"
-        >
-          Zero
-        </button>
-      </Tooltip>
+      {#if $type !== "motion"}
+        <Tooltip title="Make current value the zero offset">
+          <button
+            class="primary"
+            on:click={() => cal_offset(currentAxis)}
+            style="border-radius: 2vw; cursor: pointer;"
+          >
+            Set Zero
+          </button>
+        </Tooltip>
+        <Tooltip title="Removes the offset">
+          <button
+            class="primary"
+            on:click={() => reset_offset(currentAxis)}
+            style="border-radius: 2vw; cursor: pointer;"
+          >
+            Reset Zero
+          </button>
+        </Tooltip>
+      {/if}
     </div>
-
-    <InputConfig bind:input bind:aschema bind:currentAxis />
-    <CategoryTab active={currentCat} onClick={setCategory} />
-
-    <section class="translator-settings">
-      {#if currentCat === "MIDI"}
-        <MidiConfigForm bind:midi bind:sensormode={input.mode} />
-      {/if}
-      {#if currentCat === "HID"}
-        <HidConfigForm bind:hidMode={config.general.HidMode} bind:input {hid} />
-      {/if}
-      {#if currentCat === "OSC"}
-        <OscConfigForm bind:osc />
-      {/if}
-    </section>
-    <div style="display:flex; margin-top:1em; justify-content:right;">
-      <LoadingButton
-        onClick={submit}
-        loading={savingStatus === "loading"}
-        disabled={!isConfigValid}
-        class={savingStatus === "success"
-          ? "success"
-          : savingStatus === "error"
-            ? "error"
-            : "primary"}
-        title="Apply and save the config in pipo">Save</LoadingButton
+    {#if hide_on_out}
+      <p>This channel is currently used for output</p>
+      <p>Check beta section below</p>
+    {:else}
+      <InputConfig bind:input bind:aschema bind:currentAxis />
+      <CategoryTab active={currentCat} onClick={setCategory} />
+      <Tooltip
+        title="Disabled in Quick config"
+        followCursor={true}
+        enabled={isDisabled(currentCat, midi, hid, osc)}
       >
-    </div>
+        <section
+          class="translator-settings"
+          class:not-allowed={isDisabled(currentCat, midi, hid, osc)}
+        >
+          {#if currentCat === "MIDI"}
+            <MidiConfigForm bind:midi bind:sensormode={input.mode} />
+          {/if}
+          {#if currentCat === "HID"}
+            <HidConfigForm
+              bind:hidMode={config.general.HidMode}
+              bind:input
+              {hid}
+            />
+          {/if}
+          {#if currentCat === "OSC"}
+            <OscConfigForm bind:osc />
+          {/if}
+        </section>
+      </Tooltip>
+
+      <div style="display:flex; margin-top:1em; justify-content:right;">
+        <LoadingButton
+          onClick={submit}
+          loading={savingStatus === "loading"}
+          class={savingStatus === "success"
+            ? "success"
+            : savingStatus === "error"
+              ? "error"
+              : "primary"}
+          title="Apply and save the config in pipo">Save</LoadingButton
+        >
+      </div>
+    {/if}
   {/if}
 </Collapse>
 <hr class="separator" />

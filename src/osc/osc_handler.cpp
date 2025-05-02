@@ -13,9 +13,8 @@ void OSC_handler::setup() {
   //   // Serial.print("on port:");
   //   // Serial.println(String(out_port));
   // }
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap("OSC: End setup");
 }
 
 // Todo pass arguments there

@@ -91,26 +91,26 @@ void Engine::midi_processor(string axis_name, float sensor_val,
 
       // sensor uses continuous mode
       if (input_sensor.get_mode(axis_name) == 0) {
-        if (input_sensor.is_within_range(axis_name)) {
-          // Todo: hires not tested
-          if (midi_translator.get_hires()) {
-            uint16_t cc_val =
-                max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
-                                                      sensor_max, 1),
-                           16383));
+        // if (input_sensor.is_within_range(axis_name)) {
+        // Todo: hires not tested
+        if (midi_translator.get_hires()) {
+          uint16_t cc_val =
+              max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
+                                                    sensor_max, 1),
+                         16383));
 
-            midiio.sendControlChange(cc_nb, cc_val, channel, true);
-          } else {
-            uint8_t cc_val =
-                max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
-                                                      sensor_max, 0),
-                           127));
+          midiio.sendControlChange(cc_nb, cc_val, channel, true);
+        } else {
+          uint8_t cc_val =
+              max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
+                                                    sensor_max, 0),
+                         127));
 
-            // Serial.println(cc_val);
-            midiio.sendControlChange(cc_nb, cc_val, channel, false);
-            //Serial.println(sensor_min);
-          }
+          // Serial.println(cc_val);
+          midiio.sendControlChange(cc_nb, cc_val, channel, false);
+          //Serial.println(sensor_min);
         }
+        // }
       } else  // sensor uses trigger mode
       {
 
@@ -272,14 +272,14 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
     osc_val_prev[axis_name] = osc_val[axis_name];
     if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
 
-      if (input_sensor.is_within_range(axis_name)) {
-        osc_val[axis_name] = round_to(
-            osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
+      // if (input_sensor.is_within_range(axis_name)) {
+      osc_val[axis_name] = round_to(
+          osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
 
-        if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.send_osc_message(address, osc_val[axis_name]);
-        }
+      if (osc_val[axis_name] != osc_val_prev[axis_name]) {
+        osc.send_osc_message(address, osc_val[axis_name]);
       }
+      // }
     } else  // sensor uses trigger mode
     {
       if (input_sensor.get_bool_value(axis_name)) {

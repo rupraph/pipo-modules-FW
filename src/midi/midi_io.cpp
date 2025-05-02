@@ -3,12 +3,24 @@
 midi_io midiio;
 
 void midi_io::setup() {
+  log_i("midi_io setup started");
+
+  if (DEBUG_HEAP)
+    pipoDebugHeap("Start setup midi_io");
 #ifndef DISABLE_USB_COMM
+  log_i("midiUSBSetup");
   MidiUSBSetup();
 #endif
+
+  log_i("midiBLESetup");
+  if (DEBUG_HEAP)
+    pipoDebugHeap("MidiBLESetup: start");
 #ifdef INCLUDE_BLE
   midiBLESetup();
 #endif
+  log_i("midiBLESetup done");
+  if (DEBUG_HEAP)
+    pipoDebugHeap("MidiBLESetup: end");
   // midiRtpSetup();
 }
 // if sustainmil is 0 = infinite sustain from sustain manager

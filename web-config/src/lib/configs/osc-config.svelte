@@ -3,7 +3,6 @@
   import Text from "../form/Text.svelte";
   import Range from "../form/Range.svelte";
   import Checkbox from "../form/Checkbox.svelte";
-  import DisabledWarning from "./disabled-warning.svelte";
   export let osc: OscConfig;
 </script>
 
@@ -18,4 +17,3 @@
     max={Infinity}
   />
 {/if}
-<DisabledWarning enabled={osc.enabled} />

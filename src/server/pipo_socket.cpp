@@ -29,6 +29,8 @@ void PipoSocket::setup() {
       // client->close(true);
     } else if (type == WS_EVT_PONG) {
     } else if (type == WS_EVT_DATA) {
+      if (DEBUG_HEAP)
+        pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
 
       if (info->index == 0 && !info->final) {
@@ -52,6 +54,8 @@ void PipoSocket::setup() {
         Serial.println("Error: Message exceeds buffer size");
         inMsgL = 0;
       }
+      if (DEBUG_HEAP)
+        pipoDebugHeap("WS : End Data");
     }
   });
 }

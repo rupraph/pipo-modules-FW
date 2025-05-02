@@ -31,9 +31,8 @@ void RangeSensor::setup() {
   lp_filter.set_cutoffFrequency(18.0);
   ma_filter = MovingAverageFilter(3);
   km_filter = KalmanFilter(1, 1);
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void RangeSensor::update() {
@@ -59,7 +58,7 @@ void RangeSensor::update() {
             VL53L4CX_RANGESTATUS_RANGE_VALID) {
       if (!hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-        sensor_dat["dist"].value = sensor_dat["dist"].lmax;
+        sensor_dat["dist"].value = abs_max;
       }
 
     }
@@ -71,8 +70,8 @@ void RangeSensor::update() {
            sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
           !hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-        sensor_dat["dist"].value =
-            ma_filter.process(sensor_dat["dist"].raw_value);
+        sensor_dat["dist"].value = ma_filter.process(
+            sensor_dat["dist"].raw_value - sensor_dat["dist"].offset);
       }
 
       //  ma_filter.process(lp_filter.process(dist));
@@ -88,6 +87,14 @@ void RangeSensor::update() {
   }
   end_duration();
   measured_loop_duration();
+}
+
+void RangeSensor::measure_offset(const string& axis_name) {
+  sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
+  Serial.print("offset for ");
+  Serial.print(axis_name.c_str());
+  Serial.print(" : ");
+  Serial.println(sensor_dat[axis_name].offset);
 }
 
 void RangeSensor::set_sensor_config(JsonObject config, bool debug) {

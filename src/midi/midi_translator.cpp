@@ -106,20 +106,41 @@ bool MidiTranslator::is_a_note(string noteName) {
 vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
                                                 string pattern,
                                                 string scaleType) {
-
-  vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
   vector<int> expandedScale;
+  // expand over octaves for arpeggios and scales
+  if (pattern != "interval") {
+    vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
 
-  int baseScaleSize = scale.size();
-  int baseNoteIndex = 0;
-  int expandedNote = scale[baseNoteIndex];
+    int baseScaleSize = scale.size();
+    int baseNoteIndex = 0;
+    int expandedNote = scale[baseNoteIndex];
 
-  for (int i = 0; i < nb_notes; i++) {
-    expandedScale.push_back(expandedNote);
-    baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
-    expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    for (int i = 0; i < nb_notes; i++) {
+      expandedScale.push_back(expandedNote);
+      baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
+      expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    }
+  } else {
+    // build intervals
+    int expandedNote = rootNote;
+    for (int i = 0; i < nb_notes; i++) {
+
+      if (intervals.find(scaleType) != intervals.end()) {
+        expandedScale.push_back(expandedNote);
+        expandedNote += intervals.at(scaleType)[1];
+        Serial.print("Note: ");
+        Serial.println(expandedNote);
+      } else {
+        Serial.println("Invalid interval type");
+      }
+      Serial.print("Interval: ");
+      for (int i = 0; i < expandedScale.size(); i++) {
+        Serial.print(expandedScale[i]);
+        Serial.print("-");
+      }
+      Serial.println();
+    }
   }
-
   return expandedScale;
 }
 
@@ -147,18 +168,6 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       return scale;
     } else {
       Serial.println("Invalid arpeggio type");
-      return {};
-    }
-  } else if (pattern == "interval") {
-    auto it = intervals.find(scaleType);
-    if (it != intervals.end()) {
-      vector<int> scale = it->second;
-      for (int i = 0; i < scale.size(); i++) {
-        scale[i] += rootNote;
-      }
-      return scale;
-    } else {
-      Serial.println("Invalid interval type");
       return {};
     }
   } else {
@@ -334,3 +343,53 @@ bool MidiTranslator::is_enabled() {
 void MidiTranslator::set_enabled(bool e) {
   enabled = e;
 }
+
+// Notes scale variables
+// Todo: change architecture and add chords
+// the format is inherited from a moment where we would put custom scales in these lists. now frozen, should be constant with smaller data types.
+const unordered_map<string, vector<int>> MidiTranslator::scales = {
+    {"major", {0, 2, 4, 5, 7, 9, 11}},
+    {"minor", {0, 2, 3, 5, 7, 8, 10}},
+    {"minor pentatonic", {0, 3, 5, 6, 10}},
+    {"major pentatonic", {0, 2, 4, 7, 9}},
+    {"blues minor", {0, 3, 5, 6, 7, 10}},
+    {"blues major", {0, 2, 3, 5, 6, 7}},
+    {"chromatic", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
+    {"whole tone", {0, 2, 4, 6, 8, 10}},
+    {"octatonic", {0, 1, 3, 4, 6, 7, 9, 10}},
+    {"diatonic", {0, 2, 4, 5, 7, 9, 11}},
+    {"harmonic minor", {0, 2, 3, 5, 7, 8, 11}},
+    {"melodic minor", {0, 2, 3, 5, 7, 9, 11}},
+    {"dorian", {0, 2, 3, 5, 7, 9, 10}},
+    {"phrygian", {0, 1, 3, 5, 7, 8, 10}},
+    {"lydian", {0, 2, 4, 6, 7, 9, 11}},
+    {"mixolydian", {0, 2, 4, 5, 7, 9, 10}},
+    {"locrian", {0, 1, 3, 5, 6, 8, 10}},
+    {"ionian", {0, 2, 4, 5, 7, 9, 11}},
+    {"aeolian", {0, 2, 3, 5, 7, 8, 10}}
+    //Turkish ??
+};
+
+const unordered_map<string, vector<int>> MidiTranslator::arpegios = {
+    {"major", {0, 4, 7}},
+    {"minor", {0, 3, 7}},
+    {"diminished", {0, 3, 6}},
+    {"augmented", {0, 4, 8}},
+    {"suspended", {0, 5, 7}},
+    {"dominant", {0, 4, 7, 10}},
+    {"major7", {0, 4, 7, 11}},
+    {"minor7", {0, 3, 7, 10}},
+    {"diminished7", {0, 3, 6, 9}},
+    {"augmented7", {0, 4, 8, 10}},
+    {"suspended7", {0, 5, 7, 10}},
+    {"dominant7", {0, 4, 7, 10}},
+    {"major9", {0, 4, 7, 11, 14}},
+    {"minor9", {0, 3, 7, 10, 14}},
+    {"diminished9", {0, 3, 6, 9, 13}},
+    {"augmented9", {0, 4, 8, 10, 14}}};
+
+const unordered_map<string, vector<int>> MidiTranslator::intervals = {
+    {"second", {0, 2}},    {"third", {0, 4}},    {"fourth", {0, 5}},
+    {"fifth", {0, 7}},     {"sixth", {0, 9}},    {"seventh", {0, 11}},
+    {"octave", {0, 12}},   {"ninth", {0, 14}},   {"tenth", {0, 16}},
+    {"eleventh", {0, 17}}, {"twelveth", {0, 19}}};

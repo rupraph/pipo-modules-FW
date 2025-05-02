@@ -8,6 +8,7 @@
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "build": "vite build",
+    "postbuild": "node scripts/postbuild.js",
     "type-check": "svelte-check --threshold error --ignore src/*",
     "upload": "./scripts/upload.sh",
     "check": "svelte-check --tsconfig ./tsconfig.json"
@@ -22,6 +23,7 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "vite": "^5.4.11",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-mock-server": "^1.2.0"
   },
   "dependencies": {

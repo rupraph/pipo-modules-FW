@@ -88,10 +88,11 @@ class HwUi {
   bool is_pulsing(int led_name);
 
   void measure_battery();
+  void measure_battery_step();
   void monitor_battery();
 
   // getter/setter
-  int get_bat_voltage() { return bat_voltage; }
+  int get_bat_voltage();
 
  private:
   int bat_sampling[BAT_SAMPLE_SIZE];

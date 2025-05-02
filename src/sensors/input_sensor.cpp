@@ -28,6 +28,16 @@ void Sensor::measure_offset(const std::string& sensor_name) {
   Serial.println("default implementation does not measure offset");
 }
 
+void Sensor::reset_offset(const std::string& input) {
+  if (sensor_dat.find(input) != sensor_dat.end()) {
+    sensor_dat[input].offset = 0;
+    Serial.print("reset offset for ");
+    Serial.println(input.c_str());
+  } else {
+    Serial.println("error: Axis not found");
+  }
+}
+
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
     if (sensor_dat[axis].value > sensor_dat[axis].lmin &&
@@ -198,9 +208,11 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
 void Sensor::monitor_axis(const std::string& axis) {
   // iterate through sensor_dat, set the ws_monitor flag to true for the
   // specified axis and false for all others
+
   for (auto& dat : sensor_dat) {
     string axis_name = dat.first;
     if (axis_name == axis) {
+      log_i("set monitor_axis: %s", axis.c_str());
       dat.second.ws_monitor = true;
     } else {
       dat.second.ws_monitor = false;

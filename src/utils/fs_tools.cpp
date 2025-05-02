@@ -17,9 +17,8 @@ void init_filesystem() {
   // listDir(LittleFS, "/webpage", 2);
   Serial.print("Used filesystem bytes: ");
   Serial.println(LittleFS.usedBytes());
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap("End setup filesystem");
 }
 
 void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {

@@ -2,29 +2,33 @@
   import { teleport } from "./index";
   export let title = "";
   export let enabled = true;
+  export let followCursor = false;
   let isHovered = false;
   let x: number;
   let y: number;
 
-  function mouseOver(event: MouseEvent) {
+  function refresh(event: MouseEvent) {
     isHovered = true;
+    if (followCursor) {
+      x = event.pageX + 5;
+      y = event.pageY + 5;
+      return;
+    }
     const {
       x: bx,
       y: by,
       height,
     } = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
+
     x = bx;
     y = by + height + 5;
   }
+  function mouseOver(event: MouseEvent) {
+    isHovered = true;
+    refresh(event);
+  }
   function mouseMove(event: MouseEvent) {
-    const {
-      x: bx,
-      y: by,
-      width,
-      height,
-    } = (event.currentTarget as HTMLDivElement).getBoundingClientRect();
-    x = bx;
-    y = by + height + 5;
+    refresh(event);
   }
   function mouseLeave() {
     isHovered = false;

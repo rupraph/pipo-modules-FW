@@ -15,9 +15,8 @@ void MotionSensor::init() {
 }
 
 void MotionSensor::setup() {
-#ifdef DEBUG_HEAP
-  pipoDebugHeap();
-#endif
+  if (DEBUG_HEAP)
+    pipoDebugHeap();
 }
 
 void MotionSensor::update() {
@@ -47,12 +46,12 @@ void MotionSensor::update() {
     icm20948.readMagData(&sensor_dat["magX"].raw_value,
                          &sensor_dat["magY"].raw_value,
                          &sensor_dat["magZ"].raw_value);
-    sensor_dat["magX"].value =
-        filter_map["magX"].process(sensor_dat["magX"].raw_value);
-    sensor_dat["magY"].value =
-        filter_map["magY"].process(sensor_dat["magY"].raw_value);
-    sensor_dat["magZ"].value =
-        filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
+    sensor_dat["magX"].value = sensor_dat["magX"].raw_value;
+    //     filter_map["magX"].process(sensor_dat["magX"].raw_value);
+    sensor_dat["magY"].value = sensor_dat["magX"].raw_value;
+    //     filter_map["magY"].process(sensor_dat["magX"].raw_value);
+    sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
+    //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
   }
 
@@ -122,8 +121,8 @@ void MotionSensor::calc_euler_angles() {
   double cosy_cosp = +1.0 - 2.0 * (quat_y * quat_y + quat_z * quat_z);
   sensor_dat["yaw"].raw_value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
 
-  sensor_dat["yaw"].value =
-      filter_map["yaw"].process(sensor_dat["yaw"].raw_value);
+  sensor_dat["yaw"].value = sensor_dat["yaw"].raw_value;
+  //     filter_map["yaw"].process(sensor_dat["yaw"].raw_value);
 
   // pitch (y-axis rotation)
   double sinp = +2.0 * (quat_w * quat_y - quat_z * quat_x);
@@ -133,26 +132,26 @@ void MotionSensor::calc_euler_angles() {
   else
     sensor_dat["pitch"].raw_value = asin(sinp) * 180.0 / PI;
 
-  sensor_dat["pitch"].value =
-      filter_map["pitch"].process(sensor_dat["pitch"].raw_value);
+  sensor_dat["pitch"].value = sensor_dat["pitch"].raw_value;
+  //     filter_map["pitch"].process(sensor_dat["pitch"].raw_value);
 
   // roll (x-axis rotation)
   double sinr_cosp = +2.0 * (quat_w * quat_x + quat_y * quat_z);
   double cosr_cosp = +1.0 - 2.0 * (quat_x * quat_x + quat_y * quat_y);
   sensor_dat["roll"].raw_value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
 
-  sensor_dat["roll"].value =
-      filter_map["roll"].process(sensor_dat["roll"].raw_value);
+  sensor_dat["roll"].value = sensor_dat["roll"].raw_value;
+  //     filter_map["roll"].process(sensor_dat["roll"].raw_value);
 }
 
 void MotionSensor::convert_accell() {
   //no conversion here
-  sensor_dat["accX"].value =
-      filter_map["accX"].process(sensor_dat["accX"].raw_value);
-  sensor_dat["accY"].value =
-      filter_map["accY"].process(sensor_dat["accY"].raw_value);
-  sensor_dat["accZ"].value =
-      filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
+  sensor_dat["accX"].value = sensor_dat["accX"].raw_value;
+  // filter_map["accX"].process(sensor_dat["accX"].raw_value);
+  sensor_dat["accY"].value = sensor_dat["accY"].raw_value;
+  // filter_map["accY"].process(sensor_dat["accY"].raw_value);
+  sensor_dat["accZ"].value = sensor_dat["accZ"].raw_value;
+  // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
 void MotionSensor::measure_offset(const string& axis_name) {
