@@ -1,6 +1,10 @@
 import type { Schema } from "./types";
 
 export const schema: Schema = {
+  name: {
+    min: 4,
+    max: 254,
+  },
   motion: {
     accX: {
       label: "X-axis acceleration",
@@ -56,32 +60,32 @@ export const schema: Schema = {
       step: 1,
       index: 0,
     },
-    magX:{
+    magX: {
       label: "X-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 6
+      index: 6,
     },
-    magY:{
+    magY: {
       label: "Y-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 7
+      index: 7,
     },
-    magZ:{
+    magZ: {
       label: "Z-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 8
+      index: 8,
     },
   },
   range: {

@@ -2,7 +2,7 @@ import { pipoio } from "../pipoio";
 import type { PipoTypes } from "../types";
 import { writable } from "svelte/store";
 
-export const pipoType = writable<PipoTypes>("unknown");
+export * from "./config";
 export const ip = writable<string>("unknown");
 export const isLive = writable<boolean>(false);
 
