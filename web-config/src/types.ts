@@ -76,7 +76,16 @@ export type HidConfig = {
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
 export type PipoKeys = {
-  motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw"| "magX" | "magY" | "magZ";
+  motion:
+    | "accX"
+    | "accY"
+    | "accZ"
+    | "pitch"
+    | "roll"
+    | "yaw"
+    | "magX"
+    | "magY"
+    | "magZ";
   range: "dist";
   analog:
     | "A01"
@@ -105,10 +114,16 @@ export type AxisSchema = {
   step: number;
   index: number;
 };
+export type StringSchema = {
+  min: number;
+  max: number;
+};
 export type Schema = {
   [T in PipoTypes]: {
     [Key in PipoKeys[T]]: AxisSchema;
   };
+} & {
+  name: StringSchema;
 };
 
 export type SensorSettings = {
@@ -119,10 +134,9 @@ export type SensorSettings = {
     hold_mode: boolean;
   };
   analog: {
-    analogout: {[Key in AnalogOutKeys]: AnalogOut};
+    analogout: { [Key in AnalogOutKeys]: AnalogOut };
   };
-  unknown: {
-  };
+  unknown: {};
 };
 
 export type AnalogOut = {
@@ -130,8 +144,7 @@ export type AnalogOut = {
   outmode: number;
   lmax: number;
   lmin: number;
-}
-
+};
 
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
@@ -147,8 +160,7 @@ export type PipoConfig<T extends PipoTypes> = {
     };
     "engine-special"?: {
       quat?: QuatConfig;
-    }
-
+    };
   };
   general: GeneralConfig;
   inputs: {
@@ -198,6 +210,4 @@ export type PipoInfo = {
 export type QuatConfig = {
   enabled: boolean;
   osc_addr: string;
-}
-
-
+};
