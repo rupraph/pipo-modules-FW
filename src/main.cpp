@@ -98,6 +98,11 @@ void debug_monitor(void* pvParameters) {
     // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
     if (DEBUG_HEAP) {
       pipoDebugHeap("now");
+
+      // check https://github.com/mathieucarbou/MycilaTaskMonitor
+      // const UBaseType_t size = uxTaskGetStackHighWaterMark(sensorTaskHandle);
+      // Serial.print("size: ");
+      // Serial.println(size);
     }
     // Serial.print("Sensor task duration: ");
     // Serial.print(sensor_task_duration);
@@ -131,7 +136,9 @@ void setup() {
   Serial.begin(115200);
 
   Serial.setDebugOutput(true);
-  print_reset_reason();
+
+  delay(2000);
+
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup");
 
@@ -155,7 +162,7 @@ void setup() {
 #ifdef PIPO_ANALOG
   analog_out.setup();
 #endif
-
+  print_reset_reason();
   /////// Init filesystem
   init_filesystem();
 

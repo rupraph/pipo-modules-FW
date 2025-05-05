@@ -5,6 +5,8 @@
 #include <BLEMIDI_Transport.h>
 #include <hardware/BLEMIDI_ESP32_NimBLE.h>
 
+// Newer BLE-MIDI lib allows for custom settings (and choosing lower min connection interval)
+
 #ifdef PIPO_MOTION
 BLEMIDI_CREATE_INSTANCE("PipoMotionBLE", MidiBle);
 #elif PIPO_RANGE
@@ -14,9 +16,7 @@ BLEMIDI_CREATE_INSTANCE("PipoAnalogBLE", MidiBle);
 #endif
 
 void midiBLESetup() {
-
   MidiBle.begin();
-
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
 }
