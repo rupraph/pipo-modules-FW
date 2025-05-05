@@ -96,12 +96,13 @@ void debug_monitor(void* pvParameters) {
     // input_sensor.teleplot_data("magY");
     // input_sensor.teleplot_data("magZ");
     // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
-    if (DEBUG_HEAP)
-      // pipoDebugHeap();
-      Serial.print("Sensor task duration: ");
-    Serial.print(sensor_task_duration);
-    Serial.print(" ms, interval: ");
-    Serial.println(sensor_task_interval);
+    if (DEBUG_HEAP) {
+      pipoDebugHeap("now");
+    }
+    // Serial.print("Sensor task duration: ");
+    // Serial.print(sensor_task_duration);
+    // Serial.print(" ms, interval: ");
+    // Serial.println(sensor_task_interval);
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
@@ -233,8 +234,9 @@ void setup() {
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 2048, NULL, 1,
-                          &debugMonitorTaskHandle, 0);
+  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
+                          &debugMonitorTaskHandle,
+                          0);  // for using debugheap, 2048 crashes...
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
