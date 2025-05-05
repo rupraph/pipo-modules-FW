@@ -40,7 +40,7 @@ void sensorTask(void* pvParameters) {
 #ifdef PIPO_ANALOG
     analog_out.update();  // should be in seperate task
 #endif
-    // vTaskDelay(pdMS_TO_TICKS(2));
+    vTaskDelay(pdMS_TO_TICKS(1));
   }
 }
 
@@ -234,9 +234,9 @@ void setup() {
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
                           0);
-  xTaskCreatePinnedToCore(debug_monitor, "debug_monitor", 4096, NULL, 1,
-                          &debugMonitorTaskHandle,
-                          0);  // for using debugheap, 2048 crashes...
+  xTaskCreatePinnedToCore(
+      debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
+      1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
