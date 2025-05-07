@@ -8,7 +8,7 @@
 #define PIPO_TYPE "unknown"
 #endif
 
-#define HW_VERSION 10  // 1.0 or 1.1
+#define HW_VERSION 11  // 1.0 or 1.1
 
 // DEBUG FLAGS
 #define DEBUG_HEAP true
@@ -63,7 +63,7 @@
 #define NO_BOOT_VOLTAGE 3100  // in mV
 //for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
 #elif HW_VERSION >= 11
-#define LOW_BAT_VOLTAGE 3300  // in mV //for HW rev 1.1
+#define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.1
 #define NO_BOOT_VOLTAGE 3150  // in mV
 #define CHARGING_LEVEL 4300   // in mV
 #define SHUTDOWN_LEVEL 3100   // in mV
@@ -72,9 +72,9 @@
 #define BAT_SAMPLE_SIZE 20
 #if HW_VERSION == 10
 #define BATT_COEF 2.0  //2.56
-// battery drops hard after 3.3v -> 0% // max at 4.1. // perc = volt * 125 -412.5
+// battery drops hard after 3.3v -> 0% // max at 4.1. // =>percentage = volt * 125 -412.5
 #elif HW_VERSION >= 11
-#define BATT_COEF 0.7015  // leads 2.95 @4.2
+#define BATT_COEF 1.44  //1.436  // divider is 0.7015  // leads 2.95 @4.2
 #endif
 
 //analog sensor specific definitions

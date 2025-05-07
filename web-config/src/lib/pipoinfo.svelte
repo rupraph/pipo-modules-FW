@@ -44,12 +44,13 @@
   <span>Battery</span>
   {#if batt === null}
     <span>Waiting for Pipo to respond...</span>
+  {:else if batt >= 4.3}
+    <span> Plugged</span>
   {:else}
-    <span>{batt} V</span>
-    <span><bold>Batt Voltage: </bold>{batt} V</span>
-    <span
-      ><bold>Batt Level: </bold>{capValue(batt * 125 - 412.5, 0, 100)} %</span
-    >
+    <span>{batt.toFixed(1)} V</span>
+    <!-- <span><bold>Batt Voltage: </bold>{batt} V</span> -->
+    <span>Batt Level:</span>
+    <span>{capValue(batt * 125 - 412.5, 0, 100).toFixed(1)} %</span>
   {/if}
 </div>
 
