@@ -137,8 +137,6 @@ void setup() {
 
   Serial.setDebugOutput(true);
 
-  delay(2000);
-
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup");
 
@@ -162,7 +160,7 @@ void setup() {
 #ifdef PIPO_ANALOG
   analog_out.setup();
 #endif
-  print_reset_reason();
+
   /////// Init filesystem
   init_filesystem();
 
@@ -183,7 +181,8 @@ void setup() {
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif
-
+  delay(1000);
+  print_reset_reason();
   /////// Init wifi
   osc.setup();
   wifi.setup();  // takes 50k heap

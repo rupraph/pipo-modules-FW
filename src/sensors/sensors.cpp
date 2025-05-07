@@ -6,8 +6,8 @@ MotionSensor input_sensor;
 #endif
 
 #ifdef PIPO_RANGE
-#include "sensors/range_sensor.h"
-RangeSensor input_sensor;
+#include "sensors/pipo_range_sensor.h"
+PipoRangeSensor input_sensor;
 #endif
 
 #ifdef PIPO_ANALOG

@@ -1,14 +1,15 @@
 #ifdef PIPO_RANGE
 
-#include "sensors/range_sensor.h"
+#include "sensors/pipo_range_sensor.h"
 
-void RangeSensor::init() {
+void PipoRangeSensor::init() {
 #if defined(PROTO_ATOM)
   Wire.begin(2, 1, 400000);
 #else
   Wire.begin(17, 18, 400000);
 #endif
 
+#if HW_REV == 10
   vl53l4cx.setI2cDevice(&Wire);
   vl53l4cx.setXShutPin(15);
   vl53l4cx.begin();
@@ -19,11 +20,30 @@ void RangeSensor::init() {
   } else {
     Serial.println("VL53L4CX sensor not found or not initialized");
   }
+#elif HW_REV >= 11
+  vl53l1 = new VL53L1(&Wire, 15);
+  vl53l1->begin();
+  vl53l1->VL53L1_Off();
+  VL53L1_Error initstatus = vl53l1->InitSensor(0x52);
+  // delay(10);
+  if (initstatus == VL53L1_ERROR_NONE) {
+    Serial.println("VL53L1 sensor found and initialized");
+  } else {
+    Serial.println("VL53L1 sensor not found or not initialized");
+  }
+#endif
 }
 
-void RangeSensor::setup() {
+void PipoRangeSensor::setup() {
+#if HW_REV == 10
   vl53l4cx.VL53L4CX_StartMeasurement();
   vl53l4cx.VL53L4CX_SetMeasurementTimingBudgetMicroSeconds(20000);
+#elif HW_REV >= 11
+  vl53l1->VL53L1_StartMeasurement();
+  vl53l1->VL53L1_SetPresetMode(VL53L1_PRESETMODE_RANGING);
+  vl53l1->VL53L1_ClearInterruptAndStartMeasurement();
+#endif
+
   NewDataReady = 0;
   no_of_object_found = 0;
 
@@ -35,14 +55,22 @@ void RangeSensor::setup() {
     pipoDebugHeap();
 }
 
-void RangeSensor::update() {
+void PipoRangeSensor::update() {
   start_duration();
   int j;
 
+#if HW_REV == 10
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+#elif HW_REV >= 11
+  status = vl53l1->VL53L1_GetMeasurementDataReady(&NewDataReady);
+#endif
 
   if ((!status) && (NewDataReady != 0)) {
+#if HW_REV == 10
     status = vl53l4cx.VL53L4CX_GetMultiRangingData(pMultiRangingData);
+#elif HW_REV >= 11
+    status = vl53l1->VL53L1_GetMultiRangingData(pMultiRangingData);
+#endif
     // Todo: add ambient light capture
     // float ambiant = pMultiRangingData->AmbiantPerSpad;
     no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
@@ -53,9 +81,17 @@ void RangeSensor::update() {
 
     // process result
     // when out of range
-    if (sensor_dat["dist"].raw_value < 0 ||
-        !pMultiRangingData->RangeData[0].RangeStatus ==
-            VL53L4CX_RANGESTATUS_RANGE_VALID) {
+    int8_t range_status =
+#if HW_REV == 10
+        range_status = pMultiRangingData->RangeData[0].RangeStatus ==
+                       VL53L4CX_RANGESTATUS_RANGE_VALID;
+#elif HW_REV >= 11
+        range_status = pMultiRangingData->RangeData[0].RangeStatus ==
+                       VL53L1_RANGESTATUS_RANGE_VALID;
+
+#endif
+
+    if (sensor_dat["dist"].raw_value < 0 || !range_status) {
       if (!hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
@@ -82,14 +118,18 @@ void RangeSensor::update() {
       process_sensor_triggers();
     }
     if (status == 0) {
+#if HW_REV == 10
       status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();
+#elif HW_REV >= 11
+      status = vl53l1->VL53L1_ClearInterruptAndStartMeasurement();
+#endif
     }
   }
   end_duration();
   measured_loop_duration();
 }
 
-void RangeSensor::measure_offset(const string& axis_name) {
+void PipoRangeSensor::measure_offset(const string& axis_name) {
   sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
   Serial.print("offset for ");
   Serial.print(axis_name.c_str());
@@ -97,7 +137,7 @@ void RangeSensor::measure_offset(const string& axis_name) {
   Serial.println(sensor_dat[axis_name].offset);
 }
 
-void RangeSensor::set_sensor_config(JsonObject config, bool debug) {
+void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
     Serial.println("set_sensor_config");
   }
@@ -110,7 +150,7 @@ void RangeSensor::set_sensor_config(JsonObject config, bool debug) {
   }
 }
 
-JsonDocument RangeSensor::get_sensor_config(bool debug) {
+JsonDocument PipoRangeSensor::get_sensor_config(bool debug) {
   JsonDocument config;
   config["hold_mode"] = hold_mode;
   return config;
