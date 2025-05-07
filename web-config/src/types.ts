@@ -94,16 +94,20 @@ export type PipoKeys = {
     | "A04"
     | "A05"
     | "A06"
+    | "A07"
+    | "A08"
     | "T1"
     | "T2"
     | "T3"
     | "T4"
     | "T5"
-    | "T6";
+    | "T6"
+    | "T7"
+    | "T8";
   unknown: "";
 };
 
-export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06";
+export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06"|"A07"|"A08";
 
 export type AxisSchema = {
   label: string;

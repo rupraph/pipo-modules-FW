@@ -38,12 +38,14 @@
 #define MODE_SW 18
 #define PP_SW 7
 #elif HW_REV >= 11
-#define RGB_LED 18
-#define WIFI_LED_POS 4
-#define BT_LED_POS 3
-#define SEND_LED_POS 2
-#define LOW_BAT_LED_POS 1
 #define PP_SW 21
+#define RGB_LED 18
+// RGB LED positions, not pins anymore
+#define WIFI_LED 4
+#define BT_LED 3
+#define SEND_LED 2
+#define LOW_BAT_LED 1
+
 #endif
 
 #endif

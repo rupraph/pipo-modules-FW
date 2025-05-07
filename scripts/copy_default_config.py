@@ -4,7 +4,7 @@ import os
 Import("env")
 pipotype = env["PIOENV"]
 
-toCopy = ["analog", "motion", "range"]
+toCopy = ["analog", "analog2", "motion", "range"]
 
 
 def copy():

@@ -12,7 +12,7 @@ void HwUi::init() {
   pinMode(SEND_LED, OUTPUT);
   pinMode(LOW_BAT_LED, OUTPUT);
 
-  pinMode(MODE_SW, INPUT);
+  // pinMode(MODE_SW, INPUT);
   pinMode(BAT_VOLTAGE, INPUT);
   pinMode(PP_SW, INPUT);
 
@@ -63,10 +63,10 @@ void HwUi::update() {
  * @brief sets brightness of led
  */
 void HwUi::set_led(int led_name, int value) {
-#ifdef PIPO_ANALOG
-  soft_pwm_table[led_name].brightness = value;
-#else
+#ifdef defined(PIPO_MOTION) || defined(PIPO_RANGE)
   ledcWrite(led_channel_map[led_name], value);
+#elif defined(PIPO_ANALOG) && HW_REV == 10
+  soft_pwm_table[led_name].brightness = value;
 #endif
 }
 
