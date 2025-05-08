@@ -63,7 +63,7 @@ void HwUi::update() {
  * @brief sets brightness of led
  */
 void HwUi::set_led(int led_name, int value) {
-#ifdef defined(PIPO_MOTION) || defined(PIPO_RANGE)
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
   ledcWrite(led_channel_map[led_name], value);
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;
