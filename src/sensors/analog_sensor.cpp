@@ -7,7 +7,7 @@ void AnalogSensor::init() {}
 
 void AnalogSensor::setup() {
   for (auto const& pair : analog_map) {
-    pinMode(pair.second, INPUT_PULLDOWN);
+    pinMode(pair.second, INPUT);
   }
   for (auto const& pair : touch_map) {
     pinMode(pair.second, INPUT);

@@ -15,7 +15,11 @@ using namespace std;
 // Trying if enum are more practical than unordered in this case
 enum PinMode { IN, OUT };
 enum OutputMode { PWM, SERVO };
+#if HW_REV == 10
 enum AnalogOutput { A01, A02, A03, A04, A05, A06 };
+#elif HW_REV >= 11
+enum AnalogOutput { A01, A02, A03, A04, A05, A06, A07, A08 };
+#endif
 
 //will not use for first tests
 struct OutputData {
@@ -46,10 +50,18 @@ class AnalogOut {
 
   int get_index_from_name(string name);
 
+#if HW_REV == 10
   OutputData output_map[6];
+#elif HW_REV >= 11
+  OutputData output_map[8];
+#endif
 
  private:
+#if HW_REV == 10
   int pin_map[6] = {16, 15, 14, 13, 12, 11};
+#elif HW_REV >= 11
+  int pin_map[8] = {6, 5, 4, 3, 16, 15, 2, 1};
+#endif
 };
 
 extern AnalogOut analog_out;

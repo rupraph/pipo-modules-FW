@@ -170,8 +170,8 @@ void PipoSocket::loop() {
     float sensor_val = input_sensor.get_value(axis_name);
     bool sensor_bool = input_sensor.get_bool_value(axis_name);
 
-    if (!input_sensor.test_outside_deadzone(axis_name))
-      continue;
+    // if (!input_sensor.test_outside_deadzone(axis_name))
+    //   continue;
 
     size_t remaining = outMaxLen - strlen(outMsg) - 1;
     snprintf(outMsg + strlen(outMsg), remaining, "\nsensor,%s,%.2f,%d",
