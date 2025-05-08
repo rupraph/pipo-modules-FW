@@ -104,10 +104,10 @@ void debug_monitor(void* pvParameters) {
       // Serial.print("size: ");
       // Serial.println(size);
     }
-    // Serial.print("Sensor task duration: ");
-    // Serial.print(sensor_task_duration);
-    // Serial.print(" ms, interval: ");
-    // Serial.println(sensor_task_interval);
+    Serial.print("Sensor task duration: ");
+    Serial.print(sensor_task_duration);
+    Serial.print(" ms, interval: ");
+    Serial.println(sensor_task_interval);
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }

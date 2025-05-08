@@ -129,8 +129,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
           }
         }
-        vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
-                                       // solved with task management
+        //vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
+        // solved with task management
       }
     }
 
