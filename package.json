@@ -37,6 +37,7 @@
     "build:fs:analog_rev2": "./scripts/pio.sh run -t buildfs -e analog_rev2",
     "build:fs:range": "./scripts/pio.sh run -t buildfs -e range",
     "build:fs:range_rev1_1": "./scripts/pio.sh run -t buildfs -e range_rev1_1",
+    "upload:fs": "./scripts/pio.sh run -t uploadfs",
     "test": "./scripts/pio.sh test -vvv -e native",
     "test:websockets": "vitest -c vitest.config.ts",
     "serial": "./scripts/pio.sh device monitor",
