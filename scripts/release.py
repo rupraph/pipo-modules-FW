@@ -2,6 +2,8 @@ import subprocess
 import os
 import json
 
+# This should be run from platformio terminal
+
 ENVS = ["motion", "motion_rev1_1", "range", "range_rev1_1", "analog", "analog_rev2"]
 
 
@@ -34,8 +36,8 @@ def run(cmd):
 
 
 def build_env(env):
-    run(["npm", "run", f"build:{env}"])
-    run(["npm", "run", f"build:fs:{env}"])
+    run(["pio", "run", "-e", env])
+    run(["pio", "run", "-t", "buildfs", "-e", env])
 
 
 def merge_env(env):
@@ -81,9 +83,18 @@ def merge_env(env):
 
 
 if __name__ == "__main__":
-    tag = get_latest_tag()
-    run(["npm", "run", f"build:web"])
-    for env in ENVS:
-        build_env(env)
-        merge_env(env)
-        write_manifest(tag, env)
+    try:
+        tag = get_latest_tag()
+        run(["npm", "run", f"build:web"])
+        results = {}
+        for env in ENVS:
+            build_env(env)
+            merge_env(env)
+            write_manifest(tag, env)
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: Command failed {e.cmd} Return code: {e.returncode}")
+        exit(1)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        exit(1)
+    print("Release process completed successfully.")
