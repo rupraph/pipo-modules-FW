@@ -1,6 +1,7 @@
 import subprocess
 import os
 import json
+import shutil
 
 # This should be run from platformio terminal
 
@@ -85,16 +86,26 @@ def merge_env(env):
 if __name__ == "__main__":
     try:
         tag = get_latest_tag()
+        tag_only = tag.split("-")[0]
         run(["npm", "run", f"build:web"])
         results = {}
         for env in ENVS:
             build_env(env)
             merge_env(env)
             write_manifest(tag, env)
+        src_dir = f".pio/releases/{tag_only}"
+        dest_dir = os.path.abspath(
+            f"/Users/rup/Documents/GitHub/pipo-site-vuepress/src/.vuepress/public/assets/releases/{tag_only}"
+        )
+        if os.path.exists(dest_dir):
+            shutil.rmtree(dest_dir)
+        shutil.copytree(src_dir, dest_dir)
+        print(f"Copied {src_dir} to {dest_dir}")
     except subprocess.CalledProcessError as e:
         print(f"ERROR: Command failed {e.cmd} Return code: {e.returncode}")
         exit(1)
     except Exception as e:
         print(f"ERROR: {e}")
         exit(1)
+
     print("Release process completed successfully.")
