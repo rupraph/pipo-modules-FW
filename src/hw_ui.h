@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <unordered_map>
+#include <FastLED.h>
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
 
@@ -95,6 +96,11 @@ class HwUi {
   int get_bat_voltage();
 
  private:
+#ifdef PIPO_ANALOG&& HW_REV >= 20
+  CRGB leds[NB_RGB_LEDS];
+  CRGB leds_base_color[NB_RGB_LEDS];
+
+#endif
   int bat_sampling[BAT_SAMPLE_SIZE];
   int bat_sampling_index = 0;
   int bat_voltage = 0;

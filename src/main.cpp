@@ -251,7 +251,7 @@ void setup() {
 // by default runs on core 1
 void loop() {
   // try {
-#ifdef PIPO_ANALOG
+#if defined(PIPO_ANALOG) && HW_REV == 10
   hwui.update_soft_pwm();
 #endif
   // } catch (const std::exception& e) {

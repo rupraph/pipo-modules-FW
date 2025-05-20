@@ -30,7 +30,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-#ifndef PIPO_ANALOG
+#ifndef PIPO_ANALOG&& HW_REV == 10
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
@@ -40,6 +40,19 @@ void HwUi::setup() {
   ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
   ledcSetup(3, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+#endif
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+  leds_base_color[WIFI_LED] = CRGB::Yellow;
+  leds_base_color[WIFI_LED].nscale8_video(50);
+  leds_base_color[BT_LED] = CRGB::SkyBlue;
+  leds_base_color[BT_LED].nscale8_video(50);
+  leds_base_color[SEND_LED] = CRGB::Red;
+  leds_base_color[SEND_LED].nscale8_video(50);
+  leds_base_color[LOW_BAT_LED] = CRGB::Orange;
+  leds_base_color[LOW_BAT_LED].nscale8_video(50);
+  FastLED.addLeds<WS2812, RGB_LED, GRB>(leds, NB_RGB_LEDS);
+  // FastLED.setBrightness(0);
+  // FastLED.show();
 #endif
 
   set_led(WIFI_LED, 0);
@@ -67,6 +80,11 @@ void HwUi::set_led(int led_name, int value) {
   ledcWrite(led_channel_map[led_name], value);
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;
+#elif defined(PIPO_ANALOG) && HW_REV == 20
+  CRGB color = leds_base_color[led_name];
+  color.nscale8_video(value);
+  leds[led_name] = color;
+  FastLED.show();
 #endif
 }
 

@@ -45,10 +45,11 @@
 #define RGB_LED 18
 #define OUT_NB 8
 // RGB LED positions, not pins anymore
-#define WIFI_LED 4
-#define BT_LED 3
-#define SEND_LED 2
-#define LOW_BAT_LED 1
+// #define RGB_BRIGHTNESS 100
+#define WIFI_LED 3
+#define BT_LED 2
+#define SEND_LED 1
+#define LOW_BAT_LED 0
 
 #endif
 
@@ -69,6 +70,7 @@
 #define NO_BOOT_VOLTAGE 3100  // in mV
 //for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
 #elif HW_REV >= 11
+#define NB_RGB_LEDS 4
 #define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.1
 #define NO_BOOT_VOLTAGE 3150  // in mV
 #define CHARGING_LEVEL 4300   // in mV
