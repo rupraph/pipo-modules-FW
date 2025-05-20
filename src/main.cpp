@@ -47,7 +47,11 @@ void sensorTask(void* pvParameters) {
 void hwuiTask(void* pvParameters) {
   for (;;) {
     hwui.update();
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+    vTaskDelay(pdMS_TO_TICKS(20));
+#else
     vTaskDelay(pdMS_TO_TICKS(10));
+#endif
   }
 }
 

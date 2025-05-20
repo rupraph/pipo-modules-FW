@@ -42,7 +42,7 @@ void HwUi::setup() {
   ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
 #endif
 #if defined(PIPO_ANALOG) && HW_REV >= 20
-  leds_base_color[WIFI_LED] = CRGB::Yellow;
+  leds_base_color[WIFI_LED] = CRGB::DarkMagenta;
   leds_base_color[WIFI_LED].nscale8_video(50);
   leds_base_color[BT_LED] = CRGB::SkyBlue;
   leds_base_color[BT_LED].nscale8_video(50);
