@@ -63,30 +63,29 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  unsigned long
-      blink_once[NUM_LEDS];         // the position in table are the channel nb.
+  unsigned long blink_once
+      [NUM_LEDS];  // register blink start time // the position in table are the channel nb.
   int blink_once_brightness = 100;  // brightness for blink_once led
   void init();
   void setup();
   void update();
   void update_soft_pwm();
   void set_led(int led_name, int value);
-  void set_mode(int mode);
 
   void init_blink_once(int led_name, int blink_time, int brightness);
   void single_blink();  //for blink_once led
 
   void start_blink(int led_name, int blink_time, float duty_cycle);
   void stop_blink(int led_name);
-
-  void blinker();
-  void pulse();
+  bool is_blinking(int led_name);
 
   void start_pulse(int led_name, int pulse_period, int min_brightness,
                    int max_brightness);
   void stop_pulse(int led_name);
-
   bool is_pulsing(int led_name);
+
+  void blinker();
+  void pulse();
 
   void measure_battery();
   void measure_battery_step();

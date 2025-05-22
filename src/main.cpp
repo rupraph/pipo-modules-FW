@@ -55,6 +55,13 @@ void hwuiTask(void* pvParameters) {
   }
 }
 
+void battmonitorTask(void* pvParameters) {
+  for (;;) {
+    hwui.measure_battery();
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
 // takes 2-3 ms for motion
 void websocketTask(void* pvParameters) {
   for (;;) {
@@ -152,7 +159,6 @@ void setup() {
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
-  hwui.measure_battery();
 
   if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
     hwui.set_led(LOW_BAT_LED, 100);
@@ -235,6 +241,8 @@ void setup() {
     pipoDebugHeap();
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
                           0);
+  xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
+                          &battmonitorTaskHandle, 0);
 
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
