@@ -30,7 +30,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-#ifndef PIPO_ANALOG&& HW_REV == 10
+#if !defined(PIPO_ANALOG) && HW_REV == 10
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
