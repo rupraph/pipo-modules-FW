@@ -64,8 +64,8 @@ class HwUi {
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
   unsigned long
-      blink_once[NUM_LEDS];  // the position in table are the channel nb.
-
+      blink_once[NUM_LEDS];         // the position in table are the channel nb.
+  int blink_once_brightness = 100;  // brightness for blink_once led
   void init();
   void setup();
   void update();
@@ -74,7 +74,7 @@ class HwUi {
   void set_mode(int mode);
 
   void init_blink_once(int led_name, int blink_time, int brightness);
-  void stop_blink_once();
+  void single_blink();  //for blink_once led
 
   void start_blink(int led_name, int blink_time, float duty_cycle);
   void stop_blink(int led_name);

@@ -68,7 +68,7 @@ void HwUi::setup() {
 void HwUi::update() {
   blinker();
   pulse();
-  stop_blink_once();
+  single_blink();
   monitor_battery();
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   FastLED.show();
@@ -208,13 +208,16 @@ void HwUi::
 void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
   // carfull led_pos used for index in blink_once but comes from channel number
   int led_pos = led_channel_map[led_name];
-  set_led(led_name, brightness);
+  // set_led(led_name, brightness);
   blink_once[led_pos] = millis() + blink_time;
 }
 
-void HwUi::stop_blink_once() {
+void HwUi::blink() {
   for (auto& pair : led_channel_map) {
     int i = pair.second;
+    if (blink_once[i] != 0) {
+      set_led(pair.first, blink_once_brightness);
+    }
     if (millis() > blink_once[i] && blink_once[i] != 0) {
       set_led(pair.first, 0);
       blink_once[i] = 0;
