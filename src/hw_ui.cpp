@@ -70,6 +70,9 @@ void HwUi::update() {
   pulse();
   stop_blink_once();
   monitor_battery();
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+  FastLED.show();
+#endif
 }
 
 /**
@@ -84,7 +87,7 @@ void HwUi::set_led(int led_name, int value) {
   CRGB color = leds_base_color[led_name];
   color.nscale8_video(value);
   leds[led_name] = color;
-  FastLED.show();
+
 #endif
 }
 
