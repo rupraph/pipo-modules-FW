@@ -70,7 +70,6 @@ class HwUi {
   void update();
   void update_soft_pwm();
   void set_led(int led_name, int value);
-  void set_mode(int mode);
 
   void init_blink_once(int led_name, int blink_time, int brightness);
   void stop_blink_once();
@@ -79,14 +78,13 @@ class HwUi {
   void stop_blink(int led_name);
   bool is_blinking(int led_name);
 
-  void blinker();
-  void pulse();
-
   void start_pulse(int led_name, int pulse_period, int min_brightness,
                    int max_brightness);
   void stop_pulse(int led_name);
-
   bool is_pulsing(int led_name);
+
+  void blinker();
+  void pulse();
 
   void measure_battery();
   void measure_battery_step();
