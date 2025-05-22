@@ -117,34 +117,6 @@ void HwUi::update_soft_pwm() {
   }
 }
 
-/**
- * @brief sets brightness of led
- */
-void HwUi::set_led(int led_name, int value) {
-#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
-  ledcWrite(led_channel_map[led_name], value);
-#elif defined(PIPO_ANALOG) && HW_REV == 10
-  soft_pwm_table[led_name].brightness = value;
-#endif
-}
-
-void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
-  // carefull led_pos used for index in blink_once but comes from channel number
-  int led_pos = led_channel_map[led_name];
-  set_led(led_name, brightness);
-  blink_once[led_pos] = millis() + blink_time;
-}
-
-void HwUi::stop_blink_once() {
-  for (auto& pair : led_channel_map) {
-    int i = pair.second;
-    if (millis() > blink_once[i] && blink_once[i] != 0) {
-      set_led(pair.first, 0);
-      blink_once[i] = 0;
-    }
-  }
-}
-
 void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
   if (is_blinking(led_name))
     return;  // already blinking
@@ -257,7 +229,7 @@ void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
   blink_once[led_pos] = millis() + blink_time;
 }
 
-void HwUi::blink() {
+void HwUi::single_blink() {
   for (auto& pair : led_channel_map) {
     int i = pair.second;
     if (blink_once[i] != 0) {
