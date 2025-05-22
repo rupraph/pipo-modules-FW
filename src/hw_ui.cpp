@@ -128,7 +128,7 @@ void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
       led_blink_table[led_name].start_cycle +
       int(led_blink_table[led_name].duty_cycle *
           led_blink_table[led_name].blink_period);
-  set_led(led_name, led_blink_table[led_name].brightness);
+  // set_led(led_name, led_blink_table[led_name].brightness);
 }
 
 void HwUi::stop_blink(int led_name) {
@@ -136,7 +136,7 @@ void HwUi::stop_blink(int led_name) {
     return;  // not blinking
 
   led_blink_table[led_name].enabled = false;
-  set_led(led_name, 0);
+  // set_led(led_name, 0);
 }
 
 bool HwUi::is_blinking(int led_name) {
@@ -156,7 +156,7 @@ void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
   led_pulse_table[led_name].min_brightness = min_brightness;
   led_pulse_table[led_name].max_brightness = max_brightness;
   led_pulse_table[led_name].start_cycle = millis();
-  set_led(led_name, led_pulse_table[led_name].min_brightness);
+  // set_led(led_name, led_pulse_table[led_name].min_brightness);
 }
 
 void HwUi::stop_pulse(int led_name) {
@@ -164,7 +164,7 @@ void HwUi::stop_pulse(int led_name) {
     return;  // not pulsing
 
   led_pulse_table[led_name].enabled = false;
-  set_led(led_name, 0);
+  // set_led(led_name, 0);
 }
 
 bool HwUi::is_pulsing(int led_name) {
