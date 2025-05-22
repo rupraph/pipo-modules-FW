@@ -62,8 +62,8 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  unsigned long
-      blink_once[NUM_LEDS];  // the position in table are the channel nb.
+  unsigned long blink_once
+      [NUM_LEDS];  // register blink start time // the position in table are the channel nb.
 
   void init();
   void setup();
@@ -77,6 +77,7 @@ class HwUi {
 
   void start_blink(int led_name, int blink_time, float duty_cycle);
   void stop_blink(int led_name);
+  bool is_blinking(int led_name);
 
   void blinker();
   void pulse();

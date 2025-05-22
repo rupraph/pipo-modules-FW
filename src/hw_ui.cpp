@@ -47,6 +47,7 @@ void HwUi::setup() {
   set_led(SEND_LED, 0);
   set_led(LOW_BAT_LED, 0);
   Serial.println("HW UI setup done");
+  hwui.measure_battery();
 
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
@@ -56,7 +57,6 @@ void HwUi::update() {
   blinker();
   pulse();
   stop_blink_once();
-  monitor_battery();
 }
 
 /**
@@ -100,6 +100,9 @@ bool HwUi::is_pulsing(int led_name) {
 }
 
 void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
+  if (is_blinking(led_name))
+    return;  // already blinking
+
   if (led_pulse_table[led_name].enabled) {
     stop_pulse(led_name);
   }
@@ -117,7 +120,10 @@ void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
 
 void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
                        int max_brightness) {
-  if (led_blink_table[led_name].enabled) {
+  if (is_pulsing(led_name))
+    return;  // already pulsing
+
+  if (is_blinking(led_name)) {
     stop_blink(led_name);
   }
   led_pulse_table[led_name].enabled = true;
@@ -129,11 +135,21 @@ void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
 }
 
 void HwUi::stop_blink(int led_name) {
+  if (!is_blinking(led_name))
+    return;  // not blinking
+
   led_blink_table[led_name].enabled = false;
   set_led(led_name, 0);
 }
 
+bool HwUi::is_blinking(int led_name) {
+  return led_blink_table[led_name].enabled;
+}
+
 void HwUi::stop_pulse(int led_name) {
+  if (!is_pulsing(led_name))
+    return;  // not pulsing
+
   led_pulse_table[led_name].enabled = false;
   set_led(led_name, 0);
 }
@@ -219,7 +235,7 @@ void HwUi::measure_battery_step() {
 void HwUi::measure_battery() {
   for (int i = 0; i < BAT_SAMPLE_SIZE; i++) {
     measure_battery_step();
-    delay(1);
+    vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
