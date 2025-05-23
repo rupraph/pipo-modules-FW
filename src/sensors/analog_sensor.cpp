@@ -32,7 +32,7 @@ void AnalogSensor::measure_offset(const string& sensor_name) {
     } else if (touch_map.find(sensor_name) != touch_map.end()) {
       offset += touchRead(touch_map[sensor_name]);
     }
-    delay(2);
+    vTaskDelay(pdMS_TO_TICKS(2));
   }
   sensor_dat[sensor_name].offset =
       round((offset / num_samples) * 1000.0) / 1000.0;
@@ -57,7 +57,7 @@ void AnalogSensor::measure_offset_all() {
     for (auto const& pair : sensor_dat) {
       offset[pair.first] += sensor_dat[pair.first].value;
     }
-    delay(20);
+    vTaskDelay(pdMS_TO_TICKS(20));
   }
   for (auto const& pair : sensor_dat) {
     sensor_dat[pair.first].offset =
