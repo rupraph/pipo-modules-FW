@@ -21,7 +21,8 @@
         "rootNote": 55,
         "pattern": "scale",
         "scaleType": "major pentatonic",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       }
     },
     "engine-osc": {

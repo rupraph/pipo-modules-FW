@@ -232,6 +232,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["cc_max"] = cc_max;
   j["cc_min"] = cc_min;
   j["hires"] = hires;
+  j["velocity"] = velocity;  // Assuming velocity is a member variable
   return j;
 }
 
@@ -249,6 +250,7 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_max = j["cc_max"];
     cc_min = j["cc_min"];
     hires = j["hires"];
+    velocity = j["velocity"];  // Assuming velocity is a member variable
     this->update_scale();
 
   } catch (const std::exception& e) {
@@ -328,6 +330,14 @@ int MidiTranslator::get_min_output() {
 }
 void MidiTranslator::set_min_output(int m) {
   cc_min = m;
+}
+
+int MidiTranslator::get_velocity() {
+  return velocity;
+}
+
+void MidiTranslator::set_velocity(int v) {
+  velocity = v;
 }
 
 // int MidiTranslator::get_interpolation_type() {

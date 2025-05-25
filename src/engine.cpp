@@ -152,7 +152,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         if (input_sensor.get_bool_value(axis_name)) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
               input_sensor.get_trigger_flag(axis_name, MIDI)) {
-            midiio.sendNoteOn(thresh_note, 100, channel, sustain_ms);
+            midiio.sendNoteOn(thresh_note, midi_translator.get_velocity(),
+                              channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
         } else {
@@ -168,7 +169,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
             // !midiio.is_note_playing(note_val[channel], channel) &&
             (note_val[channel] != note_val_prev[channel] ||
              input_sensor.get_trigger_flag(axis_name, MIDI))) {
-          midiio.sendNoteOn(note_val[channel], 100, channel, sustain_ms);
+          midiio.sendNoteOn(note_val[channel], midi_translator.get_velocity(),
+                            channel, sustain_ms);
           if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }

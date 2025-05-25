@@ -87,7 +87,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A02": {
         "cc_nb": 2,
@@ -101,7 +102,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A03": {
         "cc_nb": 3,
@@ -115,7 +117,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A04": {
         "cc_nb": 4,
@@ -129,7 +132,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A05": {
         "cc_nb": 5,
@@ -143,7 +147,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A06": {
         "cc_nb": 6,
@@ -157,7 +162,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "T1": {
         "cc_nb": 7,
@@ -171,7 +177,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T2": {
         "cc_nb": 8,
@@ -185,7 +192,8 @@
         "rootNote": 79,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T3": {
         "cc_nb": 9,
@@ -199,7 +207,8 @@
         "rootNote": 75,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T4": {
         "cc_nb": 10,
@@ -213,7 +222,8 @@
         "rootNote": 72,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T5": {
         "cc_nb": 11,
@@ -227,7 +237,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "T6": {
         "cc_nb": 12,
@@ -241,7 +252,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
