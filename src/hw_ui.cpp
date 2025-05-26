@@ -30,7 +30,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-#if !defined(PIPO_ANALOG) && HW_REV == 10
+#if !defined(PIPO_ANALOG)
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
@@ -60,9 +60,7 @@ void HwUi::setup() {
   set_led(SEND_LED, 0);
   set_led(LOW_BAT_LED, 0);
 
-#if HW_REV >= 11
   pause_sw.setup_button(PP_SW);
-#endif
 
   Serial.println("HW UI setup done");
   hwui.measure_battery();
