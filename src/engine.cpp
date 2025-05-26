@@ -10,7 +10,7 @@ Engine engine;
 
 //Todo: check if processors could access sensor data without having to pass all the arguments so that invert and cyclic could be computed upfront
 void Engine::update() {
-  if (paused) {
+  if (PAUSED) {
     return;
   }
   if (config.general_config["MidiEnabled"] == true) {
@@ -65,10 +65,6 @@ void Engine::update() {
   }
 #endif
   // monitor_sensors(sensor);
-}
-
-void Engine::toggle_pause() {
-  paused = !paused;
 }
 
 void Engine::midi_processor(string axis_name, float sensor_val,

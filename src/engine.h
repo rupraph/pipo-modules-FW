@@ -14,6 +14,7 @@
 #include "hw_ui.h"
 #include "osc/osc_handler.h"
 #include "osc/osc_translators.h"
+#include "shared_flags.h"
 
 #ifdef PIPO_ANALOG
 #include "sensors/analog_out.h"
@@ -44,10 +45,6 @@ class Engine {
   hid_keyboard_report_t kb;
   hid_mouse_report_t mouse;
 
-  bool get_paused() { return paused; }
-  void set_paused(bool value) { paused = value; }
-  void toggle_pause();
-
   void update();
   void midi_processor(string axis_name, float sensor_val, float sensor_min,
                       float sensor_max);
@@ -73,7 +70,6 @@ class Engine {
  private:
   uint8_t note_val[128];
   uint8_t note_val_prev[128];
-  bool paused = false;
 
   unordered_map<string, float> osc_val;
   unordered_map<string, float> osc_val_prev;

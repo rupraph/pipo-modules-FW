@@ -408,7 +408,7 @@ void PipoServer::setup_requests() {
 #endif
 
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    engine.toggle_pause();
+    PAUSED = !PAUSED;
     return request->send(200, "text/plain", "Engine paused");
   });
   // Solution by using Chunk Hanlder
