@@ -19,6 +19,7 @@ export type NoteConfig = {
   sustain: number;
   nbOfNotes: number;
   current_scale: number[];
+  velocity: number;
 };
 export type MidiConfig = BaseMidiConfig & CCConfig & NoteConfig;
 export const BASIC = false;
