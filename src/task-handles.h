@@ -5,6 +5,7 @@
 TaskHandle_t sensorTaskHandle;
 TaskHandle_t websocketTaskHandle;
 TaskHandle_t hwuiTaskHandle;
+TaskHandle_t buttonTaskHandle;
 TaskHandle_t dnsTaskHandle;
 TaskHandle_t wifiTaskHandle;
 TaskHandle_t debugMonitorTaskHandle;
