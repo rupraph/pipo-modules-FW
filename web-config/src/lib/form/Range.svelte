@@ -51,6 +51,10 @@
   const onkeyup = throttle(() => {
     check();
   }, 100);
+  $: {
+    if (value < min) value = min;
+    if (value > max) value = max;
+  }
 </script>
 
 <Input class={$$restProps.class || ""} {label} {id} {tooltip}>
