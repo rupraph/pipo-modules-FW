@@ -25,6 +25,8 @@ using namespace std;
 // this class takes care of the translation of the sensor data to the different outputs
 // Todo: maps should not be declared per axis, but per function since some output might rely on 2 inputs
 
+void sensorTask(void* pvParameters);
+
 class OSC_handler;  // why do I need forward declaration here??
 
 class Engine {

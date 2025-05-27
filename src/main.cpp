@@ -8,7 +8,6 @@
 #include "server/server.h"
 #include "utils/config.h"
 #include "sensors/sensors.h"
-// #include "utils/fs_tools.h"
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 
@@ -17,32 +16,14 @@
 #endif
 
 // Tasks distribution
-// wifi + networking on core 0
 // core 0: wifi, server, websocket
 // core 1: sensor, midi, osc
-// #define ASYNC_TCP_RUNNING_CORE 0
 
 unsigned long lastMillis = 0;
 unsigned long sensor_task_interval = 0;
 unsigned long sensor_task_duration = 0;
 
 void init_filesystem();
-
-void sensorTask(void* pvParameters) {
-  for (;;) {
-    sensor_task_interval = millis() - lastMillis;
-    lastMillis = millis();
-    input_sensor.update();
-    // input_sensor.teleplot_data("yaw");
-    engine.update();
-    // hwui.update();
-    sensor_task_duration = millis() - lastMillis;
-#ifdef PIPO_ANALOG
-    analog_out.update();  // should be in seperate task
-#endif
-    vTaskDelay(pdMS_TO_TICKS(1));
-  }
-}
 
 // by default runs on core 1
 void setup() {

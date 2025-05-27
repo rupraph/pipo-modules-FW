@@ -8,6 +8,20 @@
 // acceleration
 Engine engine;
 
+void sensorTask(void* pvParameters) {
+  for (;;) {
+    // sensor_task_interval = millis() - lastMillis;
+    // lastMillis = millis();
+    input_sensor.update();
+    engine.update();
+    // sensor_task_duration = millis() - lastMillis;
+#ifdef PIPO_ANALOG
+    analog_out.update();  // should be in seperate task
+#endif
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+
 //Todo: check if processors could access sensor data without having to pass all the arguments so that invert and cyclic could be computed upfront
 void Engine::update() {
   if (PAUSED) {
