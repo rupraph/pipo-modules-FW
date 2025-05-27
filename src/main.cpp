@@ -55,6 +55,13 @@ void hwuiTask(void* pvParameters) {
   }
 }
 
+void buttonTask(void* pvParameters) {
+  for (;;) {
+    hwui.update_switches();
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
+}
+
 void battmonitorTask(void* pvParameters) {
   for (;;) {
     hwui.measure_battery();
@@ -250,8 +257,12 @@ void setup() {
   // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
   //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 1, &wifiTaskHandle,
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 3, &wifiTaskHandle,
                           0);
+#if HW_REV >= 11
+  xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,
+                          &buttonTaskHandle, 0);
+#endif
   // xTaskCreatePinnedToCore(
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...

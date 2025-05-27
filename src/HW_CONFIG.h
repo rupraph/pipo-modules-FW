@@ -85,6 +85,8 @@
 #define BATT_COEF 1.44  //1.436  // divider is 0.7015  // leads 2.95 @4.2
 #endif
 
+#define DEBOUNCE_TIME 50  // in ms
+
 //analog sensor specific definitions
 #define OFFSET_CAL_SAMPLES_NB 50
 #define MAX_TOUCH_VALUE 200000

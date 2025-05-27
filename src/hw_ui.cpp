@@ -30,7 +30,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-#if !defined(PIPO_ANALOG) && HW_REV == 10
+#if !defined(PIPO_ANALOG)
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
@@ -59,6 +59,9 @@ void HwUi::setup() {
   set_led(BT_LED, 0);
   set_led(SEND_LED, 0);
   set_led(LOW_BAT_LED, 0);
+
+  pause_sw.setup_button(PP_SW);
+
   Serial.println("HW UI setup done");
   hwui.measure_battery();
 
@@ -74,6 +77,17 @@ void HwUi::update() {
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   FastLED.show();
 #endif
+}
+
+void HwUi::update_switches() {
+  // PAUSE has a pullup
+  if (pause_sw.read_debounce() == 0) {
+    if (pause_sw.get_flag() == 1) {
+      PAUSED = !PAUSED;
+      pause_sw.reset_button();
+      Serial.print("PAUSED");
+    }
+  }
 }
 
 /**
@@ -275,4 +289,24 @@ void HwUi::monitor_battery() {
 
 int HwUi::get_bat_voltage() {
   return bat_voltage;
+}
+
+//Button Class Implementation
+
+void Button::setup_button(int pin) {
+  this->pin = pin;
+  pinMode(pin, INPUT);
+  position = digitalRead(pin);
+}
+
+int Button::read_debounce() {
+  int current_position = digitalRead(pin);
+  if (current_position != position) {
+    if (millis() - last_press > DEBOUNCE_TIME) {
+      position = current_position;
+      flag = true;  // button state changed
+      last_press = millis();
+    }
+  }
+  return position;
 }

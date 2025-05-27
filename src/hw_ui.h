@@ -6,6 +6,7 @@
 #include <FastLED.h>
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
+#include "shared_flags.h"
 
 // This class was initially written to use "ledc" PWM controller to control leds.
 // However for Pipo Analog, we use ledc channels to control the analog outputs
@@ -18,16 +19,34 @@
 // - somewhat works with occasioanl hanging on core 0 (with prio 1). to be check if serial was interfering
 // - seems fine when put in loop (which is anyway running on one of the core with likely a higher priority...)
 // to be followed up
+class Button {
+ private:
+  int pin;
+  int position;
+  bool flag = false;  // toogle flag
+  unsigned long last_press = 0;
 
+ public:
+  void setup_button(int pin);
+  int read_debounce();
+  int get_button();
+  void reset_button() { flag = false; }  // reset the button state
+  bool get_flag() { return flag; }       // return the button state
+};
 class HwUi {
  public:
   HwUi() {};
+
+  Button pause_sw;
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;
   std::unordered_map<int, int> led_channel_map;
 
   unsigned long soft_pwm_prediod_micros = 5000;
+
+  bool switch_pause;
+  unsigned long last_sw_pause_press = 0;
 
   struct led_blink {
     bool enabled;
@@ -69,6 +88,8 @@ class HwUi {
   void init();
   void setup();
   void update();
+  void update_switches();
+
   void update_soft_pwm();
   void set_led(int led_name, int value);
 
