@@ -1,5 +1,30 @@
 #include <server/pipo_socket.h>
 
+// takes 2-3 ms for motion
+void websocketTask(void* pvParameters) {
+  for (;;) {
+    if (!pipoNetworkReady()) {
+      vTaskDelay(pdMS_TO_TICKS(500));
+      continue;
+    }
+    int rssi = wifi.getRSSI();
+    int taskDelay;
+    // Adjust task delay based on RSSI
+    if (rssi > -65) {
+      taskDelay = 40;  // Strong signal → High frequency
+    } else if (rssi > -70) {
+      taskDelay = 80;  // Medium signal → Reduce frequency
+    } else if (rssi > -80) {
+      taskDelay = 250;  // Weak signal → Send less often
+    } else {
+      taskDelay = 500;  // Very poor signal → Minimize WebSocket activity
+    }
+
+    pipoSocket.loop();
+    vTaskDelay(pdMS_TO_TICKS(taskDelay));
+  }
+}
+
 PipoSocket pipoSocket;
 PipoSocket::PipoSocket() {
   this->ws = nullptr;

@@ -2,6 +2,41 @@
 
 HwUi hwui;
 
+void hwuiTask(void* pvParameters) {
+  for (;;) {
+    hwui.update();
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+    vTaskDelay(pdMS_TO_TICKS(20));
+#else
+    vTaskDelay(pdMS_TO_TICKS(10));
+#endif
+  }
+}
+
+void buttonTask(void* pvParameters) {
+  for (;;) {
+    hwui.update_switches();
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
+}
+
+void battmonitorTask(void* pvParameters) {
+  for (;;) {
+    hwui.measure_battery();
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
+//#ifdef PIPO_ANALOG -> for rev1 + output only
+// hwuiSoftPwmTask temporarily in the main loop. not smooth when in task
+// void hwuiSoftPwmTask(void* pvParameters) {
+//   for (;;) {
+//     hwui.update_soft_pwm();
+//     vTaskDelay(pdMS_TO_TICKS(1) / 10);
+//   }
+// }
+//#endif
+
 void HwUi::init() {
 
   PWM_Resolution = 8;

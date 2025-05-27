@@ -19,6 +19,10 @@
 // - somewhat works with occasioanl hanging on core 0 (with prio 1). to be check if serial was interfering
 // - seems fine when put in loop (which is anyway running on one of the core with likely a higher priority...)
 // to be followed up
+
+void hwuiTask(void* pvParameters);
+void buttonTask(void* pvParameters);
+void battmonitorTask(void* pvParameters);
 class Button {
  private:
   int pin;

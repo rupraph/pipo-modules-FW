@@ -15,6 +15,8 @@
 
 class Config;
 
+void oscreceiveTask(void* pvParameters);
+
 class OSC_handler {
  public:
   // OSC_handler();

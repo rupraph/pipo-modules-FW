@@ -2,6 +2,17 @@
 
 OSC_handler osc;
 
+#ifdef PIPO_ANALOG
+void oscreceiveTask(void* pvParameters) {
+  for (;;) {
+    if (WiFi.status() == WL_CONNECTED && osc.is_enabled()) {
+      osc.receive();
+    }
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+#endif
+
 /// @brief setup the OSC handler
 void OSC_handler::setup() {
 

@@ -416,6 +416,7 @@ void PipoServer::setup_requests() {
   server.addHandler(fileServer);
 }
 
+//TODO should use shared flag
 bool pipoNetworkReady() {
   return wifi.ready() && server.isRunning();
 }
