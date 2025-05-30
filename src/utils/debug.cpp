@@ -2,6 +2,8 @@
 #include "HW_CONFIG.h"
 // #define DEBUG_HEAP 1
 
+measure_time looptime("loop");
+
 void debug_monitor(void* pvParameters) {
   for (;;) {
     // input_sensor.teleplot_data("magX");
@@ -16,10 +18,11 @@ void debug_monitor(void* pvParameters) {
       // Serial.print("size: ");
       // Serial.println(size);
     }
-    Serial.print("Sensor task duration: ");
-    // Serial.print(sensor_task_duration);
-    Serial.print(" ms, interval: ");
-    // Serial.println(sensor_task_interval);
+    // Serial.print("Sensor task duration: ");
+    // // Serial.print(sensor_task_duration);
+    // Serial.print(" ms, interval: ");
+    // // Serial.println(sensor_task_interval);
+    looptime.report();
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }

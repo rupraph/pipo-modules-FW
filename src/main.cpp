@@ -10,11 +10,12 @@
 #include "sensors/sensors.h"
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
+#include "utils/debug.h"
 #if defined(PIPO_ANALOG) && defined(BETA_MODE)
 #include "sensors/analog_out.h"
 #endif
 
-// CPU core tasks distribution
+// FREERTOS core tasks distribution
 // core 0: wifi, server, websocket
 // core 1: sensor, midi, osc
 
@@ -99,8 +100,8 @@ void setup() {  // by default on core 1
 
   Serial.println("starting tasks");
 
-  xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
-                          &sensorTaskHandle, 1);
+  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
+  // &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
@@ -119,9 +120,9 @@ void setup() {  // by default on core 1
   xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,
                           &buttonTaskHandle, 0);
 #endif
-  // xTaskCreatePinnedToCore(
-  //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
-  //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
+  xTaskCreatePinnedToCore(
+      debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
+      1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
@@ -129,7 +130,20 @@ void setup() {  // by default on core 1
 }
 
 void loop() {  // by default runs on core 1
+
   // #if defined(PIPO_ANALOG) && HW_REV == 10
   //   hwui.update_soft_pwm();
   // #endif
+
+  looptime.start();
+  input_sensor.update();
+  engine.update();
+  looptime.stop();
+  // sensor_task_duration = millis() - lastMillis;
+#ifdef PIPO_ANALOG
+  analog_out.update();  // should be in seperate task
+#endif
+  vTaskDelay(pdMS_TO_TICKS(1));
+
+  //vTaskDelay(500);  // allow task to yiedl if empty
 }
