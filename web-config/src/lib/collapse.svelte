@@ -59,7 +59,7 @@
   .arrow {
     margin-right: 1em;
     border-radius: 3px;
-    border: solid rgb(0, 0, 0);
+    border: solid var(--text-color);
     border-width: 0 3px 3px 0;
     display: inline-block;
     padding: 3px;
