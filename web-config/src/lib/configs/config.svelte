@@ -239,7 +239,7 @@
 </Collapse>
 <hr class="separator" />
 
-<Collapse title="Input settings" open>
+<Collapse title="Channel settings" open>
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
