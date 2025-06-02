@@ -11,7 +11,7 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
-#if defined(PIPO_ANALOG) && defined(BETA_MODE)
+#if defined(PIPO_ANALOG) && defined(BETA_OUT)
 #include "sensors/analog_out.h"
 #endif
 
@@ -39,7 +39,7 @@ void setup() {  // by default on core 1
     while (1) {}
   }
 
-#if defined(PIPO_ANALOG) && defined(BETA_MODE)
+#if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.setup();
 #endif
 
@@ -140,7 +140,7 @@ void loop() {  // by default runs on core 1
   engine.update();
   looptime.stop();
   // sensor_task_duration = millis() - lastMillis;
-#ifdef PIPO_ANALOG
+#if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();  // should be in seperate task
 #endif
   vTaskDelay(pdMS_TO_TICKS(1));

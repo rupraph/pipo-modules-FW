@@ -12,6 +12,8 @@
 #define HW_REV 11  // 1.0 or 1.1
 #endif
 
+// #define BETA_OUT
+
 // DEBUG FLAGS
 #define DEBUG_HEAP true
 #define DEBUG_CONFIG false
