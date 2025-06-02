@@ -29,7 +29,7 @@ def copy():
     if not os.path.exists("data/configs"):
         os.makedirs("data/configs")
     shutil.copyfile(path, "data/default.json")
-    shutil.copyfile(path, "data/configs/Config-0.json")
+    shutil.copyfile(path, "data/configs/Config-1.json")
     print(f"Copy default config file {path}")
 
 
