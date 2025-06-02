@@ -48,7 +48,7 @@
   }
   .cat-tabs > .tab.active {
     cursor: text;
-    color: var(--main-darker);
+    color: var(--main);
     background-color: var(--bg-tabs);
   }
 </style>

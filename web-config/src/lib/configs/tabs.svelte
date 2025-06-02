@@ -92,7 +92,7 @@
     z-index: 12;
     cursor: text;
     padding-bottom: 4px;
-    color: var(--main);
+    color: var(--text-color);
   }
 
   .tab.active > span[contenteditable] {

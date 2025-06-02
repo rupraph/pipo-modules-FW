@@ -45,6 +45,7 @@
     height: 3em;
     justify-content: space-between;
     width: 100%;
+    color: var(--text-color);
   }
   h3 {
     cursor: pointer;

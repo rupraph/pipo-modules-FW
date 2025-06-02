@@ -35,6 +35,7 @@
     border: 1px solid transparent;
     align-items: center;
     width: 100%;
+    color: var(--text-color-secondary);
   }
 
   .input-wrapper:hover {

@@ -15,13 +15,14 @@ body{
   line-height: 1.5;
   font-weight: 00;
 
-  --text-color: rgb(0, 0, 0);
-  --bg-color: #fff7e8;
-  --bg-secondary:#ede1e1;
+  --text-color: #FAF8FE;
+  --text-color-secondary: #232024;
+  --bg-color: #232024;
+  --bg-secondary:#BDBCBD;
   --bg-tertiary:#fff;
   --bg-lighter:#6A6A6A;
-  --bg-tabs:#ffe8a7;
-  --main: #ffcb64;
+  --bg-tabs:#595CFF; /* translators tabs */
+  --main: #EFFF8E; /* EFFF8E; */
   --main-darker: #eaa31f;
   --red: #e33333;
   --green: #3bb143;
