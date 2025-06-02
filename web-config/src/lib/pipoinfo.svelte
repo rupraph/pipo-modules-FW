@@ -1,7 +1,7 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
   import type { PipoInfo } from "../types";
-  import { onMount, onDestroy, SvelteComponent_1 } from "svelte";
+  import { onMount, onDestroy } from "svelte";
 
   export let info: PipoInfo;
 
