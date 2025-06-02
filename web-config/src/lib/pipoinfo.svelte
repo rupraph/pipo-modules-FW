@@ -1,7 +1,7 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
   import type { PipoInfo } from "../types";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, SvelteComponent_1 } from "svelte";
 
   export let info: PipoInfo;
 
@@ -50,7 +50,9 @@
     <span>{batt.toFixed(1)} V</span>
     <!-- <span><bold>Batt Voltage: </bold>{batt} V</span> -->
     <span>Batt Level:</span>
-    <span>{capValue(batt * 125 - 412.5, 0, 100).toFixed(1)} %</span>
+    <!--  100 = 4.1v, 0 = 3.3v => batt * 125 - 412.5 -->
+    <!-- 100 =4.05v, 0 = 3,3 => batt * 133.3 - 439.8 -->
+    <span>{capValue(batt * 133.3 - 439.8, 0, 100).toFixed(1)} %</span>
   {/if}
 </div>
 
