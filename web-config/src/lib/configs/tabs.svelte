@@ -74,10 +74,11 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: left;
   }
   .tabs {
     max-width: calc(100% - 30px);
+    margin-left: 5%;
   }
   .tab {
     display: grid;

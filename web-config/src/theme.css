@@ -20,10 +20,12 @@ body{
   --bg-color: #232024;
   --bg-secondary:#BDBCBD;
   --bg-tertiary:#fff;
+  --bg-network: #46464682; /* network */
   --bg-lighter:#6A6A6A;
   --bg-tabs:#595CFF; /* translators tabs */
   --main: #EFFF8E; /* EFFF8E; */
-  --main-darker: #eaa31f;
+  --main-lighter: #F0FFB2; /* F0FFB2; */
+  --main-darker: #d9e878;
   --red: #e33333;
   --green: #3bb143;
   

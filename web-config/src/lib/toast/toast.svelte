@@ -49,7 +49,7 @@
     background: var(--green);
   }
   .info {
-    background: var(--main-darker);
+    background: var(--main);
   }
   .warning {
     background: DarkOrange;

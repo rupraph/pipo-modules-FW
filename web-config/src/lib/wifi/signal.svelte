@@ -14,8 +14,8 @@
       : signal / bars < 0.33
         ? "var(--red)"
         : signal / bars < 0.66
-          ? "var(--main)"
-          : "var(--main-darker)";
+          ? "var(--main-lighter)"
+          : "var(--main)";
   }
 </script>
 

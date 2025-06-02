@@ -46,7 +46,7 @@
 
 <nav>
   <!-- <span class="status" class:live> </span> -->
-  <span><strong>APIP:</strong> {apIP}</span>
+  <!-- <span><strong>APIP:</strong> {apIP}</span> -->
   <span><strong>STAIP:</strong> {staIP}</span>
   <span class="wifi-group">
     <span class="wifi" on:click={toggleWifi}>
