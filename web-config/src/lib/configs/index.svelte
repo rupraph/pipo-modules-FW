@@ -59,7 +59,7 @@
       .request({
         method: "post",
         url: "/config-new",
-        params: { name: `config-${index}` },
+        params: { name: `Config-${index}` },
       })
       .catch((e) => {
         error = e;
