@@ -120,25 +120,27 @@ void setup() {  // by default on core 1
   xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,
                           &buttonTaskHandle, 0);
 #endif
-  // xTaskCreatePinnedToCore(
-  //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
-  //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
+  xTaskCreatePinnedToCore(
+      debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
+      1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
 }
 
-void loop() {  // by default runs on core 1
+// stack is 8k by default
+// by default runs on core 1
+void loop() {
 
   // #if defined(PIPO_ANALOG) && HW_REV == 10
   //   hwui.update_soft_pwm();
   // #endif
 
-  // looptime.start();
+  looptime.start();
   input_sensor.update();
   engine.update();
-  // looptime.stop();
+  looptime.stop();
   // sensor_task_duration = millis() - lastMillis;
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();  // should be in seperate task
