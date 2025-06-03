@@ -32,8 +32,8 @@ def copy():
     if os.path.exists("data/configs"):
         shutil.rmtree("data/configs")
     os.makedirs("data/configs")
+    shutil.copyfile(path, "data/configs/Config-1.json")
 
-    shutil.copyfile(path, "data/configs/default.json")
     print(f"Copy default config file {path}")
 
 
