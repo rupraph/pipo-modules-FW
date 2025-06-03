@@ -24,11 +24,15 @@ def copy():
         path = f"configs/range_config.json"
     else:
         raise Exception("No config file for build type")
+
     if not os.path.exists("data"):
         os.makedirs("data")
-    if not os.path.exists("data/configs"):
-        os.makedirs("data/configs")
     shutil.copyfile(path, "data/default.json")
+
+    if os.path.exists("data/configs"):
+        shutil.rmtree("data/configs")
+    os.makedirs("data/configs")
+
     shutil.copyfile(path, "data/configs/default.json")
     print(f"Copy default config file {path}")
 
