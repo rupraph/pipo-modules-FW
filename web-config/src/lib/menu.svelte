@@ -99,5 +99,6 @@
   }
   .ssid {
     cursor: pointer;
+    margin-left: 0.6em;
   }
 </style>

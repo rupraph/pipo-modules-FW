@@ -198,7 +198,7 @@
 <Collapse title="Quick settings">
   <QuickConfig bind:config />
   {#if $type === "analog"}
-    <button class="primary" on:click={offsetalltouch} title="Zero the touch"
+    <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
       >Zero All Touch
     </button>
   {/if}
@@ -268,7 +268,7 @@
       {#if $type !== "motion"}
         <Tooltip title="Make current value the zero offset">
           <button
-            class="primary"
+            class="secondary"
             on:click={() => cal_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
@@ -277,7 +277,7 @@
         </Tooltip>
         <Tooltip title="Removes the offset">
           <button
-            class="primary"
+            class="secondary"
             on:click={() => reset_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
