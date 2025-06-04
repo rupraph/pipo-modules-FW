@@ -79,7 +79,7 @@
   {#if aschema.cat !== "Touch"}
     <div class="item">
       <Tooltip title="On/Off output above/below level">
-        <Switch label="Use Threshold" bind:value={input.mode} design="slider" />
+        <Switch label="Threshold" bind:value={input.mode} design="slider" />
       </Tooltip>
     </div>
     <div class="item" class:disabled={!input.mode}>
