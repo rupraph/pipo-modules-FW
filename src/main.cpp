@@ -11,7 +11,7 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
-#if defined(PIPO_ANALOG) && defined(BETA_OUT)
+#if defined(PIPO_ANALOG)
 #include "sensors/analog_out.h"
 #endif
 
@@ -38,10 +38,6 @@ void setup() {  // by default on core 1
     // esp_deep_sleep_start();
     while (1) {}
   }
-
-#if defined(PIPO_ANALOG) && defined(BETA_OUT)
-  analog_out.setup();
-#endif
 
   /////// Init filesystem
   init_filesystem();
