@@ -254,7 +254,7 @@
         --item-is-active-bg="var(--bg-lighter)"
         --item-color="var(--text-color)"
         --item-bg="var(--bg-secondary)"
-        --input-color="var(--text-color)"
+        --input-color="var(--text-color-secondary)"
         --item-hover-color="var(--text-color)"
         --item-hover-bg="var(--bg-lighter)"
         --border-radius="30px"
@@ -304,13 +304,13 @@
           {#if currentCat === "MIDI"}
             <MidiConfigForm bind:midi bind:sensormode={input.mode} />
           {/if}
-          {#if currentCat === "HID"}
+          <!-- {#if currentCat === "HID"}
             <HidConfigForm
               bind:hidMode={config.general.HidMode}
               bind:input
               {hid}
             />
-          {/if}
+          {/if} -->
           {#if currentCat === "OSC"}
             <OscConfigForm bind:osc />
           {/if}
@@ -437,6 +437,8 @@
     padding: 1em;
     border-bottom-left-radius: 0.8em;
     border-bottom-right-radius: 0.8em;
+    padding-left: 3em;
+    padding-right: 4em;
   }
 
   .axis-selector {
