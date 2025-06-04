@@ -17,7 +17,7 @@ function updateSens() {
   Object.keys(state.sensors).forEach((key) => {
     const min = s[key].min;
     const max = s[key].max;
-    state.sensors[key].value = min + ((max - min) * (sin + 1)) / 2;
+    state.sensors[key].value = 1.35;//min + ((max - min) * (sin + 1)) / 2;
   });
 }
 function getMsg(): string {
