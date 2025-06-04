@@ -158,6 +158,7 @@
     height: 1.2em;
     cursor: pointer;
     border-radius: 10%;
+    color: var(--text-color);
     /* transform: translate(-0.9em, -0.3em); */
   }
   :global(.tab .delete:hover) {
