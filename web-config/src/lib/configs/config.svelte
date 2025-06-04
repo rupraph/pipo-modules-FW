@@ -332,14 +332,19 @@
     {/if}
   {/if}
 </Collapse>
-<hr class="separator" />
-<SensorModes bind:config={config.sensorconf} />
-<hr class="separator" />
+
+{#if config.sensorconf}
+  <hr class="separator" />
+  <SensorModes bind:config={config.sensorconf} />
+{/if}
+
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-  <OscGlobalConfig
-    bind:ip={config.general.OSC_IP}
-    bind:port={config.general.OSC_PORT}
-  />
+  <section class="OSC-global-settings">
+    <OscGlobalConfig
+      bind:ip={config.general.OSC_IP}
+      bind:port={config.general.OSC_PORT}
+    />
+  </section>
   {#if $type === "motion"}
     {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
       <Switch
@@ -437,6 +442,15 @@
     padding: 1em;
     border-bottom-left-radius: 0.8em;
     border-bottom-right-radius: 0.8em;
+    padding-left: 3em;
+    padding-right: 4em;
+  }
+
+  .OSC-global-settings {
+    /* background-color: var(--bg-tabs); */
+    padding: 1em;
+    /* border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em; */
     padding-left: 3em;
     padding-right: 4em;
   }
