@@ -1,4 +1,4 @@
-import defaultAnalog from "../../configs/analog_config.json";
+import defaultAnalog from "../../configs/analog2_config.json";
 import defaultMotion from "../../configs/motion_config.json";
 import defaultRange from "../../configs/range_config.json";
 import { PipoConfig, PipoKeys, PipoTypes } from "../../web-config/src/types";
@@ -13,7 +13,7 @@ import {
   WifiState,
 } from "./types";
 
-class State<T extends PipoTypes = "motion"> {
+class State<T extends PipoTypes = "analog"> {
   public sensors: Sensors<T>;
   public wifi: WifiState;
   public battLevel: number;
@@ -28,9 +28,9 @@ class State<T extends PipoTypes = "motion"> {
       scanning: false,
       rssi: -70,
       mode: "APSTA",
-      ssid: "ESP32",
+      ssid: "Dlink-Home",
       password: "123",
-      ip: "192.168.1.1",
+      ip: "192.168.0.53",
       apIP: "192.127.127.126",
     };
     this.info = {
@@ -41,7 +41,7 @@ class State<T extends PipoTypes = "motion"> {
       mac: global.mac,
     };
     this.configs = {
-      default: defaultMotion as PipoConfig<"motion">,
+      default: defaultAnalog as PipoConfig<"analog">,
     };
     this.activeConfig = "default";
     const defaultSensor = (): Sensor => ({
@@ -86,7 +86,7 @@ class State<T extends PipoTypes = "motion"> {
   deleteConfig(name: string) {
     delete this.configs[name];
     if (!Object.keys(this.configs).length) {
-      this.configs["default"] = JSON.parse(JSON.stringify(defaultMotion));
+      this.configs["default"] = JSON.parse(JSON.stringify(defaultAnalog));
       this.activeConfig = "default";
     }
     if (this.activeConfig === name) {
@@ -94,7 +94,7 @@ class State<T extends PipoTypes = "motion"> {
     }
   }
   createConfig(name: string) {
-    this.configs[name] = JSON.parse(JSON.stringify(defaultMotion));
+    this.configs[name] = JSON.parse(JSON.stringify(defaultAnalog));
   }
   copyConfig(name: string, config: PipoConfig<T>) {
     this.configs[name] = config;
@@ -111,4 +111,4 @@ class State<T extends PipoTypes = "motion"> {
   }
 }
 
-export const state = new State("motion");
+export const state = new State("analog");

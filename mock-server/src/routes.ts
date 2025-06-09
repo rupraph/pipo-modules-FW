@@ -160,10 +160,10 @@ export const setupRoutes = (app: Express) => {
   });
   app.get("/wifi-networks", (req, res) => {
     const signals = [
-      [`"SSID1"`, -50, 1, 1],
-      [`"SSID2"`, -60, 1, 0],
-      [`"SSID3"`, -70, 0, 1],
-      [`"SSID3"`, -70, 0, 0],
+      [`"Dlink-Home"`, -40, 1, 1],
+      [`"MyRouter-345"`, -50, 0, 1],
+      [`"HomeSpot"`, -60, 0, 0],
+      [`"WiFi-2.4-7662"`, -80, 0, 0],
     ]
       .map((s) => s.join(" "))
       .join("\n");

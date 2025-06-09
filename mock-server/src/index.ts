@@ -21,6 +21,7 @@ app.use((req, res, next) => {
 });
 
 // Setup API routes
+app.use(express.static("../web-config/public"));
 setupRoutes(app);
 
 // Setup WebSocket

@@ -28,8 +28,18 @@ button:hover {
 button.primary {
   color: black;
   background-color: var(--main);
+  padding: 18px;
+  border-radius: 5px;
+}
+
+button.secondary {
+  color:var(--main);
+  background-color: var(--bg-color);
+  /* background-color: var(--main); */
+  border-color: var(--main);
   padding: 18px
 }
+
 button.error{
   color: white;
   background-color: var(--red);

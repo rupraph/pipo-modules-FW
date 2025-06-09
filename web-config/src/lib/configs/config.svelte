@@ -198,7 +198,7 @@
 <Collapse title="Quick settings">
   <QuickConfig bind:config />
   {#if $type === "analog"}
-    <button class="primary" on:click={offsetalltouch} title="Zero the touch"
+    <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
       >Zero All Touch
     </button>
   {/if}
@@ -254,7 +254,7 @@
         --item-is-active-bg="var(--bg-lighter)"
         --item-color="var(--text-color)"
         --item-bg="var(--bg-secondary)"
-        --input-color="var(--text-color)"
+        --input-color="var(--text-color-secondary)"
         --item-hover-color="var(--text-color)"
         --item-hover-bg="var(--bg-lighter)"
         --border-radius="30px"
@@ -268,7 +268,7 @@
       {#if $type !== "motion"}
         <Tooltip title="Make current value the zero offset">
           <button
-            class="primary"
+            class="secondary"
             on:click={() => cal_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
@@ -277,7 +277,7 @@
         </Tooltip>
         <Tooltip title="Removes the offset">
           <button
-            class="primary"
+            class="secondary"
             on:click={() => reset_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
@@ -304,13 +304,13 @@
           {#if currentCat === "MIDI"}
             <MidiConfigForm bind:midi bind:sensormode={input.mode} />
           {/if}
-          {#if currentCat === "HID"}
+          <!-- {#if currentCat === "HID"}
             <HidConfigForm
               bind:hidMode={config.general.HidMode}
               bind:input
               {hid}
             />
-          {/if}
+          {/if} -->
           {#if currentCat === "OSC"}
             <OscConfigForm bind:osc />
           {/if}
@@ -332,14 +332,19 @@
     {/if}
   {/if}
 </Collapse>
-<hr class="separator" />
-<SensorModes bind:config={config.sensorconf} />
-<hr class="separator" />
+
+{#if config.sensorconf}
+  <hr class="separator" />
+  <SensorModes bind:config={config.sensorconf} />
+{/if}
+
 <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-  <OscGlobalConfig
-    bind:ip={config.general.OSC_IP}
-    bind:port={config.general.OSC_PORT}
-  />
+  <section class="OSC-global-settings">
+    <OscGlobalConfig
+      bind:ip={config.general.OSC_IP}
+      bind:port={config.general.OSC_PORT}
+    />
+  </section>
   {#if $type === "motion"}
     {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
       <Switch
@@ -437,6 +442,17 @@
     padding: 1em;
     border-bottom-left-radius: 0.8em;
     border-bottom-right-radius: 0.8em;
+    padding-left: 3em;
+    padding-right: 4em;
+  }
+
+  .OSC-global-settings {
+    /* background-color: var(--bg-tabs); */
+    padding: 1em;
+    /* border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em; */
+    padding-left: 3em;
+    padding-right: 4em;
   }
 
   .axis-selector {

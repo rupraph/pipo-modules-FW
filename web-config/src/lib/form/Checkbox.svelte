@@ -17,7 +17,7 @@
   .input.checkbox {
     grid-auto-flow: column;
     grid-template-rows: auto;
-    grid-template-columns: auto auto;
+    /* grid-template-columns: auto auto; */
     width: 100%;
   }
 </style>

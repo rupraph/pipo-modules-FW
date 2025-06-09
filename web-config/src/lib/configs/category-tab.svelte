@@ -3,7 +3,7 @@
   const items = [
     { value: "MIDI", label: "MIDI" },
     { value: "OSC", label: "OSC" },
-    { value: "HID", label: "HID" },
+    // { value: "HID", label: "HID" },
   ];
   export let active: string;
   function itemClick(item: string) {
@@ -48,7 +48,7 @@
   }
   .cat-tabs > .tab.active {
     cursor: text;
-    color: var(--main-darker);
+    color: var(--main);
     background-color: var(--bg-tabs);
   }
 </style>

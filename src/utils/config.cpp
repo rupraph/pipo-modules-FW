@@ -43,9 +43,9 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
 /// config.
 void Config::load_config() {
   // if no default config, create default
-  if (!LittleFS.exists(get_path("default").c_str())) {
+  if (!LittleFS.exists(get_path("Config-1").c_str())) {
     Serial.println("no default config, creating one");
-    new_config("default");
+    new_config("Config-1");
   }
   // if last config exists, load it
   if (LittleFS.exists(last_config_path)) {
@@ -58,7 +58,7 @@ void Config::load_config() {
     Serial.println(F("last config not found, loading default"));
   }
   // if no last config, load default
-  load_config("default");
+  load_config("Config-1");
 }
 
 String Config::get_list() {
