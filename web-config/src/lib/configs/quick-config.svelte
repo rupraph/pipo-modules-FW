@@ -17,10 +17,10 @@
       key: "OSC",
       value: "engine-osc",
     },
-    {
-      key: "HID",
-      value: "engine-hid",
-    },
+    // {
+    //   key: "HID",
+    //   value: "engine-hid",
+    // },
   ];
   $: {
     if (config) {
