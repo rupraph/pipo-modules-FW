@@ -43,7 +43,9 @@
     "test": "./scripts/pio.sh test -vvv -e native",
     "test:websockets": "vitest -c vitest.config.ts",
     "serial": "./scripts/pio.sh device monitor",
-    "release": "python3 ./scripts/release.py"
+    "release": "python3 ./scripts/release.py",
+    "erase": "./scripts/pio.sh run -t erase",
+    "full:motion_rev1_1": "npm run build:web && npm run build:fs:motion_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:motion_rev1_1"
   },
   "author": "",
   "license": "ISC",
