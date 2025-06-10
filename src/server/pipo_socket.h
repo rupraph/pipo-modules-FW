@@ -8,6 +8,7 @@
 #define SO_REUSE 1
 #define SO_REUSE_RXTOALL 1  // Enable reuse of addresses for multicast as well
 #include <ESPAsyncWebServer.h>
+#include "esp_task_wdt.h"
 #include "server.h"
 using namespace std;
 

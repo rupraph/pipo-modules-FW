@@ -3,8 +3,10 @@
 //TODO: Should likely move led toggling out of this class
 
 void wifiTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     wifi.refresh();
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
     if (wifi.ready()) {
       if (!server.isRunning()) {

@@ -7,6 +7,7 @@
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
 #include "shared_flags.h"
+#include "esp_task_wdt.h"
 
 // This class was initially written to use "ledc" PWM controller to control leds.
 // However for Pipo Analog, we use ledc channels to control the analog outputs

@@ -4,10 +4,12 @@ OSC_handler osc;
 
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     if (WiFi.status() == WL_CONNECTED && osc.is_enabled()) {
       osc.receive();
     }
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(1));
   }
 }

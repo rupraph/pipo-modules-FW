@@ -1,4 +1,3 @@
-
 #include "HW_CONFIG.h"
 #include "engine.h"
 #include "hw_ui.h"
@@ -11,6 +10,7 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
+#include "esp_task_wdt.h"
 #if defined(PIPO_ANALOG)
 #include "sensors/analog_out.h"
 #endif
@@ -96,6 +96,9 @@ void setup() {  // by default on core 1
 
   Serial.println("starting tasks");
 
+  esp_task_wdt_init(2,
+                    false);  // watchdog 2 seconds timeout, no panic on timeout
+
   //CAREFULL:
   // fileserving reports running on core 1 for now. it should be on 0
   // websocket events (not loop) reports running on core 1 for now. it should be on 0
@@ -130,6 +133,7 @@ void setup() {  // by default on core 1
 
   hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
                    0.2);  //temporary patch to inform user pipo ready to connect
+
   Serial.println("Setup done");
 }
 

@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include "utils/config.h"
+#include "esp_task_wdt.h"
 
 // enum WiFiTransition {
 //   NONE,

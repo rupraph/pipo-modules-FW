@@ -8,6 +8,7 @@
 #include <WiFiUdp.h>
 #include "utils/config.h"
 #include "utils/debug.h"
+#include "esp_task_wdt.h"
 
 #ifdef PIPO_ANALOG
 #include "sensors/analog_out.h"

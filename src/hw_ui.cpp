@@ -3,8 +3,10 @@
 HwUi hwui;
 
 void hwuiTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.update();
+    esp_task_wdt_reset();
 #if defined(PIPO_ANALOG) && HW_REV >= 20
     vTaskDelay(pdMS_TO_TICKS(20));
 #else
@@ -14,15 +16,19 @@ void hwuiTask(void* pvParameters) {
 }
 
 void buttonTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.update_switches();
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
 void battmonitorTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.measure_battery_step();
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
