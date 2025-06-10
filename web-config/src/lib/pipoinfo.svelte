@@ -52,7 +52,7 @@
     <span>Batt Level:</span>
     <!--  100 = 4.1v, 0 = 3.3v => batt * 125 - 412.5 -->
     <!-- 100 =4.05v, 0 = 3,3 => batt * 133.3 - 439.8 -->
-    <span>{capValue(batt * 133.3 - 439.8, 0, 100).toFixed(1)} %</span>
+    <span>{capValue(batt * 133.3 - 439.8, 0, 100).toFixed(0)} %</span>
   {/if}
 </div>
 

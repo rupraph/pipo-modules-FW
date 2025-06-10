@@ -22,7 +22,7 @@ void buttonTask(void* pvParameters) {
 
 void battmonitorTask(void* pvParameters) {
   for (;;) {
-    hwui.measure_battery();
+    hwui.measure_battery_step();
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
@@ -291,6 +291,7 @@ void HwUi::single_blink() {
   }
 }
 
+// Battery sampling step
 void HwUi::measure_battery_step() {
   if (bat_sampling_index >= BAT_SAMPLE_SIZE) {
     bat_sampling_index = 0;
@@ -306,6 +307,7 @@ void HwUi::measure_battery_step() {
   bat_voltage = sum / BAT_SAMPLE_SIZE;
 }
 
+// Full battery sampling loop
 void HwUi::measure_battery() {
   for (int i = 0; i < BAT_SAMPLE_SIZE; i++) {
     measure_battery_step();
@@ -313,8 +315,8 @@ void HwUi::measure_battery() {
   }
 }
 
+// Display battery levels on leds
 void HwUi::monitor_battery() {
-  measure_battery_step();
   if (bat_voltage < LOW_BAT_VOLTAGE) {
     start_blink(LOW_BAT_LED, 500, 0.5);
   } else {
