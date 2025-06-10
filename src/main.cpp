@@ -96,9 +96,17 @@ void setup() {  // by default on core 1
 
   Serial.println("starting tasks");
 
+  //CAREFULL:
+  // fileserving reports running on core 1 for now. it should be on 0
+  // websocket events (not loop) reports running on core 1 for now. it should be on 0
+  // should likely move button measurements in sensor task as this is similar activity
+  // when engine commented, heap seems stable
+
+  // saving increases fragmentation from 15 to 40%
+
   // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
   // &sensorTaskHandle, 1);
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 1,
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 2,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
                           0);
@@ -126,7 +134,8 @@ void setup() {  // by default on core 1
 }
 
 // stack is 8k by default
-// by default runs on core 1
+// by default runs on core 1 for this board
+// prio 1
 void loop() {
 
   // #if defined(PIPO_ANALOG) && HW_REV == 10

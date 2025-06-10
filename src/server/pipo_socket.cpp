@@ -33,6 +33,7 @@ void PipoSocket::setup() {
   this->ws->onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
+    Serial.printf("WebSocket running on core: %d\n", xPortGetCoreID());
     if (type == WS_EVT_CONNECT) {
       // Serial.printf("WS Client connected");
       // // if more than 3 clients, delete the oldest one
@@ -221,8 +222,8 @@ void PipoSocket::loop() {
   // Send to connected clients
   for (AsyncWebSocketClient* c : clients) {
     if (!c->canSend()) {
-      // Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
-      //               c->status());
+      Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
+                    c->status());
       continue;
     }
     c->text(outMsg);

@@ -3,6 +3,7 @@
 #ifndef PIPODEBUG_H
 #define PIPODEBUG_H
 void debug_monitor(void* pvParameters);
+void pipoDebugHeapFull(const char* stepName = nullptr);
 void pipoDebugHeap(const char* stepName = nullptr);
 void print_reset_reason();
 // Class to easily measure and report time between two points in code.
