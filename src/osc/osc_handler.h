@@ -24,6 +24,9 @@ class OSC_handler {
   void setup();
   void set_config();
   void send_osc_message(string address, float value);
+  void add_to_bundle(string address, float value);
+  void bundle_has_messages();
+  void send_bundle();
 
   void set_enabled(bool ena);
   bool is_enabled();
@@ -38,6 +41,9 @@ class OSC_handler {
   int out_port;
   bool isStarted = false;
   bool enabled = false;
+
+  OSCBundle bundle;
+
   WiFiUDP Udp;
 
   void set_dest_ip(string ip);
