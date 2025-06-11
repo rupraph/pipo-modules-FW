@@ -55,7 +55,8 @@
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 2,
-    "PipoName": "range"
+    "PipoName": "range",
+    "BLEEnabled": true
   },
   "sensorconf": {
     "hold_mode": true

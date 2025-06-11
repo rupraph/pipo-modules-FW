@@ -473,7 +473,8 @@
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1,
-    "PipoName": "analog"
+    "PipoName": "analog",
+    "BLEEnabled": true
   },
   "sensorconf": {
     "analogout": {

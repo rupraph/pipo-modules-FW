@@ -66,6 +66,7 @@ export type GeneralConfig = {
   HidEnabled: boolean;
   HidMode: number;
   PipoName: string;
+  BLEEnabled: boolean;
 };
 
 export type HidConfig = {

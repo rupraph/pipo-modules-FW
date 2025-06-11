@@ -365,7 +365,8 @@
     "MidiEnabled": true,
     "HidEnabled": true,
     "HidMode": 2,
-    "PipoName": "motion"
+    "PipoName": "motion",
+    "BLEEnabled": false
   },
   "sensorconf": {
     "relative_mode": true
