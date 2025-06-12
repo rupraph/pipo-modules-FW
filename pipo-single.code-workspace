@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../../../.platformio/packages/framework-arduinoespressif32"
+			"path": "../pipo-config"
 		}
 	],
 	"settings": {
@@ -69,11 +69,6 @@
 			"forward_list": "cpp",
 			"ratio": "cpp",
 			"valarray": "cpp"
-		},
-		"svelte.plugin.svelte.compilerWarnings": {
-			"a11y-click-events-have-key-events": "ignore",
-			"a11y-no-static-element-interactions": "ignore",
-			"a11y-no-noninteractive-element-interactions": "ignore"
 		}
 	}
 }
