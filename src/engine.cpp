@@ -73,11 +73,16 @@ void Engine::update() {
       hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
   }
+
 #ifdef PIPO_MOTION
   if (enable_quat_to_osc) {
     motion_quat_to_osc();
   }
 #endif
+  if (osc.is_enabled() && osc.is_started()) {
+    osc.send_bundle();
+  }
+
   // monitor_sensors(sensor);
 }
 
@@ -293,7 +298,7 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
           osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
 
       if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-        osc.send_osc_message(address, osc_val[axis_name]);
+        osc.add_to_bundle(address, osc_val[axis_name]);
       }
       // }
     } else  // sensor uses trigger mode
@@ -301,12 +306,12 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
       if (input_sensor.get_bool_value(axis_name)) {
         osc_val[axis_name] = round_to(osc_translator.get_output_max(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.send_osc_message(address, osc_val[axis_name]);
+          osc.add_to_bundle(address, osc_val[axis_name]);
         }
       } else {
         osc_val[axis_name] = round_to(osc_translator.get_output_min(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.send_osc_message(address, osc_val[axis_name]);
+          osc.add_to_bundle(address, osc_val[axis_name]);
         }
       }
     }
@@ -401,9 +406,9 @@ void Engine::set_config(JsonObject config, bool debug) {
 void Engine::motion_quat_to_osc() {
   float quats[4];
   input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
-  osc.send_osc_message(quat_to_osc_address + "w", quats[0]);
-  osc.send_osc_message(quat_to_osc_address + "x", quats[1]);
-  osc.send_osc_message(quat_to_osc_address + "y", quats[2]);
-  osc.send_osc_message(quat_to_osc_address + "z", quats[3]);
+  osc.add_to_bundle(quat_to_osc_address + "w", quats[0]);
+  osc.add_to_bundle(quat_to_osc_address + "x", quats[1]);
+  osc.add_to_bundle(quat_to_osc_address + "y", quats[2]);
+  osc.add_to_bundle(quat_to_osc_address + "z", quats[3]);
 }
 #endif
