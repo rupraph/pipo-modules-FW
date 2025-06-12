@@ -375,7 +375,7 @@
   </div>
 </Collapse>
 
-<hr class="separator" />
+<!-- <hr class="separator" />
 <Collapse title="Beta Features">
   {#if $type === "analog"}
     <Collapse title="HW Output (from OSC only)">
@@ -398,7 +398,7 @@
       >
     </div></Collapse
   >
-</Collapse>
+</Collapse> -->
 
 <hr class="separator" />
 <Collapse title="Board settings">
