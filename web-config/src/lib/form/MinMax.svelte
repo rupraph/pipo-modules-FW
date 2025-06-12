@@ -147,7 +147,7 @@
     width: 100%;
   }
   .inputs > * {
-    width: max-content;
+    width: 100%;
   }
   .value {
     position: absolute;
