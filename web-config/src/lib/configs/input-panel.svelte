@@ -22,6 +22,7 @@
   const smoothValues: Partial<SmoothSensorValues<T>> = {};
   const withinWindowValues: Partial<SensorValues<T>> = {};
   const sensorValues: Partial<SensorValues<T>> = {};
+  let maxSensorValue = aschema.max; // Initialize with the default lmax value
 
   (pipoio as PipoIO<T>).on("sensor", ({ axis, value, withinWindow }) => {
     withinWindowValues[axis] = +withinWindow;
@@ -40,6 +41,7 @@
     smoothValues[axis].timestamp = now;
     smoothValues[axis].old = smoothValues[axis].new;
     smoothValues[axis].new = value;
+    maxSensorValue = aschema.max;
   });
 
   function animateSensor() {
@@ -56,6 +58,18 @@
     requestAnimationFrame(animateSensor);
   }
   animateSensor();
+
+  console.log("maxSensorValue", maxSensorValue);
+  $: {
+    const currentValue = sensorValues[currentAxis];
+    if (
+      currentValue !== undefined &&
+      currentValue > maxSensorValue &&
+      currentValue > aschema.max
+    ) {
+      maxSensorValue = Math.round(currentValue); // Update maxSensorValue if a higher value is reached
+    }
+  }
 </script>
 
 <MinMax
@@ -67,7 +81,7 @@
     : "single"}
   cursorActive={Boolean(withinWindowValues[currentAxis])}
   min={aschema.min}
-  max={aschema.max}
+  bind:max={maxSensorValue}
   step={aschema.step}
   minLabel={`min (${aschema.unit})`}
   maxLabel={`max (${aschema.unit})`}
