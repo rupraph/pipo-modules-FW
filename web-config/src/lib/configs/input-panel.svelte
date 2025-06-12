@@ -83,8 +83,8 @@
   min={aschema.min}
   bind:max={maxSensorValue}
   step={aschema.step}
-  minLabel={`min (${aschema.unit})`}
-  maxLabel={`max (${aschema.unit})`}
+  minLabel={`LowLim (${aschema.unit})`}
+  maxLabel={`HighLim (${aschema.unit})`}
 />
 
 <!-- {#if aschema.cat === "Touch"  } -->
