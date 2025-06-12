@@ -204,7 +204,7 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 20000,
+      max: 5000,
       step: 1,
       index: 9,
     },
