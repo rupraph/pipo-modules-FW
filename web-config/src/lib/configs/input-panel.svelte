@@ -24,6 +24,10 @@
   const sensorValues: Partial<SensorValues<T>> = {};
   let maxSensorValue = aschema.max; // Initialize with the default lmax value
 
+  $: {
+    maxSensorValue = aschema.max;
+  }
+
   (pipoio as PipoIO<T>).on("sensor", ({ axis, value, withinWindow }) => {
     withinWindowValues[axis] = +withinWindow;
     const now = Date.now();
@@ -41,7 +45,7 @@
     smoothValues[axis].timestamp = now;
     smoothValues[axis].old = smoothValues[axis].new;
     smoothValues[axis].new = value;
-    maxSensorValue = aschema.max;
+    // maxSensorValue = aschema.max;
   });
 
   function animateSensor() {
@@ -58,8 +62,6 @@
     requestAnimationFrame(animateSensor);
   }
   animateSensor();
-
-  console.log("maxSensorValue", maxSensorValue);
   $: {
     const currentValue = sensorValues[currentAxis];
     if (
