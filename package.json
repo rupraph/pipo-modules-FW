@@ -45,7 +45,9 @@
     "serial": "./scripts/pio.sh device monitor",
     "release": "python3 ./scripts/release.py",
     "erase": "./scripts/pio.sh run -t erase",
-    "full:motion_rev1_1": "npm run build:web && npm run build:fs:motion_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:motion_rev1_1"
+    "full:motion_rev1_1": "npm run build:web && npm run build:fs:motion_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:motion_rev1_1",
+    "full:range_rev1_1": "npm run build:web && npm run build:fs:range_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:range_rev1_1",
+    "full:analog_rev2": "npm run build:web && npm run build:fs:analog_rev2 && npm run erase &&npm run upload:fs && npm run upload:analog_rev2"
   },
   "author": "",
   "license": "ISC",
