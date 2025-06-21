@@ -9,7 +9,7 @@
 #endif
 
 #ifndef HW_REV
-#define HW_REV 11  // 1.0 or 1.1
+#define HW_REV 20  // 1.0 or 1.1
 #endif
 
 // #define BETA_OUT
