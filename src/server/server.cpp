@@ -406,7 +406,7 @@ void PipoServer::setup_requests() {
     }
   });
 #endif
-
+  // pause Engine
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     PAUSED = !PAUSED;
     return request->send(200, "text/plain", "Engine paused");
