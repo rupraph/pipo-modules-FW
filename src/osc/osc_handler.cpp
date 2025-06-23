@@ -192,17 +192,33 @@ void OSC_handler::add_to_bundle(string address, float value) {
 
 void OSC_handler::send_bundle() {
   if (!isStarted || bundle.size() < 1) {
+    bundle.empty();
     return;
   }
-  if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-    Udp.beginPacket(dest_ip, out_port);
-    bundle.send(Udp);
-    Udp.endPacket();
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-    bundle.empty();
-  } else {
+  if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
     Serial.println(F("No destination IP or port set"));
+    bundle.empty();
+    return;
   }
+
+  int packetStatus = Udp.beginPacket(dest_ip, out_port);
+  if (packetStatus == 0) {
+    Serial.println(F("Failed to start OSC packet"));
+    bundle.empty();
+    return;
+  }
+
+  if (bundle.hasError()) {
+    Serial.print(F("OSC Bundle has error: "));
+    Serial.println(bundle.getError());
+    bundle.empty();
+    return;
+  }
+
+  bundle.send(Udp);
+  Udp.endPacket();
+  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+  bundle.empty();  // clear the bundle after sending
 }
 
 void OSC_handler::set_enabled(bool ena) {
