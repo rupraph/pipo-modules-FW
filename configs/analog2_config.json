@@ -116,7 +116,7 @@
       },
       "A02": {
         "cc_nb": 2,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -131,7 +131,7 @@
       },
       "A03": {
         "cc_nb": 3,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -146,7 +146,7 @@
       },
       "A04": {
         "cc_nb": 4,
-        "channel": 1,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -161,7 +161,7 @@
       },
       "A05": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -176,7 +176,7 @@
       },
       "A06": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -190,8 +190,8 @@
         "velocity": 100
       },
       "A07": {
-        "cc_nb": 5,
-        "channel": 1,
+        "cc_nb": 7,
+        "channel": 7,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -205,8 +205,8 @@
         "velocity": 100
       },
       "A08": {
-        "cc_nb": 6,
-        "channel": 1,
+        "cc_nb": 8,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -220,8 +220,8 @@
         "velocity": 100
       },
       "T1": {
-        "cc_nb": 7,
-        "channel": 1,
+        "cc_nb": 9,
+        "channel": 9,
         "enabled": true,
         "hires": false,
         "cc_max": 127,
@@ -235,8 +235,8 @@
         "velocity": 100
       },
       "T2": {
-        "cc_nb": 8,
-        "channel": 1,
+        "cc_nb": 10,
+        "channel": 10,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -250,8 +250,8 @@
         "velocity": 100
       },
       "T3": {
-        "cc_nb": 9,
-        "channel": 1,
+        "cc_nb": 11,
+        "channel": 11,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -265,8 +265,8 @@
         "velocity": 100
       },
       "T4": {
-        "cc_nb": 10,
-        "channel": 1,
+        "cc_nb": 12,
+        "channel": 12,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -280,8 +280,8 @@
         "velocity": 100
       },
       "T5": {
-        "cc_nb": 11,
-        "channel": 1,
+        "cc_nb": 13,
+        "channel": 13,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -295,8 +295,8 @@
         "velocity": 100
       },
       "T6": {
-        "cc_nb": 12,
-        "channel": 1,
+        "cc_nb": 14,
+        "channel": 14,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -310,8 +310,8 @@
         "velocity": 100
       },
       "T7": {
-        "cc_nb": 11,
-        "channel": 1,
+        "cc_nb": 15,
+        "channel": 15,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -325,8 +325,8 @@
         "velocity": 100
       },
       "T8": {
-        "cc_nb": 12,
-        "channel": 1,
+        "cc_nb": 16,
+        "channel": 16,
         "enabled": false,
         "hires": false,
         "cc_max": 127,

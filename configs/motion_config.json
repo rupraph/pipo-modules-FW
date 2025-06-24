@@ -74,7 +74,7 @@
       },
       "accY": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -89,7 +89,7 @@
       },
       "accZ": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -103,8 +103,8 @@
         "velocity": 100
       },
       "pitch": {
-        "cc_nb": 1,
-        "channel": 1,
+        "cc_nb": 7,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -118,8 +118,8 @@
         "velocity": 100
       },
       "roll": {
-        "cc_nb": 2,
-        "channel": 1,
+        "cc_nb": 8,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -133,8 +133,8 @@
         "velocity": 100
       },
       "yaw": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 9,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -148,8 +148,8 @@
         "velocity": 100
       },
       "magX": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 10,
+        "channel": 7,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -163,8 +163,8 @@
         "velocity": 100
       },
       "magY": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 11,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -178,8 +178,8 @@
         "velocity": 100
       },
       "magZ": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 12,
+        "channel": 9,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
