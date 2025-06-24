@@ -48,4 +48,5 @@ class measure_time {
 };
 
 extern measure_time looptime;
+extern measure_time interval;
 #endif  //PIPODEBUG_H

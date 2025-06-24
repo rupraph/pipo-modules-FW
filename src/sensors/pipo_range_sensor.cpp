@@ -41,6 +41,8 @@ void PipoRangeSensor::setup() {
 #elif HW_REV >= 11
   vl53l1->VL53L1_StartMeasurement();
   vl53l1->VL53L1_SetPresetMode(VL53L1_PRESETMODE_RANGING);
+  vl53l1->VL53L1_SetMeasurementTimingBudgetMicroSeconds(
+      12000);  //if not specified. 33ms. 16000 normal.
   vl53l1->VL53L1_ClearInterruptAndStartMeasurement();
 #endif
 
@@ -48,15 +50,19 @@ void PipoRangeSensor::setup() {
   no_of_object_found = 0;
 
   // use of filter should likely a t one point be configurable
-  lp_filter.set_cutoffFrequency(18.0);
+  // lp_filter.set_cutoffFrequency(18.0);
   ma_filter = MovingAverageFilter(3);
-  km_filter = KalmanFilter(1, 1);
+  // km_filter = KalmanFilter(1, 1);
+
+  sensor_dat["dist"].NeutralFilter.setDeadband(0.1);
+  sensor_dat["dist"].NeutralFilter.setStableThreshold(0.5);
+
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
 void PipoRangeSensor::update() {
-  start_duration();
+  // start_duration();
   int j;
 
 #if HW_REV == 10
@@ -96,6 +102,7 @@ void PipoRangeSensor::update() {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
       }
+      // Serial.println("Out of range");
 
     }
     // not sure if capping is optimal to be here in sensor class or better in engine/translators
@@ -106,6 +113,9 @@ void PipoRangeSensor::update() {
            sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
           !hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        // interval.stop();
+        // interval.report();
+        // interval.start();
         sensor_dat["dist"].value = ma_filter.process(
             sensor_dat["dist"].raw_value - sensor_dat["dist"].offset);
       }
@@ -125,8 +135,8 @@ void PipoRangeSensor::update() {
 #endif
     }
   }
-  end_duration();
-  measured_loop_duration();
+  // end_duration();
+  // measured_loop_duration();
 }
 
 void PipoRangeSensor::measure_offset(const string& axis_name) {

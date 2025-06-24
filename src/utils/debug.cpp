@@ -3,6 +3,7 @@
 // #define DEBUG_HEAP 1
 
 measure_time looptime("loop");
+measure_time interval("interval");
 
 void debug_monitor(void* pvParameters) {
   for (;;) {
