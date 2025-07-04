@@ -94,7 +94,7 @@ export const schema: Schema = {
       cat: "",
       unit: "cm",
       min: 0,
-      max: 400,
+      max: 300,
       step: 1,
       index: 0,
     },
