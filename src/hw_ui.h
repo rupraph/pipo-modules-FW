@@ -42,6 +42,7 @@ class HwUi {
   HwUi() {};
 
   Button pause_sw;
+  Button mode_sw;
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;

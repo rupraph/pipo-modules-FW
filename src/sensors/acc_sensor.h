@@ -31,6 +31,8 @@ class MotionSensor : public Sensor {
 
   void calc_euler_angles();
   void convert_accell();
+  void reset_reference_orientation();
+  void calc_differential_euler_angles();
 
   void get_quat(float& w, float& x, float& y, float& z) {
     w = quat_w;
@@ -45,7 +47,7 @@ class MotionSensor : public Sensor {
  private:
   //config
   bool relative_mode =
-      true;  //uses quat6 or quat9 (6 = relative to start, 9 = absolute - corection to north is slow)
+      true;  //true = differential tracking (pure relative), false = quat9 absolute orientation
 
   //theses filters are for noise reduction.
   unordered_map<string, EMAFilter> filter_map = {
@@ -88,6 +90,13 @@ class MotionSensor : public Sensor {
   float quat_x;
   float quat_y;
   float quat_z;
+
+  // Reference quaternion for differential tracking
+  float quat_ref_w = 1.0;
+  float quat_ref_x = 0.0;
+  float quat_ref_y = 0.0;
+  float quat_ref_z = 0.0;
+  bool reference_set = false;
 
   // holds raw data from sensor
   //   float raw_accX;

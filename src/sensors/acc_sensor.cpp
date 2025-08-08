@@ -23,11 +23,22 @@ void MotionSensor::update() {
   icm20948.task();
   /////////  Read Quat6 orientation data
   if (relative_mode) {
+    // Mode 1: Pure relative orientation using quaternion differential tracking
     if (icm20948.quat6DataIsReady()) {
       icm20948.readQuat6Data(&quat_w, &quat_x, &quat_y, &quat_z);
-      calc_euler_angles();
+      if (!reference_set) {
+        // Set initial orientation as reference
+        quat_ref_w = quat_w;
+        quat_ref_x = quat_x;
+        quat_ref_y = quat_y;
+        quat_ref_z = quat_z;
+        reference_set = true;
+        Serial.println("Reference orientation set");
+      }
+      calc_differential_euler_angles();
     }
   } else {
+    // Mode 2: quat9 (absolute orientation)
     if (icm20948.quat9DataIsReady()) {
       icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       calc_euler_angles();
@@ -144,6 +155,43 @@ void MotionSensor::calc_euler_angles() {
   //     filter_map["roll"].process(sensor_dat["roll"].raw_value);
 }
 
+void MotionSensor::calc_differential_euler_angles() {
+  // Calculate relative quaternion: q_relative = q_current * q_reference_inverse
+  // Quaternion inverse: q_inv = [w, -x, -y, -z] / |q|^2
+  // For unit quaternions, |q|^2 = 1, so q_inv = [w, -x, -y, -z]
+
+  // q_relative = q_current * q_ref_inverse
+  float rel_w = quat_w * quat_ref_w + quat_x * quat_ref_x +
+                quat_y * quat_ref_y + quat_z * quat_ref_z;
+  float rel_x = quat_w * (-quat_ref_x) + quat_x * quat_ref_w +
+                quat_y * (-quat_ref_z) + quat_z * quat_ref_y;
+  float rel_y = quat_w * (-quat_ref_y) + quat_x * quat_ref_z +
+                quat_y * quat_ref_w + quat_z * (-quat_ref_x);
+  float rel_z = quat_w * (-quat_ref_z) + quat_x * (-quat_ref_y) +
+                quat_y * quat_ref_x + quat_z * quat_ref_w;
+
+  // Convert relative quaternion to Euler angles
+  // Yaw (z-axis rotation)
+  double siny_cosp = +2.0 * (rel_w * rel_z + rel_x * rel_y);
+  double cosy_cosp = +1.0 - 2.0 * (rel_y * rel_y + rel_z * rel_z);
+  sensor_dat["yaw"].raw_value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+  sensor_dat["yaw"].value = sensor_dat["yaw"].raw_value;
+
+  // Pitch (y-axis rotation)
+  double sinp = +2.0 * (rel_w * rel_y - rel_z * rel_x);
+  if (fabs(sinp) >= 1)
+    sensor_dat["pitch"].raw_value = copysign(PI / 2, sinp) * 180.0 / PI;
+  else
+    sensor_dat["pitch"].raw_value = asin(sinp) * 180.0 / PI;
+  sensor_dat["pitch"].value = sensor_dat["pitch"].raw_value;
+
+  // Roll (x-axis rotation)
+  double sinr_cosp = +2.0 * (rel_w * rel_x + rel_y * rel_z);
+  double cosr_cosp = +1.0 - 2.0 * (rel_x * rel_x + rel_y * rel_y);
+  sensor_dat["roll"].raw_value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+  sensor_dat["roll"].value = sensor_dat["roll"].raw_value;
+}
+
 void MotionSensor::convert_accell() {
   //no conversion here
   sensor_dat["accX"].value = sensor_dat["accX"].raw_value;
@@ -168,7 +216,12 @@ void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
     Serial.println("set_sensor_config");
   }
   if (config["relative_mode"].is<bool>()) {
+    bool old_mode = relative_mode;
     relative_mode = config["relative_mode"];
+    if (relative_mode && !old_mode) {
+      // Switching to differential mode - reset reference
+      reference_set = false;
+    }
   }
   if (debug) {
     Serial.println(relative_mode);
@@ -180,6 +233,11 @@ JsonDocument MotionSensor::get_sensor_config(bool debug = false) {
   JsonDocument config;
   config["relative_mode"] = relative_mode;
   return config;
+}
+
+void MotionSensor::reset_reference_orientation() {
+  reference_set = false;
+  Serial.println("Reference orientation will be reset on next update");
 }
 
 #endif  // PIPO_MOTION

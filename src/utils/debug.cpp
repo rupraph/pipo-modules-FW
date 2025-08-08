@@ -25,6 +25,7 @@ void debug_monitor(void* pvParameters) {
     // Serial.print(" ms, interval: ");
     // // Serial.println(sensor_task_interval);
     looptime.report();
+    // Serial.print(getCpuFrequencyMhz());
     vTaskDelay(pdMS_TO_TICKS(200));
   }
 }

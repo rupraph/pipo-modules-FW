@@ -26,6 +26,8 @@ void setup() {  // by default on core 1
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
+  // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
+
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup");
 

@@ -96,6 +96,7 @@ void HwUi::setup() {
   set_led(LOW_BAT_LED, 0);
 
   pause_sw.setup_button(PP_SW);
+  mode_sw.setup_button(MODE_SW);
 
   Serial.println("HW UI setup done");
   hwui.measure_battery();
@@ -122,6 +123,9 @@ void HwUi::update_switches() {
       pause_sw.reset_button();
       Serial.print("PAUSED");
     }
+  }
+  if (mode_sw.read_debounce() == 0) {
+    Serial.print("Mode switch pressed");
   }
 }
 
