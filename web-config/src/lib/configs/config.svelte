@@ -189,12 +189,6 @@
     });
   }
 
-  function setReference() {
-    pipoio.get("/setreference").then(() => {
-      console.log("Reference orientation reset");
-    });
-  }
-
   function reset_offset(axis: PipoKeys[T]) {
     axios({
       method: "post",
@@ -211,15 +205,7 @@
       >Zero All Touch
     </button>
   {/if}
-  {#if $type === "motion"}
-    <Tooltip
-      title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
-    >
-      <button class="primary" on:click={setReference} style="width: fit-content"
-        >Set relative reference</button
-      >
-    </Tooltip>
-  {/if}
+
   <button
     class="primary Pause"
     on:click={pause}

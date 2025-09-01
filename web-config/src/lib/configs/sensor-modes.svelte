@@ -5,6 +5,12 @@
   import Collapse from "../collapse.svelte";
   import Tooltip from "../tooltip.svelte";
   export let config: SensorSettings;
+
+  function setReference() {
+    pipoio.get("/setreference").then(() => {
+      console.log("Reference orientation reset");
+    });
+  }
 </script>
 
 {#if $type === "motion" || $type === "range"}
@@ -15,6 +21,15 @@
         bind:value={config.relative_mode}
         design="slider"
       />
+      <Tooltip
+        title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
+      >
+        <button
+          class="primary"
+          on:click={setReference}
+          style="width: fit-content">Set relative reference</button
+        >
+      </Tooltip>
     {/if}
     {#if $type === "range"}
       <Tooltip title="Hold mode will hold the last value if nothing in range">
