@@ -33,6 +33,7 @@ class MotionSensor : public Sensor {
   void convert_accell();
   void reset_reference_orientation();
   void calc_differential_euler_angles();
+  void normalize_quaternion(float& w, float& x, float& y, float& z);
 
   void get_quat(float& w, float& x, float& y, float& z) {
     w = quat_w;
@@ -40,6 +41,8 @@ class MotionSensor : public Sensor {
     y = quat_y;
     z = quat_z;
   }
+
+  void get_relative_quat(float& w, float& x, float& y, float& z);
 
   bool enable_send_vizualizer =
       false;  //set on/off serial messages for vizualizer

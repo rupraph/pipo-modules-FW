@@ -24,16 +24,25 @@ void MotionSensor::update() {
   /////////  Read Quat6 orientation data
   if (relative_mode) {
     // Mode 1: Pure relative orientation using quaternion differential tracking
-    if (icm20948.quat6DataIsReady()) {
-      icm20948.readQuat6Data(&quat_w, &quat_x, &quat_y, &quat_z);
+    if (icm20948.quat9DataIsReady()) {
+      icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       if (!reference_set) {
-        // Set initial orientation as reference
+        // Set initial orientation as reference and normalize
         quat_ref_w = quat_w;
         quat_ref_x = quat_x;
         quat_ref_y = quat_y;
         quat_ref_z = quat_z;
+        normalize_quaternion(quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
         reference_set = true;
         Serial.println("Reference orientation set");
+        Serial.print("Ref quat: w=");
+        Serial.print(quat_ref_w, 4);
+        Serial.print(" x=");
+        Serial.print(quat_ref_x, 4);
+        Serial.print(" y=");
+        Serial.print(quat_ref_y, 4);
+        Serial.print(" z=");
+        Serial.println(quat_ref_z, 4);
       }
       calc_differential_euler_angles();
     }
@@ -59,8 +68,8 @@ void MotionSensor::update() {
                          &sensor_dat["magZ"].raw_value);
     sensor_dat["magX"].value = sensor_dat["magX"].raw_value;
     //     filter_map["magX"].process(sensor_dat["magX"].raw_value);
-    sensor_dat["magY"].value = sensor_dat["magX"].raw_value;
-    //     filter_map["magY"].process(sensor_dat["magX"].raw_value);
+    sensor_dat["magY"].value = sensor_dat["magY"].raw_value;
+    //     filter_map["magY"].process(sensor_dat["magY"].raw_value);
     sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
     //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
@@ -156,19 +165,38 @@ void MotionSensor::calc_euler_angles() {
 }
 
 void MotionSensor::calc_differential_euler_angles() {
-  // Calculate relative quaternion: q_relative = q_current * q_reference_inverse
-  // Quaternion inverse: q_inv = [w, -x, -y, -z] / |q|^2
-  // For unit quaternions, |q|^2 = 1, so q_inv = [w, -x, -y, -z]
+  // Calculate relative quaternion: q_relative = q_reference_conjugate * q_current
+  // This gives us the rotation FROM reference TO current orientation
+  // Quaternion conjugate: q_ref_conj = [w, -x, -y, -z]
+  // Quaternion multiplication: q1 * q2 = [w1*w2 - x1*x2 - y1*y2 - z1*z2,
+  //                                       w1*x2 + x1*w2 + y1*z2 - z1*y2,
+  //                                       w1*y2 - x1*z2 + y1*w2 + z1*x2,
+  //                                       w1*z2 + x1*y2 - y1*x2 + z1*w2]
 
-  // q_relative = q_current * q_ref_inverse
-  float rel_w = quat_w * quat_ref_w + quat_x * quat_ref_x +
-                quat_y * quat_ref_y + quat_z * quat_ref_z;
-  float rel_x = quat_w * (-quat_ref_x) + quat_x * quat_ref_w +
-                quat_y * (-quat_ref_z) + quat_z * quat_ref_y;
-  float rel_y = quat_w * (-quat_ref_y) + quat_x * quat_ref_z +
-                quat_y * quat_ref_w + quat_z * (-quat_ref_x);
-  float rel_z = quat_w * (-quat_ref_z) + quat_x * (-quat_ref_y) +
-                quat_y * quat_ref_x + quat_z * quat_ref_w;
+  // Normalize current quaternion
+  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+
+  // q_relative = q_ref_conjugate * q_current
+  // where q_ref_conjugate = [quat_ref_w, -quat_ref_x, -quat_ref_y, -quat_ref_z]
+  float rel_w = quat_ref_w * curr_w - (-quat_ref_x) * curr_x -
+                (-quat_ref_y) * curr_y - (-quat_ref_z) * curr_z;
+  float rel_x = quat_ref_w * curr_x + (-quat_ref_x) * curr_w +
+                (-quat_ref_y) * curr_z - (-quat_ref_z) * curr_y;
+  float rel_y = quat_ref_w * curr_y - (-quat_ref_x) * curr_z +
+                (-quat_ref_y) * curr_w + (-quat_ref_z) * curr_x;
+  float rel_z = quat_ref_w * curr_z + (-quat_ref_x) * curr_y -
+                (-quat_ref_y) * curr_x + (-quat_ref_z) * curr_w;
+
+  // Simplify (removing double negatives):
+  rel_w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+          quat_ref_z * curr_z;
+  rel_x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+          quat_ref_z * curr_y;
+  rel_y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+          quat_ref_z * curr_x;
+  rel_z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+          quat_ref_z * curr_w;
 
   // Convert relative quaternion to Euler angles
   // Yaw (z-axis rotation)
@@ -238,6 +266,41 @@ JsonDocument MotionSensor::get_sensor_config(bool debug = false) {
 void MotionSensor::reset_reference_orientation() {
   reference_set = false;
   Serial.println("Reference orientation will be reset on next update");
+}
+
+void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
+                                        float& z) {
+  float norm = sqrt(w * w + x * x + y * y + z * z);
+  if (norm > 0.0f) {
+    w /= norm;
+    x /= norm;
+    y /= norm;
+    z /= norm;
+  }
+}
+
+void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
+  if (!reference_set) {
+    w = 1.0f;
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+    return;
+  }
+
+  // Normalize current quaternion
+  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+
+  // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
+  w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+      quat_ref_z * curr_z;
+  x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+      quat_ref_z * curr_y;
+  y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+      quat_ref_z * curr_x;
+  z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+      quat_ref_z * curr_w;
 }
 
 #endif  // PIPO_MOTION
