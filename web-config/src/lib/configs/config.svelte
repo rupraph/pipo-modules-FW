@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import Radio from "../form/Radio.svelte";
+
   import { pipoio } from "../../pipoio";
   import HidGlobalConfig from "./hid-global-config.svelte";
   import { onMount } from "svelte";
@@ -47,6 +49,7 @@
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   let isConfigValid = false;
+
   configValid.subscribe((valid) => {
     isConfigValid = valid;
   });
@@ -338,48 +341,51 @@
     {/if}
   {/if}
 </Collapse>
-
+<hr class="separator" />
 {#if config.sensorconf}
-  <hr class="separator" />
   <SensorModes bind:config={config.sensorconf} />
+  <hr class="separator" />
 {/if}
 
-<Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-  <section class="OSC-global-settings">
-    <OscGlobalConfig
-      bind:ip={config.general.OSC_IP}
-      bind:port={config.general.OSC_PORT}
-    />
-  </section>
-  {#if $type === "motion"}
-    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
-      <Switch
-        label="MOTION: Quaternions to OSC"
-        bind:value={config.engine["engine-special"]["quat"].enabled}
-        design="slider"
+{#if config.general.OSC_ENA}
+  <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
+    <section class="OSC-global-settings">
+      <OscGlobalConfig
+        bind:ip={config.general.OSC_IP}
+        bind:port={config.general.OSC_PORT}
       />
-      {#if config.engine["engine-special"]["quat"].enabled}
-        <Text
-          label="Address"
-          bind:value={config.engine["engine-special"]["quat"].osc_addr}
+    </section>
+    {#if $type === "motion"}
+      {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
+        <Switch
+          label="MOTION: Quaternions to OSC"
+          bind:value={config.engine["engine-special"]["quat"].enabled}
+          design="slider"
         />
+        {#if config.engine["engine-special"]["quat"].enabled}
+          <Text
+            label="Address"
+            bind:value={config.engine["engine-special"]["quat"].osc_addr}
+          />
+        {/if}
       {/if}
     {/if}
-  {/if}
-  <div style="display:flex; margin-top:1em; justify-content:right;">
-    <LoadingButton
-      onClick={submit}
-      loading={savingStatus === "loading"}
-      disabled={!isConfigValid}
-      class={savingStatus === "success"
-        ? "success"
-        : savingStatus === "error"
-          ? "error"
-          : "primary"}
-      title="Apply and save the config in pipo">Save</LoadingButton
-    >
-  </div>
-</Collapse>
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        disabled={!isConfigValid}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div>
+  </Collapse>
+  <hr class="separator" />
+{/if}
 
 <!-- <hr class="separator" />
 <Collapse title="Beta Features">
@@ -406,7 +412,6 @@
   >
 </Collapse> -->
 
-<hr class="separator" />
 <Collapse title="Board settings">
   <BoardConfig bind:generalconfig={config.general} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
