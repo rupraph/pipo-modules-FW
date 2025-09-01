@@ -406,6 +406,14 @@ void PipoServer::setup_requests() {
     }
   });
 #endif
+
+#ifdef PIPO_MOTION
+  server.on("/setreference", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    input_sensor.reset_reference_orientation();
+    return request->send(200, "text/plain", "Reference orientation reset");
+  });
+#endif
+
   // pause Engine
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
     PAUSED = !PAUSED;
