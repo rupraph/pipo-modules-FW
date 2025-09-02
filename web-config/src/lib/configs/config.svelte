@@ -200,41 +200,44 @@
   }
 </script>
 
-<Collapse title="Quick settings">
-  <QuickConfig bind:config />
-  {#if $type === "analog"}
-    <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
-      >Zero All Touch
+{#if $type !== "range"}
+  <Collapse title="Quick settings">
+    <QuickConfig bind:config />
+
+    {#if $type === "analog"}
+      <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
+        >Zero All Touch
+      </button>
+    {/if}
+
+    <button
+      class="primary Pause"
+      on:click={pause}
+      title="Pause sending data"
+      style="margin: 20px;"
+    >
+      {#if isPaused}
+        Resume
+      {/if}
+      {#if !isPaused}
+        Pause all output
+      {/if}
     </button>
-  {/if}
 
-  <button
-    class="primary Pause"
-    on:click={pause}
-    title="Pause sending data"
-    style="margin: 20px;"
-  >
-    {#if isPaused}
-      Resume
-    {/if}
-    {#if !isPaused}
-      Pause all output
-    {/if}
-  </button>
-
-  <LoadingButton
-    onClick={submit}
-    loading={savingStatus === "loading"}
-    disabled={!isConfigValid}
-    class={savingStatus === "success"
-      ? "success"
-      : savingStatus === "error"
-        ? "error"
-        : "primary"}
-    title="Apply and save the config in pipo">Save</LoadingButton
-  >
-</Collapse>
-<hr class="separator" />
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      disabled={!isConfigValid}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </Collapse>
+  <hr class="separator" />
+{/if}
 
 <Collapse title="Channel settings" open>
   {#if currentAxis && config}
