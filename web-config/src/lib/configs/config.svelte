@@ -68,6 +68,12 @@
     configSave.update(config);
   }
 
+  $: if (config.general.MidiEnabled) {
+    currentCat = "MIDI";
+  } else {
+    currentCat = "OSC";
+  }
+
   function updateConfigByChannel() {
     configByChannel = (
       Object.entries(config.inputs) as [PipoKeys[T], InputSettings][]
@@ -127,10 +133,6 @@
       currentAxis = axis;
       pipoio.monitorAxis(axis);
     }
-  }
-
-  function setCategory(cat: string) {
-    currentCat = cat;
   }
 
   function submit() {
@@ -286,7 +288,7 @@
       <p>Check beta section below</p>
     {:else}
       <InputConfig bind:input bind:aschema bind:currentAxis />
-      <CategoryTab active={currentCat} onClick={setCategory} />
+      <!-- <CategoryTab active={currentCat} onClick={setCategory} /> -->
       <Tooltip
         title="Disabled in Quick config"
         followCursor={true}
@@ -296,6 +298,10 @@
           class="translator-settings"
           class:not-allowed={isDisabled(currentCat, midi, hid, osc)}
         >
+          <!-- <h4>{currentCat} output settings</h4> -->
+          <span class="translator-title"> {currentCat} output settings</span>
+          <hr class="separator" />
+
           {#if currentCat === "MIDI"}
             <MidiConfigForm bind:midi bind:sensormode={input.mode} />
           {/if}
@@ -434,13 +440,23 @@
     background-color: rgb(211, 211, 211);
   }
 
+  .translator-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-weight: bold;
+    /* padding: 0.8em 0; */
+  }
+
   .translator-settings {
     background-color: var(--bg-tabs);
     padding: 1em;
-    border-bottom-left-radius: 0.8em;
-    border-bottom-right-radius: 0.8em;
+    /* border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em; */
+    border-radius: 0.8em;
     padding-left: 3em;
-    padding-right: 4em;
+    padding-right: 3em;
   }
 
   .OSC-global-settings {
