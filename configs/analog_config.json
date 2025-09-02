@@ -467,14 +467,14 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
+    "OSC_ENA": false,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1,
     "PipoName": "analog",
-    "BLEEnabled": true
+    "BLEEnabled": false
   },
   "sensorconf": {
     "analogout": {

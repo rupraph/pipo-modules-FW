@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends PipoTypes">
+  import Radio from "../form/Radio.svelte";
+
   import { pipoio } from "../../pipoio";
   import HidGlobalConfig from "./hid-global-config.svelte";
   import { onMount } from "svelte";
@@ -47,6 +49,7 @@
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   let isConfigValid = false;
+
   configValid.subscribe((valid) => {
     isConfigValid = valid;
   });
@@ -63,6 +66,12 @@
     updateConfigByChannel();
     // @ts-expect-error
     configSave.update(config);
+  }
+
+  $: if (config.general.MidiEnabled) {
+    currentCat = "MIDI";
+  } else {
+    currentCat = "OSC";
   }
 
   function updateConfigByChannel() {
@@ -126,10 +135,6 @@
     }
   }
 
-  function setCategory(cat: string) {
-    currentCat = cat;
-  }
-
   function submit() {
     console.log("Saving...");
     savingStatus = "loading";
@@ -186,12 +191,6 @@
     });
   }
 
-  function setReference() {
-    pipoio.get("/setreference").then(() => {
-      console.log("Reference orientation reset");
-    });
-  }
-
   function reset_offset(axis: PipoKeys[T]) {
     axios({
       method: "post",
@@ -201,49 +200,44 @@
   }
 </script>
 
-<Collapse title="Quick settings">
-  <QuickConfig bind:config />
-  {#if $type === "analog"}
-    <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
-      >Zero All Touch
-    </button>
-  {/if}
-  {#if $type === "motion"}
-    <Tooltip
-      title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
-    >
-      <button class="primary" on:click={setReference} style="width: fit-content"
-        >Set relative reference</button
-      >
-    </Tooltip>
-  {/if}
-  <button
-    class="primary Pause"
-    on:click={pause}
-    title="Pause sending data"
-    style="margin: 20px;"
-  >
-    {#if isPaused}
-      Resume
-    {/if}
-    {#if !isPaused}
-      Pause all output
-    {/if}
-  </button>
+{#if $type !== "range"}
+  <Collapse title="Quick settings">
+    <QuickConfig bind:config />
 
-  <LoadingButton
-    onClick={submit}
-    loading={savingStatus === "loading"}
-    disabled={!isConfigValid}
-    class={savingStatus === "success"
-      ? "success"
-      : savingStatus === "error"
-        ? "error"
-        : "primary"}
-    title="Apply and save the config in pipo">Save</LoadingButton
-  >
-</Collapse>
-<hr class="separator" />
+    {#if $type === "analog"}
+      <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
+        >Zero All Touch
+      </button>
+    {/if}
+
+    <button
+      class="primary Pause"
+      on:click={pause}
+      title="Pause sending data"
+      style="margin: 20px;"
+    >
+      {#if isPaused}
+        Resume
+      {/if}
+      {#if !isPaused}
+        Pause all output
+      {/if}
+    </button>
+
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      disabled={!isConfigValid}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </Collapse>
+  <hr class="separator" />
+{/if}
 
 <Collapse title="Channel settings" open>
   {#if currentAxis && config}
@@ -297,7 +291,7 @@
       <p>Check beta section below</p>
     {:else}
       <InputConfig bind:input bind:aschema bind:currentAxis />
-      <CategoryTab active={currentCat} onClick={setCategory} />
+      <!-- <CategoryTab active={currentCat} onClick={setCategory} /> -->
       <Tooltip
         title="Disabled in Quick config"
         followCursor={true}
@@ -307,6 +301,10 @@
           class="translator-settings"
           class:not-allowed={isDisabled(currentCat, midi, hid, osc)}
         >
+          <!-- <h4>{currentCat} output settings</h4> -->
+          <span class="translator-title"> {currentCat} output settings</span>
+          <hr class="separator" />
+
           {#if currentCat === "MIDI"}
             <MidiConfigForm bind:midi bind:sensormode={input.mode} />
           {/if}
@@ -338,48 +336,51 @@
     {/if}
   {/if}
 </Collapse>
-
+<hr class="separator" />
 {#if config.sensorconf}
-  <hr class="separator" />
   <SensorModes bind:config={config.sensorconf} />
+  <hr class="separator" />
 {/if}
 
-<Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-  <section class="OSC-global-settings">
-    <OscGlobalConfig
-      bind:ip={config.general.OSC_IP}
-      bind:port={config.general.OSC_PORT}
-    />
-  </section>
-  {#if $type === "motion"}
-    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
-      <Switch
-        label="MOTION: Quaternions to OSC"
-        bind:value={config.engine["engine-special"]["quat"].enabled}
-        design="slider"
+{#if config.general.OSC_ENA}
+  <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
+    <section class="OSC-global-settings">
+      <OscGlobalConfig
+        bind:ip={config.general.OSC_IP}
+        bind:port={config.general.OSC_PORT}
       />
-      {#if config.engine["engine-special"]["quat"].enabled}
-        <Text
-          label="Address"
-          bind:value={config.engine["engine-special"]["quat"].osc_addr}
+    </section>
+    {#if $type === "motion"}
+      {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
+        <Switch
+          label="MOTION: Quaternions to OSC"
+          bind:value={config.engine["engine-special"]["quat"].enabled}
+          design="slider"
         />
+        {#if config.engine["engine-special"]["quat"].enabled}
+          <Text
+            label="Address"
+            bind:value={config.engine["engine-special"]["quat"].osc_addr}
+          />
+        {/if}
       {/if}
     {/if}
-  {/if}
-  <div style="display:flex; margin-top:1em; justify-content:right;">
-    <LoadingButton
-      onClick={submit}
-      loading={savingStatus === "loading"}
-      disabled={!isConfigValid}
-      class={savingStatus === "success"
-        ? "success"
-        : savingStatus === "error"
-          ? "error"
-          : "primary"}
-      title="Apply and save the config in pipo">Save</LoadingButton
-    >
-  </div>
-</Collapse>
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        disabled={!isConfigValid}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div>
+  </Collapse>
+  <hr class="separator" />
+{/if}
 
 <!-- <hr class="separator" />
 <Collapse title="Beta Features">
@@ -406,7 +407,6 @@
   >
 </Collapse> -->
 
-<hr class="separator" />
 <Collapse title="Board settings">
   <BoardConfig bind:generalconfig={config.general} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
@@ -443,13 +443,23 @@
     background-color: rgb(211, 211, 211);
   }
 
+  .translator-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-weight: bold;
+    /* padding: 0.8em 0; */
+  }
+
   .translator-settings {
     background-color: var(--bg-tabs);
     padding: 1em;
-    border-bottom-left-radius: 0.8em;
-    border-bottom-right-radius: 0.8em;
+    /* border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em; */
+    border-radius: 0.8em;
     padding-left: 3em;
-    padding-right: 4em;
+    padding-right: 3em;
   }
 
   .OSC-global-settings {

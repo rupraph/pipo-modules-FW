@@ -362,8 +362,8 @@
     "OSC_ENA": true,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
-    "MidiEnabled": true,
-    "HidEnabled": true,
+    "MidiEnabled": false,
+    "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "motion",
     "BLEEnabled": false
