@@ -75,6 +75,7 @@ void HwUi::setup() {
   ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
   ledcSetup(3, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+  mode_sw.setup_button(MODE_SW);
 #endif
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   leds_base_color[WIFI_LED] = CRGB::DarkMagenta;
@@ -96,7 +97,6 @@ void HwUi::setup() {
   set_led(LOW_BAT_LED, 0);
 
   pause_sw.setup_button(PP_SW);
-  mode_sw.setup_button(MODE_SW);
 
   Serial.println("HW UI setup done");
   hwui.measure_battery();
