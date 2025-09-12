@@ -27,7 +27,7 @@
     },
     "engine-osc": {
       "dist": {
-        "enabled": false,
+        "enabled": true,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,

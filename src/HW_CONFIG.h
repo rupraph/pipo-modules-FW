@@ -2,6 +2,7 @@
 #define PIPO_TYPE "motion"
 #elif defined(PIPO_RANGE)
 #define PIPO_TYPE "range"
+#define USE_I2C_2V8
 #elif defined(PIPO_ANALOG)
 #define PIPO_TYPE "analog"
 #else
