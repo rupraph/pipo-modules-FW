@@ -51,6 +51,7 @@
     "erase": "./scripts/pio.sh run -t erase",
     "full:motion": "npm run build:web && npm run build:fs:motion && npm run erase &&npm run upload:fs && npm run upload:motion",
     "full:motion_rev1_1": "npm run build:web && npm run build:fs:motion_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:motion_rev1_1",
+    "full:range": "npm run build:web && npm run build:fs:range && npm run erase &&npm run upload:fs && npm run upload:range",
     "full:range_rev1_1": "npm run build:web && npm run build:fs:range_rev1_1 && npm run erase &&npm run upload:fs && npm run upload:range_rev1_1",
     "full:analog_rev2": "npm run build:web && npm run build:fs:analog_rev2 && npm run erase &&npm run upload:fs && npm run upload:analog_rev2",
     "decode_backtrace": "bash -c 'PROJECT_DIR=$(pwd) && cd $HOME/.platformio/packages/toolchain-xtensa-esp32/bin && ./xtensa-esp32-elf-addr2line -a -s -p -C -f -i -r -e \"$PROJECT_DIR/.pio/build/$0/firmware.elf\" ${@:1}'"
