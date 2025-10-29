@@ -444,14 +444,14 @@
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T5"
+        "osc_addr": "analog/T7"
       },
       "T8": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T6"
+        "osc_addr": "analog/T8"
       }
     }
   },
