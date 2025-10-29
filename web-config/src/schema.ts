@@ -233,7 +233,7 @@ export const schema: Schema = {
       min: 0,
       max: 5000,
       step: 1,
-      index: 10,
+      index: 12,
     },
     T8: {
       label: "Touch 8",
@@ -242,7 +242,7 @@ export const schema: Schema = {
       min: 0,
       max: 5000,
       step: 1,
-      index: 11,
+      index: 13,
     },
   },
   unknown: {
