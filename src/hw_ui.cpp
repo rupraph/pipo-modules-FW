@@ -124,9 +124,11 @@ void HwUi::update_switches() {
       Serial.print("PAUSED");
     }
   }
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
   if (mode_sw.read_debounce() == 0) {
     Serial.print("Mode switch pressed");
   }
+#endif
 }
 
 /**
