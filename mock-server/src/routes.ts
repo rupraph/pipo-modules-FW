@@ -188,7 +188,7 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("Error: no ssid parameter");
       return;
     }
-    const known = signals.find((s) => s[0] === ssid);
+    const known = signals.find((s) => `"${s[0]}"` === ssid);
     if (known) {
       known[3] = 0;
     }

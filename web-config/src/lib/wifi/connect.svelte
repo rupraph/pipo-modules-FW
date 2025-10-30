@@ -292,7 +292,7 @@
             {/if}
             <Signal signal={quality} bars={5} />
             {#if known}
-              <button class="forget" on:click={() => onForget(`"${ssid}"`)}
+              <button class="forget" on:click={() => onForget(ssid)}
                 >forget</button
               >
             {:else}
