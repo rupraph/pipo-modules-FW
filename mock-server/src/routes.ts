@@ -169,7 +169,7 @@ export const setupRoutes = (app: Express) => {
       .join("\n");
     res.status(200).send(`lastScan:\n${signals}`);
   });
-  app.get("/wifi-start-scan", (_, res) => {
+  app.post("/wifi-start-scan", (_, res) => {
     if (state.wifi.scanning) {
       res.status(503).send("Scanning");
       return;

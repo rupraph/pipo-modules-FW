@@ -358,7 +358,6 @@
     cursor: pointer;
   }
   .connect {
-    margin-bottom: 2em;
     grid-column-start: 1;
     grid-column-end: 5;
     display: flex;
