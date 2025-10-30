@@ -105,6 +105,41 @@
     }
     waiting = false;
   }
+  async function onForget(ssid: string) {
+    if (waiting) return;
+    waiting = true;
+    let toast: Toast = {
+      type: "info",
+      message: `Forgetting ${ssid}...`,
+      timeout: 3000,
+    };
+    addToast(toast);
+    try {
+      await pipoio.request({
+        method: "post",
+        url: "/wifi-forget",
+        params: { ssid },
+        timeout: 1000,
+      });
+      console.log("Forgotten wifi", ssid);
+      toast = {
+        type: "success",
+        message: `Network ${ssid} forgotten`,
+        timeout: 3000,
+      };
+      await fetchNetworks();
+    } catch (e) {
+      console.error(e);
+      toast = {
+        type: "error",
+        message: `Failed to forget ${ssid}`,
+        timeout: 3000,
+      };
+    }
+    waiting = false;
+    editing = "";
+    addToast(toast);
+  }
   async function onConnect(ssid: string) {
     if (waiting) return;
     waiting = true;
@@ -256,6 +291,13 @@
               <span></span>
             {/if}
             <Signal signal={quality} bars={5} />
+            {#if known}
+              <button class="forget" on:click={() => onForget(`"${ssid}"`)}
+                >forget</button
+              >
+            {:else}
+              <span></span>
+            {/if}
           </li>
           {#if editing === ssid}
             <div
@@ -343,7 +385,7 @@
     width: 100%;
     padding: 0;
     margin: 0;
-    grid-template-columns: minmax(0, 1fr) 1em 1em 2em;
+    grid-template-columns: minmax(0, 1fr) 1em 1em 2em 4em;
     grid-template-rows: repeat(auto-fill, 2em);
     justify-items: start;
     align-items: end;
@@ -393,6 +435,14 @@
   button.enabled {
     background-color: var(--main);
     color: var(--bg-lighter);
+  }
+  button.forget {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px;
+  }
+  button.forget:hover {
+    background-color: #c82333;
   }
   .buttons {
     display: flex;

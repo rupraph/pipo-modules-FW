@@ -412,5 +412,9 @@ void PipoWifi::requestScan() {
 void PipoWifi::requestRSSI() {
   next.shouldRSSI = true;
 }
+void PipoWifi::forgetNetwork(String ssid) {
+  pwm.remove(ssid);
+  pwm.save();
+}
 
 PipoWifi wifi;
