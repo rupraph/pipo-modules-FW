@@ -41,4 +41,4 @@ indexHtml = indexHtml
 
 // Save updated index.html
 fs.writeFileSync(indexPath, indexHtml);
-console.log("✅ index.html patched");
+console.log("✅ index.html patched: assets will load sequentially.");
