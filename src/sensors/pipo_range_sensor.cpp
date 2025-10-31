@@ -61,7 +61,7 @@ void PipoRangeSensor::setup() {
     pipoDebugHeap();
 }
 
-void PipoRangeSensor::update() {
+void PipoRangeSensor::measure_sensor() {
   // start_duration();
   int j;
 
@@ -124,8 +124,8 @@ void PipoRangeSensor::update() {
 
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-      process_sensor_neutral_filter();
-      process_sensor_triggers();
+      // process_sensor_neutral_filter();
+      // process_sensor_triggers();
     }
     if (status == 0) {
 #if HW_REV == 10
@@ -135,17 +135,18 @@ void PipoRangeSensor::update() {
 #endif
     }
   }
+  return newdata;
   // end_duration();
   // measured_loop_duration();
 }
 
-void PipoRangeSensor::measure_offset(const string& axis_name) {
-  sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
-  Serial.print("offset for ");
-  Serial.print(axis_name.c_str());
-  Serial.print(" : ");
-  Serial.println(sensor_dat[axis_name].offset);
-}
+// void PipoRangeSensor::measure_offset(const string& axis_name) {
+//   sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
+//   Serial.print("offset for ");
+//   Serial.print(axis_name.c_str());
+//   Serial.print(" : ");
+//   Serial.println(sensor_dat[axis_name].offset);
+// }
 
 void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {

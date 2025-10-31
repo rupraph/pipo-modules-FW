@@ -125,15 +125,15 @@ void Sensor::reset_all_offset() {
 //   }
 // }
 
-void Sensor::reset_offset(const std::string& input) {
-  if (sensor_dat.find(input) != sensor_dat.end()) {
-    sensor_dat[input].offset = 0;
-    Serial.print("reset offset for ");
-    Serial.println(input.c_str());
-  } else {
-    Serial.println("error: Axis not found");
-  }
-}
+// void Sensor::reset_offset(const std::string& input) {
+//   if (sensor_dat.find(input) != sensor_dat.end()) {
+//     sensor_dat[input].offset = 0;
+//     Serial.print("reset offset for ");
+//     Serial.println(input.c_str());
+//   } else {
+//     Serial.println("error: Axis not found");
+//   }
+// }
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
