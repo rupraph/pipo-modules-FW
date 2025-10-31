@@ -114,6 +114,11 @@ class PipoWifi {
   void setPassword(String password);
   void requestScan();
   void requestRSSI();
+  /**
+   * @brief Forgets a network by removing it from the password manager
+   * @param ssid the ssid of the network to forget
+   */
+  void forgetNetwork(String ssid);
 };
 
 extern PipoWifi wifi;

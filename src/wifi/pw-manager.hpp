@@ -109,9 +109,19 @@ class PipoPWManager {
   }
 
   /**
+   * @brief Removes a ssid and password from the list (does not save it)
+   * @param ssid the ssid of the network to remove
+   */
+  void remove(String ssid) {
+    std::string c_ssid = std::string(ssid.c_str());
+    passwords.erase(c_ssid);
+    scores.erase(c_ssid);
+  }
+
+  /**
    * @brief Updates the score of a given ssid
    * @param ssid the ssid of the network
-   * 
+   *
    */
   void promote(String ssid) {
     std::string c_ssid = std::string(ssid.c_str());

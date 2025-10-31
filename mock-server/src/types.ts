@@ -33,6 +33,10 @@ export type WifiConnectPostParams = {
   password: string;
 };
 
+export type WifiForgetPostParams = {
+  ssid: string;
+};
+
 export type OffsetCalPostParams = {
   axis: string;
 };

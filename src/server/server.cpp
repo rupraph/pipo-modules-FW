@@ -322,6 +322,15 @@ void PipoServer::setup_requests() {
     return request->send(200, "text/plain", "Scan started");
   });
 
+  server.on("/wifi-forget", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("ssid")) {
+      return request->send(400, "text/plain", "Error: no ssid parameter");
+    }
+    String ssid = request->getParam("ssid")->value();
+    wifi.forgetNetwork(ssid);
+    return request->send(200, "text/plain", "Network forgotten");
+  });
+
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", logs.readLogs());
   });
