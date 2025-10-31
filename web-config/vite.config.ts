@@ -11,12 +11,10 @@ const inlineIconPlugin = (data: Record<string, string>): Plugin => ({
     const favicon = JSON.stringify(
       "data:image/svg+xml," + encodeURIComponent(rawSvg)
     );
-    debugger;
     const res = html.replace(
-      /<link rel=\"icon\" \/>/,
-      () => `<link rel="icon" type="image/svg/xml" href=${favicon} />`
+      /<link rel="icon"[^>]*>/,
+      () => `<link rel="icon" type="image/svg+xml" href=${favicon} />`
     );
-    console.log("res", res);
     return res;
   },
 });
@@ -30,7 +28,7 @@ const plugins = [
   }),
   viteCompression({
     deleteOriginFile: true,
-    filter: /\.(js|mjs|ts|css|html|svg|json|ttf)$/,
+    filter: /\.(js|mjs|ts|css|svg|json|ttf)$/,
   }),
   inlineIconPlugin({}),
 ];

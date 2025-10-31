@@ -35,12 +35,10 @@ loadSequentially(JSON.parse(\`${JSON.stringify(resourceList, null, 2)}\`))
     </script>`;
 
 let indexHtml = fs.readFileSync(indexPath, "utf-8");
-
-// Replace Vite's injected <script type="module"> and remove <link rel="stylesheet">
 indexHtml = indexHtml
   .replace(/<script type="module"[^>]+><\/script>/, customLoader)
   .replaceAll(/<link rel="stylesheet"[^>]+>/g, "");
 
 // Save updated index.html
 fs.writeFileSync(indexPath, indexHtml);
-console.log("✅ index.html patched with sequential loader and favicon");
+console.log("✅ index.html patched: assets will load sequentially.");
