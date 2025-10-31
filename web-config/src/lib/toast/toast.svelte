@@ -46,10 +46,10 @@
     background: var(--red);
   }
   .success {
-    background: var(--green);
+    background: var(--main);
   }
   .info {
-    background: var(--main-darker);
+    background: var(--main-secondary);
   }
   .warning {
     background: DarkOrange;

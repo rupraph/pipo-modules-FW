@@ -2,6 +2,17 @@
 
 OSC_handler osc;
 
+#ifdef PIPO_ANALOG
+void oscreceiveTask(void* pvParameters) {
+  for (;;) {
+    if (WiFi.status() == WL_CONNECTED && osc.is_enabled()) {
+      osc.receive();
+    }
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+#endif
+
 /// @brief setup the OSC handler
 void OSC_handler::setup() {
 
@@ -169,6 +180,47 @@ void OSC_handler::send_osc_message(string address, float value) {
   }
 }
 
+void OSC_handler::add_to_bundle(string address, float value) {
+  if (!isStarted) {
+    return;
+  }
+  if (address[0] != '/') {
+    address = "/" + address;
+  }
+  bundle.add(address.c_str()).add(value);
+}
+
+void OSC_handler::send_bundle() {
+  if (!isStarted || bundle.size() < 1) {
+    bundle.empty();
+    return;
+  }
+  if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
+    Serial.println(F("No destination IP or port set"));
+    bundle.empty();
+    return;
+  }
+
+  int packetStatus = Udp.beginPacket(dest_ip, out_port);
+  if (packetStatus == 0) {
+    Serial.println(F("Failed to start OSC packet"));
+    bundle.empty();
+    return;
+  }
+
+  if (bundle.hasError()) {
+    Serial.print(F("OSC Bundle has error: "));
+    Serial.println(bundle.getError());
+    bundle.empty();
+    return;
+  }
+
+  bundle.send(Udp);
+  Udp.endPacket();
+  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+  bundle.empty();  // clear the bundle after sending
+}
+
 void OSC_handler::set_enabled(bool ena) {
   this->enabled = ena;
 }
@@ -176,7 +228,6 @@ void OSC_handler::set_enabled(bool ena) {
 bool OSC_handler::is_enabled() {
   return enabled;
 }
-
 bool OSC_handler::is_started() {
   return isStarted;
 }

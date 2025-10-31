@@ -1,6 +1,10 @@
 import type { Schema } from "./types";
 
 export const schema: Schema = {
+  name: {
+    min: 4,
+    max: 254,
+  },
   motion: {
     accX: {
       label: "X-axis acceleration",
@@ -56,32 +60,32 @@ export const schema: Schema = {
       step: 1,
       index: 0,
     },
-    magX:{
+    magX: {
       label: "X-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 6
+      index: 6,
     },
-    magY:{
+    magY: {
       label: "Y-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 7
+      index: 7,
     },
-    magZ:{
+    magZ: {
       label: "Z-axis MAG",
       cat: "Magnetometer",
       unit: "uT",
       min: -4900,
       max: 4900,
       step: 10,
-      index: 8
+      index: 8,
     },
   },
   range: {
@@ -90,7 +94,7 @@ export const schema: Schema = {
       cat: "",
       unit: "cm",
       min: 0,
-      max: 400,
+      max: 300,
       step: 1,
       index: 0,
     },
@@ -150,12 +154,30 @@ export const schema: Schema = {
       step: 0.1,
       index: 5,
     },
+    A07: {
+      label: "Analog 7",
+      cat: "Voltage",
+      unit: "V",
+      min: 0,
+      max: 3.1,
+      step: 0.1,
+      index: 4,
+    },
+    A08: {
+      label: "Analog 8",
+      cat: "Voltage",
+      unit: "V",
+      min: 0,
+      max: 3.1,
+      step: 0.1,
+      index: 5,
+    },
     T1: {
       label: "Touch 1",
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 6,
     },
@@ -164,7 +186,7 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 7,
     },
@@ -173,7 +195,7 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 8,
     },
@@ -182,7 +204,7 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 9,
     },
@@ -191,7 +213,7 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 10,
     },
@@ -200,9 +222,27 @@ export const schema: Schema = {
       cat: "Touch",
       unit: "-",
       min: 0,
-      max: 200000,
+      max: 5000,
       step: 1,
       index: 11,
+    },
+    T7: {
+      label: "Touch 7",
+      cat: "Touch",
+      unit: "-",
+      min: 0,
+      max: 5000,
+      step: 1,
+      index: 12,
+    },
+    T8: {
+      label: "Touch 8",
+      cat: "Touch",
+      unit: "-",
+      min: 0,
+      max: 5000,
+      step: 1,
+      index: 13,
     },
   },
   unknown: {

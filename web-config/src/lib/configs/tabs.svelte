@@ -74,10 +74,11 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: left;
   }
   .tabs {
     max-width: calc(100% - 30px);
+    margin-left: 5%;
   }
   .tab {
     display: grid;
@@ -92,7 +93,7 @@
     z-index: 12;
     cursor: text;
     padding-bottom: 4px;
-    color: var(--main);
+    color: var(--text-color);
   }
 
   .tab.active > span[contenteditable] {
@@ -157,6 +158,7 @@
     height: 1.2em;
     cursor: pointer;
     border-radius: 10%;
+    color: var(--text-color);
     /* transform: translate(-0.9em, -0.3em); */
   }
   :global(.tab .delete:hover) {

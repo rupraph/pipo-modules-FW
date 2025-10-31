@@ -2,6 +2,21 @@
 
 //TODO: Should likely move led toggling out of this class
 
+void wifiTask(void* pvParameters) {
+  for (;;) {
+    wifi.refresh();
+    vTaskDelay(pdMS_TO_TICKS(500));
+    if (wifi.ready()) {
+      if (!server.isRunning()) {
+        server.resume();
+      }
+      if (osc.is_enabled()) {
+        osc.start();
+      }
+    }
+  }
+}
+
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
   Serial.println("Pipo Wifi setup");
@@ -396,6 +411,10 @@ void PipoWifi::requestScan() {
 }
 void PipoWifi::requestRSSI() {
   next.shouldRSSI = true;
+}
+void PipoWifi::forgetNetwork(String ssid) {
+  pwm.remove(ssid);
+  pwm.save();
 }
 
 PipoWifi wifi;

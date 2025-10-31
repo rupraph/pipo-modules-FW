@@ -15,7 +15,7 @@ void AnalogOut::update() {
   // Serial.println("Updating HW output");
   // Serial.println(output_map[A01].value * 180.0f);
   // data ok. but not sure if lib does not work, or if hw was nok.
-  for (size_t i = 0; i < 6; i++) {
+  for (size_t i = 0; i < OUT_NB; i++) {
     OutputData& out = output_map[i];
     if (out.pindir == PinMode::OUT) {
       if (out.out_mode == SERVO) {
@@ -51,7 +51,7 @@ void AnalogOut::set_config(JsonObject config) {
   if (DEBUG_CONFIG == true) {
     serializeJsonPretty(config, Serial);
   }
-  for (size_t i = 0; i < 6; i++) {
+  for (size_t i = 0; i < OUT_NB; i++) {
     string key = "A0" + to_string(i + 1);
     // Serial.println(key.c_str());
     if (config[key].is<JsonObject>()) {
@@ -72,7 +72,7 @@ void AnalogOut::set_config(JsonObject config) {
 JsonDocument AnalogOut::get_config() {
   // Serial.println("Getting config");
   JsonDocument obj;
-  for (size_t i = 0; i < 6; i++) {
+  for (size_t i = 0; i < OUT_NB; i++) {
     string key = "A0" + to_string(i + 1);
     obj[key]["pindir"] = output_map[i].pindir;
     obj[key]["outmode"] = output_map[i].out_mode;

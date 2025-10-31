@@ -43,6 +43,8 @@ class MidiTranslator
   // int interpolation_type = 0;  //0=linear, 1=step, 2=log
   bool hires = false;
 
+  int velocity = 100;  // default velocity for notes
+
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
   void print_scale(vector<int> scale);
@@ -99,6 +101,9 @@ class MidiTranslator
 
   bool is_enabled();
   void set_enabled(bool e);
+
+  int get_velocity();
+  void set_velocity(int v);
 
   // template <typename T>
   // void set_param(const string& param_name, const T& value) {

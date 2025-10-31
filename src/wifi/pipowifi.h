@@ -18,6 +18,7 @@
 //   AP_TO_APSTA,
 //   APSTA_TO_AP
 // };
+void wifiTask(void* pvParameters);
 struct PipoWState {
   // WiFiTransition transition = NONE;
   wifi_mode_t mode = WIFI_MODE_APSTA;
@@ -113,6 +114,11 @@ class PipoWifi {
   void setPassword(String password);
   void requestScan();
   void requestRSSI();
+  /**
+   * @brief Forgets a network by removing it from the password manager
+   * @param ssid the ssid of the network to forget
+   */
+  void forgetNetwork(String ssid);
 };
 
 extern PipoWifi wifi;

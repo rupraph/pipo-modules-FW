@@ -11,8 +11,16 @@ import {
   OffsetCalPostParams,
   ReqQ,
   WifiConnectPostParams,
+  WifiForgetPostParams,
   WifiModePostParams,
 } from "./types";
+
+const signals = [
+  [`"Dlink-Home"`, -40, 1, 1],
+  [`"MyRouter-345"`, -50, 0, 1],
+  [`"HomeSpot"`, -60, 0, 0],
+  [`"WiFi-2.4-7662"`, -80, 0, 0],
+];
 
 export const setupRoutes = (app: Express) => {
   console.log("Setting up routes");
@@ -159,17 +167,10 @@ export const setupRoutes = (app: Express) => {
     res.status(200).send(wifistate);
   });
   app.get("/wifi-networks", (req, res) => {
-    const signals = [
-      [`"SSID1"`, -50, 1, 1],
-      [`"SSID2"`, -60, 1, 0],
-      [`"SSID3"`, -70, 0, 1],
-      [`"SSID3"`, -70, 0, 0],
-    ]
-      .map((s) => s.join(" "))
-      .join("\n");
-    res.status(200).send(`lastScan:\n${signals}`);
+    const response = signals.map((s) => s.join(" ")).join("\n");
+    res.status(200).send(`lastScan:\n${response}`);
   });
-  app.get("/wifi-start-scan", (_, res) => {
+  app.post("/wifi-start-scan", (_, res) => {
     if (state.wifi.scanning) {
       res.status(503).send("Scanning");
       return;
@@ -179,6 +180,21 @@ export const setupRoutes = (app: Express) => {
       state.wifi.scanning = false;
     }, 2000);
     res.status(200).send("Scan started");
+  });
+  app.post("/wifi-forget", (req: ReqQ<WifiForgetPostParams>, res) => {
+    const { ssid } = req.query;
+    console.log("FORGET WIFI", ssid);
+    if (!ssid) {
+      res.status(400).send("Error: no ssid parameter");
+      return;
+    }
+    const known = signals.find((s) => `"${s[0]}"` === ssid);
+    if (known) {
+      known[3] = 0;
+    }
+    console.log("FORGOTTEN WIFI", known);
+    // In the mock server, we don't actually store networks, so just acknowledge
+    res.status(200).send("Network forgotten");
   });
   app.get("/logs", (req, res) => {
     const sec = 1000;

@@ -2,6 +2,41 @@
 
 HwUi hwui;
 
+void hwuiTask(void* pvParameters) {
+  for (;;) {
+    hwui.update();
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+    vTaskDelay(pdMS_TO_TICKS(20));
+#else
+    vTaskDelay(pdMS_TO_TICKS(10));
+#endif
+  }
+}
+
+void buttonTask(void* pvParameters) {
+  for (;;) {
+    hwui.update_switches();
+    vTaskDelay(pdMS_TO_TICKS(5));
+  }
+}
+
+void battmonitorTask(void* pvParameters) {
+  for (;;) {
+    hwui.measure_battery_step();
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
+//#ifdef PIPO_ANALOG -> for rev1 + output only
+// hwuiSoftPwmTask temporarily in the main loop. not smooth when in task
+// void hwuiSoftPwmTask(void* pvParameters) {
+//   for (;;) {
+//     hwui.update_soft_pwm();
+//     vTaskDelay(pdMS_TO_TICKS(1) / 10);
+//   }
+// }
+//#endif
+
 void HwUi::init() {
 
   PWM_Resolution = 8;
@@ -12,7 +47,7 @@ void HwUi::init() {
   pinMode(SEND_LED, OUTPUT);
   pinMode(LOW_BAT_LED, OUTPUT);
 
-  pinMode(MODE_SW, INPUT);
+  // pinMode(MODE_SW, INPUT);
   pinMode(BAT_VOLTAGE, INPUT);
   pinMode(PP_SW, INPUT);
 
@@ -30,7 +65,7 @@ void HwUi::init() {
 }
 
 void HwUi::setup() {
-#ifndef PIPO_ANALOG
+#if !defined(PIPO_ANALOG)
   // led setup
   ledcSetup(0, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
@@ -40,13 +75,31 @@ void HwUi::setup() {
   ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
   ledcSetup(3, PWM_FREQ, PWM_Resolution);
   ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+  mode_sw.setup_button(MODE_SW);
+#endif
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+  leds_base_color[WIFI_LED] = CRGB::DarkMagenta;
+  leds_base_color[WIFI_LED].nscale8_video(50);
+  leds_base_color[BT_LED] = CRGB::SkyBlue;
+  leds_base_color[BT_LED].nscale8_video(50);
+  leds_base_color[SEND_LED] = CRGB::Red;
+  leds_base_color[SEND_LED].nscale8_video(50);
+  leds_base_color[LOW_BAT_LED] = CRGB::Orange;
+  leds_base_color[LOW_BAT_LED].nscale8_video(50);
+  FastLED.addLeds<WS2812, RGB_LED, GRB>(leds, NB_RGB_LEDS);
+  // FastLED.setBrightness(0);
+  // FastLED.show();
 #endif
 
   set_led(WIFI_LED, 0);
   set_led(BT_LED, 0);
   set_led(SEND_LED, 0);
   set_led(LOW_BAT_LED, 0);
+
+  pause_sw.setup_button(PP_SW);
+
   Serial.println("HW UI setup done");
+  hwui.measure_battery();
 
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
@@ -55,18 +108,42 @@ void HwUi::setup() {
 void HwUi::update() {
   blinker();
   pulse();
-  stop_blink_once();
+  single_blink();
   monitor_battery();
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+  FastLED.show();
+#endif
+}
+
+void HwUi::update_switches() {
+  // PAUSE has a pullup
+  if (pause_sw.read_debounce() == 0) {
+    if (pause_sw.get_flag() == 1) {
+      PAUSED = !PAUSED;
+      pause_sw.reset_button();
+      Serial.print("PAUSED");
+    }
+  }
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+  if (mode_sw.read_debounce() == 0) {
+    Serial.print("Mode switch pressed");
+  }
+#endif
 }
 
 /**
  * @brief sets brightness of led
  */
 void HwUi::set_led(int led_name, int value) {
-#ifdef PIPO_ANALOG
-  soft_pwm_table[led_name].brightness = value;
-#else
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
   ledcWrite(led_channel_map[led_name], value);
+#elif defined(PIPO_ANALOG) && HW_REV == 10
+  soft_pwm_table[led_name].brightness = value;
+#elif defined(PIPO_ANALOG) && HW_REV == 20
+  CRGB color = leds_base_color[led_name];
+  color.nscale8_video(value);
+  leds[led_name] = color;
+
 #endif
 }
 
@@ -95,11 +172,10 @@ void HwUi::update_soft_pwm() {
   }
 }
 
-bool HwUi::is_pulsing(int led_name) {
-  return led_pulse_table[led_name].enabled;
-}
-
 void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
+  if (is_blinking(led_name))
+    return;  // already blinking
+
   if (led_pulse_table[led_name].enabled) {
     stop_pulse(led_name);
   }
@@ -112,12 +188,27 @@ void HwUi::start_blink(int led_name, int blink_time, float duty_cycle) {
       led_blink_table[led_name].start_cycle +
       int(led_blink_table[led_name].duty_cycle *
           led_blink_table[led_name].blink_period);
-  set_led(led_name, led_blink_table[led_name].brightness);
+  // set_led(led_name, led_blink_table[led_name].brightness);
+}
+
+void HwUi::stop_blink(int led_name) {
+  if (!is_blinking(led_name))
+    return;  // not blinking
+
+  led_blink_table[led_name].enabled = false;
+  // set_led(led_name, 0);
+}
+
+bool HwUi::is_blinking(int led_name) {
+  return led_blink_table[led_name].enabled;
 }
 
 void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
                        int max_brightness) {
-  if (led_blink_table[led_name].enabled) {
+  if (is_pulsing(led_name))
+    return;  // already pulsing
+
+  if (is_blinking(led_name)) {
     stop_blink(led_name);
   }
   led_pulse_table[led_name].enabled = true;
@@ -125,17 +216,19 @@ void HwUi::start_pulse(int led_name, int pulse_period, int min_brightness,
   led_pulse_table[led_name].min_brightness = min_brightness;
   led_pulse_table[led_name].max_brightness = max_brightness;
   led_pulse_table[led_name].start_cycle = millis();
-  set_led(led_name, led_pulse_table[led_name].min_brightness);
-}
-
-void HwUi::stop_blink(int led_name) {
-  led_blink_table[led_name].enabled = false;
-  set_led(led_name, 0);
+  // set_led(led_name, led_pulse_table[led_name].min_brightness);
 }
 
 void HwUi::stop_pulse(int led_name) {
+  if (!is_pulsing(led_name))
+    return;  // not pulsing
+
   led_pulse_table[led_name].enabled = false;
-  set_led(led_name, 0);
+  // set_led(led_name, 0);
+}
+
+bool HwUi::is_pulsing(int led_name) {
+  return led_pulse_table[led_name].enabled;
 }
 
 void HwUi::blinker() {
@@ -187,13 +280,16 @@ void HwUi::
 void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
   // carfull led_pos used for index in blink_once but comes from channel number
   int led_pos = led_channel_map[led_name];
-  set_led(led_name, brightness);
+  // set_led(led_name, brightness);
   blink_once[led_pos] = millis() + blink_time;
 }
 
-void HwUi::stop_blink_once() {
+void HwUi::single_blink() {
   for (auto& pair : led_channel_map) {
     int i = pair.second;
+    if (blink_once[i] != 0) {
+      set_led(pair.first, blink_once_brightness);
+    }
     if (millis() > blink_once[i] && blink_once[i] != 0) {
       set_led(pair.first, 0);
       blink_once[i] = 0;
@@ -201,6 +297,7 @@ void HwUi::stop_blink_once() {
   }
 }
 
+// Battery sampling step
 void HwUi::measure_battery_step() {
   if (bat_sampling_index >= BAT_SAMPLE_SIZE) {
     bat_sampling_index = 0;
@@ -216,15 +313,16 @@ void HwUi::measure_battery_step() {
   bat_voltage = sum / BAT_SAMPLE_SIZE;
 }
 
+// Full battery sampling loop
 void HwUi::measure_battery() {
   for (int i = 0; i < BAT_SAMPLE_SIZE; i++) {
     measure_battery_step();
-    delay(1);
+    vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
+// Display battery levels on leds
 void HwUi::monitor_battery() {
-  measure_battery_step();
   if (bat_voltage < LOW_BAT_VOLTAGE) {
     start_blink(LOW_BAT_LED, 500, 0.5);
   } else {
@@ -234,4 +332,24 @@ void HwUi::monitor_battery() {
 
 int HwUi::get_bat_voltage() {
   return bat_voltage;
+}
+
+//Button Class Implementation
+
+void Button::setup_button(int pin) {
+  this->pin = pin;
+  pinMode(pin, INPUT);
+  position = digitalRead(pin);
+}
+
+int Button::read_debounce() {
+  int current_position = digitalRead(pin);
+  if (current_position != position) {
+    if (millis() - last_press > DEBOUNCE_TIME) {
+      position = current_position;
+      flag = true;  // button state changed
+      last_press = millis();
+    }
+  }
+  return position;
 }

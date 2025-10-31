@@ -21,12 +21,13 @@
         "rootNote": 55,
         "pattern": "scale",
         "scaleType": "major pentatonic",
-        "tl_mode": 1
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
       "dist": {
-        "enabled": false,
+        "enabled": true,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
@@ -39,7 +40,7 @@
       "deadzone": 0.4,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 60.0,
+      "lmax": 75.0,
       "lmin": 5.0,
       "mode": false,
       "th_mode": false,
@@ -48,15 +49,16 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
+    "OSC_ENA": false,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 2,
-    "PipoName": "range"
+    "PipoName": "range",
+    "BLEEnabled": true
   },
   "sensorconf": {
-    "hold_mode": false
+    "hold_mode": true
   }
 }

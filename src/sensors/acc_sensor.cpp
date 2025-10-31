@@ -52,11 +52,31 @@ bool MotionSensor::measure_sensor() {
   icm20948.task();
   /////////  Read Quat6 orientation data
   if (relative_mode) {
-    if (icm20948.quat6DataIsReady()) {
-      icm20948.readQuat6Data(&quat_w, &quat_x, &quat_y, &quat_z);
-      calc_euler_angles();
+    // Mode 1: Pure relative orientation using quaternion differential tracking
+    if (icm20948.quat9DataIsReady()) {
+      icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
+      if (!reference_set) {
+        // Set initial orientation as reference and normalize
+        quat_ref_w = quat_w;
+        quat_ref_x = quat_x;
+        quat_ref_y = quat_y;
+        quat_ref_z = quat_z;
+        normalize_quaternion(quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
+        reference_set = true;
+        Serial.println("Reference orientation set");
+        Serial.print("Ref quat: w=");
+        Serial.print(quat_ref_w, 4);
+        Serial.print(" x=");
+        Serial.print(quat_ref_x, 4);
+        Serial.print(" y=");
+        Serial.print(quat_ref_y, 4);
+        Serial.print(" z=");
+        Serial.println(quat_ref_z, 4);
+      }
+      calc_differential_euler_angles();
     }
   } else {
+    // Mode 2: quat9 (absolute orientation)
     if (icm20948.quat9DataIsReady()) {
       icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       calc_euler_angles();
@@ -75,12 +95,12 @@ bool MotionSensor::measure_sensor() {
     icm20948.readMagData(&sensor_dat["magX"].raw_value,
                          &sensor_dat["magY"].raw_value,
                          &sensor_dat["magZ"].raw_value);
-    sensor_dat["magX"].value =
-        filter_map["magX"].process(sensor_dat["magX"].raw_value);
-    sensor_dat["magY"].value =
-        filter_map["magY"].process(sensor_dat["magY"].raw_value);
-    sensor_dat["magZ"].value =
-        filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
+    sensor_dat["magX"].value = sensor_dat["magX"].raw_value;
+    //     filter_map["magX"].process(sensor_dat["magX"].raw_value);
+    sensor_dat["magY"].value = sensor_dat["magY"].raw_value;
+    //     filter_map["magY"].process(sensor_dat["magY"].raw_value);
+    sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
+    //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
   }
 
@@ -124,8 +144,8 @@ void MotionSensor::calc_euler_angles() {
   double cosy_cosp = +1.0 - 2.0 * (quat_y * quat_y + quat_z * quat_z);
   sensor_dat["yaw"].raw_value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
 
-  sensor_dat["yaw"].value =
-      filter_map["yaw"].process(sensor_dat["yaw"].raw_value);
+  sensor_dat["yaw"].value = sensor_dat["yaw"].raw_value;
+  //     filter_map["yaw"].process(sensor_dat["yaw"].raw_value);
 
   // pitch (y-axis rotation)
   double sinp = +2.0 * (quat_w * quat_y - quat_z * quat_x);
@@ -135,26 +155,82 @@ void MotionSensor::calc_euler_angles() {
   else
     sensor_dat["pitch"].raw_value = asin(sinp) * 180.0 / PI;
 
-  sensor_dat["pitch"].value =
-      filter_map["pitch"].process(sensor_dat["pitch"].raw_value);
+  sensor_dat["pitch"].value = sensor_dat["pitch"].raw_value;
+  //     filter_map["pitch"].process(sensor_dat["pitch"].raw_value);
 
   // roll (x-axis rotation)
   double sinr_cosp = +2.0 * (quat_w * quat_x + quat_y * quat_z);
   double cosr_cosp = +1.0 - 2.0 * (quat_x * quat_x + quat_y * quat_y);
   sensor_dat["roll"].raw_value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
 
-  sensor_dat["roll"].value =
-      filter_map["roll"].process(sensor_dat["roll"].raw_value);
+  sensor_dat["roll"].value = sensor_dat["roll"].raw_value;
+  //     filter_map["roll"].process(sensor_dat["roll"].raw_value);
+}
+
+void MotionSensor::calc_differential_euler_angles() {
+  // Calculate relative quaternion: q_relative = q_reference_conjugate * q_current
+  // This gives us the rotation FROM reference TO current orientation
+  // Quaternion conjugate: q_ref_conj = [w, -x, -y, -z]
+  // Quaternion multiplication: q1 * q2 = [w1*w2 - x1*x2 - y1*y2 - z1*z2,
+  //                                       w1*x2 + x1*w2 + y1*z2 - z1*y2,
+  //                                       w1*y2 - x1*z2 + y1*w2 + z1*x2,
+  //                                       w1*z2 + x1*y2 - y1*x2 + z1*w2]
+
+  // Normalize current quaternion
+  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+
+  // q_relative = q_ref_conjugate * q_current
+  // where q_ref_conjugate = [quat_ref_w, -quat_ref_x, -quat_ref_y, -quat_ref_z]
+  float rel_w = quat_ref_w * curr_w - (-quat_ref_x) * curr_x -
+                (-quat_ref_y) * curr_y - (-quat_ref_z) * curr_z;
+  float rel_x = quat_ref_w * curr_x + (-quat_ref_x) * curr_w +
+                (-quat_ref_y) * curr_z - (-quat_ref_z) * curr_y;
+  float rel_y = quat_ref_w * curr_y - (-quat_ref_x) * curr_z +
+                (-quat_ref_y) * curr_w + (-quat_ref_z) * curr_x;
+  float rel_z = quat_ref_w * curr_z + (-quat_ref_x) * curr_y -
+                (-quat_ref_y) * curr_x + (-quat_ref_z) * curr_w;
+
+  // Simplify (removing double negatives):
+  rel_w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+          quat_ref_z * curr_z;
+  rel_x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+          quat_ref_z * curr_y;
+  rel_y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+          quat_ref_z * curr_x;
+  rel_z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+          quat_ref_z * curr_w;
+
+  // Convert relative quaternion to Euler angles
+  // Yaw (z-axis rotation)
+  double siny_cosp = +2.0 * (rel_w * rel_z + rel_x * rel_y);
+  double cosy_cosp = +1.0 - 2.0 * (rel_y * rel_y + rel_z * rel_z);
+  sensor_dat["yaw"].raw_value = atan2(siny_cosp, cosy_cosp) * 180.0 / PI;
+  sensor_dat["yaw"].value = sensor_dat["yaw"].raw_value;
+
+  // Pitch (y-axis rotation)
+  double sinp = +2.0 * (rel_w * rel_y - rel_z * rel_x);
+  if (fabs(sinp) >= 1)
+    sensor_dat["pitch"].raw_value = copysign(PI / 2, sinp) * 180.0 / PI;
+  else
+    sensor_dat["pitch"].raw_value = asin(sinp) * 180.0 / PI;
+  sensor_dat["pitch"].value = sensor_dat["pitch"].raw_value;
+
+  // Roll (x-axis rotation)
+  double sinr_cosp = +2.0 * (rel_w * rel_x + rel_y * rel_z);
+  double cosr_cosp = +1.0 - 2.0 * (rel_x * rel_x + rel_y * rel_y);
+  sensor_dat["roll"].raw_value = atan2(sinr_cosp, cosr_cosp) * 180.0 / PI;
+  sensor_dat["roll"].value = sensor_dat["roll"].raw_value;
 }
 
 void MotionSensor::convert_accell() {
   //no conversion here
-  sensor_dat["accX"].value =
-      filter_map["accX"].process(sensor_dat["accX"].raw_value);
-  sensor_dat["accY"].value =
-      filter_map["accY"].process(sensor_dat["accY"].raw_value);
-  sensor_dat["accZ"].value =
-      filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
+  sensor_dat["accX"].value = sensor_dat["accX"].raw_value;
+  // filter_map["accX"].process(sensor_dat["accX"].raw_value);
+  sensor_dat["accY"].value = sensor_dat["accY"].raw_value;
+  // filter_map["accY"].process(sensor_dat["accY"].raw_value);
+  sensor_dat["accZ"].value = sensor_dat["accZ"].raw_value;
+  // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
 void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
@@ -162,7 +238,12 @@ void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
     Serial.println("set_sensor_config");
   }
   if (config["relative_mode"].is<bool>()) {
+    bool old_mode = relative_mode;
     relative_mode = config["relative_mode"];
+    if (relative_mode && !old_mode) {
+      // Switching to differential mode - reset reference
+      reference_set = false;
+    }
   }
   if (debug) {
     Serial.println(relative_mode);
@@ -174,6 +255,46 @@ JsonDocument MotionSensor::get_sensor_config(bool debug = false) {
   JsonDocument config;
   config["relative_mode"] = relative_mode;
   return config;
+}
+
+void MotionSensor::reset_reference_orientation() {
+  reference_set = false;
+  Serial.println("Reference orientation will be reset on next update");
+}
+
+void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
+                                        float& z) {
+  float norm = sqrt(w * w + x * x + y * y + z * z);
+  if (norm > 0.0f) {
+    w /= norm;
+    x /= norm;
+    y /= norm;
+    z /= norm;
+  }
+}
+
+void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
+  if (!reference_set) {
+    w = 1.0f;
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+    return;
+  }
+
+  // Normalize current quaternion
+  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+
+  // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
+  w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+      quat_ref_z * curr_z;
+  x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+      quat_ref_z * curr_y;
+  y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+      quat_ref_z * curr_x;
+  z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+      quat_ref_z * curr_w;
 }
 
 #endif  // PIPO_MOTION

@@ -43,6 +43,8 @@ export const minMax: InputMinMax = {
     A4: analogMinMax,
     A5: analogMinMax,
     A6: analogMinMax,
+    A7: analogMinMax,
+    A8: analogMinMax,
     // touch input:to be defined, not sure about the range
     T1: analogMinMax,
     T2: analogMinMax,
@@ -50,5 +52,7 @@ export const minMax: InputMinMax = {
     T4: analogMinMax,
     T5: analogMinMax,
     T6: analogMinMax,
+    T7: analogMinMax,
+    T8: analogMinMax,
   },
 };

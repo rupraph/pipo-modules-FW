@@ -8,9 +8,23 @@
 // acceleration
 Engine engine;
 
+void sensorTask(void* pvParameters) {
+  for (;;) {
+    // sensor_task_interval = millis() - lastMillis;
+    // lastMillis = millis();
+    input_sensor.update();
+    engine.update();
+    // sensor_task_duration = millis() - lastMillis;
+#ifdef PIPO_ANALOG
+    analog_out.update();  // should be in seperate task
+#endif
+    vTaskDelay(pdMS_TO_TICKS(1));
+  }
+}
+
 //Todo: check if processors could access sensor data without having to pass all the arguments so that invert and cyclic could be computed upfront
 void Engine::update() {
-  if (paused) {
+  if (PAUSED) {
     return;
   }
   if (config.general_config["MidiEnabled"] == true) {
@@ -59,16 +73,17 @@ void Engine::update() {
       hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
   }
+
 #ifdef PIPO_MOTION
   if (enable_quat_to_osc) {
     motion_quat_to_osc();
   }
 #endif
-  // monitor_sensors(sensor);
-}
+  if (osc.is_enabled() && osc.is_started()) {
+    osc.send_bundle();
+  }
 
-void Engine::toggle_pause() {
-  paused = !paused;
+  // monitor_sensors(sensor);
 }
 
 void Engine::midi_processor(string axis_name, float sensor_val,
@@ -77,7 +92,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
   // check if axis is enabled, outside deadzone and not disabled
   int channel = midi_translator.channel;
 
-  if (input_sensor.test_outside_deadzone(axis_name) &&
+  if (/*input_sensor.test_outside_deadzone(axis_name) &&*/
       midi_translator.is_enabled() == true) {
     // Serial.print("min:");
     // Serial.print(sensor_min);
@@ -129,8 +144,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
             midiio.sendControlChange(cc_nb, cc_val, channel, false);
           }
         }
-        vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
-                                       // solved with task management
+        //vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
+        // solved with task management
       }
     }
 
@@ -152,7 +167,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         if (input_sensor.get_bool_value(axis_name)) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
               input_sensor.get_trigger_flag(axis_name, MIDI)) {
-            midiio.sendNoteOn(thresh_note, 127, channel, sustain_ms);
+            midiio.sendNoteOn(thresh_note, midi_translator.get_velocity(),
+                              channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
         } else {
@@ -160,11 +176,16 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         }
       } else  // mode is continuous
       {
+        // send note on if:
+        // sensor in range
+        // AND note not already playing
+        // AND (note is diff from previous OR we entered the range)
         if (input_sensor.is_within_range(axis_name) &&
-            !midiio.is_note_playing(note_val[channel], channel) &&
+            // !midiio.is_note_playing(note_val[channel], channel) &&
             (note_val[channel] != note_val_prev[channel] ||
              input_sensor.get_trigger_flag(axis_name, MIDI))) {
-          midiio.sendNoteOn(note_val[channel], 127, channel, sustain_ms);
+          midiio.sendNoteOn(note_val[channel], midi_translator.get_velocity(),
+                            channel, sustain_ms);
           if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
@@ -266,8 +287,8 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
   OscTranslator& osc_translator = Osctranslators[axis_name];
   string address = osc_translator.get_osc_addr();
 
-  if (osc_translator.is_enabled() &&
-      input_sensor.test_outside_deadzone(axis_name)) {
+  if (osc_translator.is_enabled() /* &&
+      input_sensor.test_outside_deadzone(axis_name)*/) {
 
     osc_val_prev[axis_name] = osc_val[axis_name];
     if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
@@ -277,7 +298,7 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
           osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
 
       if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-        osc.send_osc_message(address, osc_val[axis_name]);
+        osc.add_to_bundle(address, osc_val[axis_name]);
       }
       // }
     } else  // sensor uses trigger mode
@@ -285,12 +306,12 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
       if (input_sensor.get_bool_value(axis_name)) {
         osc_val[axis_name] = round_to(osc_translator.get_output_max(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.send_osc_message(address, osc_val[axis_name]);
+          osc.add_to_bundle(address, osc_val[axis_name]);
         }
       } else {
         osc_val[axis_name] = round_to(osc_translator.get_output_min(), 3);
         if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.send_osc_message(address, osc_val[axis_name]);
+          osc.add_to_bundle(address, osc_val[axis_name]);
         }
       }
     }
@@ -385,9 +406,9 @@ void Engine::set_config(JsonObject config, bool debug) {
 void Engine::motion_quat_to_osc() {
   float quats[4];
   input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
-  osc.send_osc_message(quat_to_osc_address + "w", quats[0]);
-  osc.send_osc_message(quat_to_osc_address + "x", quats[1]);
-  osc.send_osc_message(quat_to_osc_address + "y", quats[2]);
-  osc.send_osc_message(quat_to_osc_address + "z", quats[3]);
+  osc.add_to_bundle(quat_to_osc_address + "w", quats[0]);
+  osc.add_to_bundle(quat_to_osc_address + "x", quats[1]);
+  osc.add_to_bundle(quat_to_osc_address + "y", quats[2]);
+  osc.add_to_bundle(quat_to_osc_address + "z", quats[3]);
 }
 #endif

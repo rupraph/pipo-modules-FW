@@ -8,7 +8,10 @@
 #define SO_REUSE 1
 #define SO_REUSE_RXTOALL 1  // Enable reuse of addresses for multicast as well
 #include <ESPAsyncWebServer.h>
+#include "server.h"
 using namespace std;
+
+void websocketTask(void* pvParameters);
 class PipoSocket {
  public:
   PipoSocket();

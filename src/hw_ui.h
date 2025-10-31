@@ -3,8 +3,10 @@
 
 #include <Arduino.h>
 #include <unordered_map>
+#include <FastLED.h>
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
+#include "shared_flags.h"
 
 // This class was initially written to use "ledc" PWM controller to control leds.
 // However for Pipo Analog, we use ledc channels to control the analog outputs
@@ -18,15 +20,38 @@
 // - seems fine when put in loop (which is anyway running on one of the core with likely a higher priority...)
 // to be followed up
 
+void hwuiTask(void* pvParameters);
+void buttonTask(void* pvParameters);
+void battmonitorTask(void* pvParameters);
+class Button {
+ private:
+  int pin;
+  int position;
+  bool flag = false;  // toogle flag
+  unsigned long last_press = 0;
+
+ public:
+  void setup_button(int pin);
+  int read_debounce();
+  int get_button();
+  void reset_button() { flag = false; }  // reset the button state
+  bool get_flag() { return flag; }       // return the button state
+};
 class HwUi {
  public:
   HwUi() {};
+
+  Button pause_sw;
+  Button mode_sw;
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;
   std::unordered_map<int, int> led_channel_map;
 
   unsigned long soft_pwm_prediod_micros = 5000;
+
+  bool switch_pause;
+  unsigned long last_sw_pause_press = 0;
 
   struct led_blink {
     bool enabled;
@@ -62,30 +87,31 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  unsigned long
-      blink_once[NUM_LEDS];  // the position in table are the channel nb.
-
+  unsigned long blink_once
+      [NUM_LEDS];  // register blink start time // the position in table are the channel nb.
+  int blink_once_brightness = 100;  // brightness for blink_once led
   void init();
   void setup();
   void update();
+  void update_switches();
+
   void update_soft_pwm();
   void set_led(int led_name, int value);
-  void set_mode(int mode);
 
   void init_blink_once(int led_name, int blink_time, int brightness);
-  void stop_blink_once();
+  void single_blink();  //for blink_once led
 
   void start_blink(int led_name, int blink_time, float duty_cycle);
   void stop_blink(int led_name);
-
-  void blinker();
-  void pulse();
+  bool is_blinking(int led_name);
 
   void start_pulse(int led_name, int pulse_period, int min_brightness,
                    int max_brightness);
   void stop_pulse(int led_name);
-
   bool is_pulsing(int led_name);
+
+  void blinker();
+  void pulse();
 
   void measure_battery();
   void measure_battery_step();
@@ -95,6 +121,11 @@ class HwUi {
   int get_bat_voltage();
 
  private:
+#ifdef PIPO_ANALOG&& HW_REV >= 20
+  CRGB leds[NB_RGB_LEDS];
+  CRGB leds_base_color[NB_RGB_LEDS];
+
+#endif
   int bat_sampling[BAT_SAMPLE_SIZE];
   int bat_sampling_index = 0;
   int bat_voltage = 0;

@@ -30,6 +30,7 @@ class Config {
     general_config["HidEnabled"] = true;
     general_config["HidMode"] = 2;
     general_config["PipoName"] = "default";
+    general_config["BLEEnabled"] = false;
   }
   String filename;              // raw config file name (no extension)
   JsonDocument current_config;  // stores all configs (gather)

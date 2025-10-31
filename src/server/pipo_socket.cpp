@@ -1,5 +1,30 @@
 #include <server/pipo_socket.h>
 
+// takes 2-3 ms for motion
+void websocketTask(void* pvParameters) {
+  for (;;) {
+    if (!pipoNetworkReady()) {
+      vTaskDelay(pdMS_TO_TICKS(500));
+      continue;
+    }
+    int rssi = wifi.getRSSI();
+    int taskDelay;
+    // Adjust task delay based on RSSI
+    if (rssi > -65) {
+      taskDelay = 40;  // Strong signal → High frequency
+    } else if (rssi > -70) {
+      taskDelay = 80;  // Medium signal → Reduce frequency
+    } else if (rssi > -80) {
+      taskDelay = 250;  // Weak signal → Send less often
+    } else {
+      taskDelay = 500;  // Very poor signal → Minimize WebSocket activity
+    }
+
+    pipoSocket.loop();
+    vTaskDelay(pdMS_TO_TICKS(taskDelay));
+  }
+}
+
 PipoSocket pipoSocket;
 PipoSocket::PipoSocket() {
   this->ws = nullptr;
@@ -8,6 +33,7 @@ void PipoSocket::setup() {
   this->ws->onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
+    Serial.printf("WebSocket running on core: %d\n", xPortGetCoreID());
     if (type == WS_EVT_CONNECT) {
       // Serial.printf("WS Client connected");
       // // if more than 3 clients, delete the oldest one
@@ -170,8 +196,8 @@ void PipoSocket::loop() {
     float sensor_val = input_sensor.get_value(axis_name);
     bool sensor_bool = input_sensor.get_bool_value(axis_name);
 
-    if (!input_sensor.test_outside_deadzone(axis_name))
-      continue;
+    // if (!input_sensor.test_outside_deadzone(axis_name))
+    //   continue;
 
     size_t remaining = outMaxLen - strlen(outMsg) - 1;
     snprintf(outMsg + strlen(outMsg), remaining, "\nsensor,%s,%.2f,%d",
@@ -196,8 +222,8 @@ void PipoSocket::loop() {
   // Send to connected clients
   for (AsyncWebSocketClient* c : clients) {
     if (!c->canSend()) {
-      // Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
-      //               c->status());
+      Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
+                    c->status());
       continue;
     }
     c->text(outMsg);

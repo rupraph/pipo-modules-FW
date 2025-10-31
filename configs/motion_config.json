@@ -69,11 +69,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "accY": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -83,11 +84,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "blues major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "accZ": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -97,11 +99,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "pitch": {
-        "cc_nb": 1,
-        "channel": 1,
+        "cc_nb": 7,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -111,11 +114,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "roll": {
-        "cc_nb": 2,
-        "channel": 1,
+        "cc_nb": 8,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -125,11 +129,12 @@
         "rootNote": 55,
         "pattern": "scale",
         "scaleType": "blues minor",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "yaw": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 9,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -139,11 +144,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "magX": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 10,
+        "channel": 7,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -153,11 +159,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "magY": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 11,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -167,11 +174,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "magZ": {
-        "cc_nb": 3,
-        "channel": 1,
+        "cc_nb": 12,
+        "channel": 9,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -181,7 +189,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
@@ -353,10 +362,11 @@
     "OSC_ENA": true,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
-    "MidiEnabled": true,
-    "HidEnabled": true,
+    "MidiEnabled": false,
+    "HidEnabled": false,
     "HidMode": 2,
-    "PipoName": "motion"
+    "PipoName": "motion",
+    "BLEEnabled": false
   },
   "sensorconf": {
     "relative_mode": true

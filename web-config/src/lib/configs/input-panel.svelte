@@ -22,6 +22,11 @@
   const smoothValues: Partial<SmoothSensorValues<T>> = {};
   const withinWindowValues: Partial<SensorValues<T>> = {};
   const sensorValues: Partial<SensorValues<T>> = {};
+  let maxSensorValue = aschema.max; // Initialize with the default lmax value
+
+  $: {
+    maxSensorValue = aschema.max;
+  }
 
   (pipoio as PipoIO<T>).on("sensor", ({ axis, value, withinWindow }) => {
     withinWindowValues[axis] = +withinWindow;
@@ -40,6 +45,7 @@
     smoothValues[axis].timestamp = now;
     smoothValues[axis].old = smoothValues[axis].new;
     smoothValues[axis].new = value;
+    // maxSensorValue = aschema.max;
   });
 
   function animateSensor() {
@@ -56,6 +62,16 @@
     requestAnimationFrame(animateSensor);
   }
   animateSensor();
+  $: {
+    const currentValue = sensorValues[currentAxis];
+    if (
+      currentValue !== undefined &&
+      currentValue > maxSensorValue &&
+      currentValue > aschema.max
+    ) {
+      maxSensorValue = Math.round(currentValue); // Update maxSensorValue if a higher value is reached
+    }
+  }
 </script>
 
 <MinMax
@@ -67,10 +83,10 @@
     : "single"}
   cursorActive={Boolean(withinWindowValues[currentAxis])}
   min={aschema.min}
-  max={aschema.max}
+  bind:max={maxSensorValue}
   step={aschema.step}
-  minLabel={`min (${aschema.unit})`}
-  maxLabel={`max (${aschema.unit})`}
+  minLabel={`LowLim (${aschema.unit})`}
+  maxLabel={`HighLim (${aschema.unit})`}
 />
 
 <!-- {#if aschema.cat === "Touch"  } -->
@@ -79,7 +95,7 @@
   {#if aschema.cat !== "Touch"}
     <div class="item">
       <Tooltip title="On/Off output above/below level">
-        <Switch label="Use Threshold" bind:value={input.mode} design="slider" />
+        <Switch label="Threshold" bind:value={input.mode} design="slider" />
       </Tooltip>
     </div>
     <div class="item" class:disabled={!input.mode}>

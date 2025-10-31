@@ -1,4 +1,4 @@
- #pragma once
+#pragma once
 
 #ifdef ESP_PLATFORM
 #include "sdkconfig.h"
@@ -31,7 +31,6 @@
  */
 // #define CONFIG_NIMBLE_CPP_ATT_VALUE_INIT_LENGTH 20
 
-
 /****************************************************
  *         Extended advertising settings            *
  * For use with ESP32C3, ESP32S3, ESP32H2 ONLY!     *
@@ -56,7 +55,6 @@
  * END For use with ESP32C3, ESP32S3, ESP32H2 ONLY! *
  ***************************************************/
 
-
 /** @brief Un-comment to change the default MTU size */
 // #define CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU 255
 
@@ -67,13 +65,13 @@
  *  Values: 0 = DEBUG, 1 = INFO, 2 = WARNING, 3 = ERROR, 4 = CRITICAL, 5+ = NONE\n
  *  Uses approx. 32kB of flash memory.
  */
- // #define CONFIG_BT_NIMBLE_LOG_LEVEL 5
+#define CONFIG_BT_NIMBLE_LOG_LEVEL 0
 
- /** @brief Un-comment to set the debug log messages level from the NimBLE CPP Wrapper.\n
+/** @brief Un-comment to set the debug log messages level from the NimBLE CPP Wrapper.\n
  *  Values: 0 = NONE, 1 = ERROR, 2 = WARNING, 3 = INFO, 4+ = DEBUG\n
  *  Uses approx. 32kB of flash memory.
  */
- // #define CONFIG_NIMBLE_CPP_LOG_LEVEL 0
+// #define CONFIG_NIMBLE_CPP_LOG_LEVEL 0
 
 /** @brief Un-comment to see NimBLE host return codes as text debug log messages.
  *  Uses approx. 7kB of flash memory.
@@ -93,7 +91,7 @@
 /** @brief Un-comment to change the default GAP appearance */
 // #define CONFIG_BT_NIMBLE_SVC_GAP_APPEARANCE 0x0
 
- /** @brief Un-comment if not using NimBLE Client functions \n
+/** @brief Un-comment if not using NimBLE Client functions \n
  *  Reduces flash size by approx. 7kB.
  */
 // #define CONFIG_BT_NIMBLE_ROLE_CENTRAL_DISABLED
@@ -238,9 +236,9 @@
 
 /** @brief HCI Event Buffer size */
 #if CONFIG_BT_NIMBLE_EXT_ADV || CONFIG_BT_NIMBLE_ENABLE_PERIODIC_ADV
-#  define CONFIG_BT_NIMBLE_HCI_EVT_BUF_SIZE 257
+#define CONFIG_BT_NIMBLE_HCI_EVT_BUF_SIZE 257
 #else
-#  define CONFIG_BT_NIMBLE_HCI_EVT_BUF_SIZE 70
+#define CONFIG_BT_NIMBLE_HCI_EVT_BUF_SIZE 70
 #endif
 
 /** @brief Number of high priority HCI event buffers */
@@ -284,49 +282,53 @@
 #define CONFIG_BTDM_SCAN_DUPL_TYPE_DATA_DEVICE 2
 #endif
 
-#if !defined(CONFIG_IDF_TARGET_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32S3)
+#if !defined(CONFIG_IDF_TARGET_ESP32) && \
+    !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32S3)
 #define CONFIG_IDF_TARGET_ESP32 1
 #endif
 
 #if CONFIG_BT_NIMBLE_EXT_ADV || CONFIG_BT_NIMBLE_ENABLE_PERIODIC_ADV
-#  if defined(CONFIG_IDF_TARGET_ESP32)
-#    error Extended advertising is not supported on ESP32.
-#  endif
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#error Extended advertising is not supported on ESP32.
+#endif
 #endif
 #endif
 
 #if CONFIG_BT_NIMBLE_ENABLE_PERIODIC_ADV && !CONFIG_BT_NIMBLE_EXT_ADV
-#  error Extended advertising must be enabled to use periodic advertising.
+#error Extended advertising must be enabled to use periodic advertising.
 #endif
 
 /* Must have max instances and data length set if extended advertising is enabled */
 #if CONFIG_BT_NIMBLE_EXT_ADV
-#  if !defined(CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES)
-#    define CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES 1
-#  endif
-#  if !defined(CONFIG_BT_NIMBLE_MAX_EXT_ADV_DATA_LEN)
-#    define CONFIG_BT_NIMBLE_MAX_EXT_ADV_DATA_LEN 251
-#  endif
+#if !defined(CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES)
+#define CONFIG_BT_NIMBLE_MAX_EXT_ADV_INSTANCES 1
+#endif
+#if !defined(CONFIG_BT_NIMBLE_MAX_EXT_ADV_DATA_LEN)
+#define CONFIG_BT_NIMBLE_MAX_EXT_ADV_DATA_LEN 251
+#endif
 #endif
 
 /* Must set max number of syncs if periodic advertising is enabled */
-#if CONFIG_BT_NIMBLE_ENABLE_PERIODIC_ADV && !defined(CONFIG_BT_NIMBLE_MAX_PERIODIC_SYNCS)
-#  define CONFIG_BT_NIMBLE_MAX_PERIODIC_SYNCS 1
+#if CONFIG_BT_NIMBLE_ENABLE_PERIODIC_ADV && \
+    !defined(CONFIG_BT_NIMBLE_MAX_PERIODIC_SYNCS)
+#define CONFIG_BT_NIMBLE_MAX_PERIODIC_SYNCS 1
 #endif
 
 /* Cannot use client without scan */
-#if defined(CONFIG_BT_NIMBLE_ROLE_CENTRAL) && !defined(CONFIG_BT_NIMBLE_ROLE_OBSERVER)
+#if defined(CONFIG_BT_NIMBLE_ROLE_CENTRAL) && \
+    !defined(CONFIG_BT_NIMBLE_ROLE_OBSERVER)
 #define CONFIG_BT_NIMBLE_ROLE_OBSERVER
 #endif
 
 /* Cannot use server without advertise */
-#if defined(CONFIG_BT_NIMBLE_ROLE_PERIPHERAL) && !defined(CONFIG_BT_NIMBLE_ROLE_BROADCASTER)
+#if defined(CONFIG_BT_NIMBLE_ROLE_PERIPHERAL) && \
+    !defined(CONFIG_BT_NIMBLE_ROLE_BROADCASTER)
 #define CONFIG_BT_NIMBLE_ROLE_BROADCASTER
 #endif
 
 /* Enables the use of Arduino String class for attribute values */
 #if defined __has_include
-#  if __has_include (<Arduino.h>)
-#    define NIMBLE_CPP_ARDUINO_STRING_AVAILABLE
-#  endif
+#if __has_include(<Arduino.h>)
+#define NIMBLE_CPP_ARDUINO_STRING_AVAILABLE
+#endif
 #endif

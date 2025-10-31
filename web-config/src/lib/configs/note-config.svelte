@@ -162,6 +162,7 @@
 <!-- </Tooltip> -->
 <!-- {/if} -->
 <Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
+<Range label="Velocity" bind:value={config.velocity} min={0} max={127} />
 
 <style>
 </style>

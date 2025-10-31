@@ -1,10 +1,40 @@
 #include "utils/debug.h"
 #include "HW_CONFIG.h"
 // #define DEBUG_HEAP 1
+
+measure_time looptime("loop");
+measure_time interval("interval");
+
+void debug_monitor(void* pvParameters) {
+  for (;;) {
+    // input_sensor.teleplot_data("magX");
+    // input_sensor.teleplot_data("magY");
+    // input_sensor.teleplot_data("magZ");
+    // Serial.println(uxTaskGetStackHighWaterMark(websocketTaskHandle));
+    if (DEBUG_HEAP) {
+      // pipoDebugHeap("now");
+      pipoDebugHeapFull("now");
+
+      // check https://github.com/mathieucarbou/MycilaTaskMonitor
+      // const UBaseType_t size = uxTaskGetStackHighWaterMark(sensorTaskHandle);
+      // Serial.print("size: ");
+      // Serial.println(size);
+    }
+    // Serial.print("Sensor task duration: ");
+    // // Serial.print(sensor_task_duration);
+    // Serial.print(" ms, interval: ");
+    // // Serial.println(sensor_task_interval);
+    looptime.report();
+    // Serial.print(getCpuFrequencyMhz());
+    vTaskDelay(pdMS_TO_TICKS(200));
+  }
+}
+
 void pipoDebugHeapFull(const char* stepName = nullptr) {
 
   size_t freeHeap = ESP.getFreeHeap();
   size_t totalHeap = ESP.getHeapSize();
+  size_t largest_block = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
   size_t usedHeap = totalHeap - freeHeap;
 
   if (stepName) {
@@ -13,16 +43,15 @@ void pipoDebugHeapFull(const char* stepName = nullptr) {
     Serial.println("Heap Memory Usage:");
   }
 
-  Serial.printf("  Total Heap: %u bytes (%.2f KB)\n", totalHeap,
-                totalHeap / 1024.0);
-  Serial.printf("  Used Heap:  %u bytes (%.2f KB)\n", usedHeap,
-                usedHeap / 1024.0);
+  // Serial.printf("  Total Heap: %u bytes (%.2f KB)\n", totalHeap,
+  //               totalHeap / 1024.0);
+  // Serial.printf("  Used Heap:  %u bytes (%.2f KB)\n", usedHeap,
+  //               usedHeap / 1024.0);
   Serial.printf("  Free Heap:  %u bytes (%.2f KB)\n", freeHeap,
                 freeHeap / 1024.0);
-  Serial.printf("  Heap Fragmentation: %.2f%%\n",
-                (freeHeap * 100.0) / totalHeap);
-  Serial.printf(" Max block: %u bytes\n",
-                heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+  Serial.printf(" Max block: %u bytes\n", largest_block);
+  Serial.printf("Fragmentation Ratio: %.2f%%\n",
+                (1.0 - ((float)largest_block / freeHeap)) * 100);
 }
 
 void pipoDebugHeap(const char* stepName = nullptr) {

@@ -46,7 +46,8 @@ struct SensorDat {
     bool midi_trig = false;
     bool hid_trig = false;
   };
-
+  // trigger flags used to pass entering/existing the range to the senders which will reset them once used.
+  // one for each protocol
   trigger_flag trigger_flags;
   trigger_flag untrigger_flags;
   bool ws_monitor = false;
@@ -83,6 +84,8 @@ class Sensor {
   void reset_all_offset();
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
+
+  void reset_offset(const string& input);
 
   bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);

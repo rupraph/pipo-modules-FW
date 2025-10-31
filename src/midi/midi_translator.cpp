@@ -106,20 +106,41 @@ bool MidiTranslator::is_a_note(string noteName) {
 vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
                                                 string pattern,
                                                 string scaleType) {
-
-  vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
   vector<int> expandedScale;
+  // expand over octaves for arpeggios and scales
+  if (pattern != "interval") {
+    vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
 
-  int baseScaleSize = scale.size();
-  int baseNoteIndex = 0;
-  int expandedNote = scale[baseNoteIndex];
+    int baseScaleSize = scale.size();
+    int baseNoteIndex = 0;
+    int expandedNote = scale[baseNoteIndex];
 
-  for (int i = 0; i < nb_notes; i++) {
-    expandedScale.push_back(expandedNote);
-    baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
-    expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    for (int i = 0; i < nb_notes; i++) {
+      expandedScale.push_back(expandedNote);
+      baseNoteIndex = (baseNoteIndex + 1) % baseScaleSize;
+      expandedNote = scale[baseNoteIndex] + ((i + 1) / baseScaleSize) * 12;
+    }
+  } else {
+    // build intervals
+    int expandedNote = rootNote;
+    for (int i = 0; i < nb_notes; i++) {
+
+      if (intervals.find(scaleType) != intervals.end()) {
+        expandedScale.push_back(expandedNote);
+        expandedNote += intervals.at(scaleType)[1];
+        Serial.print("Note: ");
+        Serial.println(expandedNote);
+      } else {
+        Serial.println("Invalid interval type");
+      }
+      Serial.print("Interval: ");
+      for (int i = 0; i < expandedScale.size(); i++) {
+        Serial.print(expandedScale[i]);
+        Serial.print("-");
+      }
+      Serial.println();
+    }
   }
-
   return expandedScale;
 }
 
@@ -147,18 +168,6 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       return scale;
     } else {
       Serial.println("Invalid arpeggio type");
-      return {};
-    }
-  } else if (pattern == "interval") {
-    auto it = intervals.find(scaleType);
-    if (it != intervals.end()) {
-      vector<int> scale = it->second;
-      for (int i = 0; i < scale.size(); i++) {
-        scale[i] += rootNote;
-      }
-      return scale;
-    } else {
-      Serial.println("Invalid interval type");
       return {};
     }
   } else {
@@ -223,6 +232,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["cc_max"] = cc_max;
   j["cc_min"] = cc_min;
   j["hires"] = hires;
+  j["velocity"] = velocity;  // Assuming velocity is a member variable
   return j;
 }
 
@@ -240,6 +250,7 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_max = j["cc_max"];
     cc_min = j["cc_min"];
     hires = j["hires"];
+    velocity = j["velocity"];  // Assuming velocity is a member variable
     this->update_scale();
 
   } catch (const std::exception& e) {
@@ -319,6 +330,14 @@ int MidiTranslator::get_min_output() {
 }
 void MidiTranslator::set_min_output(int m) {
   cc_min = m;
+}
+
+int MidiTranslator::get_velocity() {
+  return velocity;
+}
+
+void MidiTranslator::set_velocity(int v) {
+  velocity = v;
 }
 
 // int MidiTranslator::get_interpolation_type() {

@@ -322,6 +322,15 @@ void PipoServer::setup_requests() {
     return request->send(200, "text/plain", "Scan started");
   });
 
+  server.on("/wifi-forget", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("ssid")) {
+      return request->send(400, "text/plain", "Error: no ssid parameter");
+    }
+    String ssid = request->getParam("ssid")->value();
+    wifi.forgetNetwork(ssid);
+    return request->send(200, "text/plain", "Network forgotten");
+  });
+
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", logs.readLogs());
   });
@@ -347,36 +356,12 @@ void PipoServer::setup_requests() {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
       input_sensor.measure_offset(axis);
+      // currently config save is always done by fecthing the client.
+      // for now, send the offset to the client so that it can be saved later on
       // config.gather(engine);
       // config.save();
-      return request->send(200, "text/plain", "Offset measurement triggered");
-    } catch (const std::exception& e) {
-      return request->send(500, "text/plain",
-                           "Error measuring offset: " + String(e.what()));
-    }
-  });
-
-  server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
-    if (!request->hasParam("axis")) {
-      return request->send(400, "text/plain", "No sensor provided");
-    }
-    try {
-      string axis = request->getParam("axis")->value().c_str();
-      input_sensor.reset_offset(axis);
-      // config.gather(engine);
-      // config.save();
-      return request->send(200, "text/plain", "Offset reset");
-    } catch (const std::exception& e) {
-      return request->send(500, "text/plain",
-                           "Error resetting offset: " + String(e.what()));
-    }
-  });
-
-  server.on("/offsetall", HTTP_POST, [&](AsyncWebServerRequest* request) {
-    try {
-      input_sensor.measure_offset_all();
       return request->send(200, "text/plain",
-                           "All offset measurement triggered");
+                           String(input_sensor.get_offset(axis)));
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
@@ -384,7 +369,7 @@ void PipoServer::setup_requests() {
   });
 
 #ifdef PIPO_ANALOG
-  server.on("/offsetAllTouch", HTTP_POST, [&](AsyncWebServerRequest* request) {
+  server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
       input_sensor.measure_offset_all_touch();
       // config.gather(engine);
@@ -397,8 +382,16 @@ void PipoServer::setup_requests() {
   });
 #endif
 
+#ifdef PIPO_MOTION
+  server.on("/setreference", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    input_sensor.reset_reference_orientation();
+    return request->send(200, "text/plain", "Reference orientation reset");
+  });
+#endif
+
+  // pause Engine
   server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    engine.toggle_pause();
+    PAUSED = !PAUSED;
     return request->send(200, "text/plain", "Engine paused");
   });
   // Solution by using Chunk Hanlder
@@ -406,6 +399,7 @@ void PipoServer::setup_requests() {
   server.addHandler(fileServer);
 }
 
+//TODO should use shared flag
 bool pipoNetworkReady() {
   return wifi.ready() && server.isRunning();
 }

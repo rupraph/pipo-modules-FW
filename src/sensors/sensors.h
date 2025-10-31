@@ -8,8 +8,8 @@ extern MotionSensor input_sensor;
 #endif
 
 #ifdef PIPO_RANGE
-#include "sensors/range_sensor.h"
-extern RangeSensor input_sensor;
+#include "sensors/pipo_range_sensor.h"
+extern PipoRangeSensor input_sensor;
 // string sensor_type = "range";
 #endif
 

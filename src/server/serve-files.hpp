@@ -16,6 +16,7 @@ class PipoFileServer : public AsyncStaticWebHandler {
 
   void handleRequest(AsyncWebServerRequest* request) override {
     // Get the filename from request->_tempObject and free it
+    Serial.printf("FileServer running on core: %d\n", xPortGetCoreID());
     String filename = String((char*)request->_tempObject);
     free(request->_tempObject);
     request->_tempObject = NULL;

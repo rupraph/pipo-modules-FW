@@ -39,7 +39,7 @@
     z-index: 21;
     width: calc(100vw - 8px);
     max-width: 600px;
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-network);
     position: fixed;
     overflow: hidden;
     transform: translate(-50%, -50%);
@@ -47,7 +47,7 @@
   .close {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 4%;
     padding: 5px;
     font-size: 1.6em;
     cursor: pointer;
@@ -61,6 +61,6 @@
     position: fixed;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(7px);
   }
 </style>

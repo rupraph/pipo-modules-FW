@@ -25,7 +25,7 @@
   function fetchImage() {
     // debugger;
     return pipoio
-      .get(`/pattern-${type}.svg`, { responseType: "arraybuffer" })
+      .get(`/${type}-Horizontal-Yellow.svg`, { responseType: "arraybuffer" })
       .then(({ data }) => {
         const blob = new Blob([data], { type: "image/svg+xml" });
         const url = URL.createObjectURL(blob);
@@ -40,15 +40,11 @@
   {#await fetch()}
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
-    <div class="title-container">
-      <h1>Pipo {type}</h1>
-      {#await fetchImage()}
-        <p>Loading image...</p>
-      {:then imageDataUrl}
-        <!-- Use the imageDataUrl as the src for the image -->
-        <img src={imageDataUrl} alt="Pattern" class="pattern-image" />
-      {/await}
-    </div>
+    {#await fetchImage()}
+      <p>Loading logo...</p>
+    {:then imageDataUrl}
+      <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
+    {/await}
     <Configs />
     <article class="content section-borders">
       <Collapse title="Info">
@@ -77,22 +73,17 @@
     max-width: 600px;
     gap: 1em;
   }
-  .pattern-image {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 100%;
-    object-fit: cover;
-    z-index: -1; /* Ensure the image is behind the title */
+  .logo-image {
+    max-width: 60%; /* or any value you prefer */
+    align-self: flex-start;
   }
 
-  .title-container {
+  /* .title-container {
     position: relative;
     text-align: center;
     height: fit-content;
     margin-bottom: 30px;
-  }
+  } */
 
   h1 {
     font-family: Brugty;

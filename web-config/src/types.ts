@@ -19,6 +19,7 @@ export type NoteConfig = {
   sustain: number;
   nbOfNotes: number;
   current_scale: number[];
+  velocity: number;
 };
 export type MidiConfig = BaseMidiConfig & CCConfig & NoteConfig;
 export const BASIC = false;
@@ -65,6 +66,7 @@ export type GeneralConfig = {
   HidEnabled: boolean;
   HidMode: number;
   PipoName: string;
+  BLEEnabled: boolean;
 };
 
 export type HidConfig = {
@@ -76,7 +78,16 @@ export type HidConfig = {
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
 export type PipoKeys = {
-  motion: "accX" | "accY" | "accZ" | "pitch" | "roll" | "yaw"| "magX" | "magY" | "magZ";
+  motion:
+    | "accX"
+    | "accY"
+    | "accZ"
+    | "pitch"
+    | "roll"
+    | "yaw"
+    | "magX"
+    | "magY"
+    | "magZ";
   range: "dist";
   analog:
     | "A01"
@@ -85,16 +96,20 @@ export type PipoKeys = {
     | "A04"
     | "A05"
     | "A06"
+    | "A07"
+    | "A08"
     | "T1"
     | "T2"
     | "T3"
     | "T4"
     | "T5"
-    | "T6";
+    | "T6"
+    | "T7"
+    | "T8";
   unknown: "";
 };
 
-export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06";
+export type AnalogOutKeys = "A01" | "A02" | "A03" | "A04" | "A05" | "A06"|"A07"|"A08";
 
 export type AxisSchema = {
   label: string;
@@ -105,10 +120,16 @@ export type AxisSchema = {
   step: number;
   index: number;
 };
+export type StringSchema = {
+  min: number;
+  max: number;
+};
 export type Schema = {
   [T in PipoTypes]: {
     [Key in PipoKeys[T]]: AxisSchema;
   };
+} & {
+  name: StringSchema;
 };
 
 export type SensorSettings = {
@@ -119,10 +140,9 @@ export type SensorSettings = {
     hold_mode: boolean;
   };
   analog: {
-    analogout: {[Key in AnalogOutKeys]: AnalogOut};
+    analogout: { [Key in AnalogOutKeys]: AnalogOut };
   };
-  unknown: {
-  };
+  unknown: {};
 };
 
 export type AnalogOut = {
@@ -130,8 +150,7 @@ export type AnalogOut = {
   outmode: number;
   lmax: number;
   lmin: number;
-}
-
+};
 
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
@@ -147,8 +166,7 @@ export type PipoConfig<T extends PipoTypes> = {
     };
     "engine-special"?: {
       quat?: QuatConfig;
-    }
-
+    };
   };
   general: GeneralConfig;
   inputs: {
@@ -198,6 +216,4 @@ export type PipoInfo = {
 export type QuatConfig = {
   enabled: boolean;
   osc_addr: string;
-}
-
-
+};

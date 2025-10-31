@@ -56,7 +56,7 @@
     background-color: var(--bg-color);
     border-radius: 4px;
     padding: 4px;
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;

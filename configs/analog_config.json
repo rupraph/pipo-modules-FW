@@ -87,11 +87,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A02": {
         "cc_nb": 2,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -101,11 +102,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A03": {
         "cc_nb": 3,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -115,11 +117,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A04": {
         "cc_nb": 4,
-        "channel": 1,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -129,11 +132,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A05": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -143,11 +147,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "A06": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -157,11 +162,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "T1": {
         "cc_nb": 7,
-        "channel": 1,
+        "channel": 7,
         "enabled": true,
         "hires": false,
         "cc_max": 127,
@@ -171,11 +177,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T2": {
         "cc_nb": 8,
-        "channel": 1,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -185,11 +192,12 @@
         "rootNote": 79,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T3": {
         "cc_nb": 9,
-        "channel": 1,
+        "channel": 9,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -199,11 +207,12 @@
         "rootNote": 75,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T4": {
         "cc_nb": 10,
-        "channel": 1,
+        "channel": 10,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -213,11 +222,12 @@
         "rootNote": 72,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 1
+        "tl_mode": 1,
+        "velocity": 100
       },
       "T5": {
         "cc_nb": 11,
-        "channel": 1,
+        "channel": 11,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -227,11 +237,12 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       },
       "T6": {
         "cc_nb": 12,
-        "channel": 1,
+        "channel": 12,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -241,7 +252,8 @@
         "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major",
-        "tl_mode": 0
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
@@ -455,13 +467,14 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
+    "OSC_ENA": false,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1,
-    "PipoName": "analog"
+    "PipoName": "analog",
+    "BLEEnabled": false
   },
   "sensorconf": {
     "analogout": {
