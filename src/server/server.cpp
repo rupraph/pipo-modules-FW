@@ -368,6 +368,22 @@ void PipoServer::setup_requests() {
     }
   });
 
+  server.on("/offsetcal-list", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("channels")) {
+      return request->send(400, "text/plain", "No channel list provided");
+    }
+    try {
+      string channels = request->getParam("channels")->value().c_str();
+      Serial.print("Starting offset calibration for channels: ");
+      Serial.println(channels.c_str());
+      input_sensor.measure_offset_list(channels);
+      return request->send(200, "text/plain", "Offset measurement started for selected channels");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
+
 #ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
