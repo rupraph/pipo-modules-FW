@@ -61,9 +61,10 @@ void PipoRangeSensor::setup() {
     pipoDebugHeap();
 }
 
-void PipoRangeSensor::measure_sensor() {
+bool PipoRangeSensor::measure_sensor() {
   // start_duration();
   int j;
+  bool data_ready = false;
 
 #if HW_REV == 10
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
@@ -101,6 +102,7 @@ void PipoRangeSensor::measure_sensor() {
       if (!hold_mode) {
         sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
+        data_ready = true;
       }
       // Serial.println("Out of range");
 
@@ -118,6 +120,7 @@ void PipoRangeSensor::measure_sensor() {
         // interval.start();
         sensor_dat["dist"].value = ma_filter.process(
             sensor_dat["dist"].raw_value - sensor_dat["dist"].offset);
+        data_ready = true;
       }
 
       //  ma_filter.process(lp_filter.process(dist));
@@ -135,7 +138,7 @@ void PipoRangeSensor::measure_sensor() {
 #endif
     }
   }
-  return newdata;
+  return data_ready;
   // end_duration();
   // measured_loop_duration();
 }

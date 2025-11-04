@@ -50,6 +50,7 @@ void MotionSensor::setup() {
 
 bool MotionSensor::measure_sensor() {
   icm20948.task();
+  bool data_ready = false;
   /////////  Read Quat6 orientation data
   if (relative_mode) {
     // Mode 1: Pure relative orientation using quaternion differential tracking
@@ -74,12 +75,14 @@ bool MotionSensor::measure_sensor() {
         Serial.println(quat_ref_z, 4);
       }
       calc_differential_euler_angles();
+      data_ready = true;
     }
   } else {
     // Mode 2: quat9 (absolute orientation)
     if (icm20948.quat9DataIsReady()) {
       icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       calc_euler_angles();
+      data_ready = true;
     }
   }
 
@@ -89,6 +92,7 @@ bool MotionSensor::measure_sensor() {
                                  &sensor_dat["accY"].raw_value,
                                  &sensor_dat["accZ"].raw_value);
     convert_accell();
+    data_ready = true;
   }
 
   if (icm20948.magDataIsReady()) {
@@ -102,6 +106,7 @@ bool MotionSensor::measure_sensor() {
     sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
     //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
+    data_ready = true;
   }
 
   //activity recog
@@ -135,7 +140,7 @@ bool MotionSensor::measure_sensor() {
     // Serial.print(q3, 3);
     // Serial.println(F("}"));
   }
-  return true;
+  return data_ready;
 }
 
 void MotionSensor::calc_euler_angles() {
