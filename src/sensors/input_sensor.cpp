@@ -23,6 +23,8 @@ void Sensor::update() {
 
 void Sensor::measure_offset_iteration() {
   measure_offset_counter++;
+  Serial.print("Offset measurement iteration: ");
+  Serial.println(measure_offset_counter);
   if (measure_all) {
     // Measure all channels
     for (auto const& pair : sensor_dat) {

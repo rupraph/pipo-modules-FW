@@ -288,11 +288,38 @@
   }
 
   function reset_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/resetoffset",
-      params: { axis },
-    }).then(() => console.log("DONE"));
+    pipoio
+      .request({
+        method: "post",
+        url: "/resetoffset",
+        params: { axis },
+      })
+      .then(() => {
+        // Set local config to 0
+        config.inputs[axis].offset = 0;
+        console.log(`Offset reset for ${axis}`);
+      })
+      .catch((error) => {
+        console.error(`Failed to reset offset for ${axis}:`, error);
+      });
+  }
+
+  function reset_all_offsets() {
+    pipoio
+      .request({
+        method: "post",
+        url: "/resetoffset",
+      })
+      .then(() => {
+        // Set all local config offsets to 0
+        for (const axis of Object.keys(config.inputs) as PipoKeys[T][]) {
+          config.inputs[axis].offset = 0;
+        }
+        console.log("All offsets reset");
+      })
+      .catch((error) => {
+        console.error("Failed to reset all offsets:", error);
+      });
   }
 </script>
 
@@ -310,6 +337,14 @@
       >
         {calibratingAll ? "Calibrating All..." : "Zero All Touch"}
       </LoadingButton>
+      <!-- <button
+        class="secondary"
+        on:click={reset_all_offsets}
+        title="Reset all offsets to zero"
+        style="border-radius: 2vw; cursor: pointer;"
+      >
+        Reset All
+      </button> -->
     {/if}
 
     <button

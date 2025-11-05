@@ -437,14 +437,18 @@ void PipoServer::setup_requests() {
 #endif
 
   server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
-    if (!request->hasParam("axis")) {
-      return request->send(400, "text/plain", "No axis provided");
-    }
     try {
-      string axis = request->getParam("axis")->value().c_str();
-      input_sensor.reset_offset(axis);
-      return request->send(200, "text/plain",
-                           String(input_sensor.get_offset(axis)));
+      if (request->hasParam("axis")) {
+        // Reset single axis
+        string axis = request->getParam("axis")->value().c_str();
+        input_sensor.reset_offset(axis);
+        return request->send(200, "text/plain",
+                             "Offset reset for " + String(axis.c_str()));
+      } else {
+        // Reset all offsets
+        input_sensor.reset_all_offset();
+        return request->send(200, "text/plain", "All offsets reset");
+      }
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error resetting offset: " + String(e.what()));
