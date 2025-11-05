@@ -77,9 +77,12 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
 
-  // capturing and storing config at this point
-  //(temp solution to store the initial sensor offset measurements)
-  Serial.println("gather and save config");
+  // wait for initial offsets to be measured if needed
+  while (input_sensor.is_offset_measurement_complete() == false) {
+    input_sensor.update();
+  }
+
+  Serial.println("Boot offsets measured, gather and save config");
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
