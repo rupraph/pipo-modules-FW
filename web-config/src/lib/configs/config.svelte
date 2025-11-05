@@ -177,18 +177,114 @@
     isPaused = !isPaused;
   }
 
+  // Offset calibration states
+  let calibratingAxis: string | null = null;
+  let calibratingAll = false;
+
   function cal_offset(axis: PipoKeys[T]) {
-    pipoio.get("/offsetcal", { params: { axis } }).then(({ data }) => {
-      config.inputs[axis].offset = data;
-    });
+    calibratingAxis = axis;
+    pipoio
+      .post("/offsetcal", null, { params: { axis } })
+      .then(({ data }) => {
+        if (data.status === "measuring") {
+          // Start polling for completion
+          pollOffsetCompletion(axis);
+        }
+      })
+      .catch((error) => {
+        console.error(`Offset calibration failed for ${axis}:`, error);
+        calibratingAxis = null;
+      });
+  }
+
+  function pollOffsetCompletion(axis: PipoKeys[T]) {
+    const pollInterval = setInterval(() => {
+      pipoio
+        .get("/offsetcal-status")
+        .then(({ data }) => {
+          if (data.status === "complete" && data.offsets) {
+            // Use the returned offset values directly
+            if (data.offsets[axis] !== undefined) {
+              config.inputs[axis].offset = data.offsets[axis];
+              console.log(
+                `Offset calibrated for ${axis}: ${data.offsets[axis]}`
+              );
+            }
+            clearInterval(pollInterval);
+            calibratingAxis = null;
+          }
+          // Continue polling if still measuring
+        })
+        .catch((error) => {
+          console.error(`Offset status check failed for ${axis}:`, error);
+          clearInterval(pollInterval);
+          calibratingAxis = null;
+        });
+    }, 500); // Poll every 500ms
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (calibratingAxis === axis) {
+        console.error(`Offset calibration timeout for ${axis}`);
+        calibratingAxis = null;
+      }
+    }, 10000);
+  }
+
+  function pollAllTouchCompletion() {
+    const pollInterval = setInterval(() => {
+      pipoio
+        .get("/offsetcal-status")
+        .then(({ data }) => {
+          if (data.status === "complete" && data.offsets) {
+            // Use the returned offset values directly
+            for (const [channel, offsetValue] of Object.entries(data.offsets)) {
+              if (config.inputs[channel as PipoKeys[T]]) {
+                config.inputs[channel as PipoKeys[T]].offset =
+                  offsetValue as number;
+              }
+            }
+            console.log(
+              "All touch offset calibration completed:",
+              data.offsets
+            );
+            clearInterval(pollInterval);
+            calibratingAll = false;
+          }
+          // Continue polling if still measuring
+        })
+        .catch((error) => {
+          console.error("All touch offset status check failed:", error);
+          clearInterval(pollInterval);
+          calibratingAll = false;
+        });
+    }, 500); // Poll every 500ms
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (calibratingAll) {
+        console.error("All touch offset calibration timeout");
+        calibratingAll = false;
+      }
+    }, 10000);
   }
 
   function offsetalltouch() {
-    pipoio.get("/offsetAllTouch").then(({ data }) => {
-      for (const [axis, offset] of Object.entries(data)) {
-        config.inputs[axis as PipoKeys[T]].offset = Number(offset);
-      }
-    });
+    calibratingAll = true;
+    pipoio
+      .get("/offsetAllTouch")
+      .then(({ data }) => {
+        if (data.status === "measuring") {
+          // Start polling for completion
+          pollAllTouchCompletion();
+        }
+      })
+      .catch((error) => {
+        console.error("Touch offset calibration failed:", error);
+        calibratingAll = false;
+      });
   }
 
   function reset_offset(axis: PipoKeys[T]) {
@@ -205,9 +301,15 @@
     <QuickConfig bind:config />
 
     {#if $type === "analog"}
-      <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
-        >Zero All Touch
-      </button>
+      <LoadingButton
+        onClick={offsetalltouch}
+        loading={calibratingAll}
+        disabled={calibratingAxis !== null}
+        class="secondary"
+        title="Zero all touch sensors"
+      >
+        {calibratingAll ? "Calibrating All..." : "Zero All Touch"}
+      </LoadingButton>
     {/if}
 
     <button
@@ -267,13 +369,16 @@
       />
       {#if $type !== "motion"}
         <Tooltip title="Make current value the zero offset">
-          <button
+          <LoadingButton
+            onClick={() => cal_offset(currentAxis)}
+            loading={calibratingAxis === currentAxis}
+            disabled={calibratingAxis !== null &&
+              calibratingAxis !== currentAxis}
             class="secondary"
-            on:click={() => cal_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
-            Set Zero
-          </button>
+            {calibratingAxis === currentAxis ? "Calibrating..." : "Set Zero"}
+          </LoadingButton>
         </Tooltip>
         <Tooltip title="Removes the offset">
           <button

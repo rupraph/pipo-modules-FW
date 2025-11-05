@@ -69,6 +69,9 @@ void Sensor::measure_offset_iteration() {
       Serial.println(sensor_dat[axis_to_measure_offset].offset);
     }
 
+    // Set completion flag
+    offset_measurement_complete = true;
+
     // Reset flags
     measure_offset_flag = false;
     measure_all = false;
@@ -731,4 +734,39 @@ bool Sensor::get_cyclic(const std::string& axis) {
     return sensor_dat[axis].cyclic;
   else
     throw std::invalid_argument("Axis not found: " + axis);
+}
+
+// Offset measurement completion methods
+bool Sensor::is_offset_measurement_complete() {
+  return offset_measurement_complete;
+}
+
+void Sensor::clear_completion_flag() {
+  offset_measurement_complete = false;
+}
+
+JsonDocument Sensor::get_measured_offsets() {
+  JsonDocument result;
+
+  if (measure_all) {
+    // Return all channel offsets
+    for (const auto& pair : sensor_dat) {
+      result[pair.first] = pair.second.offset;
+    }
+  } else if (measure_list) {
+    // Return selected channel offsets
+    for (const string& channel : channels_to_measure) {
+      if (sensor_dat.find(channel) != sensor_dat.end()) {
+        result[channel] = sensor_dat[channel].offset;
+      }
+    }
+  } else {
+    // Return single axis offset
+    if (sensor_dat.find(axis_to_measure_offset) != sensor_dat.end()) {
+      result[axis_to_measure_offset] =
+          sensor_dat[axis_to_measure_offset].offset;
+    }
+  }
+
+  return result;
 }

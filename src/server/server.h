@@ -1,6 +1,7 @@
 #ifndef PIPOSERVER_H
 #define PIPOSERVER_H
 #include <ESPmDNS.h>
+#include <vector>
 #include "HW_CONFIG.h"
 #include "engine.h"
 #include <ArduinoJson.h>

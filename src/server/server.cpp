@@ -355,16 +355,42 @@ void PipoServer::setup_requests() {
     try {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
+
+      // Check if measurement is already in progress
+      if (input_sensor.is_offset_measurement_complete()) {
+        input_sensor.clear_completion_flag();
+      }
+
       input_sensor.start_measure_offset(axis);
-      // currently config save is always done by fecthing the client.
-      // for now, send the offset to the client so that it can be saved later on
-      // config.gather(engine);
-      // config.save();
-      return request->send(200, "text/plain",
-                           String(input_sensor.get_offset(axis)));
+
+      // Return immediately with status - UI will poll for completion
+      return request->send(202, "application/json",
+                           "{\"status\":\"measuring\",\"axis\":\"" +
+                               String(axis.c_str()) + "\"}");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
+    }
+  });
+
+  // New endpoint to check offset measurement status
+  server.on("/offsetcal-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    try {
+      if (input_sensor.is_offset_measurement_complete()) {
+        JsonDocument offsetData = input_sensor.get_measured_offsets();
+        input_sensor.clear_completion_flag();
+
+        String response;
+        serializeJson(offsetData, response);
+        return request->send(
+            200, "application/json",
+            "{\"status\":\"complete\",\"offsets\":" + response + "}");
+      }
+      return request->send(200, "application/json",
+                           "{\"status\":\"measuring\"}");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error checking offset status: " + String(e.what()));
     }
   });
 
@@ -377,7 +403,8 @@ void PipoServer::setup_requests() {
       Serial.print("Starting offset calibration for channels: ");
       Serial.println(channels.c_str());
       input_sensor.start_measure_offset_list(channels);
-      return request->send(200, "text/plain", "Offset measurement started for selected channels");
+      return request->send(200, "text/plain",
+                           "Offset measurement started for selected channels");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
@@ -387,21 +414,42 @@ void PipoServer::setup_requests() {
 #ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
+      // Clear any previous completion flag
+      if (input_sensor.is_offset_measurement_complete()) {
+        input_sensor.clear_completion_flag();
+      }
+
       // Use new flexible offset system to calibrate all touch channels
 #if HW_REV == 10
       input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6");
 #elif HW_REV >= 11
       input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6,T7,T8");
 #endif
-      // config.gather(engine);
-      // config.save();
-      return request->send(200, "text/plain", "Touch offset measurement");
+
+      // Return immediately with measuring status - UI will poll for completion
+      return request->send(202, "application/json",
+                           "{\"status\":\"measuring\"}");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
     }
   });
 #endif
+
+  server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("axis")) {
+      return request->send(400, "text/plain", "No axis provided");
+    }
+    try {
+      string axis = request->getParam("axis")->value().c_str();
+      input_sensor.reset_offset(axis);
+      return request->send(200, "text/plain",
+                           String(input_sensor.get_offset(axis)));
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error resetting offset: " + String(e.what()));
+    }
+  });
 
 #ifdef PIPO_MOTION
   server.on("/setreference", HTTP_GET, [&](AsyncWebServerRequest* request) {

@@ -77,16 +77,21 @@ class Sensor {
   virtual void setup() = 0;
   void update();
   virtual bool measure_sensor() = 0;
-  
-  
+
   void start_measure_offset(const string& sensor_name);
   void start_measure_offset_all();
   void start_measure_offset_list(const string& channel_list);
   void reset_offset(const string& sensor_name);
   void reset_all_offset();
+
+  // Check if offset measurement is complete
+  bool is_offset_measurement_complete();
+  void clear_completion_flag();
+
+  // Get measured offset results for async responses
+  JsonDocument get_measured_offsets();
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
-
 
   // bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);
@@ -162,17 +167,20 @@ class Sensor {
   void monitor_axis(const std::string& axis);
 
  private:
- void measure_offset_iteration();
-void apply_offset();
+  void measure_offset_iteration();
+  void apply_offset();
 
   string axis_to_measure_offset;
   bool measure_offset_flag = false;
-  bool measure_all = false;  // measure offset for all or for one
-  bool measure_list = false;  // measure offset for selected list
+  bool measure_all = false;            // measure offset for all or for one
+  bool measure_list = false;           // measure offset for selected list
   vector<string> channels_to_measure;  // list of channels to measure offset
   int measure_offset_counter = 0;
   float offset = 0;
-  
+
+  // Completion tracking for async responses
+  bool offset_measurement_complete = false;
+
   // Helper function to parse comma-separated channel list
   vector<string> parse_channel_list(const string& channel_list);
 
