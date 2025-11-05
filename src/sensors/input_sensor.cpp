@@ -10,87 +10,90 @@
 
 void Sensor::update() {
   bool newdata = measure_sensor();
-  if (newdata) {
-    if (measure_offset_flag) {
-      measure_offset_counter++;
-      
-      if (measure_all) {
-        // Measure all channels
-        for (auto const& pair : sensor_dat) {
-          sensor_dat[pair.first].offset += sensor_dat[pair.first].value;
-        }
-      } else if (measure_list) {
-        // Measure selected list of channels
-        for (const string& channel : channels_to_measure) {
-          sensor_dat[channel].offset += sensor_dat[channel].value;
-        }
-      } else {
-        // Measure single channel
-        sensor_dat[axis_to_measure_offset].offset +=
-            sensor_dat[axis_to_measure_offset].value;
-      }
-      
-      if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
-        // Calculate average offsets
-        if (measure_all) {
-          for (auto const& pair : sensor_dat) {
-            sensor_dat[pair.first].offset =
-                sensor_dat[pair.first].offset / OFFSET_CAL_SAMPLES_NB;
-          }
-          Serial.println("Completed offset measurement for all channels");
-        } else if (measure_list) {
-          for (const string& channel : channels_to_measure) {
-            sensor_dat[channel].offset =
-                sensor_dat[channel].offset / OFFSET_CAL_SAMPLES_NB;
-          }
-          Serial.print("Completed offset measurement for selected channels: ");
-          for (const string& channel : channels_to_measure) {
-            Serial.print(channel.c_str());
-            Serial.print("(");
-            Serial.print(sensor_dat[channel].offset);
-            Serial.print(") ");
-          }
-          Serial.println();
-        } else {
-          sensor_dat[axis_to_measure_offset].offset =
-              sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
-          Serial.print("offset of ");
-          Serial.print(axis_to_measure_offset.c_str());
-          Serial.print(" is: ");
-          Serial.println(sensor_dat[axis_to_measure_offset].offset);
-        }
-        
-        // Reset flags
-        measure_offset_flag = false;
-        measure_all = false;
-        measure_list = false;
-        channels_to_measure.clear();
-      }
-    } else {
-      apply_offset();
-      process_sensor_neutral_filter();
-      process_sensor_triggers();
-    }
-  }
-}
-
-bool Sensor::test_outside_deadzone(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end()) {
-
-    if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone) {
-      return true;
-    } else {
-      return false;
-    }
-
+  if (!newdata)
+    return;
+  if (measure_offset_flag) {
+    measure_offset_iteration();
   } else {
-    // Serial.println("error: Axis not found");
-    return false;
+    apply_offset();
+    process_sensor_neutral_filter();
+    process_sensor_triggers();
   }
 }
+
+void Sensor::measure_offset_iteration() {
+  measure_offset_counter++;
+  if (measure_all) {
+    // Measure all channels
+    for (auto const& pair : sensor_dat) {
+      sensor_dat[pair.first].offset += sensor_dat[pair.first].value;
+    }
+  } else if (measure_list) {
+    // Measure selected list of channels
+    for (const string& channel : channels_to_measure) {
+      sensor_dat[channel].offset += sensor_dat[channel].value;
+    }
+  } else {
+    // Measure single channel
+    sensor_dat[axis_to_measure_offset].offset +=
+        sensor_dat[axis_to_measure_offset].value;
+  }
+
+  if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+    // Calculate average offsets
+    if (measure_all) {
+      for (auto const& pair : sensor_dat) {
+        sensor_dat[pair.first].offset =
+            sensor_dat[pair.first].offset / OFFSET_CAL_SAMPLES_NB;
+      }
+      Serial.println("Completed offset measurement for all channels");
+    } else if (measure_list) {
+      for (const string& channel : channels_to_measure) {
+        sensor_dat[channel].offset =
+            sensor_dat[channel].offset / OFFSET_CAL_SAMPLES_NB;
+      }
+      Serial.print("Completed offset measurement for selected channels: ");
+      for (const string& channel : channels_to_measure) {
+        Serial.print(channel.c_str());
+        Serial.print("(");
+        Serial.print(sensor_dat[channel].offset);
+        Serial.print(") ");
+      }
+      Serial.println();
+    } else {
+      sensor_dat[axis_to_measure_offset].offset =
+          sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
+      Serial.print("offset of ");
+      Serial.print(axis_to_measure_offset.c_str());
+      Serial.print(" is: ");
+      Serial.println(sensor_dat[axis_to_measure_offset].offset);
+    }
+
+    // Reset flags
+    measure_offset_flag = false;
+    measure_all = false;
+    measure_list = false;
+    channels_to_measure.clear();
+  }
+}
+
+// bool Sensor::test_outside_deadzone(const std::string& axis) {
+//   if (sensor_dat.find(axis) != sensor_dat.end()) {
+
+//     if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone) {
+//       return true;
+//     } else {
+//       return false;
+//     }
+
+//   } else {
+//     // Serial.println("error: Axis not found");
+//     return false;
+//   }
+// }
 
 //measure single axis offset
-void Sensor::measure_offset(const std::string& sensor_name) {
+void Sensor::start_measure_offset(const std::string& sensor_name) {
   if (!measure_offset_flag) {
     measure_offset_flag = true;
     axis_to_measure_offset = sensor_name;
@@ -99,7 +102,7 @@ void Sensor::measure_offset(const std::string& sensor_name) {
     Serial.println("start offset measurement");
   }
 }
-void Sensor::measure_offset_all() {
+void Sensor::start_measure_offset_all() {
   if (!measure_offset_flag) {
     measure_offset_flag = true;
     measure_all = true;
@@ -111,10 +114,10 @@ void Sensor::measure_offset_all() {
   Serial.println("start all offset measurement");
 }
 
-void Sensor::measure_offset_list(const string& channel_list) {
+void Sensor::start_measure_offset_list(const string& channel_list) {
   if (!measure_offset_flag) {
     channels_to_measure = parse_channel_list(channel_list);
-    
+
     // Validate all channels exist
     for (const string& channel : channels_to_measure) {
       if (sensor_dat.find(channel) == sensor_dat.end()) {
@@ -123,16 +126,16 @@ void Sensor::measure_offset_list(const string& channel_list) {
         return;
       }
     }
-    
+
     // Reset offsets for selected channels
     for (const string& channel : channels_to_measure) {
       sensor_dat[channel].offset = 0;
     }
-    
+
     measure_list = true;
     measure_offset_flag = true;
     measure_offset_counter = 0;
-    
+
     Serial.print("Starting offset measurement for channels: ");
     Serial.println(channel_list.c_str());
   }
@@ -141,7 +144,7 @@ void Sensor::measure_offset_list(const string& channel_list) {
 vector<string> Sensor::parse_channel_list(const string& channel_list) {
   vector<string> channels;
   string current_channel;
-  
+
   for (char c : channel_list) {
     if (c == ',' || c == ' ') {
       if (!current_channel.empty()) {
@@ -152,12 +155,12 @@ vector<string> Sensor::parse_channel_list(const string& channel_list) {
       current_channel += c;
     }
   }
-  
+
   // Add the last channel if not empty
   if (!current_channel.empty()) {
     channels.push_back(current_channel);
   }
-  
+
   return channels;
 }
 

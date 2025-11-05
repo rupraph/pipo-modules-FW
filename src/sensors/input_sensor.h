@@ -77,17 +77,18 @@ class Sensor {
   virtual void setup() = 0;
   void update();
   virtual bool measure_sensor() = 0;
-  void apply_offset();
-  void measure_offset(const string& sensor_name);
-  void measure_offset_all();
-  void measure_offset_list(const string& channel_list);
+  
+  
+  void start_measure_offset(const string& sensor_name);
+  void start_measure_offset_all();
+  void start_measure_offset_list(const string& channel_list);
   void reset_offset(const string& sensor_name);
   void reset_all_offset();
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
 
-  bool test_outside_deadzone(const std::string& axis);
+  // bool test_outside_deadzone(const std::string& axis);
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
   void process_sensor_triggers();
@@ -161,6 +162,9 @@ class Sensor {
   void monitor_axis(const std::string& axis);
 
  private:
+ void measure_offset_iteration();
+void apply_offset();
+
   string axis_to_measure_offset;
   bool measure_offset_flag = false;
   bool measure_all = false;  // measure offset for all or for one

@@ -59,7 +59,7 @@ class AnalogSensor : public Sensor {
   JsonDocument get_sensor_config(bool debug = false) override;
   // void measure_offset(const string& sensor_name) override;
   // void measure_offset_all();
-  void measure_offset_all_touch();
+  // void measure_offset_all_touch();
 
  private:
   unordered_map<string, MedianFilter> filter_map = {{"A01", MedianFilter(5)},

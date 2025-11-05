@@ -355,7 +355,7 @@ void PipoServer::setup_requests() {
     try {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
-      input_sensor.measure_offset(axis);
+      input_sensor.start_measure_offset(axis);
       // currently config save is always done by fecthing the client.
       // for now, send the offset to the client so that it can be saved later on
       // config.gather(engine);
@@ -376,7 +376,7 @@ void PipoServer::setup_requests() {
       string channels = request->getParam("channels")->value().c_str();
       Serial.print("Starting offset calibration for channels: ");
       Serial.println(channels.c_str());
-      input_sensor.measure_offset_list(channels);
+      input_sensor.start_measure_offset_list(channels);
       return request->send(200, "text/plain", "Offset measurement started for selected channels");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
@@ -387,10 +387,15 @@ void PipoServer::setup_requests() {
 #ifdef PIPO_ANALOG
   server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
-      input_sensor.measure_offset_all_touch();
+      // Use new flexible offset system to calibrate all touch channels
+#if HW_REV == 10
+      input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6");
+#elif HW_REV >= 11
+      input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6,T7,T8");
+#endif
       // config.gather(engine);
       // config.save();
-      return request->send(200, "text/plain", "Offset measured");
+      return request->send(200, "text/plain", "Touch offset measurement");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));

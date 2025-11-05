@@ -12,8 +12,11 @@ void AnalogSensor::setup() {
   for (auto const& pair : touch_map) {
     pinMode(pair.second, INPUT);
   }
-
-  measure_offset_all_touch();
+#if HW_REV == 10
+  start_measure_offset_list("T1,T2,T3,T4,T5,T6");
+#elif HW_REV >= 11
+  start_measure_offset_list("T1,T2,T3,T4,T5,T6,T7,T8");
+#endif
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
@@ -39,31 +42,31 @@ void AnalogSensor::setup() {
 // }
 
 // measure offset of touch. name is wrong
-void AnalogSensor::measure_offset_all_touch() {
-  // perform intial baseline calibration
-  int num_samples = OFFSET_CAL_SAMPLES_NB;
-  unordered_map<string, float> offset;
-  for (int i = 0; i < num_samples; i++) {
+// void AnalogSensor::measure_offset_all_touch() {
+//   // perform intial baseline calibration
+//   int num_samples = OFFSET_CAL_SAMPLES_NB;
+//   unordered_map<string, float> offset;
+//   for (int i = 0; i < num_samples; i++) {
 
-    // measure values without corretcing for offset
-    // for (auto const& pair : analog_map) {
-    //   sensor_dat[pair.first].value = analogRead(pair.second) * 0.000806;
-    // }
-    for (auto const& pair : touch_map) {
-      sensor_dat[pair.first].value = touchRead(pair.second);
-    }
+//     // measure values without corretcing for offset
+//     // for (auto const& pair : analog_map) {
+//     //   sensor_dat[pair.first].value = analogRead(pair.second) * 0.000806;
+//     // }
+//     for (auto const& pair : touch_map) {
+//       sensor_dat[pair.first].value = touchRead(pair.second);
+//     }
 
-    // save measurement
-    for (auto const& pair : sensor_dat) {
-      offset[pair.first] += sensor_dat[pair.first].value;
-    }
-    vTaskDelay(pdMS_TO_TICKS(20));
-  }
-  for (auto const& pair : sensor_dat) {
-    sensor_dat[pair.first].offset =
-        round((offset[pair.first] / num_samples) * 1000.0) / 1000.0;
-  }
-}
+//     // save measurement
+//     for (auto const& pair : sensor_dat) {
+//       offset[pair.first] += sensor_dat[pair.first].value;
+//     }
+//     vTaskDelay(pdMS_TO_TICKS(20));
+//   }
+//   for (auto const& pair : sensor_dat) {
+//     sensor_dat[pair.first].offset =
+//         round((offset[pair.first] / num_samples) * 1000.0) / 1000.0;
+//   }
+// }
 
 // void AnalogSensor::update() {
 //   measure_sensor();
@@ -79,8 +82,8 @@ bool AnalogSensor::measure_sensor() {
       sensor_dat[pair.first].raw_value = std::min(
           std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
       sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
-      sensor_dat[pair.first].value = filter_map[pair.first].process(
-          sensor_dat[pair.first].raw_value);
+      sensor_dat[pair.first].value =
+          filter_map[pair.first].process(sensor_dat[pair.first].raw_value);
       ;  // * 0.000806f;
     }
   }
@@ -92,8 +95,8 @@ bool AnalogSensor::measure_sensor() {
 
     sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
 
-    sensor_dat[pair.first].value = filter_map[pair.first].process(
-        sensor_dat[pair.first].raw_value);
+    sensor_dat[pair.first].value =
+        filter_map[pair.first].process(sensor_dat[pair.first].raw_value);
 
     if (sensor_dat[pair.first].value > MAX_TOUCH_VALUE) {
       sensor_dat[pair.first].value = MAX_TOUCH_VALUE;
