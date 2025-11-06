@@ -345,7 +345,7 @@
   },
   "inputs": {
     "A01": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -355,7 +355,7 @@
       "cyclic": false
     },
     "A02": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -365,7 +365,7 @@
       "cyclic": false
     },
     "A03": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -375,7 +375,7 @@
       "cyclic": false
     },
     "A04": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -385,7 +385,7 @@
       "cyclic": false
     },
     "A05": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -395,7 +395,7 @@
       "cyclic": false
     },
     "A06": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -405,7 +405,7 @@
       "cyclic": false
     },
     "T1": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
@@ -415,7 +415,7 @@
       "cyclic": false
     },
     "T2": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
@@ -425,7 +425,7 @@
       "cyclic": false
     },
     "T3": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
@@ -435,7 +435,7 @@
       "cyclic": false
     },
     "T4": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
@@ -445,7 +445,7 @@
       "cyclic": false
     },
     "T5": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
@@ -455,7 +455,7 @@
       "cyclic": false
     },
     "T6": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,

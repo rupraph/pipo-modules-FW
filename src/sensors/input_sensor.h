@@ -22,7 +22,7 @@ struct SensorDat {
 
   // Config attributes
   float
-      deadzone;  // supposed to be % of the total range. value for now. is used to set a deadzone around zero + dynamic neutral band filter
+      deadband;  // supposed to be % of the total range. value for now. is used to set a deadband around zero + dynamic neutral band filter
   float offset;
   bool inverted;
   float lmax;  // can be used in shcmitt trigger mode for high/low triggers
@@ -57,7 +57,7 @@ struct SensorDat {
 
   // should split in structs for config items and live data.
   SensorDat()
-      : deadzone(0.0),
+      : deadband(0.0),
         offset(0.0),
         inverted(false),
         raw_value(0.0),
@@ -94,7 +94,7 @@ class Sensor {
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
-  // bool test_outside_deadzone(const std::string& axis);
+  // bool test_outside_deadband(const std::string& axis);
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
   void process_sensor_triggers();
@@ -124,8 +124,8 @@ class Sensor {
   bool get_inverted(const std::string& axis);
   void set_inverted(const std::string& axis, bool value);
 
-  float get_deadzone(const std::string& axis);
-  void set_deadzone(const std::string& axis, float value);
+  float get_deadband(const std::string& axis);
+  void set_deadband(const std::string& axis, float value);
 
   float get_offset(const std::string& axis);
   void set_offset(const std::string& axis, float value);

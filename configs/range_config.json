@@ -37,7 +37,7 @@
   },
   "inputs": {
     "dist": {
-      "deadzone": 0.4,
+      "deadband": 0.4,
       "offset": 0.0,
       "inverted": false,
       "lmax": 75.0,

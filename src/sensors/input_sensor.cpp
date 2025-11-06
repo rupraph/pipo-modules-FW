@@ -5,8 +5,8 @@
 
 //Todo: replace throw with Serial
 
-//Todo: deadzone should be in percentage or max or in value ?
-// true if outside deadzone
+//Todo: deadband should be in percentage or max or in value ?
+// true if outside deadband
 
 void Sensor::update() {
   bool newdata = measure_sensor();
@@ -82,10 +82,10 @@ void Sensor::measure_offset_iter() {
   }
 }
 
-// bool Sensor::test_outside_deadzone(const std::string& axis) {
+// bool Sensor::test_outside_deadband(const std::string& axis) {
 //   if (sensor_dat.find(axis) != sensor_dat.end()) {
 
-//     if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone) {
+//     if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadband) {
 //       return true;
 //     } else {
 //       return false;
@@ -348,7 +348,7 @@ JsonDocument Sensor::get_inputs_config(bool debug) {
       string axis_name = pair.first;
       // config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
       config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
-      config[axis_name]["deadzone"] = sensor_dat[axis_name].deadzone;
+      config[axis_name]["deadband"] = sensor_dat[axis_name].deadband;
       // config[axis_name]["value"] = sensor_dat[axis_name].value;
       config[axis_name]["offset"] = sensor_dat[axis_name].offset;
       config[axis_name]["lmax"] = sensor_dat[axis_name].lmax;
@@ -377,7 +377,7 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
     // should likely use getter/setter here
-    set_deadzone(axis_name, config[axis_name]["deadzone"]);
+    set_deadband(axis_name, config[axis_name]["deadband"]);
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
     sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
     sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
@@ -517,9 +517,9 @@ bool Sensor::get_inverted(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-float Sensor::get_deadzone(const std::string& axis) {
+float Sensor::get_deadband(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].deadzone;
+    return sensor_dat[axis].deadband;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -646,9 +646,9 @@ void Sensor::set_inverted(const std::string& axis, bool value) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-void Sensor::set_deadzone(const std::string& axis, float value) {
+void Sensor::set_deadband(const std::string& axis, float value) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    sensor_dat[axis].deadzone = value;
+    sensor_dat[axis].deadband = value;
     sensor_dat[axis].NeutralFilter.setDeadband(value);
   } else
     throw std::invalid_argument("Axis not found: " + axis);
