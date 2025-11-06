@@ -72,6 +72,9 @@
       maxSensorValue = Math.round(currentValue); // Update maxSensorValue if a higher value is reached
     }
   }
+
+  $: display_min = (aschema.min - input.offset).toFixed(2);
+  $: display_max = (maxSensorValue - input.offset).toFixed(2);
 </script>
 
 <MinMax
@@ -82,8 +85,8 @@
     ? "double"
     : "single"}
   cursorActive={Boolean(withinWindowValues[currentAxis])}
-  min={aschema.min}
-  bind:max={maxSensorValue}
+  min={display_min}
+  bind:max={display_max}
   step={aschema.step}
   minLabel={`LowLim (${aschema.unit})`}
   maxLabel={`HighLim (${aschema.unit})`}

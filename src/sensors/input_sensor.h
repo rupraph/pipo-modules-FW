@@ -38,6 +38,7 @@ struct SensorDat {
   float raw_value;  // raw value from sensor
   float value;  // should distinguish raw value from output value and have both
   float value_prev;
+  float value_ready;     // value available for reading (thread-safe)
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
@@ -167,7 +168,7 @@ class Sensor {
   void monitor_axis(const std::string& axis);
 
  private:
-  void measure_offset_iteration();
+  void measure_offset_iter();
   void apply_offset();
 
   string axis_to_measure_offset;

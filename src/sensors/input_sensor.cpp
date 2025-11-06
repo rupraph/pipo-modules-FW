@@ -13,7 +13,7 @@ void Sensor::update() {
   if (!newdata)
     return;
   if (measure_offset_flag) {
-    measure_offset_iteration();
+    measure_offset_iter();
   } else {
     apply_offset();
     process_sensor_neutral_filter();
@@ -21,7 +21,7 @@ void Sensor::update() {
   }
 }
 
-void Sensor::measure_offset_iteration() {
+void Sensor::measure_offset_iter() {
   measure_offset_counter++;
   Serial.print("Offset measurement iteration: ");
   Serial.println(measure_offset_counter);
@@ -171,7 +171,8 @@ vector<string> Sensor::parse_channel_list(const string& channel_list) {
 
 void Sensor::apply_offset() {
   for (auto const& pair : sensor_dat) {
-    sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
+    sensor_dat[pair.first].value_ready =
+        sensor_dat[pair.first].value - sensor_dat[pair.first].offset;
   }
 }
 
@@ -535,7 +536,7 @@ float Sensor::get_offset(const std::string& axis) {
  */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].value;
+    return sensor_dat[axis].value_ready;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
