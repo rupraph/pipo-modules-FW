@@ -164,7 +164,8 @@ void OSC_handler::send_osc_message(string address, float value) {
   }
   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
-
+    address =
+        config.general_config["PipoName"].as<std::string>() + "/" + address;
     if (address[0] != '/') {
       address = "/" + address;
     }
