@@ -403,7 +403,7 @@
         on:change={(evt) => setAxis(evt.detail.value)}
       />
       {#if $type !== "motion"}
-        <Tooltip title="Make current value the zero offset">
+        <!-- <Tooltip title="Make current value the zero offset">
           <LoadingButton
             onClick={() => cal_offset(currentAxis)}
             loading={calibratingAxis === currentAxis}
@@ -414,8 +414,8 @@
           >
             {calibratingAxis === currentAxis ? "Calibrating..." : "Set Zero"}
           </LoadingButton>
-        </Tooltip>
-        <Tooltip title="Removes the offset">
+        </Tooltip> -->
+        <!-- <Tooltip title="Removes the offset">
           <button
             class="secondary"
             on:click={() => reset_offset(currentAxis)}
@@ -423,7 +423,7 @@
           >
             Reset Zero
           </button>
-        </Tooltip>
+        </Tooltip> -->
       {/if}
     </div>
     {#if hide_on_out}
