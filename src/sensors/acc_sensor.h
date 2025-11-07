@@ -6,6 +6,7 @@
 #include "Arduino-ICM20948.h"
 #include "utils/filters.h"
 #include "utils/debug.h"
+#include <Preferences.h>
 
 class MotionSensor : public Sensor {
  public:
@@ -42,7 +43,7 @@ class MotionSensor : public Sensor {
     z = quat_z;
   }
 
-  void get_relative_quat(float& w, float& x, float& y, float& z);
+  //   void get_relative_quat(float& w, float& x, float& y, float& z);
 
   bool enable_send_vizualizer =
       false;  //set on/off serial messages for vizualizer
@@ -114,6 +115,8 @@ class MotionSensor : public Sensor {
   string axis_to_measure_offset;
   int measure_offset_counter = 0;
   float offset = 0;
+
+  Preferences motiondata;
 };
 
 #endif  //ACC_SENSOR_H

@@ -15,6 +15,13 @@ void MotionSensor::init() {
 }
 
 void MotionSensor::setup() {
+  // Load last relative orientation reference
+  motiondata.begin("motion-store", false);
+  quat_ref_w = motiondata.getFloat("quat_ref_W", 0.0);
+  quat_ref_x = motiondata.getFloat("quat_ref_X", 0.0);
+  quat_ref_y = motiondata.getFloat("quat_ref_y", 0.0);
+  quat_ref_z = motiondata.getFloat("quat_ref_z", 0.0);
+  reference_set = true;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
@@ -33,6 +40,10 @@ void MotionSensor::update() {
         quat_ref_y = quat_y;
         quat_ref_z = quat_z;
         normalize_quaternion(quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
+        motiondata.putFloat("quat_ref_w", quat_ref_w);
+        motiondata.putFloat("quat_ref_x", quat_ref_x);
+        motiondata.putFloat("quat_ref_y", quat_ref_y);
+        motiondata.putFloat("quat_ref_z", quat_ref_z);
         reference_set = true;
         Serial.println("Reference orientation set");
         Serial.print("Ref quat: w=");
@@ -279,28 +290,28 @@ void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
   }
 }
 
-void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
-  if (!reference_set) {
-    w = 1.0f;
-    x = 0.0f;
-    y = 0.0f;
-    z = 0.0f;
-    return;
-  }
+// void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
+//   if (!reference_set) {
+//     w = 1.0f;
+//     x = 0.0f;
+//     y = 0.0f;
+//     z = 0.0f;
+//     return;
+//   }
 
-  // Normalize current quaternion
-  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
-  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+//   // Normalize current quaternion
+//   float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+//   normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
 
-  // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
-  w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
-      quat_ref_z * curr_z;
-  x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
-      quat_ref_z * curr_y;
-  y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
-      quat_ref_z * curr_x;
-  z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
-      quat_ref_z * curr_w;
-}
+//   // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
+//   w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+//       quat_ref_z * curr_z;
+//   x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+//       quat_ref_z * curr_y;
+//   y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+//       quat_ref_z * curr_x;
+//   z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+//       quat_ref_z * curr_w;
+// }
 
 #endif  // PIPO_MOTION
