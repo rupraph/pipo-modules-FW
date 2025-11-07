@@ -117,6 +117,9 @@ class HwUi {
   void measure_battery_step();
   void monitor_battery();
 
+  // Monitor shared flags and orchestrate LED patterns
+  void monitor_wifi_flags();
+
   // getter/setter
   int get_bat_voltage();
 
@@ -129,6 +132,9 @@ class HwUi {
   int bat_sampling[BAT_SAMPLE_SIZE];
   int bat_sampling_index = 0;
   int bat_voltage = 0;
+  // previous-state tracking for flag transitions
+  bool prev_staConnected = false;
+  bool prev_apStarted = false;
 };
 
 extern HwUi hwui;

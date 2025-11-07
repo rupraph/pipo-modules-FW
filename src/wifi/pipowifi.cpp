@@ -75,8 +75,6 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
       staConnected = true;
-      hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 30,
-                       WIFI_PULSE_BRIGHTNESS);
       pwm.add(next.ssid, next.password);
       pwm.promote(next.ssid);
       pwm.save();
@@ -88,7 +86,6 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:  //ESP32 station disconnected from AP
       Serial.println("STA DISCONNECTED!");
-      hwui.stop_pulse(WIFI_LED);
       uint8_t reason =
           info.wifi_sta_disconnected
               .reason;  // for some reason if commented it seem to impact setting the custom AP name.....

@@ -106,6 +106,11 @@ void HwUi::setup() {
 }
 
 void HwUi::update() {
+#if 1
+  // Monitor flags first so LED state changes are reflected by blinker()/pulse()
+  monitor_wifi_flags();
+  monitor_system_flags();
+#endif
   blinker();
   pulse();
   single_blink();
@@ -113,6 +118,33 @@ void HwUi::update() {
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   FastLED.show();
 #endif
+}
+
+void HwUi::monitor_wifi_flags() {
+  // Read shared flags (volatile) to detect transitions
+  bool curSta = staConnected;
+  bool curAp = apStarted;
+
+  // STA connected -> give steady pulse
+  if (curSta != prev_staConnected) {
+    if (curSta) {
+      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 30, WIFI_PULSE_BRIGHTNESS);
+    } else {
+      stop_pulse(WIFI_LED);
+    }
+    prev_staConnected = curSta;
+  }
+
+  // AP started (no STA) -> blink to indicate AP mode
+  if (curAp != prev_apStarted) {
+    if (curAp && !curSta) {
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+    } else {
+      // if AP stopped or STA present, ensure AP blink is stopped
+      stop_blink(WIFI_LED);
+    }
+    prev_apStarted = curAp;
+  }
 }
 
 void HwUi::update_switches() {
