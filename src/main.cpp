@@ -11,6 +11,7 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
+#include <set>
 #if defined(PIPO_ANALOG)
 #include "sensors/analog_out.h"
 #endif
@@ -22,6 +23,14 @@
 void init_filesystem();
 
 void setup() {  // by default on core 1
+
+  //pulldown all pins
+  std::set<int> nopulldown = {0, 19, 20, 26, 27, 28, 29, 30, 31, 32};
+  for (int pin = 0; pin <= 48; pin++) {
+    if (nopulldown.find(pin) == nopulldown.end()) {
+      pinMode(pin, INPUT_PULLDOWN);
+    }
+  }
 
   Serial.begin(115200);
   Serial.setDebugOutput(true);
@@ -117,8 +126,8 @@ void setup() {  // by default on core 1
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
                           &oscreceiveTaskHandle, 0);
-  // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
-  //                         &hwuiSoftPwmTaskHandle, 0);
+// xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
+//                         &hwuiSoftPwmTaskHandle, 0);
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 3, &wifiTaskHandle,
                           0);
