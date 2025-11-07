@@ -23,14 +23,14 @@ void midiBLESetup() {
 
 void OnConnected() {
   Serial.println("Ble Connected!");
-  hwui.set_led(BT_LED, 80);
+  BTconnected = true;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
 void OnDisconnected() {
   Serial.println("Ble Disconnected!");
-  hwui.set_led(BT_LED, 0);
+  BTconnected = false;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }

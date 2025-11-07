@@ -108,8 +108,7 @@ void HwUi::setup() {
 void HwUi::update() {
 #if 1
   // Monitor flags first so LED state changes are reflected by blinker()/pulse()
-  monitor_wifi_flags();
-  monitor_system_flags();
+  monitor_wifiBT_flags();
 #endif
   blinker();
   pulse();
@@ -120,10 +119,11 @@ void HwUi::update() {
 #endif
 }
 
-void HwUi::monitor_wifi_flags() {
+void HwUi::monitor_wifiBT_flags() {
   // Read shared flags (volatile) to detect transitions
   bool curSta = staConnected;
   bool curAp = apStarted;
+  bool curBT = BTconnected;
 
   // STA connected -> give steady pulse
   if (curSta != prev_staConnected) {
@@ -144,6 +144,16 @@ void HwUi::monitor_wifi_flags() {
       stop_blink(WIFI_LED);
     }
     prev_apStarted = curAp;
+  }
+
+  // BT connected -> steady medium brightness
+  if (curBT != prev_BTconnected) {
+    if (curBT) {
+      set_led(BT_LED, 80);
+    } else {
+      set_led(BT_LED, 0);
+    }
+    prev_BTconnected = curBT;
   }
 }
 

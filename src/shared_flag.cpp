@@ -5,3 +5,4 @@ volatile bool staStarted = false;
 volatile bool apStarted = false;
 volatile bool staConnected = false;
 volatile bool apConnected = false;
+volatile bool BTconnected = false;
