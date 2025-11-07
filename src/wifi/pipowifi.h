@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include "utils/config.h"
+#include "shared_flags.h"
 
 // enum WiFiTransition {
 //   NONE,
@@ -41,9 +42,8 @@ class PipoWifi {
   unsigned long lastScan = 0;
   bool shouldRefreshRSSI = true;
   bool scanning = false;
-  bool apStarted = false;
-  bool staStarted = false;
-  bool wifiReady = false;
+
+  // bool wifiReady = false;
   bool isChangingAP = false;  // means switching from one AP to another ?
   PipoPWManager pwm;
   std::map<String, int> signals;

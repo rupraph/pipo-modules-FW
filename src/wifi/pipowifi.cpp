@@ -74,6 +74,7 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
     case ARDUINO_EVENT_WIFI_STA_CONNECTED:  //ESP32 station connected to AP
       Serial.println("STA CONNECTED!");
       status = CONNECTED;
+      staConnected = true;
       hwui.start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 30,
                        WIFI_PULSE_BRIGHTNESS);
       pwm.add(next.ssid, next.password);
@@ -100,6 +101,7 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       }
       isChangingAP = false;
       status = DISCONNECTED;
+      staConnected = false;
       step();
       break;
     case ARDUINO_EVENT_WIFI_STA_AUTHMODE_CHANGE:  //the auth mode of AP connected by ESP32 station changed
@@ -133,10 +135,12 @@ void PipoWifi::handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info) {
       Serial.println("APSTA CONNECTED!");
       break;
     case ARDUINO_EVENT_WIFI_AP_STADISCONNECTED:  //a station disconnected from ESP32 soft-AP
+      apConnected = false;
       Serial.println("APSTA DISCONNECTED!");
       osc.stop();
       break;
     case ARDUINO_EVENT_WIFI_AP_STAIPASSIGNED:  //ESP32 soft-AP assign an IP to a connected station
+      apConnected = true;
       Serial.println("APSTA IPASSIGNED!");
       osc.start();  //seems not to work when AP started but no sta connected
       break;
