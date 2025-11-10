@@ -58,7 +58,7 @@
   onDestroy(() => clearInterval(interval));
 </script>
 
-<Collapse title="Logs">
+<Collapse title="Logs" collapseId="logs">
   <div class="logs {logs.length > 6 ? 'scroll' : ''}">
     {#each logs as log}
       <span>{format(log.timestamp)}</span>

@@ -8,6 +8,7 @@
     currentConfig,
     activeConfigName,
   } from "../../services";
+  import { uiState } from "../ui-state";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -58,7 +59,16 @@
   onMount(() => {
     if (config) {
       updateConfigByChannel();
-      setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
+
+      // Try to restore selected channel from persisted state
+      const persistedChannel = $type !== "unknown" ? uiState.getSelectedChannel($type) : undefined;
+      const firstChannel = Object.keys(configByChannel)[0] as PipoKeys[T];
+
+      if (persistedChannel && persistedChannel in configByChannel) {
+        setAxis(persistedChannel as PipoKeys[T]);
+      } else {
+        setAxis(firstChannel);
+      }
     }
   });
 
@@ -132,6 +142,11 @@
     if (axis !== currentAxis) {
       currentAxis = axis;
       pipoio.monitorAxis(axis);
+
+      // Persist selected channel to state
+      if ($type !== "unknown") {
+        uiState.setSelectedChannel($type, axis as string);
+      }
     }
   }
 
@@ -201,7 +216,7 @@
 </script>
 
 {#if $type !== "range"}
-  <Collapse title="Quick settings">
+  <Collapse title="Quick settings" collapseId="quick-settings">
     <QuickConfig bind:config />
 
     {#if $type === "analog"}
@@ -238,11 +253,11 @@
   </Collapse>
   <hr class="separator" />
 {/if}
-<Collapse title="Presets" open>
+<Collapse title="Presets" collapseId="presets">
   <Presets />
 </Collapse>
 
-<Collapse title="Channel settings" open>
+<Collapse title="Channel settings" collapseId="channel-settings">
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
@@ -346,7 +361,7 @@
 {/if}
 
 {#if config.general.OSC_ENA}
-  <Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
+  <Collapse title="OSC settings" collapseId="osc-settings" bind:value={config.general.OSC_ENA}>
     <section class="OSC-global-settings">
       <OscGlobalConfig
         bind:ip={config.general.OSC_IP}
@@ -410,7 +425,7 @@
   >
 </Collapse> -->
 
-<Collapse title="Board settings">
+<Collapse title="Board settings" collapseId="board-settings">
   <BoardConfig bind:generalconfig={config.general} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
     <LoadingButton
