@@ -9,6 +9,7 @@ import {
   ConfigsDeleteGetParams,
   ConfigsGetParams,
   OffsetCalPostParams,
+  PresetGetParams,
   ReqQ,
   WifiConnectPostParams,
   WifiForgetPostParams,
@@ -238,5 +239,41 @@ export const setupRoutes = (app: Express) => {
   });
   app.get("/pause", (req, res) => {
     res.send("Engine paused");
+  });
+
+  // Preset routes
+  app.get("/presets", (_req, res) => {
+    res.status(200).json(state.presets);
+  });
+
+  app.get("/preset", (req: ReqQ<PresetGetParams>, res) => {
+    const { name } = req.query;
+    if (!name) {
+      res.status(400).send("Error: no name parameter");
+      return;
+    }
+
+    // Find preset by name or filename
+    const preset = state.presets.find(
+      (p) => p.name === name || p.filename === name
+    );
+
+    if (!preset) {
+      res.status(404).send("Preset not found");
+      return;
+    }
+
+    try {
+      // Load and return the actual preset file content
+      const presetContent = state.getPresetContent(preset.filename);
+      res.status(200).json(presetContent);
+    } catch (err) {
+      res.status(500).send(`Error loading preset: ${err}`);
+    }
+  });
+
+  app.get("/presets-refresh", (_req, res) => {
+    state.refreshPresets();
+    res.status(200).send("Presets refreshed");
   });
 };

@@ -41,6 +41,16 @@ export type OffsetCalPostParams = {
   axis: string;
 };
 
+export type PresetGetParams = {
+  name: string;
+};
+
+export type Preset = {
+  name: string;
+  description: string;
+  filename: string;
+};
+
 export type ReqQ<T> = Request<{}, {}, {}, T>;
 export type WifiState = {
   scanning: boolean;
