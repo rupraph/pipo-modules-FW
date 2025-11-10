@@ -11,7 +11,7 @@
     " loading-button contract " +
     (loading ? " loading" : "") +
     (disabled ? " disabled" : "")}
-  style="width: {width};"
+  style="width: {width}; box-sizing: border-box;"
 >
   {#if !loading}
     <span class="label"><slot></slot></span>
@@ -21,6 +21,10 @@
 </button>
 
 <style>
+  .loading-button {
+    height: 38px;
+    max-height: 38px;
+  }
   .loading-button.loading {
     cursor: wait;
   }
