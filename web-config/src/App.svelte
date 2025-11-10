@@ -47,7 +47,7 @@
     {/await}
     <Configs />
     <article class="content section-borders">
-      <Collapse title="Info">
+      <Collapse title="Info" collapseId="info">
         <Pipoinfo info={resp} />
       </Collapse>
     </article>

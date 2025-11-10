@@ -15,7 +15,7 @@
 </script>
 
 {#if $type === "motion" || $type === "range"}
-  <Collapse title="Sensor settings">
+  <Collapse title="Sensor settings" collapseId="sensor-settings">
     {#if $type === "motion"}
       <Switch
         label="Relative (on) or absolute orientation"
