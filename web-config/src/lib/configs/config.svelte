@@ -2,7 +2,12 @@
   import { pipoio } from "../../pipoio";
   import { onMount } from "svelte";
   import { schema } from "../../schema";
-  import { configSave, configValid, pipoType as type } from "../../services";
+  import {
+    configValid,
+    pipoType as type,
+    currentConfig,
+    activeConfigName,
+  } from "../../services";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -30,8 +35,9 @@
   import axios from "axios";
   import Presets from "../presets.svelte";
 
-  export let config: PipoConfig<T>;
-  export let name: string;
+  // Use stores instead of props
+  $: config = $currentConfig as unknown as PipoConfig<T>;
+  $: name = $activeConfigName;
   let savingStatus = "none";
 
   let configByChannel: ConfigByChannel<T> = {} as ConfigByChannel<T>;
@@ -59,8 +65,7 @@
   // Ensures configByChannel updates reactively
   $: if (config) {
     updateConfigByChannel();
-    // @ts-expect-error
-    configSave.update(config);
+    // ConfigSave will auto-update via store subscription in Phase 4
   }
 
   $: if (config.general.MidiEnabled) {
@@ -233,7 +238,7 @@
   </Collapse>
   <hr class="separator" />
 {/if}
-<Collapse title="Presets">
+<Collapse title="Presets" open>
   <Presets />
 </Collapse>
 

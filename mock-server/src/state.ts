@@ -122,6 +122,13 @@ class State<T extends PipoTypes = "analog"> {
 
     try {
       const content = fs.readFileSync(filePath, "utf-8");
+      console.log(
+        `Read preset file ${filePath}, ${JSON.stringify(
+          JSON.parse(content).engine["engine-midi"]["A01"],
+          null,
+          2
+        )}`
+      );
       return JSON.parse(content);
     } catch (err) {
       console.error(`Error reading preset file ${filename}:`, err);

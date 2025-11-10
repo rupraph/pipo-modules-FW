@@ -1,5 +1,6 @@
 import { pipoio } from "../pipoio";
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
+import { activeConfigName, configService, currentConfig } from "./config";
 
 export interface Preset {
   name: string;
@@ -23,7 +24,8 @@ class PresetsService {
       presets.set(presetList);
       return presetList;
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to fetch presets";
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to fetch presets";
       presetsError.set(errorMsg);
       console.error("Error fetching presets:", err);
       return [];
@@ -39,7 +41,8 @@ class PresetsService {
       });
       return response.data;
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to load preset";
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to load preset";
       presetsError.set(errorMsg);
       console.error("Error loading preset:", err);
       throw err;
@@ -50,20 +53,16 @@ class PresetsService {
     try {
       presetsLoading.set(true);
       presetsError.set(null);
-
       // Get the preset data
       const presetData = await this.getPreset(name);
-
-      // Apply the preset configuration
-      await pipoio.request({
-        method: "post",
-        url: "/config",
-        params: { config: JSON.stringify(presetData) },
-      });
-
+      delete presetData.preset;
+      const configName = get(activeConfigName);
+      await configService.saveConfig(presetData, configName);
+      await configService.refreshActiveConfig();
       console.log(`Applied preset: ${name}`);
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to apply preset";
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to apply preset";
       presetsError.set(errorMsg);
       console.error("Error applying preset:", err);
       throw err;
@@ -77,7 +76,8 @@ class PresetsService {
       await pipoio.get("/presets-refresh");
       await this.fetchPresets();
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to refresh presets";
+      const errorMsg =
+        err instanceof Error ? err.message : "Failed to refresh presets";
       presetsError.set(errorMsg);
       console.error("Error refreshing presets:", err);
     }

@@ -1,4 +1,5 @@
 import type { Express, Request } from "express";
+import multer from "multer";
 import { state } from "./state";
 import {
   ActiveConfigGetParams,
@@ -15,6 +16,9 @@ import {
   WifiForgetPostParams,
   WifiModePostParams,
 } from "./types";
+
+// Setup multer for handling multipart/form-data
+const upload = multer({ storage: multer.memoryStorage() });
 
 const signals = [
   [`"Dlink-Home"`, -40, 1, 1],
@@ -125,12 +129,25 @@ export const setupRoutes = (app: Express) => {
       res.status(500).send(`Error while renaming config ${e}`);
     }
   });
-  app.post("/save", (req, res) => {
-    // read the formData
-    const data = req.body;
-    console.log("SAVE", data, req.params, req.query);
-    // TODO
-    res.send("Config saved");
+  app.post("/save", upload.single("file"), (req, res) => {
+    // read the formData - multer puts the file in req.file
+    if (!req.file) {
+      res.status(400).send("No file uploaded");
+      return;
+    }
+    try {
+      // The file buffer contains the JSON config
+      const configData = req.file.buffer.toString("utf-8");
+      const config = JSON.parse(configData);
+      const filename = req.file.originalname;
+
+      console.log("SAVE config:", filename);
+      state.setConfig(config);
+      res.status(200).send("Config saved");
+    } catch (e) {
+      console.error("Error saving config:", e);
+      res.status(500).send(`Error while saving config: ${e}`);
+    }
   });
   app.get("/reboot", (req, res) => {
     res.send("Rebooting");
