@@ -11,6 +11,21 @@ export function throttle(fn: Function, delay: number) {
   };
 }
 
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: NodeJS.Timeout | null = null;
+  return function (...args: Parameters<T>) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+}
+
 export function onError(e: AxiosError) {
   if (!e.config || !e.config.url) {
     return `Error during fetch: ${e}`;

@@ -23,6 +23,7 @@ void PipoServer::setup() {
   //Todo: check lib exemple. can be improved
   fileServer = new PipoFileServer("/", LittleFS, "/webpage");
 
+  presets.setup();
   setup_requests();
   // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   // captivePortal.start(&server);
@@ -428,6 +429,10 @@ void PipoServer::setup_requests() {
     PAUSED = !PAUSED;
     return request->send(200, "text/plain", "Engine paused");
   });
+
+  // Add preset routes
+  presets.addRoutes(&server);
+
   // Solution by using Chunk Hanlder
   fileServer->setDefaultFile("index.html");
   server.addHandler(fileServer);

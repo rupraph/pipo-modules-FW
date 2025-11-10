@@ -1,11 +1,13 @@
 <script lang="ts" generics="T extends PipoTypes">
-  import Radio from "../form/Radio.svelte";
-
   import { pipoio } from "../../pipoio";
-  import HidGlobalConfig from "./hid-global-config.svelte";
   import { onMount } from "svelte";
   import { schema } from "../../schema";
-  import { configSave, configValid, pipoType as type } from "../../services";
+  import {
+    configValid,
+    pipoType as type,
+    currentConfig,
+    activeConfigName,
+  } from "../../services";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -21,12 +23,9 @@
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
   import InputConfig from "./input-panel.svelte";
-  import CategoryTab from "./category-tab.svelte";
-  import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
   import QuickConfig from "./quick-config.svelte";
-  import AnalogOutForm from "./analog-out.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
   import SensorModes from "./sensor-modes.svelte";
   import BoardConfig from "./board-config.svelte";
@@ -34,9 +33,11 @@
   import Text from "../form/Text.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import axios from "axios";
+  import Presets from "../presets.svelte";
 
-  export let config: PipoConfig<T>;
-  export let name: string;
+  // Use stores instead of props
+  $: config = $currentConfig as unknown as PipoConfig<T>;
+  $: name = $activeConfigName;
   let savingStatus = "none";
 
   let configByChannel: ConfigByChannel<T> = {} as ConfigByChannel<T>;
@@ -64,8 +65,7 @@
   // Ensures configByChannel updates reactively
   $: if (config) {
     updateConfigByChannel();
-    // @ts-expect-error
-    configSave.update(config);
+    // ConfigSave will auto-update via store subscription in Phase 4
   }
 
   $: if (config.general.MidiEnabled) {
@@ -238,6 +238,9 @@
   </Collapse>
   <hr class="separator" />
 {/if}
+<Collapse title="Presets" open>
+  <Presets />
+</Collapse>
 
 <Collapse title="Channel settings" open>
   {#if currentAxis && config}

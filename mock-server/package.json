@@ -4,16 +4,21 @@
   "description": "A server to mock a Pipo board",
   "main": "index.js",
   "scripts": {
-    "start": "vite-node src/index.ts"
+    "start": "vite-node src/index.ts",
+    "dev": "vite-node -w src/index.ts",
+    "debug": "node --inspect --import tsx src/index.ts"
   },
   "author": "",
   "dependencies": {
     "express": "^4.21.2",
+    "multer": "^2.0.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/multer": "^2.0.0",
     "@types/ws": "^8.5.14",
+    "tsx": "^4.20.6",
     "vite-node": "^3.0.5"
   }
 }
