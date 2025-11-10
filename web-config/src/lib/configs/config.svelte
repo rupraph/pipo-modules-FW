@@ -61,7 +61,8 @@
       updateConfigByChannel();
 
       // Try to restore selected channel from persisted state
-      const persistedChannel = $type !== "unknown" ? uiState.getSelectedChannel($type) : undefined;
+      const persistedChannel =
+        $type !== "unknown" ? uiState.getSelectedChannel($type) : undefined;
       const firstChannel = Object.keys(configByChannel)[0] as PipoKeys[T];
 
       if (persistedChannel && persistedChannel in configByChannel) {
@@ -257,7 +258,7 @@
   <Presets />
 </Collapse>
 
-<Collapse title="Channel settings" collapseId="channel-settings">
+<Collapse title="Channel settings" collapseId="channel-settings" open>
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
@@ -361,7 +362,11 @@
 {/if}
 
 {#if config.general.OSC_ENA}
-  <Collapse title="OSC settings" collapseId="osc-settings" bind:value={config.general.OSC_ENA}>
+  <Collapse
+    title="OSC settings"
+    collapseId="osc-settings"
+    bind:value={config.general.OSC_ENA}
+  >
     <section class="OSC-global-settings">
       <OscGlobalConfig
         bind:ip={config.general.OSC_IP}
