@@ -164,8 +164,7 @@ void OSC_handler::send_osc_message(string address, float value) {
   }
   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
-    address =
-        config.general_config["PipoName"].as<std::string>() + "/" + address;
+    address = config.general_config["PipoName"].as<string>() + "/" + address;
     if (address[0] != '/') {
       address = "/" + address;
     }
@@ -185,6 +184,7 @@ void OSC_handler::add_to_bundle(string address, float value) {
   if (!isStarted) {
     return;
   }
+  address = config.general_config["PipoName"].as<string>() + "/" + address;
   if (address[0] != '/') {
     address = "/" + address;
   }
