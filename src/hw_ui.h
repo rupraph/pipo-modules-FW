@@ -134,7 +134,7 @@ class HwUi {
   int bat_voltage = 0;
   // previous-state tracking for flag transitions
   bool prev_staConnected = false;
-  bool prev_apStarted = false;
+  bool prev_apConnected = false;
   bool prev_BTconnected = false;
 };
 

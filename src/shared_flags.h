@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 extern volatile bool PAUSED;
-extern volatile bool staStarted = false;
-extern volatile bool apStarted = false;
-extern volatile bool staConnected = false;
-extern volatile bool apConnected = false;
-extern volatile bool BTconnected = false;
+extern volatile bool staStarted;
+extern volatile bool apStarted;
+extern volatile bool staConnected;
+extern volatile bool apConnected;
+extern volatile bool BTconnected;
