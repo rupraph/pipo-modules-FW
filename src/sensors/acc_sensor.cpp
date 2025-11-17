@@ -17,8 +17,8 @@ void MotionSensor::init() {
 void MotionSensor::setup() {
   // Load last relative orientation reference
   motiondata.begin("motion-store", false);
-  quat_ref_w = motiondata.getFloat("quat_ref_W", 0.0);
-  quat_ref_x = motiondata.getFloat("quat_ref_X", 0.0);
+  quat_ref_w = motiondata.getFloat("quat_ref_w", 0.0);
+  quat_ref_x = motiondata.getFloat("quat_ref_x", 0.0);
   quat_ref_y = motiondata.getFloat("quat_ref_y", 0.0);
   quat_ref_z = motiondata.getFloat("quat_ref_z", 0.0);
   reference_set = true;
