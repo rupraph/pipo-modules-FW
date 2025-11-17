@@ -102,9 +102,7 @@ void HwUi::setup() {
   hwui.measure_battery();
 
   start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
-  if (config.general_config["BTEnable"].as<bool>()) {
-    start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
-  }
+  // BT LED blink is started in midiBLESetup() if BLE is enabled
 
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
@@ -170,6 +168,7 @@ void HwUi::monitor_wifiBT_flags() {
                   BT_PULSE_BRIGHTNESS);
     } else {
       stop_pulse(BT_LED);
+      start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
     }
     prev_BTconnected = curBT;
   }

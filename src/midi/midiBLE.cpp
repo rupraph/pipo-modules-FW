@@ -19,6 +19,9 @@ void midiBLESetup() {
   MidiBle.begin();
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
+
+  // Start BT LED blinking to indicate BLE is enabled and waiting for connection
+  hwui.start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
 }
 
 void OnConnected() {
