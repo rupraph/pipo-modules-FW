@@ -2,10 +2,12 @@
 
 Config config;  // global config object so it can be accessed from anywhere
 
-void Config::load_config(String filename, bool addJsonExtension = true) {
+bool Config::load_config(String filename, bool addJsonExtension = true) {
   this->filename = filename;
+  String configPath = get_path(filename, addJsonExtension);
   Serial.print("load config: ");
-  Serial.println(get_path(filename, addJsonExtension).c_str());
+  Serial.println(configPath.c_str());
+
   try {
     if (DEBUG_HEAP)
       pipoDebugHeap("Config: load config");
@@ -15,15 +17,46 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
       serializeJsonPretty(current_config, Serial);
     }
 
+    // Check if file exists
+    if (!LittleFS.exists(configPath.c_str())) {
+      Serial.println("Config file not found: " + configPath);
+      logs.writeError("Config file not found: " + configPath);
+      return false;
+    }
+
+    // Check file size (basic sanity check)
+    File f = LittleFS.open(configPath.c_str(), FILE_READ);
+    if (!f) {
+      Serial.println("Failed to open config file: " + configPath);
+      logs.writeError("Failed to open config file: " + configPath);
+      return false;
+    }
+    size_t fileSize = f.size();
+    f.close();
+
+    if (fileSize < 10) {  // Too small to be a valid config
+      Serial.println("Config file too small (likely corrupted): " +
+                     String(fileSize) + " bytes");
+      logs.writeError("Config file too small: " + String(fileSize) + " bytes");
+      return false;
+    }
+
     current_config.clear();
-    DeserializationError error = deserializeJson(
-        current_config,
-        readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
+    DeserializationError error =
+        deserializeJson(current_config, readFile(LittleFS, configPath.c_str()));
     if (error) {
       Serial.print("deserializeJson() failed: ");
       Serial.println(error.c_str());
       logs.writeError("Error loading config: " + String(error.c_str()));
-      return;
+      return false;
+    }
+
+    // Basic validation: check that essential keys exist
+    if (!current_config.containsKey("engine") ||
+        !current_config.containsKey("general")) {
+      Serial.println("Config missing required keys (engine/general)");
+      logs.writeError("Config missing required keys");
+      return false;
     }
 
     if (DEBUG_CONFIG) {
@@ -33,9 +66,13 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
     logs.writeLog("load config: " + filename);
     if (DEBUG_HEAP)
       pipoDebugHeap("Config: end load config");
+
+    return true;
   } catch (const std::exception& e) {
     Serial.println("error loading config");
     Serial.println(e.what());
+    logs.writeError("Exception loading config: " + String(e.what()));
+    return false;
   }
 }
 
@@ -52,13 +89,36 @@ void Config::load_config() {
     String name = String(readFile(LittleFS, last_config_path).c_str());
     if (LittleFS.exists(get_path(name).c_str())) {
       Serial.println("last config found: " + name);
-      load_config(name);
+      bool success = load_config(name);
+      if (!success) {
+        // Config is corrupted, delete it and fallback to default
+        Serial.println("Config corrupted, deleting: " + name);
+        logs.writeError("Deleting corrupted config: " + name);
+        LittleFS.remove(get_path(name).c_str());
+
+        // Load default config
+        Serial.println("Falling back to default config");
+        bool defaultSuccess = load_config("Config-1");
+        if (!defaultSuccess) {
+          Serial.println("CRITICAL: Default config is also corrupted!");
+          logs.writeError("CRITICAL: Default config corrupted, recreating");
+          // Recreate default from model
+          new_config("Config-1");
+          load_config("Config-1");
+        }
+      }
       return;
     }
     Serial.println(F("last config not found, loading default"));
   }
   // if no last config, load default
-  load_config("Config-1");
+  bool success = load_config("Config-1");
+  if (!success) {
+    Serial.println("CRITICAL: Default config corrupted, recreating");
+    logs.writeError("CRITICAL: Default config corrupted, recreating");
+    new_config("Config-1");
+    load_config("Config-1");
+  }
 }
 
 String Config::get_list() {
@@ -133,7 +193,13 @@ void Config::delete_config(String filename) {
       logs.writeLog("deleted last config, creating new default");
     } else {
       String name = String(file.name());
-      load_config(name.substring(0, name.length() - 5));
+      bool success = load_config(name.substring(0, name.length() - 5));
+      if (!success) {
+        Serial.println("Next config corrupted, falling back to default");
+        logs.writeError("Next config corrupted: " + name);
+        LittleFS.remove(get_path(name.substring(0, name.length() - 5)).c_str());
+        load_config();
+      }
     }
     root.close();
     file.close();

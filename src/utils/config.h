@@ -37,7 +37,7 @@ class Config {
   JsonDocument general_config;
 
   // load config from files into current_config
-  void load_config(String filename, bool addJsonExtension = true);
+  bool load_config(String filename, bool addJsonExtension = true);
   void load_config();
   // void shouldSave();
   // void saveIfNecessary();
