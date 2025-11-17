@@ -101,6 +101,11 @@ void HwUi::setup() {
   Serial.println("HW UI setup done");
   hwui.measure_battery();
 
+  start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+  if (config.general_config["BTEnable"].as<bool>()) {
+    start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
+  }
+
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
 }
@@ -124,16 +129,18 @@ void HwUi::monitor_wifiBT_flags() {
 
   // STA connected -> give steady pulse (slower, to indicate stable connection)
   if (curSta != prev_staConnected) {
-    Serial.print("[LED] STA state change: ");
-    Serial.println(curSta ? "CONNECTED" : "DISCONNECTED");
     if (curSta) {
-      // STA takes priority, stop any AP patterns first
-      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, 30, WIFI_PULSE_BRIGHTNESS);
+      // STA takes priority
+      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
     } else {
       stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
       // If STA disconnects but AP is still active, start AP pattern
       if (curAp) {
-        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, 30, WIFI_PULSE_BRIGHTNESS);
+        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
       }
     }
     prev_staConnected = curSta;
@@ -141,16 +148,14 @@ void HwUi::monitor_wifiBT_flags() {
 
   // AP connected -> faster pulse to indicate AP mode (only if STA not connected)
   if (curAp != prev_apConnected) {
-    Serial.print("[LED] AP client state change: ");
-    Serial.print(curAp ? "CONNECTED" : "DISCONNECTED");
-    Serial.print(" (STA: ");
-    Serial.print(curSta ? "active" : "inactive");
-    Serial.println(")");
     if (curAp && !curSta) {
-      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, 30, WIFI_PULSE_BRIGHTNESS);
+      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
     } else if (!curAp && !curSta) {
       // AP stopped and no STA, turn off LED
       stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
     }
     // If STA is present, it takes priority (handled in STA logic above)
     prev_apConnected = curAp;
@@ -161,9 +166,10 @@ void HwUi::monitor_wifiBT_flags() {
     Serial.print("[LED] BT state change: ");
     Serial.println(curBT ? "CONNECTED" : "DISCONNECTED");
     if (curBT) {
-      set_led(BT_LED, 80);
+      start_pulse(BT_LED, BT_PULSE_TIME, BT_PULSE_MIN_BRIGHTNESS,
+                  BT_PULSE_BRIGHTNESS);
     } else {
-      set_led(BT_LED, 0);
+      stop_pulse(BT_LED);
     }
     prev_BTconnected = curBT;
   }
@@ -312,9 +318,9 @@ void HwUi::blinker() {
   }
 }
 
-void HwUi::
-    pulse() {  // this should oscillate the led brightness between min and
-               // max brightness
+void HwUi::pulse() {
+  // this should oscillate the led brightness between min and
+  // max brightness
   unsigned long current_millis = millis();
   // loop through led_pulse_table
   for (auto& pair : led_pulse_table) {
