@@ -128,6 +128,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
+  osc.stop();
   wifi.step();
 }
 
@@ -140,6 +141,7 @@ void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
+  osc.start();
   wifi.step();
 }
 
@@ -148,12 +150,14 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
+  osc.start();
   wifi.step();
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
+  osc.stop();
   wifi.step();
 }
 
@@ -178,6 +182,7 @@ void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = true;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
+  osc.start();
 }
 
 void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
