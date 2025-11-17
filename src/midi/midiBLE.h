@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "HW_CONFIG.h"
+#include "shared_flags.h"
 
 #ifdef INCLUDE_BLE
 

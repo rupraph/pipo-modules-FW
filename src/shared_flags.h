@@ -2,3 +2,8 @@
 #include <Arduino.h>
 
 extern volatile bool PAUSED;
+extern volatile bool staStarted;
+extern volatile bool apStarted;
+extern volatile bool staConnected;
+extern volatile bool apConnected;
+extern volatile bool BTconnected;

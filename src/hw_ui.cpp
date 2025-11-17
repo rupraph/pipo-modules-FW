@@ -101,11 +101,15 @@ void HwUi::setup() {
   Serial.println("HW UI setup done");
   hwui.measure_battery();
 
+  start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+  // BT LED blink is started in midiBLESetup() if BLE is enabled
+
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
 }
 
 void HwUi::update() {
+  monitor_wifiBT_flags();
   blinker();
   pulse();
   single_blink();
@@ -113,6 +117,61 @@ void HwUi::update() {
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   FastLED.show();
 #endif
+}
+
+void HwUi::monitor_wifiBT_flags() {
+  // Read shared flags (volatile) to detect transitions
+  bool curSta = staConnected;
+  bool curAp = apConnected;
+  bool curBT = BTconnected;
+
+  // STA connected -> give steady pulse (slower, to indicate stable connection)
+  if (curSta != prev_staConnected) {
+    if (curSta) {
+      // STA takes priority
+      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
+    } else {
+      stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+      // If STA disconnects but AP is still active, start AP pattern
+      if (curAp) {
+        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
+      }
+    }
+    prev_staConnected = curSta;
+  }
+
+  // AP connected -> faster pulse to indicate AP mode (only if STA not connected)
+  if (curAp != prev_apConnected) {
+    if (curAp && !curSta) {
+      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
+    } else if (!curAp && !curSta) {
+      // AP stopped and no STA, turn off LED
+      stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+    }
+    // If STA is present, it takes priority (handled in STA logic above)
+    prev_apConnected = curAp;
+  }
+
+  // BT connected -> steady medium brightness
+  if (curBT != prev_BTconnected) {
+    Serial.print("[LED] BT state change: ");
+    Serial.println(curBT ? "CONNECTED" : "DISCONNECTED");
+    if (curBT) {
+      start_pulse(BT_LED, BT_PULSE_TIME, BT_PULSE_MIN_BRIGHTNESS,
+                  BT_PULSE_BRIGHTNESS);
+    } else {
+      stop_pulse(BT_LED);
+      start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
+    }
+    prev_BTconnected = curBT;
+  }
 }
 
 void HwUi::update_switches() {
@@ -224,7 +283,7 @@ void HwUi::stop_pulse(int led_name) {
     return;  // not pulsing
 
   led_pulse_table[led_name].enabled = false;
-  // set_led(led_name, 0);
+  set_led(led_name, 0);
 }
 
 bool HwUi::is_pulsing(int led_name) {
@@ -258,9 +317,9 @@ void HwUi::blinker() {
   }
 }
 
-void HwUi::
-    pulse() {  // this should oscillate the led brightness between min and
-               // max brightness
+void HwUi::pulse() {
+  // this should oscillate the led brightness between min and
+  // max brightness
   unsigned long current_millis = millis();
   // loop through led_pulse_table
   for (auto& pair : led_pulse_table) {

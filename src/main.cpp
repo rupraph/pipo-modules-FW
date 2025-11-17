@@ -130,8 +130,6 @@ void setup() {  // by default on core 1
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
-  hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
-                   0.2);  //temporary patch to inform user pipo ready to connect
   Serial.println("Setup done");
 }
 

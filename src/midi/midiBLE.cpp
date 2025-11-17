@@ -19,18 +19,21 @@ void midiBLESetup() {
   MidiBle.begin();
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
+
+  // Start BT LED blinking to indicate BLE is enabled and waiting for connection
+  hwui.start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
 }
 
 void OnConnected() {
   Serial.println("Ble Connected!");
-  hwui.set_led(BT_LED, 80);
+  BTconnected = true;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
 void OnDisconnected() {
   Serial.println("Ble Disconnected!");
-  hwui.set_led(BT_LED, 0);
+  BTconnected = false;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
