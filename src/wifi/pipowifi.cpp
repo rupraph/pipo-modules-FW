@@ -166,12 +166,14 @@ void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apStarted = true;
   Serial.print("  Flag apStarted = ");
   Serial.println(apStarted);
+  // Note: apStarted means the AP has started, but not necessarily configured yet
   wifi.step();
 }
 
 void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] AP_STOP");
   apStarted = false;
+  apConfigured = false;
   wifi.step();
 }
 
@@ -257,9 +259,11 @@ bool PipoWifi::configureAP() {
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
   if (apStarted) {
     Serial.println("AP started successfully.");
+    apConfigured = true;
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     Serial.println("Failed to start AP.");
+    apConfigured = false;
   }
   return apStarted;
 }
@@ -390,6 +394,7 @@ void PipoWifi::step() {
     vTaskDelay(pdMS_TO_TICKS(100));
     WiFi.mode(next.mode);
     apStarted = false;
+    apConfigured = false;
     staStarted = false;
   }
   if (staStarted && status != CONNECTING && (status != CONNECTED)) {
@@ -411,13 +416,15 @@ void PipoWifi::step() {
   Serial.print(mode);
   Serial.print(" apStarted ");
   Serial.print(apStarted);
+  Serial.print(" apConfigured ");
+  Serial.print(apConfigured);
   Serial.print(" staStarted ");
   Serial.print(staStarted);
   Serial.print(" status ");
   Serial.println(status);
 
-  if (!apStarted && (mode == WIFI_MODE_AP ||
-                     mode == WIFI_MODE_APSTA && status != CONNECTING)) {
+  if (!apConfigured && (mode == WIFI_MODE_AP ||
+                        mode == WIFI_MODE_APSTA && status != CONNECTING)) {
     // we are in AP mode, need to configure it
     Serial.println("Configure AP");
     configureAP();

@@ -4,6 +4,7 @@
 extern volatile bool PAUSED;
 extern volatile bool staStarted;
 extern volatile bool apStarted;
+extern volatile bool apConfigured;
 extern volatile bool staConnected;
 extern volatile bool apConnected;
 extern volatile bool BTconnected;
