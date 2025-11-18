@@ -84,6 +84,9 @@ void PipoRangeSensor::update() {
     // -> test driver to report single value. tested working on another sensor from same type.
     sensor_dat["dist"].raw_value =
         pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
+    Serial.print("> ambient: ");
+    Serial.println(
+        (float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
 
     // process result
     // when out of range
