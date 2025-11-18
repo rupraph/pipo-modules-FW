@@ -402,31 +402,15 @@ void PipoServer::setup_requests() {
       string channels = request->getParam("channels")->value().c_str();
       Serial.print("Starting offset calibration for channels: ");
       Serial.println(channels.c_str());
-      input_sensor.start_measure_offset_list(channels);
-      return request->send(200, "text/plain",
-                           "Offset measurement started for selected channels");
-    } catch (const std::exception& e) {
-      return request->send(500, "text/plain",
-                           "Error measuring offset: " + String(e.what()));
-    }
-  });
 
-#ifdef PIPO_ANALOG
-  server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    try {
-      // Clear any previous completion flag
+      // Check if measurement is already in progress
       if (input_sensor.is_offset_measurement_complete()) {
         input_sensor.clear_completion_flag();
       }
 
-      // Use new flexible offset system to calibrate all touch channels
-#if HW_REV == 10
-      input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6");
-#elif HW_REV >= 11
-      input_sensor.start_measure_offset_list("T1,T2,T3,T4,T5,T6,T7,T8");
-#endif
+      input_sensor.start_measure_offset_list(channels);
 
-      // Return immediately with measuring status - UI will poll for completion
+      // Return immediately with status - UI will poll for completion
       return request->send(202, "application/json",
                            "{\"status\":\"measuring\"}");
     } catch (const std::exception& e) {
@@ -434,7 +418,6 @@ void PipoServer::setup_requests() {
                            "Error measuring offset: " + String(e.what()));
     }
   });
-#endif
 
   server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
     try {

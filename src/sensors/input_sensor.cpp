@@ -74,11 +74,10 @@ void Sensor::measure_offset_iter() {
     // Set completion flag
     offset_measurement_complete = true;
 
-    // Reset flags
+    // Reset measurement flag but keep type flags for get_measured_offsets()
     measure_offset_flag = false;
-    measure_all = false;
-    measure_list = false;
-    channels_to_measure.clear();
+    // Note: measure_all, measure_list, and channels_to_measure are cleared
+    // in clear_completion_flag() after the client retrieves the offsets
   }
 }
 
@@ -746,6 +745,10 @@ bool Sensor::is_offset_measurement_complete() {
 
 void Sensor::clear_completion_flag() {
   offset_measurement_complete = false;
+  // Reset measurement type flags after client has retrieved the offsets
+  measure_all = false;
+  measure_list = false;
+  channels_to_measure.clear();
 }
 
 JsonDocument Sensor::get_measured_offsets() {

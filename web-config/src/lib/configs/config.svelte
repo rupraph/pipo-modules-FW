@@ -273,8 +273,14 @@
 
   function offsetalltouch() {
     calibratingAll = true;
+
+    // Get all touch channel names from schema
+    const touchChannels = (Object.keys(configByChannel) as PipoKeys[T][])
+      .filter((axis) => schema[$type as T][axis].cat === "Touch")
+      .join(",");
+
     pipoio
-      .get("/offsetAllTouch")
+      .post("/offsetcal-list", null, { params: { channels: touchChannels } })
       .then(({ data }) => {
         if (data.status === "measuring") {
           // Start polling for completion
@@ -402,8 +408,8 @@
         --background="var(--bg-tabs)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
-      {#if $type !== "motion"}
-        <!-- <Tooltip title="Make current value the zero offset">
+      {#if $type == "analog" && aschema.cat == "Touch"}
+        <Tooltip title="Make current value the zero offset">
           <LoadingButton
             onClick={() => cal_offset(currentAxis)}
             loading={calibratingAxis === currentAxis}
@@ -414,8 +420,8 @@
           >
             {calibratingAxis === currentAxis ? "Calibrating..." : "Set Zero"}
           </LoadingButton>
-        </Tooltip> -->
-        <!-- <Tooltip title="Removes the offset">
+        </Tooltip>
+        <Tooltip title="Removes the offset">
           <button
             class="secondary"
             on:click={() => reset_offset(currentAxis)}
@@ -423,7 +429,7 @@
           >
             Reset Zero
           </button>
-        </Tooltip> -->
+        </Tooltip>
       {/if}
     </div>
     {#if hide_on_out}
