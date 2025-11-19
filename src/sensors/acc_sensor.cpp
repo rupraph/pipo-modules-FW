@@ -17,11 +17,24 @@ void MotionSensor::init() {
 void MotionSensor::setup() {
   // Load last relative orientation reference
   motiondata.begin("motion-store", false);
-  quat_ref_w = motiondata.getFloat("quat_ref_w", 0.0);
+  // Default to identity quaternion (no rotation) if not stored
+  quat_ref_w = motiondata.getFloat("quat_ref_w", 1.0);
   quat_ref_x = motiondata.getFloat("quat_ref_x", 0.0);
   quat_ref_y = motiondata.getFloat("quat_ref_y", 0.0);
   quat_ref_z = motiondata.getFloat("quat_ref_z", 0.0);
-  reference_set = true;
+
+  // Check if this is a valid stored reference (not identity)
+  // If it's identity quaternion, treat as not set
+  if (quat_ref_w == 1.0 && quat_ref_x == 0.0 && quat_ref_y == 0.0 &&
+      quat_ref_z == 0.0) {
+    reference_set = false;
+    Serial.println(
+        "No stored reference orientation - will be set on first update");
+  } else {
+    reference_set = true;
+    Serial.println("Loaded stored reference orientation");
+  }
+
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
