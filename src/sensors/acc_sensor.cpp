@@ -39,8 +39,38 @@ void MotionSensor::setup() {
     pipoDebugHeap();
 }
 
-void MotionSensor::update() {
+// void MotionSensor::update() {
+//   measure_sensor();
+//   //should add step counter
+//   process_sensor_neutral_filter();
+//   process_sensor_triggers();
+
+//   //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
+//   // each class should control its own update task ? (so that it can be paused)
+//   if (!measure_offset_flag) {
+//     for (auto const& pair : sensor_dat) {
+//       sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
+//     }
+//   }
+
+//   if (measure_offset_flag) {
+//     measure_offset_counter++;
+//     offset += sensor_dat[axis_to_measure_offset].value;
+//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+//       sensor_dat[axis_to_measure_offset].offset =
+//           offset / OFFSET_CAL_SAMPLES_NB;
+//       measure_offset_flag = false;
+//       Serial.print("offset of ");
+//       Serial.print(axis_to_measure_offset.c_str());
+//       Serial.print(" is: ");
+//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
+//     }
+//   }
+// }
+
+bool MotionSensor::measure_sensor() {
   icm20948.task();
+  bool data_ready = false;
   /////////  Read Quat6 orientation data
   if (relative_mode) {
     // Mode 1: Pure relative orientation using quaternion differential tracking
@@ -69,12 +99,14 @@ void MotionSensor::update() {
         Serial.println(quat_ref_z, 4);
       }
       calc_differential_euler_angles();
+      data_ready = true;
     }
   } else {
     // Mode 2: quat9 (absolute orientation)
     if (icm20948.quat9DataIsReady()) {
       icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       calc_euler_angles();
+      data_ready = true;
     }
   }
 
@@ -84,6 +116,7 @@ void MotionSensor::update() {
                                  &sensor_dat["accY"].raw_value,
                                  &sensor_dat["accZ"].raw_value);
     convert_accell();
+    data_ready = true;
   }
 
   if (icm20948.magDataIsReady()) {
@@ -97,6 +130,7 @@ void MotionSensor::update() {
     sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
     //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
+    data_ready = true;
   }
 
   //activity recog
@@ -107,11 +141,6 @@ void MotionSensor::update() {
   // s = still
   // t = tilt
   // icm20948.readHarData(&har);
-
-  //should add step counter
-  process_sensor_neutral_filter();
-  process_sensor_triggers();
-
   //Todo: try read additional data from sensor
 
   // send to adafruit visualizer
@@ -135,28 +164,7 @@ void MotionSensor::update() {
     // Serial.print(q3, 3);
     // Serial.println(F("}"));
   }
-
-  //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
-  // each class should control its own update task ? (so that it can be paused)
-  if (!measure_offset_flag) {
-    for (auto const& pair : sensor_dat) {
-      sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
-    }
-  }
-
-  if (measure_offset_flag) {
-    measure_offset_counter++;
-    offset += sensor_dat[axis_to_measure_offset].value;
-    if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
-      sensor_dat[axis_to_measure_offset].offset =
-          offset / OFFSET_CAL_SAMPLES_NB;
-      measure_offset_flag = false;
-      Serial.print("offset of ");
-      Serial.print(axis_to_measure_offset.c_str());
-      Serial.print(" is: ");
-      Serial.println(sensor_dat[axis_to_measure_offset].offset);
-    }
-  }
+  return data_ready;
 }
 
 void MotionSensor::calc_euler_angles() {
@@ -252,15 +260,6 @@ void MotionSensor::convert_accell() {
   // filter_map["accY"].process(sensor_dat["accY"].raw_value);
   sensor_dat["accZ"].value = sensor_dat["accZ"].raw_value;
   // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
-}
-
-void MotionSensor::measure_offset(const string& axis_name) {
-  if (!measure_offset_flag) {
-    measure_offset_flag = true;
-    axis_to_measure_offset = axis_name;
-    measure_offset_counter = 0;
-    Serial.println("start offset measurement");
-  }
 }
 
 void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {

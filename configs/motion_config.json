@@ -267,7 +267,7 @@
   },
   "inputs": {
     "accX": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 8.0,
@@ -277,7 +277,7 @@
       "cyclic": false
     },
     "accY": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 8.0,
@@ -287,7 +287,7 @@
       "cyclic": false
     },
     "accZ": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 8.0,
@@ -297,7 +297,7 @@
       "cyclic": false
     },
     "pitch": {
-      "deadzone": 0.5,
+      "deadband": 0.5,
       "offset": 0.0,
       "inverted": false,
       "lmax": 90,
@@ -307,7 +307,7 @@
       "cyclic": false
     },
     "roll": {
-      "deadzone": 0.5,
+      "deadband": 0.5,
       "offset": 0.0,
       "inverted": false,
       "lmax": 180,
@@ -317,7 +317,7 @@
       "cyclic": false
     },
     "yaw": {
-      "deadzone": 0.5,
+      "deadband": 0.5,
       "offset": 0.0,
       "inverted": false,
       "lmax": 180,
@@ -327,7 +327,7 @@
       "cyclic": false
     },
     "magX": {
-      "deadzone": 2.0,
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 1000,
@@ -337,7 +337,7 @@
       "cyclic": false
     },
     "magY": {
-      "deadzone": 2.0,
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 1000,
@@ -347,7 +347,7 @@
       "cyclic": false
     },
     "magZ": {
-      "deadzone": 2.0,
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 1000,

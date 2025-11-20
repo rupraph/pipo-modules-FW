@@ -41,7 +41,7 @@ export function isBasicThresholdMode(config: InputSettings): boolean {
 export type InputSettings = {
   mode: boolean;
   th_mode: boolean;
-  deadzone: number;
+  deadband: number;
   lmax: number;
   lmin: number;
   offset: number;

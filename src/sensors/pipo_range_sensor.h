@@ -19,14 +19,14 @@ class PipoRangeSensor : public Sensor {
 
   void init() override;
   void setup() override;
-  void update() override;
-  void measure_offset(const string& sensor_name) override;
+  bool measure_sensor() override;
+  // void measure_offset(const string& sensor_name) override;
   void set_sensor_config(JsonObject config, bool debug = false) override;
   JsonDocument get_sensor_config(bool debug = false) override;
 
  private:
-  bool within_range = false;
-  bool within_range_prev = false;
+  // bool within_range = false;
+  // bool within_range_prev = false;
 
   float abs_max = 400.0;
 

@@ -349,73 +349,95 @@ void PipoServer::setup_requests() {
                          String(hwui.get_bat_voltage()).c_str());
   });
 
-  // Todo: this is too long to be executed in the server reauest
-  // this should be offloaded to a task and a monitoring task setup to  handle and send the pending response when the action if finished
-  server.on("/offsetcal", HTTP_GET, [&](AsyncWebServerRequest* request) {
+  server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("axis")) {
       return request->send(400, "text/plain", "No sensor provided");
     }
     try {
       string axis = request->getParam("axis")->value().c_str();
       Serial.println(axis.c_str());
-      input_sensor.measure_offset(axis);
-      // currently config save is always done by fecthing the client.
-      // for now, send the offset to the client so that it can be saved later on
-      // config.gather(engine);
-      // config.save();
-      return request->send(200, "text/plain",
-                           String(input_sensor.get_offset(axis)));
+
+      // Check if measurement is already in progress
+      if (input_sensor.is_offset_measurement_complete()) {
+        input_sensor.clear_completion_flag();
+      }
+
+      input_sensor.start_measure_offset(axis);
+
+      // Return immediately with status - UI will poll for completion
+      return request->send(202, "application/json",
+                           "{\"status\":\"measuring\",\"axis\":\"" +
+                               String(axis.c_str()) + "\"}");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error measuring offset: " + String(e.what()));
     }
   });
 
-  server.on("/resetoffset", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    if (!request->hasParam("axis")) {
-      return request->send(400, "text/plain", "No sensor provided");
+  // New endpoint to check offset measurement status
+  server.on("/offsetcal-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    try {
+      if (input_sensor.is_offset_measurement_complete()) {
+        JsonDocument offsetData = input_sensor.get_measured_offsets();
+        input_sensor.clear_completion_flag();
+
+        String response;
+        serializeJson(offsetData, response);
+        return request->send(
+            200, "application/json",
+            "{\"status\":\"complete\",\"offsets\":" + response + "}");
+      }
+      return request->send(200, "application/json",
+                           "{\"status\":\"measuring\"}");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error checking offset status: " + String(e.what()));
+    }
+  });
+
+  server.on("/offsetcal-list", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    if (!request->hasParam("channels")) {
+      return request->send(400, "text/plain", "No channel list provided");
     }
     try {
-      string axis = request->getParam("axis")->value().c_str();
-      Serial.println(axis.c_str());
-      input_sensor.reset_offset(axis);
-      // config.gather(engine);
-      // config.save();
-      return request->send(200, "text/plain",
-                           String(input_sensor.get_offset(axis)));
+      string channels = request->getParam("channels")->value().c_str();
+      Serial.print("Starting offset calibration for channels: ");
+      Serial.println(channels.c_str());
+
+      // Check if measurement is already in progress
+      if (input_sensor.is_offset_measurement_complete()) {
+        input_sensor.clear_completion_flag();
+      }
+
+      input_sensor.start_measure_offset_list(channels);
+
+      // Return immediately with status - UI will poll for completion
+      return request->send(202, "application/json",
+                           "{\"status\":\"measuring\"}");
+    } catch (const std::exception& e) {
+      return request->send(500, "text/plain",
+                           "Error measuring offset: " + String(e.what()));
+    }
+  });
+
+  server.on("/resetoffset", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    try {
+      if (request->hasParam("axis")) {
+        // Reset single axis
+        string axis = request->getParam("axis")->value().c_str();
+        input_sensor.reset_offset(axis);
+        return request->send(200, "text/plain",
+                             "Offset reset for " + String(axis.c_str()));
+      } else {
+        // Reset all offsets
+        input_sensor.reset_all_offset();
+        return request->send(200, "text/plain", "All offsets reset");
+      }
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
                            "Error resetting offset: " + String(e.what()));
     }
   });
-
-#ifdef PIPO_ANALOG
-  server.on("/offsetAllTouch", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    try {
-      input_sensor.measure_offset_all();
-      // config.gather(engine);
-      // config.save();
-      String offsetstring = "{";
-      bool first = true;
-      for (auto const& pair : input_sensor.get_sensor_dat_map()) {
-        if (pair.first[0] == 'T') {
-          if (!first) {
-            offsetstring += ",";
-          }
-          first = false;
-          offsetstring += "\"" + String(pair.first.c_str()) +
-                          "\" : " + String(input_sensor.get_offset(pair.first));
-        }
-      }
-      offsetstring += "}";
-
-      return request->send(200, "json", offsetstring.c_str());
-    } catch (const std::exception& e) {
-      return request->send(500, "text/plain",
-                           "Error measuring offset: " + String(e.what()));
-    }
-  });
-#endif
 
 #ifdef PIPO_MOTION
   server.on("/setreference", HTTP_GET, [&](AsyncWebServerRequest* request) {

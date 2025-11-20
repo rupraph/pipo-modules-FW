@@ -72,6 +72,9 @@
       maxSensorValue = Math.round(currentValue); // Update maxSensorValue if a higher value is reached
     }
   }
+
+  // $: display_min = (aschema.min - input.offset).toFixed(2);
+  // $: display_max = (maxSensorValue - input.offset).toFixed(2);
 </script>
 
 <MinMax
