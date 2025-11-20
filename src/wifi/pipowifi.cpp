@@ -409,8 +409,6 @@ void PipoWifi::step() {
     if (connect()) {
       return;
     }
-    // There might have been no one to connect to, we need to start AP anyway
-    Serial.println("No one to connect to, starting AP");
   }
   Serial.print("Should AP? ");
   Serial.print(mode);
