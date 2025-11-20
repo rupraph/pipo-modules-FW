@@ -100,7 +100,7 @@ bool PipoRangeSensor::measure_sensor() {
 
     if (sensor_dat["dist"].raw_value < 0 || !range_status) {
       if (!hold_mode) {
-        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
         data_ready = true;
       }
@@ -114,7 +114,7 @@ bool PipoRangeSensor::measure_sensor() {
       if ((hold_mode &&
            sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
           !hold_mode) {
-        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         // interval.stop();
         // interval.report();
         // interval.start();

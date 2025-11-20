@@ -81,7 +81,7 @@ bool AnalogSensor::measure_sensor() {
     if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
       sensor_dat[pair.first].raw_value = std::min(
           std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
-      sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+      // sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
       sensor_dat[pair.first].value =
           filter_map[pair.first].process(sensor_dat[pair.first].raw_value);
       ;  // * 0.000806f;
@@ -93,7 +93,7 @@ bool AnalogSensor::measure_sensor() {
     //float val = lp_filter_map[pair.first].process(touchRead(pair.second))-sensor_dat[pair.first].offset;
     sensor_dat[pair.first].raw_value = touchRead(pair.second);
 
-    sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
+    // sensor_dat[pair.first].value_prev = sensor_dat[pair.first].value;
 
     sensor_dat[pair.first].value =
         filter_map[pair.first].process(sensor_dat[pair.first].raw_value);

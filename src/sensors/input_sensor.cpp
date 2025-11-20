@@ -9,7 +9,9 @@
 // true if outside deadband
 
 void Sensor::update() {
+  store_previous_values();
   bool newdata = measure_sensor();
+
   if (!newdata)
     return;
   if (measure_offset_flag) {
@@ -193,6 +195,12 @@ void Sensor::reset_all_offset() {
     sensor_dat[pair.first].offset = 0;
   }
   Serial.println("reset all offset");
+}
+
+void Sensor::store_previous_values() {
+  for (auto& dat : sensor_dat) {
+    dat.second.value_prev = dat.second.value_ready;
+  }
 }
 
 // void Sensor::offset_handler() {
@@ -552,20 +560,20 @@ float Sensor::get_value_constrained(const std::string& axis) {
     // wrap value for circular axis, clip for others.
     if (axis == "pitch" || axis == " yaw" || axis == "roll") {
       float range = sensor_dat[axis].lmax - sensor_dat[axis].lmin;
-      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
-        return sensor_dat[axis].value + range;
-      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
-        return sensor_dat[axis].value - range;
+      if (sensor_dat[axis].value_ready < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].value_ready + range;
+      } else if (sensor_dat[axis].value_ready > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].value_ready - range;
       } else {
-        return sensor_dat[axis].value;
+        return sensor_dat[axis].value_ready;
       }
     } else {
-      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+      if (sensor_dat[axis].value_ready < sensor_dat[axis].lmin) {
         return sensor_dat[axis].lmin;
-      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+      } else if (sensor_dat[axis].value_ready > sensor_dat[axis].lmax) {
         return sensor_dat[axis].lmax;
       } else {
-        return sensor_dat[axis].value;
+        return sensor_dat[axis].value_ready;
       }
     }
   else

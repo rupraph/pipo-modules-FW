@@ -85,6 +85,8 @@ class Sensor {
   void reset_offset(const string& sensor_name);
   void reset_all_offset();
 
+  void store_previous_values();
+
   // Check if offset measurement is complete
   bool is_offset_measurement_complete();
   void clear_completion_flag();
