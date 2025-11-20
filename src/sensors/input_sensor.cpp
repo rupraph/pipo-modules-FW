@@ -99,6 +99,7 @@ void Sensor::measure_offset_iter() {
 //measure single axis offset
 void Sensor::start_measure_offset(const std::string& sensor_name) {
   if (!measure_offset_flag) {
+    offset_measurement_complete = false;  // Reset completion flag
     measure_offset_flag = true;
     axis_to_measure_offset = sensor_name;
     measure_offset_counter = 0;
@@ -108,6 +109,7 @@ void Sensor::start_measure_offset(const std::string& sensor_name) {
 }
 void Sensor::start_measure_offset_all() {
   if (!measure_offset_flag) {
+    offset_measurement_complete = false;  // Reset completion flag
     measure_offset_flag = true;
     measure_all = true;
     measure_offset_counter = 0;
@@ -136,6 +138,7 @@ void Sensor::start_measure_offset_list(const string& channel_list) {
       sensor_dat[channel].offset = 0;
     }
 
+    offset_measurement_complete = false;  // Reset completion flag
     measure_list = true;
     measure_offset_flag = true;
     measure_offset_counter = 0;

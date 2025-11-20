@@ -80,6 +80,7 @@ void setup() {  // by default on core 1
   // wait for initial offsets to be measured if needed
   while (input_sensor.is_offset_measurement_complete() == false) {
     input_sensor.update();
+    Serial.println("Waiting for boot offset measurement...");
   }
 
   Serial.println("Boot offsets measured, gather and save config");

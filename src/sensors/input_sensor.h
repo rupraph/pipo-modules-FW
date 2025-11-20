@@ -180,7 +180,9 @@ class Sensor {
   float offset = 0;
 
   // Completion tracking for async responses
-  bool offset_measurement_complete = false;
+  // Initialized to true (no measurement needed by default)
+  // Set to false when start_measure_offset*() is called, then back to true when done
+  bool offset_measurement_complete = true;
 
   // Helper function to parse comma-separated channel list
   vector<string> parse_channel_list(const string& channel_list);
