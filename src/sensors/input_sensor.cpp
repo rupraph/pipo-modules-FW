@@ -228,8 +228,8 @@ void Sensor::reset_all_offset() {
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value < sensor_dat[axis].lmax) {
+    if (sensor_dat[axis].value_ready > sensor_dat[axis].lmin &&
+        sensor_dat[axis].value_ready < sensor_dat[axis].lmax) {
       return true;
     } else {
       return false;
@@ -283,11 +283,11 @@ void Sensor::process_sensor_triggers() {
 
       //simple threshold mode
       if (axis_data.th_mode == 0) {
-        axis_data.bool_value = axis_data.value > axis_data.lmin;
+        axis_data.bool_value = axis_data.value_ready > axis_data.lmin;
       } else {
         if (axis_data.th_mode == 1) {
-          axis_data.bool_value = axis_data.value > axis_data.lmin &&
-                                 axis_data.value < axis_data.lmax;
+          axis_data.bool_value = axis_data.value_ready > axis_data.lmin &&
+                                 axis_data.value_ready < axis_data.lmax;
         }
       }
       // trigger flags for trigger mode
@@ -307,7 +307,8 @@ void Sensor::process_sensor_neutral_filter() {
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     SensorDat& axis_data = dat.second;
-    axis_data.value = axis_data.NeutralFilter.process(axis_data.value);
+    axis_data.value_ready =
+        axis_data.NeutralFilter.process(axis_data.value_ready);
   }
 }
 
@@ -322,8 +323,8 @@ void Sensor::teleplot_data(string axis) {
     Serial.println(sensor_dat[axis].raw_value);
     Serial.print(">");
     Serial.print(axis.c_str());
-    Serial.print("value: ");
-    Serial.println(sensor_dat[axis].value);
+    Serial.print("value ready: ");
+    Serial.println(sensor_dat[axis].value_ready);
   }
 }
 
