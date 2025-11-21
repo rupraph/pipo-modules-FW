@@ -2,6 +2,120 @@
 
 Config config;  // global config object so it can be accessed from anywhere
 
+/// @brief Validate that the config has all required sections and they are not null/empty
+/// @param config_doc The JSON document to validate
+/// @return true if config is valid, false otherwise
+bool Config::validate_config(JsonDocument& config_doc) {
+  // Check for required top-level keys
+  const char* required_keys[] = {"engine", "inputs", "general", "sensorconf"};
+
+  for (const char* key : required_keys) {
+    if (!config_doc.containsKey(key)) {
+      Serial.print("Config validation failed: missing key '");
+      Serial.print(key);
+      Serial.println("'");
+      logs.writeError("Config validation: missing key '" + String(key) + "'");
+      return false;
+    }
+
+    // Check if the key's value is null
+    if (config_doc[key].isNull()) {
+      Serial.print("Config validation failed: key '");
+      Serial.print(key);
+      Serial.println("' is null");
+      logs.writeError("Config validation: key '" + String(key) + "' is null");
+      return false;
+    }
+
+    // For object types, check if they're empty
+    if (config_doc[key].is<JsonObject>()) {
+      JsonObject obj = config_doc[key].as<JsonObject>();
+      if (obj.size() == 0) {
+        Serial.print("Config validation failed: key '");
+        Serial.print(key);
+        Serial.println("' is empty");
+        logs.writeError("Config validation: key '" + String(key) +
+                        "' is empty");
+        return false;
+      }
+    }
+  }
+
+  // Additional validation: check that engine has its subsections
+  if (config_doc["engine"].is<JsonObject>()) {
+    JsonObject engine = config_doc["engine"].as<JsonObject>();
+    const char* engine_keys[] = {"engine-hid", "engine-midi", "engine-osc"};
+
+    for (const char* key : engine_keys) {
+      if (!engine.containsKey(key) || engine[key].isNull()) {
+        Serial.print("Config validation failed: engine missing or null key '");
+        Serial.print(key);
+        Serial.println("'");
+        logs.writeError("Config validation: engine missing/null key '" +
+                        String(key) + "'");
+        return false;
+      }
+    }
+  }
+
+  Serial.println("Config validation passed");
+  return true;
+}
+
+/// @brief Restore a corrupted config by copying default.json
+/// @param target_filename The filename to restore (without extension)
+/// @return true if restore succeeded, false otherwise
+bool Config::restore_from_default(String target_filename) {
+  Serial.println("Attempting to restore config from default.json");
+  logs.writeLog("Restoring config from default.json to " + target_filename);
+
+  // Check if default.json exists
+  if (!LittleFS.exists(config_model_path)) {
+    Serial.println("CRITICAL: default.json not found, cannot restore");
+    logs.writeError("CRITICAL: default.json not found");
+    return false;
+  }
+
+  String target_path = get_path(target_filename);
+
+  // Delete the corrupted file first
+  if (LittleFS.exists(target_path.c_str())) {
+    LittleFS.remove(target_path.c_str());
+    Serial.println("Removed corrupted config: " + target_path);
+  }
+
+  // Copy default.json to target (copyFile returns void, so we verify afterward)
+  copyFile(LittleFS, config_model_path, target_path.c_str());
+
+  // Verify the copy succeeded by checking if the file exists and has content
+  if (!LittleFS.exists(target_path.c_str())) {
+    Serial.println("Failed to restore config: file not created");
+    logs.writeError("Failed to restore config: " + target_filename);
+    return false;
+  }
+
+  File verifyFile = LittleFS.open(target_path.c_str(), FILE_READ);
+  if (!verifyFile) {
+    Serial.println("Failed to restore config: cannot open file");
+    logs.writeError("Failed to restore config (cannot open): " +
+                    target_filename);
+    return false;
+  }
+
+  size_t fileSize = verifyFile.size();
+  verifyFile.close();
+
+  if (fileSize < 10) {
+    Serial.println("Failed to restore config: file too small");
+    logs.writeError("Failed to restore config (too small): " + target_filename);
+    return false;
+  }
+
+  Serial.println("Successfully restored config from default.json");
+  logs.writeLog("Config restored successfully: " + target_filename);
+  return true;
+}
+
 bool Config::load_config(String filename, bool addJsonExtension = true) {
   this->filename = filename;
   String configPath = get_path(filename, addJsonExtension);
@@ -57,6 +171,41 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
       Serial.println("Config missing required keys (engine/general)");
       logs.writeError("Config missing required keys");
       return false;
+    }
+
+    // NEW: Comprehensive validation to detect incomplete configs
+    if (!validate_config(current_config)) {
+      Serial.println(
+          "Config validation failed, attempting to restore from default.json");
+      logs.writeError("Config validation failed for: " + filename);
+
+      // Try to restore from default
+      if (restore_from_default(filename)) {
+        // Reload the restored config
+        Serial.println("Reloading restored config...");
+        current_config.clear();
+        error = deserializeJson(current_config,
+                                readFile(LittleFS, configPath.c_str()));
+
+        if (error) {
+          Serial.println("Failed to reload restored config");
+          logs.writeError("Failed to reload restored config");
+          return false;
+        }
+
+        // Validate again
+        if (!validate_config(current_config)) {
+          Serial.println("Restored config still invalid");
+          logs.writeError("Restored config validation failed");
+          return false;
+        }
+
+        Serial.println("Config successfully restored and validated");
+        logs.writeLog("Config restored and validated: " + filename);
+      } else {
+        Serial.println("Failed to restore config from default.json");
+        return false;
+      }
     }
 
     if (DEBUG_CONFIG) {
@@ -159,6 +308,14 @@ void Config::save() {
   save(filename);
 }
 void Config::save(String filename) {
+  // Validate config before saving to prevent writing incomplete configs
+  if (!validate_config(current_config)) {
+    Serial.println(
+        "CRITICAL: Attempted to save invalid config, operation aborted!");
+    logs.writeError("Save aborted: config validation failed for " + filename);
+    return;
+  }
+
   //uses serialize method to write file
   Serial.print("save config: ");
   Serial.println(get_path(filename).c_str());
@@ -166,14 +323,26 @@ void Config::save(String filename) {
   File file = LittleFS.open(get_path(filename).c_str(), FILE_WRITE);
   if (!file) {
     Serial.println("failed to open file for writing");
+    logs.writeError("Failed to open file for writing: " + filename);
     return;
   }
-  if (serializeJson(current_config, file) == 0) {
-    Serial.println("Failed to write to file");
+
+  size_t bytesWritten = serializeJson(current_config, file);
+  file.close();
+
+  if (bytesWritten == 0) {
+    Serial.println("Failed to write to file (0 bytes written)");
+    logs.writeError("Failed to write config (0 bytes): " + filename);
+
+    // Delete the potentially corrupted file
+    LittleFS.remove(get_path(filename).c_str());
+    Serial.println("Removed potentially corrupted file");
   } else {
+    Serial.print("Config saved successfully (");
+    Serial.print(bytesWritten);
+    Serial.println(" bytes)");
     logs.writeLog("save config: " + filename);
   }
-  file.close();
   // save(filename, current_config.dump().c_str());
 }
 
@@ -347,6 +516,36 @@ void Config::gather(Engine& engine, bool debug) {
   Serial.println("gatherconfig sensorconf");
   current_config["sensorconf"].clear();
   current_config["sensorconf"] = input_sensor.get_sensor_config();
+
+  // Validate the gathered config
+  if (!validate_config(current_config)) {
+    Serial.println("WARNING: Gathered config is incomplete!");
+    logs.writeError("Gathered config validation failed");
+
+    // Log which sections are problematic
+    if (current_config["inputs"].isNull() ||
+        (current_config["inputs"].is<JsonObject>() &&
+         current_config["inputs"].as<JsonObject>().size() == 0)) {
+      Serial.println("  - inputs section is null or empty");
+    }
+    if (current_config["engine"].isNull() ||
+        (current_config["engine"].is<JsonObject>() &&
+         current_config["engine"].as<JsonObject>().size() == 0)) {
+      Serial.println("  - engine section is null or empty");
+    }
+    if (current_config["general"].isNull() ||
+        (current_config["general"].is<JsonObject>() &&
+         current_config["general"].as<JsonObject>().size() == 0)) {
+      Serial.println("  - general section is null or empty");
+    }
+    if (current_config["sensorconf"].isNull() ||
+        (current_config["sensorconf"].is<JsonObject>() &&
+         current_config["sensorconf"].as<JsonObject>().size() == 0)) {
+      Serial.println("  - sensorconf section is null or empty");
+    }
+  } else {
+    Serial.println("Gathered config validated successfully");
+  }
 
   if (debug) {
     Serial.println("gathered_config");

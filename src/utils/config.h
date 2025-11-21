@@ -62,6 +62,8 @@ class Config {
 
  private:
   std::vector<std::string> split(const std::string& str, char delimiter);
+  bool validate_config(JsonDocument& config_doc);
+  bool restore_from_default(String target_filename);
   // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
