@@ -50,4 +50,16 @@ void MidiBLEsendNoteOff(int note, int velocity, int channel) {
   MidiBle.sendNoteOff(note, velocity, channel);
 }
 
+void MidiBLEbeginBatch() {
+  // Begin a batch transmission - messages will accumulate in the transport buffer
+  // until MidiBLEendBatch() is called, allowing multiple MIDI messages
+  // to be sent in a single BLE packet for improved performance
+  BLEMidiBle.beginTransmission(MIDI_NAMESPACE::InvalidType);
+}
+
+void MidiBLEendBatch() {
+  // Flush all accumulated MIDI messages in one BLE packet
+  BLEMidiBle.endTransmission();
+}
+
 #endif  //INCLUDE_BLE

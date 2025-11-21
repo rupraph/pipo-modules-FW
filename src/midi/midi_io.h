@@ -54,6 +54,11 @@ class midi_io {
 
   void sendHiResControlChange(int control, int value, int channel);
 
+  // Batch sending for improved BLE performance
+  // Call beginBatch() before sending multiple messages, then endBatch() to flush
+  void beginBatch();
+  void endBatch();
+
   //utility functions
   void printNoteList(int channel);
 };

@@ -76,18 +76,22 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
 void midi_io::sendAllNotesOff(int channel) {
   unsigned long time = millis();
 
-  // loop through channel_note_list[channel] and send note off for all notes
   // Create a copy of the keys (notes)
   std::vector<int> notes;
   for (auto const& pair : channel_note_list[channel]) {
     notes.push_back(pair.first);
   }
 
+  // Use batching for sending multiple note offs efficiently
+  beginBatch();
+
   // Loop through the notes and send note off for all notes
   for (int note : notes) {
     this->sendNoteOff(note, 127, channel);
     vTaskDelay(pdMS_TO_TICKS(5));
   }
+
+  endBatch();
 }
 
 void midi_io::sendControlChange(int control, int value, int channel,
@@ -113,9 +117,21 @@ void midi_io::sendHiResControlChange(int control, int value, int channel) {
   int msb = (sizeddata >> 7) & 0x7F;
   int lsb = sizeddata & 0x7F;
 
+  // Batch the MSB and LSB messages together for BLE efficiency
+  beginBatch();
+
   MidiUSBsendCC(control, msb, channel);
   MidiUSBsendCC(control + 32, lsb, channel);
-  // MidiUsb.sendControlChange(control, value, channel);
+
+#ifdef INCLUDE_BLE
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEsendCC(control, msb, channel);
+    MidiBLEsendCC(control + 32, lsb, channel);
+  }
+#endif
+
+  endBatch();
+
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 }
 
@@ -153,4 +169,23 @@ void midi_io::printNoteList(int channel) {
     Serial.print("isplaying ?: ");
     Serial.println(is_note_playing(pair.first, channel));
   }
+}
+
+void midi_io::beginBatch() {
+  // Begin batch mode for BLE to accumulate messages in the transport buffer
+#ifdef INCLUDE_BLE
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEbeginBatch();
+  }
+#endif
+  // USB MIDI doesn't need batching as it has different performance characteristics
+}
+
+void midi_io::endBatch() {
+  // End batch mode and flush all accumulated BLE messages in one packet
+#ifdef INCLUDE_BLE
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEendBatch();
+  }
+#endif
 }

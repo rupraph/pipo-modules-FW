@@ -27,7 +27,15 @@ void Engine::update() {
   if (PAUSED) {
     return;
   }
+
+  // Begin MIDI batch - all MIDI messages in this update cycle will be bundled
+  // into a single BLE packet for improved performance
+  bool midi_batch_active = false;
   if (config.general_config["MidiEnabled"] == true) {
+    midiio.beginBatch();
+    midi_batch_active = true;
+
+    // Manage note sustain (sends note offs when sustain expires)
     midiio.manage_sustain();
   }
 
@@ -72,6 +80,11 @@ void Engine::update() {
         HID_translators.find(axis_name) != HID_translators.end()) {
       hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
+  }
+
+  // End MIDI batch - flush all accumulated MIDI messages in one BLE packet
+  if (midi_batch_active) {
+    midiio.endBatch();
   }
 
 #ifdef PIPO_MOTION
