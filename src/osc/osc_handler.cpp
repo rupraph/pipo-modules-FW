@@ -16,6 +16,11 @@ void oscreceiveTask(void* pvParameters) {
 
 /// @brief setup the OSC handler
 void OSC_handler::setup() {
+  // Create mutex for thread safety
+  mutex = xSemaphoreCreateMutex();
+  if (mutex == NULL) {
+    Serial.println("Failed to create OSC mutex!");
+  }
 
   set_config();
   // if (config.general_config["OSC_ENA"]) {
@@ -47,7 +52,7 @@ void OSC_handler::set_config() {
   }
 }
 
-/// @brief start the UDP connection.
+/// @brief start the UDP connection (internal - must be called with mutex held)
 void OSC_handler::ensure_started() {
   if (!isStarted && enabled) {
     Udp.begin(localPort);
