@@ -152,9 +152,9 @@ void Engine::midi_processor(string axis_name, float sensor_val,
     // if Note mode
     else {
       // getting note for continuous mode
-      note_val_prev[channel] = note_val[channel];
+      note_val_prev[axis_name] = note_val[axis_name];
       int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
-      note_val[channel] = max(0, min(note, 127));  // clip between 0 and 127
+      note_val[axis_name] = max(0, min(note, 127));  // clip between 0 and 127
 
       int sustain_ms = int(midi_translator.get_sustain() *
                            1000.0);  // 0 means sustain manager will not
@@ -181,10 +181,10 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         // AND note not already playing
         // AND (note is diff from previous OR we entered the range)
         if (input_sensor.is_within_range(axis_name) &&
-            // !midiio.is_note_playing(note_val[channel], channel) &&
-            (note_val[channel] != note_val_prev[channel] ||
+            // !midiio.is_note_playing(note_val[axis_name], channel) &&
+            (note_val[axis_name] != note_val_prev[axis_name] ||
              input_sensor.get_trigger_flag(axis_name, MIDI))) {
-          midiio.sendNoteOn(note_val[channel], midi_translator.get_velocity(),
+          midiio.sendNoteOn(note_val[axis_name], midi_translator.get_velocity(),
                             channel, sustain_ms);
           if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
