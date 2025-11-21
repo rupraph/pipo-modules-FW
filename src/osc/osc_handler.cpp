@@ -1,4 +1,5 @@
 #include "osc/osc_handler.h"
+#include "shared_flags.h"
 
 OSC_handler osc;
 
@@ -47,32 +48,27 @@ void OSC_handler::set_config() {
 }
 
 /// @brief start the UDP connection.
-void OSC_handler::start() {
-  if (isStarted) {
-    return;
-  }
-
-  if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-    Serial.println("Can't start OSC, No destination IP or port defined");
-    return;
-  } else {
-    Serial.println("Starting OSC");
-    Serial.print("OSC sending to IP: ");
-    Serial.println(dest_ip.toString());
-    Serial.print("on port:");
-    Serial.println(String(out_port));
-    Udp.begin(out_port);
+void OSC_handler::ensure_started() {
+  if (!isStarted && enabled) {
+    Udp.begin(localPort);
     isStarted = true;
-    Serial.println("OSC started");
+    Serial.print("OSC UDP started, listening on port ");
+    Serial.println(localPort);
+    if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+      Serial.print("OSC sending to IP: ");
+      Serial.println(dest_ip.toString());
+      Serial.print("on port: ");
+      Serial.println(String(out_port));
+    }
   }
 }
 
 void OSC_handler::stop() {
-  if (!isStarted) {
-    return;
+  if (isStarted) {
+    Udp.stop();
+    isStarted = false;
+    Serial.println("OSC UDP stopped");
   }
-  Udp.stop();
-  isStarted = false;
 }
 
 // assume data format is /pwm/1. With duty cycle btw 0 and 1
@@ -102,9 +98,17 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
 }
 
 void OSC_handler::receive() {
-  if (isStarted == false || !enabled) {
+  ensure_started();
+
+  if (!isStarted || !enabled) {
     return;
   }
+
+  // Check connection status at receive time
+  if (!staConnected && !apConnected) {
+    return;
+  }
+
   // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
   // keep using as much as possible the library to receive the OSC data.
   OSCBundle bundleIN;
@@ -136,49 +140,35 @@ void OSC_handler::receive() {
 void OSC_handler::set_dest_ip(string ip) {
   IPAddress new_ip;
   new_ip.fromString(ip.c_str());
-  if (!isStarted) {
-    dest_ip = new_ip;
-  }
-  if (isStarted) {
-    stop();
-    dest_ip = new_ip;
-    start();
-  }
+  dest_ip = new_ip;
 }
 
 /// @brief use to update the output port
 void OSC_handler::set_out_port(int port) {
-  if (!isStarted) {
-    out_port = port;
-  }
-  if (isStarted) {
-    stop();
-    out_port = port;
-    start();
-  }
+  out_port = port;
 }
 
-void OSC_handler::send_osc_message(string address, float value) {
-  if (!isStarted || !enabled) {
-    return;
-  }
-  if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-    //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
-    address = config.general_config["PipoName"].as<string>() + "/" + address;
-    if (address[0] != '/') {
-      address = "/" + address;
-    }
-    OSCMessage msg((address).c_str());
-    msg.add(value);
-    Udp.beginPacket(dest_ip, out_port);
-    msg.send(Udp);
-    Udp.endPacket();
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-    msg.empty();
-  } else {
-    Serial.println(F("No destination IP or port set"));
-  }
-}
+// void OSC_handler::send_osc_message(string address, float value) {
+//   if (!isStarted || !enabled) {
+//     return;
+//   }
+//   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+//     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
+//     address = config.general_config["PipoName"].as<string>() + "/" + address;
+//     if (address[0] != '/') {
+//       address = "/" + address;
+//     }
+//     OSCMessage msg((address).c_str());
+//     msg.add(value);
+//     Udp.beginPacket(dest_ip, out_port);
+//     msg.send(Udp);
+//     Udp.endPacket();
+//     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+//     msg.empty();
+//   } else {
+//     Serial.println(F("No destination IP or port set"));
+//   }
+// }
 
 void OSC_handler::add_to_bundle(string address, float value) {
   if (!isStarted) {
@@ -192,10 +182,20 @@ void OSC_handler::add_to_bundle(string address, float value) {
 }
 
 void OSC_handler::send_bundle() {
-  if (!isStarted || bundle.size() < 1) {
+  ensure_started();
+
+  if (!enabled || bundle.size() < 1) {
     bundle.empty();
     return;
   }
+
+  // Check connection status at send time
+  if (!staConnected && !apConnected) {
+    // Serial.println(F("OSC: No network connection"));
+    bundle.empty();
+    return;
+  }
+
   if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
     Serial.println(F("No destination IP or port set"));
     bundle.empty();
@@ -224,6 +224,9 @@ void OSC_handler::send_bundle() {
 
 void OSC_handler::set_enabled(bool ena) {
   this->enabled = ena;
+  if (!ena) {
+    stop();  // Stop UDP if OSC is disabled
+  }
 }
 
 bool OSC_handler::is_enabled() {

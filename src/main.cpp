@@ -140,6 +140,9 @@ void setup() {  // by default on core 1
 // stack is 8k by default
 // by default runs on core 1 for this board
 // prio 1
+int test[10] = {0, 1, 2, 3, 4, 5, 4, 3, 2, 1};
+int id = 0;
+
 void loop() {
 
   // #if defined(PIPO_ANALOG) && HW_REV == 10
@@ -147,9 +150,12 @@ void loop() {
   // #endif
 
   looptime.start();
-  input_sensor.update();
-  input_sensor.teleplot_data("A01");
-  engine.update();
+  // input_sensor.update();
+  // input_sensor.teleplot_data("A01");
+  // engine.update();
+  osc.add_to_bundle("test", test[id % 10]);
+  osc.send_bundle();
+  id++;
   looptime.stop();
   // sensor_task_duration = millis() - lastMillis;
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)

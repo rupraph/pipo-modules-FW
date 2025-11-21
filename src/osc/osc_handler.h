@@ -33,12 +33,13 @@ class OSC_handler {
   bool is_started();
   void receive();
 
-  void start();
+  void ensure_started();
   void stop();
 
  private:
   IPAddress dest_ip;
   int out_port;
+  int localPort = 8001;  // Local port for receiving OSC
   bool isStarted = false;
   bool enabled = false;
 
