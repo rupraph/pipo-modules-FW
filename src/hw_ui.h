@@ -23,19 +23,37 @@
 void hwuiTask(void* pvParameters);
 void buttonTask(void* pvParameters);
 void battmonitorTask(void* pvParameters);
+
+enum PressType { PRESS_NONE = 0, PRESS_SHORT = 1, PRESS_LONG = 2 };
+
+// Callback type for button press handlers
+using ButtonCallback = void (*)();
+
 class Button {
  private:
   int pin;
   int position;
   bool flag = false;  // toogle flag
   unsigned long last_press = 0;
+  unsigned long press_start_time = 0;
+  bool is_pressed = false;
+  bool long_press_triggered = false;
+  PressType last_press_type = PRESS_NONE;
 
  public:
   void setup_button(int pin);
   int read_debounce();
   int get_button();
-  void reset_button() { flag = false; }  // reset the button state
-  bool get_flag() { return flag; }       // return the button state
+  void reset_button() {
+    flag = false;
+    last_press_type = PRESS_NONE;
+  }  // reset the button state
+  bool get_flag() { return flag; }  // return the button state
+  PressType get_press_type() {
+    return last_press_type;
+  }  // return the type of press detected
+  bool is_long_press();   // check if current press is long
+  bool is_short_press();  // check if last completed press was short
 };
 class HwUi {
  public:
@@ -123,7 +141,26 @@ class HwUi {
   // getter/setter
   int get_bat_voltage();
 
+  // Button callback registration
+  void set_pause_short_press_callback(ButtonCallback cb) {
+    pause_short_press_cb = cb;
+  }
+  void set_pause_long_press_callback(ButtonCallback cb) {
+    pause_long_press_cb = cb;
+  }
+  void set_mode_short_press_callback(ButtonCallback cb) {
+    mode_short_press_cb = cb;
+  }
+  void set_mode_long_press_callback(ButtonCallback cb) {
+    mode_long_press_cb = cb;
+  }
+
  private:
+  // Button callbacks
+  ButtonCallback pause_short_press_cb = nullptr;
+  ButtonCallback pause_long_press_cb = nullptr;
+  ButtonCallback mode_short_press_cb = nullptr;
+  ButtonCallback mode_long_press_cb = nullptr;
 #ifdef PIPO_ANALOG&& HW_REV >= 20
   CRGB leds[NB_RGB_LEDS];
   CRGB leds_base_color[NB_RGB_LEDS];

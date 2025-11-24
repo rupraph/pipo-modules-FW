@@ -24,6 +24,10 @@ class PipoRangeSensor : public Sensor {
   void set_sensor_config(JsonObject config, bool debug = false) override;
   JsonDocument get_sensor_config(bool debug = false) override;
 
+  // Button action methods
+  void toggle_hold_mode();
+  bool get_hold_mode() const { return hold_mode; }
+
  private:
   // bool within_range = false;
   // bool within_range_prev = false;

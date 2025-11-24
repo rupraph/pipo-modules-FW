@@ -39,6 +39,17 @@ void MotionSensor::setup() {
     pipoDebugHeap();
 }
 
+void MotionSensor::toggle_relative_mode() {
+  relative_mode = !relative_mode;
+  Serial.print("Relative mode ");
+  Serial.println(relative_mode ? "ENABLED" : "DISABLED");
+}
+
+void MotionSensor::set_new_reference_orientation() {
+  reset_reference_orientation();
+  Serial.println("New reference orientation set");
+}
+
 // void MotionSensor::update() {
 //   measure_sensor();
 //   //should add step counter

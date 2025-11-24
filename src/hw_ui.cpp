@@ -176,16 +176,43 @@ void HwUi::monitor_wifiBT_flags() {
 
 void HwUi::update_switches() {
   // PAUSE has a pullup
-  if (pause_sw.read_debounce() == 0) {
-    if (pause_sw.get_flag() == 1) {
-      PAUSED = !PAUSED;
-      pause_sw.reset_button();
-      Serial.print("PAUSED");
+  pause_sw.read_debounce();
+  if (pause_sw.get_flag()) {
+    if (pause_sw.is_short_press()) {
+      if (pause_short_press_cb != nullptr) {
+        pause_short_press_cb();
+      } else {
+        // Default behavior if no callback registered
+        PAUSED = !PAUSED;
+        Serial.println("PAUSED (short press - default)");
+      }
+    } else if (pause_sw.is_long_press()) {
+      if (pause_long_press_cb != nullptr) {
+        pause_long_press_cb();
+      } else {
+        Serial.println("PAUSE long press (no handler)");
+      }
     }
+    pause_sw.reset_button();
   }
+
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
-  if (mode_sw.read_debounce() == 0) {
-    Serial.print("Mode switch pressed");
+  mode_sw.read_debounce();
+  if (mode_sw.get_flag()) {
+    if (mode_sw.is_short_press()) {
+      if (mode_short_press_cb != nullptr) {
+        mode_short_press_cb();
+      } else {
+        Serial.println("Mode switch short press (no handler)");
+      }
+    } else if (mode_sw.is_long_press()) {
+      if (mode_long_press_cb != nullptr) {
+        mode_long_press_cb();
+      } else {
+        Serial.println("Mode switch long press (no handler)");
+      }
+    }
+    mode_sw.reset_button();
   }
 #endif
 }
@@ -403,12 +430,51 @@ void Button::setup_button(int pin) {
 
 int Button::read_debounce() {
   int current_position = digitalRead(pin);
+  unsigned long current_time = millis();
+
   if (current_position != position) {
-    if (millis() - last_press > DEBOUNCE_TIME) {
+    if (current_time - last_press > DEBOUNCE_TIME) {
       position = current_position;
-      flag = true;  // button state changed
-      last_press = millis();
+      last_press = current_time;
+
+      if (position == 0) {  // Button pressed (assuming active LOW)
+        is_pressed = true;
+        press_start_time = current_time;
+        long_press_triggered = false;
+        last_press_type = PRESS_NONE;
+      } else {  // Button released
+        is_pressed = false;
+        unsigned long press_duration = current_time - press_start_time;
+
+        if (!long_press_triggered) {
+          // Only register short press if long press wasn't already triggered
+          if (press_duration < LONG_PRESS_TIME) {
+            last_press_type = PRESS_SHORT;
+          } else {
+            last_press_type = PRESS_LONG;
+          }
+          flag = true;  // button action completed
+        }
+      }
     }
   }
+
+  // Check for long press while button is held
+  if (is_pressed && !long_press_triggered) {
+    if (current_time - press_start_time >= LONG_PRESS_TIME) {
+      long_press_triggered = true;
+      last_press_type = PRESS_LONG;
+      flag = true;  // trigger long press immediately
+    }
+  }
+
   return position;
+}
+
+bool Button::is_long_press() {
+  return last_press_type == PRESS_LONG;
+}
+
+bool Button::is_short_press() {
+  return last_press_type == PRESS_SHORT;
 }

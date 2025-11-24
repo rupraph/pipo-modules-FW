@@ -49,6 +49,11 @@ class MotionSensor : public Sensor {
   bool enable_send_vizualizer =
       false;  //set on/off serial messages for vizualizer
 
+  // Button action methods
+  void toggle_relative_mode();
+  void set_new_reference_orientation();
+  bool get_relative_mode() const { return relative_mode; }
+
  private:
   //config
   bool relative_mode =

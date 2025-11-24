@@ -93,6 +93,7 @@
 #endif
 
 #define DEBOUNCE_TIME 50  // in ms
+#define LONG_PRESS_TIME 1000  // in ms
 
 //analog sensor specific definitions
 #define OFFSET_CAL_SAMPLES_NB 50

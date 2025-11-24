@@ -86,6 +86,20 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
 
+    // Register button callbacks for sensor-specific actions
+#ifdef PIPO_MOTION
+  hwui.set_mode_short_press_callback(
+      []() { input_sensor.set_new_reference_orientation(); });
+  hwui.set_mode_long_press_callback(
+      []() { input_sensor.toggle_relative_mode(); });
+  Serial.println("Motion sensor button callbacks registered");
+#endif
+
+#ifdef PIPO_RANGE
+  hwui.set_mode_short_press_callback([]() { input_sensor.toggle_hold_mode(); });
+  Serial.println("Range sensor button callbacks registered");
+#endif
+
   // wait for initial offsets to be measured if needed
   while (input_sensor.is_offset_measurement_complete() == false) {
     input_sensor.update();
@@ -157,7 +171,6 @@ void loop() {
 
   looptime.start();
   input_sensor.update();
-  input_sensor.teleplot_data("A01");
   engine.update();
   looptime.stop();
   // sensor_task_duration = millis() - lastMillis;

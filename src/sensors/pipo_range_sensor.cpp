@@ -61,6 +61,12 @@ void PipoRangeSensor::setup() {
     pipoDebugHeap();
 }
 
+void PipoRangeSensor::toggle_hold_mode() {
+  hold_mode = !hold_mode;
+  Serial.print("Hold mode ");
+  Serial.println(hold_mode ? "ENABLED" : "DISABLED");
+}
+
 bool PipoRangeSensor::measure_sensor() {
   // start_duration();
   int j;
