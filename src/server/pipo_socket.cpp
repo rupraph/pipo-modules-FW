@@ -193,7 +193,7 @@ void PipoSocket::loop() {
     if (!pair.second.ws_monitor)
       continue;
     string axis_name = pair.first;
-    float sensor_val = input_sensor.get_value(axis_name);
+    float sensor_val = input_sensor.get_value_offset(axis_name);
     bool sensor_bool = input_sensor.get_bool_value(axis_name);
 
     // if (!input_sensor.test_outside_deadzone(axis_name))

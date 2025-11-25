@@ -175,7 +175,7 @@ vector<string> Sensor::parse_channel_list(const string& channel_list) {
 
 void Sensor::apply_offset() {
   for (auto const& pair : sensor_dat) {
-    sensor_dat[pair.first].value_ready =
+    sensor_dat[pair.first].value_offset =
         sensor_dat[pair.first].value - sensor_dat[pair.first].offset;
   }
 }
@@ -316,7 +316,7 @@ void Sensor::process_sensor_neutral_filter() {
     string axis = dat.first;
     SensorDat& axis_data = dat.second;
     axis_data.value_ready =
-        axis_data.NeutralFilter.process(axis_data.value_ready);
+        axis_data.NeutralFilter.process(axis_data.value_offset);
   }
 }
 
@@ -543,11 +543,21 @@ float Sensor::get_offset(const std::string& axis) {
 }
 
 /**
-@brief get the value of the axis
+@brief get the final value of the axis (after all processing: offset + neutral filter)
  */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].value_ready;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+/**
+@brief get the value after offset but before neutral filtering (for UI display)
+ */
+float Sensor::get_value_offset(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].value_offset;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
