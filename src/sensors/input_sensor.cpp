@@ -8,12 +8,12 @@
 //Todo: deadband should be in percentage or max or in value ?
 // true if outside deadband
 
-void Sensor::update() {
+bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
 
   if (!newdata)
-    return;
+    return false;
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
@@ -21,6 +21,7 @@ void Sensor::update() {
     process_sensor_neutral_filter();
     process_sensor_triggers();
   }
+  return newdata;
 }
 
 void Sensor::measure_offset_iter() {
@@ -310,14 +311,20 @@ void Sensor::process_sensor_triggers() {
 }
 /**
  * @brief This applies the dynamic dead band filter to the sensor data
+ * returns true if data changed after filtering
  */
-void Sensor::process_sensor_neutral_filter() {
+bool Sensor::process_sensor_neutral_filter() {
+  bool data_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     SensorDat& axis_data = dat.second;
-    axis_data.value_ready =
-        axis_data.NeutralFilter.process(axis_data.value_ready);
+    float new_value = axis_data.NeutralFilter.process(axis_data.value_ready);
+    if (new_value != axis_data.value_prev) {
+      data_changed = true;
+      axis_data.value_ready = new_value;
+    }
   }
+  return data_changed;
 }
 
 void Sensor::teleplot_data(string axis) {

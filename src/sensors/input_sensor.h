@@ -76,7 +76,7 @@ class Sensor {
  public:
   virtual void init() = 0;
   virtual void setup() = 0;
-  void update();
+  bool update();
   virtual bool measure_sensor() = 0;
 
   void start_measure_offset(const string& sensor_name);
@@ -100,7 +100,7 @@ class Sensor {
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
   void process_sensor_triggers();
-  void process_sensor_neutral_filter();
+  bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
 
   void teleplot_data(string axis);

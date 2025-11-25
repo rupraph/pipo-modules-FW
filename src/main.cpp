@@ -110,8 +110,6 @@ void setup() {  // by default on core 1
 
   // saving increases fragmentation from 15 to 40%
 
-  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
-  // &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 2,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
@@ -134,34 +132,31 @@ void setup() {  // by default on core 1
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
+  // using the main loop instead of Sensor task to optimize ram usage
+  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8000, NULL, 1,
+  //                         &sensorTaskHandle, 1);  // Priority 4, Core 1, 400Hz
+
   Serial.println("Setup done");
 }
 
 // stack is 8k by default
 // by default runs on core 1 for this board
 // prio 1
-int test[10] = {0, 1, 2, 3, 4, 5, 4, 3, 2, 1};
-int id = 0;
 
 void loop() {
+  static TickType_t xLastWakeTime = xTaskGetTickCount();
+  static const TickType_t xFrequency = pdMS_TO_TICKS(2.5);  // 400Hz max
 
-  // #if defined(PIPO_ANALOG) && HW_REV == 10
-  //   hwui.update_soft_pwm();
-  // #endif
+  bool datachanged = input_sensor.update();
+  if (datachanged) {
+    engine.update();
+  }
 
-  looptime.start();
-  // input_sensor.update();
-  // input_sensor.teleplot_data("A01");
-  // engine.update();
-  osc.add_to_bundle("test", test[id % 10]);
-  osc.send_bundle();
-  id++;
-  looptime.stop();
-  // sensor_task_duration = millis() - lastMillis;
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
-  analog_out.update();  // should be in seperate task
+  analog_out.update();
 #endif
-  vTaskDelay(pdMS_TO_TICKS(1));
 
-  //vTaskDelay(500);  // allow task to yiedl if empty
+  vTaskDelayUntil(
+      &xLastWakeTime,
+      xFrequency);  // Fixed 400Hz rate  //vTaskDelay(500);  // allow task to yiedl if empty
 }
