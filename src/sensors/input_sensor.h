@@ -30,6 +30,8 @@ struct SensorDat {
 
   bool mode;     // 0 = continuous, 1 = trigger
   bool th_mode;  // 0 = basic, 1 = window trigger
+  bool
+      over_out;  // when measured value is above lmax, use min for out when true, or max when false
 
   bool
       cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
@@ -170,6 +172,9 @@ class Sensor {
 
   bool get_cyclic(const std::string& axis);
   void set_cyclic(const std::string& axis, bool value);
+
+  bool get_over_out(const std::string& axis);
+  void set_over_out(const std::string& axis, bool value);
 
   void monitor_axis(const std::string& axis);
 

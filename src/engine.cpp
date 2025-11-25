@@ -46,10 +46,17 @@ void Engine::update() {
         axis_name);  // could add invert here so that I get the inverted value here.
     bool sensor_invert = input_sensor.get_inverted(axis_name);
     bool sensor_cycle = input_sensor.get_cyclic(axis_name);
+    bool sensor_over_out = input_sensor.get_over_out(axis_name);
     float sensor_min = input_sensor.get_limit_min(axis_name);
     float sensor_max = input_sensor.get_limit_max(axis_name);
     float sensor_midpoint;
 
+    // Store original values before any transformations
+    float original_sensor_val = sensor_val;
+    float original_min = sensor_min;
+    float original_max = sensor_max;
+
+    // Handle cyclic mode (split range at midpoint)
     sensor_midpoint = sensor_min + (sensor_max - sensor_min) / 2.0f;
     if (sensor_cycle) {
       if (sensor_val < sensor_midpoint) {
@@ -60,10 +67,17 @@ void Engine::update() {
       }
     }
 
-    if (sensor_invert == true) {
-      float temp = sensor_max;
-      sensor_max = sensor_min;
-      sensor_min = temp;
+    // Apply over_out: if ORIGINAL value exceeds max, return the OUTPUT minimum
+    // Check on original value so it works consistently regardless of invert
+    if (sensor_over_out && original_sensor_val >= original_max) {
+      // The output minimum is sensor_min (which is the logical min considering cyclic)
+      sensor_val = sensor_min;
+    } else {
+      // Apply invert: reverse the value within the range
+      if (sensor_invert) {
+        // Map value from [min, max] to [max, min]
+        sensor_val = sensor_max + sensor_min - sensor_val;
+      }
     }
 
     if (config.general_config["MidiEnabled"] == true &&

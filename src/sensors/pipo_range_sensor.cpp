@@ -124,8 +124,8 @@ bool PipoRangeSensor::measure_sensor() {
         // interval.stop();
         // interval.report();
         // interval.start();
-        sensor_dat["dist"].value = ma_filter.process(
-            sensor_dat["dist"].raw_value - sensor_dat["dist"].offset);
+        sensor_dat["dist"].value =
+            ma_filter.process(sensor_dat["dist"].raw_value);
         data_ready = true;
       }
 

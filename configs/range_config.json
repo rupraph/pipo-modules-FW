@@ -44,7 +44,8 @@
       "lmin": 5.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {
