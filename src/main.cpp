@@ -179,7 +179,6 @@ void loop() {
   bool datachanged = input_sensor.update();
   if (datachanged) {
     engine.update();
-    Serial.println("Engine updated");
   }
 
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)

@@ -29,8 +29,8 @@ class PipoRangeSensor : public Sensor {
   bool get_hold_mode() const { return hold_mode; }
 
  private:
-  // bool within_range = false;
-  // bool within_range_prev = false;
+  bool within_range = false;
+  bool within_range_prev = false;
 
   float abs_max = 400.0;
 

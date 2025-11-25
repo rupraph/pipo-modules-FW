@@ -72,6 +72,9 @@ bool PipoRangeSensor::measure_sensor() {
   int j;
   bool data_ready = false;
 
+  // Store previous range state
+  within_range_prev = within_range;
+
 #if HW_REV == 10
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
 #elif HW_REV >= 11
@@ -105,6 +108,7 @@ bool PipoRangeSensor::measure_sensor() {
 #endif
 
     if (sensor_dat["dist"].raw_value < 0 || !range_status) {
+      within_range = false;
       if (!hold_mode) {
         // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
@@ -116,6 +120,12 @@ bool PipoRangeSensor::measure_sensor() {
     // not sure if capping is optimal to be here in sensor class or better in engine/translators
     // when in range
     else {
+      within_range = true;
+
+      // Reset filter when transitioning into valid range to prevent spurious values
+      if (within_range && !within_range_prev) {
+        ma_filter.reset(sensor_dat["dist"].raw_value);
+      }
 
       if ((hold_mode &&
            sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
