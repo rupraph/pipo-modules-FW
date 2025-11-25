@@ -11,17 +11,17 @@
 bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
-
+  bool data_changed = false;
   if (!newdata)
     return false;
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
     apply_offset();
-    process_sensor_neutral_filter();
+    data_changed = process_sensor_neutral_filter();
     process_sensor_triggers();
   }
-  return newdata;
+  return data_changed;
 }
 
 void Sensor::measure_offset_iter() {
