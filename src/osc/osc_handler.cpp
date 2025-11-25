@@ -1,20 +1,26 @@
 #include "osc/osc_handler.h"
+#include "shared_flags.h"
 
 OSC_handler osc;
 
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
   for (;;) {
-    if (WiFi.status() == WL_CONNECTED && osc.is_enabled()) {
+    if ((staConnected || apConnected) && osc.is_enabled()) {
       osc.receive();
     }
-    vTaskDelay(pdMS_TO_TICKS(1));
+    vTaskDelay(pdMS_TO_TICKS(10));  // 10ms polling - reasonable for OSC receive
   }
 }
 #endif
 
 /// @brief setup the OSC handler
 void OSC_handler::setup() {
+  // Create mutex for thread safety
+  mutex = xSemaphoreCreateMutex();
+  if (mutex == NULL) {
+    Serial.println("Failed to create OSC mutex!");
+  }
 
   set_config();
   // if (config.general_config["OSC_ENA"]) {
@@ -46,33 +52,33 @@ void OSC_handler::set_config() {
   }
 }
 
-/// @brief start the UDP connection.
-void OSC_handler::start() {
-  if (isStarted) {
-    return;
-  }
-
-  if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-    Serial.println("Can't start OSC, No destination IP or port defined");
-    return;
-  } else {
-    Serial.println("Starting OSC");
-    Serial.print("OSC sending to IP: ");
-    Serial.println(dest_ip.toString());
-    Serial.print("on port:");
-    Serial.println(String(out_port));
-    Udp.begin(out_port);
+/// @brief start the UDP connection (internal - must be called with mutex held)
+void OSC_handler::ensure_started() {
+  if (!isStarted && enabled) {
+    Udp.begin(localPort);
     isStarted = true;
-    Serial.println("OSC started");
+    lastConnectionTime = millis();  // Record when we started
+    Serial.print("OSC UDP started, listening on port ");
+    Serial.println(localPort);
+    if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+      Serial.print("OSC sending to IP: ");
+      Serial.println(dest_ip.toString());
+      Serial.print("on port: ");
+      Serial.println(String(out_port));
+    }
   }
 }
 
 void OSC_handler::stop() {
-  if (!isStarted) {
-    return;
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    if (isStarted) {
+      Udp.stop();
+      isStarted = false;
+      lastConnectionTime = 0;  // Reset connection time
+      Serial.println("OSC UDP stopped");
+    }
+    xSemaphoreGive(mutex);
   }
-  Udp.stop();
-  isStarted = false;
 }
 
 // assume data format is /pwm/1. With duty cycle btw 0 and 1
@@ -102,33 +108,47 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
 }
 
 void OSC_handler::receive() {
-  if (isStarted == false || !enabled) {
-    return;
-  }
-  // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
-  // keep using as much as possible the library to receive the OSC data.
-  OSCBundle bundleIN;
-  int size;
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    ensure_started();
 
-  if ((size = Udp.parsePacket()) > 0) {
-    // Serial.print("Packet size: ");
-    // Serial.println(size);
-    while (size--)
-      bundleIN.fill(Udp.read());
-
-    if (!bundleIN.hasError()) {
-      // Serial.println("OSC route");
-      // this will require translators I think
-      // bundleIN.route("/pwm", pwm);
-      bundleIN.route("/out", send_to_analog);
-      // bundleIN.route("/digi", digi);
-
-      // bundleIN.dispatch("/servo", pwm);
-    } else {
-      OSCErrorCode error = bundleIN.getError();
-      Serial.print("Error: ");
-      Serial.println(error);
+    if (!isStarted || !enabled) {
+      xSemaphoreGive(mutex);
+      return;
     }
+
+    // Check connection status at receive time
+    if (!staConnected && !apConnected) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // do not try to receive raw udp data in a buffer then transfer to either Bundle or message processing. very tricky and spent long time having constant crashes.
+    // keep using as much as possible the library to receive the OSC data.
+    OSCBundle bundleIN;
+    int size;
+
+    if ((size = Udp.parsePacket()) > 0) {
+      // Serial.print("Packet size: ");
+      // Serial.println(size);
+      while (size--)
+        bundleIN.fill(Udp.read());
+
+      if (!bundleIN.hasError()) {
+        // Serial.println("OSC route");
+        // this will require translators I think
+        // bundleIN.route("/pwm", pwm);
+        bundleIN.route("/out", send_to_analog);
+        // bundleIN.route("/digi", digi);
+
+        // bundleIN.dispatch("/servo", pwm);
+      } else {
+        OSCErrorCode error = bundleIN.getError();
+        Serial.print("Error: ");
+        Serial.println(error);
+      }
+    }
+
+    xSemaphoreGive(mutex);
   }
 }
 
@@ -136,94 +156,127 @@ void OSC_handler::receive() {
 void OSC_handler::set_dest_ip(string ip) {
   IPAddress new_ip;
   new_ip.fromString(ip.c_str());
-  if (!isStarted) {
-    dest_ip = new_ip;
-  }
-  if (isStarted) {
-    stop();
-    dest_ip = new_ip;
-    start();
-  }
+  dest_ip = new_ip;
 }
 
 /// @brief use to update the output port
 void OSC_handler::set_out_port(int port) {
-  if (!isStarted) {
-    out_port = port;
-  }
-  if (isStarted) {
-    stop();
-    out_port = port;
-    start();
-  }
+  out_port = port;
 }
 
-void OSC_handler::send_osc_message(string address, float value) {
-  if (!isStarted || !enabled) {
-    return;
-  }
-  if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-    //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
-    address = config.general_config["PipoName"].as<string>() + "/" + address;
-    if (address[0] != '/') {
-      address = "/" + address;
-    }
-    OSCMessage msg((address).c_str());
-    msg.add(value);
-    Udp.beginPacket(dest_ip, out_port);
-    msg.send(Udp);
-    Udp.endPacket();
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-    msg.empty();
-  } else {
-    Serial.println(F("No destination IP or port set"));
-  }
-}
+// void OSC_handler::send_osc_message(string address, float value) {
+//   if (!isStarted || !enabled) {
+//     return;
+//   }
+//   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+//     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
+//     address = config.general_config["PipoName"].as<string>() + "/" + address;
+//     if (address[0] != '/') {
+//       address = "/" + address;
+//     }
+//     OSCMessage msg((address).c_str());
+//     msg.add(value);
+//     Udp.beginPacket(dest_ip, out_port);
+//     msg.send(Udp);
+//     Udp.endPacket();
+//     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+//     msg.empty();
+//   } else {
+//     Serial.println(F("No destination IP or port set"));
+//   }
+// }
 
 void OSC_handler::add_to_bundle(string address, float value) {
-  if (!isStarted) {
-    return;
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    ensure_started();
+
+    if (!isStarted || !enabled) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Use fixed buffer to avoid heap allocation
+    char fullAddress[128];
+    const char* pipoName = config.general_config["PipoName"].as<const char*>();
+
+    // Build address: /PipoName/address
+    if (address[0] == '/') {
+      snprintf(fullAddress, sizeof(fullAddress), "/%s%s", pipoName,
+               address.c_str());
+    } else {
+      snprintf(fullAddress, sizeof(fullAddress), "/%s/%s", pipoName,
+               address.c_str());
+    }
+
+    bundle.add(fullAddress).add(value);
+
+    xSemaphoreGive(mutex);
   }
-  address = config.general_config["PipoName"].as<string>() + "/" + address;
-  if (address[0] != '/') {
-    address = "/" + address;
-  }
-  bundle.add(address.c_str()).add(value);
 }
 
 void OSC_handler::send_bundle() {
-  if (!isStarted || bundle.size() < 1) {
-    bundle.empty();
-    return;
-  }
-  if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-    Serial.println(F("No destination IP or port set"));
-    bundle.empty();
-    return;
-  }
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    ensure_started();
 
-  int packetStatus = Udp.beginPacket(dest_ip, out_port);
-  if (packetStatus == 0) {
-    Serial.println(F("Failed to start OSC packet"));
-    bundle.empty();
-    return;
-  }
+    if (!enabled || bundle.size() < 1) {
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
 
-  if (bundle.hasError()) {
-    Serial.print(F("OSC Bundle has error: "));
-    Serial.println(bundle.getError());
-    bundle.empty();
-    return;
-  }
+    // Check connection status at send time
+    if (!staConnected && !apConnected) {
+      // Serial.println(F("OSC: No network connection"));
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
 
-  bundle.send(Udp);
-  Udp.endPacket();
-  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-  bundle.empty();  // clear the bundle after sending
+    // Wait for network stack to stabilize after connection (avoid ENOMEM errors)
+    if (millis() - lastConnectionTime < 100) {
+      // Too soon after connection, network buffers may not be ready
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
+      Serial.println(F("No destination IP or port set"));
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    int packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus == 0) {
+      Serial.println(F("Failed to start OSC packet"));
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    if (bundle.hasError()) {
+      Serial.print(F("OSC Bundle has error: "));
+      Serial.println(bundle.getError());
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    bundle.send(Udp);
+    Udp.endPacket();
+    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+    bundle.empty();  // clear the bundle after sending
+
+    xSemaphoreGive(mutex);
+  }
 }
 
 void OSC_handler::set_enabled(bool ena) {
   this->enabled = ena;
+  if (!ena) {
+    stop();  // Stop UDP if OSC is disabled
+  }
 }
 
 bool OSC_handler::is_enabled() {
