@@ -14,14 +14,19 @@ void oscreceiveTask(void* pvParameters) {
 }
 #endif
 
-/// @brief setup the OSC handler
-void OSC_handler::setup() {
+/// @brief Initialize OSC handler - create mutex (call early, before WiFi)
+void OSC_handler::init() {
   // Create mutex for thread safety
   mutex = xSemaphoreCreateMutex();
   if (mutex == NULL) {
     Serial.println("Failed to create OSC mutex!");
+  } else {
+    Serial.println("OSC mutex created");
   }
+}
 
+/// @brief Setup the OSC handler - configure settings (call after config loaded)
+void OSC_handler::setup() {
   set_config();
   // if (config.general_config["OSC_ENA"]) {
   //   // osc.start();
@@ -70,6 +75,9 @@ void OSC_handler::ensure_started() {
 }
 
 void OSC_handler::stop() {
+  if (mutex == NULL) {
+    return;  // Not initialized yet, nothing to stop
+  }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
     if (isStarted) {
       Udp.stop();
@@ -108,6 +116,9 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
 }
 
 void OSC_handler::receive() {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
     ensure_started();
 
@@ -187,6 +198,9 @@ void OSC_handler::set_out_port(int port) {
 // }
 
 void OSC_handler::add_to_bundle(string address, float value) {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
     ensure_started();
 
@@ -215,6 +229,9 @@ void OSC_handler::add_to_bundle(string address, float value) {
 }
 
 void OSC_handler::send_bundle() {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
     ensure_started();
 
