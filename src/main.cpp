@@ -64,7 +64,7 @@ void setup() {  // by default on core 1
   print_reset_reason();
 
   /////// Init wifi
-  osc.setup();
+  osc.init();  // Create OSC mutex before WiFi (prevents crashes from WiFi events)
   wifi.setup();  //50k heap
 
   /////// print filesystem files list
@@ -94,7 +94,7 @@ void setup() {  // by default on core 1
   Serial.println("starting config page");
   server.setup();  // takes 30k heap
 
-  // Start OSC
+  // Configure OSC (mutex already created in init())
   osc.setup();
 
   if (DEBUG_HEAP)
@@ -144,8 +144,14 @@ void setup() {  // by default on core 1
 // prio 1
 
 void loop() {
-  static TickType_t xLastWakeTime = xTaskGetTickCount();
+  static bool first_run = true;
+  static TickType_t xLastWakeTime;
   static const TickType_t xFrequency = pdMS_TO_TICKS(2.5);  // 400Hz max
+
+  if (first_run) {
+    xLastWakeTime = xTaskGetTickCount();
+    first_run = false;
+  }
 
   bool datachanged = input_sensor.update();
   if (datachanged) {

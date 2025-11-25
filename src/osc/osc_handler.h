@@ -23,7 +23,8 @@ class OSC_handler {
  public:
   // OSC_handler();
 
-  void setup();
+  void init();   // Initialize mutex and thread-safe resources
+  void setup();  // Configure OSC settings
   void set_config();
   void send_osc_message(string address, float value);
   void add_to_bundle(string address, float value);
