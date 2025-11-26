@@ -8,6 +8,10 @@ const acceleroMinMax = {
   min: -100,
   max: 100,
 };
+const gyroMinMax = {
+  min: -2000,
+  max: 2000,
+};
 const analogMinMax = {
   min: 0,
   max: 1023,
@@ -35,6 +39,14 @@ export const minMax: InputMinMax = {
     pitch: angleMinMax,
     roll: angleMinMax,
     yaw: angleMinMax,
+    // magnetometer in uT
+    magX: angleMinMax,
+    magY: angleMinMax,
+    magZ: angleMinMax,
+    // angular velocity in degrees/second
+    gyroX: gyroMinMax,
+    gyroY: gyroMinMax,
+    gyroZ: gyroMinMax,
   },
   analog: {
     A1: analogMinMax,

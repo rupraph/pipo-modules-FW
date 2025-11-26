@@ -87,7 +87,10 @@ export type PipoKeys = {
     | "yaw"
     | "magX"
     | "magY"
-    | "magZ";
+    | "magZ"
+    | "gyroX"
+    | "gyroY"
+    | "gyroZ";
   range: "dist";
   analog:
     | "A01"
