@@ -43,6 +43,7 @@ void setup() {  // by default on core 1
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
+  //Prevent boot if battery is too low
   if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
     hwui.set_led(LOW_BAT_LED, 100);
     delay(3000);
@@ -65,7 +66,9 @@ void setup() {  // by default on core 1
   }
 
   /////// Init midi and hid
-  midiio.setup();  //50k heap
+  String deviceName =
+      "Pipo-" + String(config.general_config["PipoName"].as<String>());
+  midiio.setup(deviceName.c_str());  //50k heap
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif

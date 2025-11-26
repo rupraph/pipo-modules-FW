@@ -11,7 +11,7 @@
 
 #include "utils/debug.h"
 
-void midiBLESetup();
+void midiBLESetup(const char* deviceName = "Pipo-BLE");
 void OnConnected();
 void OnDisconnected();
 
