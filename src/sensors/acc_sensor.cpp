@@ -144,6 +144,20 @@ bool MotionSensor::measure_sensor() {
     data_ready = true;
   }
 
+  if (icm20948.gyroDataIsReady()) {
+    icm20948.readGyroData(&sensor_dat["gyroX"].raw_value,
+                          &sensor_dat["gyroY"].raw_value,
+                          &sensor_dat["gyroZ"].raw_value);
+    sensor_dat["gyroX"].value = sensor_dat["gyroX"].raw_value;
+    //     filter_map["gyroX"].process(sensor_dat["gyroX"].raw_value);
+    sensor_dat["gyroY"].value = sensor_dat["gyroY"].raw_value;
+    //     filter_map["gyroY"].process(sensor_dat["gyroY"].raw_value);
+    sensor_dat["gyroZ"].value = sensor_dat["gyroZ"].raw_value;
+    //     filter_map["gyroZ"].process(sensor_dat["gyroZ"].raw_value);
+    // unit is degrees per second (°/s)
+    data_ready = true;
+  }
+
   //activity recog
   // d = drive
   // w = walk

@@ -20,6 +20,9 @@ class MotionSensor : public Sensor {
     sensor_dat["magX"] = SensorDat();
     sensor_dat["magY"] = SensorDat();
     sensor_dat["magZ"] = SensorDat();
+    sensor_dat["gyroX"] = SensorDat();
+    sensor_dat["gyroY"] = SensorDat();
+    sensor_dat["gyroZ"] = SensorDat();
   };
 
   void init() override;
@@ -61,11 +64,12 @@ class MotionSensor : public Sensor {
 
   //theses filters are for noise reduction.
   unordered_map<string, EMAFilter> filter_map = {
-      {"roll", EMAFilter(0.7)}, {"pitch", EMAFilter(0.7)},
-      {"yaw", EMAFilter(0.7)},  {"accX", EMAFilter(0.7)},
-      {"accY", EMAFilter(0.7)}, {"accZ", EMAFilter(0.7)},
-      {"magX", EMAFilter(0.7)}, {"magY", EMAFilter(0.7)},
-      {"magZ", EMAFilter(0.7)}};
+      {"roll", EMAFilter(0.7)},  {"pitch", EMAFilter(0.7)},
+      {"yaw", EMAFilter(0.7)},   {"accX", EMAFilter(0.7)},
+      {"accY", EMAFilter(0.7)},  {"accZ", EMAFilter(0.7)},
+      {"magX", EMAFilter(0.7)},  {"magY", EMAFilter(0.7)},
+      {"magZ", EMAFilter(0.7)},  {"gyroX", EMAFilter(0.7)},
+      {"gyroY", EMAFilter(0.7)}, {"gyroZ", EMAFilter(0.7)}};
 
   ArduinoICM20948 icm20948;
   ArduinoICM20948Settings icmSettings = {
@@ -74,7 +78,7 @@ class MotionSensor : public Sensor {
       .cs_pin = 10,          // SPI chip select pin
       .spi_speed = 7000000,  // SPI clock speed in Hz, max speed is 7MHz
       .mode = 1,             // 0 = low power mode, 1 = high performance mode
-      .enable_gyroscope = false,     // Enables gyroscope output
+      .enable_gyroscope = true,      // Enables gyroscope output
       .enable_accelerometer = true,  // Enables accelerometer output
       .enable_magnetometer =
           true,  // Enables magnetometer output // Enables quaternion output
@@ -84,12 +88,12 @@ class MotionSensor : public Sensor {
       .enable_quaternion9 = true,         // Enables quaternion 9DOF output
       .enable_har = false,                // Enables activity recognition
       .enable_steps = false,              // Enables step counter
-      .gyroscope_frequency = 1,      // Max frequency = 225, min frequency = 1
+      .gyroscope_frequency = 200,    // Max frequency = 225, min frequency = 1
       .accelerometer_frequency = 1,  // Max frequency = 225, min frequency = 1
       .magnetometer_frequency = 60,  // Max frequency = 70, min frequency = 1
       .gravity_frequency = 1,        // Max frequency = 225, min frequency = 1
       .linearAcceleration_frequency =
-          225,                       // Max frequency = 225, min frequency = 1
+          200,                       // Max frequency = 225, min frequency = 1
       .quaternion6_frequency = 100,  // Max frequency = 225, min frequency = 50
       .quaternion9_frequency = 100,  // Max frequency = 225, min frequency = 50
       .har_frequency = 50,           // Max frequency = 225, min frequency = 50

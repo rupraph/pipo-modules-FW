@@ -88,6 +88,9 @@ export const MOTION_AXIS = [
   "magX",
   "magY",
   "magZ",
+  "gyroX",
+  "gyroY",
+  "gyroZ",
 ] as const;
 export const RANGE_AXIS = ["dist"] as const;
 export const ANALOG_AXIS = [
