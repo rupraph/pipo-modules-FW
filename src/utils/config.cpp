@@ -19,13 +19,16 @@ void Config::load_config(String filename, bool addJsonExtension = true) {
     DeserializationError error = deserializeJson(
         current_config,
         readFile(LittleFS, get_path(filename, addJsonExtension).c_str()));
-    general_config = current_config["general"];
     if (error) {
       Serial.print("deserializeJson() failed: ");
       Serial.println(error.c_str());
       logs.writeError("Error loading config: " + String(error.c_str()));
       return;
     }
+
+    // Update general_config from loaded file
+    general_config.clear();
+    general_config = current_config["general"];
 
     if (DEBUG_CONFIG) {
       Serial.println("loaded config:");
