@@ -517,6 +517,7 @@
       <OscGlobalConfig
         bind:ip={config.general.OSC_IP}
         bind:port={config.general.OSC_PORT}
+        bind:battEnabled={config.general.OSC_Batt}
       />
     </section>
     {#if $type === "motion"}

@@ -1,4 +1,6 @@
 #include "hw_ui.h"
+#include "utils/config.h"
+#include "osc/osc_handler.h"
 
 HwUi hwui;
 
@@ -21,8 +23,27 @@ void buttonTask(void* pvParameters) {
 }
 
 void battmonitorTask(void* pvParameters) {
+  static int prev_bat_percentage = -1;
+  static unsigned long last_send_time = 0;
+  const unsigned long SEND_INTERVAL = 1000;  // Send every 1 second when changed
+
   for (;;) {
     hwui.measure_battery_step();
+
+    // Check if OSC battery sending is enabled and enough time has passed
+    if (config.general_config["OSC_Batt"] == true && osc.is_enabled() &&
+        (millis() - last_send_time >= SEND_INTERVAL)) {
+
+      int current_bat_percentage = (int)round(hwui.get_bat_percentage());
+
+      // Send if percentage has changed (integer comparison)
+      if (current_bat_percentage != prev_bat_percentage) {
+        osc.send_battery_level((float)current_bat_percentage);
+        prev_bat_percentage = current_bat_percentage;
+        last_send_time = millis();
+      }
+    }
+
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
@@ -418,6 +439,24 @@ void HwUi::monitor_battery() {
 
 int HwUi::get_bat_voltage() {
   return bat_voltage;
+}
+
+float HwUi::get_bat_percentage() {
+  // Use same formula as UI: percentage = voltage * 133.3 - 439.8
+  // This maps: 3.3V = 0%, 4.05V = 100%
+  // bat_voltage is in mV, convert to V first
+  float voltage_in_volts = bat_voltage / 1000.0f;
+
+  // Calculate percentage using UI formula
+  float percentage = voltage_in_volts * 133.3f - 439.8f;
+
+  // Clamp to 0-100 range
+  if (percentage < 0.0f)
+    percentage = 0.0f;
+  if (percentage > 100.0f)
+    percentage = 100.0f;
+
+  return percentage;
 }
 
 //Button Class Implementation

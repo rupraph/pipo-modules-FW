@@ -209,20 +209,67 @@ void OSC_handler::add_to_bundle(string address, float value) {
       return;
     }
 
-    // Use fixed buffer to avoid heap allocation
-    char fullAddress[128];
-    const char* pipoName = config.general_config["PipoName"].as<const char*>();
-
     // Build address: /PipoName/address
-    if (address[0] == '/') {
-      snprintf(fullAddress, sizeof(fullAddress), "/%s%s", pipoName,
-               address.c_str());
-    } else {
-      snprintf(fullAddress, sizeof(fullAddress), "/%s/%s", pipoName,
-               address.c_str());
+    String fullAddress = "/";
+    fullAddress += config.general_config["PipoName"].as<const char*>();
+    if (address[0] != '/') {
+      fullAddress += "/";
+    }
+    fullAddress += address.c_str();
+
+    bundle.add(fullAddress.c_str()).add(value);
+
+    xSemaphoreGive(mutex);
+  }
+}
+
+void OSC_handler::send_battery_level(float voltage) {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    ensure_started();
+
+    if (!enabled) {
+      xSemaphoreGive(mutex);
+      return;
     }
 
-    bundle.add(fullAddress).add(value);
+    // Check connection status
+    if (!staConnected && !apConnected) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Wait for network stack to stabilize after connection
+    if (millis() - lastConnectionTime < 100) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Build address: /PipoName/battery
+    String fullAddress = "/";
+    fullAddress += config.general_config["PipoName"].as<const char*>();
+    fullAddress += "/battery";
+
+    OSCMessage msg(fullAddress.c_str());
+    msg.add(voltage);
+
+    int packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus == 0) {
+      msg.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    msg.send(Udp);
+    Udp.endPacket();
+    msg.empty();
 
     xSemaphoreGive(mutex);
   }

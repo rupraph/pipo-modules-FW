@@ -63,6 +63,7 @@ export type GeneralConfig = {
   OSC_ENA: boolean;
   OSC_IP: string;
   OSC_PORT: number;
+  OSC_Batt: boolean;
   MidiEnabled: boolean;
   HidEnabled: boolean;
   HidMode: number;
