@@ -153,10 +153,8 @@ void loop() {
     first_run = false;
   }
 
-  bool datachanged = input_sensor.update();
-  if (datachanged) {
-    engine.update();
-  }
+  input_sensor.update();
+  engine.update();
 
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();
