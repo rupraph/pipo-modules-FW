@@ -8,19 +8,23 @@
 //Todo: deadband should be in percentage or max or in value ?
 // true if outside deadband
 
-void Sensor::update() {
+bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
-
+  bool data_changed = false;
   if (!newdata)
-    return;
+    return false;
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
     apply_offset();
-    process_sensor_neutral_filter();
-    process_sensor_triggers();
+    data_changed = process_sensor_neutral_filter();
+    bool triggers_changed = process_sensor_triggers();
+    data_changed =
+        data_changed ||
+        triggers_changed;  // data changed if either filter or triggers changed
   }
+  return data_changed;
 }
 
 void Sensor::measure_offset_iter() {
@@ -175,7 +179,7 @@ vector<string> Sensor::parse_channel_list(const string& channel_list) {
 
 void Sensor::apply_offset() {
   for (auto const& pair : sensor_dat) {
-    sensor_dat[pair.first].value_ready =
+    sensor_dat[pair.first].value_offset =
         sensor_dat[pair.first].value - sensor_dat[pair.first].offset;
   }
 }
@@ -266,7 +270,8 @@ float Sensor::clip(float value, float min, float max) {
   return std::max(min, std::min(value, max));
 }
 
-void Sensor::process_sensor_triggers() {
+bool Sensor::process_sensor_triggers() {
+  bool flags_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     // warning if reference modifies correctly the value
@@ -279,10 +284,12 @@ void Sensor::process_sensor_triggers() {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
       if (is_within_range(axis) == true &&
           is_prev_within_range(axis) == false) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
     }
 
@@ -301,23 +308,32 @@ void Sensor::process_sensor_triggers() {
       // trigger flags for trigger mode
       if (axis_data.bool_value && !axis_data.bool_value_prev) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
       if (!axis_data.bool_value && axis_data.bool_value_prev) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
     }
   }
+  return flags_changed;
 }
 /**
  * @brief This applies the dynamic dead band filter to the sensor data
+ * returns true if data changed after filtering
  */
-void Sensor::process_sensor_neutral_filter() {
+bool Sensor::process_sensor_neutral_filter() {
+  bool data_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     SensorDat& axis_data = dat.second;
-    axis_data.value_ready =
-        axis_data.NeutralFilter.process(axis_data.value_ready);
+    float new_value = axis_data.NeutralFilter.process(axis_data.value_offset);
+    if (new_value != axis_data.value_prev) {
+      data_changed = true;
+      axis_data.value_ready = new_value;
+    }
   }
+  return data_changed;
 }
 
 void Sensor::teleplot_data(string axis) {
@@ -545,11 +561,21 @@ float Sensor::get_offset(const std::string& axis) {
 }
 
 /**
-@brief get the value of the axis
+@brief get the final value of the axis (after all processing: offset + neutral filter)
  */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].value_ready;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+/**
+@brief get the value after offset but before neutral filtering (for UI display)
+ */
+float Sensor::get_value_offset(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].value_offset;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

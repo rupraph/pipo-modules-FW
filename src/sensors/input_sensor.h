@@ -37,10 +37,11 @@ struct SensorDat {
       cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
 
   // Live attributes
-  float raw_value;  // raw value from sensor
-  float value;  // should distinguish raw value from output value and have both
-  float value_prev;
-  float value_ready;     // value available for reading (post offset)
+  float raw_value;       // raw value from sensor (pure reading)
+  float value;           // after sensor-specific filtering
+  float value_offset;    // after offset applied
+  float value_ready;     // final value after neutral filter
+  float value_prev;      // previous value_ready for comparison
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
@@ -64,6 +65,8 @@ struct SensorDat {
         inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
+        value_offset(0.0),
+        value_ready(0.0),
         value_prev(0.0),
         lmax(1000.0),
         lmin(0.0),
@@ -78,7 +81,7 @@ class Sensor {
  public:
   virtual void init() = 0;
   virtual void setup() = 0;
-  void update();
+  bool update();
   virtual bool measure_sensor() = 0;
 
   void start_measure_offset(const string& sensor_name);
@@ -101,8 +104,8 @@ class Sensor {
   // bool test_outside_deadband(const std::string& axis);
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
-  void process_sensor_triggers();
-  void process_sensor_neutral_filter();
+  bool process_sensor_triggers();        //return true if any flags were toggled
+  bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
 
   void teleplot_data(string axis);
@@ -135,6 +138,7 @@ class Sensor {
   void set_offset(const std::string& axis, float value);
 
   float get_value(const std::string& axis);
+  float get_value_offset(const std::string& axis);
   float get_value_constrained(const std::string& axis);
   void set_value(const std::string& axis, float value);
 

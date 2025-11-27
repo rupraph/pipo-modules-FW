@@ -118,7 +118,7 @@ export const schema: Schema = {
   range: {
     dist: {
       label: "Distance",
-      cat: "Distance",
+      cat: "dist",
       unit: "cm",
       min: 0,
       max: 300,

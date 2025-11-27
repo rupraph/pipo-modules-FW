@@ -8,19 +8,25 @@
 // acceleration
 Engine engine;
 
-void sensorTask(void* pvParameters) {
-  for (;;) {
-    // sensor_task_interval = millis() - lastMillis;
-    // lastMillis = millis();
-    input_sensor.update();
-    engine.update();
-    // sensor_task_duration = millis() - lastMillis;
-#ifdef PIPO_ANALOG
-    analog_out.update();  // should be in seperate task
-#endif
-    vTaskDelay(pdMS_TO_TICKS(1));
-  }
-}
+// using the main loop instead to optimize ram usage
+// void sensorTask(void* pvParameters) {
+//   TickType_t xLastWakeTime = xTaskGetTickCount();
+//   const TickType_t xFrequency = pdMS_TO_TICKS(2.5);  // 2.5ms = 400Hz
+
+//   for (;;) {
+//     // sensor_task_interval = millis() - lastMillis;
+//     // lastMillis = millis();
+//     bool datachanged = input_sensor.update();
+//     if (datachanged) {
+//       engine.update();
+//     }
+//     // sensor_task_duration = millis() - lastMillis;
+//     // #ifdef PIPO_ANALOG
+//     //     analog_out.update();  // should be in seperate task
+//     // #endif
+//     vTaskDelayUntil(&xLastWakeTime, xFrequency);  // Fixed 400Hz rate
+//   }
+// }
 
 //Todo: check if processors could access sensor data without having to pass all the arguments so that invert and cyclic could be computed upfront
 void Engine::update() {

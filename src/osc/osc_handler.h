@@ -6,6 +6,8 @@
 #include <OSCData.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 #include "utils/config.h"
 #include "utils/debug.h"
 
@@ -21,7 +23,8 @@ class OSC_handler {
  public:
   // OSC_handler();
 
-  void setup();
+  void init();   // Initialize mutex and thread-safe resources
+  void setup();  // Configure OSC settings
   void set_config();
   void send_osc_message(string address, float value);
   void add_to_bundle(string address, float value);
@@ -33,18 +36,22 @@ class OSC_handler {
   bool is_started();
   void receive();
 
-  void start();
+  void ensure_started();
   void stop();
 
  private:
   IPAddress dest_ip;
   int out_port;
+  int localPort = 8001;  // Local port for receiving OSC
   bool isStarted = false;
   bool enabled = false;
+  unsigned long lastConnectionTime = 0;  // Track when network connected
 
   OSCBundle bundle;
 
   WiFiUDP Udp;
+
+  SemaphoreHandle_t mutex;  // Mutex for thread safety
 
   void set_dest_ip(string ip);
   void set_out_port(int port);

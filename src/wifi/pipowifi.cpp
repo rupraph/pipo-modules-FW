@@ -10,9 +10,6 @@ void wifiTask(void* pvParameters) {
       if (!server.isRunning()) {
         server.resume();
       }
-      if (osc.is_enabled()) {
-        osc.start();
-      }
     }
   }
 }
@@ -128,7 +125,6 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
-  osc.stop();
   wifi.step();
 }
 
@@ -141,7 +137,6 @@ void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
-  osc.start();
   wifi.step();
 }
 
@@ -150,14 +145,12 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
-  osc.start();
   wifi.step();
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
-  osc.stop();
   wifi.step();
 }
 
@@ -184,7 +177,6 @@ void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = true;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
-  osc.start();
 }
 
 void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -194,7 +186,6 @@ void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = false;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
-  osc.stop();
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -204,7 +195,6 @@ void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = true;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
-  osc.start();
 }
 
 void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -389,6 +379,7 @@ void PipoWifi::step() {
   Serial.println(status);
 
   if (next.mode != WiFi.getMode()) {
+    osc.stop();  // Stop OSC before changing WiFi mode
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_MODE_NULL);
     vTaskDelay(pdMS_TO_TICKS(100));

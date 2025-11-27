@@ -119,7 +119,7 @@
       <Switch label="Invert" bind:value={input.inverted} design="slider" />
     </Tooltip>
   </div>
-  {#if aschema.cat === "Range"}
+  {#if aschema.cat === "dist"}
     <div class="item">
       <Tooltip title="no object retunrs max or 0" enabled={true}>
         <Switch label="Over-out" bind:value={input.over_out} design="slider" />
