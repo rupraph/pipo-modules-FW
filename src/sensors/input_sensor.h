@@ -104,7 +104,7 @@ class Sensor {
   // bool test_outside_deadband(const std::string& axis);
   bool is_within_range(const std::string& axis);
   bool is_prev_within_range(const std::string& axis);
-  void process_sensor_triggers();
+  bool process_sensor_triggers();        //return true if any flags were toggled
   bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
 

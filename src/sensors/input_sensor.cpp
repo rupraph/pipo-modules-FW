@@ -19,7 +19,10 @@ bool Sensor::update() {
   } else {
     apply_offset();
     data_changed = process_sensor_neutral_filter();
-    process_sensor_triggers();
+    bool triggers_changed = process_sensor_triggers();
+    data_changed =
+        data_changed ||
+        triggers_changed;  // data changed if either filter or triggers changed
   }
   return data_changed;
 }
@@ -267,7 +270,8 @@ float Sensor::clip(float value, float min, float max) {
   return std::max(min, std::min(value, max));
 }
 
-void Sensor::process_sensor_triggers() {
+bool Sensor::process_sensor_triggers() {
+  bool flags_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     // warning if reference modifies correctly the value
@@ -280,10 +284,12 @@ void Sensor::process_sensor_triggers() {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
       if (is_within_range(axis) == true &&
           is_prev_within_range(axis) == false) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
     }
 
@@ -302,12 +308,15 @@ void Sensor::process_sensor_triggers() {
       // trigger flags for trigger mode
       if (axis_data.bool_value && !axis_data.bool_value_prev) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
       if (!axis_data.bool_value && axis_data.bool_value_prev) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
     }
   }
+  return flags_changed;
 }
 /**
  * @brief This applies the dynamic dead band filter to the sensor data
