@@ -47,6 +47,7 @@ export type InputSettings = {
   offset: number;
   inverted: boolean;
   cyclic: boolean;
+  over_out: boolean;
 };
 
 export type OscConfig = {

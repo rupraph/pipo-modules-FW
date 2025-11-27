@@ -367,6 +367,7 @@ JsonDocument Sensor::get_inputs_config(bool debug) {
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
       config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
       config[axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
+      config[axis_name]["over_out"] = sensor_dat[axis_name].over_out;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -396,6 +397,7 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
     sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
     sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
+    sensor_dat[axis_name].over_out = config[axis_name]["over_out"];
   }
   if (debug) {
     Serial.println("set_sensor_axis_config_end");
@@ -746,6 +748,20 @@ void Sensor::set_cyclic(const std::string& axis, bool value) {
 bool Sensor::get_cyclic(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].cyclic;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_over_out(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    sensor_dat[axis].over_out = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+bool Sensor::get_over_out(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].over_out;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }

@@ -464,7 +464,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A02": {
       "deadband": 0.02,
@@ -474,7 +475,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A03": {
       "deadband": 0.02,
@@ -484,7 +486,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A04": {
       "deadband": 0.02,
@@ -494,7 +497,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A05": {
       "deadband": 0.02,
@@ -504,7 +508,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A06": {
       "deadband": 0.02,
@@ -514,7 +519,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A07": {
       "deadband": 0.02,
@@ -524,7 +530,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A08": {
       "deadband": 0.02,
@@ -534,7 +541,8 @@
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T1": {
       "deadband": 5.0,
@@ -544,7 +552,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T2": {
       "deadband": 5.0,
@@ -554,7 +563,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T3": {
       "deadband": 5.0,
@@ -564,7 +574,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T4": {
       "deadband": 5.0,
@@ -574,7 +585,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T5": {
       "deadband": 5.0,
@@ -584,7 +596,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T6": {
       "deadband": 5.0,
@@ -594,7 +607,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T7": {
       "deadband": 5.0,
@@ -604,7 +618,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T8": {
       "deadband": 5.0,
@@ -614,7 +629,8 @@
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {

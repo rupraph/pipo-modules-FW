@@ -358,7 +358,8 @@
       "lmin": -8.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "accY": {
       "deadband": 0.05,
@@ -368,7 +369,8 @@
       "lmin": -8.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "accZ": {
       "deadband": 0.05,
@@ -378,7 +380,8 @@
       "lmin": -8.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "pitch": {
       "deadband": 0.5,
@@ -388,7 +391,8 @@
       "lmin": -90,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "roll": {
       "deadband": 0.5,
@@ -398,7 +402,8 @@
       "lmin": -180,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "yaw": {
       "deadband": 0.5,
@@ -408,7 +413,8 @@
       "lmin": -180,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "magX": {
       "deadband": 2.0,
@@ -418,7 +424,8 @@
       "lmin": -1000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "magY": {
       "deadband": 2.0,
@@ -428,7 +435,8 @@
       "lmin": -1000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "magZ": {
       "deadband": 2.0,
@@ -438,7 +446,8 @@
       "lmin": -1000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "gyroX": {
       "deadband": 2.0,
@@ -448,7 +457,8 @@
       "lmin": -2000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "gyroY": {
       "deadband": 2.0,
@@ -458,7 +468,8 @@
       "lmin": -2000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "gyroZ": {
       "deadband": 2.0,
@@ -468,7 +479,8 @@
       "lmin": -2000,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {
