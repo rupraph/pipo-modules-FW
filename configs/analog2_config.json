@@ -146,7 +146,7 @@
       },
       "A04": {
         "cc_nb": 4,
-        "channel": 2,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -636,7 +636,7 @@
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": false,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,

@@ -1,4 +1,8 @@
 {
+  "preset": {
+    "name": "OSC-quats",
+    "description": "Send only quaternion to OSC"
+  },
   "engine": {
     "engine-hid": {
       "accX": {
@@ -92,7 +96,7 @@
       },
       "accY": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -107,7 +111,7 @@
       },
       "accZ": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -122,7 +126,7 @@
       },
       "pitch": {
         "cc_nb": 7,
-        "channel": 1,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -137,7 +141,7 @@
       },
       "roll": {
         "cc_nb": 8,
-        "channel": 1,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -152,7 +156,7 @@
       },
       "yaw": {
         "cc_nb": 9,
-        "channel": 1,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -167,7 +171,7 @@
       },
       "magX": {
         "cc_nb": 10,
-        "channel": 1,
+        "channel": 7,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -182,7 +186,7 @@
       },
       "magY": {
         "cc_nb": 11,
-        "channel": 1,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -197,7 +201,7 @@
       },
       "magZ": {
         "cc_nb": 12,
-        "channel": 1,
+        "channel": 9,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -212,7 +216,7 @@
       },
       "gyroX": {
         "cc_nb": 13,
-        "channel": 1,
+        "channel": 10,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -227,7 +231,7 @@
       },
       "gyroY": {
         "cc_nb": 14,
-        "channel": 1,
+        "channel": 11,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -242,7 +246,7 @@
       },
       "gyroZ": {
         "cc_nb": 15,
-        "channel": 1,
+        "channel": 12,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -279,21 +283,21 @@
         "osc_addr": "accZ"
       },
       "pitch": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "pitch"
       },
       "roll": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "roll"
       },
       "yaw": {
-        "enabled": true,
+        "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
@@ -344,7 +348,7 @@
     },
     "engine-special": {
       "quat": {
-        "enabled": false,
+        "enabled": true,
         "osc_addr": "quat"
       }
     }

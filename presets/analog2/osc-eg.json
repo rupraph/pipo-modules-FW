@@ -640,7 +640,7 @@
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": true,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": false,
     "HidEnabled": false,

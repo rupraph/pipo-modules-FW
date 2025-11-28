@@ -1,7 +1,7 @@
 {
   "preset": {
-    "name": "USB",
-    "description": "A clear and short description about this preset"
+    "name": "Midi eg 1 ",
+    "description": "Note scale on roll, CC on Pitch/Yaw and Gyros"
   },
   "engine": {
     "engine-hid": {
@@ -96,7 +96,7 @@
       },
       "accY": {
         "cc_nb": 5,
-        "channel": 2,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -111,7 +111,7 @@
       },
       "accZ": {
         "cc_nb": 6,
-        "channel": 3,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -125,9 +125,9 @@
         "velocity": 100
       },
       "pitch": {
-        "cc_nb": 7,
-        "channel": 4,
-        "enabled": false,
+        "cc_nb": 14,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
@@ -140,24 +140,24 @@
         "velocity": 100
       },
       "roll": {
-        "cc_nb": 8,
-        "channel": 5,
-        "enabled": false,
+        "cc_nb": 15,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
         "nbOfNotes": 15,
         "sustain": 0.8,
-        "rootNote": 55,
+        "rootNote": 45,
         "pattern": "scale",
-        "scaleType": "blues minor",
+        "scaleType": "major pentatonic",
         "tl_mode": 1,
         "velocity": 100
       },
       "yaw": {
-        "cc_nb": 9,
-        "channel": 6,
-        "enabled": false,
+        "cc_nb": 16,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
@@ -171,7 +171,7 @@
       },
       "magX": {
         "cc_nb": 10,
-        "channel": 7,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -186,7 +186,7 @@
       },
       "magY": {
         "cc_nb": 11,
-        "channel": 8,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -201,7 +201,7 @@
       },
       "magZ": {
         "cc_nb": 12,
-        "channel": 9,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -215,9 +215,9 @@
         "velocity": 100
       },
       "gyroX": {
-        "cc_nb": 13,
-        "channel": 10,
-        "enabled": false,
+        "cc_nb": 17,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
@@ -230,9 +230,9 @@
         "velocity": 100
       },
       "gyroY": {
-        "cc_nb": 14,
-        "channel": 11,
-        "enabled": false,
+        "cc_nb": 18,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
@@ -245,9 +245,9 @@
         "velocity": 100
       },
       "gyroZ": {
-        "cc_nb": 15,
-        "channel": 12,
-        "enabled": false,
+        "cc_nb": 19,
+        "channel": 1,
+        "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
@@ -395,7 +395,7 @@
       "lmin": -90,
       "mode": false,
       "th_mode": false,
-      "cyclic": false,
+      "cyclic": true,
       "over_out": false
     },
     "roll": {
@@ -406,7 +406,7 @@
       "lmin": -180,
       "mode": false,
       "th_mode": false,
-      "cyclic": false,
+      "cyclic": true,
       "over_out": false
     },
     "yaw": {
@@ -417,7 +417,7 @@
       "lmin": -180,
       "mode": false,
       "th_mode": false,
-      "cyclic": false,
+      "cyclic": true,
       "over_out": false
     },
     "magX": {
@@ -489,10 +489,10 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
-    "OSC_IP": "192.168.1.71",
+    "OSC_ENA": false,
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
-    "MidiEnabled": false,
+    "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "motion",

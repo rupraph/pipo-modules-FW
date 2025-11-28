@@ -1,7 +1,7 @@
 {
   "preset": {
-    "name": "BLE",
-    "description": "A clear and short description about this preset"
+    "name": "Midi harp",
+    "description": "A midi harp"
   },
   "engine": {
     "engine-hid": {
@@ -20,12 +20,12 @@
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
-        "nbOfNotes": 15,
+        "nbOfNotes": 12,
         "sustain": 0.8,
-        "rootNote": 55,
+        "rootNote": 45,
         "pattern": "scale",
         "scaleType": "major pentatonic",
-        "tl_mode": 0,
+        "tl_mode": 1,
         "velocity": 100
       }
     },
@@ -44,17 +44,18 @@
       "deadzone": 0.4,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 75.0,
-      "lmin": 5.0,
+      "lmax": 60.0,
+      "lmin": 2.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": false,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
