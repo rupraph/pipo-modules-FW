@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "HW_CONFIG.h"
+#include "shared_flags.h"
 
 #ifdef INCLUDE_BLE
 
@@ -10,7 +11,7 @@
 
 #include "utils/debug.h"
 
-void midiBLESetup();
+void midiBLESetup(const char* deviceName = "Pipo-BLE");
 void OnConnected();
 void OnDisconnected();
 

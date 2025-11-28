@@ -54,6 +54,7 @@ export async function fetchNetworks() {
         return b.quality - a.quality;
       });
     const connected = networks.find((n) => n.connected);
+    console.table(networks);
     setNetworks(networks);
     if (connected) {
       setSignal(connected.quality);

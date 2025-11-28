@@ -2,6 +2,7 @@
 #define PIPO_TYPE "motion"
 #elif defined(PIPO_RANGE)
 #define PIPO_TYPE "range"
+#define USE_I2C_2V8
 #elif defined(PIPO_ANALOG)
 #define PIPO_TYPE "analog"
 #else
@@ -9,7 +10,7 @@
 #endif
 
 #ifndef HW_REV
-#define HW_REV 11  // 1.0 or 1.1
+#define HW_REV 20  // 1.0 or 1.1
 #endif
 
 // #define BETA_OUT
@@ -65,6 +66,10 @@
 #define WIFI_STA_PULSE_TIME 2000
 #define WIFI_AP_PULSE_TIME 1000
 #define WIFI_PULSE_BRIGHTNESS 50
+#define WIFI_PULSE_MIN_BRIGHTNESS 30
+#define BT_PULSE_TIME 3000
+#define BT_PULSE_BRIGHTNESS 50
+#define BT_PULSE_MIN_BRIGHTNESS 20
 // #define ANALOG_TO_VOLTS 0.000806
 
 //ANALOG SETTINGS
@@ -88,6 +93,7 @@
 #endif
 
 #define DEBOUNCE_TIME 50  // in ms
+#define LONG_PRESS_TIME 1000  // in ms
 
 //analog sensor specific definitions
 #define OFFSET_CAL_SAMPLES_NB 50

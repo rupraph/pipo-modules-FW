@@ -1,11 +1,8 @@
 import { defineConfig, Plugin } from "vite";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import mockServer from "vite-plugin-mock-server";
 import viteCompression from "vite-plugin-compression";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import mocks from "./mock/index.mock";
-import { pipoType } from "./mock/pipo-type";
 
 const inlineIconPlugin = (data: Record<string, string>): Plugin => ({
   name: "inline-icon",
@@ -14,12 +11,10 @@ const inlineIconPlugin = (data: Record<string, string>): Plugin => ({
     const favicon = JSON.stringify(
       "data:image/svg+xml," + encodeURIComponent(rawSvg)
     );
-    debugger;
     const res = html.replace(
-      /<link rel=\"icon\" \/>/,
-      () => `<link rel="icon" type="image/svg/xml" href=${favicon} />`
+      /<link rel="icon"[^>]*>/,
+      () => `<link rel="icon" type="image/svg+xml" href=${favicon} />`
     );
-    console.log("res", res);
     return res;
   },
 });
@@ -33,19 +28,10 @@ const plugins = [
   }),
   viteCompression({
     deleteOriginFile: true,
-    filter: /\.(js|mjs|ts|css|html|svg|json|ttf)$/,
+    filter: /\.(js|mjs|ts|css|svg|json|ttf)$/,
   }),
   inlineIconPlugin({}),
 ];
-
-if (pipoType) {
-  plugins.push(
-    mockServer({
-      logLevel: "off",
-      urlPrefixes: Object.values(mocks).map(({ pattern }) => pattern),
-    })
-  );
-}
 
 export default defineConfig(({ mode }) => ({
   plugins,
@@ -59,5 +45,4 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  envDir: pipoType ? "mocks" : ".",
 }));

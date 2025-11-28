@@ -93,17 +93,19 @@
       bind:value={low}
       on:change={onMinChange}
     />
-    <label class="max" for={maxId}>{maxLabel}:</label>
-    <input
-      id={maxId}
-      class="max"
-      type="number"
-      {min}
-      {max}
-      {step}
-      bind:value={high}
-      on:change={onMaxChange}
-    />
+    {#if mode === "double"}
+      <label class="max" for={maxId}>{maxLabel}:</label>
+      <input
+        id={maxId}
+        class="max"
+        type="number"
+        {min}
+        {max}
+        {step}
+        bind:value={high}
+        on:change={onMaxChange}
+      />
+    {/if}
   </div>
 </div>
 
@@ -145,7 +147,7 @@
     width: 100%;
   }
   .inputs > * {
-    width: max-content;
+    width: 100%;
   }
   .value {
     position: absolute;

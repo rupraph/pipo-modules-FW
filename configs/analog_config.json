@@ -92,7 +92,7 @@
       },
       "A02": {
         "cc_nb": 2,
-        "channel": 1,
+        "channel": 2,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -107,7 +107,7 @@
       },
       "A03": {
         "cc_nb": 3,
-        "channel": 1,
+        "channel": 3,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -122,7 +122,7 @@
       },
       "A04": {
         "cc_nb": 4,
-        "channel": 1,
+        "channel": 4,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -137,7 +137,7 @@
       },
       "A05": {
         "cc_nb": 5,
-        "channel": 1,
+        "channel": 5,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -152,7 +152,7 @@
       },
       "A06": {
         "cc_nb": 6,
-        "channel": 1,
+        "channel": 6,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -167,7 +167,7 @@
       },
       "T1": {
         "cc_nb": 7,
-        "channel": 1,
+        "channel": 7,
         "enabled": true,
         "hires": false,
         "cc_max": 127,
@@ -182,7 +182,7 @@
       },
       "T2": {
         "cc_nb": 8,
-        "channel": 1,
+        "channel": 8,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -197,7 +197,7 @@
       },
       "T3": {
         "cc_nb": 9,
-        "channel": 1,
+        "channel": 9,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -212,7 +212,7 @@
       },
       "T4": {
         "cc_nb": 10,
-        "channel": 1,
+        "channel": 10,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -227,7 +227,7 @@
       },
       "T5": {
         "cc_nb": 11,
-        "channel": 1,
+        "channel": 11,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -242,7 +242,7 @@
       },
       "T6": {
         "cc_nb": 12,
-        "channel": 1,
+        "channel": 12,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -345,135 +345,148 @@
   },
   "inputs": {
     "A01": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A02": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A03": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A04": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A05": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "A06": {
-      "deadzone": 0.05,
+      "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T1": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T2": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T3": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T4": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T5": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     },
     "T6": {
-      "deadzone": 5.0,
+      "deadband": 5.0,
       "offset": 0.0,
       "inverted": false,
       "lmax": 200000.0,
       "lmin": 500.0,
       "mode": true,
       "th_mode": false,
-      "cyclic": false
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": true,
+    "OSC_ENA": false,
     "OSC_IP": "192.168.1.71",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1,
-    "PipoName": "analog"
+    "PipoName": "analog",
+    "BLEEnabled": false
   },
   "sensorconf": {
     "analogout": {

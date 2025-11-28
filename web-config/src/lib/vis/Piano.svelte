@@ -59,7 +59,7 @@
   });
 </script>
 
-<Collapse title="Keyboard" class="keyboard" open>
+<Collapse title="Keyboard" class="keyboard" open collapseId="piano">
   <div class="layout">
     <div class="piano scroll">
       <ul class="keyboard">

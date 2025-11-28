@@ -11,7 +11,7 @@
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensors/sensors.h"
-#include "hw_ui.h"
+// #include "hw_ui.h"
 #include "osc/osc_handler.h"
 #include "osc/osc_translators.h"
 #include "shared_flags.h"
@@ -70,8 +70,9 @@ class Engine {
 #endif
 
  private:
-  uint8_t note_val[128];
-  uint8_t note_val_prev[128];
+  unordered_map<string, uint8_t> note_val;  // indexed by axis_name, not channel
+  unordered_map<string, uint8_t>
+      note_val_prev;  // indexed by axis_name, not channel
 
   unordered_map<string, float> osc_val;
   unordered_map<string, float> osc_val_prev;

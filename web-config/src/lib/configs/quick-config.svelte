@@ -5,33 +5,19 @@
   export let config: PipoConfig<T>;
   let columns: number = 0;
   let headers: PipoKeys[T][] = [];
-  const rows: {
-    key: string;
-    value: keyof PipoConfig<T>["engine"];
-  }[] = [
-    {
-      key: "MIDI",
-      value: "engine-midi",
-    },
-    {
-      key: "OSC",
-      value: "engine-osc",
-    },
-    // {
-    //   key: "HID",
-    //   value: "engine-hid",
-    // },
-  ];
+
+  // Determine current mode based on config
+  $: currentMode = config?.general?.MidiEnabled ? "MIDI" : "OSC";
+  $: currentEngineKey = config?.general?.MidiEnabled
+    ? "engine-midi"
+    : "engine-osc";
+
   $: {
     if (config) {
-      columns = Object.keys(schema).length + 1;
-      headers = (
-        Object.entries(schema[$type]) as unknown as Array<
-          [keyof Schema[T], Schema[T][keyof Schema[T]]]
-        >
-      )
+      columns = Object.keys(schema[$type]).length + 1;
+      headers = (Object.entries(schema[$type]) as Array<[PipoKeys[T], any]>)
         .sort((a, b) => a[1].index - b[1].index)
-        .map(([key]) => key) as PipoKeys[T][];
+        .map(([key]) => key);
     }
   }
 </script>
@@ -42,17 +28,25 @@
     {#each headers as header, i}
       <div class="header" style="grid-column:{i + 2}">{header}</div>
     {/each}
-    {#each rows as row, i}
-      <span class="row-header" style="grid-row={i + 2}">{row.key}</span>
-      {#each headers as header, j}
-        <label class="checkbox" style="grid-row:{i + 2}; grid-column:{j + 2}">
-          <input
-            type="checkbox"
-            class="checkbox__input"
-            bind:checked={config.engine[row.value][header].enabled}
-          />
-        </label>
-      {/each}
+    <span class="row-header" style="grid-row=2">{currentMode}</span>
+    {#each headers as header, j}
+      <label class="checkbox" style="grid-row:2; grid-column:{j + 2}">
+        <input
+          type="checkbox"
+          class="checkbox__input"
+          checked={currentEngineKey === "engine-midi"
+            ? config.engine["engine-midi"][header].enabled
+            : config.engine["engine-osc"][header].enabled}
+          on:change={(e) => {
+            const checked = e.currentTarget.checked;
+            if (currentEngineKey === "engine-midi") {
+              config.engine["engine-midi"][header].enabled = checked;
+            } else {
+              config.engine["engine-osc"][header].enabled = checked;
+            }
+          }}
+        />
+      </label>
     {/each}
   </div>
 </div>
@@ -66,8 +60,8 @@
     display: grid;
     justify-items: center;
     grid-template-columns: repeat(var(--columns), 1fr);
-    grid-template-rows: 4;
-    grid-gap: 1em;
+    grid-template-rows: repeat(2, auto);
+    grid-gap: 0.5em;
     padding-bottom: 1em;
     padding-right: 1em;
     width: max-content;

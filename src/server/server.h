@@ -1,6 +1,7 @@
 #ifndef PIPOSERVER_H
 #define PIPOSERVER_H
 #include <ESPmDNS.h>
+#include <vector>
 #include "HW_CONFIG.h"
 #include "engine.h"
 #include <ArduinoJson.h>
@@ -11,6 +12,7 @@
 #include "server/pipo_socket.h"
 #include "server/captive-portal.h"
 #include "server/serve-files.hpp"
+#include "server/presets.hpp"
 #include "wifi/pipowifi.h"
 #include "HW_CONFIG.h"
 
@@ -33,6 +35,7 @@ class PipoServer {
   AsyncWebServer server;
   AsyncWebSocket ws;
   PipoFileServer* fileServer;
+  PipoPresets presets;
   string received_configData;
 };
 

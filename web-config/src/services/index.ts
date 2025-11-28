@@ -1,8 +1,8 @@
 import { pipoio } from "../pipoio";
-import type { PipoTypes } from "../types";
 import { writable } from "svelte/store";
 
 export * from "./config";
+export * from "./presets";
 export const ip = writable<string>("unknown");
 export const isLive = writable<boolean>(false);
 

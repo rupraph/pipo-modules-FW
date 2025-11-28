@@ -1,9 +1,14 @@
 <script lang="ts" generics="T extends PipoTypes">
   import { pipoio } from "../../pipoio";
-  import HidGlobalConfig from "./hid-global-config.svelte";
   import { onMount } from "svelte";
   import { schema } from "../../schema";
-  import { configSave, configValid, pipoType as type } from "../../services";
+  import {
+    configValid,
+    pipoType as type,
+    currentConfig,
+    activeConfigName,
+  } from "../../services";
+  import { uiState } from "../ui-state";
   import Select from "svelte-select";
   import {
     type InputSettings,
@@ -19,12 +24,9 @@
   import Collapse from "../collapse.svelte";
   import LoadingButton from "../form/LoadingButton.svelte";
   import InputConfig from "./input-panel.svelte";
-  import CategoryTab from "./category-tab.svelte";
-  import HidConfigForm from "./hid-config.svelte";
   import MidiConfigForm from "./midi-config.svelte";
   import OscConfigForm from "./osc-config.svelte";
   import QuickConfig from "./quick-config.svelte";
-  import AnalogOutForm from "./analog-out.svelte";
   import OscGlobalConfig from "./osc-global-config.svelte";
   import SensorModes from "./sensor-modes.svelte";
   import BoardConfig from "./board-config.svelte";
@@ -32,9 +34,11 @@
   import Text from "../form/Text.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import axios from "axios";
+  import Presets from "../presets.svelte";
 
-  export let config: PipoConfig<T>;
-  export let name: string;
+  // Use stores instead of props
+  $: config = $currentConfig as unknown as PipoConfig<T>;
+  $: name = $activeConfigName;
   let savingStatus = "none";
 
   let configByChannel: ConfigByChannel<T> = {} as ConfigByChannel<T>;
@@ -47,6 +51,7 @@
   let axisSelect: { value: string; label: string }[] = [];
   let currentCat = "MIDI";
   let isConfigValid = false;
+
   configValid.subscribe((valid) => {
     isConfigValid = valid;
   });
@@ -54,15 +59,30 @@
   onMount(() => {
     if (config) {
       updateConfigByChannel();
-      setAxis(Object.keys(configByChannel)[0] as PipoKeys[T]);
+
+      // Try to restore selected channel from persisted state
+      const persistedChannel =
+        $type !== "unknown" ? uiState.getSelectedChannel($type) : undefined;
+      const firstChannel = Object.keys(configByChannel)[0] as PipoKeys[T];
+
+      if (persistedChannel && persistedChannel in configByChannel) {
+        setAxis(persistedChannel as PipoKeys[T]);
+      } else {
+        setAxis(firstChannel);
+      }
     }
   });
 
   // Ensures configByChannel updates reactively
   $: if (config) {
     updateConfigByChannel();
-    // @ts-expect-error
-    configSave.update(config);
+    // ConfigSave will auto-update via store subscription in Phase 4
+  }
+
+  $: if (config.general.MidiEnabled) {
+    currentCat = "MIDI";
+  } else {
+    currentCat = "OSC";
   }
 
   function updateConfigByChannel() {
@@ -123,11 +143,12 @@
     if (axis !== currentAxis) {
       currentAxis = axis;
       pipoio.monitorAxis(axis);
-    }
-  }
 
-  function setCategory(cat: string) {
-    currentCat = cat;
+      // Persist selected channel to state
+      if ($type !== "unknown") {
+        uiState.setSelectedChannel($type, axis as string);
+      }
+    }
   }
 
   function submit() {
@@ -172,74 +193,215 @@
     isPaused = !isPaused;
   }
 
+  // Offset calibration states
+  let calibratingAxis: string | null = null;
+  let calibratingAll = false;
+
   function cal_offset(axis: PipoKeys[T]) {
-    pipoio.get("/offsetcal", { params: { axis } }).then(({ data }) => {
-      config.inputs[axis].offset = data;
-    });
+    calibratingAxis = axis;
+    pipoio
+      .post("/offsetcal", null, { params: { axis } })
+      .then(({ data }) => {
+        if (data.status === "measuring") {
+          // Start polling for completion
+          pollOffsetCompletion(axis);
+        }
+      })
+      .catch((error) => {
+        console.error(`Offset calibration failed for ${axis}:`, error);
+        calibratingAxis = null;
+      });
+  }
+
+  function pollOffsetCompletion(axis: PipoKeys[T]) {
+    const pollInterval = setInterval(() => {
+      pipoio
+        .get("/offsetcal-status")
+        .then(({ data }) => {
+          if (data.status === "complete" && data.offsets) {
+            // Use the returned offset values directly
+            if (data.offsets[axis] !== undefined) {
+              config.inputs[axis].offset = data.offsets[axis];
+              console.log(
+                `Offset calibrated for ${axis}: ${data.offsets[axis]}`
+              );
+            }
+            clearInterval(pollInterval);
+            calibratingAxis = null;
+          }
+          // Continue polling if still measuring
+        })
+        .catch((error) => {
+          console.error(`Offset status check failed for ${axis}:`, error);
+          clearInterval(pollInterval);
+          calibratingAxis = null;
+        });
+    }, 500); // Poll every 500ms
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (calibratingAxis === axis) {
+        console.error(`Offset calibration timeout for ${axis}`);
+        calibratingAxis = null;
+      }
+    }, 10000);
+  }
+
+  function pollAllTouchCompletion() {
+    const pollInterval = setInterval(() => {
+      pipoio
+        .get("/offsetcal-status")
+        .then(({ data }) => {
+          if (data.status === "complete" && data.offsets) {
+            // Use the returned offset values directly
+            for (const [channel, offsetValue] of Object.entries(data.offsets)) {
+              if (config.inputs[channel as PipoKeys[T]]) {
+                config.inputs[channel as PipoKeys[T]].offset =
+                  offsetValue as number;
+              }
+            }
+            console.log(
+              "All touch offset calibration completed:",
+              data.offsets
+            );
+            clearInterval(pollInterval);
+            calibratingAll = false;
+          }
+          // Continue polling if still measuring
+        })
+        .catch((error) => {
+          console.error("All touch offset status check failed:", error);
+          clearInterval(pollInterval);
+          calibratingAll = false;
+        });
+    }, 500); // Poll every 500ms
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (calibratingAll) {
+        console.error("All touch offset calibration timeout");
+        calibratingAll = false;
+      }
+    }, 10000);
   }
 
   function offsetalltouch() {
-    pipoio.get("/offsetAllTouch").then(({ data }) => {
-      for (const [axis, offset] of Object.entries(data)) {
-        config.inputs[axis as PipoKeys[T]].offset = Number(offset);
-      }
-    });
+    calibratingAll = true;
+
+    // Get all touch channel names from schema
+    const touchChannels = (Object.keys(configByChannel) as PipoKeys[T][])
+      .filter((axis) => schema[$type as T][axis].cat === "Touch")
+      .join(",");
+
+    pipoio
+      .post("/offsetcal-list", null, { params: { channels: touchChannels } })
+      .then(({ data }) => {
+        if (data.status === "measuring") {
+          // Start polling for completion
+          pollAllTouchCompletion();
+        }
+      })
+      .catch((error) => {
+        console.error("Touch offset calibration failed:", error);
+        calibratingAll = false;
+      });
   }
 
   function reset_offset(axis: PipoKeys[T]) {
-    axios({
-      method: "post",
-      url: "/resetoffset",
-      params: { axis },
-    }).then(() => console.log("DONE"));
+    pipoio
+      .request({
+        method: "post",
+        url: "/resetoffset",
+        params: { axis },
+      })
+      .then(() => {
+        // Set local config to 0
+        config.inputs[axis].offset = 0;
+        console.log(`Offset reset for ${axis}`);
+      })
+      .catch((error) => {
+        console.error(`Failed to reset offset for ${axis}:`, error);
+      });
+  }
+
+  function reset_all_offsets() {
+    pipoio
+      .request({
+        method: "post",
+        url: "/resetoffset",
+      })
+      .then(() => {
+        // Set all local config offsets to 0
+        for (const axis of Object.keys(config.inputs) as PipoKeys[T][]) {
+          config.inputs[axis].offset = 0;
+        }
+        console.log("All offsets reset");
+      })
+      .catch((error) => {
+        console.error("Failed to reset all offsets:", error);
+      });
   }
 </script>
 
-<Collapse title="Quick settings">
-  <QuickConfig bind:config />
-  {#if $type === "analog"}
-    <button class="secondary" on:click={offsetalltouch} title="Zero the touch"
-      >Zero All Touch
-    </button>
-  {/if}
-  {#if $type === "motion"}
-    <Tooltip
-      title="This will set the 0 of relative orentation. Do not move Pipo for the next 10s "
-    >
-      <button class="primary" on:click={reboot} style="width: fit-content"
-        >Reboot to calibrate</button
+{#if $type !== "range"}
+  <Collapse title="Quick settings" collapseId="quick-settings">
+    <QuickConfig bind:config />
+
+    {#if $type === "analog"}
+      <LoadingButton
+        onClick={offsetalltouch}
+        loading={calibratingAll}
+        disabled={calibratingAxis !== null}
+        class="secondary"
+        title="Zero all touch sensors"
       >
-    </Tooltip>
-  {/if}
-  <button
-    class="primary Pause"
-    on:click={pause}
-    title="Pause sending data"
-    style="margin: 20px;"
-  >
-    {#if isPaused}
-      Resume
+        {calibratingAll ? "Calibrating All..." : "Zero All Touch"}
+      </LoadingButton>
+      <!-- <button
+        class="secondary"
+        on:click={reset_all_offsets}
+        title="Reset all offsets to zero"
+        style="border-radius: 2vw; cursor: pointer;"
+      >
+        Reset All
+      </button> -->
     {/if}
-    {#if !isPaused}
-      Pause all output
-    {/if}
-  </button>
 
-  <LoadingButton
-    onClick={submit}
-    loading={savingStatus === "loading"}
-    disabled={!isConfigValid}
-    class={savingStatus === "success"
-      ? "success"
-      : savingStatus === "error"
-        ? "error"
-        : "primary"}
-    title="Apply and save the config in pipo">Save</LoadingButton
-  >
+    <button
+      class="primary Pause"
+      on:click={pause}
+      title="Pause sending data"
+      style="margin: 20px;"
+    >
+      {#if isPaused}
+        Resume
+      {/if}
+      {#if !isPaused}
+        Pause all output
+      {/if}
+    </button>
+
+    <LoadingButton
+      onClick={submit}
+      loading={savingStatus === "loading"}
+      disabled={!isConfigValid}
+      class={savingStatus === "success"
+        ? "success"
+        : savingStatus === "error"
+          ? "error"
+          : "primary"}
+      title="Apply and save the config in pipo">Save</LoadingButton
+    >
+  </Collapse>
+  <hr class="separator" />
+{/if}
+<Collapse title="Presets" collapseId="presets">
+  <Presets />
 </Collapse>
-<hr class="separator" />
 
-<Collapse title="Channel settings" open>
+<Collapse title="Channel settings" collapseId="channel-settings" open>
   {#if currentAxis && config}
     <div class="axis-selector">
       <h4>Input:</h4>
@@ -265,15 +427,18 @@
         --background="var(--bg-tabs)"
         on:change={(evt) => setAxis(evt.detail.value)}
       />
-      {#if $type !== "motion"}
+      {#if $type == "analog" && aschema.cat == "Touch"}
         <Tooltip title="Make current value the zero offset">
-          <button
+          <LoadingButton
+            onClick={() => cal_offset(currentAxis)}
+            loading={calibratingAxis === currentAxis}
+            disabled={calibratingAxis !== null &&
+              calibratingAxis !== currentAxis}
             class="secondary"
-            on:click={() => cal_offset(currentAxis)}
             style="border-radius: 2vw; cursor: pointer;"
           >
-            Set Zero
-          </button>
+            {calibratingAxis === currentAxis ? "Calibrating..." : "Set Zero"}
+          </LoadingButton>
         </Tooltip>
         <Tooltip title="Removes the offset">
           <button
@@ -291,7 +456,7 @@
       <p>Check beta section below</p>
     {:else}
       <InputConfig bind:input bind:aschema bind:currentAxis />
-      <CategoryTab active={currentCat} onClick={setCategory} />
+      <!-- <CategoryTab active={currentCat} onClick={setCategory} /> -->
       <Tooltip
         title="Disabled in Quick config"
         followCursor={true}
@@ -301,6 +466,10 @@
           class="translator-settings"
           class:not-allowed={isDisabled(currentCat, midi, hid, osc)}
         >
+          <!-- <h4>{currentCat} output settings</h4> -->
+          <span class="translator-title"> {currentCat} output settings</span>
+          <hr class="separator" />
+
           {#if currentCat === "MIDI"}
             <MidiConfigForm bind:midi bind:sensormode={input.mode} />
           {/if}
@@ -332,50 +501,57 @@
     {/if}
   {/if}
 </Collapse>
-
+<hr class="separator" />
 {#if config.sensorconf}
-  <hr class="separator" />
   <SensorModes bind:config={config.sensorconf} />
+  <hr class="separator" />
 {/if}
 
-<Collapse title="OSC settings" bind:value={config.general.OSC_ENA}>
-  <section class="OSC-global-settings">
-    <OscGlobalConfig
-      bind:ip={config.general.OSC_IP}
-      bind:port={config.general.OSC_PORT}
-    />
-  </section>
-  {#if $type === "motion"}
-    {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
-      <Switch
-        label="MOTION: Quaternions to OSC"
-        bind:value={config.engine["engine-special"]["quat"].enabled}
-        design="slider"
+{#if config.general.OSC_ENA}
+  <Collapse
+    title="OSC settings"
+    collapseId="osc-settings"
+    bind:value={config.general.OSC_ENA}
+  >
+    <section class="OSC-global-settings">
+      <OscGlobalConfig
+        bind:ip={config.general.OSC_IP}
+        bind:port={config.general.OSC_PORT}
       />
-      {#if config.engine["engine-special"]["quat"].enabled}
-        <Text
-          label="Address"
-          bind:value={config.engine["engine-special"]["quat"].osc_addr}
+    </section>
+    {#if $type === "motion"}
+      {#if config.engine["engine-special"] && config.engine["engine-special"]["quat"]}
+        <Switch
+          label="MOTION: Quaternions to OSC"
+          bind:value={config.engine["engine-special"]["quat"].enabled}
+          design="slider"
         />
+        {#if config.engine["engine-special"]["quat"].enabled}
+          <Text
+            label="Address"
+            bind:value={config.engine["engine-special"]["quat"].osc_addr}
+          />
+        {/if}
       {/if}
     {/if}
-  {/if}
-  <div style="display:flex; margin-top:1em; justify-content:right;">
-    <LoadingButton
-      onClick={submit}
-      loading={savingStatus === "loading"}
-      disabled={!isConfigValid}
-      class={savingStatus === "success"
-        ? "success"
-        : savingStatus === "error"
-          ? "error"
-          : "primary"}
-      title="Apply and save the config in pipo">Save</LoadingButton
-    >
-  </div>
-</Collapse>
+    <div style="display:flex; margin-top:1em; justify-content:right;">
+      <LoadingButton
+        onClick={submit}
+        loading={savingStatus === "loading"}
+        disabled={!isConfigValid}
+        class={savingStatus === "success"
+          ? "success"
+          : savingStatus === "error"
+            ? "error"
+            : "primary"}
+        title="Apply and save the config in pipo">Save</LoadingButton
+      >
+    </div>
+  </Collapse>
+  <hr class="separator" />
+{/if}
 
-<hr class="separator" />
+<!-- <hr class="separator" />
 <Collapse title="Beta Features">
   {#if $type === "analog"}
     <Collapse title="HW Output (from OSC only)">
@@ -398,10 +574,9 @@
       >
     </div></Collapse
   >
-</Collapse>
+</Collapse> -->
 
-<hr class="separator" />
-<Collapse title="Board settings">
+<Collapse title="Board settings" collapseId="board-settings">
   <BoardConfig bind:generalconfig={config.general} />
   <div style="display:flex; margin-top:1em; justify-content:right;">
     <LoadingButton
@@ -437,13 +612,23 @@
     background-color: rgb(211, 211, 211);
   }
 
+  .translator-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-weight: bold;
+    /* padding: 0.8em 0; */
+  }
+
   .translator-settings {
     background-color: var(--bg-tabs);
     padding: 1em;
-    border-bottom-left-radius: 0.8em;
-    border-bottom-right-radius: 0.8em;
+    /* border-bottom-left-radius: 0.8em;
+    border-bottom-right-radius: 0.8em; */
+    border-radius: 0.8em;
     padding-left: 3em;
-    padding-right: 4em;
+    padding-right: 3em;
   }
 
   .OSC-global-settings {

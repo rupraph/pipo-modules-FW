@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 #include "utils/config.h"
+#include "shared_flags.h"
 #include "esp_task_wdt.h"
 
 // enum WiFiTransition {
@@ -19,6 +20,26 @@
 //   AP_TO_APSTA,
 //   APSTA_TO_AP
 // };
+
+// Forward declarations for WiFi event handlers
+void onWiFiReadyHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onScanDoneHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAStartHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info);
+void onAPGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info);
+
 void wifiTask(void* pvParameters);
 struct PipoWState {
   // WiFiTransition transition = NONE;
@@ -31,35 +52,38 @@ struct PipoWState {
 };
 
 class PipoWifi {
+ private:
+  // Private implementation details not needed by event handlers
   static const uint CONNECT_TIMEOUT = 10000;
   static const uint CHECK_TIMEOUT = 1000;
   const int WIFI_DELAY = 2000;
   const int MIN_SUBNET = 10;
-  PipoWState next;
   int subnetBase = MIN_SUBNET;
   IPAddress apIP = IPAddress(192, 168, subnetBase, 1);
   IPAddress apMask = IPAddress(255, 255, 255, 0);
   unsigned long lastScan = 0;
   bool shouldRefreshRSSI = true;
+
+  void getFreeSubNet();
+
+ public:
+  // Public state accessible by event handlers - embedded systems pragmatic approach
   bool scanning = false;
-  bool apStarted = false;
-  bool staStarted = false;
-  bool wifiReady = false;
   bool isChangingAP = false;  // means switching from one AP to another ?
+  PipoWState next;
   PipoPWManager pwm;
   std::map<String, int> signals;
   int8_t rssi;
-  void saveScanResult();
-  void getFreeSubNet();
-  void handleWiFiEvent(WiFiEvent_t event, arduino_event_info_t info);
 
- public:
-  bool configureAP();
   /**
   * @brief The current status of the wifi
   */
   enum PipoWifiStatus { CONNECTING, CONNECTED, DISCONNECTED };
   PipoWifiStatus status = DISCONNECTED;
+
+  // Public methods
+  void saveScanResult();
+  bool configureAP();
   PipoWifi();
   void setup();
   /**
@@ -115,6 +139,11 @@ class PipoWifi {
   void setPassword(String password);
   void requestScan();
   void requestRSSI();
+  /**
+   * @brief Forgets a network by removing it from the password manager
+   * @param ssid the ssid of the network to forget
+   */
+  void forgetNetwork(String ssid);
 };
 
 extern PipoWifi wifi;

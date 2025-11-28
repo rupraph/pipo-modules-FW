@@ -2,21 +2,26 @@
 
 midi_io midiio;
 
-void midi_io::setup() {
+void midi_io::setup(const char* deviceName) {
   log_i("midi_io setup started");
 
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup midi_io");
+
 #ifndef DISABLE_USB_COMM
   log_i("midiUSBSetup");
-  MidiUSBSetup();
+  String usbName = String(deviceName) + "-USB";
+  MidiUSBSetup(usbName.c_str());
 #endif
 
   log_i("midiBLESetup");
   if (DEBUG_HEAP)
     pipoDebugHeap("MidiBLESetup: start");
 #ifdef INCLUDE_BLE
-  midiBLESetup();
+  if (config.general_config["BLEEnabled"]) {
+    String bleName = String(deviceName) + "-BLE";
+    midiBLESetup(bleName.c_str());
+  }
 #endif
   log_i("midiBLESetup done");
   if (DEBUG_HEAP)
@@ -36,7 +41,9 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
   }
   MidiUSBsendNoteOn(note, velocity, channel);
 #ifdef INCLUDE_BLE
-  MidiBLEsendNoteOn(note, velocity, channel);
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEsendNoteOn(note, velocity, channel);
+  }
 #endif
 
   // pipoSocket.sendNoteOn(note, velocity,channel);
@@ -60,7 +67,9 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
       channel_note_list[channel].end()) {
     MidiUSBsendNoteOff(note, velocity, channel);
 #ifdef INCLUDE_BLE
-    MidiBLEsendNoteOff(note, velocity, channel);
+    if (config.general_config["BLEEnabled"]) {
+      MidiBLEsendNoteOff(note, velocity, channel);
+    }
 #endif
     // pipoSocket.sendNoteOff(note, velocity,channel);
     channel_note_list[channel].erase(note);
@@ -92,7 +101,9 @@ void midi_io::sendControlChange(int control, int value, int channel,
     } else {
       MidiUSBsendCC(control, value, channel);
 #ifdef INCLUDE_BLE
-      MidiBLEsendCC(control, value, channel);
+      if (config.general_config["BLEEnabled"]) {
+        MidiBLEsendCC(control, value, channel);
+      }
 #endif
     }
     lastcc[channel][control] = value;

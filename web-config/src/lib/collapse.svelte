@@ -2,11 +2,30 @@
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import Switch from "./form/Switch.svelte";
+  import { uiState } from "./ui-state";
+  import { pipoType } from "../services";
+  import type { PipoTypes } from "../types";
+
   export let title: string;
   export let open = false;
   export let value: boolean | undefined = undefined;
+  export let collapseId: string | undefined = undefined; // Optional ID for state persistence
 
   const hasState = value !== undefined;
+
+  // Initialize from persisted state if collapseId is provided
+  // If no persisted state exists, the component keeps its prop default
+  if (collapseId && $pipoType && $pipoType !== "unknown") {
+    const persistedState = uiState.getCollapseState($pipoType, collapseId);
+    if (persistedState !== undefined) {
+      open = persistedState;
+    }
+  }
+
+  // Update persisted state when open changes
+  $: if (collapseId && $pipoType && $pipoType !== "unknown") {
+    uiState.setCollapseState($pipoType, collapseId, open);
+  }
 </script>
 
 <div class="title-container">

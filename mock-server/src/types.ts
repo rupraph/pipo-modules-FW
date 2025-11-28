@@ -33,8 +33,22 @@ export type WifiConnectPostParams = {
   password: string;
 };
 
+export type WifiForgetPostParams = {
+  ssid: string;
+};
+
 export type OffsetCalPostParams = {
   axis: string;
+};
+
+export type PresetGetParams = {
+  name: string;
+};
+
+export type Preset = {
+  name: string;
+  description: string;
+  filename: string;
 };
 
 export type ReqQ<T> = Request<{}, {}, {}, T>;
@@ -74,6 +88,9 @@ export const MOTION_AXIS = [
   "magX",
   "magY",
   "magZ",
+  "gyroX",
+  "gyroY",
+  "gyroZ",
 ] as const;
 export const RANGE_AXIS = ["dist"] as const;
 export const ANALOG_AXIS = [

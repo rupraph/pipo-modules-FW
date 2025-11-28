@@ -6,18 +6,22 @@ import {
   ANALOG_AXIS,
   Info,
   MOTION_AXIS,
+  Preset,
   RANGE_AXIS,
   Sensor,
   Sensors,
   UNKNOWN_AXIS,
   WifiState,
 } from "./types";
+import * as fs from "fs";
+import * as path from "path";
 
 class State<T extends PipoTypes = "analog"> {
   public sensors: Sensors<T>;
   public wifi: WifiState;
   public battLevel: number;
   public configs: Record<string, PipoConfig<T>>;
+  public presets: Preset[];
   private info: Info;
   public activeConfig: string;
   private type: T;
@@ -61,6 +65,75 @@ class State<T extends PipoTypes = "analog"> {
     this.sensors = Object.fromEntries(
       axis.map((key) => [key, defaultSensor()])
     ) as Sensors<T>;
+
+    // Initialize presets based on type
+    this.presets = this.getPresetsForType(type);
+  }
+
+  private getPresetsForType(type: T): Preset[] {
+    const presetType = type === "analog" ? "analog2" : type;
+    const presetsPath = path.join(__dirname, "../../presets", presetType);
+    const presets: Preset[] = [];
+
+    try {
+      if (!fs.existsSync(presetsPath)) {
+        console.warn(`Presets directory not found: ${presetsPath}`);
+        return [];
+      }
+
+      const files = fs.readdirSync(presetsPath);
+
+      for (const filename of files) {
+        if (!filename.endsWith(".json")) continue;
+
+        const filePath = path.join(presetsPath, filename);
+        try {
+          const content = fs.readFileSync(filePath, "utf-8");
+          const presetData = JSON.parse(content);
+
+          if (presetData.preset && presetData.preset.name) {
+            presets.push({
+              name: presetData.preset.name,
+              description: presetData.preset.description || "",
+              filename: filename,
+            });
+          }
+        } catch (err) {
+          console.error(`Error reading preset file ${filename}:`, err);
+        }
+      }
+
+      console.log(`Loaded ${presets.length} presets for type ${type}`);
+    } catch (err) {
+      console.error(`Error scanning presets directory:`, err);
+    }
+
+    return presets;
+  }
+
+  getPresetContent(filename: string): any {
+    const presetType = this.type === "analog" ? "analog2" : this.type;
+    const filePath = path.join(
+      __dirname,
+      "../../presets",
+      presetType,
+      filename
+    );
+
+    try {
+      const content = fs.readFileSync(filePath, "utf-8");
+      console.log(
+        `Read preset file ${filePath}, ${JSON.stringify(
+          JSON.parse(content).engine["engine-midi"]["A01"],
+          null,
+          2
+        )}`
+      );
+      return JSON.parse(content);
+    } catch (err) {
+      console.error(`Error reading preset file ${filename}:`, err);
+      throw new Error(`Preset file not found: ${filename}`);
+    }
   }
 
   getInfo() {
@@ -108,6 +181,9 @@ class State<T extends PipoTypes = "analog"> {
   }
   getType() {
     return this.type;
+  }
+  refreshPresets() {
+    this.presets = this.getPresetsForType(this.type);
   }
 }
 

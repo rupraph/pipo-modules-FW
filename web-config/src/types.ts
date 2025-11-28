@@ -41,12 +41,13 @@ export function isBasicThresholdMode(config: InputSettings): boolean {
 export type InputSettings = {
   mode: boolean;
   th_mode: boolean;
-  deadzone: number;
+  deadband: number;
   lmax: number;
   lmin: number;
   offset: number;
   inverted: boolean;
   cyclic: boolean;
+  over_out: boolean;
 };
 
 export type OscConfig = {
@@ -66,6 +67,7 @@ export type GeneralConfig = {
   HidEnabled: boolean;
   HidMode: number;
   PipoName: string;
+  BLEEnabled: boolean;
 };
 
 export type HidConfig = {
@@ -86,7 +88,10 @@ export type PipoKeys = {
     | "yaw"
     | "magX"
     | "magY"
-    | "magZ";
+    | "magZ"
+    | "gyroX"
+    | "gyroY"
+    | "gyroZ";
   range: "dist";
   analog:
     | "A01"
