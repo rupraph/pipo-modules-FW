@@ -35,7 +35,8 @@ void PipoSocket::setup() {
   this->ws->onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
-    Serial.printf("WebSocket running on core: %d\n", xPortGetCoreID());
+    Serial.print("WebSocket running on core: ");
+    Serial.println(xPortGetCoreID());
     if (type == WS_EVT_CONNECT) {
       // Serial.printf("WS Client connected");
       // // if more than 3 clients, delete the oldest one

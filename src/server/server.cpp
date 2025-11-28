@@ -55,6 +55,8 @@ bool PipoServer::isRunning() {
 }
 void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    Serial.print("HTTP /info handler on core: ");
+    Serial.println(xPortGetCoreID());
     Serial.println("info request");
     if (DEBUG_HEAP)
       pipoDebugHeap("info request");

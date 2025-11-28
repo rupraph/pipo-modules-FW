@@ -98,7 +98,9 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_CONNECTED");
+  Serial.print("[Event] STA_CONNECTED (Core ");
+  Serial.print(xPortGetCoreID());
+  Serial.println(")");
   wifi.status = PipoWifi::CONNECTED;
   staConnected = true;
   wifi.pwm.add(wifi.next.ssid, wifi.next.password);
