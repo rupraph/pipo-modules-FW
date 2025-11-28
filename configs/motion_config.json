@@ -262,90 +262,90 @@
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accX"
+        "osc_addr": "accX"
       },
       "accY": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accY"
+        "osc_addr": "accY"
       },
       "accZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accZ"
+        "osc_addr": "accZ"
       },
       "pitch": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/pitch"
+        "osc_addr": "pitch"
       },
       "roll": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/roll"
+        "osc_addr": "roll"
       },
       "yaw": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/yaw"
+        "osc_addr": "yaw"
       },
       "magX": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magX"
+        "osc_addr": "magX"
       },
       "magY": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magY"
+        "osc_addr": "magY"
       },
       "magZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magZ"
+        "osc_addr": "magZ"
       },
       "gyroX": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroX"
+        "osc_addr": "gyroX"
       },
       "gyroY": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroY"
+        "osc_addr": "gyroY"
       },
       "gyroZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroZ"
+        "osc_addr": "gyroZ"
       }
     },
     "engine-special": {
       "quat": {
         "enabled": false,
-        "osc_addr": "motion/quat"
+        "osc_addr": "quat"
       }
     }
   },
