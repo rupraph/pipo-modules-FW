@@ -68,16 +68,63 @@ void setup() {  // by default on core 1
   /////// Init midi and hid
   String deviceName =
       "Pipo-" + String(config.general_config["PipoName"].as<String>());
-  midiio.setup(deviceName.c_str());  //50k heap
+
+  // USB MIDI setup on Core 1 (no async callbacks, just USB buffers)
 #ifndef DISABLE_USB_COMM
+  String usbName = String(deviceName) + "-USB";
+  MidiUSBSetup(usbName.c_str());
   hidio.setup(config.general_config["HidMode"]);
 #endif
   delay(1000);
   print_reset_reason();
 
-  /////// Init wifi
+  /////// Init event-driven components on Core 0
+  // WiFi, Server, OSC, BLE all have event callbacks that should run on Core 0
+  // to avoid interfering with Core 1's critical sensor/MIDI loop
   osc.init();  // Create OSC mutex before WiFi (prevents crashes from WiFi events)
-  wifi.setup();  //50k heap
+
+  // Create temporary task on Core 0 to initialize all event-driven components
+  TaskHandle_t networkSetupHandle = NULL;
+  xTaskCreatePinnedToCore(
+      [](void* param) {
+        String* devName = (String*)param;
+        Serial.print("Network setup running on core: ");
+        Serial.println(xPortGetCoreID());
+
+    // BLE MIDI setup (BLE connection/disconnection callbacks)
+    // Note: BLE *sending* will still happen on Core 1 from engine
+#ifdef INCLUDE_BLE
+        if (config.general_config["BLEEnabled"]) {
+          Serial.println("BLE MIDI setup on Core 0");
+          String bleName = *devName + "-BLE";
+          midiBLESetup(bleName.c_str());
+        }
+#endif
+
+        // WiFi setup (WiFi event callbacks)
+        wifi.setup();
+
+        // Wait for WiFi setup to complete initialization
+        vTaskDelay(pdMS_TO_TICKS(100));
+
+        // Server setup (HTTP handlers, WebSocket events, MDNS)
+        Serial.println("starting config page");
+        server.setup();
+
+        // OSC setup
+        osc.setup();
+
+        Serial.println("Network setup complete on Core 0");
+        vTaskDelete(NULL);  // Delete task after setup completes
+      },
+      "networkSetup", 8192, (void*)&deviceName, 1, &networkSetupHandle,
+      0  // Core 0, pass deviceName
+  );
+
+  // Wait for network setup to complete
+  while (eTaskGetState(networkSetupHandle) != eDeleted) {
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
 
   /////// print filesystem files list
   listDir(LittleFS, "/", 0);
@@ -112,16 +159,6 @@ void setup() {  // by default on core 1
   Serial.println("Boot offsets measured, gather and save config");
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
-
-  if (DEBUG_HEAP)
-    pipoDebugHeap();
-
-  // Start server
-  Serial.println("starting config page");
-  server.setup();  // takes 30k heap
-
-  // Configure OSC (mutex already created in init())
-  osc.setup();
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
@@ -207,9 +244,13 @@ void loop() {
   if (executionTime >= xFrequency) {
     overrunCount++;
     if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
-      Serial.printf("⚠️ loop() overruns: %lu (execution: %dms, target: %dms)\n",
-                    overrunCount, pdTICKS_TO_MS(executionTime),
-                    pdTICKS_TO_MS(xFrequency));
+      Serial.print("⚠️ loop() overruns: ");
+      Serial.print(overrunCount);
+      Serial.print(" (execution: ");
+      Serial.print(pdTICKS_TO_MS(executionTime));
+      Serial.print("ms, target: ");
+      Serial.print(pdTICKS_TO_MS(xFrequency));
+      Serial.println("ms)");
       overrunCount = 0;
       lastReportTime = millis();
     }
