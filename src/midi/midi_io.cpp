@@ -82,16 +82,12 @@ void midi_io::sendAllNotesOff(int channel) {
     notes.push_back(pair.first);
   }
 
-  // Use batching for sending multiple note offs efficiently
-  beginBatch();
-
   // Loop through the notes and send note off for all notes
+  // Will be batched by engine's beginBatch/endBatch
   for (int note : notes) {
     this->sendNoteOff(note, 127, channel);
     vTaskDelay(pdMS_TO_TICKS(5));
   }
-
-  endBatch();
 }
 
 void midi_io::sendControlChange(int control, int value, int channel,
@@ -117,9 +113,7 @@ void midi_io::sendHiResControlChange(int control, int value, int channel) {
   int msb = (sizeddata >> 7) & 0x7F;
   int lsb = sizeddata & 0x7F;
 
-  // Batch the MSB and LSB messages together for BLE efficiency
-  beginBatch();
-
+  // Send MSB and LSB - will be batched by engine's beginBatch/endBatch
   MidiUSBsendCC(control, msb, channel);
   MidiUSBsendCC(control + 32, lsb, channel);
 
@@ -129,8 +123,6 @@ void midi_io::sendHiResControlChange(int control, int value, int channel) {
     MidiBLEsendCC(control + 32, lsb, channel);
   }
 #endif
-
-  endBatch();
 
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 }
