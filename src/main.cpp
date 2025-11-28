@@ -128,8 +128,12 @@ void setup() {  // by default on core 1
 
   Serial.println("starting tasks");
 
-  esp_task_wdt_init(2,
-                    false);  // watchdog 2 seconds timeout, no panic on timeout
+#ifdef DEBUG_WATCHDOG
+  esp_task_wdt_init(1000, false);  // 1 second timeout in debug mode
+  Serial.println("⚠️ DEBUG_WATCHDOG enabled: 1000ms timeout");
+#else
+  esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
+#endif
 
   //CAREFULL:
   // fileserving reports running on core 1 for now. it should be on 0
@@ -176,6 +180,10 @@ void loop() {
   static bool first_run = true;
   static TickType_t xLastWakeTime;
   static const TickType_t xFrequency = pdMS_TO_TICKS(2.5);  // 400Hz max
+#ifdef DEBUG_WATCHDOG
+  static unsigned long overrunCount = 0;
+  static unsigned long lastReportTime = 0;
+#endif
 
   if (first_run) {
     xLastWakeTime = xTaskGetTickCount();
@@ -183,11 +191,29 @@ void loop() {
     first_run = false;
   }
 
+#ifdef DEBUG_WATCHDOG
+  TickType_t startTime = xTaskGetTickCount();
+#endif
+
   input_sensor.update();
   engine.update();
 
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();
+#endif
+
+#ifdef DEBUG_WATCHDOG
+  TickType_t executionTime = xTaskGetTickCount() - startTime;
+  if (executionTime >= xFrequency) {
+    overrunCount++;
+    if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
+      Serial.printf("⚠️ loop() overruns: %lu (execution: %dms, target: %dms)\n",
+                    overrunCount, pdTICKS_TO_MS(executionTime),
+                    pdTICKS_TO_MS(xFrequency));
+      overrunCount = 0;
+      lastReportTime = millis();
+    }
+  }
 #endif
 
   esp_task_wdt_reset();  // Reset watchdog in main loop
