@@ -11,6 +11,16 @@
 
 #include "utils/debug.h"
 
+// Custom BLE-MIDI buffer size for high-throughput applications
+// Default is 64 bytes, we increase to 128 for burst handling
+#define BLEMIDI_NAMESPACE BLEMidi
+namespace BLEMIDI_NAMESPACE {
+struct CustomBLESettings {
+  static const size_t MaxBufferSize = 128;
+};
+}  // namespace BLEMIDI_NAMESPACE
+#define DefaultSettings CustomBLESettings
+
 void midiBLESetup();
 void OnConnected();
 void OnDisconnected();

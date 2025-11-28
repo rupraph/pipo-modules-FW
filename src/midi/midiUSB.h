@@ -12,4 +12,8 @@ void MidiUSBsendHiResCC(int value);
 void MidiUSBsendNoteOn(int note, int velocity, int channel);
 void MidiUSBsendNoteOff(int note, int velocity, int channel);
 
+// Optional: Enable buffer monitoring for development/debugging
+// Uncomment to log warnings when USB MIDI buffer usage is high
+// #define DEBUG_MIDI_BUFFER
+
 #endif  //MIDIUSB_H

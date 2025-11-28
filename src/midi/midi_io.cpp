@@ -74,8 +74,6 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
 }
 
 void midi_io::sendAllNotesOff(int channel) {
-  unsigned long time = millis();
-
   // Create a copy of the keys (notes)
   std::vector<int> notes;
   for (auto const& pair : channel_note_list[channel]) {
@@ -84,9 +82,11 @@ void midi_io::sendAllNotesOff(int channel) {
 
   // Loop through the notes and send note off for all notes
   // Will be batched by engine's beginBatch/endBatch
+  // Small delay provides spacing for BLE packet transmission (7.5-15ms connection interval)
   for (int note : notes) {
     this->sendNoteOff(note, 127, channel);
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(
+        1));  // Reduced from 5ms - flow control handles USB buffering
   }
 }
 
