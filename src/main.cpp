@@ -179,6 +179,7 @@ void loop() {
 
   if (first_run) {
     xLastWakeTime = xTaskGetTickCount();
+    esp_task_wdt_add(NULL);  // Register main loop task with watchdog
     first_run = false;
   }
 
@@ -188,6 +189,8 @@ void loop() {
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();
 #endif
+
+  esp_task_wdt_reset();  // Reset watchdog in main loop
 
   vTaskDelayUntil(
       &xLastWakeTime,
