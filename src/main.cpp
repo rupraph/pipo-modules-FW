@@ -5,9 +5,9 @@
 #include "midi/midi_io.h"
 #include "task-handles.h"
 #include "osc/osc_handler.h"
-#include "soc/rtc_cntl_reg.h"
 #include "server/server.h"
 #include "utils/config.h"
+#include "esp_system.h"
 #include "sensors/sensors.h"
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
@@ -35,23 +35,6 @@ void setup() {  // by default on core 1
 
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-
-  // ===== BOOTLOADER MODE ENTRY =====
-  // Check if pause button is held during boot to enter bootloader mode
-  // This allows firmware updates without opening the case to press the boot button
-  // User should hold the pause button while powering on the device
-  pinMode(PP_SW, INPUT);
-  delay(100);                       // Allow pin to stabilize
-  if (digitalRead(PP_SW) == LOW) {  // Button is active low (pressed = LOW)
-    Serial.println("Pause button held at boot - entering bootloader mode...");
-    Serial.println("Restarting into bootloader mode...");
-    Serial.flush();
-    delay(100);
-
-    // Set RTC memory to force download boot mode
-    REG_WRITE(RTC_CNTL_OPTION1_REG, RTC_CNTL_FORCE_DOWNLOAD_BOOT);
-    esp_restart();
-  }
 
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
 

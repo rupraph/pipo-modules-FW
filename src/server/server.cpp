@@ -1,4 +1,5 @@
 #include "server/server.h"
+#include "server/ota_update.h"
 
 PipoServer server;
 
@@ -25,6 +26,10 @@ void PipoServer::setup() {
 
   presets.setup();
   setup_requests();
+
+  // Setup OTA update endpoints
+  otaUpdate.setup(&server);
+
   // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
   // captivePortal.start(&server);
   // Add a custom 404 handler
