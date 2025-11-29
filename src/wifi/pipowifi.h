@@ -52,6 +52,11 @@ struct PipoWState {
 };
 
 class PipoWifi {
+ public:
+  // Constants accessible by event handlers
+  static const uint8_t MAX_RECONNECT_ATTEMPTS = 3;
+  static const uint RECONNECT_DELAY = 2000;
+
  private:
   // Private implementation details not needed by event handlers
   static const uint CONNECT_TIMEOUT = 10000;
@@ -70,10 +75,14 @@ class PipoWifi {
   // Public state accessible by event handlers - embedded systems pragmatic approach
   bool scanning = false;
   bool isChangingAP = false;  // means switching from one AP to another ?
+  bool intentionalDisconnect =
+      false;  // flag to distinguish user-initiated disconnects
   PipoWState next;
   PipoPWManager pwm;
   std::map<String, int> signals;
   int8_t rssi;
+  uint8_t reconnectAttempts = 0;
+  unsigned long lastReconnectAttempt = 0;
 
   /**
   * @brief The current status of the wifi
@@ -144,6 +153,10 @@ class PipoWifi {
    * @param ssid the ssid of the network to forget
    */
   void forgetNetwork(String ssid);
+  /**
+   * @brief Disconnects from the current network intentionally
+   */
+  void disconnect();
 };
 
 extern PipoWifi wifi;

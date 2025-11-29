@@ -44,6 +44,7 @@ void PipoWifi::setup() {
                ARDUINO_EVENT_WIFI_AP_PROBEREQRECVED);
   WiFi.onEvent(onAPGotIP6Handler, ARDUINO_EVENT_WIFI_AP_GOT_IP6);
 
+  intentionalDisconnect = true;
   WiFi.disconnect(true, true);  // Ensure no previous connection persists
   WiFi.mode(
       WIFI_MODE_NULL);  // Reset Wi-Fi stack to prevent auto-starting in STA
@@ -105,6 +106,7 @@ void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.pwm.promote(wifi.next.ssid);
   wifi.pwm.save();
   wifi.rssi = wifi.signals[wifi.next.ssid];
+  wifi.reconnectAttempts = 0;  // Reset counter on successful connection
   wifi.next.ssid = "";
   wifi.next.password = "";
   wifi.isChangingAP = false;
@@ -117,12 +119,34 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.print("  Reason: ");
   Serial.println(reason);
 
-  // we disconnected from the asked AP: means wrong credentials,
-  // erase the ssid and password to allow fallback to other APs
-  if (strcmp((char*)info.wifi_sta_disconnected.ssid, wifi.next.ssid.c_str()) ==
-      0) {
+  // Check if this was an intentional disconnect
+  if (wifi.intentionalDisconnect) {
+    Serial.println("  Intentional disconnect, resetting counter");
+    wifi.reconnectAttempts = 0;
+    wifi.intentionalDisconnect = false;
     wifi.next.ssid = "";
     wifi.next.password = "";
+  } else {
+    // we disconnected from the asked AP: means wrong credentials,
+    // erase the ssid and password to allow fallback to other APs
+    if (strcmp((char*)info.wifi_sta_disconnected.ssid,
+               wifi.next.ssid.c_str()) == 0) {
+      wifi.reconnectAttempts++;
+      Serial.print("  Reconnect attempt: ");
+      Serial.print(wifi.reconnectAttempts);
+      Serial.print("/");
+      Serial.println(wifi.MAX_RECONNECT_ATTEMPTS);
+
+      if (wifi.reconnectAttempts >= wifi.MAX_RECONNECT_ATTEMPTS) {
+        Serial.println("  Max reconnect attempts reached, giving up");
+        wifi.next.ssid = "";
+        wifi.next.password = "";
+        wifi.reconnectAttempts = 0;
+        WiFi.setAutoReconnect(false);
+      } else {
+        wifi.lastReconnectAttempt = millis();
+      }
+    }
   }
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
@@ -233,6 +257,9 @@ bool PipoWifi::connect(String ssid, String password) {
   status = CONNECTING;
   next.ssid = ssid;
   next.password = password;
+  reconnectAttempts = 0;  // Reset counter for new connection attempt
+  lastReconnectAttempt = millis();
+  WiFi.setAutoReconnect(true);  // Re-enable auto-reconnect for new connection
   Serial.print("Connecting to ");
   Serial.println(ssid.c_str());
   WiFi.begin(ssid.c_str(), password.c_str());
@@ -382,6 +409,7 @@ void PipoWifi::step() {
 
   if (next.mode != WiFi.getMode()) {
     osc.stop();  // Stop OSC before changing WiFi mode
+    intentionalDisconnect = true;
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_MODE_NULL);
     vTaskDelay(pdMS_TO_TICKS(100));
@@ -438,6 +466,7 @@ void PipoWifi::refresh() {
     isChangingAP = false;
     if (status == CONNECTED) {
       Serial.println("Disconnect 1");
+      intentionalDisconnect = true;
       WiFi.disconnect();
     } else if (status == DISCONNECTED && apStarted) {
       scanning =
@@ -473,6 +502,12 @@ void PipoWifi::requestRSSI() {
 void PipoWifi::forgetNetwork(String ssid) {
   pwm.remove(ssid);
   pwm.save();
+}
+
+void PipoWifi::disconnect() {
+  Serial.println("User-initiated disconnect");
+  intentionalDisconnect = true;
+  WiFi.disconnect();
 }
 
 PipoWifi wifi;
