@@ -591,9 +591,15 @@
       title="Apply and save the config in pipo">Save</LoadingButton
     >
   </div>
-  <button class="primary" on:click={reboot} style="width: fit-content"
-    >Reboot</button
-  >
+  <div style="display:flex; gap:1em; margin-top:1em;">
+    <button class="primary" on:click={reboot} style="width: fit-content"
+      >Reboot</button
+    >
+    <a href="/update.html" style="text-decoration: none;">
+      <button class="primary" style="width: fit-content">Firmware Update</button
+      >
+    </a>
+  </div>
 </Collapse>
 
 <style>

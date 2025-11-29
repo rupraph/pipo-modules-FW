@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipo Firmware Update</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .version {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #f8f9ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-area.drag-over {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .status {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .status.error {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .status.success {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .file-info {
+            background: #e8f5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .file-name {
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .file-size {
+            color: #66bb6a;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Settings</a>
+        
+        <h1>Firmware Update</h1>
+        <div class="version">Device: <span id="deviceName">Loading...</span></div>
+        
+        <div class="info-box">
+            <div class="info-row">
+                <span class="info-label">Current Version:</span>
+                <span class="info-value" id="currentVersion">...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Chip Model:</span>
+                <span class="info-value" id="chipModel">...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Free Space:</span>
+                <span class="info-value" id="freeSpace">...</span>
+            </div>
+        </div>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📦</div>
+            <div class="upload-text">Drag & drop firmware file here</div>
+            <div class="upload-text" style="font-size: 12px; color: #999;">or click to browse</div>
+            <input type="file" id="fileInput" class="file-input" accept=".bin">
+        </div>
+        
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+        </div>
+        
+        <button class="btn" id="uploadBtn" disabled>Select Firmware File</button>
+        
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div class="status" id="status">Uploading...</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const status = document.getElementById('status');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        
+        // Load device info
+        fetch('/ota/info')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('currentVersion').textContent = data.currentVersion || 'Unknown';
+                document.getElementById('chipModel').textContent = data.chipModel || 'Unknown';
+                const freeMB = (data.freeSketchSpace / 1024 / 1024).toFixed(2);
+                document.getElementById('freeSpace').textContent = freeMB + ' MB';
+            })
+            .catch(err => console.error('Failed to load device info:', err));
+        
+        // Load device name from config
+        fetch('/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.general && data.general.PipoName) {
+                    document.getElementById('deviceName').textContent = data.general.PipoName;
+                }
+            })
+            .catch(() => {});
+        
+        // Click to browse
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        // Drag & drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.bin')) {
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            selectedFile = file;
+            fileName.textContent = file.name;
+            const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+            fileSize.textContent = 'Size: ' + sizeMB + ' MB';
+            fileInfo.style.display = 'block';
+            uploadBtn.textContent = 'Upload Firmware';
+            uploadBtn.disabled = false;
+        }
+        
+        uploadBtn.addEventListener('click', uploadFirmware);
+        
+        function uploadFirmware() {
+            if (!selectedFile) return;
+            
+            uploadBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            uploadArea.style.display = 'none';
+            fileInfo.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('firmware', selectedFile);
+            
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    progressFill.style.width = percent + '%';
+                    progressFill.textContent = percent + '%';
+                }
+            });
+            
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    status.textContent = 'Update successful! Device rebooting...';
+                    status.className = 'status success';
+                    progressFill.style.width = '100%';
+                    progressFill.textContent = '100%';
+                    
+                    // Wait a bit, then redirect or show reconnect message
+                    setTimeout(() => {
+                        status.textContent = 'Device is rebooting. Please wait 10 seconds...';
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 10000);
+                    }, 1000);
+                } else {
+                    status.textContent = 'Upload failed: ' + xhr.statusText;
+                    status.className = 'status error';
+                    uploadBtn.disabled = false;
+                }
+            });
+            
+            xhr.addEventListener('error', () => {
+                status.textContent = 'Upload failed: Network error';
+                status.className = 'status error';
+                uploadBtn.disabled = false;
+            });
+            
+            xhr.open('POST', '/ota/upload');
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>
