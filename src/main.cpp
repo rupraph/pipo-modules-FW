@@ -148,7 +148,6 @@ void loop() {
 
   looptime.start();
   input_sensor.update();
-  input_sensor.teleplot_data("A01");
   engine.update();
   looptime.stop();
   // sensor_task_duration = millis() - lastMillis;
