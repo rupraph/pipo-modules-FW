@@ -1,6 +1,10 @@
 #include "server/ota_update.h"
 #include "utils/logs.h"
 
+// Macro to convert define to string
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 OTAUpdate otaUpdate;
 
 bool OTAUpdate::updateInProgress = false;
@@ -14,7 +18,7 @@ void OTAUpdate::setup(AsyncWebServer* server) {
     String info = "{";
     info += "\"currentVersion\":\"";
 #ifdef PIPO_FW_VERSION
-    info += stringify(PIPO_FW_VERSION);
+    info += TOSTRING(PIPO_FW_VERSION);
 #else
     info += "unknown";
 #endif
