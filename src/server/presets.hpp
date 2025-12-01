@@ -120,6 +120,7 @@ class PipoPresets {
       }
 
       request->send(LittleFS, filepath, "application/json");
+      Serial.printf("Served preset file: %s\n", filepath.c_str());
     });
 
     // GET /presets-refresh - Rescans the presets directory
