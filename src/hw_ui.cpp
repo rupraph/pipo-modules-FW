@@ -3,8 +3,10 @@
 HwUi hwui;
 
 void hwuiTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.update();
+    esp_task_wdt_reset();
 #if defined(PIPO_ANALOG) && HW_REV >= 20
     vTaskDelay(pdMS_TO_TICKS(20));
 #else
@@ -14,15 +16,19 @@ void hwuiTask(void* pvParameters) {
 }
 
 void buttonTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.update_switches();
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
 void battmonitorTask(void* pvParameters) {
+  esp_task_wdt_add(NULL);
   for (;;) {
     hwui.measure_battery_step();
+    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
@@ -101,11 +107,15 @@ void HwUi::setup() {
   Serial.println("HW UI setup done");
   hwui.measure_battery();
 
+  start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+  // BT LED blink is started in midiBLESetup() if BLE is enabled
+
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
 }
 
 void HwUi::update() {
+  monitor_wifiBT_flags();
   blinker();
   pulse();
   single_blink();
@@ -115,18 +125,100 @@ void HwUi::update() {
 #endif
 }
 
+void HwUi::monitor_wifiBT_flags() {
+  // Read shared flags (volatile) to detect transitions
+  bool curSta = staConnected;
+  bool curAp = apConnected;
+  bool curBT = BTconnected;
+
+  // STA connected -> give steady pulse (slower, to indicate stable connection)
+  if (curSta != prev_staConnected) {
+    if (curSta) {
+      // STA takes priority
+      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
+    } else {
+      stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+      // If STA disconnects but AP is still active, start AP pattern
+      if (curAp) {
+        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
+      }
+    }
+    prev_staConnected = curSta;
+  }
+
+  // AP connected -> faster pulse to indicate AP mode (only if STA not connected)
+  if (curAp != prev_apConnected) {
+    if (curAp && !curSta) {
+      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                  WIFI_PULSE_BRIGHTNESS);
+    } else if (!curAp && !curSta) {
+      // AP stopped and no STA, turn off LED
+      stop_pulse(WIFI_LED);
+      //wait wifi
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+    }
+    // If STA is present, it takes priority (handled in STA logic above)
+    prev_apConnected = curAp;
+  }
+
+  // BT connected -> steady medium brightness
+  if (curBT != prev_BTconnected) {
+    Serial.print("[LED] BT state change: ");
+    Serial.println(curBT ? "CONNECTED" : "DISCONNECTED");
+    if (curBT) {
+      start_pulse(BT_LED, BT_PULSE_TIME, BT_PULSE_MIN_BRIGHTNESS,
+                  BT_PULSE_BRIGHTNESS);
+    } else {
+      stop_pulse(BT_LED);
+      start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
+    }
+    prev_BTconnected = curBT;
+  }
+}
+
 void HwUi::update_switches() {
   // PAUSE has a pullup
-  if (pause_sw.read_debounce() == 0) {
-    if (pause_sw.get_flag() == 1) {
-      PAUSED = !PAUSED;
-      pause_sw.reset_button();
-      Serial.print("PAUSED");
+  pause_sw.read_debounce();
+  if (pause_sw.get_flag()) {
+    if (pause_sw.is_short_press()) {
+      if (pause_short_press_cb != nullptr) {
+        pause_short_press_cb();
+      } else {
+        // Default behavior if no callback registered
+        PAUSED = !PAUSED;
+        Serial.println("PAUSED (short press - default)");
+      }
+    } else if (pause_sw.is_long_press()) {
+      if (pause_long_press_cb != nullptr) {
+        pause_long_press_cb();
+      } else {
+        Serial.println("PAUSE long press (no handler)");
+      }
     }
+    pause_sw.reset_button();
   }
+
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
-  if (mode_sw.read_debounce() == 0) {
-    Serial.print("Mode switch pressed");
+  mode_sw.read_debounce();
+  if (mode_sw.get_flag()) {
+    if (mode_sw.is_short_press()) {
+      if (mode_short_press_cb != nullptr) {
+        mode_short_press_cb();
+      } else {
+        Serial.println("Mode switch short press (no handler)");
+      }
+    } else if (mode_sw.is_long_press()) {
+      if (mode_long_press_cb != nullptr) {
+        mode_long_press_cb();
+      } else {
+        Serial.println("Mode switch long press (no handler)");
+      }
+    }
+    mode_sw.reset_button();
   }
 #endif
 }
@@ -224,7 +316,7 @@ void HwUi::stop_pulse(int led_name) {
     return;  // not pulsing
 
   led_pulse_table[led_name].enabled = false;
-  // set_led(led_name, 0);
+  set_led(led_name, 0);
 }
 
 bool HwUi::is_pulsing(int led_name) {
@@ -258,9 +350,9 @@ void HwUi::blinker() {
   }
 }
 
-void HwUi::
-    pulse() {  // this should oscillate the led brightness between min and
-               // max brightness
+void HwUi::pulse() {
+  // this should oscillate the led brightness between min and
+  // max brightness
   unsigned long current_millis = millis();
   // loop through led_pulse_table
   for (auto& pair : led_pulse_table) {
@@ -344,12 +436,51 @@ void Button::setup_button(int pin) {
 
 int Button::read_debounce() {
   int current_position = digitalRead(pin);
+  unsigned long current_time = millis();
+
   if (current_position != position) {
-    if (millis() - last_press > DEBOUNCE_TIME) {
+    if (current_time - last_press > DEBOUNCE_TIME) {
       position = current_position;
-      flag = true;  // button state changed
-      last_press = millis();
+      last_press = current_time;
+
+      if (position == 0) {  // Button pressed (assuming active LOW)
+        is_pressed = true;
+        press_start_time = current_time;
+        long_press_triggered = false;
+        last_press_type = PRESS_NONE;
+      } else {  // Button released
+        is_pressed = false;
+        unsigned long press_duration = current_time - press_start_time;
+
+        if (!long_press_triggered) {
+          // Only register short press if long press wasn't already triggered
+          if (press_duration < LONG_PRESS_TIME) {
+            last_press_type = PRESS_SHORT;
+          } else {
+            last_press_type = PRESS_LONG;
+          }
+          flag = true;  // button action completed
+        }
+      }
     }
   }
+
+  // Check for long press while button is held
+  if (is_pressed && !long_press_triggered) {
+    if (current_time - press_start_time >= LONG_PRESS_TIME) {
+      long_press_triggered = true;
+      last_press_type = PRESS_LONG;
+      flag = true;  // trigger long press immediately
+    }
+  }
+
   return position;
+}
+
+bool Button::is_long_press() {
+  return last_press_type == PRESS_LONG;
+}
+
+bool Button::is_short_press() {
+  return last_press_type == PRESS_SHORT;
 }

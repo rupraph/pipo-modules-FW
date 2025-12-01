@@ -15,12 +15,73 @@ void MotionSensor::init() {
 }
 
 void MotionSensor::setup() {
+  // Load last relative orientation reference
+  motiondata.begin("motion-store", false);
+  // Default to identity quaternion (no rotation) if not stored
+  quat_ref_w = motiondata.getFloat("quat_ref_w", 1.0);
+  quat_ref_x = motiondata.getFloat("quat_ref_x", 0.0);
+  quat_ref_y = motiondata.getFloat("quat_ref_y", 0.0);
+  quat_ref_z = motiondata.getFloat("quat_ref_z", 0.0);
+
+  // Check if this is a valid stored reference (not identity)
+  // If it's identity quaternion, treat as not set
+  if (quat_ref_w == 1.0 && quat_ref_x == 0.0 && quat_ref_y == 0.0 &&
+      quat_ref_z == 0.0) {
+    reference_set = false;
+    Serial.println(
+        "No stored reference orientation - will be set on first update");
+  } else {
+    reference_set = true;
+    Serial.println("Loaded stored reference orientation");
+  }
+
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
-void MotionSensor::update() {
+void MotionSensor::toggle_relative_mode() {
+  relative_mode = !relative_mode;
+  Serial.print("Relative mode ");
+  Serial.println(relative_mode ? "ENABLED" : "DISABLED");
+}
+
+void MotionSensor::set_new_reference_orientation() {
+  reset_reference_orientation();
+  Serial.println("New reference orientation set");
+}
+
+// void MotionSensor::update() {
+//   measure_sensor();
+//   //should add step counter
+//   process_sensor_neutral_filter();
+//   process_sensor_triggers();
+
+//   //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
+//   // each class should control its own update task ? (so that it can be paused)
+//   if (!measure_offset_flag) {
+//     for (auto const& pair : sensor_dat) {
+//       sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
+//     }
+//   }
+
+//   if (measure_offset_flag) {
+//     measure_offset_counter++;
+//     offset += sensor_dat[axis_to_measure_offset].value;
+//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+//       sensor_dat[axis_to_measure_offset].offset =
+//           offset / OFFSET_CAL_SAMPLES_NB;
+//       measure_offset_flag = false;
+//       Serial.print("offset of ");
+//       Serial.print(axis_to_measure_offset.c_str());
+//       Serial.print(" is: ");
+//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
+//     }
+//   }
+// }
+
+bool MotionSensor::measure_sensor() {
   icm20948.task();
+  bool data_ready = false;
   /////////  Read Quat6 orientation data
   if (relative_mode) {
     // Mode 1: Pure relative orientation using quaternion differential tracking
@@ -33,6 +94,10 @@ void MotionSensor::update() {
         quat_ref_y = quat_y;
         quat_ref_z = quat_z;
         normalize_quaternion(quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
+        motiondata.putFloat("quat_ref_w", quat_ref_w);
+        motiondata.putFloat("quat_ref_x", quat_ref_x);
+        motiondata.putFloat("quat_ref_y", quat_ref_y);
+        motiondata.putFloat("quat_ref_z", quat_ref_z);
         reference_set = true;
         Serial.println("Reference orientation set");
         Serial.print("Ref quat: w=");
@@ -45,12 +110,14 @@ void MotionSensor::update() {
         Serial.println(quat_ref_z, 4);
       }
       calc_differential_euler_angles();
+      data_ready = true;
     }
   } else {
     // Mode 2: quat9 (absolute orientation)
     if (icm20948.quat9DataIsReady()) {
       icm20948.readQuat9Data(&quat_w, &quat_x, &quat_y, &quat_z);
       calc_euler_angles();
+      data_ready = true;
     }
   }
 
@@ -60,6 +127,7 @@ void MotionSensor::update() {
                                  &sensor_dat["accY"].raw_value,
                                  &sensor_dat["accZ"].raw_value);
     convert_accell();
+    data_ready = true;
   }
 
   if (icm20948.magDataIsReady()) {
@@ -73,6 +141,21 @@ void MotionSensor::update() {
     sensor_dat["magZ"].value = sensor_dat["magZ"].raw_value;
     //     filter_map["magZ"].process(sensor_dat["magZ"].raw_value);
     // unit seems to be (mT)
+    data_ready = true;
+  }
+
+  if (icm20948.gyroDataIsReady()) {
+    icm20948.readGyroData(&sensor_dat["gyroX"].raw_value,
+                          &sensor_dat["gyroY"].raw_value,
+                          &sensor_dat["gyroZ"].raw_value);
+    sensor_dat["gyroX"].value = sensor_dat["gyroX"].raw_value;
+    //     filter_map["gyroX"].process(sensor_dat["gyroX"].raw_value);
+    sensor_dat["gyroY"].value = sensor_dat["gyroY"].raw_value;
+    //     filter_map["gyroY"].process(sensor_dat["gyroY"].raw_value);
+    sensor_dat["gyroZ"].value = sensor_dat["gyroZ"].raw_value;
+    //     filter_map["gyroZ"].process(sensor_dat["gyroZ"].raw_value);
+    // unit is degrees per second (°/s)
+    data_ready = true;
   }
 
   //activity recog
@@ -83,11 +166,6 @@ void MotionSensor::update() {
   // s = still
   // t = tilt
   // icm20948.readHarData(&har);
-
-  //should add step counter
-  process_sensor_neutral_filter();
-  process_sensor_triggers();
-
   //Todo: try read additional data from sensor
 
   // send to adafruit visualizer
@@ -111,28 +189,7 @@ void MotionSensor::update() {
     // Serial.print(q3, 3);
     // Serial.println(F("}"));
   }
-
-  //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
-  // each class should control its own update task ? (so that it can be paused)
-  if (!measure_offset_flag) {
-    for (auto const& pair : sensor_dat) {
-      sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
-    }
-  }
-
-  if (measure_offset_flag) {
-    measure_offset_counter++;
-    offset += sensor_dat[axis_to_measure_offset].value;
-    if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
-      sensor_dat[axis_to_measure_offset].offset =
-          offset / OFFSET_CAL_SAMPLES_NB;
-      measure_offset_flag = false;
-      Serial.print("offset of ");
-      Serial.print(axis_to_measure_offset.c_str());
-      Serial.print(" is: ");
-      Serial.println(sensor_dat[axis_to_measure_offset].offset);
-    }
-  }
+  return data_ready;
 }
 
 void MotionSensor::calc_euler_angles() {
@@ -230,15 +287,6 @@ void MotionSensor::convert_accell() {
   // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
-void MotionSensor::measure_offset(const string& axis_name) {
-  if (!measure_offset_flag) {
-    measure_offset_flag = true;
-    axis_to_measure_offset = axis_name;
-    measure_offset_counter = 0;
-    Serial.println("start offset measurement");
-  }
-}
-
 void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
   if (debug) {
     Serial.println("set_sensor_config");
@@ -279,28 +327,28 @@ void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
   }
 }
 
-void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
-  if (!reference_set) {
-    w = 1.0f;
-    x = 0.0f;
-    y = 0.0f;
-    z = 0.0f;
-    return;
-  }
+// void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
+//   if (!reference_set) {
+//     w = 1.0f;
+//     x = 0.0f;
+//     y = 0.0f;
+//     z = 0.0f;
+//     return;
+//   }
 
-  // Normalize current quaternion
-  float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
-  normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
+//   // Normalize current quaternion
+//   float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;
+//   normalize_quaternion(curr_w, curr_x, curr_y, curr_z);
 
-  // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
-  w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
-      quat_ref_z * curr_z;
-  x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
-      quat_ref_z * curr_y;
-  y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
-      quat_ref_z * curr_x;
-  z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
-      quat_ref_z * curr_w;
-}
+//   // Calculate relative quaternion: q_relative = q_ref_conjugate * q_current
+//   w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +
+//       quat_ref_z * curr_z;
+//   x = quat_ref_w * curr_x - quat_ref_x * curr_w - quat_ref_y * curr_z +
+//       quat_ref_z * curr_y;
+//   y = quat_ref_w * curr_y + quat_ref_x * curr_z - quat_ref_y * curr_w -
+//       quat_ref_z * curr_x;
+//   z = quat_ref_w * curr_z - quat_ref_x * curr_y + quat_ref_y * curr_x -
+//       quat_ref_z * curr_w;
+// }
 
 #endif  // PIPO_MOTION

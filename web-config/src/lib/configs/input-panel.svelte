@@ -72,6 +72,9 @@
       maxSensorValue = Math.round(currentValue); // Update maxSensorValue if a higher value is reached
     }
   }
+
+  // $: display_min = (aschema.min - input.offset).toFixed(2);
+  // $: display_max = (maxSensorValue - input.offset).toFixed(2);
 </script>
 
 <MinMax
@@ -116,6 +119,13 @@
       <Switch label="Invert" bind:value={input.inverted} design="slider" />
     </Tooltip>
   </div>
+  {#if aschema.cat === "dist"}
+    <div class="item">
+      <Tooltip title="no object retunrs max or 0" enabled={true}>
+        <Switch label="Over-out" bind:value={input.over_out} design="slider" />
+      </Tooltip>
+    </div>
+  {/if}
 </div>
 
 <!-- {/if} -->

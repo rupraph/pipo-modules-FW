@@ -61,9 +61,19 @@ void PipoRangeSensor::setup() {
     pipoDebugHeap();
 }
 
-void PipoRangeSensor::update() {
+void PipoRangeSensor::toggle_hold_mode() {
+  hold_mode = !hold_mode;
+  Serial.print("Hold mode ");
+  Serial.println(hold_mode ? "ENABLED" : "DISABLED");
+}
+
+bool PipoRangeSensor::measure_sensor() {
   // start_duration();
   int j;
+  bool data_ready = false;
+
+  // Store previous range state
+  within_range_prev = within_range;
 
 #if HW_REV == 10
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
@@ -98,9 +108,11 @@ void PipoRangeSensor::update() {
 #endif
 
     if (sensor_dat["dist"].raw_value < 0 || !range_status) {
+      within_range = false;
       if (!hold_mode) {
-        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         sensor_dat["dist"].value = abs_max;
+        data_ready = true;
       }
       // Serial.println("Out of range");
 
@@ -108,24 +120,31 @@ void PipoRangeSensor::update() {
     // not sure if capping is optimal to be here in sensor class or better in engine/translators
     // when in range
     else {
+      within_range = true;
+
+      // Reset filter when transitioning into valid range to prevent spurious values
+      if (within_range && !within_range_prev) {
+        ma_filter.reset(sensor_dat["dist"].raw_value);
+      }
 
       if ((hold_mode &&
            sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
           !hold_mode) {
-        sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
+        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
         // interval.stop();
         // interval.report();
         // interval.start();
-        sensor_dat["dist"].value = ma_filter.process(
-            sensor_dat["dist"].raw_value - sensor_dat["dist"].offset);
+        sensor_dat["dist"].value =
+            ma_filter.process(sensor_dat["dist"].raw_value);
+        data_ready = true;
       }
 
       //  ma_filter.process(lp_filter.process(dist));
 
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-      process_sensor_neutral_filter();
-      process_sensor_triggers();
+      // process_sensor_neutral_filter();
+      // process_sensor_triggers();
     }
     if (status == 0) {
 #if HW_REV == 10
@@ -135,17 +154,18 @@ void PipoRangeSensor::update() {
 #endif
     }
   }
+  return data_ready;
   // end_duration();
   // measured_loop_duration();
 }
 
-void PipoRangeSensor::measure_offset(const string& axis_name) {
-  sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
-  Serial.print("offset for ");
-  Serial.print(axis_name.c_str());
-  Serial.print(" : ");
-  Serial.println(sensor_dat[axis_name].offset);
-}
+// void PipoRangeSensor::measure_offset(const string& axis_name) {
+//   sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
+//   Serial.print("offset for ");
+//   Serial.print(axis_name.c_str());
+//   Serial.print(" : ");
+//   Serial.println(sensor_dat[axis_name].offset);
+// }
 
 void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {

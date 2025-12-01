@@ -85,6 +85,14 @@ class MovingAverageFilter {
     sum = 0.0f;
   }
 
+  void reset(float initialValue) {
+    for (int i = 0; i < bufferSize; i++) {
+      buffer[i] = initialValue;
+    }
+    sum = initialValue * bufferSize;
+    bufferIndex = 0;
+  }
+
   float process(float rawValue) {
     sum -= buffer[bufferIndex];
     buffer[bufferIndex] = rawValue;

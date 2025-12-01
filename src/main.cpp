@@ -1,4 +1,3 @@
-
 #include "HW_CONFIG.h"
 #include "engine.h"
 #include "hw_ui.h"
@@ -11,6 +10,8 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
+#include "esp_task_wdt.h"
+#include <set>
 #if defined(PIPO_ANALOG)
 #include "sensors/analog_out.h"
 #endif
@@ -23,6 +24,14 @@ void init_filesystem();
 
 void setup() {  // by default on core 1
 
+  //pulldown all pins
+  std::set<int> nopulldown = {0, 19, 20, 26, 27, 28, 29, 30, 31, 32};
+  for (int pin = 0; pin <= 48; pin++) {
+    if (nopulldown.find(pin) == nopulldown.end()) {
+      pinMode(pin, INPUT_PULLDOWN);
+    }
+  }
+
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
@@ -34,6 +43,7 @@ void setup() {  // by default on core 1
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
+  //Prevent boot if battery is too low
   if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
     hwui.set_led(LOW_BAT_LED, 100);
     delay(3000);
@@ -56,7 +66,9 @@ void setup() {  // by default on core 1
   }
 
   /////// Init midi and hid
-  midiio.setup();  //50k heap
+  String deviceName =
+      "Pipo-" + String(config.general_config["PipoName"].as<String>());
+  midiio.setup(deviceName.c_str());  //50k heap
 #ifndef DISABLE_USB_COMM
   hidio.setup(config.general_config["HidMode"]);
 #endif
@@ -64,7 +76,7 @@ void setup() {  // by default on core 1
   print_reset_reason();
 
   /////// Init wifi
-  osc.setup();
+  osc.init();  // Create OSC mutex before WiFi (prevents crashes from WiFi events)
   wifi.setup();  //50k heap
 
   /////// print filesystem files list
@@ -77,9 +89,27 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
 
-  // capturing and storing config at this point
-  //(temp solution to store the initial sensor offset measurements)
-  Serial.println("gather and save config");
+    // Register button callbacks for sensor-specific actions
+#ifdef PIPO_MOTION
+  hwui.set_mode_short_press_callback(
+      []() { input_sensor.set_new_reference_orientation(); });
+  hwui.set_mode_long_press_callback(
+      []() { input_sensor.toggle_relative_mode(); });
+  Serial.println("Motion sensor button callbacks registered");
+#endif
+
+#ifdef PIPO_RANGE
+  hwui.set_mode_short_press_callback([]() { input_sensor.toggle_hold_mode(); });
+  Serial.println("Range sensor button callbacks registered");
+#endif
+
+  // wait for initial offsets to be measured if needed
+  while (input_sensor.is_offset_measurement_complete() == false) {
+    input_sensor.update();
+    Serial.println("Waiting for boot offset measurement...");
+  }
+
+  Serial.println("Boot offsets measured, gather and save config");
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
@@ -90,13 +120,20 @@ void setup() {  // by default on core 1
   Serial.println("starting config page");
   server.setup();  // takes 30k heap
 
-  // Start OSC
+  // Configure OSC (mutex already created in init())
   osc.setup();
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
 
   Serial.println("starting tasks");
+
+#ifdef DEBUG_WATCHDOG
+  esp_task_wdt_init(1000, false);  // 1 second timeout in debug mode
+  Serial.println("⚠️ DEBUG_WATCHDOG enabled: 1000ms timeout");
+#else
+  esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
+#endif
 
   //CAREFULL:
   // fileserving reports running on core 1 for now. it should be on 0
@@ -106,8 +143,6 @@ void setup() {  // by default on core 1
 
   // saving increases fragmentation from 15 to 40%
 
-  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 5000, NULL, 1,
-  // &sensorTaskHandle, 1);
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 2,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
@@ -117,8 +152,8 @@ void setup() {  // by default on core 1
 #ifdef PIPO_ANALOG
   xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
                           &oscreceiveTaskHandle, 0);
-  // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
-  //                         &hwuiSoftPwmTaskHandle, 0);
+// xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
+//                         &hwuiSoftPwmTaskHandle, 0);
 #endif
   xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 3, &wifiTaskHandle,
                           0);
@@ -130,29 +165,60 @@ void setup() {  // by default on core 1
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
-  hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME,
-                   0.2);  //temporary patch to inform user pipo ready to connect
+  // using the main loop instead of Sensor task to optimize ram usage
+  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8000, NULL, 1,
+  //                         &sensorTaskHandle, 1);  // Priority 4, Core 1, 400Hz
+
   Serial.println("Setup done");
 }
 
 // stack is 8k by default
 // by default runs on core 1 for this board
 // prio 1
+
 void loop() {
+  static bool first_run = true;
+  static TickType_t xLastWakeTime;
+  static const TickType_t xFrequency = pdMS_TO_TICKS(2.5);  // 400Hz max
+#ifdef DEBUG_WATCHDOG
+  static unsigned long overrunCount = 0;
+  static unsigned long lastReportTime = 0;
+#endif
 
-  // #if defined(PIPO_ANALOG) && HW_REV == 10
-  //   hwui.update_soft_pwm();
-  // #endif
+  if (first_run) {
+    xLastWakeTime = xTaskGetTickCount();
+    esp_task_wdt_add(NULL);  // Register main loop task with watchdog
+    first_run = false;
+  }
 
-  looptime.start();
+#ifdef DEBUG_WATCHDOG
+  TickType_t startTime = xTaskGetTickCount();
+#endif
+
   input_sensor.update();
   engine.update();
-  looptime.stop();
-  // sensor_task_duration = millis() - lastMillis;
-#if defined(PIPO_ANALOG) && defined(BETA_OUT)
-  analog_out.update();  // should be in seperate task
-#endif
-  vTaskDelay(pdMS_TO_TICKS(1));
 
-  //vTaskDelay(500);  // allow task to yiedl if empty
+#if defined(PIPO_ANALOG) && defined(BETA_OUT)
+  analog_out.update();
+#endif
+
+#ifdef DEBUG_WATCHDOG
+  TickType_t executionTime = xTaskGetTickCount() - startTime;
+  if (executionTime >= xFrequency) {
+    overrunCount++;
+    if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
+      Serial.printf("⚠️ loop() overruns: %lu (execution: %dms, target: %dms)\n",
+                    overrunCount, pdTICKS_TO_MS(executionTime),
+                    pdTICKS_TO_MS(xFrequency));
+      overrunCount = 0;
+      lastReportTime = millis();
+    }
+  }
+#endif
+
+  esp_task_wdt_reset();  // Reset watchdog in main loop
+
+  vTaskDelayUntil(
+      &xLastWakeTime,
+      xFrequency);  // Fixed 400Hz rate  //vTaskDelay(500);  // allow task to yiedl if empty
 }

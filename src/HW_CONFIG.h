@@ -66,6 +66,10 @@
 #define WIFI_STA_PULSE_TIME 2000
 #define WIFI_AP_PULSE_TIME 1000
 #define WIFI_PULSE_BRIGHTNESS 50
+#define WIFI_PULSE_MIN_BRIGHTNESS 30
+#define BT_PULSE_TIME 3000
+#define BT_PULSE_BRIGHTNESS 50
+#define BT_PULSE_MIN_BRIGHTNESS 20
 // #define ANALOG_TO_VOLTS 0.000806
 
 //ANALOG SETTINGS
@@ -89,6 +93,7 @@
 #endif
 
 #define DEBOUNCE_TIME 50  // in ms
+#define LONG_PRESS_TIME 1000  // in ms
 
 //analog sensor specific definitions
 #define OFFSET_CAL_SAMPLES_NB 50

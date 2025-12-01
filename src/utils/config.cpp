@@ -208,6 +208,10 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
       }
     }
 
+    // Update general_config from loaded file
+    general_config.clear();
+    general_config = current_config["general"];
+
     if (DEBUG_CONFIG) {
       Serial.println("loaded config:");
       serializeJsonPretty(current_config, Serial);

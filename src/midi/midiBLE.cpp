@@ -6,31 +6,31 @@
 #include <hardware/BLEMIDI_ESP32_NimBLE.h>
 
 // Newer BLE-MIDI lib allows for custom settings (and choosing lower min connection interval)
+// Using generic name initially, will be updated in setup with device name from caller
+BLEMIDI_CREATE_INSTANCE("Pipo-BLE", MidiBle);
 
-#ifdef PIPO_MOTION
-BLEMIDI_CREATE_INSTANCE("PipoMotionBLE", MidiBle);
-#elif PIPO_RANGE
-BLEMIDI_CREATE_INSTANCE("PipoRangeBLE", MidiBle);
-#elif PIPO_ANALOG
-BLEMIDI_CREATE_INSTANCE("PipoAnalogBLE", MidiBle);
-#endif
+void midiBLESetup(const char* deviceName) {
+  // Set BLE name from passed parameter for consistency with USB, mDNS, and OSC naming
+  BLEMidiBle.setName(deviceName);
 
-void midiBLESetup() {
   MidiBle.begin();
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);
+
+  // Start BT LED blinking to indicate BLE is enabled and waiting for connection
+  hwui.start_blink(BT_LED, WIFI_AP_PULSE_TIME, 0.2);
 }
 
 void OnConnected() {
   Serial.println("Ble Connected!");
-  hwui.set_led(BT_LED, 80);
+  BTconnected = true;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
 void OnDisconnected() {
   Serial.println("Ble Disconnected!");
-  hwui.set_led(BT_LED, 0);
+  BTconnected = false;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }

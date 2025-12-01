@@ -5,43 +5,243 @@
 
 //Todo: replace throw with Serial
 
-//Todo: deadzone should be in percentage or max or in value ?
-// true if outside deadzone
+//Todo: deadband should be in percentage or max or in value ?
+// true if outside deadband
 
-bool Sensor::test_outside_deadzone(const std::string& axis) {
-  if (sensor_dat.find(axis) != sensor_dat.end()) {
+bool Sensor::update() {
+  store_previous_values();
+  bool newdata = measure_sensor();
+  bool data_changed = false;
+  if (!newdata)
+    return false;
+  if (measure_offset_flag) {
+    measure_offset_iter();
+  } else {
+    apply_offset();
+    data_changed = process_sensor_neutral_filter();
+    bool triggers_changed = process_sensor_triggers();
+    data_changed =
+        data_changed ||
+        triggers_changed;  // data changed if either filter or triggers changed
+  }
+  return data_changed;
+}
 
-    if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadzone) {
-      return true;
+void Sensor::measure_offset_iter() {
+  measure_offset_counter++;
+  Serial.print("Offset measurement iteration: ");
+  Serial.println(measure_offset_counter);
+  if (measure_all) {
+    // Measure all channels
+    for (auto const& pair : sensor_dat) {
+      sensor_dat[pair.first].offset += sensor_dat[pair.first].value;
+    }
+  } else if (measure_list) {
+    // Measure selected list of channels
+    for (const string& channel : channels_to_measure) {
+      sensor_dat[channel].offset += sensor_dat[channel].value;
+    }
+  } else {
+    // Measure single channel
+    sensor_dat[axis_to_measure_offset].offset +=
+        sensor_dat[axis_to_measure_offset].value;
+  }
+
+  if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+    // Calculate average offsets
+    if (measure_all) {
+      for (auto const& pair : sensor_dat) {
+        sensor_dat[pair.first].offset =
+            sensor_dat[pair.first].offset / OFFSET_CAL_SAMPLES_NB;
+      }
+      Serial.println("Completed offset measurement for all channels");
+    } else if (measure_list) {
+      for (const string& channel : channels_to_measure) {
+        sensor_dat[channel].offset =
+            sensor_dat[channel].offset / OFFSET_CAL_SAMPLES_NB;
+      }
+      Serial.print("Completed offset measurement for selected channels: ");
+      for (const string& channel : channels_to_measure) {
+        Serial.print(channel.c_str());
+        Serial.print("(");
+        Serial.print(sensor_dat[channel].offset);
+        Serial.print(") ");
+      }
+      Serial.println();
     } else {
-      return false;
+      sensor_dat[axis_to_measure_offset].offset =
+          sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
+      Serial.print("offset of ");
+      Serial.print(axis_to_measure_offset.c_str());
+      Serial.print(" is: ");
+      Serial.println(sensor_dat[axis_to_measure_offset].offset);
     }
 
-  } else {
-    // Serial.println("error: Axis not found");
-    return false;
+    // Set completion flag
+    offset_measurement_complete = true;
+
+    // Reset measurement flag but keep type flags for get_measured_offsets()
+    measure_offset_flag = false;
+    // Note: measure_all, measure_list, and channels_to_measure are cleared
+    // in clear_completion_flag() after the client retrieves the offsets
   }
 }
 
-//provide default implementation
-void Sensor::measure_offset(const std::string& sensor_name) {
-  Serial.println("default implementation does not measure offset");
+// bool Sensor::test_outside_deadband(const std::string& axis) {
+//   if (sensor_dat.find(axis) != sensor_dat.end()) {
+
+//     if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadband) {
+//       return true;
+//     } else {
+//       return false;
+//     }
+
+//   } else {
+//     // Serial.println("error: Axis not found");
+//     return false;
+//   }
+// }
+
+//measure single axis offset
+void Sensor::start_measure_offset(const std::string& sensor_name) {
+  if (!measure_offset_flag) {
+    offset_measurement_complete = false;  // Reset completion flag
+    measure_offset_flag = true;
+    axis_to_measure_offset = sensor_name;
+    measure_offset_counter = 0;
+    sensor_dat[sensor_name].offset = 0;
+    Serial.println("start offset measurement");
+  }
+}
+void Sensor::start_measure_offset_all() {
+  if (!measure_offset_flag) {
+    offset_measurement_complete = false;  // Reset completion flag
+    measure_offset_flag = true;
+    measure_all = true;
+    measure_offset_counter = 0;
+  }
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].offset = 0;
+  }
+  Serial.println("start all offset measurement");
 }
 
-void Sensor::reset_offset(const std::string& input) {
-  if (sensor_dat.find(input) != sensor_dat.end()) {
-    sensor_dat[input].offset = 0;
-    Serial.print("reset offset for ");
-    Serial.println(input.c_str());
+void Sensor::start_measure_offset_list(const string& channel_list) {
+  if (!measure_offset_flag) {
+    channels_to_measure = parse_channel_list(channel_list);
+
+    // Validate all channels exist
+    for (const string& channel : channels_to_measure) {
+      if (sensor_dat.find(channel) == sensor_dat.end()) {
+        Serial.print("Error: Channel not found: ");
+        Serial.println(channel.c_str());
+        return;
+      }
+    }
+
+    // Reset offsets for selected channels
+    for (const string& channel : channels_to_measure) {
+      sensor_dat[channel].offset = 0;
+    }
+
+    offset_measurement_complete = false;  // Reset completion flag
+    measure_list = true;
+    measure_offset_flag = true;
+    measure_offset_counter = 0;
+
+    Serial.print("Starting offset measurement for channels: ");
+    Serial.println(channel_list.c_str());
+  }
+}
+
+vector<string> Sensor::parse_channel_list(const string& channel_list) {
+  vector<string> channels;
+  string current_channel;
+
+  for (char c : channel_list) {
+    if (c == ',' || c == ' ') {
+      if (!current_channel.empty()) {
+        channels.push_back(current_channel);
+        current_channel.clear();
+      }
+    } else {
+      current_channel += c;
+    }
+  }
+
+  // Add the last channel if not empty
+  if (!current_channel.empty()) {
+    channels.push_back(current_channel);
+  }
+
+  return channels;
+}
+
+void Sensor::apply_offset() {
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].value_offset =
+        sensor_dat[pair.first].value - sensor_dat[pair.first].offset;
+  }
+}
+
+void Sensor::reset_offset(const std::string& sensor_name) {
+  if (sensor_dat.find(sensor_name) != sensor_dat.end()) {
+    Serial.print("reset offset of ");
+    Serial.println(sensor_name.c_str());
+    sensor_dat[sensor_name].offset = 0;
   } else {
     Serial.println("error: Axis not found");
   }
 }
 
+void Sensor::reset_all_offset() {
+  for (auto const& pair : sensor_dat) {
+    sensor_dat[pair.first].offset = 0;
+  }
+  Serial.println("reset all offset");
+}
+
+void Sensor::store_previous_values() {
+  for (auto& dat : sensor_dat) {
+    dat.second.value_prev = dat.second.value_ready;
+  }
+}
+
+// void Sensor::offset_handler() {
+
+//   if (!measure_offset_flag) {
+//     //
+//   }
+
+//   if (measure_offset_flag) {
+//     measure_offset_counter++;
+//     offset += sensor_dat[axis_to_measure_offset].value;
+//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
+//       sensor_dat[axis_to_measure_offset].offset =
+//           offset / OFFSET_CAL_SAMPLES_NB;
+//       measure_offset_flag = false;
+//       Serial.print("offset of ");
+//       Serial.print(axis_to_measure_offset.c_str());
+//       Serial.print(" is: ");
+//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
+//     }
+//   }
+// }
+
+// void Sensor::reset_offset(const std::string& input) {
+//   if (sensor_dat.find(input) != sensor_dat.end()) {
+//     sensor_dat[input].offset = 0;
+//     Serial.print("reset offset for ");
+//     Serial.println(input.c_str());
+//   } else {
+//     Serial.println("error: Axis not found");
+//   }
+// }
+
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value < sensor_dat[axis].lmax) {
+    if (sensor_dat[axis].value_ready > sensor_dat[axis].lmin &&
+        sensor_dat[axis].value_ready < sensor_dat[axis].lmax) {
       return true;
     } else {
       return false;
@@ -70,7 +270,8 @@ float Sensor::clip(float value, float min, float max) {
   return std::max(min, std::min(value, max));
 }
 
-void Sensor::process_sensor_triggers() {
+bool Sensor::process_sensor_triggers() {
+  bool flags_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     // warning if reference modifies correctly the value
@@ -83,10 +284,12 @@ void Sensor::process_sensor_triggers() {
       if (is_within_range(axis) == false &&
           is_prev_within_range(axis) == true) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
       if (is_within_range(axis) == true &&
           is_prev_within_range(axis) == false) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
     }
 
@@ -95,32 +298,42 @@ void Sensor::process_sensor_triggers() {
 
       //simple threshold mode
       if (axis_data.th_mode == 0) {
-        axis_data.bool_value = axis_data.value > axis_data.lmin;
+        axis_data.bool_value = axis_data.value_ready > axis_data.lmin;
       } else {
         if (axis_data.th_mode == 1) {
-          axis_data.bool_value = axis_data.value > axis_data.lmin &&
-                                 axis_data.value < axis_data.lmax;
+          axis_data.bool_value = axis_data.value_ready > axis_data.lmin &&
+                                 axis_data.value_ready < axis_data.lmax;
         }
       }
       // trigger flags for trigger mode
       if (axis_data.bool_value && !axis_data.bool_value_prev) {
         set_all_trigger(axis, true);
+        flags_changed = true;
       }
       if (!axis_data.bool_value && axis_data.bool_value_prev) {
         set_all_untrigger(axis, true);
+        flags_changed = true;
       }
     }
   }
+  return flags_changed;
 }
 /**
  * @brief This applies the dynamic dead band filter to the sensor data
+ * returns true if data changed after filtering
  */
-void Sensor::process_sensor_neutral_filter() {
+bool Sensor::process_sensor_neutral_filter() {
+  bool data_changed = false;
   for (auto& dat : sensor_dat) {
     string axis = dat.first;
     SensorDat& axis_data = dat.second;
-    axis_data.value = axis_data.NeutralFilter.process(axis_data.value);
+    float new_value = axis_data.NeutralFilter.process(axis_data.value_offset);
+    if (new_value != axis_data.value_prev) {
+      data_changed = true;
+      axis_data.value_ready = new_value;
+    }
   }
+  return data_changed;
 }
 
 void Sensor::teleplot_data(string axis) {
@@ -134,8 +347,8 @@ void Sensor::teleplot_data(string axis) {
     Serial.println(sensor_dat[axis].raw_value);
     Serial.print(">");
     Serial.print(axis.c_str());
-    Serial.print("value: ");
-    Serial.println(sensor_dat[axis].value);
+    Serial.print("value ready: ");
+    Serial.println(sensor_dat[axis].value_ready);
   }
 }
 
@@ -162,7 +375,7 @@ JsonDocument Sensor::get_inputs_config(bool debug) {
       string axis_name = pair.first;
       // config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
       config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
-      config[axis_name]["deadzone"] = sensor_dat[axis_name].deadzone;
+      config[axis_name]["deadband"] = sensor_dat[axis_name].deadband;
       // config[axis_name]["value"] = sensor_dat[axis_name].value;
       config[axis_name]["offset"] = sensor_dat[axis_name].offset;
       config[axis_name]["lmax"] = sensor_dat[axis_name].lmax;
@@ -170,6 +383,7 @@ JsonDocument Sensor::get_inputs_config(bool debug) {
       config[axis_name]["mode"] = sensor_dat[axis_name].mode;
       config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
       config[axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
+      config[axis_name]["over_out"] = sensor_dat[axis_name].over_out;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
@@ -191,7 +405,7 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
   for (auto const& pair : config) {
     string axis_name = pair.key().c_str();
     // should likely use getter/setter here
-    set_deadzone(axis_name, config[axis_name]["deadzone"]);
+    set_deadband(axis_name, config[axis_name]["deadband"]);
     sensor_dat[axis_name].offset = config[axis_name]["offset"];
     sensor_dat[axis_name].inverted = config[axis_name]["inverted"];
     sensor_dat[axis_name].lmax = config[axis_name]["lmax"];
@@ -199,6 +413,7 @@ void Sensor::set_input_config(JsonObject config, bool debug) {
     sensor_dat[axis_name].mode = config[axis_name]["mode"];
     sensor_dat[axis_name].th_mode = config[axis_name]["th_mode"];
     sensor_dat[axis_name].cyclic = config[axis_name]["cyclic"];
+    sensor_dat[axis_name].over_out = config[axis_name]["over_out"];
   }
   if (debug) {
     Serial.println("set_sensor_axis_config_end");
@@ -331,9 +546,9 @@ bool Sensor::get_inverted(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-float Sensor::get_deadzone(const std::string& axis) {
+float Sensor::get_deadband(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].deadzone;
+    return sensor_dat[axis].deadband;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -346,11 +561,21 @@ float Sensor::get_offset(const std::string& axis) {
 }
 
 /**
-@brief get the value of the axis
+@brief get the final value of the axis (after all processing: offset + neutral filter)
  */
 float Sensor::get_value(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
-    return sensor_dat[axis].value;
+    return sensor_dat[axis].value_ready;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+/**
+@brief get the value after offset but before neutral filtering (for UI display)
+ */
+float Sensor::get_value_offset(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].value_offset;
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
@@ -363,20 +588,20 @@ float Sensor::get_value_constrained(const std::string& axis) {
     // wrap value for circular axis, clip for others.
     if (axis == "pitch" || axis == " yaw" || axis == "roll") {
       float range = sensor_dat[axis].lmax - sensor_dat[axis].lmin;
-      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
-        return sensor_dat[axis].value + range;
-      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
-        return sensor_dat[axis].value - range;
+      if (sensor_dat[axis].value_ready < sensor_dat[axis].lmin) {
+        return sensor_dat[axis].value_ready + range;
+      } else if (sensor_dat[axis].value_ready > sensor_dat[axis].lmax) {
+        return sensor_dat[axis].value_ready - range;
       } else {
-        return sensor_dat[axis].value;
+        return sensor_dat[axis].value_ready;
       }
     } else {
-      if (sensor_dat[axis].value < sensor_dat[axis].lmin) {
+      if (sensor_dat[axis].value_ready < sensor_dat[axis].lmin) {
         return sensor_dat[axis].lmin;
-      } else if (sensor_dat[axis].value > sensor_dat[axis].lmax) {
+      } else if (sensor_dat[axis].value_ready > sensor_dat[axis].lmax) {
         return sensor_dat[axis].lmax;
       } else {
-        return sensor_dat[axis].value;
+        return sensor_dat[axis].value_ready;
       }
     }
   else
@@ -460,9 +685,9 @@ void Sensor::set_inverted(const std::string& axis, bool value) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-void Sensor::set_deadzone(const std::string& axis, float value) {
+void Sensor::set_deadband(const std::string& axis, float value) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    sensor_dat[axis].deadzone = value;
+    sensor_dat[axis].deadband = value;
     sensor_dat[axis].NeutralFilter.setDeadband(value);
   } else
     throw std::invalid_argument("Axis not found: " + axis);
@@ -551,4 +776,57 @@ bool Sensor::get_cyclic(const std::string& axis) {
     return sensor_dat[axis].cyclic;
   else
     throw std::invalid_argument("Axis not found: " + axis);
+}
+
+void Sensor::set_over_out(const std::string& axis, bool value) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    sensor_dat[axis].over_out = value;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+bool Sensor::get_over_out(const std::string& axis) {
+  if (sensor_dat.find(axis) != sensor_dat.end())
+    return sensor_dat[axis].over_out;
+  else
+    throw std::invalid_argument("Axis not found: " + axis);
+}
+
+// Offset measurement completion methods
+bool Sensor::is_offset_measurement_complete() {
+  return offset_measurement_complete;
+}
+
+void Sensor::clear_completion_flag() {
+  offset_measurement_complete = false;
+  // Reset measurement type flags after client has retrieved the offsets
+  measure_all = false;
+  measure_list = false;
+  channels_to_measure.clear();
+}
+
+JsonDocument Sensor::get_measured_offsets() {
+  JsonDocument result;
+
+  if (measure_all) {
+    // Return all channel offsets
+    for (const auto& pair : sensor_dat) {
+      result[pair.first] = pair.second.offset;
+    }
+  } else if (measure_list) {
+    // Return selected channel offsets
+    for (const string& channel : channels_to_measure) {
+      if (sensor_dat.find(channel) != sensor_dat.end()) {
+        result[channel] = sensor_dat[channel].offset;
+      }
+    }
+  } else {
+    // Return single axis offset
+    if (sensor_dat.find(axis_to_measure_offset) != sensor_dat.end()) {
+      result[axis_to_measure_offset] =
+          sensor_dat[axis_to_measure_offset].offset;
+    }
+  }
+
+  return result;
 }

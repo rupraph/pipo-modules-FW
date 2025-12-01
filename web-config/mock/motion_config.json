@@ -181,7 +181,7 @@
   },
   "sensor": {
     "accX": {
-      "deadZone": 0,
+      "deadband": 0,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
@@ -190,7 +190,7 @@
       "limit_min": -8.0
     },
     "accY": {
-      "deadZone": 0,
+      "deadband": 0,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
@@ -199,7 +199,7 @@
       "limit_min": -8.0
     },
     "accZ": {
-      "deadZone": 0.2,
+      "deadband": 0.2,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
@@ -208,7 +208,7 @@
       "limit_min": -8.0
     },
     "pitch": {
-      "deadZone": 2,
+      "deadband": 2,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
@@ -217,7 +217,7 @@
       "limit_min": -90
     },
     "roll": {
-      "deadZone": 2,
+      "deadband": 2,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
@@ -226,7 +226,7 @@
       "limit_min": -180
     },
     "yaw": {
-      "deadZone": 2,
+      "deadband": 2,
       "enabled": true,
       "inverted": false,
       "offset": 0.0,
