@@ -35,6 +35,17 @@ void setup() {  // by default on core 1
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
+#if defined(DISABLE_USB_COMM)
+  // Wait press to start setup
+  Serial.println("Press any key to start...");
+  while (!Serial.available()) {
+    delay(10);
+  }
+  delay(100);  // Extra time for terminal to be ready
+#endif
+
+  Serial.println("\n=== Pipo Setup Start ===");
+
   config.cleanup_temp_files();  // Clean up any orphaned temp files from crashes
 
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
