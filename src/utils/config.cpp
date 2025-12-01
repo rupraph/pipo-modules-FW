@@ -223,6 +223,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
 
 /// @brief Clean up any orphaned .tmp files from previous crashes
 void Config::cleanup_temp_files() {
+  Serial.println("Cleaning up potential temp config files...");
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
     return;
