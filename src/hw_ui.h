@@ -141,6 +141,10 @@ class HwUi {
 
   // getter/setter
   int get_bat_voltage();
+  float get_bat_percentage();
+  int get_bat_percentage_int();
+  bool is_plugged();
+  bool is_low_battery();
 
   // Button callback registration
   void set_pause_short_press_callback(ButtonCallback cb) {

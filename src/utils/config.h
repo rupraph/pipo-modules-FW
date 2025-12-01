@@ -26,6 +26,7 @@ class Config {
     general_config["OSC_ENA"] = true;
     general_config["OSC_PORT"] = 8000;
     general_config["OSC_IP"] = "0.0.0.0";
+    general_config["OSC_Batt"] = false;
     general_config["MidiEnabled"] = true;
     general_config["HidEnabled"] = true;
     general_config["HidMode"] = 2;

@@ -638,6 +638,7 @@
     "OSC_ENA": false,
     "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
+    "OSC_Batt": false,
     "MidiEnabled": true,
     "HidEnabled": false,
     "HidMode": 1,

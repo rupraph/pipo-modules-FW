@@ -85,6 +85,8 @@
 #endif
 
 #define BAT_SAMPLE_SIZE 20
+#define BAT_HYSTERESIS_PERCENT \
+  2  // Minimum percentage change to report (prevents oscillation)
 #if HW_REV == 10
 #define BATT_COEF 2.0  //2.56
 // battery drops hard after 3.3v -> 0% // max at 4.1. // =>percentage = volt * 125 -412.5
@@ -92,7 +94,7 @@
 #define BATT_COEF 1.44  //1.436  // divider is 0.7015  // leads 2.95 @4.2
 #endif
 
-#define DEBOUNCE_TIME 50  // in ms
+#define DEBOUNCE_TIME 50      // in ms
 #define LONG_PRESS_TIME 1000  // in ms
 
 //analog sensor specific definitions

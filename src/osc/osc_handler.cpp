@@ -211,20 +211,88 @@ void OSC_handler::add_to_bundle(string address, float value) {
       return;
     }
 
-    // Use fixed buffer to avoid heap allocation
-    char fullAddress[128];
-    const char* pipoName = config.general_config["PipoName"].as<const char*>();
-
     // Build address: /PipoName/address
-    if (address[0] == '/') {
-      snprintf(fullAddress, sizeof(fullAddress), "/%s%s", pipoName,
-               address.c_str());
-    } else {
-      snprintf(fullAddress, sizeof(fullAddress), "/%s/%s", pipoName,
-               address.c_str());
+    String fullAddress = "/";
+    fullAddress += config.general_config["PipoName"].as<const char*>();
+    if (address[0] != '/') {
+      fullAddress += "/";
+    }
+    fullAddress += address.c_str();
+
+    bundle.add(fullAddress.c_str()).add(value);
+
+    xSemaphoreGive(mutex);
+  }
+}
+
+void OSC_handler::send_battery_level(int percentage, bool is_plugged,
+                                     bool is_low_battery) {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    ensure_started();
+
+    if (!enabled) {
+      xSemaphoreGive(mutex);
+      return;
     }
 
-    bundle.add(fullAddress).add(value);
+    // Check connection status
+    if (!staConnected && !apConnected) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Wait for network stack to stabilize after connection
+    if (millis() - lastConnectionTime < 100) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    String pipoName = config.general_config["PipoName"].as<const char*>();
+
+    // Send battery percentage: /PipoName/Battery <percentage>
+    String batteryAddress = "/" + pipoName + "/Battery";
+    OSCMessage batteryMsg(batteryAddress.c_str());
+    batteryMsg.add((int32_t)percentage);
+
+    // Send plugged state: /PipoName/Plugged <0 or 1>
+    String pluggedAddress = "/" + pipoName + "/Plugged";
+    OSCMessage pluggedMsg(pluggedAddress.c_str());
+    pluggedMsg.add((int32_t)(is_plugged ? 1 : 0));
+
+    // Send low battery state: /PipoName/LowBattery <0 or 1>
+    String lowBatteryAddress = "/" + pipoName + "/LowBattery";
+    OSCMessage lowBatteryMsg(lowBatteryAddress.c_str());
+    lowBatteryMsg.add((int32_t)(is_low_battery ? 1 : 0));
+
+    // Send all three messages
+    int packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus != 0) {
+      batteryMsg.send(Udp);
+      Udp.endPacket();
+    }
+    batteryMsg.empty();
+
+    packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus != 0) {
+      pluggedMsg.send(Udp);
+      Udp.endPacket();
+    }
+    pluggedMsg.empty();
+
+    packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus != 0) {
+      lowBatteryMsg.send(Udp);
+      Udp.endPacket();
+    }
+    lowBatteryMsg.empty();
 
     xSemaphoreGive(mutex);
   }

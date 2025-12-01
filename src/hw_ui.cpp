@@ -1,4 +1,6 @@
 #include "hw_ui.h"
+#include "utils/config.h"
+#include "osc/osc_handler.h"
 
 HwUi hwui;
 
@@ -26,9 +28,47 @@ void buttonTask(void* pvParameters) {
 
 void battmonitorTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
+  static int prev_bat_percentage = -1;
+  static bool prev_plugged_state = false;
+  static bool prev_low_battery_state = false;
+  static unsigned long last_send_time = 0;
+  const unsigned long SEND_INTERVAL = 1000;  // Send every 1 second when changed
+
   for (;;) {
     hwui.measure_battery_step();
-    esp_task_wdt_reset();
+
+    // Update the shared state flags
+    battery_plugged = hwui.is_plugged();
+    battery_low_level = hwui.is_low_battery();
+
+    // Check if OSC battery sending is enabled and enough time has passed
+    if (config.general_config["OSC_Batt"] == true && osc.is_enabled() &&
+        (millis() - last_send_time >= SEND_INTERVAL)) {
+
+      int current_bat_percentage = hwui.get_bat_percentage_int();
+      bool current_plugged_state = battery_plugged;
+      bool current_low_battery_state = hwui.is_low_battery();
+
+      // Apply hysteresis: only send if change exceeds threshold or plugged state changed
+      bool percentage_changed =
+          abs(current_bat_percentage - prev_bat_percentage) >=
+          BAT_HYSTERESIS_PERCENT;
+      bool state_changed = current_plugged_state != prev_plugged_state;
+      bool low_battery_changed =
+          current_low_battery_state != prev_low_battery_state;
+
+      // Always send on first measurement (prev_bat_percentage == -1)
+      if (prev_bat_percentage == -1 || percentage_changed || state_changed ||
+          low_battery_changed) {
+        osc.send_battery_level(current_bat_percentage, current_plugged_state,
+                               current_low_battery_state);
+        prev_bat_percentage = current_bat_percentage;
+        prev_plugged_state = current_plugged_state;
+        prev_low_battery_state = current_low_battery_state;
+        last_send_time = millis();
+      }
+    }
+
     vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
@@ -424,6 +464,40 @@ void HwUi::monitor_battery() {
 
 int HwUi::get_bat_voltage() {
   return bat_voltage;
+}
+
+float HwUi::get_bat_percentage() {
+  // Use same formula as UI: percentage = voltage * 133.3 - 439.8
+  // This maps: 3.3V = 0%, 4.05V = 100%
+  // bat_voltage is in mV, convert to V first
+  float voltage_in_volts = bat_voltage / 1000.0f;
+
+  // Calculate percentage using UI formula
+  float percentage = voltage_in_volts * 133.3f - 439.8f;
+
+  // Clamp to 0-100 range
+  if (percentage < 0.0f)
+    percentage = 0.0f;
+  if (percentage > 100.0f)
+    percentage = 100.0f;
+
+  return percentage;
+}
+
+int HwUi::get_bat_percentage_int() {
+  return (int)round(get_bat_percentage());
+}
+
+bool HwUi::is_plugged() {
+  // Device is considered plugged when voltage >= 4.3V
+  // bat_voltage is in mV
+  return bat_voltage >= 4300;
+}
+
+bool HwUi::is_low_battery() {
+  // Low battery when voltage is below LOW_BAT_VOLTAGE threshold
+  // bat_voltage is in mV
+  return bat_voltage < LOW_BAT_VOLTAGE;
 }
 
 //Button Class Implementation

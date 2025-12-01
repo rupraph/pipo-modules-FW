@@ -358,8 +358,13 @@ void PipoServer::setup_requests() {
 
   // batt is temporarily as a request since I don't want it to be polled as fast as the pipo data
   server.on("/battlevel", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    return request->send(200, "text/plain",
-                         String(hwui.get_bat_voltage()).c_str());
+    // Return battery percentage as integer, or -1 if plugged
+    if (battery_plugged) {
+      return request->send(200, "text/plain", "-1");
+    } else {
+      return request->send(200, "text/plain",
+                           String(hwui.get_bat_percentage_int()).c_str());
+    }
   });
 
   server.on("/offsetcal", HTTP_POST, [&](AsyncWebServerRequest* request) {
