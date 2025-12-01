@@ -149,7 +149,13 @@ void PipoServer::setup_requests() {
     try {
       if (DEBUG_HEAP)
         pipoDebugHeap("request: set active config");
-      config.load_config(request->getParam("name")->value().c_str(), true);
+      bool success =
+          config.load_config(request->getParam("name")->value().c_str(), true);
+      if (!success) {
+        Serial.println("Failed to load config, using current config");
+        return request->send(500, "text/plain",
+                             "Error: Config file corrupted or invalid");
+      }
       config.apply(engine, osc, DEBUG_CONFIG);
       if (DEBUG_HEAP)
         pipoDebugHeap("end set ctive config");
@@ -240,7 +246,14 @@ void PipoServer::setup_requests() {
             if (DEBUG_HEAP)
               pipoDebugHeap("Request: config data received");
             config.save(config.filename, received_configData.c_str());
-            config.load_config(config.filename);
+            bool success = config.load_config(config.filename);
+            if (!success) {
+              received_configData.clear();
+              if (DEBUG_HEAP)
+                pipoDebugHeap("Request: config load failed");
+              return request->send(500, "text/plain",
+                                   "Error: Uploaded config is invalid");
+            }
             config.apply(engine, osc, DEBUG_CONFIG);
             received_configData.clear();
             if (DEBUG_HEAP)

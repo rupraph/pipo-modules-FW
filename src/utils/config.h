@@ -37,7 +37,7 @@ class Config {
   JsonDocument general_config;
 
   // load config from files into current_config
-  void load_config(String filename, bool addJsonExtension = true);
+  bool load_config(String filename, bool addJsonExtension = true);
   void load_config();
   // void shouldSave();
   // void saveIfNecessary();
@@ -59,13 +59,18 @@ class Config {
   void gather(Engine& engine, bool debug = false);
   void apply(Engine& engine, OSC_handler& osc, bool debug = false);
   String get_path(String filename, bool add_extension = true);
+  void cleanup_temp_files();
 
  private:
   std::vector<std::string> split(const std::string& str, char delimiter);
+  bool validate_config(JsonDocument& config_doc);
+  bool restore_from_default(String target_filename);
+
   // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";
   const char* config_model_path = "/default.json";
   const char* configs_root = "/configs";
+  const char* temp_suffix = ".tmp";
   JsonDocument* tmp;
 };
 
