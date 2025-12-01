@@ -27,7 +27,7 @@ class OSC_handler {
   void setup();  // Configure OSC settings
   void set_config();
   void send_osc_message(string address, float value);
-  void send_battery_level(float voltage);
+  void send_battery_level(int percentage, bool is_plugged, bool is_low_battery);
   void add_to_bundle(string address, float value);
   void bundle_has_messages();
   void send_bundle();

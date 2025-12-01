@@ -223,7 +223,7 @@ void OSC_handler::add_to_bundle(string address, float value) {
   }
 }
 
-void OSC_handler::send_battery_level(float voltage) {
+void OSC_handler::send_battery_level(int percentage, bool is_plugged, bool is_low_battery) {
   if (mutex == NULL) {
     return;  // Not initialized yet
   }
@@ -258,7 +258,15 @@ void OSC_handler::send_battery_level(float voltage) {
     fullAddress += "/battery";
 
     OSCMessage msg(fullAddress.c_str());
-    msg.add(voltage);
+
+    // Send "plugged" string if plugged, "low" if low battery, otherwise send percentage as integer
+    if (is_plugged) {
+      msg.add("plugged");
+    } else if (is_low_battery) {
+      msg.add("low");
+    } else {
+      msg.add((int32_t)percentage);
+    }
 
     int packetStatus = Udp.beginPacket(dest_ip, out_port);
     if (packetStatus == 0) {

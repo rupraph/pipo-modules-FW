@@ -5,13 +5,23 @@
 
   export let info: PipoInfo;
 
-  let batt: number | null = null;
+  let battPercentage: number | null = null;
+  let isPlugged: boolean = false;
   let intervalId: number;
 
   async function fetchBatteryLevel() {
     try {
       const { data } = await pipoio.get("/battlevel", { timeout: 2000 });
-      batt = data / 1000;
+      const value = parseInt(data);
+
+      // -1 means plugged
+      if (value === -1) {
+        isPlugged = true;
+        battPercentage = null;
+      } else {
+        isPlugged = false;
+        battPercentage = value;
+      }
     } catch (error) {
       console.error("Failed to fetch battery level:", error);
     }
@@ -29,10 +39,6 @@
     // Clear the interval when the component is destroyed
     clearInterval(intervalId);
   });
-
-  function capValue(value: number, min: number, max: number) {
-    return Math.max(min, Math.min(max, value));
-  }
 </script>
 
 <div class="pipo-info">
@@ -42,17 +48,12 @@
   <span>Name</span> <span>{info.name}</span>
   <span>Version</span> <span>{info.version}</span>
   <span>Battery</span>
-  {#if batt === null}
+  {#if battPercentage === null && !isPlugged}
     <span>Waiting for Pipo to respond...</span>
-  {:else if batt >= 4.3}
-    <span> Plugged</span>
+  {:else if isPlugged}
+    <span>Plugged</span>
   {:else}
-    <span>{batt.toFixed(1)} V</span>
-    <!-- <span><bold>Batt Voltage: </bold>{batt} V</span> -->
-    <span>Batt Level:</span>
-    <!--  100 = 4.1v, 0 = 3.3v => batt * 125 - 412.5 -->
-    <!-- 100 =4.05v, 0 = 3,3 => batt * 133.3 - 439.8 -->
-    <span>{capValue(batt * 133.3 - 439.8, 0, 100).toFixed(0)} %</span>
+    <span>{battPercentage} %</span>
   {/if}
 </div>
 

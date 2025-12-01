@@ -7,3 +7,4 @@ volatile bool apConfigured = false;
 volatile bool staConnected = false;
 volatile bool apConnected = false;
 volatile bool BTconnected = false;
+volatile bool battery_plugged = false;
