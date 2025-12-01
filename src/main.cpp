@@ -35,6 +35,8 @@ void setup() {  // by default on core 1
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
+  config.cleanup_temp_files();  // Clean up any orphaned temp files from crashes
+
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
 
   if (DEBUG_HEAP)

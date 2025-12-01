@@ -165,14 +165,6 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
       return false;
     }
 
-    // Basic validation: check that essential keys exist
-    if (!current_config.containsKey("engine") ||
-        !current_config.containsKey("general")) {
-      Serial.println("Config missing required keys (engine/general)");
-      logs.writeError("Config missing required keys");
-      return false;
-    }
-
     // NEW: Comprehensive validation to detect incomplete configs
     if (!validate_config(current_config)) {
       Serial.println(
@@ -227,6 +219,30 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     logs.writeError("Exception loading config: " + String(e.what()));
     return false;
   }
+}
+
+/// @brief Clean up any orphaned .tmp files from previous crashes
+void Config::cleanup_temp_files() {
+  File root = LittleFS.open(configs_root);
+  if (!root || !root.isDirectory()) {
+    return;
+  }
+
+  File file = root.openNextFile();
+  while (file) {
+    String name = String(file.name());
+    if (name.endsWith(temp_suffix)) {
+      String fullPath = String(configs_root) + "/" + name;
+      file.close();
+      LittleFS.remove(fullPath.c_str());
+      Serial.println("Cleaned up temp file: " + fullPath);
+      logs.writeLog("Cleaned up orphaned temp file: " + name);
+      file = root.openNextFile();
+    } else {
+      file = root.openNextFile();
+    }
+  }
+  root.close();
 }
 
 /// @brief Load the last config used, if it exists, otherwise load the default
@@ -320,14 +336,17 @@ void Config::save(String filename) {
     return;
   }
 
-  //uses serialize method to write file
-  Serial.print("save config: ");
-  Serial.println(get_path(filename).c_str());
+  String finalPath = get_path(filename);
+  String tempPath = finalPath + temp_suffix;
 
-  File file = LittleFS.open(get_path(filename).c_str(), FILE_WRITE);
+  Serial.print("save config (atomic): ");
+  Serial.println(finalPath.c_str());
+
+  // Write to temporary file first
+  File file = LittleFS.open(tempPath.c_str(), FILE_WRITE);
   if (!file) {
-    Serial.println("failed to open file for writing");
-    logs.writeError("Failed to open file for writing: " + filename);
+    Serial.println("failed to open temp file for writing");
+    logs.writeError("Failed to open temp file for writing: " + filename);
     return;
   }
 
@@ -335,19 +354,37 @@ void Config::save(String filename) {
   file.close();
 
   if (bytesWritten == 0) {
-    Serial.println("Failed to write to file (0 bytes written)");
-    logs.writeError("Failed to write config (0 bytes): " + filename);
+    Serial.println("Failed to write to temp file (0 bytes written)");
+    logs.writeError("Failed to write config to temp (0 bytes): " + filename);
+    LittleFS.remove(tempPath.c_str());
+    Serial.println("Removed corrupted temp file");
+    return;
+  }
 
-    // Delete the potentially corrupted file
-    LittleFS.remove(get_path(filename).c_str());
-    Serial.println("Removed potentially corrupted file");
-  } else {
+  // Verify temp file before committing
+  File verifyFile = LittleFS.open(tempPath.c_str(), FILE_READ);
+  if (!verifyFile || verifyFile.size() != bytesWritten) {
+    Serial.println("Temp file verification failed");
+    logs.writeError("Temp file verification failed for: " + filename);
+    if (verifyFile)
+      verifyFile.close();
+    LittleFS.remove(tempPath.c_str());
+    return;
+  }
+  verifyFile.close();
+
+  // Atomic rename: this is the critical moment
+  // If power fails here, either old or new config exists (never partial)
+  if (LittleFS.rename(tempPath.c_str(), finalPath.c_str())) {
     Serial.print("Config saved successfully (");
     Serial.print(bytesWritten);
     Serial.println(" bytes)");
     logs.writeLog("save config: " + filename);
+  } else {
+    Serial.println("Failed to rename temp file to final config");
+    logs.writeError("Failed to commit config (rename failed): " + filename);
+    LittleFS.remove(tempPath.c_str());
   }
-  // save(filename, current_config.dump().c_str());
 }
 
 // saving from a string
