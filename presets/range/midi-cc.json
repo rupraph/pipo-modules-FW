@@ -1,7 +1,7 @@
 {
   "preset": {
-    "name": "BLE",
-    "description": "A clear and short description about this preset"
+    "name": "Midi CC",
+    "description": "Range to CC"
   },
   "engine": {
     "engine-hid": {
@@ -14,7 +14,7 @@
     },
     "engine-midi": {
       "dist": {
-        "cc_nb": 2,
+        "cc_nb": 14,
         "channel": 1,
         "enabled": true,
         "hires": false,
@@ -35,7 +35,7 @@
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "range/dist"
+        "osc_addr": "dist"
       }
     }
   },
@@ -44,8 +44,8 @@
       "deadzone": 0.4,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 75.0,
-      "lmin": 5.0,
+      "lmax": 60.0,
+      "lmin": 2.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false
@@ -54,7 +54,7 @@
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": false,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,

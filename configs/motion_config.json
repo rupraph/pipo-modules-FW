@@ -92,7 +92,7 @@
       },
       "accY": {
         "cc_nb": 5,
-        "channel": 2,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -107,7 +107,7 @@
       },
       "accZ": {
         "cc_nb": 6,
-        "channel": 3,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -122,7 +122,7 @@
       },
       "pitch": {
         "cc_nb": 7,
-        "channel": 4,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -137,7 +137,7 @@
       },
       "roll": {
         "cc_nb": 8,
-        "channel": 5,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -152,7 +152,7 @@
       },
       "yaw": {
         "cc_nb": 9,
-        "channel": 6,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -167,7 +167,7 @@
       },
       "magX": {
         "cc_nb": 10,
-        "channel": 7,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -182,7 +182,7 @@
       },
       "magY": {
         "cc_nb": 11,
-        "channel": 8,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -197,7 +197,7 @@
       },
       "magZ": {
         "cc_nb": 12,
-        "channel": 9,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -212,7 +212,7 @@
       },
       "gyroX": {
         "cc_nb": 13,
-        "channel": 10,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -227,7 +227,7 @@
       },
       "gyroY": {
         "cc_nb": 14,
-        "channel": 11,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -242,7 +242,7 @@
       },
       "gyroZ": {
         "cc_nb": 15,
-        "channel": 12,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -262,90 +262,90 @@
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accX"
+        "osc_addr": "accX"
       },
       "accY": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accY"
+        "osc_addr": "accY"
       },
       "accZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/accZ"
+        "osc_addr": "accZ"
       },
       "pitch": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/pitch"
+        "osc_addr": "pitch"
       },
       "roll": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/roll"
+        "osc_addr": "roll"
       },
       "yaw": {
         "enabled": true,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/yaw"
+        "osc_addr": "yaw"
       },
       "magX": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magX"
+        "osc_addr": "magX"
       },
       "magY": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magY"
+        "osc_addr": "magY"
       },
       "magZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/magZ"
+        "osc_addr": "magZ"
       },
       "gyroX": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroX"
+        "osc_addr": "gyroX"
       },
       "gyroY": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroY"
+        "osc_addr": "gyroY"
       },
       "gyroZ": {
         "enabled": false,
         "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "motion/gyroZ"
+        "osc_addr": "gyroZ"
       }
     },
     "engine-special": {
       "quat": {
         "enabled": false,
-        "osc_addr": "motion/quat"
+        "osc_addr": "quat"
       }
     }
   },
@@ -486,7 +486,7 @@
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": true,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": false,
     "HidEnabled": false,

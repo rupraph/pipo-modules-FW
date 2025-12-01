@@ -1,77 +1,77 @@
 {
   "preset": {
-    "name": "MIDI",
-    "description": "A clear and short description about this preset"
+    "name": "Midi eg 2 ",
+    "description": "Note on Z taps, CC on pitch/roll"
   },
   "engine": {
     "engine-hid": {
-      "A01": {
-        "enabled": false,
-        "addr": "KEY_DOWN",
-        "addr2": "KEY_DOWN",
-        "stroke_mode": true
-      },
-      "A02": {
+      "accX": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A03": {
+      "accY": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A04": {
+      "accZ": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A05": {
+      "pitch": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "A06": {
+      "roll": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T1": {
+      "yaw": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T2": {
+      "magX": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T3": {
+      "magY": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T4": {
+      "magZ": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T5": {
+      "gyroX": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
         "stroke_mode": true
       },
-      "T6": {
+      "gyroY": {
+        "enabled": false,
+        "addr": "KEY_DOWN",
+        "addr2": "KEY_UP",
+        "stroke_mode": true
+      },
+      "gyroZ": {
         "enabled": false,
         "addr": "KEY_DOWN",
         "addr2": "KEY_UP",
@@ -79,8 +79,53 @@
       }
     },
     "engine-midi": {
-      "A01": {
-        "cc_nb": 1,
+      "accX": {
+        "cc_nb": 4,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "accY": {
+        "cc_nb": 5,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 18,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "blues major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "accZ": {
+        "cc_nb": 6,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 10,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 1,
+        "velocity": 100
+      },
+      "pitch": {
+        "cc_nb": 7,
         "channel": 1,
         "enabled": true,
         "hires": false,
@@ -94,144 +139,24 @@
         "tl_mode": 0,
         "velocity": 100
       },
-      "A02": {
-        "cc_nb": 2,
-        "channel": 2,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 25,
-        "sustain": 0.8,
-        "rootNote": 45,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 0,
-        "velocity": 100
-      },
-      "A03": {
-        "cc_nb": 3,
-        "channel": 3,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 25,
-        "sustain": 0.8,
-        "rootNote": 45,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 0,
-        "velocity": 100
-      },
-      "A04": {
-        "cc_nb": 4,
-        "channel": 4,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 25,
-        "sustain": 0.8,
-        "rootNote": 45,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 0,
-        "velocity": 100
-      },
-      "A05": {
-        "cc_nb": 5,
-        "channel": 5,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 25,
-        "sustain": 0.8,
-        "rootNote": 45,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 0,
-        "velocity": 100
-      },
-      "A06": {
-        "cc_nb": 6,
-        "channel": 6,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 25,
-        "sustain": 0.8,
-        "rootNote": 45,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 0,
-        "velocity": 100
-      },
-      "T1": {
-        "cc_nb": 7,
-        "channel": 7,
+      "roll": {
+        "cc_nb": 8,
+        "channel": 1,
         "enabled": true,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
-        "nbOfNotes": 25,
+        "nbOfNotes": 15,
         "sustain": 0.8,
-        "rootNote": 45,
+        "rootNote": 55,
         "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 1,
+        "scaleType": "blues minor",
+        "tl_mode": 0,
         "velocity": 100
       },
-      "T2": {
-        "cc_nb": 8,
-        "channel": 8,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 1,
-        "sustain": 0.8,
-        "rootNote": 79,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 1,
-        "velocity": 100
-      },
-      "T3": {
+      "yaw": {
         "cc_nb": 9,
-        "channel": 9,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 1,
-        "sustain": 0.8,
-        "rootNote": 75,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 1,
-        "velocity": 100
-      },
-      "T4": {
-        "cc_nb": 10,
-        "channel": 10,
-        "enabled": false,
-        "hires": false,
-        "cc_max": 127,
-        "cc_min": 0,
-        "nbOfNotes": 1,
-        "sustain": 0.8,
-        "rootNote": 72,
-        "pattern": "scale",
-        "scaleType": "major",
-        "tl_mode": 1,
-        "velocity": 100
-      },
-      "T5": {
-        "cc_nb": 11,
-        "channel": 11,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -244,9 +169,84 @@
         "tl_mode": 0,
         "velocity": 100
       },
-      "T6": {
+      "magX": {
+        "cc_nb": 10,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "magY": {
+        "cc_nb": 11,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "magZ": {
         "cc_nb": 12,
-        "channel": 12,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "gyroX": {
+        "cc_nb": 13,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "gyroY": {
+        "cc_nb": 14,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "gyroZ": {
+        "cc_nb": 15,
+        "channel": 1,
         "enabled": false,
         "hires": false,
         "cc_max": 127,
@@ -261,221 +261,227 @@
       }
     },
     "engine-osc": {
-      "A01": {
+      "accX": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A1"
+        "osc_addr": "accX"
       },
-      "A02": {
+      "accY": {
         "enabled": false,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A2"
+        "osc_addr": "accY"
       },
-      "A03": {
+      "accZ": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A3"
+        "osc_addr": "accZ"
       },
-      "A04": {
-        "enabled": false,
-        "mode_raw": false,
+      "pitch": {
+        "enabled": true,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A4"
+        "osc_addr": "pitch"
       },
-      "A05": {
-        "enabled": false,
-        "mode_raw": false,
+      "roll": {
+        "enabled": true,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A5"
+        "osc_addr": "roll"
       },
-      "A06": {
-        "enabled": false,
-        "mode_raw": false,
+      "yaw": {
+        "enabled": true,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/A6"
+        "osc_addr": "yaw"
       },
-      "T1": {
+      "magX": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T1"
+        "osc_addr": "magX"
       },
-      "T2": {
+      "magY": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T2"
+        "osc_addr": "magY"
       },
-      "T3": {
+      "magZ": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T3"
+        "osc_addr": "magZ"
       },
-      "T4": {
+      "gyroX": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T4"
+        "osc_addr": "gyroX"
       },
-      "T5": {
+      "gyroY": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T5"
+        "osc_addr": "gyroY"
       },
-      "T6": {
+      "gyroZ": {
         "enabled": false,
-        "mode_raw": false,
+        "mode_raw": true,
         "osc_max": 1,
         "osc_min": 0,
-        "osc_addr": "analog/T6"
+        "osc_addr": "gyroZ"
+      }
+    },
+    "engine-special": {
+      "quat": {
+        "enabled": false,
+        "osc_addr": "quat"
       }
     }
   },
   "inputs": {
-    "A01": {
+    "accX": {
       "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "A02": {
+    "accY": {
       "deadband": 0.05,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "A03": {
+    "accZ": {
       "deadband": 0.05,
       "offset": 0.0,
+      "inverted": true,
+      "lmax": 2.0,
+      "lmin": -2.0,
+      "mode": true,
+      "th_mode": true,
+      "cyclic": false,
+      "over_out": false
+    },
+    "pitch": {
+      "deadband": 0.5,
+      "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 90,
+      "lmin": -90,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": true,
+      "over_out": false
+    },
+    "roll": {
+      "deadband": 0.5,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 180,
+      "lmin": -180,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": true,
+      "over_out": false
+    },
+    "yaw": {
+      "deadband": 0.5,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 180,
+      "lmin": -180,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "A04": {
-      "deadband": 0.05,
+    "magX": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 1000,
+      "lmin": -1000,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "A05": {
-      "deadband": 0.05,
+    "magY": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 1000,
+      "lmin": -1000,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "A06": {
-      "deadband": 0.05,
+    "magZ": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
-      "lmin": 0.0,
+      "lmax": 1000,
+      "lmin": -1000,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "T1": {
-      "deadband": 5.0,
+    "gyroX": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
+      "lmax": 2000,
+      "lmin": -2000,
+      "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "T2": {
-      "deadband": 5.0,
+    "gyroY": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
+      "lmax": 2000,
+      "lmin": -2000,
+      "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
     },
-    "T3": {
-      "deadband": 5.0,
+    "gyroZ": {
+      "deadband": 2.0,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
-      "th_mode": false,
-      "cyclic": false,
-      "over_out": false
-    },
-    "T4": {
-      "deadband": 5.0,
-      "offset": 0.0,
-      "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
-      "th_mode": false,
-      "cyclic": false,
-      "over_out": false
-    },
-    "T5": {
-      "deadband": 5.0,
-      "offset": 0.0,
-      "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
-      "th_mode": false,
-      "cyclic": false,
-      "over_out": false
-    },
-    "T6": {
-      "deadband": 5.0,
-      "offset": 0.0,
-      "inverted": false,
-      "lmax": 200000.0,
-      "lmin": 500.0,
-      "mode": true,
+      "lmax": 2000,
+      "lmin": -2000,
+      "mode": false,
       "th_mode": false,
       "cyclic": false,
       "over_out": false
@@ -484,52 +490,15 @@
   "general": {
     "Wifi_mode": "STA",
     "OSC_ENA": false,
-    "OSC_IP": "192.168.1.71",
+    "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "MidiEnabled": true,
     "HidEnabled": false,
-    "HidMode": 1,
-    "PipoName": "analog",
+    "HidMode": 2,
+    "PipoName": "motion",
     "BLEEnabled": false
   },
   "sensorconf": {
-    "analogout": {
-      "A01": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      },
-      "A02": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      },
-      "A03": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      },
-      "A04": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      },
-      "A05": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      },
-      "A06": {
-        "pindir": 0,
-        "outmode": 1,
-        "lmax": 180.0,
-        "lmin": 0.0
-      }
-    }
+    "relative_mode": true
   }
 }
