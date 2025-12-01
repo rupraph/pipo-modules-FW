@@ -32,8 +32,9 @@ void battmonitorTask(void* pvParameters) {
   for (;;) {
     hwui.measure_battery_step();
 
-    // Update the plugged state flag
+    // Update the shared state flags
     battery_plugged = hwui.is_plugged();
+    battery_low_level = hwui.is_low_battery();
 
     // Check if OSC battery sending is enabled and enough time has passed
     if (config.general_config["OSC_Batt"] == true && osc.is_enabled() &&
@@ -48,11 +49,14 @@ void battmonitorTask(void* pvParameters) {
           abs(current_bat_percentage - prev_bat_percentage) >=
           BAT_HYSTERESIS_PERCENT;
       bool state_changed = current_plugged_state != prev_plugged_state;
-      bool low_battery_changed = current_low_battery_state != prev_low_battery_state;
+      bool low_battery_changed =
+          current_low_battery_state != prev_low_battery_state;
 
       // Always send on first measurement (prev_bat_percentage == -1)
-      if (prev_bat_percentage == -1 || percentage_changed || state_changed || low_battery_changed) {
-        osc.send_battery_level(current_bat_percentage, current_plugged_state, current_low_battery_state);
+      if (prev_bat_percentage == -1 || percentage_changed || state_changed ||
+          low_battery_changed) {
+        osc.send_battery_level(current_bat_percentage, current_plugged_state,
+                               current_low_battery_state);
         prev_bat_percentage = current_bat_percentage;
         prev_plugged_state = current_plugged_state;
         prev_low_battery_state = current_low_battery_state;

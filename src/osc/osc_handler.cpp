@@ -223,7 +223,8 @@ void OSC_handler::add_to_bundle(string address, float value) {
   }
 }
 
-void OSC_handler::send_battery_level(int percentage, bool is_plugged, bool is_low_battery) {
+void OSC_handler::send_battery_level(int percentage, bool is_plugged,
+                                     bool is_low_battery) {
   if (mutex == NULL) {
     return;  // Not initialized yet
   }
@@ -252,32 +253,44 @@ void OSC_handler::send_battery_level(int percentage, bool is_plugged, bool is_lo
       return;
     }
 
-    // Build address: /PipoName/battery
-    String fullAddress = "/";
-    fullAddress += config.general_config["PipoName"].as<const char*>();
-    fullAddress += "/battery";
+    String pipoName = config.general_config["PipoName"].as<const char*>();
 
-    OSCMessage msg(fullAddress.c_str());
+    // Send battery percentage: /PipoName/Battery <percentage>
+    String batteryAddress = "/" + pipoName + "/Battery";
+    OSCMessage batteryMsg(batteryAddress.c_str());
+    batteryMsg.add((int32_t)percentage);
 
-    // Send "plugged" string if plugged, "low" if low battery, otherwise send percentage as integer
-    if (is_plugged) {
-      msg.add("plugged");
-    } else if (is_low_battery) {
-      msg.add("low");
-    } else {
-      msg.add((int32_t)percentage);
-    }
+    // Send plugged state: /PipoName/Plugged <0 or 1>
+    String pluggedAddress = "/" + pipoName + "/Plugged";
+    OSCMessage pluggedMsg(pluggedAddress.c_str());
+    pluggedMsg.add((int32_t)(is_plugged ? 1 : 0));
 
+    // Send low battery state: /PipoName/LowBattery <0 or 1>
+    String lowBatteryAddress = "/" + pipoName + "/LowBattery";
+    OSCMessage lowBatteryMsg(lowBatteryAddress.c_str());
+    lowBatteryMsg.add((int32_t)(is_low_battery ? 1 : 0));
+
+    // Send all three messages
     int packetStatus = Udp.beginPacket(dest_ip, out_port);
-    if (packetStatus == 0) {
-      msg.empty();
-      xSemaphoreGive(mutex);
-      return;
+    if (packetStatus != 0) {
+      batteryMsg.send(Udp);
+      Udp.endPacket();
     }
+    batteryMsg.empty();
 
-    msg.send(Udp);
-    Udp.endPacket();
-    msg.empty();
+    packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus != 0) {
+      pluggedMsg.send(Udp);
+      Udp.endPacket();
+    }
+    pluggedMsg.empty();
+
+    packetStatus = Udp.beginPacket(dest_ip, out_port);
+    if (packetStatus != 0) {
+      lowBatteryMsg.send(Udp);
+      Udp.endPacket();
+    }
+    lowBatteryMsg.empty();
 
     xSemaphoreGive(mutex);
   }

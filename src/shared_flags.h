@@ -9,3 +9,4 @@ extern volatile bool staConnected;
 extern volatile bool apConnected;
 extern volatile bool BTconnected;
 extern volatile bool battery_plugged;
+extern volatile bool battery_low_level;
