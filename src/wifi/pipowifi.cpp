@@ -97,6 +97,14 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.next.ssid = "";
   wifi.next.password = "";
   osc.stop();  // STA interface stopped, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA stopped but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -154,6 +162,14 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
   osc.stop();  // STA disconnected, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA lost but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -183,6 +199,14 @@ void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
   osc.stop();  // Network lost, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA lost IP but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -192,6 +216,7 @@ void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.print("  Flag apStarted = ");
   Serial.println(apStarted);
   // Note: apStarted means the AP has started, but not necessarily configured yet
+  // Wait for configureAP() to set apConfigured, then start UDP
   wifi.step();
 }
 
@@ -219,7 +244,8 @@ void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = false;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
-  osc.stop();  // AP client disconnected, stop UDP
+  // Don't stop UDP - AP is still configured and can accept new clients
+  // UDP should only stop when AP itself stops (AP_STOP event)
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -289,6 +315,8 @@ bool PipoWifi::configureAP() {
   if (apStarted) {
     Serial.println("AP started successfully.");
     apConfigured = true;
+    // AP has IP address now, start UDP for communication
+    osc.start();
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     Serial.println("Failed to start AP.");

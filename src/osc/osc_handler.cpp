@@ -7,7 +7,8 @@ OSC_handler osc;
 void oscreceiveTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
   for (;;) {
-    if ((staConnected || apConnected) && osc.is_enabled()) {
+    // Check if network is available: STA connected OR AP configured
+    if ((staConnected || apConfigured) && osc.is_enabled()) {
       osc.receive();
     }
     esp_task_wdt_reset();
@@ -21,9 +22,9 @@ void OSC_handler::init() {
   // Create mutex for thread safety
   mutex = xSemaphoreCreateMutex();
   if (mutex == NULL) {
-    Serial.println("Failed to create OSC mutex!");
+    log_e("Failed to create OSC mutex!");
   } else {
-    Serial.println("OSC mutex created");
+    log_i("OSC mutex created");
   }
 }
 
@@ -57,6 +58,17 @@ void OSC_handler::set_config() {
     set_enabled(config.general_config["OSC_ENA"]);
     // Serial.println("OSC enabled: " + String(enabled));
   }
+
+  // Reset failure tracking when config changes (new destination)
+  consecutiveFailures = 0;
+
+  // Restart UDP to apply new configuration if already started
+  if (isStarted && enabled) {
+    log_i("OSC config changed, restarting UDP");
+    stop();
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay for cleanup
+    start();                        // Will start if network is ready
+  }
 }
 
 /// @brief Start UDP - only if enabled and not already started
@@ -65,17 +77,16 @@ void OSC_handler::start() {
     return;  // Not initialized yet
   }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    if (!isStarted && enabled && (staConnected || apConnected)) {
+    // Start if: STA connected to network, OR AP is configured (has IP)
+    // Note: apConnected means client connected to our AP, but AP works without clients
+    if (!isStarted && enabled && (staConnected || apConfigured)) {
       Udp.begin(localPort);
       isStarted = true;
       lastConnectionTime = millis();
-      Serial.print("OSC UDP started, listening on port ");
-      Serial.println(localPort);
+      log_i("OSC UDP started, listening on port %d", localPort);
       if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-        Serial.print("OSC sending to IP: ");
-        Serial.println(dest_ip.toString());
-        Serial.print("on port: ");
-        Serial.println(String(out_port));
+        log_i("OSC sending to IP: %s port: %d", dest_ip.toString().c_str(),
+              out_port);
       }
     }
     xSemaphoreGive(mutex);
@@ -91,7 +102,7 @@ void OSC_handler::stop() {
       Udp.stop();
       isStarted = false;
       lastConnectionTime = 0;
-      Serial.println("OSC UDP stopped");
+      log_i("OSC UDP stopped");
     }
     xSemaphoreGive(mutex);
   }
@@ -133,8 +144,8 @@ void OSC_handler::receive() {
       return;
     }
 
-    // Check connection status at receive time
-    if (!staConnected && !apConnected) {
+    // Check connection status: STA connected OR AP configured (has IP)
+    if (!staConnected && !apConfigured) {
       xSemaphoreGive(mutex);
       return;
     }
@@ -160,8 +171,7 @@ void OSC_handler::receive() {
         // bundleIN.dispatch("/servo", pwm);
       } else {
         OSCErrorCode error = bundleIN.getError();
-        Serial.print("Error: ");
-        Serial.println(error);
+        log_e("OSC parse error: %d", error);
       }
     }
 
@@ -214,8 +224,8 @@ void OSC_handler::add_to_bundle(string address, float value) {
       return;
     }
 
-    // Check we have network connection
-    if (!staConnected && !apConnected) {
+    // Check we have network: STA connected OR AP configured
+    if (!staConnected && !apConfigured) {
       xSemaphoreGive(mutex);
       return;
     }
@@ -246,8 +256,8 @@ void OSC_handler::send_battery_level(int percentage, bool is_plugged,
       return;
     }
 
-    // Check connection status
-    if (!staConnected && !apConnected) {
+    // Check connection: STA connected OR AP configured
+    if (!staConnected && !apConfigured) {
       xSemaphoreGive(mutex);
       return;
     }
@@ -280,11 +290,11 @@ void OSC_handler::send_battery_level(int percentage, bool is_plugged,
     OSCMessage lowBatteryMsg(lowBatteryAddress.c_str());
     lowBatteryMsg.add((int32_t)(is_low_battery ? 1 : 0));
 
-    // Send all three messages
+    // Send all three messages (UDP best-effort, failures are expected)
     int packetStatus = Udp.beginPacket(dest_ip, out_port);
     if (packetStatus != 0) {
       batteryMsg.send(Udp);
-      Udp.endPacket();
+      Udp.endPacket();  // Ignore return value, UDP is best-effort
     }
     batteryMsg.empty();
 
@@ -325,9 +335,8 @@ void OSC_handler::send_bundle() {
       return;
     }
 
-    // Check connection status at send time
-    if (!staConnected && !apConnected) {
-      // Serial.println(F("OSC: No network connection"));
+    // Check connection: STA connected OR AP configured
+    if (!staConnected && !apConfigured) {
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
@@ -342,7 +351,7 @@ void OSC_handler::send_bundle() {
     }
 
     if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-      Serial.println(F("No destination IP or port set"));
+      log_e("No destination IP or port set");
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
@@ -350,24 +359,43 @@ void OSC_handler::send_bundle() {
 
     int packetStatus = Udp.beginPacket(dest_ip, out_port);
     if (packetStatus == 0) {
-      Serial.println(F("Failed to start OSC packet"));
+      log_e("Failed to start OSC packet");
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
     }
 
     if (bundle.hasError()) {
-      Serial.print(F("OSC Bundle has error: "));
-      Serial.println(bundle.getError());
+      log_e("OSC Bundle has error: %d", bundle.getError());
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
     }
 
     bundle.send(Udp);
-    Udp.endPacket();
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-    bundle.empty();  // clear the bundle after sending
+    int sendResult = Udp.endPacket();
+
+    if (sendResult == 0) {
+      // endPacket failed - likely destination unreachable or network issue
+      // lwIP will handle buffer cleanup after ARP timeout (~5s)
+      // Just track for diagnostics and throttle error logging
+      consecutiveFailures++;
+
+      // Throttle error messages to avoid serial spam
+      if (millis() - lastErrorLogTime >= ERROR_LOG_INTERVAL) {
+        log_e("OSC: Failed to send to %s:%d (%d consecutive failures)",
+              dest_ip.toString().c_str(), out_port, consecutiveFailures);
+        lastErrorLogTime = millis();
+      }
+    } else {
+      // Success - reset failure counter
+      if (consecutiveFailures > 0) {
+        consecutiveFailures = 0;
+      }
+      hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+    }
+
+    bundle.empty();  // Always clear bundle (already sent or dropped)
 
     xSemaphoreGive(mutex);
   }
