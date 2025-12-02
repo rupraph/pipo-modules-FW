@@ -89,7 +89,7 @@ void midi_io::sendAllNotesOff(int channel) {
   // Loop through the notes and send note off for all notes
   for (int note : notes) {
     this->sendNoteOff(note, 127, channel);
-    vTaskDelay(pdMS_TO_TICKS(5));
+    vTaskDelay(pdMS_TO_TICKS(2));
   }
 }
 
