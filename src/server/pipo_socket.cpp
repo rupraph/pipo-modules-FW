@@ -223,8 +223,7 @@ void PipoSocket::loop() {
   // Send to connected clients
   for (AsyncWebSocketClient* c : clients) {
     if (!c->canSend()) {
-      log_d("client cannot send: ID = %u STATUS = %u", c->id(),
-            c->status());
+      log_d("client cannot send: ID = %u STATUS = %u", c->id(), c->status());
       continue;
     }
     c->text(outMsg);

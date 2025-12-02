@@ -51,10 +51,8 @@ class PipoPresets {
           info.description = doc["preset"]["description"].as<String>();
           presets.push_back(info);
 
-          log_i("Found preset: %s - %s (%s)",
-                info.name.c_str(),
-                info.description.c_str(),
-                info.filename.c_str());
+          log_i("Found preset: %s - %s (%s)", info.name.c_str(),
+                info.description.c_str(), info.filename.c_str());
         } else {
           log_w("Failed to parse preset file: %s", filename.c_str());
         }
@@ -70,9 +68,7 @@ class PipoPresets {
  public:
   PipoPresets() {}
 
-  void setup() {
-    scanPresets();
-  }
+  void setup() { scanPresets(); }
 
   void addRoutes(AsyncWebServer* server) {
     // GET /presets - Returns array of preset names and descriptions
@@ -124,9 +120,10 @@ class PipoPresets {
     });
 
     // GET /presets-refresh - Rescans the presets directory
-    server->on("/presets-refresh", HTTP_GET, [this](AsyncWebServerRequest* request) {
-      scanPresets();
-      request->send(200, "text/plain", "Presets refreshed");
-    });
+    server->on("/presets-refresh", HTTP_GET,
+               [this](AsyncWebServerRequest* request) {
+                 scanPresets();
+                 request->send(200, "text/plain", "Presets refreshed");
+               });
   }
 };

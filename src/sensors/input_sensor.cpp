@@ -66,7 +66,7 @@ void Sensor::measure_offset_iter() {
     } else {
       sensor_dat[axis_to_measure_offset].offset =
           sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
-      log_i("offset of %s is: %.2f", axis_to_measure_offset.c_str(), 
+      log_i("offset of %s is: %.2f", axis_to_measure_offset.c_str(),
             sensor_dat[axis_to_measure_offset].offset);
     }
 

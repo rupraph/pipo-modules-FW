@@ -47,8 +47,7 @@ void pipoDebugHeapFull(const char* stepName = nullptr) {
   //               totalHeap / 1024.0);
   // Serial.printf("  Used Heap:  %u bytes (%.2f KB)\n", usedHeap,
   //               usedHeap / 1024.0);
-  log_d("  Free Heap:  %u bytes (%.2f KB)", freeHeap,
-        freeHeap / 1024.0);
+  log_d("  Free Heap:  %u bytes (%.2f KB)", freeHeap, freeHeap / 1024.0);
   log_d(" Max block: %u bytes", largest_block);
   log_d("Fragmentation Ratio: %.2f%%",
         (1.0 - ((float)largest_block / freeHeap)) * 100);
@@ -60,8 +59,7 @@ void pipoDebugHeap(const char* stepName) {
     log_d("FREEHEAP at %s: %u bytes (%.2f KB)", stepName, freeHeap,
           (float)freeHeap / 1024.0f);
   } else {
-    log_d("FREEHEAP: %u bytes (%.2f KB)", freeHeap,
-          (float)freeHeap / 1024.0f);
+    log_d("FREEHEAP: %u bytes (%.2f KB)", freeHeap, (float)freeHeap / 1024.0f);
   }
 }
 

@@ -98,8 +98,8 @@ bool MotionSensor::measure_sensor() {
         motiondata.putFloat("quat_ref_z", quat_ref_z);
         reference_set = true;
         log_i("Reference orientation set");
-        log_i("Ref quat: w=%.4f x=%.4f y=%.4f z=%.4f",
-              quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
+        log_i("Ref quat: w=%.4f x=%.4f y=%.4f z=%.4f", quat_ref_w, quat_ref_x,
+              quat_ref_y, quat_ref_z);
       }
       calc_differential_euler_angles();
       data_ready = true;

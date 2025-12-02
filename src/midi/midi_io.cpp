@@ -151,7 +151,7 @@ void midi_io::manage_sustain() {
 void midi_io::printNoteList(int channel) {
   log_d("Printing note list");
   for (auto const& pair : channel_note_list[channel]) {
-    log_d("Note: %d isplaying ?: %d", pair.first, 
+    log_d("Note: %d isplaying ?: %d", pair.first,
           is_note_playing(pair.first, channel));
   }
 }

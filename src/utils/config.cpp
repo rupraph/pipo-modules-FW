@@ -156,7 +156,8 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
 
     // NEW: Comprehensive validation to detect incomplete configs
     if (!validate_config(current_config)) {
-      log_w("Config validation failed, attempting to restore from default.json");
+      log_w(
+          "Config validation failed, attempting to restore from default.json");
       logs.writeError("Config validation failed for: " + filename);
 
       // Try to restore from default
