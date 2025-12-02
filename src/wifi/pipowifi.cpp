@@ -1,4 +1,5 @@
 #include <wifi/pipowifi.h>
+#include <osc/osc_handler.h>
 
 //TODO: Should move content from callback (only put flags)
 
@@ -95,6 +96,7 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   staStarted = false;
   wifi.next.ssid = "";
   wifi.next.password = "";
+  osc.stop();  // STA interface stopped, stop UDP
   wifi.step();
 }
 
@@ -151,6 +153,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
+  osc.stop();  // STA disconnected, stop UDP
   wifi.step();
 }
 
@@ -163,6 +166,7 @@ void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
+  osc.start();  // Network ready, start UDP
   wifi.step();
 }
 
@@ -171,12 +175,14 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.status = PipoWifi::CONNECTED;
   Serial.print("  IP: ");
   Serial.println(WiFi.localIP());
+  osc.start();  // Network ready with IPv6, start UDP
   wifi.step();
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
+  osc.stop();  // Network lost, stop UDP
   wifi.step();
 }
 
@@ -193,6 +199,7 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] AP_STOP");
   apStarted = false;
   apConfigured = false;
+  osc.stop();  // AP stopped, stop UDP
   wifi.step();
 }
 
@@ -212,6 +219,7 @@ void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = false;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
+  osc.stop();  // AP client disconnected, stop UDP
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -221,6 +229,7 @@ void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apConnected = true;
   Serial.print("  Flag AFTER apConnected = ");
   Serial.println(apConnected);
+  osc.start();  // AP client ready, start UDP
 }
 
 void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -229,6 +238,7 @@ void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 
 void onAPGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   Serial.println("[Event] AP_GOT_IP6");
+  osc.start();  // AP ready with IPv6, start UDP
 }
 
 bool PipoWifi::connect() {

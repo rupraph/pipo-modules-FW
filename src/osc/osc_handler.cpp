@@ -59,20 +59,26 @@ void OSC_handler::set_config() {
   }
 }
 
-/// @brief start the UDP connection (internal - must be called with mutex held)
-void OSC_handler::ensure_started() {
-  if (!isStarted && enabled) {
-    Udp.begin(localPort);
-    isStarted = true;
-    lastConnectionTime = millis();  // Record when we started
-    Serial.print("OSC UDP started, listening on port ");
-    Serial.println(localPort);
-    if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-      Serial.print("OSC sending to IP: ");
-      Serial.println(dest_ip.toString());
-      Serial.print("on port: ");
-      Serial.println(String(out_port));
+/// @brief Start UDP - only if enabled and not already started
+void OSC_handler::start() {
+  if (mutex == NULL) {
+    return;  // Not initialized yet
+  }
+  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
+    if (!isStarted && enabled && (staConnected || apConnected)) {
+      Udp.begin(localPort);
+      isStarted = true;
+      lastConnectionTime = millis();
+      Serial.print("OSC UDP started, listening on port ");
+      Serial.println(localPort);
+      if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
+        Serial.print("OSC sending to IP: ");
+        Serial.println(dest_ip.toString());
+        Serial.print("on port: ");
+        Serial.println(String(out_port));
+      }
     }
+    xSemaphoreGive(mutex);
   }
 }
 
@@ -84,7 +90,7 @@ void OSC_handler::stop() {
     if (isStarted) {
       Udp.stop();
       isStarted = false;
-      lastConnectionTime = 0;  // Reset connection time
+      lastConnectionTime = 0;
       Serial.println("OSC UDP stopped");
     }
     xSemaphoreGive(mutex);
@@ -122,8 +128,6 @@ void OSC_handler::receive() {
     return;  // Not initialized yet
   }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    ensure_started();
-
     if (!isStarted || !enabled) {
       xSemaphoreGive(mutex);
       return;
@@ -204,9 +208,14 @@ void OSC_handler::add_to_bundle(string address, float value) {
     return;  // Not initialized yet
   }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    ensure_started();
-
+    // Only add to bundle if UDP is started and OSC is enabled
     if (!isStarted || !enabled) {
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Check we have network connection
+    if (!staConnected && !apConnected) {
       xSemaphoreGive(mutex);
       return;
     }
@@ -231,9 +240,8 @@ void OSC_handler::send_battery_level(int percentage, bool is_plugged,
     return;  // Not initialized yet
   }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    ensure_started();
-
-    if (!enabled) {
+    // Check if UDP is started and OSC is enabled
+    if (!isStarted || !enabled) {
       xSemaphoreGive(mutex);
       return;
     }
@@ -303,9 +311,15 @@ void OSC_handler::send_bundle() {
     return;  // Not initialized yet
   }
   if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    ensure_started();
-
+    // Check if bundle has data and OSC is enabled
     if (!enabled || bundle.size() < 1) {
+      bundle.empty();
+      xSemaphoreGive(mutex);
+      return;
+    }
+
+    // Check if UDP is started before sending
+    if (!isStarted) {
       bundle.empty();
       xSemaphoreGive(mutex);
       return;

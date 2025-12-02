@@ -38,8 +38,8 @@ class OSC_handler {
   bool is_started();
   void receive();
 
-  void ensure_started();
-  void stop();
+  void start();  // Start UDP if enabled and network ready
+  void stop();   // Stop UDP
 
  private:
   IPAddress dest_ip;
