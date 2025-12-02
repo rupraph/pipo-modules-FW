@@ -129,7 +129,8 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     if (strcmp((char*)info.wifi_sta_disconnected.ssid,
                wifi.next.ssid.c_str()) == 0) {
       wifi.reconnectAttempts++;
-      log_w("  Reconnect attempt: %d/%d", wifi.reconnectAttempts, wifi.MAX_RECONNECT_ATTEMPTS);
+      log_w("  Reconnect attempt: %d/%d", wifi.reconnectAttempts,
+            wifi.MAX_RECONNECT_ATTEMPTS);
 
       if (wifi.reconnectAttempts >= wifi.MAX_RECONNECT_ATTEMPTS) {
         log_w("  Max reconnect attempts reached, giving up");
@@ -370,6 +371,8 @@ void PipoWifi::step() {
   log_d("Step: mode=%d next.mode=%d apStarted=%d staStarted=%d status=%d",
         WiFi.getMode(), next.mode, apStarted, staStarted, status);
   wifi_mode_t mode = WiFi.getMode();
+
+  if (next.mode != WiFi.getMode()) {
     osc.stop();  // Stop OSC before changing WiFi mode
     intentionalDisconnect = true;
     WiFi.disconnect(true, true);
@@ -393,9 +396,9 @@ void PipoWifi::step() {
       return;
     }
   }
-  
-  log_d("Step: Checking AP - mode=%d apStarted=%d apConfigured=%d",
-        mode, apStarted, apConfigured);
+
+  log_d("Step: Checking AP - mode=%d apStarted=%d apConfigured=%d", mode,
+        apStarted, apConfigured);
 
   if (!apConfigured && (mode == WIFI_MODE_AP ||
                         mode == WIFI_MODE_APSTA && status != CONNECTING)) {
