@@ -292,7 +292,7 @@ void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
           break;
       }
     } else {
-      Serial.println("key not found");
+      log_e("Engine: HID key not found");
     }
     hidio.update();
   }
@@ -358,9 +358,9 @@ JsonDocument Engine::get_config(bool debug) {
   j["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
 #endif
   if (debug) {
-    Serial.println("engine_get_config");
+    log_d("engine_get_config");
     serializeJsonPretty(j, Serial);
-    Serial.println("engine_get_config_end");
+    log_d("engine_get_config_end");
   }
 
   return j;
@@ -368,16 +368,16 @@ JsonDocument Engine::get_config(bool debug) {
 
 void Engine::set_config(JsonObject config, bool debug) {
   if (debug) {
-    Serial.println("will set engine config:");
+    log_d("will set engine config:");
     serializeJsonPretty(config, Serial);
-    Serial.println();
+    log_d("");  // Empty line
   }
 
   JsonDocument jmidi = config["engine-midi"];
 
   // set midi config from main config
   if (debug)
-    Serial.println("set engine midi");
+    log_d("set engine midi");
   for (auto const& pair : Miditranslators) {
     if (jmidi[pair.first].is<JsonVariant>()) {
       // Serial.println(jmidi[pair.first].dump().c_str());
@@ -387,7 +387,7 @@ void Engine::set_config(JsonObject config, bool debug) {
   }
   // set hid config from general config
   if (debug)
-    Serial.println("set engine hid");
+    log_d("set engine hid");
   JsonDocument jhid = config["engine-hid"];
   for (auto const& pair : HID_translators) {
     if (jhid[pair.first].is<JsonVariant>()) {
@@ -396,7 +396,7 @@ void Engine::set_config(JsonObject config, bool debug) {
   }
   JsonDocument josc = config["engine-osc"];
   if (debug)
-    Serial.println("set engine osc");
+    log_d("set engine osc");
   for (auto const& pair : Osctranslators) {
     if (josc[pair.first].is<JsonVariant>()) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
@@ -405,7 +405,7 @@ void Engine::set_config(JsonObject config, bool debug) {
 #ifdef PIPO_MOTION
   JsonObject jspecial = config["engine-special"].as<JsonObject>();
   if (debug)
-    Serial.println("set engine special");
+    log_d("set engine special");
   // check how many elements are in the json object
   if (jspecial.size() > 0) {
     for (JsonPair pair : jspecial) {
@@ -415,11 +415,11 @@ void Engine::set_config(JsonObject config, bool debug) {
       }
     }
   } else {
-    Serial.println("no special config found");
+    log_w("Engine: no special config found");
   }
 #endif
   if (debug) {
-    Serial.println("engine config set");
+    log_d("engine config set");
   }
 }
 #ifdef PIPO_MOTION

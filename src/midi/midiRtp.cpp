@@ -80,7 +80,9 @@ void OnAppleMidiException(const APPLEMIDI_NAMESPACE::ssrc_t& ssrc,
       break;
     case APPLEMIDI_NAMESPACE::Exception::
         NoResponseFromConnectionRequestException:
-      log_e("MIDI RTP: No response from connection request - check address, port, and firewall");
+      log_e(
+          "MIDI RTP: No response from connection request - check address, "
+          "port, and firewall");
       break;
     case APPLEMIDI_NAMESPACE::Exception::SendPacketsDropped:
       log_w("MIDI RTP: SendPacketsDropped");
