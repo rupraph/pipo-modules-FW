@@ -22,14 +22,14 @@ void midiBLESetup(const char* deviceName) {
 }
 
 void OnConnected() {
-  Serial.println("Ble Connected!");
+  log_i("MIDI BLE connected");
   BTconnected = true;
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
 
 void OnDisconnected() {
-  Serial.println("Ble Disconnected!");
+  log_i("MIDI BLE disconnected");
   BTconnected = false;
   if (DEBUG_HEAP)
     pipoDebugHeap();

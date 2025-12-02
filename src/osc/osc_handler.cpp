@@ -21,9 +21,9 @@ void OSC_handler::init() {
   // Create mutex for thread safety
   mutex = xSemaphoreCreateMutex();
   if (mutex == NULL) {
-    Serial.println("Failed to create OSC mutex!");
+    log_e("Failed to create OSC mutex!");
   } else {
-    Serial.println("OSC mutex created");
+    log_d("OSC mutex created");
   }
 }
 
@@ -65,13 +65,9 @@ void OSC_handler::ensure_started() {
     Udp.begin(localPort);
     isStarted = true;
     lastConnectionTime = millis();  // Record when we started
-    Serial.print("OSC UDP started, listening on port ");
-    Serial.println(localPort);
+    log_i("OSC UDP started, listening on port %d", localPort);
     if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-      Serial.print("OSC sending to IP: ");
-      Serial.println(dest_ip.toString());
-      Serial.print("on port: ");
-      Serial.println(String(out_port));
+      log_i("OSC sending to IP: %s port: %d", dest_ip.toString().c_str(), out_port);
     }
   }
 }
@@ -85,7 +81,7 @@ void OSC_handler::stop() {
       Udp.stop();
       isStarted = false;
       lastConnectionTime = 0;  // Reset connection time
-      Serial.println("OSC UDP stopped");
+      log_i("OSC UDP stopped");
     }
     xSemaphoreGive(mutex);
   }
@@ -97,19 +93,14 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
   String deststring = address.substring(addrOffset + 1);
   // int dest = deststring.toInt();
   if (LOG_RECEIVED_OSC) {
-    Serial.print("address: ");
-    Serial.print(address);
-    Serial.print(" offset");
-    Serial.println(addrOffset);
-    Serial.print("dest: ");
-    Serial.println(deststring);
-    Serial.print("value:  ");
     if (msg.isFloat(0)) {
-      Serial.println(msg.getFloat(0));
+      log_d("OSC: %s offset %d dest: %s value: %f",
+            address.c_str(), addrOffset, deststring.c_str(), msg.getFloat(0));
     } else if (msg.isInt(0)) {
-      Serial.println(msg.getInt(0));
+      log_d("OSC: %s offset %d dest: %s value: %d",
+            address.c_str(), addrOffset, deststring.c_str(), msg.getInt(0));
     } else {
-      Serial.println("not a float or int");
+      log_d("OSC: %s - not a float or int", address.c_str());
     }
   }
 #ifdef PIPO_ANALOG

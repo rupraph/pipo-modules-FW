@@ -35,7 +35,7 @@ void PipoSocket::setup() {
   this->ws->onEvent([&](AsyncWebSocket* server, AsyncWebSocketClient* client,
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
-    Serial.printf("WebSocket running on core: %d\n", xPortGetCoreID());
+    log_v("WebSocket running on core: %d", xPortGetCoreID());
     if (type == WS_EVT_CONNECT) {
       // Serial.printf("WS Client connected");
       // // if more than 3 clients, delete the oldest one
@@ -46,11 +46,11 @@ void PipoSocket::setup() {
       //       c->close();
       //       break;
       //     }
-      //   }
+      // }
       //   ws->cleanupClients();
       // }
     } else if (type == WS_EVT_DISCONNECT) {
-      Serial.printf("WS Client disconnected");
+      log_d("WebSocket client disconnected");
       // client->close();
     } else if (type == WS_EVT_ERROR) {
       uint16_t errorCode = *((uint16_t*)arg);
@@ -79,7 +79,7 @@ void PipoSocket::setup() {
         }
       } else {
         // Message too large or buffer overflow
-        Serial.println("Error: Message exceeds buffer size");
+        log_e("WebSocket: Message exceeds buffer size");
         inMsgL = 0;
       }
       if (DEBUG_HEAP)
@@ -119,8 +119,7 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
-    Serial.println("error on message");
-    Serial.println(e.what());
+    log_e("WebSocket message error: %s", e.what());
   }
 }
 

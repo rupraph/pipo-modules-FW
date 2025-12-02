@@ -144,7 +144,7 @@ void HwUi::setup() {
 
   pause_sw.setup_button(PP_SW);
 
-  Serial.println("HW UI setup done");
+  log_i("HW UI setup complete");
   hwui.measure_battery();
 
   start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
@@ -207,8 +207,7 @@ void HwUi::monitor_wifiBT_flags() {
 
   // BT connected -> steady medium brightness
   if (curBT != prev_BTconnected) {
-    Serial.print("[LED] BT state change: ");
-    Serial.println(curBT ? "CONNECTED" : "DISCONNECTED");
+    log_d("LED: BT state change: %s", curBT ? "CONNECTED" : "DISCONNECTED");
     if (curBT) {
       start_pulse(BT_LED, BT_PULSE_TIME, BT_PULSE_MIN_BRIGHTNESS,
                   BT_PULSE_BRIGHTNESS);
@@ -230,13 +229,13 @@ void HwUi::update_switches() {
       } else {
         // Default behavior if no callback registered
         PAUSED = !PAUSED;
-        Serial.println("PAUSED (short press - default)");
+        log_d("Button: PAUSE (short press - default)");
       }
     } else if (pause_sw.is_long_press()) {
       if (pause_long_press_cb != nullptr) {
         pause_long_press_cb();
       } else {
-        Serial.println("PAUSE long press (no handler)");
+        log_d("Button: PAUSE long press (no handler)");
       }
     }
     pause_sw.reset_button();
@@ -249,13 +248,13 @@ void HwUi::update_switches() {
       if (mode_short_press_cb != nullptr) {
         mode_short_press_cb();
       } else {
-        Serial.println("Mode switch short press (no handler)");
+        log_d("Button: Mode switch short press (no handler)");
       }
     } else if (mode_sw.is_long_press()) {
       if (mode_long_press_cb != nullptr) {
         mode_long_press_cb();
       } else {
-        Serial.println("Mode switch long press (no handler)");
+        log_d("Button: Mode switch long press (no handler)");
       }
     }
     mode_sw.reset_button();

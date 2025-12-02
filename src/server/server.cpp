@@ -13,13 +13,13 @@ void PipoServer::setup() {
       string("pipo-") + config.general_config["PipoName"].as<string>();
   if (!MDNS.begin(
           mdns_name.c_str())) {  // Start the mDNS responder for esp.local
-    Serial.println("Error setting up MDNS responder!");
+    log_e("Error setting up MDNS responder!");
   } else {
-    Serial.println("mDNS responder started");
+    log_i("mDNS responder started: %s", mdns_name.c_str());
     // Add service to MDNS-SD
     MDNS.addService("http", "tcp", 80);
   }
-  Serial.println("Start server");
+  log_i("Starting HTTP server");
   //Todo: check lib exemple. can be improved
   fileServer = new PipoFileServer("/", LittleFS, "/webpage");
 
@@ -29,7 +29,7 @@ void PipoServer::setup() {
   // captivePortal.start(&server);
   // Add a custom 404 handler
   server.onNotFound([&](AsyncWebServerRequest* request) {
-    Serial.println("File not found: " + request->url());
+    log_w("File not found: %s", request->url().c_str());
     request->send(404, "text/plain", "File Not Found");
   });
 
@@ -55,7 +55,7 @@ bool PipoServer::isRunning() {
 }
 void PipoServer::setup_requests() {
   server.on("/info", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    Serial.println("info request");
+    log_d("HTTP request: /info");
     if (DEBUG_HEAP)
       pipoDebugHeap("info request");
 #ifdef PIPO_FW_VERSION

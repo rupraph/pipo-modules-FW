@@ -11,18 +11,14 @@ bool Config::validate_config(JsonDocument& config_doc) {
 
   for (const char* key : required_keys) {
     if (!config_doc.containsKey(key)) {
-      Serial.print("Config validation failed: missing key '");
-      Serial.print(key);
-      Serial.println("'");
+      log_e("Config validation failed: missing key '%s'", key);
       logs.writeError("Config validation: missing key '" + String(key) + "'");
       return false;
     }
 
     // Check if the key's value is null
     if (config_doc[key].isNull()) {
-      Serial.print("Config validation failed: key '");
-      Serial.print(key);
-      Serial.println("' is null");
+      log_e("Config validation failed: key '%s' is null", key);
       logs.writeError("Config validation: key '" + String(key) + "' is null");
       return false;
     }
@@ -31,9 +27,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
     if (config_doc[key].is<JsonObject>()) {
       JsonObject obj = config_doc[key].as<JsonObject>();
       if (obj.size() == 0) {
-        Serial.print("Config validation failed: key '");
-        Serial.print(key);
-        Serial.println("' is empty");
+        log_e("Config validation failed: key '%s' is empty", key);
         logs.writeError("Config validation: key '" + String(key) +
                         "' is empty");
         return false;
@@ -48,9 +42,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
 
     for (const char* key : engine_keys) {
       if (!engine.containsKey(key) || engine[key].isNull()) {
-        Serial.print("Config validation failed: engine missing or null key '");
-        Serial.print(key);
-        Serial.println("'");
+        log_e("Config validation failed: engine missing or null key '%s'", key);
         logs.writeError("Config validation: engine missing/null key '" +
                         String(key) + "'");
         return false;
@@ -58,7 +50,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
     }
   }
 
-  Serial.println("Config validation passed");
+  log_i("Config validation passed");
   return true;
 }
 
@@ -66,12 +58,12 @@ bool Config::validate_config(JsonDocument& config_doc) {
 /// @param target_filename The filename to restore (without extension)
 /// @return true if restore succeeded, false otherwise
 bool Config::restore_from_default(String target_filename) {
-  Serial.println("Attempting to restore config from default.json");
+  log_w("Attempting to restore config from default.json");
   logs.writeLog("Restoring config from default.json to " + target_filename);
 
   // Check if default.json exists
   if (!LittleFS.exists(config_model_path)) {
-    Serial.println("CRITICAL: default.json not found, cannot restore");
+    log_e("CRITICAL: default.json not found, cannot restore");
     logs.writeError("CRITICAL: default.json not found");
     return false;
   }

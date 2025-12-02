@@ -253,9 +253,8 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     velocity = j["velocity"];  // Assuming velocity is a member variable
     this->update_scale();
 
-  } catch (const std::exception& e) {
-    Serial.print("Error: ");
-    Serial.println(e.what());
+  } catch (std::exception& e) {
+    log_e("MIDI translator error: %s", e.what());
   }
 }
 

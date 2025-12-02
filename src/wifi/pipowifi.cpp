@@ -18,7 +18,7 @@ void wifiTask(void* pvParameters) {
 
 PipoWifi::PipoWifi() {};
 void PipoWifi::setup() {
-  Serial.println("Pipo Wifi setup");
+  log_i("Pipo WiFi setup");
   pwm.setup();
 
   // Register event handlers directly - standard ESP32 approach
@@ -55,16 +55,15 @@ void PipoWifi::setup() {
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
   // prevent from the Wifi to sleep: avoid latency in websockets
   scanning = true;
-  Serial.println("Wifi scan network initiated");
+  log_i("WiFi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
-  Serial.println("Scan done, wifi setup ");
+  log_i("WiFi scan complete, setup done");
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup pipowifi");
 };
 void PipoWifi::saveScanResult() {
   signals.clear();
-  Serial.print("Saving scan results: ");
-  Serial.println(WiFi.scanComplete());
+  log_d("Saving scan results: %d networks found", WiFi.scanComplete());
   for (int i = 0; i < WiFi.scanComplete(); i++) {
     signals[WiFi.SSID(i)] = WiFi.RSSI(i);
   }
@@ -74,24 +73,24 @@ void PipoWifi::saveScanResult() {
 
 // WiFi Event Handlers - Standard ESP32 approach
 void onWiFiReadyHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] WIFI_READY");
+  log_d("[Event] WIFI_READY");
 }
 
 void onScanDoneHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] SCAN_DONE");
+  log_d("[Event] SCAN_DONE");
   wifi.scanning = false;
   wifi.saveScanResult();
   wifi.step();
 }
 
 void onSTAStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_START");
+  log_d("[Event] STA_START");
   staStarted = true;
   wifi.step();
 }
 
 void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_STOP");
+  log_d("[Event] STA_STOP");
   staStarted = false;
   wifi.next.ssid = "";
   wifi.next.password = "";
@@ -99,7 +98,7 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_CONNECTED");
+  log_i("[Event] STA_CONNECTED");
   wifi.status = PipoWifi::CONNECTED;
   staConnected = true;
   wifi.pwm.add(wifi.next.ssid, wifi.next.password);
@@ -114,14 +113,12 @@ void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_DISCONNECTED");
   uint8_t reason = info.wifi_sta_disconnected.reason;
-  Serial.print("  Reason: ");
-  Serial.println(reason);
+  log_w("[Event] STA_DISCONNECTED - Reason: %d", reason);
 
   // Check if this was an intentional disconnect
   if (wifi.intentionalDisconnect) {
-    Serial.println("  Intentional disconnect, resetting counter");
+    log_d("  Intentional disconnect, resetting counter");
     wifi.reconnectAttempts = 0;
     wifi.intentionalDisconnect = false;
     wifi.next.ssid = "";
@@ -132,13 +129,10 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     if (strcmp((char*)info.wifi_sta_disconnected.ssid,
                wifi.next.ssid.c_str()) == 0) {
       wifi.reconnectAttempts++;
-      Serial.print("  Reconnect attempt: ");
-      Serial.print(wifi.reconnectAttempts);
-      Serial.print("/");
-      Serial.println(wifi.MAX_RECONNECT_ATTEMPTS);
+      log_w("  Reconnect attempt: %d/%d", wifi.reconnectAttempts, wifi.MAX_RECONNECT_ATTEMPTS);
 
       if (wifi.reconnectAttempts >= wifi.MAX_RECONNECT_ATTEMPTS) {
-        Serial.println("  Max reconnect attempts reached, giving up");
+        log_w("  Max reconnect attempts reached, giving up");
         wifi.next.ssid = "";
         wifi.next.password = "";
         wifi.reconnectAttempts = 0;
@@ -155,80 +149,62 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_AUTHMODE_CHANGE");
+  log_d("[Event] STA_AUTHMODE_CHANGE");
 }
 
 void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_GOT_IP");
+  log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
-  Serial.print("  IP: ");
-  Serial.println(WiFi.localIP());
   wifi.step();
 }
 
 void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_GOT_IP6");
+  log_i("[Event] STA_GOT_IP6 - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
-  Serial.print("  IP: ");
-  Serial.println(WiFi.localIP());
   wifi.step();
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] STA_LOST_IP");
+  log_w("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
   wifi.step();
 }
 
 void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_START");
+  log_d("[Event] AP_START - apStarted flag: %d", true);
   apStarted = true;
-  Serial.print("  Flag apStarted = ");
-  Serial.println(apStarted);
   // Note: apStarted means the AP has started, but not necessarily configured yet
   wifi.step();
 }
 
 void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_STOP");
+  log_d("[Event] AP_STOP");
   apStarted = false;
   apConfigured = false;
   wifi.step();
 }
 
 void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_STACONNECTED");
-  Serial.print("  Flag BEFORE apConnected = ");
-  Serial.println(apConnected);
+  log_d("[Event] AP_STACONNECTED - apConnected: false -> true");
   apConnected = true;
-  Serial.print("  Flag AFTER apConnected = ");
-  Serial.println(apConnected);
 }
 
 void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_STADISCONNECTED");
-  Serial.print("  Flag BEFORE apConnected = ");
-  Serial.println(apConnected);
+  log_d("[Event] AP_STADISCONNECTED - apConnected: true -> false");
   apConnected = false;
-  Serial.print("  Flag AFTER apConnected = ");
-  Serial.println(apConnected);
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_STAIPASSIGNED");
-  Serial.print("  Flag BEFORE apConnected = ");
-  Serial.println(apConnected);
+  log_d("[Event] AP_STAIPASSIGNED - apConnected: -> true");
   apConnected = true;
-  Serial.print("  Flag AFTER apConnected = ");
-  Serial.println(apConnected);
 }
 
 void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_PROBEREQRECVED");
+  log_v("[Event] AP_PROBEREQRECVED");
 }
 
 void onAPGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  Serial.println("[Event] AP_GOT_IP6");
+  log_d("[Event] AP_GOT_IP6");
 }
 
 bool PipoWifi::connect() {
@@ -260,8 +236,7 @@ bool PipoWifi::connect(String ssid, String password) {
   reconnectAttempts = 0;  // Reset counter for new connection attempt
   lastReconnectAttempt = millis();
   WiFi.setAutoReconnect(true);  // Re-enable auto-reconnect for new connection
-  Serial.print("Connecting to ");
-  Serial.println(ssid.c_str());
+  log_i("Connecting to WiFi: %s", ssid.c_str());
   WiFi.begin(ssid.c_str(), password.c_str());
   return true;
 };
@@ -272,16 +247,14 @@ bool PipoWifi::configureAP() {
   apIP = IPAddress(192, 168, subnetBase, 1);
   WiFi.softAPConfig(apIP, apIP, apMask);
   string apName = "Pipo-" + config.general_config["PipoName"].as<string>();
-  Serial.print("Starting AP: ");
-  // log_i("Starting AP:");
-  Serial.println(apName.c_str());
+  log_i("Starting AP: %s", apName.c_str());
   apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
   if (apStarted) {
-    Serial.println("AP started successfully.");
+    log_i("AP started successfully");
     apConfigured = true;
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
-    Serial.println("Failed to start AP.");
+    log_e("Failed to start AP");
     apConfigured = false;
   }
   return apStarted;
@@ -390,24 +363,13 @@ void PipoWifi::getFreeSubNet() {
 }
 void PipoWifi::step() {
   if (scanning || status == CONNECTING) {
-    Serial.println("Step scanning");
+    log_d("Step: scanning or connecting, skipping");
     return;
   }
 
-  Serial.println("Step");
+  log_d("Step: mode=%d next.mode=%d apStarted=%d staStarted=%d status=%d",
+        WiFi.getMode(), next.mode, apStarted, staStarted, status);
   wifi_mode_t mode = WiFi.getMode();
-  Serial.print("Change mode? ");
-  Serial.print(next.mode);
-  Serial.print(" mode ");
-  Serial.print(mode);
-  Serial.print(" apStarted ");
-  Serial.print(apStarted);
-  Serial.print(" staStarted ");
-  Serial.print(staStarted);
-  Serial.print(" status ");
-  Serial.println(status);
-
-  if (next.mode != WiFi.getMode()) {
     osc.stop();  // Stop OSC before changing WiFi mode
     intentionalDisconnect = true;
     WiFi.disconnect(true, true);
@@ -431,21 +393,14 @@ void PipoWifi::step() {
       return;
     }
   }
-  Serial.print("Should AP? ");
-  Serial.print(mode);
-  Serial.print(" apStarted ");
-  Serial.print(apStarted);
-  Serial.print(" apConfigured ");
-  Serial.print(apConfigured);
-  Serial.print(" staStarted ");
-  Serial.print(staStarted);
-  Serial.print(" status ");
-  Serial.println(status);
+  
+  log_d("Step: Checking AP - mode=%d apStarted=%d apConfigured=%d",
+        mode, apStarted, apConfigured);
 
   if (!apConfigured && (mode == WIFI_MODE_AP ||
                         mode == WIFI_MODE_APSTA && status != CONNECTING)) {
     // we are in AP mode, need to configure it
-    Serial.println("Configure AP");
+    log_d("Configuring AP");
     configureAP();
   }
 }
@@ -455,17 +410,17 @@ void PipoWifi::refresh() {
   wifi_mode_t prevMode = WiFi.getMode();
 
   if (next.shouldScan) {
-    Serial.println("Wifi Scan");
+    log_d("WiFi: Starting network scan");
     scanning = WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     next.shouldScan = false;
   } else if (next.shouldRSSI) {
-    Serial.println("RSSI");
+    log_d("WiFi: Updating RSSI");
     rssi = WiFi.RSSI();
     next.shouldRSSI = false;
   } else if (isChangingAP) {
     isChangingAP = false;
     if (status == CONNECTED) {
-      Serial.println("Disconnect 1");
+      log_d("WiFi: Disconnecting for AP change");
       intentionalDisconnect = true;
       WiFi.disconnect();
     } else if (status == DISCONNECTED && apStarted) {
@@ -505,7 +460,7 @@ void PipoWifi::forgetNetwork(String ssid) {
 }
 
 void PipoWifi::disconnect() {
-  Serial.println("User-initiated disconnect");
+  log_i("User-initiated disconnect");
   intentionalDisconnect = true;
   WiFi.disconnect();
 }

@@ -37,14 +37,14 @@ void setup() {  // by default on core 1
 
 #if defined(DISABLE_USB_COMM)
   // Wait press to start setup
-  Serial.println("Press any key to start...");
+  log_i("Press any key to start...");
   while (!Serial.available()) {
     delay(10);
   }
   delay(100);  // Extra time for terminal to be ready
 #endif
 
-  Serial.println("\n=== Pipo Setup Start ===");
+  log_i("\n=== Pipo Setup Start ===");
 
   config.cleanup_temp_files();  // Clean up any orphaned temp files from crashes
 
@@ -68,14 +68,13 @@ void setup() {  // by default on core 1
   init_filesystem();
 
   /////// Load config
-  Serial.print("config list:");
-  Serial.println(config.get_list());
+  log_i("config list: %s", config.get_list().c_str());
   config.load_config();
 
   try {
     config.apply(engine, osc, DEBUG_CONFIG);
   } catch (const std::exception& e) {
-    Serial.println("failed setting conf");
+    log_e("Failed to apply configuration: %s", e.what());
   }
 
   /////// Init midi and hid
@@ -96,7 +95,7 @@ void setup() {  // by default on core 1
   listDir(LittleFS, "/", 0);
 
   /////// initialize sensor/inputs
-  Serial.println("init sensor");
+  log_i("Initializing sensor");
   input_sensor.init();
   input_sensor.setup();
   if (DEBUG_HEAP)
@@ -108,21 +107,21 @@ void setup() {  // by default on core 1
       []() { input_sensor.set_new_reference_orientation(); });
   hwui.set_mode_long_press_callback(
       []() { input_sensor.toggle_relative_mode(); });
-  Serial.println("Motion sensor button callbacks registered");
+  log_i("Motion sensor button callbacks registered");
 #endif
 
 #ifdef PIPO_RANGE
   hwui.set_mode_short_press_callback([]() { input_sensor.toggle_hold_mode(); });
-  Serial.println("Range sensor button callbacks registered");
+  log_i("Range sensor button callbacks registered");
 #endif
 
   // wait for initial offsets to be measured if needed
   while (input_sensor.is_offset_measurement_complete() == false) {
     input_sensor.update();
-    Serial.println("Waiting for boot offset measurement...");
+    log_i("Waiting for boot offset measurement...");
   }
 
-  Serial.println("Boot offsets measured, gather and save config");
+  log_i("Boot offsets measured, gather and save config");
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 
@@ -130,7 +129,7 @@ void setup() {  // by default on core 1
     pipoDebugHeap();
 
   // Start server
-  Serial.println("starting config page");
+  log_i("Starting config page");
   server.setup();  // takes 30k heap
 
   // Configure OSC (mutex already created in init())
@@ -139,11 +138,11 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap();
 
-  Serial.println("starting tasks");
+  log_i("Starting tasks");
 
 #ifdef DEBUG_WATCHDOG
   esp_task_wdt_init(1000, false);  // 1 second timeout in debug mode
-  Serial.println("⚠️ DEBUG_WATCHDOG enabled: 1000ms timeout");
+  log_w("DEBUG_WATCHDOG enabled: 1000ms timeout");
 #else
   esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
 #endif
@@ -182,7 +181,7 @@ void setup() {  // by default on core 1
   // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8000, NULL, 1,
   //                         &sensorTaskHandle, 1);  // Priority 4, Core 1, 400Hz
 
-  Serial.println("Setup done");
+  log_i("Setup complete");
 }
 
 // stack is 8k by default
@@ -220,9 +219,9 @@ void loop() {
   if (executionTime >= xFrequency) {
     overrunCount++;
     if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
-      Serial.printf("⚠️ loop() overruns: %lu (execution: %dms, target: %dms)\n",
-                    overrunCount, pdTICKS_TO_MS(executionTime),
-                    pdTICKS_TO_MS(xFrequency));
+      log_w("loop() overruns: %lu (execution: %dms, target: %dms)",
+            overrunCount, pdTICKS_TO_MS(executionTime),
+            pdTICKS_TO_MS(xFrequency));
       overrunCount = 0;
       lastReportTime = millis();
     }

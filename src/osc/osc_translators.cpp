@@ -53,8 +53,7 @@ void OscTranslator::set_from_json(const JsonDocument& j) {
     osc_min = j["osc_min"];
     osc_addr = j["osc_addr"].as<string>();
   } catch (const std::exception& e) {
-    Serial.print("Error: ");
-    Serial.println(e.what());
+    log_e("OSC translator error: %s", e.what());
   }
 }
 
