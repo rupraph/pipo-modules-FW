@@ -7,7 +7,7 @@ HidTranslator::HidTranslator() {}
 int HidTranslator::map_linear(float value, float input_min, float input_max,
                               int output_min, int output_max) {
   if (input_min == input_max || output_min == output_max) {
-    Serial.println("min and max values cannot be equal");
+    log_e("min and max values cannot be equal");
   }
   // cap value to input range
   if (value < input_min) {
@@ -64,8 +64,7 @@ void HidTranslator::set_from_json(const JsonDocument& j) {
     addr2 = j["addr2"].as<string>();
     stroke_mode = j["stroke_mode"];
   } catch (const std::exception& e) {
-    Serial.print("Error: ");
-    Serial.println(e.what());
+    log_e("Error: %s", e.what());
   }
 }
 

@@ -9,38 +9,34 @@
 void init_filesystem() {
   // Init LittleFS
   if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
-    Serial.println("LittleFS Mount Failed");
+    log_e("LittleFS Mount Failed");
     return;
   }
-  Serial.println("LittleFS Mount Success");
+  log_i("LittleFS Mount Success");
   // listDir(LittleFS, "/config", 2);
   // listDir(LittleFS, "/webpage", 2);
-  Serial.print("Used filesystem bytes: ");
-  Serial.println(LittleFS.usedBytes());
+  log_i("Used filesystem bytes: %u", LittleFS.usedBytes());
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup filesystem");
 }
 
 void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {
-  Serial.print("Listing directory:");
-  Serial.println(dirname);
+  log_d("Listing directory: %s", dirname);
 
   File root = fs.open(dirname);
   if (!root) {
-    Serial.println("- failed to open directory");
+    log_e("- failed to open directory");
     return;
   }
   if (!root.isDirectory()) {
-    Serial.println(" - not a directory");
+    log_e(" - not a directory");
     return;
   }
 
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
-      Serial.print("  DIR : ");
-
-      Serial.print(file.name());
+      log_d("  DIR : %s", file.name());
       time_t t = file.getLastWrite();
       struct tm* tmstruct = localtime(&t);
       // Serial.printf("  LAST WRITE: %d-%02d-%02d
@@ -52,11 +48,7 @@ void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {
         listDir(fs, file.name(), levels - 1);
       }
     } else {
-      Serial.print("  FILE: ");
-      Serial.print(file.name());
-      Serial.print("  SIZE: ");
-
-      Serial.print(file.size());
+      log_d("  FILE: %s  SIZE: %u", file.name(), file.size());
       time_t t = file.getLastWrite();
       struct tm* tmstruct = localtime(&t);
       // Serial.printf("  LAST WRITE: %d-%02d-%02d
@@ -71,38 +63,35 @@ void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {
 }
 
 void createDir(fs::FS& fs, const char* path) {
-  Serial.print("Creating Dir:");
-  Serial.println(path);
+  log_d("Creating Dir: %s", path);
   if (fs.mkdir(path)) {
-    Serial.println("Dir created");
+    log_d("Dir created");
   } else {
-    Serial.println("mkdir failed");
+    log_e("mkdir failed");
   }
 }
 
 void removeDir(fs::FS& fs, const char* path) {
   // Serial.printf("Removing Dir: %s\n", path);
-  Serial.print("Removing Dir:");
-  Serial.println(path);
+  log_d("Removing Dir: %s", path);
   if (fs.rmdir(path)) {
-    Serial.println("Dir removed");
+    log_d("Dir removed");
   } else {
-    Serial.println("rmdir failed");
+    log_e("rmdir failed");
   }
 }
 
 // issue with the pipo analog might also be related to the file itself.
 std::string readFile(fs::FS& fs, const char* path) {
-  Serial.print("Start reading file: ");
-  Serial.println(path);
+  log_d("Start reading file: %s", path);
 
   File file = fs.open(path, "r");
   if (!file || file.isDirectory()) {
-    Serial.println("- failed to open file for reading");
+    log_e("- failed to open file for reading");
     return std::string();
   }
 
-  Serial.println("- read file:");
+  log_d("- read file:");
   std::string fileContents;
   char buffer[128];
   while (file.available()) {
@@ -110,78 +99,73 @@ std::string readFile(fs::FS& fs, const char* path) {
     fileContents.append(buffer, bytesRead);
   }
   file.close();
-  Serial.println("- file read done");
+  log_d("- file read done");
 
   return fileContents;
 }
 
 void writeFile(fs::FS& fs, const char* path, const char* message) {
-  Serial.print("Writing file: ");
-  Serial.println(path);
+  log_d("Writing file: %s", path);
 
   File file = fs.open(path, FILE_WRITE);
   if (!file) {
-    Serial.println("- failed to open file for writing");
+    log_e("- failed to open file for writing");
     return;
   }
   if (file.print(message)) {
-    Serial.println("- file written");
+    log_d("- file written");
   } else {
-    Serial.println("- write failed");
+    log_e("- write failed");
   }
   file.close();
 }
 
 void appendFile(fs::FS& fs, const char* path, const char* message) {
-  Serial.print("Appending to file:");
-  Serial.println(path);
+  log_d("Appending to file: %s", path);
 
   File file = fs.open(path, FILE_APPEND);
   if (!file) {
-    Serial.println("- failed to open file for appending");
+    log_e("- failed to open file for appending");
     return;
   }
   if (file.print(message)) {
-    Serial.println("- message appended");
+    log_d("- message appended");
   } else {
-    Serial.println("- append failed");
+    log_e("- append failed");
   }
   file.close();
 }
 
 void renameFile(fs::FS& fs, const char* path1, const char* path2) {
-  Serial.print("Renaming file");
-  Serial.print(path1);
-  Serial.print("to");
-  Serial.println(path2);
+  log_d("Renaming file %s to %s", path1, path2);
   if (fs.rename(path1, path2)) {
-    Serial.println("- file renamed");
+    log_d("- file renamed");
   } else {
-    Serial.println("- rename failed");
+    log_e("- rename failed");
   }
 }
 
 void deleteFile(fs::FS& fs, const char* path) {
-  Serial.println("Deleting file:" + String(path));
+  log_d("Deleting file: %s", path);
   if (fs.remove(path)) {
-    Serial.println("- file deleted");
+    log_d("- file deleted");
   } else {
-    Serial.println("- delete failed");
+    log_e("- delete failed");
   }
 }
 
 void copyFile(fs::FS& fs, const char* path1, const char* path2) {
-  Serial.println("Copying file from:" + String(path1) + String(path2));
+  log_d("Copying file from: %s to %s", path1, path2);
 
   File file = fs.open(path1, "r");
   if (!file || file.isDirectory()) {
-    Serial.println("- failed to open file for reading");
+    log_e("- failed to open file for reading");
     return;
   }
 
   File file2 = fs.open(path2, "w");
   if (!file2) {
-    Serial.println("- failed to open file for writing");
+    log_e("- failed to open file for writing");
     return;
   }
 
@@ -191,7 +175,7 @@ void copyFile(fs::FS& fs, const char* path1, const char* path2) {
 
   file.close();
   file2.close();
-  Serial.println("- file copied");
+  log_d("- file copied");
 }
 
 // SPIFFS-like write and delete file
@@ -219,13 +203,13 @@ void writeFile2(fs::FS& fs, const char* path, const char* message) {
   // Serial.printf("Writing file to: %s\r\n", path);
   File file = fs.open(path, FILE_WRITE);
   if (!file) {
-    Serial.println("- failed to open file for writing");
+    log_e("- failed to open file for writing");
     return;
   }
   if (file.print(message)) {
-    Serial.println("- file written");
+    log_d("- file written");
   } else {
-    Serial.println("- write failed");
+    log_e("- write failed");
   }
   file.close();
 }
@@ -236,9 +220,9 @@ void deleteFile2(fs::FS& fs, const char* path) {
   // Serial.printf("Deleting file and empty folders on path: %s\r\n", path);
 
   if (fs.remove(path)) {
-    Serial.println("- file deleted");
+    log_d("- file deleted");
   } else {
-    Serial.println("- delete failed");
+    log_e("- delete failed");
   }
 
   char* pathStr = strdup(path);
@@ -263,20 +247,20 @@ void testFileIO(fs::FS& fs, const char* path) {
   size_t len = 0;
   File file = fs.open(path, FILE_WRITE);
   if (!file) {
-    Serial.println("- failed to open file for writing");
+    log_e("- failed to open file for writing");
     return;
   }
 
   size_t i;
-  Serial.print("- writing");
+  log_d("- writing");
   uint32_t start = millis();
   for (i = 0; i < 2048; i++) {
     if ((i & 0x001F) == 0x001F) {
-      Serial.print(".");
+      log_v(".");
     }
     file.write(buf, 512);
   }
-  Serial.println("");
+  log_d("");
   uint32_t end = millis() - start;
   // Serial.printf(" - %u bytes written in %u ms\r\n", 2048 * 512, end);
   file.close();
@@ -289,7 +273,7 @@ void testFileIO(fs::FS& fs, const char* path) {
     len = file.size();
     size_t flen = len;
     start = millis();
-    Serial.print("- reading");
+    log_d("- reading");
     while (len) {
       size_t toRead = len;
       if (toRead > 512) {
@@ -297,15 +281,15 @@ void testFileIO(fs::FS& fs, const char* path) {
       }
       file.read(buf, toRead);
       if ((i++ & 0x001F) == 0x001F) {
-        Serial.print(".");
+        log_v(".");
       }
       len -= toRead;
     }
-    Serial.println("");
+    log_d("");
     end = millis() - start;
     // Serial.printf("- %u bytes read in %u ms\r\n", flen, end);
     file.close();
   } else {
-    Serial.println("- failed to open file for reading");
+    log_e("- failed to open file for reading");
   }
 }

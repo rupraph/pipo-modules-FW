@@ -166,7 +166,7 @@ void PipoSocket::loop() {
 
   // Handle low memory case
   if (ESP.getFreeHeap() < 30000) {
-    Serial.println("⚠️ Low Memory: Skipping WebSocket Messages");
+    log_w("⚠️ Low Memory: Skipping WebSocket Messages");
     return;
   }
 
@@ -223,8 +223,8 @@ void PipoSocket::loop() {
   // Send to connected clients
   for (AsyncWebSocketClient* c : clients) {
     if (!c->canSend()) {
-      Serial.printf("client cannot send: ID = %u STATUS = %u\n", c->id(),
-                    c->status());
+      log_d("client cannot send: ID = %u STATUS = %u", c->id(),
+            c->status());
       continue;
     }
     c->text(outMsg);
@@ -232,8 +232,7 @@ void PipoSocket::loop() {
 }
 
 void PipoSocket::stop() {
-  Serial.print("Closing with clients: ");
-  Serial.println(ws->count());
+  log_d("Closing with clients: %u", ws->count());
   this->ws->cleanupClients();
   this->ws->closeAll();
   this->ws->enable(false);

@@ -51,9 +51,9 @@ void usb_hid::setup(int hid_mode) {
     delay(1);
   }
   if (!TinyUSBDevice.mounted()) {
-    Serial.println("USB HID not mounted");
+    log_i("USB HID not mounted");
   } else {
-    Serial.println("USB HID mounted");
+    log_i("USB HID mounted");
   }
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup usb_hid");
@@ -134,7 +134,7 @@ void usb_hid::keyboard_set_press(string address) {
     // if (_ascii2keycode[uch][0]) {
     //   modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
     // }
-    Serial.println(_ascii2keycode[uch][1]);
+    // log_d("keycode: %d", _ascii2keycode[uch][1]);
     kb_keycodes[keycodes_index] = _ascii2keycode[uch][1];
   } else {  // deal with KEY_UP / KEY_DOWN / KEY_LEFT / KEY_RIGHT
     if (map_address == "KEY_UP") {
@@ -163,7 +163,7 @@ void usb_hid::keyboard_set_press(string address) {
   if (keycodes_index < 5) {
     keycodes_index++;
   } else {
-    Serial.println("keyboard key count exceeded, only using the first 6 keys");
+    log_w("keyboard key count exceeded, only using the first 6 keys");
   }
 }
 

@@ -24,7 +24,7 @@ void init_filesystem();
 
 void setup() {  // by default on core 1
 
-  //pulldown all pins
+  //Pulldown all pins (avoid floating)
   std::set<int> nopulldown = {0, 19, 20, 26, 27, 28, 29, 30, 31, 32};
   for (int pin = 0; pin <= 48; pin++) {
     if (nopulldown.find(pin) == nopulldown.end()) {
@@ -88,7 +88,7 @@ void setup() {  // by default on core 1
   print_reset_reason();
 
   /////// Init wifi
-  osc.init();  // Create OSC mutex before WiFi (prevents crashes from WiFi events)
+  osc.init();    // Create OSC mutex before WiFi
   wifi.setup();  //50k heap
 
   /////// print filesystem files list
@@ -128,7 +128,7 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap();
 
-  // Start server
+  // Start web server
   log_i("Starting config page");
   server.setup();  // takes 30k heap
 
@@ -150,10 +150,9 @@ void setup() {  // by default on core 1
   //CAREFULL:
   // fileserving reports running on core 1 for now. it should be on 0
   // websocket events (not loop) reports running on core 1 for now. it should be on 0
-  // should likely move button measurements in sensor task as this is similar activity
-  // when engine commented, heap seems stable
-
   // saving increases fragmentation from 15 to 40%
+
+  // We are using the main loop instead of a dedicated Sensor task to optimize ram usage in arduino framework
 
   xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 2,
                           &websocketTaskHandle, 0);
@@ -177,13 +176,10 @@ void setup() {  // by default on core 1
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
 
-  // using the main loop instead of Sensor task to optimize ram usage
-  // xTaskCreatePinnedToCore(sensorTask, "sensorTask", 8000, NULL, 1,
-  //                         &sensorTaskHandle, 1);  // Priority 4, Core 1, 400Hz
-
   log_i("Setup complete");
 }
 
+// Loop
 // stack is 8k by default
 // by default runs on core 1 for this board
 // prio 1
@@ -232,5 +228,5 @@ void loop() {
 
   vTaskDelayUntil(
       &xLastWakeTime,
-      xFrequency);  // Fixed 400Hz rate  //vTaskDelay(500);  // allow task to yiedl if empty
+      xFrequency);  // Fixed 400Hz rate // allow task to yiedl if empty
 }

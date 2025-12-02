@@ -339,14 +339,6 @@ bool PipoWifi::ready() {
   bool apStaReady = mode == WIFI_MODE_APSTA && staStarted && apStarted;
   bool staReady = mode == WIFI_MODE_STA && staStarted;
   bool apReady = (mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA) && apStarted;
-  // Serial.print("Ready? ");
-  // Serial.print(mode);
-  // Serial.print(" status ");
-  // Serial.print(status);
-  // Serial.print(" sta ");
-  // Serial.print(staStarted);
-  // Serial.print(" ap ");
-  // Serial.println(apStarted);
   return notScanningOrConnecting && (apStaReady || staReady || apReady);
 }
 

@@ -148,8 +148,7 @@ void OSC_handler::receive() {
         // bundleIN.dispatch("/servo", pwm);
       } else {
         OSCErrorCode error = bundleIN.getError();
-        Serial.print("Error: ");
-        Serial.println(error);
+        log_e("OSC receive error: %d", error);
       }
     }
 
@@ -320,7 +319,7 @@ void OSC_handler::send_bundle() {
     }
 
     if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-      Serial.println(F("No destination IP or port set"));
+      log_w("No destination IP or port set");
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
@@ -328,15 +327,14 @@ void OSC_handler::send_bundle() {
 
     int packetStatus = Udp.beginPacket(dest_ip, out_port);
     if (packetStatus == 0) {
-      Serial.println(F("Failed to start OSC packet"));
+      log_e("Failed to start OSC packet");
       bundle.empty();
       xSemaphoreGive(mutex);
       return;
     }
 
     if (bundle.hasError()) {
-      Serial.print(F("OSC Bundle has error: "));
-      Serial.println(bundle.getError());
+      log_e("OSC Bundle has error: %d", bundle.getError());
       bundle.empty();
       xSemaphoreGive(mutex);
       return;

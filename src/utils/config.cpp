@@ -73,7 +73,7 @@ bool Config::restore_from_default(String target_filename) {
   // Delete the corrupted file first
   if (LittleFS.exists(target_path.c_str())) {
     LittleFS.remove(target_path.c_str());
-    Serial.println("Removed corrupted config: " + target_path);
+    log_i("Removed corrupted config: %s", target_path.c_str());
   }
 
   // Copy default.json to target (copyFile returns void, so we verify afterward)
@@ -81,14 +81,14 @@ bool Config::restore_from_default(String target_filename) {
 
   // Verify the copy succeeded by checking if the file exists and has content
   if (!LittleFS.exists(target_path.c_str())) {
-    Serial.println("Failed to restore config: file not created");
+    log_e("Failed to restore config: file not created");
     logs.writeError("Failed to restore config: " + target_filename);
     return false;
   }
 
   File verifyFile = LittleFS.open(target_path.c_str(), FILE_READ);
   if (!verifyFile) {
-    Serial.println("Failed to restore config: cannot open file");
+    log_e("Failed to restore config: cannot open file");
     logs.writeError("Failed to restore config (cannot open): " +
                     target_filename);
     return false;
@@ -98,12 +98,12 @@ bool Config::restore_from_default(String target_filename) {
   verifyFile.close();
 
   if (fileSize < 10) {
-    Serial.println("Failed to restore config: file too small");
+    log_e("Failed to restore config: file too small");
     logs.writeError("Failed to restore config (too small): " + target_filename);
     return false;
   }
 
-  Serial.println("Successfully restored config from default.json");
+  log_i("Successfully restored config from default.json");
   logs.writeLog("Config restored successfully: " + target_filename);
   return true;
 }
@@ -111,21 +111,20 @@ bool Config::restore_from_default(String target_filename) {
 bool Config::load_config(String filename, bool addJsonExtension = true) {
   this->filename = filename;
   String configPath = get_path(filename, addJsonExtension);
-  Serial.print("load config: ");
-  Serial.println(configPath.c_str());
+  log_i("load config: %s", configPath.c_str());
 
   try {
     if (DEBUG_HEAP)
       pipoDebugHeap("Config: load config");
 
     if (DEBUG_CONFIG) {
-      Serial.println("config: before loading");
+      log_d("config: before loading");
       serializeJsonPretty(current_config, Serial);
     }
 
     // Check if file exists
     if (!LittleFS.exists(configPath.c_str())) {
-      Serial.println("Config file not found: " + configPath);
+      log_e("Config file not found: %s", configPath.c_str());
       logs.writeError("Config file not found: " + configPath);
       return false;
     }
@@ -133,7 +132,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     // Check file size (basic sanity check)
     File f = LittleFS.open(configPath.c_str(), FILE_READ);
     if (!f) {
-      Serial.println("Failed to open config file: " + configPath);
+      log_e("Failed to open config file: %s", configPath.c_str());
       logs.writeError("Failed to open config file: " + configPath);
       return false;
     }
@@ -141,8 +140,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     f.close();
 
     if (fileSize < 10) {  // Too small to be a valid config
-      Serial.println("Config file too small (likely corrupted): " +
-                     String(fileSize) + " bytes");
+      log_e("Config file too small (likely corrupted): %d bytes", fileSize);
       logs.writeError("Config file too small: " + String(fileSize) + " bytes");
       return false;
     }
@@ -151,43 +149,41 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     DeserializationError error =
         deserializeJson(current_config, readFile(LittleFS, configPath.c_str()));
     if (error) {
-      Serial.print("deserializeJson() failed: ");
-      Serial.println(error.c_str());
+      log_e("deserializeJson() failed: %s", error.c_str());
       logs.writeError("Error loading config: " + String(error.c_str()));
       return false;
     }
 
     // NEW: Comprehensive validation to detect incomplete configs
     if (!validate_config(current_config)) {
-      Serial.println(
-          "Config validation failed, attempting to restore from default.json");
+      log_w("Config validation failed, attempting to restore from default.json");
       logs.writeError("Config validation failed for: " + filename);
 
       // Try to restore from default
       if (restore_from_default(filename)) {
         // Reload the restored config
-        Serial.println("Reloading restored config...");
+        log_i("Reloading restored config...");
         current_config.clear();
         error = deserializeJson(current_config,
                                 readFile(LittleFS, configPath.c_str()));
 
         if (error) {
-          Serial.println("Failed to reload restored config");
+          log_e("Failed to reload restored config");
           logs.writeError("Failed to reload restored config");
           return false;
         }
 
         // Validate again
         if (!validate_config(current_config)) {
-          Serial.println("Restored config still invalid");
+          log_e("Restored config still invalid");
           logs.writeError("Restored config validation failed");
           return false;
         }
 
-        Serial.println("Config successfully restored and validated");
+        log_i("Config successfully restored and validated");
         logs.writeLog("Config restored and validated: " + filename);
       } else {
-        Serial.println("Failed to restore config from default.json");
+        log_e("Failed to restore config from default.json");
         return false;
       }
     }
@@ -197,7 +193,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     general_config = current_config["general"];
 
     if (DEBUG_CONFIG) {
-      Serial.println("loaded config:");
+      log_d("loaded config:");
       serializeJsonPretty(current_config, Serial);
     }
     logs.writeLog("load config: " + filename);
@@ -206,8 +202,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
 
     return true;
   } catch (const std::exception& e) {
-    Serial.println("error loading config");
-    Serial.println(e.what());
+    log_e("error loading config: %s", e.what());
     logs.writeError("Exception loading config: " + String(e.what()));
     return false;
   }
@@ -215,7 +210,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
 
 /// @brief Clean up any orphaned .tmp files from previous crashes
 void Config::cleanup_temp_files() {
-  Serial.println("Cleaning up potential temp config files...");
+  log_i("Cleaning up potential temp config files...");
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
     return;
@@ -228,7 +223,7 @@ void Config::cleanup_temp_files() {
       String fullPath = String(configs_root) + "/" + name;
       file.close();
       LittleFS.remove(fullPath.c_str());
-      Serial.println("Cleaned up temp file: " + fullPath);
+      log_i("Cleaned up temp file: %s", fullPath.c_str());
       logs.writeLog("Cleaned up orphaned temp file: " + name);
       file = root.openNextFile();
     } else {
@@ -243,26 +238,26 @@ void Config::cleanup_temp_files() {
 void Config::load_config() {
   // if no default config, create default
   if (!LittleFS.exists(get_path("Config-1").c_str())) {
-    Serial.println("no default config, creating one");
+    log_i("no default config, creating one");
     new_config("Config-1");
   }
   // if last config exists, load it
   if (LittleFS.exists(last_config_path)) {
     String name = String(readFile(LittleFS, last_config_path).c_str());
     if (LittleFS.exists(get_path(name).c_str())) {
-      Serial.println("last config found: " + name);
+      log_i("last config found: %s", name.c_str());
       bool success = load_config(name);
       if (!success) {
         // Config is corrupted, delete it and fallback to default
-        Serial.println("Config corrupted, deleting: " + name);
+        log_w("Config corrupted, deleting: %s", name.c_str());
         logs.writeError("Deleting corrupted config: " + name);
         LittleFS.remove(get_path(name).c_str());
 
         // Load default config
-        Serial.println("Falling back to default config");
+        log_i("Falling back to default config");
         bool defaultSuccess = load_config("Config-1");
         if (!defaultSuccess) {
-          Serial.println("CRITICAL: Default config is also corrupted!");
+          log_e("CRITICAL: Default config is also corrupted!");
           logs.writeError("CRITICAL: Default config corrupted, recreating");
           // Recreate default from model
           new_config("Config-1");
@@ -271,12 +266,12 @@ void Config::load_config() {
       }
       return;
     }
-    Serial.println(F("last config not found, loading default"));
+    log_i("last config not found, loading default");
   }
   // if no last config, load default
   bool success = load_config("Config-1");
   if (!success) {
-    Serial.println("CRITICAL: Default config corrupted, recreating");
+    log_e("CRITICAL: Default config corrupted, recreating");
     logs.writeError("CRITICAL: Default config corrupted, recreating");
     new_config("Config-1");
     load_config("Config-1");
@@ -286,7 +281,7 @@ void Config::load_config() {
 String Config::get_list() {
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
-    Serial.print("failed to open config root");
+    log_e("failed to open config root");
     throw std::runtime_error("failed to open configs root");
   }
   String list;
@@ -323,8 +318,7 @@ void Config::save() {
 void Config::save(String filename) {
   // Validate config before saving to prevent writing incomplete configs
   if (!validate_config(current_config)) {
-    Serial.println(
-        "CRITICAL: Attempted to save invalid config, operation aborted!");
+    log_e("CRITICAL: Attempted to save invalid config, operation aborted!");
     logs.writeError("Save aborted: config validation failed for " + filename);
     return;
   }
@@ -332,13 +326,12 @@ void Config::save(String filename) {
   String finalPath = get_path(filename);
   String tempPath = finalPath + temp_suffix;
 
-  Serial.print("save config (atomic): ");
-  Serial.println(finalPath.c_str());
+  log_i("save config (atomic): %s", finalPath.c_str());
 
   // Write to temporary file first
   File file = LittleFS.open(tempPath.c_str(), FILE_WRITE);
   if (!file) {
-    Serial.println("failed to open temp file for writing");
+    log_e("failed to open temp file for writing");
     logs.writeError("Failed to open temp file for writing: " + filename);
     return;
   }
@@ -347,17 +340,17 @@ void Config::save(String filename) {
   file.close();
 
   if (bytesWritten == 0) {
-    Serial.println("Failed to write to temp file (0 bytes written)");
+    log_e("Failed to write to temp file (0 bytes written)");
     logs.writeError("Failed to write config to temp (0 bytes): " + filename);
     LittleFS.remove(tempPath.c_str());
-    Serial.println("Removed corrupted temp file");
+    log_i("Removed corrupted temp file");
     return;
   }
 
   // Verify temp file before committing
   File verifyFile = LittleFS.open(tempPath.c_str(), FILE_READ);
   if (!verifyFile || verifyFile.size() != bytesWritten) {
-    Serial.println("Temp file verification failed");
+    log_e("Temp file verification failed");
     logs.writeError("Temp file verification failed for: " + filename);
     if (verifyFile)
       verifyFile.close();
@@ -369,12 +362,10 @@ void Config::save(String filename) {
   // Atomic rename: this is the critical moment
   // If power fails here, either old or new config exists (never partial)
   if (LittleFS.rename(tempPath.c_str(), finalPath.c_str())) {
-    Serial.print("Config saved successfully (");
-    Serial.print(bytesWritten);
-    Serial.println(" bytes)");
+    log_i("Config saved successfully (%d bytes)", bytesWritten);
     logs.writeLog("save config: " + filename);
   } else {
-    Serial.println("Failed to rename temp file to final config");
+    log_e("Failed to rename temp file to final config");
     logs.writeError("Failed to commit config (rename failed): " + filename);
     LittleFS.remove(tempPath.c_str());
   }
@@ -398,7 +389,7 @@ void Config::delete_config(String filename) {
       String name = String(file.name());
       bool success = load_config(name.substring(0, name.length() - 5));
       if (!success) {
-        Serial.println("Next config corrupted, falling back to default");
+        log_w("Next config corrupted, falling back to default");
         logs.writeError("Next config corrupted: " + name);
         LittleFS.remove(get_path(name.substring(0, name.length() - 5)).c_str());
         load_config();
@@ -439,17 +430,15 @@ void Config::set(const String& config) {
     current_config.clear();
     DeserializationError error = deserializeJson(current_config, config);
     if (error) {
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.c_str());
+      log_e("deserializeJson() failed: %s", error.c_str());
       logs.writeError("Error setting config: " + String(error.c_str()));
       return;
     }
     // current_config = config;
-    Serial.println("config set");
+    log_i("config set");
     logs.writeLog("config set");
   } catch (const std::exception& e) {
-    Serial.println("error setting current_config from a json object");
-    Serial.println(e.what());
+    log_e("error setting current_config from a json object: %s", e.what());
     logs.writeError("Error setting config: " + String(e.what()));
   }
 }
@@ -538,53 +527,53 @@ void Config::print() {
 
 //* @brief This gathers from all classes the config. does not save it.
 void Config::gather(Engine& engine, bool debug) {
-  Serial.println("gatherconfig sensor");
+  log_d("gatherconfig sensor");
   current_config["inputs"].clear();
   current_config["inputs"] = input_sensor.get_inputs_config();
-  Serial.println("gatherconfig engine");
+  log_d("gatherconfig engine");
   current_config["engine"].clear();
   current_config["engine"] = engine.get_config();
-  Serial.println("gatherconfig general");
+  log_d("gatherconfig general");
   current_config["general"].clear();
   current_config["general"] = general_config;
-  Serial.println("gatherconfig sensorconf");
+  log_d("gatherconfig sensorconf");
   current_config["sensorconf"].clear();
   current_config["sensorconf"] = input_sensor.get_sensor_config();
 
   // Validate the gathered config
   if (!validate_config(current_config)) {
-    Serial.println("WARNING: Gathered config is incomplete!");
+    log_w("WARNING: Gathered config is incomplete!");
     logs.writeError("Gathered config validation failed");
 
     // Log which sections are problematic
     if (current_config["inputs"].isNull() ||
         (current_config["inputs"].is<JsonObject>() &&
          current_config["inputs"].as<JsonObject>().size() == 0)) {
-      Serial.println("  - inputs section is null or empty");
+      log_w("  - inputs section is null or empty");
     }
     if (current_config["engine"].isNull() ||
         (current_config["engine"].is<JsonObject>() &&
          current_config["engine"].as<JsonObject>().size() == 0)) {
-      Serial.println("  - engine section is null or empty");
+      log_w("  - engine section is null or empty");
     }
     if (current_config["general"].isNull() ||
         (current_config["general"].is<JsonObject>() &&
          current_config["general"].as<JsonObject>().size() == 0)) {
-      Serial.println("  - general section is null or empty");
+      log_w("  - general section is null or empty");
     }
     if (current_config["sensorconf"].isNull() ||
         (current_config["sensorconf"].is<JsonObject>() &&
          current_config["sensorconf"].as<JsonObject>().size() == 0)) {
-      Serial.println("  - sensorconf section is null or empty");
+      log_w("  - sensorconf section is null or empty");
     }
   } else {
-    Serial.println("Gathered config validated successfully");
+    log_i("Gathered config validated successfully");
   }
 
   if (debug) {
-    Serial.println("gathered_config");
+    log_d("gathered_config");
     serializeJsonPretty(current_config, Serial);
-    Serial.println("gathered_config_end");
+    log_d("gathered_config_end");
   }
 }
 

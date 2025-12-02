@@ -149,11 +149,9 @@ void midi_io::manage_sustain() {
 }
 
 void midi_io::printNoteList(int channel) {
-  Serial.println("Printing note list");
+  log_d("Printing note list");
   for (auto const& pair : channel_note_list[channel]) {
-    Serial.print("Note: ");
-    Serial.println(pair.first);
-    Serial.print("isplaying ?: ");
-    Serial.println(is_note_playing(pair.first, channel));
+    log_d("Note: %d isplaying ?: %d", pair.first, 
+          is_note_playing(pair.first, channel));
   }
 }

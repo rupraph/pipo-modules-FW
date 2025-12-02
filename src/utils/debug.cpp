@@ -38,70 +38,70 @@ void pipoDebugHeapFull(const char* stepName = nullptr) {
   size_t usedHeap = totalHeap - freeHeap;
 
   if (stepName) {
-    Serial.printf("Heap Memory Usage at %s:\n", stepName);
+    log_d("Heap Memory Usage at %s:", stepName);
   } else {
-    Serial.println("Heap Memory Usage:");
+    log_d("Heap Memory Usage:");
   }
 
   // Serial.printf("  Total Heap: %u bytes (%.2f KB)\n", totalHeap,
   //               totalHeap / 1024.0);
   // Serial.printf("  Used Heap:  %u bytes (%.2f KB)\n", usedHeap,
   //               usedHeap / 1024.0);
-  Serial.printf("  Free Heap:  %u bytes (%.2f KB)\n", freeHeap,
-                freeHeap / 1024.0);
-  Serial.printf(" Max block: %u bytes\n", largest_block);
-  Serial.printf("Fragmentation Ratio: %.2f%%\n",
-                (1.0 - ((float)largest_block / freeHeap)) * 100);
+  log_d("  Free Heap:  %u bytes (%.2f KB)", freeHeap,
+        freeHeap / 1024.0);
+  log_d(" Max block: %u bytes", largest_block);
+  log_d("Fragmentation Ratio: %.2f%%",
+        (1.0 - ((float)largest_block / freeHeap)) * 100);
 }
 
-void pipoDebugHeap(const char* stepName = nullptr) {
+void pipoDebugHeap(const char* stepName) {
   size_t freeHeap = ESP.getFreeHeap();
   if (stepName) {
-    Serial.printf("FREEHEAP at %s:", stepName);
+    log_d("FREEHEAP at %s: %u bytes (%.2f KB)", stepName, freeHeap,
+          (float)freeHeap / 1024.0f);
   } else {
-    Serial.println("FREEHEAP:");
+    log_d("FREEHEAP: %u bytes (%.2f KB)", freeHeap,
+          (float)freeHeap / 1024.0f);
   }
-  Serial.printf("  Free Heap:  %u bytes (%.2f KB)\n", freeHeap,
-                freeHeap / 1024.0);
 }
 
 void print_reset_reason() {
 
   esp_reset_reason_t reason = esp_reset_reason();
 
-  Serial.print("Reset reason: ");
+  log_i("Reset reason: ");
   switch (reason) {
     case ESP_RST_POWERON:
-      Serial.println("Power-on reset");
+      log_i("Power-on reset");
       break;
     case ESP_RST_EXT:
-      Serial.println("External reset");
+      log_i("External reset");
       break;
     case ESP_RST_SW:
-      Serial.println("Software reset");
+      log_i("Software reset");
       break;
     case ESP_RST_PANIC:
-      Serial.println("Exception/Panic reset");
+      log_i("Exception/Panic reset");
       break;
     case ESP_RST_INT_WDT:
-      Serial.println("Interrupt watchdog reset");
+      log_i("Interrupt watchdog reset");
       break;
     case ESP_RST_TASK_WDT:
-      Serial.println("Task watchdog reset");
+      log_i("Task watchdog reset");
       break;
     case ESP_RST_WDT:
-      Serial.println("Other watchdog reset");
+      log_i("Other watchdog reset");
       break;
     case ESP_RST_DEEPSLEEP:
-      Serial.println("Wakeup from deep sleep");
+      log_i("Wakeup from deep sleep");
       break;
     case ESP_RST_BROWNOUT:
-      Serial.println("Brownout reset");
+      log_i("Brownout reset");
       break;
     case ESP_RST_SDIO:
-      Serial.println("SDIO reset");
+      log_i("SDIO reset");
       break;
     default:
-      Serial.println("Unknown reset reason");
+      log_i("Unknown reset reason");
   }
 }

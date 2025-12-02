@@ -37,8 +37,7 @@ void AnalogOut::update() {
 void AnalogOut::set_value(string name, float value) {
   // Serial.println("Setting servo");
   if (name.substr(0, 1) != "A") {
-    Serial.print("can't set value to analog out, wrong name ");
-    Serial.println(name.c_str());
+    log_e("can't set value to analog out, wrong name %s", name.c_str());
     return;
   }
   int index = get_index_from_name(name);
@@ -47,7 +46,7 @@ void AnalogOut::set_value(string name, float value) {
 
 void AnalogOut::set_config(JsonObject config) {
   // Serial.println("Setting config");
-  Serial.println("Setting sensor config");
+  log_d("Setting sensor config");
   if (DEBUG_CONFIG == true) {
     serializeJsonPretty(config, Serial);
   }
@@ -64,7 +63,7 @@ void AnalogOut::set_config(JsonObject config) {
       //Todo: setter for changing out mode
 
     } else {
-      Serial.println("key not found");
+      log_w("key not found");
     }
   }
 }

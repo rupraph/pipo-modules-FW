@@ -21,12 +21,12 @@ class PipoPresets {
 
     File root = LittleFS.open(presets_path);
     if (!root) {
-      Serial.println("Failed to open presets directory");
+      log_e("Failed to open presets directory");
       return;
     }
 
     if (!root.isDirectory()) {
-      Serial.println("Presets path is not a directory");
+      log_e("Presets path is not a directory");
       root.close();
       return;
     }
@@ -51,12 +51,12 @@ class PipoPresets {
           info.description = doc["preset"]["description"].as<String>();
           presets.push_back(info);
 
-          Serial.printf("Found preset: %s - %s (%s)\n",
-                       info.name.c_str(),
-                       info.description.c_str(),
-                       info.filename.c_str());
+          log_i("Found preset: %s - %s (%s)",
+                info.name.c_str(),
+                info.description.c_str(),
+                info.filename.c_str());
         } else {
-          Serial.printf("Failed to parse preset file: %s\n", filename.c_str());
+          log_w("Failed to parse preset file: %s", filename.c_str());
         }
       }
       file.close();
@@ -64,7 +64,7 @@ class PipoPresets {
     }
     root.close();
 
-    Serial.printf("Found %d presets\n", presets.size());
+    log_i("Found %d presets", presets.size());
   }
 
  public:
@@ -120,7 +120,7 @@ class PipoPresets {
       }
 
       request->send(LittleFS, filepath, "application/json");
-      Serial.printf("Served preset file: %s\n", filepath.c_str());
+      log_d("Served preset file: %s", filepath.c_str());
     });
 
     // GET /presets-refresh - Rescans the presets directory

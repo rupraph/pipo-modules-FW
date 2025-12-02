@@ -29,8 +29,7 @@ bool Sensor::update() {
 
 void Sensor::measure_offset_iter() {
   measure_offset_counter++;
-  Serial.print("Offset measurement iteration: ");
-  Serial.println(measure_offset_counter);
+  log_d("Offset measurement iteration: %d", measure_offset_counter);
   if (measure_all) {
     // Measure all channels
     for (auto const& pair : sensor_dat) {
@@ -54,27 +53,21 @@ void Sensor::measure_offset_iter() {
         sensor_dat[pair.first].offset =
             sensor_dat[pair.first].offset / OFFSET_CAL_SAMPLES_NB;
       }
-      Serial.println("Completed offset measurement for all channels");
+      log_i("Completed offset measurement for all channels");
     } else if (measure_list) {
       for (const string& channel : channels_to_measure) {
         sensor_dat[channel].offset =
             sensor_dat[channel].offset / OFFSET_CAL_SAMPLES_NB;
       }
-      Serial.print("Completed offset measurement for selected channels: ");
+      log_i("Completed offset measurement for selected channels:");
       for (const string& channel : channels_to_measure) {
-        Serial.print(channel.c_str());
-        Serial.print("(");
-        Serial.print(sensor_dat[channel].offset);
-        Serial.print(") ");
+        log_i("  %s (%.2f)", channel.c_str(), sensor_dat[channel].offset);
       }
-      Serial.println();
     } else {
       sensor_dat[axis_to_measure_offset].offset =
           sensor_dat[axis_to_measure_offset].offset / OFFSET_CAL_SAMPLES_NB;
-      Serial.print("offset of ");
-      Serial.print(axis_to_measure_offset.c_str());
-      Serial.print(" is: ");
-      Serial.println(sensor_dat[axis_to_measure_offset].offset);
+      log_i("offset of %s is: %.2f", axis_to_measure_offset.c_str(), 
+            sensor_dat[axis_to_measure_offset].offset);
     }
 
     // Set completion flag
@@ -110,7 +103,7 @@ void Sensor::start_measure_offset(const std::string& sensor_name) {
     axis_to_measure_offset = sensor_name;
     measure_offset_counter = 0;
     sensor_dat[sensor_name].offset = 0;
-    Serial.println("start offset measurement");
+    log_i("start offset measurement");
   }
 }
 void Sensor::start_measure_offset_all() {
@@ -123,7 +116,7 @@ void Sensor::start_measure_offset_all() {
   for (auto const& pair : sensor_dat) {
     sensor_dat[pair.first].offset = 0;
   }
-  Serial.println("start all offset measurement");
+  log_i("start all offset measurement");
 }
 
 void Sensor::start_measure_offset_list(const string& channel_list) {
@@ -133,8 +126,7 @@ void Sensor::start_measure_offset_list(const string& channel_list) {
     // Validate all channels exist
     for (const string& channel : channels_to_measure) {
       if (sensor_dat.find(channel) == sensor_dat.end()) {
-        Serial.print("Error: Channel not found: ");
-        Serial.println(channel.c_str());
+        log_e("Error: Channel not found: %s", channel.c_str());
         return;
       }
     }
@@ -149,7 +141,7 @@ void Sensor::start_measure_offset_list(const string& channel_list) {
     measure_offset_flag = true;
     measure_offset_counter = 0;
 
-    Serial.print("Starting offset measurement for channels: ");
+    log_i("Starting offset measurement for channels:");
     Serial.println(channel_list.c_str());
   }
 }

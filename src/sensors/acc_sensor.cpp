@@ -10,7 +10,7 @@ void MotionSensor::init() {
   Wire.begin(17, 18, 400000);
 #endif
 
-  Serial.println("init motion sensor");
+  log_i("init motion sensor");
   icm20948.init(icmSettings);
 }
 
@@ -28,11 +28,10 @@ void MotionSensor::setup() {
   if (quat_ref_w == 1.0 && quat_ref_x == 0.0 && quat_ref_y == 0.0 &&
       quat_ref_z == 0.0) {
     reference_set = false;
-    Serial.println(
-        "No stored reference orientation - will be set on first update");
+    log_i("No stored reference orientation - will be set on first update");
   } else {
     reference_set = true;
-    Serial.println("Loaded stored reference orientation");
+    log_i("Loaded stored reference orientation");
   }
 
   if (DEBUG_HEAP)
@@ -41,13 +40,12 @@ void MotionSensor::setup() {
 
 void MotionSensor::toggle_relative_mode() {
   relative_mode = !relative_mode;
-  Serial.print("Relative mode ");
-  Serial.println(relative_mode ? "ENABLED" : "DISABLED");
+  log_i("Relative mode %s", relative_mode ? "ENABLED" : "DISABLED");
 }
 
 void MotionSensor::set_new_reference_orientation() {
   reset_reference_orientation();
-  Serial.println("New reference orientation set");
+  log_i("New reference orientation set");
 }
 
 // void MotionSensor::update() {
@@ -99,15 +97,9 @@ bool MotionSensor::measure_sensor() {
         motiondata.putFloat("quat_ref_y", quat_ref_y);
         motiondata.putFloat("quat_ref_z", quat_ref_z);
         reference_set = true;
-        Serial.println("Reference orientation set");
-        Serial.print("Ref quat: w=");
-        Serial.print(quat_ref_w, 4);
-        Serial.print(" x=");
-        Serial.print(quat_ref_x, 4);
-        Serial.print(" y=");
-        Serial.print(quat_ref_y, 4);
-        Serial.print(" z=");
-        Serial.println(quat_ref_z, 4);
+        log_i("Reference orientation set");
+        log_i("Ref quat: w=%.4f x=%.4f y=%.4f z=%.4f",
+              quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
       }
       calc_differential_euler_angles();
       data_ready = true;
@@ -287,9 +279,9 @@ void MotionSensor::convert_accell() {
   // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
-void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
+void AccSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
-    Serial.println("set_sensor_config");
+    log_d("set_sensor_config");
   }
   if (config["relative_mode"].is<bool>()) {
     bool old_mode = relative_mode;

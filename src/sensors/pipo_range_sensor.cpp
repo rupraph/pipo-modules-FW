@@ -16,9 +16,9 @@ void PipoRangeSensor::init() {
   vl53l4cx.VL53L4CX_Off();
   VL53L4CX_Error initstatus = vl53l4cx.InitSensor(0x12);
   if (initstatus == VL53L4CX_ERROR_NONE) {
-    Serial.println("VL53L4CX sensor found and initialized");
+    log_i("VL53L4CX sensor found and initialized");
   } else {
-    Serial.println("VL53L4CX sensor not found or not initialized");
+    log_w("VL53L4CX sensor not found or not initialized");
   }
 #elif HW_REV >= 11
   vl53l1 = new VL53L1(&Wire, 15);
@@ -27,9 +27,9 @@ void PipoRangeSensor::init() {
   VL53L1_Error initstatus = vl53l1->InitSensor(0x52);
   // delay(10);
   if (initstatus == VL53L1_ERROR_NONE) {
-    Serial.println("VL53L1 sensor found and initialized");
+    log_i("VL53L1 sensor found and initialized");
   } else {
-    Serial.println("VL53L1 sensor not found or not initialized");
+    log_w("VL53L1 sensor not found or not initialized");
   }
 #endif
 }
@@ -63,8 +63,7 @@ void PipoRangeSensor::setup() {
 
 void PipoRangeSensor::toggle_hold_mode() {
   hold_mode = !hold_mode;
-  Serial.print("Hold mode ");
-  Serial.println(hold_mode ? "ENABLED" : "DISABLED");
+  log_i("Hold mode %s", hold_mode ? "ENABLED" : "DISABLED");
 }
 
 bool PipoRangeSensor::measure_sensor() {
@@ -167,16 +166,16 @@ bool PipoRangeSensor::measure_sensor() {
 //   Serial.println(sensor_dat[axis_name].offset);
 // }
 
-void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
+void RangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
-    Serial.println("set_sensor_config");
+    log_d("set_sensor_config");
   }
   if (config["hold_mode"].is<bool>()) {
-    hold_mode = config["hold_mode"];
+    set_hold_mode(config["hold_mode"].as<bool>());
   }
   if (debug) {
-    Serial.println(hold_mode);
-    Serial.println("set_sensor_config_end");
+    log_d("%d", hold_mode);
+    log_d("set_sensor_config_end");
   }
 }
 

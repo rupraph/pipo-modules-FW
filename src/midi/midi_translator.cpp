@@ -14,7 +14,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
 
   float input_range = max_input - min_input;
   if (input_range == 0) {
-    Serial.println("Error: Invalid input range");
+    log_e("Error: Invalid input range");
     return 0;  // or handle the error as needed
   }
 
@@ -27,12 +27,11 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
 }
 
 void MidiTranslator::print_scale(vector<int> scale) {
-  Serial.println("Scale: ");
+  log_d("Scale: ");
   for (int i = 0; i < scale.size(); i++) {
-    Serial.print(scale[i]);
-    Serial.print("-");
+    log_d("%d-", scale[i]);
   }
-  Serial.println();
+  log_d("");
 }
 
 void MidiTranslator::set_scale_type(string scaleType) {
@@ -128,17 +127,15 @@ vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
       if (intervals.find(scaleType) != intervals.end()) {
         expandedScale.push_back(expandedNote);
         expandedNote += intervals.at(scaleType)[1];
-        Serial.print("Note: ");
-        Serial.println(expandedNote);
+        log_d("Note: %d", expandedNote);
       } else {
-        Serial.println("Invalid interval type");
+        log_w("Invalid interval type");
       }
-      Serial.print("Interval: ");
+      log_d("Interval: ");
       for (int i = 0; i < expandedScale.size(); i++) {
-        Serial.print(expandedScale[i]);
-        Serial.print("-");
+        log_d("%d-", expandedScale[i]);
       }
-      Serial.println();
+      log_d("");
     }
   }
   return expandedScale;
@@ -155,7 +152,7 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       }
       return scale;
     } else {
-      Serial.println("Invalid scale type");
+      log_w("Invalid scale type");
       return {};
     }
   } else if (pattern == "arpeggio") {
@@ -167,11 +164,11 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
       }
       return scale;
     } else {
-      Serial.println("Invalid arpeggio type");
+      log_w("Invalid arpeggio type");
       return {};
     }
   } else {
-    Serial.println("Invalid pattern type");
+    log_w("Invalid pattern type");
     return {};
   }
 }

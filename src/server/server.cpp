@@ -152,7 +152,7 @@ void PipoServer::setup_requests() {
       bool success =
           config.load_config(request->getParam("name")->value().c_str(), true);
       if (!success) {
-        Serial.println("Failed to load config, using current config");
+        log_w("Failed to load config, using current config");
         return request->send(500, "text/plain",
                              "Error: Config file corrupted or invalid");
       }
@@ -161,7 +161,7 @@ void PipoServer::setup_requests() {
         pipoDebugHeap("end set ctive config");
       return request->send(200, "text/plain", "Active config set");
     } catch (const std::exception e) {
-      Serial.println("error loading config");
+      log_e("error loading config: %s", e.what());
       return request->send(500, "text/plain",
                            "Error loading config: " + String(e.what()));
     }
@@ -261,7 +261,7 @@ void PipoServer::setup_requests() {
             return request->send(200, "text/plain", "Config saved");
           }
         } catch (const std::exception& e) {
-          Serial.println("error saving config");
+          log_e("error saving config: %s", e.what());
           return request->send(500, "text/plain",
                                "Error saving config: " + String(e.what()));
         }
@@ -274,14 +274,14 @@ void PipoServer::setup_requests() {
   });
 
   server.on("/wifi-mode", HTTP_POST, [&](AsyncWebServerRequest* request) {
-    Serial.println("POST wifi-mode");
+    log_d("POST wifi-mode");
     if (!request->hasParam("mode")) {
-      Serial.println("no mode");
+      log_w("no mode");
 
       return request->send(400, "text/plain", "Error: no mode parameter");
     }
     String mode = request->getParam("mode")->value();
-    Serial.println("mode: " + mode);
+    log_d("mode: %s", mode.c_str());
     if (mode != "AP" && mode != "STA" && mode != "APSTA") {
       return request->send(400, "text/plain", "Error: invalid mode");
     }
@@ -289,7 +289,7 @@ void PipoServer::setup_requests() {
     vTaskDelay(pdMS_TO_TICKS(100));
     pause();
     config.general_config["Wifi_mode"] = mode;
-    Serial.println("Setting mode: " + mode);
+    log_i("Setting mode: %s", mode.c_str());
     if (mode == "AP") {
       wifi.setMode(WIFI_AP);
     } else if (mode == "STA") {
@@ -373,7 +373,7 @@ void PipoServer::setup_requests() {
     }
     try {
       string axis = request->getParam("axis")->value().c_str();
-      Serial.println(axis.c_str());
+      log_d("%s", axis.c_str());
 
       // Check if measurement is already in progress
       if (input_sensor.is_offset_measurement_complete()) {
@@ -419,8 +419,7 @@ void PipoServer::setup_requests() {
     }
     try {
       string channels = request->getParam("channels")->value().c_str();
-      Serial.print("Starting offset calibration for channels: ");
-      Serial.println(channels.c_str());
+      log_i("Starting offset calibration for channels: %s", channels.c_str());
 
       // Check if measurement is already in progress
       if (input_sensor.is_offset_measurement_complete()) {

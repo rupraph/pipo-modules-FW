@@ -4,12 +4,12 @@ CaptivePortal captivePortal;
 CaptivePortal::CaptivePortal() {}
 
 void CaptivePortal::start(AsyncWebServer* server) {
-  Serial.print("Starting captive portal? ");
+  log_d("Starting captive portal? ");
   if (dns_server != nullptr || !canEnable()) {
-    Serial.println("Nope");
+    log_d("Nope");
     return;
   }
-  Serial.println("Yes");
+  log_d("Yes");
   // dns_server = new DNSServer();
   // dns_server->setErrorReplyCode(DNSReplyCode::NoError);
   // TODO: if Pipo changes IP ip, we need to update this
