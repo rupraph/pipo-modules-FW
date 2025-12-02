@@ -1,4 +1,5 @@
 #include <wifi/pipowifi.h>
+#include <osc/osc_handler.h>
 
 //TODO: Should move content from callback (only put flags)
 
@@ -94,6 +95,15 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   staStarted = false;
   wifi.next.ssid = "";
   wifi.next.password = "";
+  osc.stop();  // STA interface stopped, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA stopped but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -146,6 +156,15 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
+  osc.stop();  // STA disconnected, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA lost but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -156,18 +175,29 @@ void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
+  osc.start();  // Network ready, start UDP
   wifi.step();
 }
 
 void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP6 - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
+  osc.start();  // Network ready with IPv6, start UDP
   wifi.step();
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_w("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
+  osc.stop();  // Network lost, stop UDP
+
+  // If in APSTA mode and AP is configured, restart UDP for AP interface
+  if (WiFi.getMode() == WIFI_MODE_APSTA && apConfigured) {
+    Serial.println("  STA lost IP but AP configured, restarting UDP for AP");
+    vTaskDelay(pdMS_TO_TICKS(50));  // Brief delay
+    osc.start();                    // Restart for AP interface
+  }
+
   wifi.step();
 }
 
@@ -175,6 +205,7 @@ void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_START - apStarted flag: %d", true);
   apStarted = true;
   // Note: apStarted means the AP has started, but not necessarily configured yet
+  // Wait for configureAP() to set apConfigured, then start UDP
   wifi.step();
 }
 
@@ -182,6 +213,7 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_STOP");
   apStarted = false;
   apConfigured = false;
+  osc.stop();  // AP stopped, stop UDP
   wifi.step();
 }
 
@@ -198,6 +230,7 @@ void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_STAIPASSIGNED - apConnected: -> true");
   apConnected = true;
+  osc.start();  // AP client ready, start UDP
 }
 
 void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -206,6 +239,7 @@ void onAPProbeReqReceivedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 
 void onAPGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_GOT_IP6");
+  osc.start();  // AP ready with IPv6, start UDP
 }
 
 bool PipoWifi::connect() {
@@ -253,6 +287,8 @@ bool PipoWifi::configureAP() {
   if (apStarted) {
     log_i("AP started successfully");
     apConfigured = true;
+    // AP has IP address now, start UDP for communication
+    osc.start();
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     log_e("Failed to start AP");

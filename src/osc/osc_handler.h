@@ -38,8 +38,8 @@ class OSC_handler {
   bool is_started();
   void receive();
 
-  void ensure_started();
-  void stop();
+  void start();  // Start UDP if enabled and network ready
+  void stop();   // Stop UDP
 
  private:
   IPAddress dest_ip;
@@ -48,6 +48,12 @@ class OSC_handler {
   bool isStarted = false;
   bool enabled = false;
   unsigned long lastConnectionTime = 0;  // Track when network connected
+
+  // Error tracking for diagnostics (not flow control)
+  int consecutiveFailures = 0;
+  unsigned long lastErrorLogTime = 0;
+  static const unsigned long ERROR_LOG_INTERVAL =
+      1000;  // Log errors max once per 10s
 
   OSCBundle bundle;
 
