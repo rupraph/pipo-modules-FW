@@ -75,7 +75,8 @@
 //ANALOG SETTINGS
 #if HW_REV == 10
 #define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.0
-#define NO_BOOT_VOLTAGE 3100  // in mV
+#define NO_BOOT_VOLTAGE 3100  // in mV (boot if vbat > 3.65)
+#define SHUTDOWN_LEVEL 3100   // in mV (seams like it lead vbat 3.35v )
 //for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
 #elif HW_REV >= 11
 #define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.1

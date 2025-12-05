@@ -56,13 +56,6 @@ void setup() {  // by default on core 1
   /////// Init hardware user interface (leds and switches)
   hwui.init();
   hwui.setup();
-  //Prevent boot if battery is too low
-  if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
-    hwui.set_led(LOW_BAT_LED, 100);
-    delay(3000);
-    // esp_deep_sleep_start();
-    while (1) {}
-  }
 
   /////// Init filesystem
   init_filesystem();

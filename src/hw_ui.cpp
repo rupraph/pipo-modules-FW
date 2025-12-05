@@ -1,8 +1,43 @@
 #include "hw_ui.h"
 #include "utils/config.h"
 #include "osc/osc_handler.h"
+#include <esp_sleep.h>
 
 HwUi hwui;
+
+// Helper function to safely shutdown the ESP32
+void shutdown_esp32() {
+  log_w("Battery critically low - shutting down ESP32");
+
+  // Flash LED to indicate shutdown
+  for (int i = 0; i < 5; i++) {
+    hwui.set_led(LOW_BAT_LED, 100);
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+    FastLED.show();  // Update WS2812 LEDs
+#endif
+    delay(100);
+    hwui.set_led(LOW_BAT_LED, 0);
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+    FastLED.show();  // Update WS2812 LEDs
+#endif
+    delay(100);
+  }
+
+  // Turn off all LEDs before shutdown
+  hwui.set_led(WIFI_LED, 0);
+  hwui.set_led(BT_LED, 0);
+  hwui.set_led(SEND_LED, 0);
+  hwui.set_led(LOW_BAT_LED, 0);
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+  FastLED.show();  // Update WS2812 LEDs
+#endif
+
+  delay(100);
+
+  // Enter deep sleep (effectively shuts down the ESP32)
+  // No wakeup source configured, so it will stay off until power cycled or reset
+  esp_deep_sleep_start();
+}
 
 void hwuiTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
@@ -33,6 +68,9 @@ void battmonitorTask(void* pvParameters) {
   static bool prev_low_battery_state = false;
   static unsigned long last_send_time = 0;
   const unsigned long SEND_INTERVAL = 1000;  // Send every 1 second when changed
+  static int shutdown_counter = 0;           // Counter to confirm low voltage
+  const int SHUTDOWN_CONFIRM_COUNT =
+      10;  // Require 10 consecutive low readings (5 seconds)
 
   for (;;) {
     hwui.measure_battery_step();
@@ -40,6 +78,17 @@ void battmonitorTask(void* pvParameters) {
     // Update the shared state flags
     battery_plugged = hwui.is_plugged();
     battery_low_level = hwui.is_low_battery();
+
+    // Check for critical battery level (shutdown condition)
+    // Only shutdown if not plugged in and voltage is critically low
+    if (!battery_plugged && hwui.get_bat_voltage() < SHUTDOWN_LEVEL) {
+      shutdown_counter++;
+      if (shutdown_counter >= SHUTDOWN_CONFIRM_COUNT) {
+        shutdown_esp32();  // This will not return
+      }
+    } else {
+      shutdown_counter = 0;  // Reset counter if voltage recovers
+    }
 
     // Check if OSC battery sending is enabled and enough time has passed
     if (config.general_config["OSC_Batt"] == true && osc.is_enabled() &&
@@ -146,6 +195,27 @@ void HwUi::setup() {
 
   log_i("HW UI setup complete");
   hwui.measure_battery();
+
+  //Prevent boot if battery is too low
+  if (hwui.get_bat_voltage() < NO_BOOT_VOLTAGE) {
+    log_w("Battery too low to boot (%d mV < %d mV)", hwui.get_bat_voltage(),
+          NO_BOOT_VOLTAGE);
+    // Blink 3 times quickly to warn user
+    for (int i = 0; i < 3; i++) {
+      hwui.set_led(LOW_BAT_LED, 100);
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+      FastLED.show();  // Update WS2812 LEDs
+#endif
+      delay(200);
+      hwui.set_led(LOW_BAT_LED, 0);
+#if defined(PIPO_ANALOG) && HW_REV >= 20
+      FastLED.show();  // Update WS2812 LEDs
+#endif
+      delay(200);
+    }
+    delay(100);
+    esp_deep_sleep_start();  // Enter deep sleep until power cycled
+  }
 
   start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   // BT LED blink is started in midiBLESetup() if BLE is enabled
