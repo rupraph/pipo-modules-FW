@@ -133,7 +133,7 @@ export const schema: Schema = {
       unit: "%",
       min: 0,
       max: 3.3,
-      step: 1,
+      step: 0.1,
       index: 0,
     },
     A02: {
@@ -142,7 +142,7 @@ export const schema: Schema = {
       unit: "%",
       min: 0,
       max: 3.3,
-      step: 1,
+      step: 0.1,
       index: 1,
     },
     A03: {
