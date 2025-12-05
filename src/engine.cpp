@@ -312,7 +312,7 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
 
     float new_osc_val;
     if (osc_translator.get_mode_raw()) {
-      new_osc_val = sensor_val;
+      new_osc_val = round_to(sensor_val, 3);
     } else {
       if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
         // if (input_sensor.is_within_range(axis_name)) {
