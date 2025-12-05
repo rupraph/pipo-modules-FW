@@ -3,12 +3,9 @@
 using namespace std;
 
 float OscTranslator::get_value(float value, float input_min, float input_max) {
-  if (mode_raw) {
-    return value;
-  } else {
-    return (value - input_min) / (input_max - input_min) * (osc_max - osc_min) +
-           osc_min;
-  }
+
+  return (value - input_min) / (input_max - input_min) * (osc_max - osc_min) +
+         osc_min;
 }
 
 float OscTranslator::get_output_max() {

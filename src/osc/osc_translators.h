@@ -21,6 +21,7 @@ class OscTranslator {
   void set_output_min(float value);
   void set_osc_addr(string value);
   string get_osc_addr();
+  bool get_mode_raw() { return mode_raw; }
 
   // config
   JsonDocument get_json() const;

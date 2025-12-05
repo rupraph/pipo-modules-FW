@@ -310,30 +310,28 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
   if (osc_translator.is_enabled() /* &&
       input_sensor.test_outside_deadzone(axis_name)*/) {
 
-    osc_val_prev[axis_name] = osc_val[axis_name];
-    if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
-
-      // if (input_sensor.is_within_range(axis_name)) {
-      osc_val[axis_name] = round_to(
-          osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
-
-      if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-        osc.add_to_bundle(address, osc_val[axis_name]);
-      }
-      // }
-    } else  // sensor uses trigger mode
-    {
-      if (input_sensor.get_bool_value(axis_name)) {
-        osc_val[axis_name] = round_to(osc_translator.get_output_max(), 3);
-        if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.add_to_bundle(address, osc_val[axis_name]);
-        }
-      } else {
-        osc_val[axis_name] = round_to(osc_translator.get_output_min(), 3);
-        if (osc_val[axis_name] != osc_val_prev[axis_name]) {
-          osc.add_to_bundle(address, osc_val[axis_name]);
+    float new_osc_val;
+    if (osc_translator.get_mode_raw()) {
+      new_osc_val = sensor_val;
+    } else {
+      if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
+        // if (input_sensor.is_within_range(axis_name)) {
+        new_osc_val = round_to(
+            osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
+        // }
+      } else {  // sensor uses trigger mode
+        if (input_sensor.get_bool_value(axis_name)) {
+          new_osc_val = round_to(osc_translator.get_output_max(), 3);
+        } else {
+          new_osc_val = round_to(osc_translator.get_output_min(), 3);
         }
       }
+    }
+
+    // Single check for value change
+    if (new_osc_val != osc_val[axis_name]) {
+      osc_val[axis_name] = new_osc_val;
+      osc.add_to_bundle(address, new_osc_val);
     }
   }
 }
