@@ -342,7 +342,7 @@
     },
     "engine-osc": {
       "A01": {
-        "enabled": false,
+        "enabled": true,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
@@ -398,7 +398,7 @@
         "osc_addr": "A8"
       },
       "T1": {
-        "enabled": false,
+        "enabled": true,
         "mode_raw": false,
         "osc_max": 1,
         "osc_min": 0,
