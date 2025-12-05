@@ -401,6 +401,8 @@ void OSC_handler::set_enabled(bool ena) {
   this->enabled = ena;
   if (!ena) {
     stop();  // Stop UDP if OSC is disabled
+  } else {
+    start();  // Start UDP if OSC is enabled and network is ready
   }
 }
 
