@@ -593,6 +593,7 @@ void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
    and engine instead of being in the general config...
   */
   osc.set_config();
+  log_i("config applied: %s", filename.c_str());
   logs.writeLog("config applied: " + filename);
 }
 // catch (const std::exception& e) {

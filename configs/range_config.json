@@ -10,7 +10,7 @@
     },
     "engine-midi": {
       "dist": {
-        "cc_nb": 2,
+        "cc_nb": 14,
         "channel": 1,
         "enabled": true,
         "hires": false,

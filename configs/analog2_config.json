@@ -132,7 +132,7 @@
       "A03": {
         "cc_nb": 3,
         "channel": 1,
-        "enabled": true,
+        "enabled": false,
         "hires": false,
         "cc_max": 127,
         "cc_min": 0,
