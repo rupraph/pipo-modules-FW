@@ -32,19 +32,24 @@
   {#await fetch()}
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
-    <Menu />
-    <ConfigSelect />
-    <AnalogChannels />
-    <ChannelSettings />
-    <OscOutputSettings />
-    <article class="content section-borders">
-      <Collapse title="Info" collapseId="info">
-        <Pipoinfo info={resp} />
-      </Collapse>
-    </article>
-    <article class="content section-borders">
-      <Logs />
-    </article>
+    <div class="main-container">
+      <Menu />
+      <ConfigSelect />
+      <section>
+        <h3>Channel Settings</h3>
+        <AnalogChannels />
+        <ChannelSettings />
+      </section>
+      <OscOutputSettings />
+      <article class="content section-borders">
+        <Collapse title="Info" collapseId="info">
+          <Pipoinfo info={resp} />
+        </Collapse>
+      </article>
+      <article class="content section-borders">
+        <Logs />
+      </article>
+    </div>
   {:catch e}
     <article>
       <h3>Network error</h3>

@@ -15,7 +15,7 @@
       ? "osc"
       : "osc";
 
-  let open = true;
+  let open = false;
 
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
@@ -115,19 +115,9 @@
     flex-direction: column;
     gap: 16px;
     padding: 16px;
+    box-sizing: border-box;
   }
-  .row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-  .left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-  }
+
   .pill-switch {
     border: 2px solid var(--main);
     position: relative;

@@ -10,8 +10,9 @@
 </script>
 
 <section>
-  <h4>
-    OSC Output Settings <InfoModal>
+  <h3>
+    OSC Output Settings
+    <InfoModal>
       <p>
         Configure the Open Sound Control (OSC) output settings for your Pipo
         device. OSC is a protocol used for communication among computers, sound
@@ -41,7 +42,18 @@
         on the specified IP and port.
       </p>
     </InfoModal>
-  </h4>
-  <Number label="Out min" ></Number>
-  <Number label="Out max" ></Number>
+  </h3>
+  <Number label="Out min"></Number>
+  <Number label="Out max"></Number>
 </section>
+
+<style scoped>
+  section {
+    width: 100%;
+  }
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>

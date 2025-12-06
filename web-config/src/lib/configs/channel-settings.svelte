@@ -10,7 +10,11 @@
     } from "../../types";
     import { isContinuousMode, isHisteresisMode } from "../../types";
     type Keys = PipoKeys["analog"];
-    import { currentConfig, currentMode, pipoType } from "../../services/config";
+    import {
+        currentConfig,
+        currentMode,
+        pipoType,
+    } from "../../services/config";
     import { uiState } from "../ui-state";
     import InfoModal from "../InfoModal.svelte";
     import MinMax from "../form/MinMax.svelte";
@@ -31,7 +35,8 @@
             : Array.from({ length: 8 }, (_, i) => `T${i + 1}` as Keys);
 
     $: selectedChannel = $uiState[type]?.selectedChannel;
-    $: input = config && selectedChannel ? config.inputs[selectedChannel] : null;
+    $: input =
+        config && selectedChannel ? config.inputs[selectedChannel] : null;
     $: aschema = selectedChannel ? schema[type][selectedChannel] : null;
 
     let sensorValue: number | undefined = undefined;
@@ -62,23 +67,30 @@
 
     function animateSensor() {
         if (smoothValue.dt > 0) {
-            sensorValue = smoothValue.old + (smoothValue.new - smoothValue.old) * (smoothValue.dt / 1000);
+            sensorValue =
+                smoothValue.old +
+                (smoothValue.new - smoothValue.old) * (smoothValue.dt / 1000);
         }
         requestAnimationFrame(animateSensor);
     }
     animateSensor();
 
-    $: if (sensorValue !== undefined && aschema && sensorValue > maxSensorValue && sensorValue > aschema.max) {
+    $: if (
+        sensorValue !== undefined &&
+        aschema &&
+        sensorValue > maxSensorValue &&
+        sensorValue > aschema.max
+    ) {
         maxSensorValue = Math.round(sensorValue);
     }
 
     function isEnabled() {
-        // TODO: Rupert where is the muted ? 
+        // TODO: Rupert where is the muted ?
         if (!config || !selectedChannel) return false;
         return config.engine[engineKey][selectedChannel].muted;
     }
     function isSolo() {
-        // TODO: Rupert where is the solo ? 
+        // TODO: Rupert where is the solo ?
         if (!config || !selectedChannel) return false;
         return config.engine[engineKey][selectedChannel].solo;
     }
@@ -121,21 +133,6 @@
 {/if}
 
 <style scoped>
-    .row {
-        font-family: Instrument Sans;
-        font-size: 12px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-sizing: content-box;
-        width: calc(100% - 44px);
-    }
-    .left {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
     .label {
         text-align: left;
     }

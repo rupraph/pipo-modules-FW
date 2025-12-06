@@ -157,40 +157,40 @@
   }
 </script>
 
-<div class="config-select">
-  <span>
-    Current Config
-  </span>
-  <div
-    on:dblclick={handleSelectDoubleClick}
-    on:touchstart={handleTouchStart}
-    on:touchend={handleTouchEnd}
-    on:touchmove={handleTouchMove}
-  >
-    <Select
-      --height="18px"
-      --max-height="18px"
-      --width="134px"
-      --padding="0"
-      --value-container-padding="0"
-      --selected-item-padding="0 0 0 10px"
-      --selected-item-color="var(--bg-primary)"
-      --font-size="16px"
-      --color="var(--bg-primary)"
-      --item-color="var(--bg-primary)"
-      --item-bg="var(--bg-secondary)"
-      --item-is-active-color="var(--main)"
-      --item-is-active-bg="var(--bg-secondary)"
-      --item-hover-color="var(--text-color)"
-      --item-hover-bg="var(--bg-secondary)"
-      --input-color="var(--text-color)"
-      items={selectItems}
-      value={selectedItem}
-      on:change={handleSelect}
-      clearable={false}
-      searchable={false}
-      disabled={$configsLoading}
-    />
+<div class="row">
+  <div class="left">
+    <span> Current Config </span>
+    <div
+      on:dblclick={handleSelectDoubleClick}
+      on:touchstart={handleTouchStart}
+      on:touchend={handleTouchEnd}
+      on:touchmove={handleTouchMove}
+    >
+      <Select
+        --height="18px"
+        --max-height="18px"
+        --width="134px"
+        --padding="0"
+        --value-container-padding="0"
+        --selected-item-padding="0 0 0 10px"
+        --selected-item-color="var(--bg-primary)"
+        --font-size="16px"
+        --color="var(--bg-primary)"
+        --item-color="var(--bg-primary)"
+        --item-bg="var(--bg-secondary)"
+        --item-is-active-color="var(--main)"
+        --item-is-active-bg="var(--bg-secondary)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        items={selectItems}
+        value={selectedItem}
+        on:change={handleSelect}
+        clearable={false}
+        searchable={false}
+        disabled={$configsLoading}
+      />
+    </div>
   </div>
 
   <div class="actions">
@@ -239,7 +239,12 @@
       autofocus
     />
     <div class="modal-buttons">
-      <button on:click={() => { showRenameModal = false; newname = ""; }}>Cancel</button>
+      <button
+        on:click={() => {
+          showRenameModal = false;
+          newname = "";
+        }}>Cancel</button
+      >
       <button on:click={finishRename} disabled={!newname.trim()}>Rename</button>
     </div>
   </div>
@@ -256,7 +261,12 @@
       autofocus
     />
     <div class="modal-buttons">
-      <button on:click={() => { showCopyModal = false; copyName = ""; }}>Cancel</button>
+      <button
+        on:click={() => {
+          showCopyModal = false;
+          copyName = "";
+        }}>Cancel</button
+      >
       <button on:click={finishCopy} disabled={!copyName.trim() || duplicating}>
         {duplicating ? "Copying..." : "Copy"}
       </button>
@@ -267,11 +277,21 @@
 <Modal bind:open={showDeleteModal}>
   <div class="modal-content">
     <h3>Delete Configuration</h3>
-    <p>Are you sure you want to delete the configuration "{$activeConfigName}"?</p>
+    <p>
+      Are you sure you want to delete the configuration "{$activeConfigName}"?
+    </p>
     <p class="warning">This action cannot be undone.</p>
     <div class="modal-buttons">
-      <button on:click={() => { showDeleteModal = false; }}>Cancel</button>
-      <button class="delete-confirm-btn" on:click={confirmDelete} disabled={deleting}>
+      <button
+        on:click={() => {
+          showDeleteModal = false;
+        }}>Cancel</button
+      >
+      <button
+        class="delete-confirm-btn"
+        on:click={confirmDelete}
+        disabled={deleting}
+      >
         {deleting ? "Deleting..." : "Delete"}
       </button>
     </div>
@@ -289,7 +309,12 @@
       autofocus
     />
     <div class="modal-buttons">
-      <button on:click={() => { showCreateModal = false; createName = ""; }}>Cancel</button>
+      <button
+        on:click={() => {
+          showCreateModal = false;
+          createName = "";
+        }}>Cancel</button
+      >
       <button on:click={finishCreate} disabled={!createName.trim() || creating}>
         {creating ? "Creating..." : "Create"}
       </button>
@@ -298,20 +323,11 @@
 </Modal>
 
 <style scoped>
-  .config-select :global(.selected-item) {
+  .row :global(.selected-item) {
     line-height: var(--font-size);
     font-family: Source Sans Pro;
   }
-
-  .config-select {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    margin-left: 5px;
-  }
-  .config-select span {
+  .row span {
     font-size: 14px;
     line-height: 14px;
   }
