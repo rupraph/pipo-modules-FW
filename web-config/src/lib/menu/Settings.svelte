@@ -5,8 +5,9 @@
   import InfoModal from "../InfoModal.svelte";
   import Text from "../form/Text.svelte";
   import { currentConfig } from "../../services";
-    import Switch from "../form/Switch.svelte";
-    import PillSwitch from "../form/PillSwitch.svelte";
+  import Switch from "../form/Switch.svelte";
+  import PillSwitch from "../form/PillSwitch.svelte";
+  import { schema } from "../../schema";
 
   $: config = $currentConfig;
   $: mode = config?.general.MidiEnabled
@@ -22,6 +23,19 @@
     config.general.MidiEnabled = newMode === "midi";
     config.general.OSC_ENA = newMode === "osc";
   }
+
+  const validate = (name) => {
+    // firbid spaces
+    if (name.includes(" ")) {
+      return "Spaces are not allowed";
+    }
+    // forbid any other character than a-zA-Z0-9
+    const regex = /^[a-zA-Z0-9]+$/;
+    if (!regex.test(name)) {
+      return "Only letters and numbers are allowed";
+    }
+    return "";
+  };
 </script>
 
 <MenuButton on:click={() => (open = !open)}>
@@ -105,6 +119,27 @@
           />
         </div>
       {/if}
+      <div class="row">
+        <div class="left">
+          Pipo Name
+          <InfoModal>
+            <p>
+              The Pipo Name is used to identify your device on the network and
+              when connecting via Bluetooth. Choose a unique name without spaces
+              or special characters.
+            </p>
+          </InfoModal>
+        </div>
+        <div style="width: 200px;">
+          <Text
+            label=""
+            bind:value={config.general.PipoName}
+            maxlength={schema.name.max}
+            minlength={schema.name.min}
+            {validate}
+          />
+        </div>
+      </div>
     </div>
   {/if}
 </Modal>

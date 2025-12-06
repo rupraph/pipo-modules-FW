@@ -34,4 +34,7 @@
 </Input>
 
 <style>
+  input {
+    color: var(--text-color);
+  }
 </style>

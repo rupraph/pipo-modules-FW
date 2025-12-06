@@ -12,7 +12,9 @@
   function fetchImage() {
     // debugger;
     return pipoio
-      .get(`/${$pipoType}-Horizontal-Yellow.svg`, { responseType: "arraybuffer" })
+      .get(`/${$pipoType}-Horizontal-Yellow.svg`, {
+        responseType: "arraybuffer",
+      })
       .then(({ data }) => {
         const blob = new Blob([data], { type: "image/svg+xml" });
         const url = URL.createObjectURL(blob);
@@ -26,9 +28,11 @@
     <p></p>
   {:then imageDataUrl}
     <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
-    <Settings />
-    <Wifi />
-    <PlayPause />
+    <div class="controls">
+      <Settings />
+      <Wifi />
+      <PlayPause />
+    </div>
   {/await}
 </nav>
 <Modal bind:open={wifiOpen}>
@@ -40,10 +44,16 @@
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    padding: 0.5em;
+    /* padding: 0.5em; */
     gap: 1em;
     align-items: center;
     box-sizing: border-box;
+    justify-content: space-between;
+  }
+  .controls {
+    display: flex;
+    gap: 1em;
+    align-items: center;
   }
   .logo-image {
     width: 200px;
