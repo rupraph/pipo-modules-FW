@@ -11,6 +11,7 @@
   import OfflineOverlay from "./lib/offline-overlay.svelte";
   import Pipoinfo from "./lib/pipoinfo.svelte";
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
+    import ChannelSettings from "./lib/configs/channel-settings.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -34,6 +35,7 @@
     <Menu />
     <ConfigSelect />
     <AnalogChannels />
+    <ChannelSettings />
     <article class="content section-borders">
       <Collapse title="Info" collapseId="info">
         <Pipoinfo info={resp} />
