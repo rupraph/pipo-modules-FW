@@ -53,7 +53,7 @@
     /* transform: translate(-50%, 0); */
     border: 1px solid #ddd;
     box-shadow: 1px 1px 1px #ddd;
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
     border-radius: 4px;
     padding: 4px;
     position: fixed;

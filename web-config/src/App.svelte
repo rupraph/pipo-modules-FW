@@ -5,10 +5,10 @@
   import { pipoType, ip } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
+  import ConfigSelect from "./lib/configs/config-select.svelte";
   import { pipoio } from "./pipoio";
-  import Menu from "./lib/menu.svelte";
+  import Menu from "./lib/menu/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
-  import { onMount, onDestroy } from "svelte";
   import Pipoinfo from "./lib/pipoinfo.svelte";
 
   let type: PipoTypes = "unknown";
@@ -22,30 +22,16 @@
         return data;
       });
   }
-  function fetchImage() {
-    // debugger;
-    return pipoio
-      .get(`/${type}-Horizontal-Yellow.svg`, { responseType: "arraybuffer" })
-      .then(({ data }) => {
-        const blob = new Blob([data], { type: "image/svg+xml" });
-        const url = URL.createObjectURL(blob);
-        return url;
-      });
-  }
+
 </script>
 
 <main>
   <Toasts />
-  <Menu />
   {#await fetch()}
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
-    {#await fetchImage()}
-      <p>Loading logo...</p>
-    {:then imageDataUrl}
-      <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
-    {/await}
-    <Configs />
+    <Menu />
+    <ConfigSelect />
     <article class="content section-borders">
       <Collapse title="Info" collapseId="info">
         <Pipoinfo info={resp} />

@@ -11,26 +11,26 @@ body{
   overflow: hidden;
 }
 :root {
-  font-family: Helvetica, system-ui, Brugty, Arial, sans-serif;
+  font-family: Intrument Sans;
+  
   line-height: 1.5;
-  font-weight: 00;
+  font-weight: 400;
+  font-size: 14px;
 
+  --secondary-front: Source Sans Pro;
   --text-color: #FAF8FE;
   --text-color-secondary: #232024;
-  --bg-color: #232024;
-  --bg-secondary:#BDBCBD;
-  --bg-tertiary:#fff;
+  --bg-primary: #232024;
+  --bg-secondary:#353535;
+  --bg-tertiary:#444444;
   --bg-network: #46464682; /* network */
-  --bg-lighter:#6A6A6A;
-  --bg-tabs:#595CFF; /* translators tabs */
-  --main: #EFFF8E; /* EFFF8E; */
+  --grey: #D9D9D9;
+  --main: #F2FD97; /* EFFF8E; */
   --main-lighter: #F0FFB2; /* F0FFB2; */
-  --main-secondary: #595CFF; /* EFFF8E; */
-  --main-darker: #d9e878;
   --red: #e33333;
   --green: #3bb143;
   
-  background-color: var(--bg-color); 
+  background-color: var(--bg-primary); 
   color: var(--text-color);
   font-synthesis: none;
   text-rendering: optimizeLegibility;

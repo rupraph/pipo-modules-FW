@@ -37,7 +37,7 @@
       drawCube();
     });
     const bgcolor = hexToRgba(
-      getComputedStyle(document.body).getPropertyValue("--bg-color")
+      getComputedStyle(document.body).getPropertyValue("--bg-primary")
     );
     const regl = r({
       canvas: document.getElementById("cube") as HTMLCanvasElement,

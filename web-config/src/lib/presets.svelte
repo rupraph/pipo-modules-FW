@@ -139,13 +139,13 @@
   }
 
   .error-message {
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
     border: 2px solid var(--red);
     color: var(--red);
   }
 
   .success-message {
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
     border: 2px solid var(--green);
     color: var(--green);
   }
@@ -178,7 +178,7 @@
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
   }
 
   .preset-card:hover {

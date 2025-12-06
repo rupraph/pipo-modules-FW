@@ -122,7 +122,7 @@
     width: 1em;
     height: 1em;
     border-radius: 50%;
-    border: 1px solid var(--bg-color);
+    border: 1px solid var(--bg-primary);
   }
   .sound-button:hover {
     border-color: var(--main);
