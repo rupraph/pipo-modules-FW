@@ -27,6 +27,38 @@ export const configsLoading = writable<boolean>(false);
 export const configsError = writable<string | null>(null);
 export const configSaving = writable<boolean>(false);
 
+// Change detection stores
+export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
+export const hasUnsavedChanges = writable<boolean>(false);
+
+// Polling interval to check for deep changes in config
+let changeDetectionInterval: number | null = null;
+
+function startChangeDetection() {
+  if (changeDetectionInterval) return;
+  
+  changeDetectionInterval = window.setInterval(() => {
+    const current = get(currentConfig);
+    const original = get(originalConfig);
+    
+    if (!current || !original) {
+      hasUnsavedChanges.set(false);
+      return;
+    }
+    
+    // Deep comparison using JSON stringify
+    const hasChanges = JSON.stringify(current) !== JSON.stringify(original);
+    hasUnsavedChanges.set(hasChanges);
+  }, 300); // Check every 300ms
+}
+
+function stopChangeDetection() {
+  if (changeDetectionInterval) {
+    window.clearInterval(changeDetectionInterval);
+    changeDetectionInterval = null;
+  }
+}
+
 class ConfigSave<T extends PipoTypes> {
   private previousConfig: PipoConfig<T> | null = null;
   private unsubscribe: (() => void) | null = null;
@@ -182,6 +214,9 @@ class ConfigService {
     const config = await this.fetchConfig(name);
     if (config) {
       currentConfig.set(config);
+      // Store a deep copy as the original for change detection
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
     }
   }
 
@@ -205,6 +240,9 @@ class ConfigService {
       const config = await this.fetchConfig(name);
       if (config) {
         currentConfig.set(config);
+        // Store a deep copy as the original for change detection
+        originalConfig.set(JSON.parse(JSON.stringify(config)));
+        hasUnsavedChanges.set(false);
       }
     } catch (err) {
       const errorMsg =
@@ -394,6 +432,9 @@ class ConfigService {
       const config = await this.fetchConfig(activeName);
       if (config) {
         currentConfig.set(config);
+        // Store a deep copy as the original for change detection
+        originalConfig.set(JSON.parse(JSON.stringify(config)));
+        hasUnsavedChanges.set(false);
       }
     } catch (err) {
       const errorMsg =
@@ -408,6 +449,8 @@ class ConfigService {
    */
   async initialize(): Promise<void> {
     await this.refresh();
+    // Start polling for changes after config is loaded
+    startChangeDetection();
   }
 }
 

@@ -14,7 +14,9 @@
 
   $: config = $currentConfig;
   $: mode = $currentMode;
-  $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as "engine-midi" | "engine-osc";
+  $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
+    | "engine-midi"
+    | "engine-osc";
   $: keys =
     category === "analog"
       ? Array.from({ length: 8 }, (_, i) => `A0${i + 1}` as Keys)
@@ -22,9 +24,23 @@
 
   $: selectedChannel = $uiState[boardType]?.selectedChannel;
 
+  // Create a reactive object that tracks enabled state for each channel
+  // Force reactivity by also depending on config and currentConfig
+  $: channelStates =
+    config && $currentConfig
+      ? keys.reduce(
+          (acc, key) => {
+            acc[key] = config.engine[engineKey][key].enabled ?? false;
+            return acc;
+          },
+          {} as Record<Keys, boolean>
+        )
+      : ({} as Record<Keys, boolean>);
+
   function toggle(key: Keys) {
     if (!config) return;
-    config.engine[engineKey][key].enabled = !config.engine[engineKey][key].enabled;
+    config.engine[engineKey][key].enabled =
+      !config.engine[engineKey][key].enabled;
     console.log(config.engine[engineKey][key].enabled);
     currentConfig.set(config);
   }
@@ -53,7 +69,7 @@
   <div class="channels">
     {#each keys as key}
       <button
-        class:enabled={isEnabled(key)}
+        class:enabled={channelStates[key]}
         class:selected={key === selectedChannel}
         on:click={() => {
           selectChannel(key);

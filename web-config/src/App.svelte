@@ -13,7 +13,12 @@
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
   import MotionChannels from "./lib/configs/motion-channels.svelte";
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
-  import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
+  import FloatingSaveButton from "./lib/FloatingSaveButton.svelte";
+  import {
+    currentConfig,
+    hasUnsavedChanges,
+    originalConfig,
+  } from "./services/config";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -25,6 +30,14 @@
         pipoType.set(type);
         return data;
       });
+  }
+
+  function handleSaveSuccess() {
+    // Reset the original config to the current config after successful save
+    if ($currentConfig) {
+      originalConfig.set(JSON.parse(JSON.stringify($currentConfig)));
+      hasUnsavedChanges.set(false);
+    }
   }
 </script>
 
@@ -45,7 +58,6 @@
         {/if}
         <ChannelSettings />
       </section>
-      <OscOutputSettings />
       <article class="content section-borders">
         <Collapse title="Info" collapseId="info">
           <Pipoinfo info={resp} />
@@ -55,6 +67,13 @@
         <Logs />
       </article>
     </div>
+
+    <!-- Floating Save Button -->
+    <FloatingSaveButton
+      config={$currentConfig}
+      show={$hasUnsavedChanges}
+      onSaveSuccess={handleSaveSuccess}
+    />
   {:catch e}
     <article>
       <h3>Network error</h3>
