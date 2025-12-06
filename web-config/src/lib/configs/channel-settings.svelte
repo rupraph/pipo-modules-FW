@@ -75,6 +75,14 @@
   }
   animateSensor();
 
+  $: console.log('Channel Settings State:', {
+    config: !!config,
+    selectedChannel,
+    channelConfig: !!channelConfig,
+    type,
+    uiState: $uiState
+  });
+
   $: if (
     sensorValue !== undefined &&
     aschema &&
@@ -123,8 +131,9 @@
       min={aschema.min}
       bind:max={maxSensorValue}
       step={aschema.step}
-      minLabel={`LowLim (${aschema.unit})`}
-      maxLabel={`HighLim (${aschema.unit})`}
+      minLabel={`Min`}
+      maxLabel={`Max`}
+      units={aschema.unit}
     />
   {/if}
 {/if}

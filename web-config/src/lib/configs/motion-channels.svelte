@@ -49,6 +49,11 @@
 
   $: selectedChannel = $uiState[boardType]?.selectedChannel;
 
+  // Set first channel as default if none selected
+  $: if (config && keys.length > 0 && !selectedChannel) {
+    uiState.setSelectedChannel(boardType, keys[0]);
+  }
+
   // Create a reactive object that tracks enabled state for each channel
   // Force reactivity by also depending on config and currentConfig
   $: channelStates =

@@ -90,6 +90,7 @@
   step={aschema.step}
   minLabel={`LowLim (${aschema.unit})`}
   maxLabel={`HighLim (${aschema.unit})`}
+  units={aschema.unit}
 />
 
 <!-- {#if aschema.cat === "Touch"  } -->

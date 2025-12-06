@@ -10,6 +10,7 @@
   export let low: number = 0;
   export let high: number = 100;
   export let step: number = 1;
+  export let units: string = "";
   let id = uid();
   let color = fillColor();
   const minId = uid();
@@ -48,7 +49,10 @@
 
 <div class="minmax-input" {id}>
   {#if value !== undefined}
-    <div class="curr-value">Current reading: {value.toFixed(2)}</div>
+    <div class="curr-value">
+      Current reading: {value.toFixed(2)}
+      {units}
+    </div>
   {/if}
   <div class="minmax">
     <span>{min}</span>
@@ -82,29 +86,33 @@
   </div>
 
   <div class="inputs">
-    <label class="min" for={minId}>{minLabel}:</label>
-    <input
-      id={minId}
-      class="min"
-      type="number"
-      {min}
-      {max}
-      {step}
-      bind:value={low}
-      on:change={onMinChange}
-    />
-    {#if mode === "double"}
-      <label class="max" for={maxId}>{maxLabel}:</label>
+    <div class="input-group">
+      <label class="min" for={minId}>{minLabel}</label>
       <input
-        id={maxId}
-        class="max"
+        id={minId}
+        class="min"
         type="number"
         {min}
         {max}
         {step}
-        bind:value={high}
-        on:change={onMaxChange}
+        bind:value={low}
+        on:change={onMinChange}
       />
+    </div>
+    {#if mode === "double"}
+      <div class="input-group">
+        <label class="max" for={maxId}>{maxLabel}</label>
+        <input
+          id={maxId}
+          class="max"
+          type="number"
+          {min}
+          {max}
+          {step}
+          bind:value={high}
+          on:change={onMaxChange}
+        />
+      </div>
     {/if}
   </div>
 </div>
@@ -143,11 +151,21 @@
   .inputs {
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-between;
     width: 100%;
+    gap: 1rem;
   }
-  .inputs > * {
-    width: 100%;
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .input-group label {
+    white-space: nowrap;
+  }
+  .input-group input {
+    flex: 1;
+    min-width: 80px;
   }
   .value {
     position: absolute;
@@ -231,5 +249,16 @@
   input[type="range"]:active::-webkit-slider-thumb {
     background-color: #ffffff;
     border: 1px solid var(--main);
+  }
+
+  /* Hide number input spinner arrows */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
   }
 </style>
