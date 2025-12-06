@@ -325,7 +325,6 @@
 <style scoped>
   .row :global(.selected-item) {
     line-height: var(--font-size);
-    font-family: Source Sans Pro;
   }
   .row span {
     font-size: 14px;
