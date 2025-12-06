@@ -11,6 +11,7 @@
   import OfflineOverlay from "./lib/offline-overlay.svelte";
   import Pipoinfo from "./lib/pipoinfo.svelte";
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
+  import MotionChannels from "./lib/configs/motion-channels.svelte";
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
   import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
 
@@ -37,7 +38,11 @@
       <ConfigSelect />
       <section>
         <h3>Channel Settings</h3>
-        <AnalogChannels />
+        {#if type === "analog"}
+          <AnalogChannels />
+        {:else if type === "motion"}
+          <MotionChannels />
+        {/if}
         <ChannelSettings />
       </section>
       <OscOutputSettings />
