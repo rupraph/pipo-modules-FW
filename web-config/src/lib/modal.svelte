@@ -27,8 +27,10 @@
       easing: cubicOut,
     }}
   >
+    <div class="close" on:click={() => (open = false)}>
+      <span>✖</span>
+    </div>
     <slot></slot>
-    <div class="close" on:click={() => (open = false)}>✖</div>
   </div>
 {/if}
 
@@ -38,19 +40,21 @@
     left: 50%;
     z-index: 21;
     width: calc(100vw - 8px);
-    max-width: 600px;
+    max-width: 400px;
     background-color: var(--bg-network);
     position: fixed;
     overflow: hidden;
     transform: translate(-50%, -50%);
   }
   .close {
-    position: absolute;
-    top: 0;
-    right: 4%;
-    padding: 5px;
     font-size: 1.6em;
     cursor: pointer;
+    width: 100%;
+    display: flex;
+  }
+  .close span {
+    margin-left: auto;
+    margin-right: 8px;
   }
   .overlay {
     top: 0;
