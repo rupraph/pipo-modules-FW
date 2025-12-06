@@ -297,7 +297,7 @@
   </div>
 </Modal>
 
-<style>
+<style scoped>
   .config-select :global(.selected-item) {
     line-height: var(--font-size);
     font-family: Source Sans Pro;

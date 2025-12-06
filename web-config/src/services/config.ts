@@ -5,6 +5,7 @@ import { formatNumbers, debounce } from "../utils";
 import type {
   AxisSchema,
   InputSettings,
+  OutputMode,
   PipoConfig,
   PipoKeys,
   PipoTypes,
@@ -18,6 +19,8 @@ export const configValid = writable<boolean>(false);
 export const configNames = writable<string[]>([]);
 export const activeConfigName = writable<string>("");
 export const currentConfig = writable<PipoConfig<PipoTypes> | null>(null);
+//TODO: derive it from config, and have a global swith in config to switch modes.
+export const currentMode = writable<OutputMode>("MIDI");
 
 // UI state stores
 export const configsLoading = writable<boolean>(false);
