@@ -11,7 +11,8 @@
   import OfflineOverlay from "./lib/offline-overlay.svelte";
   import Pipoinfo from "./lib/pipoinfo.svelte";
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
-    import ChannelSettings from "./lib/configs/channel-settings.svelte";
+  import ChannelSettings from "./lib/configs/channel-settings.svelte";
+  import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -24,7 +25,6 @@
         return data;
       });
   }
-
 </script>
 
 <main>
@@ -36,6 +36,7 @@
     <ConfigSelect />
     <AnalogChannels />
     <ChannelSettings />
+    <OscOutputSettings />
     <article class="content section-borders">
       <Collapse title="Info" collapseId="info">
         <Pipoinfo info={resp} />
@@ -63,10 +64,6 @@
     max-width: 600px;
     gap: 1em;
   }
-  .logo-image {
-    max-width: 60%; /* or any value you prefer */
-    align-self: flex-start;
-  }
 
   /* .title-container {
     position: relative;
@@ -74,11 +71,4 @@
     height: fit-content;
     margin-bottom: 30px;
   } */
-
-  h1 {
-    font-family: Brugty;
-    position: relative;
-    z-index: 1; /* Ensure the title is above the image */
-    color: rgb(60, 60, 60); /* Adjust the text color for better visibility */
-  }
 </style>
