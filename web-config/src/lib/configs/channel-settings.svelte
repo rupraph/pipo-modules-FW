@@ -75,12 +75,12 @@
   }
   animateSensor();
 
-  $: console.log('Channel Settings State:', {
+  $: console.log("Channel Settings State:", {
     config: !!config,
     selectedChannel,
     channelConfig: !!channelConfig,
     type,
-    uiState: $uiState
+    uiState: $uiState,
   });
 
   $: if (
@@ -98,7 +98,7 @@
     <span class="label">Channel state</span>
     <div class="buttons">
       <button
-        class:muted={!channelConfig.enabled}
+        class:enabled={!channelConfig.enabled}
         on:click={() => {
           channelConfig.enabled = !channelConfig.enabled;
           // Trigger store update to notify other components
@@ -115,8 +115,8 @@
       <InfoModal>Information about options</InfoModal>
     </div>
     <div class="buttons">
-      <button> Range invert </button>
-      <button> Binqry mode </button>
+      <button class="rounder primary">Range invert </button>
+      <button class="rounder primary">Binary mode </button>
     </div>
   </div>
   {#if input && aschema && selectedChannel}
@@ -131,11 +131,15 @@
       min={aschema.min}
       bind:max={maxSensorValue}
       step={aschema.step}
-      minLabel={`Min`}
-      maxLabel={`Max`}
-      units={aschema.unit}
+      minLabel={`LowLim (${aschema.unit})`}
+      maxLabel={`HighLim (${aschema.unit})`}
     />
   {/if}
+  <div class="row centered">
+    <button class="rounded secondary"> Calibrate zero </button>
+    <button class="rounded secondary"> Remove offset </button>
+    <InfoModal>Information about calibration</InfoModal>
+  </div>
 {/if}
 
 <style scoped>
@@ -146,22 +150,5 @@
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-  .row button {
-    border: 2px solid var(--main);
-    height: 29px;
-    padding: 0 16px;
-    background-color: var(--bg-secondary);
-    border-radius: 18px;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 700;
-    color: var(--main);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  .row button.muted {
-    background-color: var(--main);
-    color: var(--bg-primary);
   }
 </style>

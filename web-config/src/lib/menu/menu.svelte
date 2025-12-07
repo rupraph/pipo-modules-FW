@@ -23,18 +23,20 @@
   }
 </script>
 
-<nav>
+<section>
   {#await fetchImage()}
     <p></p>
   {:then imageDataUrl}
-    <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
-    <div class="controls">
-      <Settings />
-      <Wifi />
-      <PlayPause />
+    <div class="row">
+      <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
+      <div class="centered">
+        <Settings />
+        <Wifi />
+        <PlayPause />
+      </div>
     </div>
   {/await}
-</nav>
+</section>
 <Modal bind:open={wifiOpen}>
   <WifiConnect />
 </Modal>
