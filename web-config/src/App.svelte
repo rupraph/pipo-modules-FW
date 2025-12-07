@@ -15,8 +15,11 @@
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
   import FloatingSaveButton from "./lib/FloatingSaveButton.svelte";
   import BatteryStatus from "./lib/BatteryStatus.svelte";
+  import MidiOutputSettings from "./lib/configs/midi-output-settings.svelte";
+  import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
   import {
     currentConfig,
+    currentMode,
     hasUnsavedChanges,
     originalConfig,
   } from "./services/config";
@@ -59,6 +62,13 @@
           <MotionChannels />
         {/if}
         <ChannelSettings />
+
+        <!-- Output settings based on board's general output mode -->
+        {#if $currentConfig?.general.MidiEnabled}
+          <MidiOutputSettings />
+        {:else if $currentConfig?.general.OSC_ENA}
+          <OscOutputSettings />
+        {/if}
       </section>
       <article class="content section-borders">
         <Collapse title="Info" collapseId="info">
