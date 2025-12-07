@@ -100,8 +100,8 @@
     <div class="row">
         <span class="label">Channel state</span>
         <div class="buttons">
-            <button class:enabled={isEnabled()}> Mute </button>
-            <button class:enabled={!isSolo()}> Solo </button>
+            <button class="rounded primary" class:enabled={isEnabled()}> Mute </button>
+            <button class="rounded primary" class:enabled={!isSolo()}> Solo </button>
         </div>
     </div>
     <div class="row">
@@ -110,8 +110,8 @@
             <InfoModal>Information about options</InfoModal>
         </div>
         <div class="buttons">
-            <button> Range invert </button>
-            <button> Binqry mode </button>
+            <button class="rounded primary"> Range invert </button>
+            <button class="rounded primary"> Binary mode </button>
         </div>
     </div>
     {#if input && aschema && selectedChannel}
@@ -130,6 +130,11 @@
             maxLabel={`HighLim (${aschema.unit})`}
         />
     {/if}
+    <div class="row centered">
+            <button class="rounded secondary"> Calibrate zero </button>
+            <button class="rounded secondary"> Remove offset </button>
+            <InfoModal>Information about calibration</InfoModal>
+    </div>
 {/if}
 
 <style scoped>
@@ -140,17 +145,5 @@
         display: flex;
         align-items: center;
         gap: 6px;
-    }
-    .row button {
-        border: 2px solid var(--main);
-        height: 29px;
-        padding: 0 16px;
-        background-color: var(--bg-secondary);
-        border-radius: 18px;
-        font-size: 12px;
-        line-height: 16px;
-        font-weight: 700;
-        color: var(--main);
-        cursor: pointer;
     }
 </style>

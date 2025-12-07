@@ -157,76 +157,78 @@
   }
 </script>
 
-<div class="row">
-  <div class="left">
-    <span> Current Config </span>
-    <div
-      on:dblclick={handleSelectDoubleClick}
-      on:touchstart={handleTouchStart}
-      on:touchend={handleTouchEnd}
-      on:touchmove={handleTouchMove}
-    >
-      <Select
-        --height="18px"
-        --max-height="18px"
-        --width="134px"
-        --padding="0"
-        --value-container-padding="0"
-        --selected-item-padding="0 0 0 10px"
-        --selected-item-color="var(--bg-primary)"
-        --font-size="16px"
-        --color="var(--bg-primary)"
-        --item-color="var(--bg-primary)"
-        --item-bg="var(--bg-secondary)"
-        --item-is-active-color="var(--main)"
-        --item-is-active-bg="var(--bg-secondary)"
-        --item-hover-color="var(--text-color)"
-        --item-hover-bg="var(--bg-secondary)"
-        --input-color="var(--text-color)"
-        items={selectItems}
-        value={selectedItem}
-        on:change={handleSelect}
-        clearable={false}
-        searchable={false}
+<section>
+  <div class="row">
+    <div class="left">
+      <span> Current Config </span>
+      <div
+        on:dblclick={handleSelectDoubleClick}
+        on:touchstart={handleTouchStart}
+        on:touchend={handleTouchEnd}
+        on:touchmove={handleTouchMove}
+      >
+        <Select
+          --height="18px"
+          --max-height="18px"
+          --width="134px"
+          --padding="0"
+          --value-container-padding="0"
+          --selected-item-padding="0 0 0 10px"
+          --selected-item-color="var(--bg-primary)"
+          --font-size="16px"
+          --color="var(--bg-primary)"
+          --item-color="var(--bg-primary)"
+          --item-bg="var(--bg-secondary)"
+          --item-is-active-color="var(--main)"
+          --item-is-active-bg="var(--bg-secondary)"
+          --item-hover-color="var(--text-color)"
+          --item-hover-bg="var(--bg-secondary)"
+          --input-color="var(--text-color)"
+          items={selectItems}
+          value={selectedItem}
+          on:change={handleSelect}
+          clearable={false}
+          searchable={false}
+          disabled={$configsLoading}
+        />
+      </div>
+    </div>
+
+    <div class="actions">
+      <LoadingButton
+        onClick={startCopy}
+        class="action-btn "
+        loading={duplicating}
         disabled={$configsLoading}
-      />
+        title="Duplicate"
+        width="1.5em"
+      >
+        <CopyPlus />
+      </LoadingButton>
+      <LoadingButton
+        onClick={startDelete}
+        class="action-btn delete-btn"
+        loading={deleting}
+        disabled={$configsLoading}
+        title="Delete"
+        width="1.5em"
+      >
+        <Trash2 />
+      </LoadingButton>
+
+      <LoadingButton
+        onClick={startCreate}
+        class="action-btn new-btn"
+        loading={creating}
+        disabled={$configsLoading}
+        title="New Config"
+        width="1.5em"
+      >
+        <Plus />
+      </LoadingButton>
     </div>
   </div>
-
-  <div class="actions">
-    <LoadingButton
-      onClick={startCopy}
-      class="action-btn "
-      loading={duplicating}
-      disabled={$configsLoading}
-      title="Duplicate"
-      width="1.5em"
-    >
-      <CopyPlus />
-    </LoadingButton>
-    <LoadingButton
-      onClick={startDelete}
-      class="action-btn delete-btn"
-      loading={deleting}
-      disabled={$configsLoading}
-      title="Delete"
-      width="1.5em"
-    >
-      <Trash2 />
-    </LoadingButton>
-
-    <LoadingButton
-      onClick={startCreate}
-      class="action-btn new-btn"
-      loading={creating}
-      disabled={$configsLoading}
-      title="New Config"
-      width="1.5em"
-    >
-      <Plus />
-    </LoadingButton>
-  </div>
-</div>
+</section>
 
 <Modal bind:open={showRenameModal}>
   <div class="modal-content">

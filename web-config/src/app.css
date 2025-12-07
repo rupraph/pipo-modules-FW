@@ -73,19 +73,22 @@ input {
   background-color: transparent;
 }
 .main-container{
-  width: calc(100% - 44px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 0;
-}
-.main-container > section {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 16px;
+  padding: 24px 8px;
+  box-sizing: border-box;
+}
+.main-container > section {
+  width: 100%;
+  padding: 6px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
+  box-sizing: border-box;
 }
 .row {
   font-size: 12px;
@@ -95,6 +98,12 @@ input {
   justify-content: space-between;
   box-sizing: content-box;
   width: 100%;
+}
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .left {

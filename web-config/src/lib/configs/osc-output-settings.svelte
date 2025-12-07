@@ -50,6 +50,7 @@
 <style scoped>
   section {
     width: 100%;
+    background-color: var(--bg-secondary);
   }
   h3 {
     display: flex;

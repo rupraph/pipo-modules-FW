@@ -12,7 +12,9 @@
   function fetchImage() {
     // debugger;
     return pipoio
-      .get(`/${$pipoType}-Horizontal-Yellow.svg`, { responseType: "arraybuffer" })
+      .get(`/${$pipoType}-Horizontal-Yellow.svg`, {
+        responseType: "arraybuffer",
+      })
       .then(({ data }) => {
         const blob = new Blob([data], { type: "image/svg+xml" });
         const url = URL.createObjectURL(blob);
@@ -21,16 +23,20 @@
   }
 </script>
 
-<nav>
+<section>
   {#await fetchImage()}
     <p></p>
   {:then imageDataUrl}
-    <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
-    <Settings />
-    <Wifi />
-    <PlayPause />
+    <div class="row">
+      <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
+      <div class="centered">
+        <Settings />
+        <Wifi />
+        <PlayPause />
+      </div>
+    </div>
   {/await}
-</nav>
+</section>
 <Modal bind:open={wifiOpen}>
   <WifiConnect />
 </Modal>
