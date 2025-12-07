@@ -1,19 +1,25 @@
 <script lang="ts">
   import MenuButton from "./MenuButton.svelte";
-  import Modal from "../modal.svelte";
-  import {CirclePause} from "lucide-svelte";
+  import { CirclePause, CirclePlay } from "lucide-svelte";
+  import { pipoio } from "../../pipoio";
 
-  let open = false;
+  let isPaused = false;
+
+  function togglePause() {
+    pipoio.post("/pause").then(() => {
+      console.log("Toggling pause...");
+    });
+    isPaused = !isPaused;
+  }
 </script>
 
-
-<MenuButton on:click={() => open = !open}>
- <CirclePause color="var(--grey)"/>
+<MenuButton on:click={togglePause}>
+  {#if isPaused}
+    <CirclePlay color="var(--grey)" size={50} />
+  {:else}
+    <CirclePause color="var(--grey)" size={50} />
+  {/if}
 </MenuButton>
-
-<Modal bind:open={open}>
-  Coucou
-</Modal>
 
 <style>
 </style>

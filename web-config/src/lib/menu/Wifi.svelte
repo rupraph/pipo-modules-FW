@@ -2,12 +2,12 @@
   import { pipoio } from "../../pipoio";
   import { isLive } from "../../services";
   import WifiConnect from "../wifi/connect.svelte";
-  import {Wifi, WifiHigh} from "lucide-svelte";
+  import { Wifi, WifiHigh } from "lucide-svelte";
   import Signal from "../wifi/signal.svelte";
   import Modal from "../modal.svelte";
   import { wifiState } from "../wifi/store";
   import { fetchNetworks, fetchState } from "../../services/wifi";
-    import MenuButton from "./MenuButton.svelte";
+  import MenuButton from "./MenuButton.svelte";
 
   let wifiSignal = 4;
   let open = false;
@@ -43,12 +43,12 @@
     });
 </script>
 
-<MenuButton secondary on:click={() => open = !open}>
- <div class="icon">
-  <WifiHigh color="var(--bg-primary)"/>
- </div>
+<MenuButton secondary on:click={() => (open = !open)}>
+  <div class="icon">
+    <WifiHigh color="var(--bg-primary)" size={25} strokeWidth={3} />
+  </div>
 </MenuButton>
-<Modal bind:open={open}>
+<Modal bind:open>
   <WifiConnect />
 </Modal>
 

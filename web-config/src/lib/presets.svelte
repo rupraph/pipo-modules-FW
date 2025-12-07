@@ -8,208 +8,148 @@
   } from "../services/presets";
   import { onMount } from "svelte";
   import LoadingButton from "./form/LoadingButton.svelte";
+  import Select from "svelte-select";
+  import InfoModal from "./InfoModal.svelte";
 
   let selectedPreset: Preset | null = null;
   let applying = false;
-  let successMessage = "";
 
   onMount(() => {
     presetsService.fetchPresets();
   });
 
-  async function handleApply() {
+  $: selectItems = $presets.map((preset) => ({
+    value: preset.filename,
+    label: preset.name,
+  }));
+
+  $: selectedItem = selectedPreset
+    ? { value: selectedPreset.filename, label: selectedPreset.name }
+    : null;
+
+  async function handleSelect(event: CustomEvent) {
+    const selected = event.detail;
+    if (selected) {
+      selectedPreset =
+        $presets.find((p) => p.filename === selected.value) || null;
+    }
+  }
+
+  async function handleLoad() {
     if (!selectedPreset) return;
 
     applying = true;
-    successMessage = "";
 
     try {
       await presetsService.applyPreset(selectedPreset.name);
-      successMessage = `Successfully applied preset: ${selectedPreset.name}`;
-      setTimeout(() => {
-        successMessage = "";
-      }, 3000);
     } catch (err) {
       // Error is handled by the service and stored in presetsError
     } finally {
       applying = false;
     }
   }
-
-  function handleRefresh() {
-    presetsService.refresh();
-  }
-
-  function selectPreset(preset: Preset) {
-    selectedPreset = preset;
-  }
 </script>
 
-<div class="presets-container">
-  <div class="presets-header">
-    <h2>Presets</h2>
-    <LoadingButton
-      class="secondary"
-      loading={$presetsLoading}
-      onClick={handleRefresh}
-      width="120px"
-    >
-      Refresh
-    </LoadingButton>
-  </div>
-
-  {#if $presetsError}
-    <div class="error-message">
-      <p>Error: {$presetsError}</p>
+<section class="preset-select">
+  <div class="row">
+    <div class="left">
+      <span>Preset</span>
     </div>
-  {/if}
-
-  {#if successMessage}
-    <div class="success-message">
-      <p>{successMessage}</p>
+    <div>
+      <Select
+        --height="25px"
+        --max-height="25px"
+        --width="134px"
+        --padding="0"
+        --value-container-padding="0"
+        --selected-item-padding="0 0 0 10px"
+        --selected-item-color="var(--bg-primary)"
+        --font-size="14px"
+        --color="var(--bg-primary)"
+        --item-color="var(--bg-primary)"
+        --item-bg="var(--bg-secondary)"
+        --item-is-active-color="var(--main)"
+        --item-is-active-bg="var(--bg-secondary)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        items={selectItems}
+        value={selectedItem}
+        on:change={handleSelect}
+        placeholder={$presetsLoading ? "Loading..." : "Select a preset"}
+        clearable={false}
+        searchable={false}
+        disabled={$presetsLoading}
+      />
     </div>
-  {/if}
-
-  {#if $presetsLoading && $presets.length === 0}
-    <div class="loading">
-      <p>Loading presets...</p>
-    </div>
-  {:else if $presets.length === 0}
-    <div class="empty-state">
-      <p>No presets available</p>
-    </div>
-  {:else}
-    <div class="presets-grid">
-      {#each $presets as preset (preset.filename)}
-        <div
-          class="preset-card"
-          class:selected={selectedPreset?.filename === preset.filename}
-          on:click={() => selectPreset(preset)}
-          role="button"
-          tabindex="0"
-          on:keydown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              selectPreset(preset);
-            }
-          }}
-        >
-          <h3>{preset.name}</h3>
-          <p class="description">{preset.description}</p>
-        </div>
-      {/each}
+    <div>
+      {#if selectedPreset}
+        <InfoModal>
+          {selectedPreset.description || "No description available"}
+        </InfoModal>
+      {/if}
     </div>
 
     <div class="actions">
       <LoadingButton
-        class="success"
+        class="action-btn"
         loading={applying}
-        disabled={!selectedPreset}
-        onClick={handleApply}
-        width="150px"
+        disabled={!selectedPreset || $presetsLoading}
+        onClick={handleLoad}
+        title="Load preset"
+        width="auto"
       >
-        Apply Preset
+        Load
       </LoadingButton>
     </div>
-  {/if}
-</div>
+
+    {#if $presetsError}
+      <div class="error-message">
+        {$presetsError}
+      </div>
+    {/if}
+  </div>
+</section>
 
 <style>
-  .presets-container {
+  section {
     width: 100%;
   }
 
-  .presets-header {
+  /* .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    width: 100%;
+    gap: 1em;
+  } */
+  .row span {
+    font-size: 14px;
+    line-height: 14px;
   }
 
-  .presets-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+  .left span {
+    font-size: 14px;
+    font-weight: 500;
   }
 
-  .error-message,
-  .success-message {
-    padding: 0.75rem 1rem;
-    border-radius: 3px;
-    margin-bottom: 1rem;
-  }
-
-  .error-message {
-    background-color: var(--bg-primary);
-    border: 2px solid var(--red);
-    color: var(--red);
-  }
-
-  .success-message {
-    background-color: var(--bg-primary);
-    border: 2px solid var(--green);
-    color: var(--green);
-  }
-
-  .loading,
-  .empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-color);
-    opacity: 0.7;
-  }
-
-  .loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .presets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .preset-card {
-    padding: 1.25rem;
-    border: 2px solid var(--bg-lighter);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background-color: var(--bg-primary);
-  }
-
-  .preset-card:hover {
-    border-color: var(--main);
-    transform: translateY(-2px);
-  }
-
-  .preset-card.selected {
-    border-color: var(--main);
-    background-color: var(--bg-lighter);
-  }
-
-  .preset-card h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-color);
-  }
-
-  .preset-card .description {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--text-color);
-    opacity: 0.8;
-    line-height: 1.4;
+  .select-container {
+    flex: 1;
   }
 
   .actions {
     display: flex;
-    justify-content: center;
-    padding-top: 1rem;
-    border-top: 2px solid var(--bg-lighter);
+    gap: 8px;
+    align-items: center;
+  }
+
+  .error-message {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    color: var(--red);
+    font-size: 13px;
   }
 </style>

@@ -161,37 +161,37 @@
   <div class="row">
     <div class="left">
       <span> Current Config </span>
-      <div
-        on:dblclick={handleSelectDoubleClick}
-        on:touchstart={handleTouchStart}
-        on:touchend={handleTouchEnd}
-        on:touchmove={handleTouchMove}
-      >
-        <Select
-          --height="18px"
-          --max-height="18px"
-          --width="134px"
-          --padding="0"
-          --value-container-padding="0"
-          --selected-item-padding="0 0 0 10px"
-          --selected-item-color="var(--bg-primary)"
-          --font-size="16px"
-          --color="var(--bg-primary)"
-          --item-color="var(--bg-primary)"
-          --item-bg="var(--bg-secondary)"
-          --item-is-active-color="var(--main)"
-          --item-is-active-bg="var(--bg-secondary)"
-          --item-hover-color="var(--text-color)"
-          --item-hover-bg="var(--bg-secondary)"
-          --input-color="var(--text-color)"
-          items={selectItems}
-          value={selectedItem}
-          on:change={handleSelect}
-          clearable={false}
-          searchable={false}
-          disabled={$configsLoading}
-        />
-      </div>
+    </div>
+    <div
+      on:dblclick={handleSelectDoubleClick}
+      on:touchstart={handleTouchStart}
+      on:touchend={handleTouchEnd}
+      on:touchmove={handleTouchMove}
+    >
+      <Select
+        --height="25px"
+        --max-height="25px"
+        --width="134px"
+        --padding="0"
+        --value-container-padding="0"
+        --selected-item-padding="0 0 0 10px"
+        --selected-item-color="var(--bg-primary)"
+        --font-size="14px"
+        --color="var(--bg-primary)"
+        --item-color="var(--bg-primary)"
+        --item-bg="var(--bg-secondary)"
+        --item-is-active-color="var(--main)"
+        --item-is-active-bg="var(--bg-secondary)"
+        --item-hover-color="var(--text-color)"
+        --item-hover-bg="var(--bg-secondary)"
+        --input-color="var(--text-color)"
+        items={selectItems}
+        value={selectedItem}
+        on:change={handleSelect}
+        clearable={false}
+        searchable={false}
+        disabled={$configsLoading}
+      />
     </div>
 
     <div class="actions">
@@ -340,10 +340,10 @@
   }
 
   .actions :global(.action-btn) {
-    width: 19px;
-    height: 19px;
-    min-width: 19px;
-    min-height: 19px;
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
     padding: 0;
     display: flex;
     align-items: center;

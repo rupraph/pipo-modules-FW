@@ -22,7 +22,7 @@
 
 <style>
   .loading-button {
-    height: 38px;
+    /* height: 38px; */
     max-height: 38px;
   }
   .loading-button.loading {

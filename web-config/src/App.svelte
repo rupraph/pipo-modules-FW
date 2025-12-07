@@ -24,6 +24,7 @@
     hasUnsavedChanges,
     originalConfig,
   } from "./services/config";
+  import Presets from "./lib/presets.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -55,6 +56,7 @@
       <BatteryStatus />
       <Menu />
       <ConfigSelect />
+
       <section>
         <TouchCalibration />
       </section>
@@ -74,14 +76,15 @@
           <OscOutputSettings />
         {/if}
       </section>
+      <Presets />
       <article class="content section-borders">
         <Collapse title="Info" collapseId="info">
           <Pipoinfo info={resp} />
         </Collapse>
       </article>
-      <article class="content section-borders">
+      <!-- <article class="content section-borders">
         <Logs />
-      </article>
+      </article> -->
     </div>
 
     <!-- Floating Save Button -->
