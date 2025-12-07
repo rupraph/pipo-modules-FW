@@ -14,6 +14,7 @@
   import MotionChannels from "./lib/configs/motion-channels.svelte";
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
   import FloatingSaveButton from "./lib/FloatingSaveButton.svelte";
+  import BatteryStatus from "./lib/BatteryStatus.svelte";
   import {
     currentConfig,
     hasUnsavedChanges,
@@ -47,6 +48,7 @@
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
     <div class="main-container">
+      <BatteryStatus />
       <Menu />
       <ConfigSelect />
       <section>
