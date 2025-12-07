@@ -53,14 +53,15 @@
   /* Minimal mode styles */
   .pill-switch.minimal {
     border: none;
-    background-color: transparent;
+    /* background-color: transparent; */
+    background-color: var(--bg-secondary);
     padding: 0;
   }
 
   .minimal-track {
     position: relative;
     width: 50px;
-    height: 24px;
+    height: 20px;
     background-color: red;
     border-radius: 20px;
     border: 2px solid var(--main);
@@ -75,15 +76,17 @@
   }
 
   .minimal-pill {
-    width: 20px;
-    height: 20px;
-    background-color: var(--bg-primary);
+    width: 16px;
+    height: 16px;
+    background-color: var(--main);
     border-radius: 50%;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 4px;
   }
 
   .minimal-track.on .minimal-pill {
     transform: translateX(26px);
+    background-color: var(--bg-primary);
   }
 
   /* Labeled mode styles */

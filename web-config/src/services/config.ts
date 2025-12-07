@@ -22,6 +22,14 @@ export const currentConfig = writable<PipoConfig<PipoTypes> | null>(null);
 //TODO: derive it from config, and have a global swith in config to switch modes.
 export const currentMode = writable<OutputMode>("MIDI");
 
+// Update currentMode when config changes
+currentConfig.subscribe((config) => {
+  if (config?.general) {
+    const mode: OutputMode = config.general.MidiEnabled ? "MIDI" : config.general.OSC_ENA ? "OSC" : "MIDI";
+    currentMode.set(mode);
+  }
+});
+
 // UI state stores
 export const configsLoading = writable<boolean>(false);
 export const configsError = writable<string | null>(null);

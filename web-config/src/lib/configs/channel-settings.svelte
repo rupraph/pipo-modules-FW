@@ -16,12 +16,27 @@
   import MinMax from "../form/MinMax.svelte";
   import { schema } from "../../schema";
   import { pipoio, PipoIO } from "../../pipoio";
+  import PillSwitch from "../form/PillSwitch.svelte";
 
   let category: "analog" | "touch" = "analog";
 
   $: config = $currentConfig;
   $: type = $pipoType;
-  $: mode = $currentMode;
+  $: mode = config?.general.MidiEnabled
+    ? "MIDI"
+    : config?.general.OSC_ENA
+      ? "OSC"
+      : "MIDI";
+
+  $: console.log(
+    "Mode changed:",
+    mode,
+    "MidiEnabled:",
+    config?.general.MidiEnabled,
+    "OSC_ENA:",
+    config?.general.OSC_ENA
+  );
+
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
     | "engine-midi"
     | "engine-osc";
@@ -130,6 +145,12 @@
     currentConfig.set(config);
   }
 
+  function toggleCyclic() {
+    if (!input) return;
+    input.cyclic = !input.cyclic;
+    currentConfig.set(config);
+  }
+
   // Compute if binary mode is active
   $: isBinaryMode = input
     ? aschema?.cat === "Touch"
@@ -154,28 +175,55 @@
       </button>
     </div>
   </div>
-  <div class="row">
-    <div class="left">
-      <span class="label">Options</span>
-      <InfoModal>Information about options</InfoModal>
+  {#if mode === "OSC"}
+    <div class="row">
+      <span class="label">Raw output</span>
+      <div class="buttons">
+        <PillSwitch
+          label=""
+          bind:value={channelConfig.mode_raw}
+          on:change={() => {
+            // Trigger store update to notify other components
+            currentConfig.set(config);
+          }}
+        />
+      </div>
     </div>
-    <div class="buttons">
-      <button
-        class="rounder primary"
-        class:enabled={input?.inverted}
-        on:click={toggleRangeInvert}
-      >
-        Range invert
-      </button>
-      <button
-        class="rounder primary"
-        class:enabled={isBinaryMode}
-        on:click={toggleBinaryMode}
-      >
-        Binary mode
-      </button>
+  {/if}
+  {#if !channelConfig.mode_raw}
+    <div class="row">
+      <div class="left">
+        <span class="label">Options</span>
+        <InfoModal>Information about options</InfoModal>
+      </div>
+
+      <div class="buttons">
+        <button
+          class="rounder primary"
+          class:enabled={input?.inverted}
+          on:click={toggleRangeInvert}
+        >
+          Range invert
+        </button>
+        <button
+          class="rounder primary"
+          class:enabled={isBinaryMode}
+          on:click={toggleBinaryMode}
+        >
+          Binary mode
+        </button>
+        <div class="buttons">
+          <button
+            class="rounder primary"
+            class:enabled={input?.cyclic}
+            on:click={toggleCyclic}
+          >
+            Cyclic
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
+  {/if}
   {#if input && aschema && selectedChannel}
     <MinMax
       bind:low={input.lmin}

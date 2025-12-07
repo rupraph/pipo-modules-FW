@@ -17,6 +17,7 @@
   import BatteryStatus from "./lib/BatteryStatus.svelte";
   import MidiOutputSettings from "./lib/configs/midi-output-settings.svelte";
   import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
+  import TouchCalibration from "./lib/TouchCalibration.svelte";
   import {
     currentConfig,
     currentMode,
@@ -54,6 +55,9 @@
       <BatteryStatus />
       <Menu />
       <ConfigSelect />
+      <section>
+        <TouchCalibration />
+      </section>
       <section>
         <h3>Channel Settings</h3>
         {#if type === "analog"}

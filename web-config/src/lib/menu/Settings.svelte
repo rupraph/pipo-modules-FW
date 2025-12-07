@@ -22,6 +22,7 @@
     if (!config) return;
     config.general.MidiEnabled = newMode === "midi";
     config.general.OSC_ENA = newMode === "osc";
+    currentConfig.set(config);
   }
 
   const validate = (name) => {
