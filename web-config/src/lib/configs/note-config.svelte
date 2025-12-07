@@ -2,7 +2,7 @@
   import { pipoType } from "../../services";
   import type { NoteConfig, BaseMidiConfig } from "../../types";
   import NoteInput from "../form/NoteInput.svelte";
-  import Range from "../form/Range.svelte";
+  import Number from "../form/Number.svelte";
   import Select from "../form/Select.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
 
@@ -116,53 +116,114 @@
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
-<Select
-  class={isThresholdMode ? "disabled" : ""}
-  label="Pattern"
-  options={patternTypes}
-  bind:value={config.pattern}
-/>
+<div class="select-row">
+  <span class="note-label">Pattern</span>
+  <div class="select-input-container pattern-select">
+    <Select
+      class={isThresholdMode ? "disabled" : ""}
+      label=""
+      options={patternTypes}
+      bind:value={config.pattern}
+    />
+  </div>
+</div>
 {#if config.pattern === "scale"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Scale type"
-    options={scaleTypes}
-    bind:value={config.scaleType}
-  />
+  <div class="select-row">
+    <span class="note-label">Scale type</span>
+    <div class="select-input-container scale-type-select">
+      <Select
+        class={isThresholdMode ? "disabled" : ""}
+        label=""
+        options={scaleTypes}
+        bind:value={config.scaleType}
+      />
+    </div>
+  </div>
 {:else if config.pattern === "arpeggio"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Arpeggio type"
-    options={arpeggioTypes}
-    bind:value={config.scaleType}
-  />
+  <div class="select-row">
+    <span class="note-label">Arpeggio type</span>
+    <div class="select-input-container scale-type-select">
+      <Select
+        class={isThresholdMode ? "disabled" : ""}
+        label=""
+        options={arpeggioTypes}
+        bind:value={config.scaleType}
+      />
+    </div>
+  </div>
 {:else if config.pattern === "interval"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Interval type"
-    options={intervals}
-    bind:value={config.scaleType}
-  />
+  <div class="select-row">
+    <span class="note-label">Interval type</span>
+    <div class="select-input-container scale-type-select">
+      <Select
+        class={isThresholdMode ? "disabled" : ""}
+        label=""
+        options={intervals}
+        bind:value={config.scaleType}
+      />
+    </div>
+  </div>
 {/if}
 <!-- </Tooltip> -->
 <!-- {/if} -->
 
-<NoteInput label="Root Note" bind:value={config.rootNote} />
+<div class="note-config-row">
+  <span class="note-label">Root Note</span>
+  <div class="note-input-container">
+    <NoteInput label="" bind:value={config.rootNote} />
+  </div>
+</div>
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
-<Range
-  class={isThresholdMode ? "disabled" : ""}
-  label="Number of Notes"
-  tooltip="You are in threshold mode, this value is ignored."
-  bind:value={config.nbOfNotes}
-  min={1}
-  max={50}
-/>
+<div class="note-config-row">
+  <span class="note-label">Number of Notes</span>
+  <div class="note-input-container">
+    <Number label="" bind:value={config.nbOfNotes} min={1} max={50} step={1} />
+  </div>
+</div>
 <!-- </Tooltip> -->
 <!-- {/if} -->
-<Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
-<Range label="Velocity" bind:value={config.velocity} min={0} max={127} />
+<div class="note-config-row">
+  <span class="note-label">Sustain</span>
+  <div class="note-input-container">
+    <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
+  </div>
+</div>
+<div class="note-config-row">
+  <span class="note-label">Velocity</span>
+  <div class="note-input-container">
+    <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
+  </div>
+</div>
 
 <style>
+  .select-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .note-config-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .note-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--main);
+  }
+
+  .select-input-container :global(.input-wrapper) {
+    width: 200px;
+  }
+
+  .note-input-container :global(.input label),
+  .select-input-container :global(.input label) {
+    display: none;
+  }
 </style>

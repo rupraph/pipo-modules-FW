@@ -69,7 +69,6 @@
 <style>
   .noteinput {
     width: 100%;
-    padding: 1rem;
   }
   .noteinput > :global(.input) {
     grid-template-columns: 50px auto;

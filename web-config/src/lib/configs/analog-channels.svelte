@@ -115,7 +115,7 @@
     height: 48px;
     background-color: var(--bg-secondary);
     border: none;
-    color: var(--main);
+    color: var(--grey);
     font: Instrument Sans;
     font-weight: 700;
     font-size: 16px;
@@ -123,11 +123,11 @@
     padding: 0;
   }
   .channels > button.enabled {
-    background-color: var(--main);
-    color: var(--bg-secondary);
+    /* background-color: var(--main); */
+    color: var(--main);
   }
   .channels > button.selected {
     outline: 2px solid var(--main);
-    outline-offset: 2px;
+    outline-offset: -3px;
   }
 </style>

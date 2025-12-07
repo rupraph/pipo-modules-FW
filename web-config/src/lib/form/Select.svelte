@@ -30,7 +30,7 @@
     items={options}
     {clearable}
     bind:value={selectedItem}
-    --selected-item-color="var(--text-color-secondary)"
+    --selected-item-color="var(--text-color)"
     --item-is-active-bg="var(--bg-lighter)"
     --item-is-active-color="var(--text-color)"
     --item-color="var(--text-color)"

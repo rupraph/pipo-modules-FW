@@ -91,6 +91,51 @@
   ) {
     maxSensorValue = Math.round(sensorValue);
   }
+
+  function toggleRangeInvert() {
+    if (!input) return;
+    input.inverted = !input.inverted;
+    currentConfig.set(config);
+  }
+
+  function toggleBinaryMode() {
+    if (!input || !aschema) return;
+
+    // For Touch category: toggle only mode
+    if (aschema.cat === "Touch") {
+      if (input.mode === false && input.th_mode === false) {
+        // Currently continuous -> switch to binary (threshold mode only)
+        input.mode = true;
+        input.th_mode = false;
+      } else {
+        // Currently binary -> switch to continuous
+        input.mode = false;
+        input.th_mode = false;
+      }
+    } else {
+      // For other categories: toggle both mode and th_mode together
+      // Binary enabled: both true
+      // Binary disabled (continuous): both false
+      if (input.mode === true && input.th_mode === true) {
+        // Currently binary -> switch to continuous (both false)
+        input.mode = false;
+        input.th_mode = false;
+      } else {
+        // Currently continuous or other -> switch to binary (both true)
+        input.mode = true;
+        input.th_mode = true;
+      }
+    }
+
+    currentConfig.set(config);
+  }
+
+  // Compute if binary mode is active
+  $: isBinaryMode = input
+    ? aschema?.cat === "Touch"
+      ? input.mode === true
+      : input.mode === true && input.th_mode === true
+    : false;
 </script>
 
 {#if config && selectedChannel && channelConfig}
@@ -115,8 +160,20 @@
       <InfoModal>Information about options</InfoModal>
     </div>
     <div class="buttons">
-      <button class="rounder primary">Range invert </button>
-      <button class="rounder primary">Binary mode </button>
+      <button
+        class="rounder primary"
+        class:enabled={input?.inverted}
+        on:click={toggleRangeInvert}
+      >
+        Range invert
+      </button>
+      <button
+        class="rounder primary"
+        class:enabled={isBinaryMode}
+        on:click={toggleBinaryMode}
+      >
+        Binary mode
+      </button>
     </div>
   </div>
   {#if input && aschema && selectedChannel}
@@ -131,8 +188,8 @@
       min={aschema.min}
       bind:max={maxSensorValue}
       step={aschema.step}
-      minLabel={`LowLim (${aschema.unit})`}
-      maxLabel={`HighLim (${aschema.unit})`}
+      minLabel={`Min`}
+      maxLabel={`Max`}
     />
   {/if}
   {#if selectedChannel && aschema.cat === "Touch"}

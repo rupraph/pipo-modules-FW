@@ -109,7 +109,7 @@
   h4 {
     font-size: 16px;
     font-weight: 700;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     color: var(--main);
   }
 
@@ -117,7 +117,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
   }
 
   .label {
@@ -128,7 +128,6 @@
 
   /* Input Container */
   .input-container {
-    min-width: 120px;
   }
 
   .input-container :global(.input) {

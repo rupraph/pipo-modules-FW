@@ -166,7 +166,7 @@
   h4 {
     font-size: 16px;
     font-weight: 700;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
     color: var(--main);
   }
 
@@ -205,6 +205,8 @@
 
   /* Input Container */
   .input-container {
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
   }
 
@@ -222,6 +224,10 @@
   .input-container :global(.input-wrapper) {
     width: auto;
     min-width: 80px;
+  }
+
+  /* Pill Switch Container */
+  .pill-switch {
   }
 
   /* Pill Switch - Component Specific */
