@@ -2,6 +2,7 @@
   import type { OscConfig } from "../../types";
   import { currentConfig, pipoType } from "../../services/config";
   import { uiState } from "../ui-state/store";
+  import Number from "../form/Number.svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -20,66 +21,80 @@
     currentConfig.set(config);
   }
 
-  function toggleRawMode() {
-    if (!oscConfig) return;
-    oscConfig.mode_raw = !oscConfig.mode_raw;
-    currentConfig.set(config);
+  function validateOscAddress(event: Event) {
+    const input = event.target as HTMLInputElement;
+    // Remove spaces and special characters, keep only alphanumeric, slash, hyphen, underscore, and dot
+    const cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
+    if (cleaned !== input.value) {
+      input.value = cleaned;
+      if (oscConfig) {
+        oscConfig.osc_addr = cleaned;
+        currentConfig.set(config);
+      }
+    }
+  }
+
+  function handleOscAddressKeydown(event: KeyboardEvent) {
+    // Prevent space and other invalid characters from being entered
+    if (event.key === " " || /[^a-zA-Z0-9/_\-\.]/.test(event.key)) {
+      // Allow navigation and control keys
+      if (
+        !event.ctrlKey &&
+        !event.metaKey &&
+        event.key !== "Backspace" &&
+        event.key !== "Delete" &&
+        event.key !== "ArrowLeft" &&
+        event.key !== "ArrowRight" &&
+        event.key !== "Tab"
+      ) {
+        event.preventDefault();
+      }
+    }
   }
 </script>
 
 {#if config && selectedChannel && oscConfig}
   <div class="output-settings">
     <h4>OSC Output</h4>
-
-    <!-- Enable/Disable Toggle -->
-    <div class="row">
-      <span class="label">Output State</span>
-      <button class:enabled={oscConfig.enabled} on:click={toggleEnabled}>
-        {oscConfig.enabled ? "Enabled" : "Disabled"}
-      </button>
-    </div>
-
     <!-- OSC Address -->
     <div class="row">
       <span class="label">OSC Address</span>
-      <input
-        type="text"
-        bind:value={oscConfig.osc_addr}
-        maxlength="255"
-        class="text-input"
-        placeholder="/address"
-      />
-    </div>
-
-    <!-- Raw Mode Toggle -->
-    <div class="row">
-      <span class="label">Raw Mode</span>
-      <button class:enabled={oscConfig.mode_raw} on:click={toggleRawMode}>
-        {oscConfig.mode_raw ? "On" : "Off"}
-      </button>
+      <div class="input-container">
+        <input
+          type="text"
+          bind:value={oscConfig.osc_addr}
+          maxlength="255"
+          class="text-input"
+          placeholder="/address"
+          on:input={validateOscAddress}
+          on:keydown={handleOscAddressKeydown}
+        />
+      </div>
     </div>
 
     <!-- Min/Max Values (only when not in raw mode) -->
     {#if !oscConfig.mode_raw}
       <div class="row">
         <span class="label">Output Min</span>
-        <input
-          type="number"
-          bind:value={oscConfig.osc_min}
-          min="0"
-          max={oscConfig.osc_max}
-          class="number-input"
-        />
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={oscConfig.osc_min}
+            min={0}
+            max={oscConfig.osc_max}
+          />
+        </div>
       </div>
 
       <div class="row">
         <span class="label">Output Max</span>
-        <input
-          type="number"
-          bind:value={oscConfig.osc_max}
-          min={oscConfig.osc_min}
-          class="number-input"
-        />
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={oscConfig.osc_max}
+            min={oscConfig.osc_min}
+          />
+        </div>
       </div>
     {/if}
   </div>
@@ -88,7 +103,6 @@
 <style>
   .output-settings {
     width: 100%;
-    background-color: var(--bg-secondary);
     margin-top: 24px;
   }
 
@@ -112,24 +126,25 @@
     color: var(--main);
   }
 
-  /* Enable/Disable Button */
-  button {
-    border: 2px solid var(--main);
-    height: 29px;
-    padding: 0 16px;
-    background-color: var(--bg-secondary);
-    border-radius: 18px;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 700;
-    color: var(--main);
-    cursor: pointer;
-    transition: all 0.2s ease;
+  /* Input Container */
+  .input-container {
+    min-width: 120px;
   }
 
-  button.enabled {
-    background-color: var(--main);
-    color: var(--bg-primary);
+  .input-container :global(.input) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .input-container :global(.input label) {
+    display: none;
+  }
+
+  .input-container :global(.input-wrapper) {
+    width: auto;
+    min-width: 80px;
   }
 
   /* Text Input */
@@ -153,36 +168,5 @@
   .text-input::placeholder {
     color: var(--grey);
     opacity: 0.5;
-  }
-
-  /* Number Input */
-  .number-input {
-    width: 80px;
-    height: 32px;
-    padding: 0 12px;
-    border: 2px solid var(--main);
-    border-radius: 6px;
-    background-color: var(--bg-secondary);
-    color: var(--main);
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-  }
-
-  .number-input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  /* Remove spinner buttons */
-  .number-input::-webkit-inner-spin-button,
-  .number-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .number-input[type="number"] {
-    -moz-appearance: textfield;
-    appearance: textfield;
   }
 </style>

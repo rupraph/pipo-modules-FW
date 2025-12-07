@@ -153,57 +153,9 @@
     box-sizing: border-box;
   }
 
-  .pill-switch {
-    border: 2px solid var(--main);
-    position: relative;
-    display: inline-flex;
-    background-color: var(--bg-primary);
-    border-radius: 20px;
-    padding: 2px;
-    gap: 2px;
-  }
-
-  .pill-indicator {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    height: calc(100% - 4px);
-    width: calc(50% - 3px);
-    background-color: var(--main);
-    border-radius: 18px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 0;
-  }
-
+  /* Pill Switch - Component Specific */
   .pill-indicator.midi {
     transform: translateX(calc(100% + 2px));
-  }
-
-  .pill-switch input[type="radio"] {
-    display: none;
-  }
-
-  .pill-switch label {
-    position: relative;
-    z-index: 1;
-    padding: 0 10px;
-    border-radius: 18px;
-    cursor: pointer;
-    transition: color 0.3s ease;
-    background-color: transparent;
-    color: var(--color);
-    font-size: 14px;
-    text-align: center;
-    user-select: none;
-    flex: 1;
-  }
-
-  .pill-switch label.active {
-    color: var(--bg-primary);
-  }
-
-  .pill-switch label:hover {
-    opacity: 0.8;
   }
 
   input[type="text"] {

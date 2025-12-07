@@ -135,11 +135,13 @@
       maxLabel={`HighLim (${aschema.unit})`}
     />
   {/if}
-  <div class="row centered">
-    <button class="rounded secondary"> Calibrate zero </button>
-    <button class="rounded secondary"> Remove offset </button>
-    <InfoModal>Information about calibration</InfoModal>
-  </div>
+  {#if selectedChannel && aschema.cat === "Touch"}
+    <div class="row centered">
+      <button class="rounded secondary"> Calibrate zero </button>
+      <button class="rounded secondary"> Remove offset </button>
+      <InfoModal>Information about calibration</InfoModal>
+    </div>
+  {/if}
 {/if}
 
 <style scoped>

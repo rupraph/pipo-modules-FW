@@ -3,6 +3,7 @@
   import { currentConfig, currentMode, pipoType } from "../../services/config";
   import { uiState } from "../ui-state/store";
   import NoteConfig from "./note-config.svelte";
+  import Number from "../form/Number.svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -50,15 +51,6 @@
 {#if config && selectedChannel && midiConfig && input}
   <div class="output-settings">
     <h4>MIDI Output</h4>
-
-    <!-- Enable/Disable Toggle -->
-    <div class="row">
-      <span class="label">Output State</span>
-      <button class:enabled={midiConfig.enabled} on:click={toggleEnabled}>
-        {midiConfig.enabled ? "Enabled" : "Disabled"}
-      </button>
-    </div>
-
     <!-- Message Type: Note/CC Pill Switch -->
     <div class="row">
       <span class="label">Message Type</span>
@@ -100,52 +92,51 @@
     <!-- MIDI Channel -->
     <div class="row">
       <span class="label">MIDI Channel</span>
-      <input
-        type="number"
-        bind:value={midiConfig.channel}
-        min="1"
-        max="16"
-        class="number-input"
-      />
+      <div class="input-container">
+        <Number label="" bind:value={midiConfig.channel} min={1} max={16} />
+      </div>
     </div>
 
     <!-- CC Mode Settings -->
     {#if midiConfig.tl_mode === 0}
       <div class="row">
         <span class="label">CC Number</span>
-        <input
-          type="number"
-          bind:value={midiConfig.cc_nb}
-          min="0"
-          max="127"
-          step="1"
-          class="number-input"
-        />
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_nb}
+            min={0}
+            max={127}
+            step={1}
+          />
+        </div>
       </div>
 
       <div class="row">
         <span class="label">CC Out Min</span>
-        <input
-          type="number"
-          bind:value={midiConfig.cc_min}
-          min="0"
-          max={midiConfig.cc_max}
-          class="number-input"
-        />
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_min}
+            min={0}
+            max={midiConfig.cc_max}
+          />
+        </div>
       </div>
 
       <div class="row">
         <span class="label">CC Out Max</span>
-        <input
-          type="number"
-          bind:value={midiConfig.cc_max}
-          min={midiConfig.cc_min}
-          max={midiConfig.hires ? 16383 : 127}
-          class="number-input"
-        />
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_max}
+            min={midiConfig.cc_min}
+            max={midiConfig.hires ? 16383 : 127}
+          />
+        </div>
       </div>
 
-      <div class="row">
+      <!-- <div class="row">
         <span class="label">High Resolution</span>
         <button
           class:enabled={midiConfig.hires}
@@ -156,7 +147,7 @@
         >
           {midiConfig.hires ? "On" : "Off"}
         </button>
-      </div>
+      </div> -->
     {/if}
 
     <!-- Note Mode Settings -->
@@ -183,7 +174,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 4px;
   }
 
   .label {
@@ -212,84 +203,29 @@
     color: var(--bg-primary);
   }
 
-  /* Pill Switch Styling */
-  .pill-switch {
-    border: 2px solid var(--main);
-    position: relative;
-    display: inline-flex;
-    background-color: var(--bg-primary);
-    border-radius: 20px;
-    padding: 2px;
-    gap: 2px;
-    height: 36px;
-  }
-
-  .pill-indicator {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: calc(50% - 2px);
-    height: calc(100% - 4px);
-    background-color: var(--main);
-    border-radius: 18px;
-    transition: transform 0.3s ease;
-    z-index: 0;
-  }
-
-  .pill-indicator.note {
-    transform: translateX(100%);
-  }
-
-  .pill-switch input[type="radio"] {
-    display: none;
-  }
-
-  .pill-switch label {
-    position: relative;
-    z-index: 1;
-    padding: 6px 20px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--main);
-    transition: color 0.3s ease;
-    user-select: none;
-    display: flex;
+  /* Input Container */
+  .input-container {
     align-items: center;
   }
 
-  .pill-switch label.active {
-    color: var(--bg-primary);
+  .input-container :global(.input) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
   }
 
-  /* Number Input */
-  .number-input {
-    width: 80px;
-    height: 32px;
-    padding: 0 12px;
-    border: 2px solid var(--main);
-    border-radius: 6px;
-    background-color: var(--bg-secondary);
-    color: var(--main);
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
+  .input-container :global(.input label) {
+    display: none;
   }
 
-  .number-input:focus {
-    outline: none;
-    border-color: var(--accent);
+  .input-container :global(.input-wrapper) {
+    width: auto;
+    min-width: 80px;
   }
 
-  /* Remove spinner buttons */
-  .number-input::-webkit-inner-spin-button,
-  .number-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .number-input[type="number"] {
-    -moz-appearance: textfield;
-    appearance: textfield;
+  /* Pill Switch - Component Specific */
+  .pill-indicator.note {
+    transform: translateX(calc(100% + 2px));
   }
 </style>
