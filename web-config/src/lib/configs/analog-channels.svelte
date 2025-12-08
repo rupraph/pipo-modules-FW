@@ -8,6 +8,7 @@
   type Keys = PipoKeys["analog"];
   import { currentConfig, currentMode } from "../../services/config";
   import { uiState } from "../ui-state";
+  import TouchCalibration from "../TouchCalibration.svelte";
 
   let category: "analog" | "touch" = "analog";
   const boardType = "analog";
@@ -85,6 +86,9 @@
       </button>
     {/each}
   </div>
+  {#if category === "touch"}
+    <TouchCalibration />
+  {/if}
 {/if}
 
 <style scoped>

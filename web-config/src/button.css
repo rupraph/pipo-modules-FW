@@ -63,3 +63,12 @@ button.active {
 button.disabled {
   cursor: not-allowed;
 }
+
+button.enabled {
+  background-color: var(--main);
+  color: var(--bg-primary);
+}
+
+button.enabled:hover {
+  background-color: var(--main-darker);
+}

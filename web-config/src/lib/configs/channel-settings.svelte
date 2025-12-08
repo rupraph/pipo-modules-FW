@@ -190,7 +190,7 @@
       </div>
     </div>
   {/if}
-  {#if !channelConfig.mode_raw}
+  {#if !channelConfig.mode_raw && !(aschema.cat === "Touch")}
     <div class="row">
       <div class="left">
         <span class="label">Options</span>

@@ -56,10 +56,6 @@
       <BatteryStatus />
       <Menu />
       <ConfigSelect />
-
-      <section>
-        <TouchCalibration />
-      </section>
       <section>
         <h3>Channel Settings</h3>
         {#if type === "analog"}
