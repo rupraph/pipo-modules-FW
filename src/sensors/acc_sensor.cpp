@@ -279,7 +279,7 @@ void MotionSensor::convert_accell() {
   // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
 }
 
-void AccSensor::set_sensor_config(JsonObject config, bool debug) {
+void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
   if (debug) {
     log_d("set_sensor_config");
   }
