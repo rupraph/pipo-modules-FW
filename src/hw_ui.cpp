@@ -555,9 +555,10 @@ float HwUi::get_bat_percentage() {
 
 int HwUi::get_bat_percentage_int() {
   if (battery_plugged) {
-    return -1;
+    return (int)-1;
+  } else {
+    return (int)round(get_bat_percentage());
   }
-  return (int)round(get_bat_percentage());
 }
 
 bool HwUi::is_plugged() {
