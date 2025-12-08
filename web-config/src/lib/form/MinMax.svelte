@@ -42,7 +42,13 @@
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
-  $: if (mode) {
+  $: if (
+    mode ||
+    min !== undefined ||
+    max !== undefined ||
+    low !== undefined ||
+    high !== undefined
+  ) {
     color = fillColor();
   }
 </script>

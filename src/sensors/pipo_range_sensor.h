@@ -27,6 +27,7 @@ class PipoRangeSensor : public Sensor {
   // Button action methods
   void toggle_hold_mode();
   bool get_hold_mode() const { return hold_mode; }
+  void set_hold_mode(bool mode) { hold_mode = mode; }
 
  private:
   bool within_range = false;

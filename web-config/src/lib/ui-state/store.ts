@@ -1,6 +1,7 @@
 import { writable, get } from "svelte/store";
 import type { PipoTypes } from "../../types";
 import type { UIState, BoardUIState } from "./types";
+import { pipoio } from "../../pipoio";
 
 const STORAGE_KEY = "pipo-ui-state";
 
@@ -112,7 +113,9 @@ function createUIStateStore() {
           state[boardType] = getDefaultBoardState();
         }
         state[boardType]!.selectedChannel = channel;
+        pipoio.monitorAxis(channel);
         return state;
+        
       });
     },
 

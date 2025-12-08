@@ -184,7 +184,6 @@
           label=""
           bind:value={channelConfig.mode_raw}
           on:change={() => {
-            // Trigger store update to notify other components
             currentConfig.set(config);
           }}
         />

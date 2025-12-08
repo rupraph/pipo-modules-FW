@@ -16,6 +16,9 @@
         ] as OscConfig)
       : null;
 
+  // Create a reactive variable for mode_raw so the UI updates when it changes
+  $: modeRaw = oscConfig?.mode_raw ?? false;
+
   function toggleEnabled() {
     if (!oscConfig) return;
     oscConfig.enabled = !oscConfig.enabled;
@@ -87,7 +90,7 @@
     </div>
 
     <!-- Min/Max Values (only when not in raw mode and not quaternion) -->
-    {#if !oscConfig.mode_raw && channelType !== "quaternion"}
+    {#if !modeRaw && channelType !== "quaternion"}
       <div class="row">
         <span class="output-label">Output Min</span>
         <div class="input-container">

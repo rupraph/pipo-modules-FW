@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import { uid } from "../../utils";
+
+  const dispatch = createEventDispatcher();
 
   export let label: string;
   export let value: boolean;
@@ -15,11 +18,23 @@
   <div class="pill-switch" class:minimal={!hasLabels}>
     {#if hasLabels}
       <div class="pill-indicator" class:on={value}></div>
-      <input type="checkbox" {id} name={label} bind:checked={value} />
+      <input
+        type="checkbox"
+        {id}
+        name={label}
+        bind:checked={value}
+        on:change={() => dispatch("change", value)}
+      />
       <label for={id} class:active={!value}>{offLabel || "OFF"}</label>
       <label for={id} class:active={value}>{onLabel || "ON"}</label>
     {:else}
-      <input type="checkbox" {id} name={label} bind:checked={value} />
+      <input
+        type="checkbox"
+        {id}
+        name={label}
+        bind:checked={value}
+        on:change={() => dispatch("change", value)}
+      />
       <label for={id} class="minimal-track" class:on={value}>
         <div class="minimal-pill"></div>
       </label>
