@@ -7,6 +7,7 @@
   $: config = $currentConfig;
   $: type = $pipoType;
   $: selectedChannel = $uiState[type]?.selectedChannel;
+  $: channelType = $uiState[type]?.channelType;
 
   $: oscConfig =
     config && selectedChannel
@@ -59,21 +60,34 @@
     <!-- OSC Address -->
     <div class="row">
       <span class="output-label">OSC Address</span>
+
       <div class="input-container">
-        <input
-          type="text"
-          bind:value={oscConfig.osc_addr}
-          maxlength="255"
-          class="text-input"
-          placeholder="/address"
-          on:input={validateOscAddress}
-          on:keydown={handleOscAddressKeydown}
-        />
+        {#if channelType === "quaternion"}
+          <input
+            type="text"
+            bind:value={config.engine["engine-special"]["quat"].osc_addr}
+            maxlength="255"
+            class="text-input"
+            placeholder="/address"
+            on:input={validateOscAddress}
+            on:keydown={handleOscAddressKeydown}
+          />
+        {:else}
+          <input
+            type="text"
+            bind:value={oscConfig.osc_addr}
+            maxlength="255"
+            class="text-input"
+            placeholder="/address"
+            on:input={validateOscAddress}
+            on:keydown={handleOscAddressKeydown}
+          />
+        {/if}
       </div>
     </div>
 
-    <!-- Min/Max Values (only when not in raw mode) -->
-    {#if !oscConfig.mode_raw}
+    <!-- Min/Max Values (only when not in raw mode and not quaternion) -->
+    {#if !oscConfig.mode_raw && channelType !== "quaternion"}
       <div class="row">
         <span class="output-label">Output Min</span>
         <div class="input-container">

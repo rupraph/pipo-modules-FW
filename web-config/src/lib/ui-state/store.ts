@@ -117,6 +117,30 @@ function createUIStateStore() {
     },
 
     /**
+     * Get the channel type for a specific board type
+     */
+    getChannelType: (boardType: PipoTypes): string | undefined => {
+      const state = get({ subscribe });
+      return state[boardType]?.channelType;
+    },
+
+    /**
+     * Set the channel type for a specific board type
+     */
+    setChannelType: (
+      boardType: PipoTypes,
+      channelType: string | undefined
+    ): void => {
+      update((state) => {
+        if (!state[boardType]) {
+          state[boardType] = getDefaultBoardState();
+        }
+        state[boardType]!.channelType = channelType;
+        return state;
+      });
+    },
+
+    /**
      * Reset state for a specific board type
      */
     resetBoardState: (boardType: PipoTypes): void => {

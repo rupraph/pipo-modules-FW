@@ -24,6 +24,7 @@
     hasUnsavedChanges,
     originalConfig,
   } from "./services/config";
+  import { uiState } from "./lib/ui-state";
   import Presets from "./lib/presets.svelte";
 
   let type: PipoTypes = "unknown";
@@ -63,9 +64,11 @@
         {:else if type === "motion"}
           <MotionChannels />
         {/if}
-        <div class="channel-settings">
-          <ChannelSettings />
-        </div>
+        {#if type !== "motion" || $uiState[type]?.channelType !== "quaternion"}
+          <div class="channel-settings">
+            <ChannelSettings />
+          </div>
+        {/if}
       </section>
       <section class="output-settings">
         <!-- Output settings based on board's general output mode -->

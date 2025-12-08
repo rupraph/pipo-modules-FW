@@ -15,9 +15,9 @@
 
 <MenuButton on:click={togglePause}>
   {#if isPaused}
-    <CirclePlay color="var(--grey)" size={50} />
-  {:else}
     <CirclePause color="var(--grey)" size={50} />
+  {:else}
+    <CirclePlay color="var(--grey)" size={50} />
   {/if}
 </MenuButton>
 

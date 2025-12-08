@@ -3,23 +3,25 @@
   type Keys = PipoKeys["motion"];
   import { currentConfig, currentMode } from "../../services/config";
   import { uiState } from "../ui-state";
+  import PillSwitch from "../form/PillSwitch.svelte";
 
   const channelTypes = [
     {
-      label: "Lin Acc",
-      value: "linear_acceleration",
-    },
-    {
-      label: "Euler",
+      label: "Euler Angles",
       value: "euler",
     },
-    { label: "Mag", value: "magnitude" },
     {
-      label: "Ang Acc",
+      label: "Lin Accell",
+      value: "linear_acceleration",
+    },
+
+    { label: "Magneto", value: "magnitude" },
+    {
+      label: "Gyro",
       value: "angular_acceleration",
     },
     {
-      label: "Quat",
+      label: "Quats",
       value: "quaternion",
     },
   ];
@@ -27,11 +29,27 @@
   let currentType = "euler";
   const boardType = "motion";
 
+  // Initialize currentType from uiState or use default
+  $: if ($uiState[boardType]?.channelType) {
+    currentType = $uiState[boardType]!.channelType;
+  }
+
+  // Update uiState when currentType changes
+  $: if (currentType) {
+    uiState.setChannelType(boardType, currentType);
+  }
+
   $: config = $currentConfig;
   $: mode = $currentMode;
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
     | "engine-midi"
     | "engine-osc";
+
+  // Filter channel types based on mode - hide quaternion in MIDI mode
+  $: availableChannelTypes = channelTypes.filter(
+    (type) => !(mode === "MIDI" && type.value === "quaternion")
+  );
+
   $: keys =
     currentType === "euler"
       ? (["yaw", "pitch", "roll"] as Keys[])
@@ -41,11 +59,7 @@
           ? (["magX", "magY", "magZ"] as Keys[])
           : currentType === "angular_acceleration"
             ? (["gyroX", "gyroY", "gyroZ"] as Keys[])
-            : currentType === "quaternion"
-              ? // TODO: Rup the quaternion is not defined in the types, I dont know
-                // what it is supposed to be
-                (["yaw", "pitch", "roll"] as Keys[])
-              : [];
+            : [];
 
   $: selectedChannel = $uiState[boardType]?.selectedChannel;
 
@@ -85,7 +99,7 @@
 
 {#if config}
   <div class="category">
-    {#each channelTypes as typeOption}
+    {#each availableChannelTypes as typeOption}
       <button
         class:selected={currentType === typeOption.value}
         on:click={() => (currentType = typeOption.value)}
@@ -94,20 +108,30 @@
       </button>
     {/each}
   </div>
-  <div class="channels">
-    {#each keys as key}
-      <button
-        class:enabled={channelStates[key]}
-        class:selected={key === selectedChannel}
-        on:click={() => {
-          selectChannel(key);
-          console.log(`Selected channel: ${selectedChannel}`);
-        }}
-      >
-        {key}
-      </button>
-    {/each}
-  </div>
+  {#if currentType === "quaternion"}
+    <div class="row">
+      <div class="label">Quaternion</div>
+      <PillSwitch
+        label=""
+        bind:value={config.engine["engine-special"]["quat"].enabled}
+      />
+    </div>
+  {:else}
+    <div class="channels">
+      {#each keys as key}
+        <button
+          class:enabled={channelStates[key]}
+          class:selected={key === selectedChannel}
+          on:click={() => {
+            selectChannel(key);
+            console.log(`Selected channel: ${selectedChannel}`);
+          }}
+        >
+          {key}
+        </button>
+      {/each}
+    </div>
+  {/if}
 {/if}
 
 <style scoped>
@@ -119,19 +143,21 @@
     max-width: 300px;
   }
   .category > button {
-    width: 67px;
+    width: 100px;
     height: 32px;
-    color: var(--main);
+    color: var(--text-color);
+    font: Instrument Sans;
     font-weight: 700;
     font-size: 14px;
     border: none;
     background-color: var(--bg-secondary);
     cursor: pointer;
     padding: 0;
+    border-radius: 0px;
   }
   .category > button.selected {
-    background-color: var(--main);
-    color: var(--bg-secondary);
+    outline: 3px solid var(--main);
+    outline-offset: -3px;
   }
   .channels {
     display: grid;
@@ -144,7 +170,7 @@
     height: 48px;
     background-color: var(--bg-secondary);
     border: none;
-    color: var(--main);
+    color: var(--grey);
     font: Instrument Sans;
     font-weight: 700;
     font-size: 16px;
@@ -152,11 +178,12 @@
     padding: 0;
   }
   .channels > button.enabled {
-    background-color: var(--main);
-    color: var(--bg-secondary);
+    /* background-color: var(--main); */
+    color: var(--main);
   }
   .channels > button.selected {
-    outline: 2px solid var(--main);
-    outline-offset: 2px;
+    outline: 6px solid var(--main);
+    /* border-radius: 8px; */
+    outline-offset: -6px;
   }
 </style>

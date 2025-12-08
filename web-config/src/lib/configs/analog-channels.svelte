@@ -13,6 +13,16 @@
   let category: "analog" | "touch" = "analog";
   const boardType = "analog";
 
+  // Initialize category from uiState or use default
+  $: if ($uiState[boardType]?.channelType) {
+    category = $uiState[boardType]!.channelType as "analog" | "touch";
+  }
+
+  // Update uiState when category changes
+  $: if (category) {
+    uiState.setChannelType(boardType, category);
+  }
+
   $: config = $currentConfig;
   $: mode = $currentMode;
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
@@ -95,17 +105,20 @@
   .category > button {
     width: 145px;
     height: 32px;
-    color: var(--main);
+    color: var(--text-color);
     font: Instrument Sans;
     font-weight: 700;
     font-size: 14px;
     border: none;
     background-color: var(--bg-secondary);
     cursor: pointer;
+    border-radius: 0px;
   }
   .category > button.selected {
-    background-color: var(--main);
-    color: var(--bg-secondary);
+    /* background-color: var(--main); */
+    /* color: var(--bg-secondary); */
+    outline: 3px solid var(--main);
+    outline-offset: -3px;
   }
   .channels {
     display: grid;
@@ -115,8 +128,8 @@
     margin-top: 15px;
   }
   .channels > button {
-    width: 64px;
-    height: 48px;
+    width: 60px;
+    height: 42px;
     background-color: var(--bg-secondary);
     border: none;
     color: var(--grey);
@@ -131,7 +144,8 @@
     color: var(--main);
   }
   .channels > button.selected {
-    outline: 2px solid var(--main);
-    outline-offset: -3px;
+    outline: 6px solid var(--main);
+    /* border-radius: 8px; */
+    outline-offset: -6px;
   }
 </style>
