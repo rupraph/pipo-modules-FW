@@ -83,6 +83,7 @@
 </script>
 
 <button
+  class="secondary"
   on:click={calibrateAllTouch}
   disabled={calibrating || type !== "analog"}
 >

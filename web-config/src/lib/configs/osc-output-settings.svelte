@@ -103,7 +103,6 @@
 <style>
   .output-settings {
     width: 100%;
-    margin-top: 24px;
   }
 
   h4 {

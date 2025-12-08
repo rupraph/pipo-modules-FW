@@ -39,6 +39,7 @@ h3 {
 
 h4 {
   text-align: left;
+  margin-block-start: 0.5em;
 }
 
 .card {

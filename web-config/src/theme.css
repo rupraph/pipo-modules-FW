@@ -86,8 +86,9 @@ main > article{
 }
 
 .section-borders{
-  border-radius: 12px;
-  border: 2px solid rgb(80, 80, 80);
+  /* border-radius: 12px; */
+  border-top: 2px solid rgb(80, 80, 80);
+  /* border-bottom: 2px solid rgb(80, 80, 80); */
   margin-left: 0;
   box-sizing: border-box;
 }

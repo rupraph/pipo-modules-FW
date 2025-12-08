@@ -164,6 +164,7 @@
     <span class="label">Channel state</span>
     <div class="buttons">
       <button
+        class="rounder primary"
         class:enabled={!channelConfig.enabled}
         on:click={() => {
           channelConfig.enabled = !channelConfig.enabled;

@@ -56,15 +56,18 @@
       <BatteryStatus />
       <Menu />
       <ConfigSelect />
-      <section>
+      <section style="border-top: 2px solid var(--bg-tertiary);">
         <h3>Channel Settings</h3>
         {#if type === "analog"}
           <AnalogChannels />
         {:else if type === "motion"}
           <MotionChannels />
         {/if}
-        <ChannelSettings />
-
+        <div class="channel-settings">
+          <ChannelSettings />
+        </div>
+      </section>
+      <section class="output-settings">
         <!-- Output settings based on board's general output mode -->
         {#if $currentConfig?.general.MidiEnabled}
           <MidiOutputSettings />
@@ -72,12 +75,22 @@
           <OscOutputSettings />
         {/if}
       </section>
-      <Presets />
-      <article class="content section-borders">
-        <Collapse title="Info" collapseId="info">
+      <section
+        style="border-top: 2px solid var(--bg-tertiary);border-bottom: 2px solid var(--bg-tertiary);"
+      >
+        <Presets />
+      </section>
+      <section>
+        <!-- <Collapse title="Info" collapseId="info">
           <Pipoinfo info={resp} />
-        </Collapse>
-      </article>
+        </Collapse> -->
+        <div class="row" style="color: var(--bg-secondary);">
+          <div class="left">
+            <h3>SW:</h3>
+            <span>{resp.version}</span>
+          </div>
+        </div>
+      </section>
       <!-- <article class="content section-borders">
         <Logs />
       </article> -->
@@ -107,6 +120,22 @@
     align-items: center;
     max-width: 600px;
     gap: 1em;
+  }
+
+  .channel-settings {
+    border-top: 1px dashed var(--bg-secondary);
+    padding-top: 12px;
+    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .output-settings {
+    border-radius: 12px;
+    border-top: 1px dashed var(--bg-secondary);
+    width: 100%;
+    background-color: var(--bg-secondary);
   }
 
   /* .title-container {
