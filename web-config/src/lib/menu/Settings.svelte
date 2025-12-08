@@ -8,6 +8,7 @@
   import Switch from "../form/Switch.svelte";
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
+  import { pipoio } from "../../pipoio";
 
   $: config = $currentConfig;
   $: mode = config?.general.MidiEnabled
@@ -37,6 +38,10 @@
     }
     return "";
   };
+
+  function reboot() {
+    pipoio.get("/reboot").then(() => console.log("Rebooting..."));
+  }
 </script>
 
 <MenuButton on:click={() => (open = !open)}>
@@ -141,6 +146,19 @@
           />
         </div>
       </div>
+      <div class="row">
+        <a
+          href="https://pipointerfaces.com/manual"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="manual-button"
+        >
+          Online Manual link
+        </a>
+        <button class="primary" on:click={reboot} style="width: fit-content"
+          >Reboot</button
+        >
+      </div>
     </div>
   {/if}
 </Modal>
@@ -169,4 +187,26 @@
     font-size: 14px;
     width: 150px;
   }
+
+  /* .content :global(a.manual-button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 8px 16px;
+    background-color: var(--bg-secondary);
+    color: var(--main);
+    border: 1px solid var(--main);
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .content :global(a.manual-button:hover) {
+    background-color: var(--main);
+    color: var(--bg-secondary);
+  } */
 </style>

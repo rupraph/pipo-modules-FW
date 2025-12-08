@@ -40,6 +40,7 @@ h3 {
 h4 {
   text-align: left;
   margin-block-start: 0.5em;
+  color: var(--text-color);
 }
 
 .card {
@@ -111,6 +112,12 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.output-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
 /* Pill Switch - Global Shared Styles */

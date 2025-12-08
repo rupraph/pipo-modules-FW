@@ -31,7 +31,7 @@
     display: flex;
     flex-direction: row;
     border-radius: 3px;
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-primary);
     border: 1px solid transparent;
     align-items: center;
     width: 100%;

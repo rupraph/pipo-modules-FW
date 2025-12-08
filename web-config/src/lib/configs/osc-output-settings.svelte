@@ -58,7 +58,7 @@
     <h4>OSC Output</h4>
     <!-- OSC Address -->
     <div class="row">
-      <span class="label">OSC Address</span>
+      <span class="output-label">OSC Address</span>
       <div class="input-container">
         <input
           type="text"
@@ -75,7 +75,7 @@
     <!-- Min/Max Values (only when not in raw mode) -->
     {#if !oscConfig.mode_raw}
       <div class="row">
-        <span class="label">Output Min</span>
+        <span class="output-label">Output Min</span>
         <div class="input-container">
           <Number
             label=""
@@ -87,7 +87,7 @@
       </div>
 
       <div class="row">
-        <span class="label">Output Max</span>
+        <span class="output-label">Output Max</span>
         <div class="input-container">
           <Number
             label=""
@@ -105,24 +105,11 @@
     width: 100%;
   }
 
-  h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--main);
-  }
-
   .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
-  }
-
-  .label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--main);
   }
 
   /* Input Container */
@@ -147,12 +134,12 @@
 
   /* Text Input */
   .text-input {
-    width: 200px;
-    height: 32px;
+    width: 150px;
+    /* height: 32px; */
     padding: 0 12px;
     border: 2px solid var(--main);
     border-radius: 6px;
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     color: var(--main);
     font-size: 14px;
     font-weight: 500;

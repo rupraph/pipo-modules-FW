@@ -53,7 +53,7 @@
     <h4>MIDI Output</h4>
     <!-- Message Type: Note/CC Pill Switch -->
     <div class="row">
-      <span class="label">Message Type</span>
+      <span class="output-label">Message Type</span>
       <div class="pill-switch">
         <div class="pill-indicator" class:note={midiConfig.tl_mode === 1}></div>
         <input
@@ -91,7 +91,7 @@
 
     <!-- MIDI Channel -->
     <div class="row">
-      <span class="label">MIDI Channel</span>
+      <span class="output-label">MIDI Channel</span>
       <div class="input-container">
         <Number label="" bind:value={midiConfig.channel} min={1} max={16} />
       </div>
@@ -113,7 +113,7 @@
       </div>
 
       <div class="row">
-        <span class="label">CC Out Min</span>
+        <span class="output-label">CC Out Min</span>
         <div class="input-container">
           <Number
             label=""
@@ -125,7 +125,7 @@
       </div>
 
       <div class="row">
-        <span class="label">CC Out Max</span>
+        <span class="output-label">CC Out Max</span>
         <div class="input-container">
           <Number
             label=""
@@ -136,8 +136,7 @@
         </div>
       </div>
 
-      <!-- <div class="row">
-        <span class="label">High Resolution</span>
+      <!-- <div class=\"row\">\n        <span class=\"output-label\">High Resolution</span>", "oldString": "      <!-- <div class=\"row\">\n        <span class=\"label\">High Resolution</span>"
         <button
           class:enabled={midiConfig.hires}
           on:click={() => {
@@ -162,24 +161,11 @@
     width: 100%;
   }
 
-  h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--main);
-  }
-
   .row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
-  }
-
-  .label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--main);
   }
 
   /* Enable/Disable Button */

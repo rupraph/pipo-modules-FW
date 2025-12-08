@@ -21,7 +21,7 @@
     tabindex="0"
   ></div>
   <div
-    class="modal section-borders"
+    class="modal modal-style"
     transition:scale={{
       duration: 300,
       easing: cubicOut,

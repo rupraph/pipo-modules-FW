@@ -38,11 +38,12 @@
     --input-color="var(--text-color)"
     --item-hover-color="var(--text-color)"
     --item-hover-bg="var(--bg-lighter)"
-    --border-radius="0"
+    --border-radius="2px"
     --border="0"
     --border-focused="0"
-    --list-background="var(--bg-secondary)"
-    --background="var(--bg-secondary)"
+    --list-background="var(--bg-primary)"
+    --background="var(--bg-primary)"
+    --font-size="12px"
     on:change={(e) => (value = e.detail.value)}
   />
 </Input>

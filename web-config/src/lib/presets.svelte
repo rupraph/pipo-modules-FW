@@ -92,7 +92,7 @@
 
     <div class="actions">
       <LoadingButton
-        class="action-btn"
+        class="primary"
         loading={applying}
         disabled={!selectedPreset || $presetsLoading}
         onClick={handleLoad}

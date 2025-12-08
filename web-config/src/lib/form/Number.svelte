@@ -56,9 +56,7 @@
   }
 </script>
 
-<Input class={"number-input-container "} 
-{label} {id} >
-
+<Input class={"number-input-container "} {label} {id}>
   <button
     class:disabled={value <= min}
     on:click={() => {
@@ -73,7 +71,16 @@
     on:mouseup={onmouseup}
     on:focusout={onmouseup}>-</button
   >
-  <input type="number" class="number-input" {id} name={label} {min} {max} {step} bind:value />
+  <input
+    type="number"
+    class="number-input"
+    {id}
+    name={label}
+    {min}
+    {max}
+    {step}
+    bind:value
+  />
   <button
     class:disabled={value >= max}
     on:click={() => {
@@ -102,7 +109,6 @@
     display: grid;
     grid-template-columns: 27px 32px 27px;
     gap: 2px;
-
   }
   input.number-input {
     width: 100%;

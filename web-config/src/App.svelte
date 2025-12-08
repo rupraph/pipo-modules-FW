@@ -116,7 +116,7 @@
   main {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-section-borders: space-around;
     align-items: center;
     max-width: 600px;
     gap: 1em;

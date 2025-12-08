@@ -117,7 +117,7 @@
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
 <div class="select-row">
-  <span class="note-label">Pattern</span>
+  <h3>Pattern</h3>
   <div class="select-input-container pattern-select">
     <Select
       class={isThresholdMode ? "disabled" : ""}
@@ -129,7 +129,7 @@
 </div>
 {#if config.pattern === "scale"}
   <div class="select-row">
-    <span class="note-label">Scale type</span>
+    <span class="output-label">Scale type</span>
     <div class="select-input-container scale-type-select">
       <Select
         class={isThresholdMode ? "disabled" : ""}
@@ -141,7 +141,7 @@
   </div>
 {:else if config.pattern === "arpeggio"}
   <div class="select-row">
-    <span class="note-label">Arpeggio type</span>
+    <span class="output-label">Arpeggio type</span>
     <div class="select-input-container scale-type-select">
       <Select
         class={isThresholdMode ? "disabled" : ""}
@@ -153,7 +153,7 @@
   </div>
 {:else if config.pattern === "interval"}
   <div class="select-row">
-    <span class="note-label">Interval type</span>
+    <span class="output-label">Interval type</span>
     <div class="select-input-container scale-type-select">
       <Select
         class={isThresholdMode ? "disabled" : ""}
@@ -168,7 +168,7 @@
 <!-- {/if} -->
 
 <div class="note-config-row">
-  <span class="note-label">Root Note</span>
+  <span class="output-label">Root Note</span>
   <div class="note-input-container">
     <NoteInput label="" bind:value={config.rootNote} />
   </div>
@@ -177,7 +177,7 @@
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
 <div class="note-config-row">
-  <span class="note-label">Number of Notes</span>
+  <span class="output-label">Number of Notes</span>
   <div class="note-input-container">
     <Number label="" bind:value={config.nbOfNotes} min={1} max={50} step={1} />
   </div>
@@ -185,13 +185,13 @@
 <!-- </Tooltip> -->
 <!-- {/if} -->
 <div class="note-config-row">
-  <span class="note-label">Sustain</span>
+  <span class="output-label">Sustain</span>
   <div class="note-input-container">
     <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
   </div>
 </div>
 <div class="note-config-row">
-  <span class="note-label">Velocity</span>
+  <span class="output-label">Velocity</span>
   <div class="note-input-container">
     <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
   </div>
@@ -210,12 +210,6 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
-  }
-
-  .note-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--main);
   }
 
   .select-input-container :global(.input-wrapper) {
