@@ -177,6 +177,7 @@ void setup() {  // by default on core 1
 // stack is 8k by default
 // by default runs on core 1 for this board
 // prio 1
+// not using a task to benefit from the already allocated heap for loop.
 
 void loop() {
   static bool first_run = true;

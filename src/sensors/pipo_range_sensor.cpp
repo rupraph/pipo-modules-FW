@@ -166,7 +166,7 @@ bool PipoRangeSensor::measure_sensor() {
 //   Serial.println(sensor_dat[axis_name].offset);
 // }
 
-void RangeSensor::set_sensor_config(JsonObject config, bool debug) {
+void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {
     log_d("set_sensor_config");
   }
