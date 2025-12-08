@@ -79,8 +79,9 @@ input {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   padding: 24px 8px;
+  padding-top: 2px;
   box-sizing: border-box;
 }
 .main-container > section {

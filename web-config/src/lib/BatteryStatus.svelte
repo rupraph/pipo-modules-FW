@@ -1,6 +1,12 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
   import { onMount, onDestroy } from "svelte";
+  import {
+    BatteryCharging,
+    BatteryFull,
+    BatteryMedium,
+    BatteryLow,
+  } from "lucide-svelte";
 
   let battPercentage: number | null = null;
   let isPlugged: boolean = false;
@@ -33,22 +39,24 @@
     clearInterval(intervalId);
   });
 
-  // Calculate battery level for visual representation
-  $: batteryLevel = isPlugged ? 100 : (battPercentage ?? 0);
+  // Calculate battery level and icon
+  $: batteryLevel = battPercentage ?? 0;
   $: batteryColor =
-    batteryLevel > 50 ? "var(--main)" : batteryLevel > 20 ? "orange" : "red";
+    batteryLevel > 50 ? "var(--main)" : batteryLevel > 35 ? "orange" : "red";
 </script>
 
 <nav class="battery-status">
   <div class="battery-info">
     <div class="battery-icon">
-      <div class="battery-body">
-        <div
-          class="battery-level"
-          style="width: {batteryLevel}%; background-color: {batteryColor};"
-        />
-      </div>
-      <div class="battery-tip" />
+      {#if isPlugged}
+        <BatteryCharging size={20} color="var(--main)" />
+      {:else if batteryLevel > 75}
+        <BatteryFull size={20} color={batteryColor} />
+      {:else if batteryLevel >= 35}
+        <BatteryMedium size={20} color={batteryColor} />
+      {:else}
+        <BatteryLow size={20} color="red" />
+      {/if}
     </div>
   </div>
   <span class="battery-text">
@@ -80,40 +88,13 @@
   .battery-icon {
     display: flex;
     align-items: center;
-    gap: 1px;
-  }
-
-  .battery-body {
-    position: relative;
-    width: 24px;
-    height: 10px;
-    border: 2px solid var(--text-color);
-    border-radius: 3px;
-    background-color: var(--bg-primary);
-    overflow: hidden;
-  }
-
-  .battery-level {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    transition:
-      width 0.3s ease,
-      background-color 0.3s ease;
-  }
-
-  .battery-tip {
-    width: 3px;
-    height: 8px;
-    background-color: var(--text-color);
-    border-radius: 0 2px 2px 0;
   }
 
   .battery-text {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--text-color-secondary);
     min-width: 50px;
+    padding-left: 5px;
   }
 </style>

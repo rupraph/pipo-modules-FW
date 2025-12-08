@@ -26,7 +26,7 @@ class State<T extends PipoTypes = "analog"> {
   public activeConfig: string;
   private type: T;
   constructor(type: T) {
-    this.battLevel = 100;
+    this.battLevel = 34;
     this.type = type;
     this.wifi = {
       scanning: false,
