@@ -1,6 +1,7 @@
 <script lang="ts">
   import { scale } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { CircleX } from "lucide-svelte";
   export let open = false;
 
   function close(e: KeyboardEvent) {
@@ -28,7 +29,7 @@
     }}
   >
     <div class="close" on:click={() => (open = false)}>
-      <span>✖</span>
+      <CircleX size={28} />
     </div>
     <slot></slot>
   </div>
@@ -47,14 +48,14 @@
     transform: translate(-50%, -50%);
   }
   .close {
-    font-size: 1.6em;
     cursor: pointer;
-    width: 100%;
     display: flex;
+    justify-content: flex-end;
+    padding: 8px 8px 0 0;
+    color: var(--text-color);
   }
-  .close span {
-    margin-left: auto;
-    margin-right: 8px;
+  .close:hover {
+    color: var(--main);
   }
   .overlay {
     top: 0;

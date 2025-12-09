@@ -1,46 +1,41 @@
 <script lang="ts">
+  import { Signal, SignalHigh, SignalLow, SignalZero } from "lucide-svelte";
+
   export let bars = 5;
   export let signal = 4;
   export let disconnected = false;
-  function getHeight(disconnected: boolean, i: number, signal: number) {
-    return i > signal && !disconnected ? 0 : ((i + 1) / bars) * 100;
-  }
-  function getBorder(disconnected: boolean) {
-    return disconnected ? "1px solid var(--bg-lighter)" : "none";
-  }
+
   function getColor(disconnected: boolean, signal: number, bars: number) {
     return disconnected
-      ? "transparent"
+      ? "var(--bg-lighter)"
       : signal / bars < 0.33
         ? "var(--red)"
         : signal / bars < 0.66
           ? "var(--main-lighter)"
           : "var(--main)";
   }
+
+  function getIcon(signal: number, bars: number, disconnected: boolean) {
+    if (disconnected) return SignalZero;
+    const ratio = signal / bars;
+    if (ratio < 0.25) return SignalZero;
+    if (ratio < 0.5) return SignalLow;
+    if (ratio < 0.75) return SignalHigh;
+    return Signal;
+  }
+
+  $: Icon = getIcon(signal, bars, disconnected);
+  $: color = getColor(disconnected, signal, bars);
 </script>
 
 <div class="signal">
-  {#each Array(bars) as _, i}
-    <div
-      class="bar"
-      style="height: {getHeight(disconnected, i, signal)}%;
-            background: {getColor(disconnected, signal, bars)};
-            border:{getBorder(disconnected)}; 
-            "
-    ></div>
-  {/each}
+  <svelte:component this={Icon} size={24} style="color: {color}" />
 </div>
 
 <style scoped>
   .signal {
-    width: 100%;
-    height: 100%;
     display: flex;
-    flex-direction: row;
-    gap: 5%;
-    transform: scaleY(-1);
-  }
-  .bar {
-    flex: 1;
+    align-items: center;
+    justify-content: center;
   }
 </style>

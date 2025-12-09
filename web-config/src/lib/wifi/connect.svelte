@@ -2,6 +2,7 @@
   import { get } from "svelte/store";
   import Signal from "./signal.svelte";
   import { slide } from "svelte/transition";
+  import { Lock, LockOpen, Eye, EyeOff, CircleCheck } from "lucide-svelte";
   import { addToast, type Toast } from "../toast";
   import { pipoio } from "../../pipoio";
   import { setLastScan, wifiState } from "./store";
@@ -220,7 +221,7 @@
 </script>
 
 <section class="connection" class:waiting>
-  <h3>Networks</h3>
+  <h3 style="text-align: center;">WiFiNetworks</h3>
   <div class="ips">
     <span><strong>APIP:</strong> {apIP}</span>
     <span><strong>STAIP:</strong> {staIP}</span>
@@ -242,54 +243,18 @@
         {#each networks as { ssid, quality, known, connected }}
           <li on:click={() => onSelect(ssid, known)}>
             <span class="ssid">{ssid}</span>
-            <svg
-              class="lock"
-              height="30"
-              width="30"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 100 100"
-              stroke="black"
-              stroke-width="6"
-              on:click={() => onLockClick(ssid, known)}
-            >
-              <g>
-                <path
-                  stroke-linecap="round"
-                  fill="none"
-                  d="M25 50 L75 50 75 95 25 95 25 50"
-                />
-                <circle cx="50" cy="75" r="5" fill="none" />
-                <path
-                  stroke-linecap="round"
-                  fill="none"
-                  d={known
-                    ? "M40 50 L40 30 C 40 0 3 0 3 30 L 3 35"
-                    : "M30 50 L30 30 C 30 0 70 0 70 30 L 70 50"}
-                />
-              </g>
-            </svg>
             {#if connected}
-              <svg
-                class="checkmark"
-                height="30"
-                width="30"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 100 100"
-                xml:space="preserve"
-                stroke="#8fbe00"
-                stroke-width="6"
-              >
-                <g>
-                  <path
-                    stroke-linecap="round"
-                    fill="none"
-                    d="M30 75 L50 90 90 30"
-                  />
-                </g>
-              </svg>
+              <CircleCheck size={24} class="checkmark" />
             {:else}
               <span></span>
             {/if}
+            <button class="lock-icon" on:click={() => onLockClick(ssid, known)}>
+              {#if known}
+                <LockOpen size={20} />
+              {:else}
+                <Lock size={20} />
+              {/if}
+            </button>
             <Signal signal={quality} bars={5} />
             {#if known}
               <button class="forget" on:click={() => onForget(ssid)}
@@ -315,22 +280,12 @@
                 type={showPassword ? "text" : "password"}
                 id="network-password"
               />
-              <button class="showhide stroke" on:click={hideShowPassword}>
-                <icon>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
-                    viewBox="0 0 24 24"
-                    ><path
-                      d="M15 12c0 1.654-1.346 3-3 3s-3-1.346-3-3 1.346-3 3-3 3 1.346 3 3zm9-.449s-4.252 8.449-11.985 8.449c-7.18 0-12.015-8.449-12.015-8.449s4.446-7.551 12.015-7.551c7.694 0 11.985 7.551 11.985 7.551zm-7 .449c0-2.757-2.243-5-5-5s-5 2.243-5 5 2.243 5 5 5 5-2.243 5-5z"
-                    />
-                    {#if !showPassword}
-                      <path stroke-width="3" d="M0 0 L24 24" stroke="black"
-                      ></path>
-                    {/if}
-                  </svg>
-                </icon>
+              <button class="showhide" on:click={hideShowPassword}>
+                {#if showPassword}
+                  <Eye size={24} />
+                {:else}
+                  <EyeOff size={24} />
+                {/if}
               </button>
 
               <button on:click={() => onConnect(editing)}>connect</button>
@@ -369,7 +324,7 @@
     align-items: center;
     gap: 1em;
     font-size: 1em;
-    padding: 0 0.5em 0.5em 0.5em;
+    padding: 0 1em 0.5em 1em;
     max-height: calc(100vh - 10em);
     overflow-y: auto;
   }
@@ -388,9 +343,9 @@
     grid-template-columns: minmax(0, 1fr) 1em 1em 2em 4em;
     grid-template-rows: repeat(auto-fill, 2em);
     justify-items: start;
-    align-items: end;
+    align-items: center;
     display: grid;
-    gap: 1em;
+    gap: 2em;
     margin-bottom: 1em;
   }
   li {
@@ -401,7 +356,7 @@
   }
   .connect {
     grid-column-start: 1;
-    grid-column-end: 5;
+    grid-column-end: 6;
     display: flex;
     flex-direction: row;
     gap: 1em;
@@ -412,24 +367,32 @@
     overflow: hidden;
     white-space: nowrap;
     max-width: 100%;
+    align-items: center;
   }
-  svg.lock {
-    fill: var(--bg-lighter);
+  button.lock-icon {
+    width: fit-content;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: var(--text-color);
+  }
+  button.lock-icon:hover {
+    color: var(--main);
+  }
+  :global(.checkmark) {
+    color: #8fbe00;
   }
   button.showhide {
     width: fit-content;
     background-color: transparent;
-    background-repeat: no-repeat;
     border: none;
     cursor: pointer;
-    overflow: hidden;
-    outline: none;
+    padding: 0;
+    color: var(--text-color);
   }
-  button.showhide svg {
-    fill: var(--text-color);
-  }
-  button.showhide:hover svg {
-    fill: var(--main);
+  button.showhide:hover {
+    color: var(--main);
   }
   button.enabled {
     background-color: var(--main);
@@ -438,7 +401,8 @@
   button.forget {
     background-color: #dc3545;
     color: white;
-    padding: 10px;
+    padding: 6px;
+    height: fit-content;
   }
   button.forget:hover {
     background-color: #c82333;
