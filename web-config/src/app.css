@@ -86,7 +86,7 @@ input {
 }
 .main-container > section {
   width: 100%;
-  padding: 6px 18px;
+  padding: 6px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;

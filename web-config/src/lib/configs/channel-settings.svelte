@@ -229,6 +229,8 @@
         <button
           class="rounder primary"
           class:enabled={isOverOut}
+          class:disabled={isBinaryMode}
+          disabled={isBinaryMode}
           on:click={toggleOverOut}
         >
           Over mode
@@ -237,6 +239,8 @@
           <button
             class="rounder primary"
             class:enabled={input?.cyclic}
+            class:disabled={isBinaryMode}
+            disabled={isBinaryMode}
             on:click={toggleCyclic}
           >
             Cyclic
@@ -290,5 +294,11 @@
   .buttons.channel-state :global(.pill-switch label) {
     padding: 0px 8px;
     font-size: 12px;
+  }
+
+  button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 </style>
