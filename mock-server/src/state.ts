@@ -44,8 +44,14 @@ class State<T extends PipoTypes = "analog"> {
       ip: global.ip,
       mac: global.mac,
     };
+    
+    const defaultConfig = 
+      type === "motion" ? defaultMotion :
+      type === "range" ? defaultRange :
+      defaultAnalog;
+    
     this.configs = {
-      default: defaultAnalog as PipoConfig<"analog">,
+      default: defaultConfig as any as PipoConfig<T>,
     };
     this.activeConfig = "default";
     const defaultSensor = (): Sensor => ({
@@ -159,7 +165,11 @@ class State<T extends PipoTypes = "analog"> {
   deleteConfig(name: string) {
     delete this.configs[name];
     if (!Object.keys(this.configs).length) {
-      this.configs["default"] = JSON.parse(JSON.stringify(defaultAnalog));
+      const defaultConfig = 
+        this.type === "motion" ? defaultMotion :
+        this.type === "range" ? defaultRange :
+        defaultAnalog;
+      this.configs["default"] = JSON.parse(JSON.stringify(defaultConfig));
       this.activeConfig = "default";
     }
     if (this.activeConfig === name) {
@@ -167,7 +177,11 @@ class State<T extends PipoTypes = "analog"> {
     }
   }
   createConfig(name: string) {
-    this.configs[name] = JSON.parse(JSON.stringify(defaultAnalog));
+    const defaultConfig = 
+      this.type === "motion" ? defaultMotion :
+      this.type === "range" ? defaultRange :
+      defaultAnalog;
+    this.configs[name] = JSON.parse(JSON.stringify(defaultConfig));
   }
   copyConfig(name: string, config: PipoConfig<T>) {
     this.configs[name] = config;
@@ -187,4 +201,4 @@ class State<T extends PipoTypes = "analog"> {
   }
 }
 
-export const state = new State("analog");
+export const state = new State("range");

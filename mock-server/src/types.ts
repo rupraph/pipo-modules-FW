@@ -100,11 +100,15 @@ export const ANALOG_AXIS = [
   "A04",
   "A05",
   "A06",
+  "A07",
+  "A08",
   "T1",
   "T2",
   "T3",
   "T4",
   "T5",
   "T6",
+  "T7",
+  "T8",
 ] as const;
 export const UNKNOWN_AXIS = [""] as const;
