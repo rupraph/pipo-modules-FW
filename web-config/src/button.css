@@ -70,5 +70,5 @@ button.enabled {
 }
 
 button.enabled:hover {
-  background-color: var(--main-darker);
+  background-color: var(--main-lighter);
 }

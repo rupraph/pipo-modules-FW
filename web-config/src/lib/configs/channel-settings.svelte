@@ -168,6 +168,9 @@
       ? input.mode === true
       : input.mode === true && input.th_mode === true
     : false;
+
+  // Compute if over mode is active
+  $: isOverOut = input ? input.over_out === true : false;
 </script>
 
 {#if config && selectedChannel && channelConfig}
@@ -225,7 +228,7 @@
         </button>
         <button
           class="rounder primary"
-          class:enabled={isBinaryMode}
+          class:enabled={isOverOut}
           on:click={toggleOverOut}
         >
           Over mode
@@ -273,7 +276,9 @@
   }
   .buttons {
     display: flex;
-    align-items: center;
+    align-content: flex-start;
+    /* align-items: center; */
     gap: 6px;
+    flex-wrap: wrap;
   }
 </style>
