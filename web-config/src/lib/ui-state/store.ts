@@ -71,6 +71,16 @@ function createUIStateStore() {
     saveState(state);
   });
 
+  // When WebSocket connects, monitor all currently selected channels
+  pipoio.on("connect", () => {
+    const state = get({ subscribe });
+    Object.entries(state).forEach(([boardType, boardState]) => {
+      if (boardState?.selectedChannel) {
+        pipoio.monitorAxis(boardState.selectedChannel);
+      }
+    });
+  });
+
   return {
     subscribe,
     set,
