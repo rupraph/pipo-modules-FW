@@ -178,17 +178,15 @@
     <div class="row">
       <span class="label">Channel state</span>
       <div class="buttons">
-        <button
-          class="rounder primary"
-          class:enabled={!channelConfig.enabled}
-          on:click={() => {
-            channelConfig.enabled = !channelConfig.enabled;
-            // Trigger store update to notify other components
+        <PillSwitch
+          label=""
+          bind:value={channelConfig.enabled}
+          offLabel="OFF"
+          onLabel="ON"
+          on:change={() => {
             currentConfig.set(config);
           }}
-        >
-          Enable
-        </button>
+        />
       </div>
     </div>
   {/if}
@@ -282,5 +280,15 @@
     /* align-items: center; */
     gap: 6px;
     flex-wrap: wrap;
+  }
+
+  /* Make the channel state pill switch larger */
+  .buttons :global(.pill-switch) {
+    min-width: 40px;
+  }
+
+  .buttons :global(.pill-switch label) {
+    padding: 2px 10px;
+    font-size: 12px;
   }
 </style>
