@@ -46,12 +46,17 @@
     position: fixed;
     overflow: hidden;
     transform: translate(-50%, -50%);
+    padding: 0 8px 8px 8px;
+  }
+  .modal :global(p) {
+    text-align: left;
+    margin: 0.5em 0;
   }
   .close {
     cursor: pointer;
     display: flex;
     justify-content: flex-end;
-    padding: 8px 8px 0 0;
+    padding: 8px 0 0;
     color: var(--text-color);
   }
   .close:hover {

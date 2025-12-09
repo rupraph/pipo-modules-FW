@@ -2,6 +2,7 @@
   import Select from "svelte-select";
   import LoadingButton from "../form/LoadingButton.svelte";
   import Modal from "../modal.svelte";
+  import InfoModal from "../InfoModal.svelte";
   import {
     configService,
     configNames,
@@ -161,6 +162,36 @@
   <div class="row">
     <div class="left">
       <span> Current Config </span>
+      <InfoModal>
+        <p>
+          Select in the list the active configuration to use. To manage
+          configurations, you can:
+        </p>
+        <ul
+          style="justify-content: flex-start; text-align: left; margin-top: 0.5em;"
+        >
+          <li>
+            Clone the current configuration using
+            <CopyPlus
+              size={16}
+              style="display: inline; vertical-align: middle;"
+            />
+          </li>
+          <li>
+            Create a new configuration from the factory default with <Plus
+              size={16}
+              style="display: inline; vertical-align: middle;"
+            />
+          </li>
+          <li>
+            Delete the current configuration using
+            <Trash2
+              size={16}
+              style="display: inline; vertical-align: middle;"
+            />
+          </li>
+        </ul>
+      </InfoModal>
     </div>
     <div
       on:dblclick={handleSelectDoubleClick}
@@ -196,6 +227,16 @@
 
     <div class="actions">
       <LoadingButton
+        onClick={startCreate}
+        class="action-btn new-btn"
+        loading={creating}
+        disabled={$configsLoading}
+        title="New Config"
+        width="1.5em"
+      >
+        <Plus />
+      </LoadingButton>
+      <LoadingButton
         onClick={startCopy}
         class="action-btn "
         loading={duplicating}
@@ -214,17 +255,6 @@
         width="1.5em"
       >
         <Trash2 />
-      </LoadingButton>
-
-      <LoadingButton
-        onClick={startCreate}
-        class="action-btn new-btn"
-        loading={creating}
-        disabled={$configsLoading}
-        title="New Config"
-        width="1.5em"
-      >
-        <Plus />
       </LoadingButton>
     </div>
   </div>

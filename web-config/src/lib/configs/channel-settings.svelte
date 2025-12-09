@@ -174,22 +174,24 @@
 </script>
 
 {#if config && selectedChannel && channelConfig}
-  <div class="row">
-    <span class="label">Channel state</span>
-    <div class="buttons">
-      <button
-        class="rounder primary"
-        class:enabled={!channelConfig.enabled}
-        on:click={() => {
-          channelConfig.enabled = !channelConfig.enabled;
-          // Trigger store update to notify other components
-          currentConfig.set(config);
-        }}
-      >
-        Enable
-      </button>
+  {#if type !== "range"}
+    <div class="row">
+      <span class="label">Channel state</span>
+      <div class="buttons">
+        <button
+          class="rounder primary"
+          class:enabled={!channelConfig.enabled}
+          on:click={() => {
+            channelConfig.enabled = !channelConfig.enabled;
+            // Trigger store update to notify other components
+            currentConfig.set(config);
+          }}
+        >
+          Enable
+        </button>
+      </div>
     </div>
-  </div>
+  {/if}
   {#if mode === "OSC"}
     <div class="row">
       <span class="label">Raw output</span>

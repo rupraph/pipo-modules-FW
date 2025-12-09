@@ -129,12 +129,21 @@
           <InfoModal>
             <p>
               This enables sending Midi over BLE (Bluetooth Low Energy). When
-              toggled, this requires a reboot aftyer saving. The BLE connection
-              process depends on your OS -- On MacOS, this is native and done
-              through the native "Audio MIDI Setup" panel -- On mobiles this is
-              done directly in the receiving music app -- On windows this
-              requires a third party bridge app.
+              toggled, this requires a reboot after saving the change. The BLE
+              connection process depends on your OS:
             </p>
+            <ul
+              style="justify-content: flex-start; text-align: left; margin-top: 0.5em;"
+            >
+              <li>
+                On MacOS, this is native and done through the native "Audio MIDI
+                Setup" panel
+              </li>
+              <li>
+                On mobiles this is done directly in the receiving music app
+              </li>
+              <li>On windows this requires a third party bridge app</li>
+            </ul>
           </InfoModal>
           <PillSwitch label="" bind:value={config.general.BLEEnabled} />
         </div>

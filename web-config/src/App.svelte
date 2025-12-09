@@ -69,15 +69,19 @@
           {/if}
         {:else}
           <div class="row">
-            <h3>Hold mode</h3>
-            <InfoModal>
-              <p>
-                This defines the output behaviour when an obstacle is removed
-                from the field of view of the sensor: when hold is on, the last
-                value is maintained. if hold is off, the sensor returns min or
-                max.
-              </p>
-            </InfoModal>
+            <div
+              style="display: flex; align-items: center; gap: 0.5em; white-space: nowrap;"
+            >
+              <h3 style="margin: 0; white-space: nowrap;">Hold mode</h3>
+              <InfoModal>
+                <p style="white-space: normal;">
+                  This defines the output behaviour when an obstacle is removed
+                  from the field of view of the sensor: when hold is on, the
+                  last value is maintained. if hold is off, the sensor returns
+                  min or max.
+                </p>
+              </InfoModal>
+            </div>
             {#if $currentConfig?.sensorconf}
               <PillSwitch
                 label=""
@@ -143,6 +147,7 @@
     flex-direction: column;
     justify-section-borders: space-around;
     align-items: center;
+    width: 100%;
     max-width: 600px;
     gap: 1em;
   }
