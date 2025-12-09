@@ -15,6 +15,7 @@
   let apIP = "";
   let staIP = "";
   let disconnected = false;
+  let isConnected = false;
   let live = false;
   isLive.subscribe((value) => {
     live = value;
@@ -25,6 +26,7 @@
     apIP = value.apIP;
     staIP = value.staIP;
     disconnected = value.status === "DISCONNECTED";
+    isConnected = value.status === "CONNECTED";
   });
 
   $: fetchNetworks().then(() => fetchState());
@@ -43,9 +45,9 @@
     });
 </script>
 
-<MenuButton secondary on:click={() => (open = !open)}>
+<MenuButton connected={isConnected} on:click={() => (open = !open)}>
   <div class="icon">
-    <WifiHigh color="var(--bg-primary)" size={25} strokeWidth={3} />
+    <WifiHigh color="var(--bg-primary)" size={30} strokeWidth={3} />
   </div>
 </MenuButton>
 <Modal bind:open>

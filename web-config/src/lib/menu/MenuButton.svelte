@@ -1,9 +1,10 @@
 <script lang="ts">
   export let border = false;
   export let secondary = false;
+  export let connected = false;
 </script>
 
-<button class:border class:secondary on:click>
+<button class:border class:secondary class:connected on:click>
   <slot></slot>
 </button>
 
@@ -20,6 +21,10 @@
     background-color: var(--grey);
     color: var(--bg-primary);
   }
+  button.connected {
+    background-color: var(--main);
+    color: var(--bg-primary);
+  }
   button.border {
     border: 1px solid var(--main);
   }
@@ -29,6 +34,9 @@
   }
   button.secondary:hover {
     background-color: var(--bg-tertiary);
+  }
+  button.connected:hover {
+    background-color: var(--main-lighter);
   }
   button > * {
     width: 100%;
