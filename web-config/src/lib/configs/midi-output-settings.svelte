@@ -4,6 +4,7 @@
   import { uiState } from "../ui-state/store";
   import NoteConfig from "./note-config.svelte";
   import Number from "../form/Number.svelte";
+  import InfoModal from "../InfoModal.svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -54,6 +55,14 @@
     <!-- Message Type: Note/CC Pill Switch -->
     <div class="row">
       <span class="output-label">Message Type</span>
+      <InfoModal>
+        <p>
+          You can choose to translate the sensor data into Midi Continous
+          Controls, or to Midi Notes. If the sensor is put into binary mode,
+          this allows to trigger only one note. If continuous it will behave
+          like an harp.
+        </p>
+      </InfoModal>
       <div class="pill-switch">
         <div class="pill-indicator" class:note={midiConfig.tl_mode === 1}></div>
         <input
@@ -92,6 +101,7 @@
     <!-- MIDI Channel -->
     <div class="row">
       <span class="output-label">MIDI Channel</span>
+      <span></span>
       <div class="input-container">
         <Number label="" bind:value={midiConfig.channel} min={1} max={16} />
       </div>
@@ -101,6 +111,7 @@
     {#if midiConfig.tl_mode === 0}
       <div class="row">
         <span class="label">CC Number</span>
+        <span></span>
         <div class="input-container">
           <Number
             label=""
@@ -114,6 +125,7 @@
 
       <div class="row">
         <span class="output-label">CC Out Min</span>
+        <span></span>
         <div class="input-container">
           <Number
             label=""
@@ -126,6 +138,7 @@
 
       <div class="row">
         <span class="output-label">CC Out Max</span>
+        <span></span>
         <div class="input-container">
           <Number
             label=""
@@ -162,10 +175,20 @@
   }
 
   .row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 24px 1fr;
     align-items: center;
+    gap: 0.5em;
     margin-bottom: 4px;
+  }
+
+  .output-label {
+    white-space: nowrap;
+  }
+
+  .input-container,
+  .pill-switch {
+    justify-self: end;
   }
 
   /* Enable/Disable Button */

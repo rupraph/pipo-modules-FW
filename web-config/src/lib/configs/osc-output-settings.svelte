@@ -3,6 +3,7 @@
   import { currentConfig, pipoType } from "../../services/config";
   import { uiState } from "../ui-state/store";
   import Number from "../form/Number.svelte";
+  import InfoModal from "../InfoModal.svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -63,7 +64,13 @@
     <!-- OSC Address -->
     <div class="row">
       <span class="output-label">OSC Address</span>
-
+      <InfoModal>
+        <p>
+          Define the OSC address for this channel. It is prefixed by the Pipo
+          Name (in settings pannel). No spaces or special characters are
+          allowed.
+        </p>
+      </InfoModal>
       <div class="input-container">
         {#if channelType === "quaternion"}
           <input
@@ -93,6 +100,7 @@
     {#if !modeRaw && channelType !== "quaternion"}
       <div class="row">
         <span class="output-label">Output Min</span>
+        <span></span>
         <div class="input-container">
           <Number
             label=""
@@ -105,6 +113,7 @@
 
       <div class="row">
         <span class="output-label">Output Max</span>
+        <span></span>
         <div class="input-container">
           <Number
             label=""
@@ -123,14 +132,20 @@
   }
 
   .row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 24px 1fr;
     align-items: center;
+    gap: 0.5em;
     margin-bottom: 4px;
+  }
+
+  .output-label {
+    white-space: nowrap;
   }
 
   /* Input Container */
   .input-container {
+    justify-self: end;
   }
 
   .input-container :global(.input) {

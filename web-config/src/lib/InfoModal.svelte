@@ -1,15 +1,14 @@
 <script lang="ts">
   import Modal from "./modal.svelte";
-  import {Info} from "lucide-svelte";
+  import { Info } from "lucide-svelte";
   let open = false;
 </script>
 
-
-<button class="info" on:click={() => open = !open}>
- <Info color="var(--grey)"/>
+<button class="info" on:click={() => (open = !open)}>
+  <Info color="var(--grey)" />
 </button>
 
-<Modal bind:open={open}>
+<Modal bind:open>
   <slot></slot>
 </Modal>
 
@@ -20,8 +19,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     transition: background-color 0.2s;
   }

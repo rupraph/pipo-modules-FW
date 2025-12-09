@@ -5,6 +5,7 @@
   import Number from "../form/Number.svelte";
   import Select from "../form/Select.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
+  import InfoModal from "../InfoModal.svelte";
 
   export let config: NoteConfig & BaseMidiConfig;
   export let isThresholdMode = false;
@@ -169,6 +170,7 @@
 
 <div class="note-config-row">
   <span class="output-label">Root Note</span>
+  <span></span>
   <div class="note-input-container">
     <NoteInput label="" bind:value={config.rootNote} />
   </div>
@@ -178,6 +180,7 @@
 <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
 <div class="note-config-row">
   <span class="output-label">Number of Notes</span>
+  <span></span>
   <div class="note-input-container">
     <Number label="" bind:value={config.nbOfNotes} min={1} max={50} step={1} />
   </div>
@@ -186,12 +189,19 @@
 <!-- {/if} -->
 <div class="note-config-row">
   <span class="output-label">Sustain</span>
+  <InfoModal>
+    <p>
+      This defines the note duration in seconds. Setting 0 will make sustain
+      infinite until going out of range).
+    </p>
+  </InfoModal>
   <div class="note-input-container">
     <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
   </div>
 </div>
 <div class="note-config-row">
   <span class="output-label">Velocity</span>
+  <span></span>
   <div class="note-input-container">
     <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
   </div>
@@ -206,10 +216,19 @@
   }
 
   .note-config-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 24px 1fr;
     align-items: center;
+    gap: 0.5em;
     margin-bottom: 4px;
+  }
+
+  .output-label {
+    white-space: nowrap;
+  }
+
+  .note-input-container {
+    justify-self: end;
   }
 
   .select-input-container :global(.input-wrapper) {
