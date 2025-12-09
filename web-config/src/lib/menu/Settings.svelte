@@ -158,7 +158,7 @@
             Please power cycle after saving the changes.
           </p>
         </InfoModal>
-        <div style="width: 200px;">
+        <div class="text-input-wrapper">
           <Text
             label=""
             bind:value={config.general.PipoName}
@@ -230,6 +230,12 @@
     color: var(--text-color);
     font-size: 14px;
     width: 150px;
+  }
+
+  .text-input-wrapper {
+    max-width: 200px;
+    width: 100%;
+    justify-self: end;
   }
 
   /* .content :global(a.manual-button) {

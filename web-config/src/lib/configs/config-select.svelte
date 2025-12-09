@@ -202,7 +202,7 @@
       <Select
         --height="25px"
         --max-height="25px"
-        --width="134px"
+        --width="130px"
         --padding="0"
         --value-container-padding="0"
         --selected-item-padding="0 0 0 10px"

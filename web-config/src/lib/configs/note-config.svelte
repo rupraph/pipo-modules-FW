@@ -119,7 +119,7 @@
 <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
 {#if !isThresholdMode}
   <div class="select-row">
-    <h3>Pattern</h3>
+    <span class="output-label">Pattern</span>
     <div class="select-input-container pattern-select">
       <Select
         class={isThresholdMode ? "disabled" : ""}

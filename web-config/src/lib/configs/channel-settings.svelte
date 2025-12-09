@@ -177,7 +177,7 @@
   {#if type !== "range"}
     <div class="row">
       <span class="label">Channel state</span>
-      <div class="buttons">
+      <div class="buttons channel-state">
         <PillSwitch
           label=""
           bind:value={channelConfig.enabled}
@@ -283,12 +283,12 @@
   }
 
   /* Make the channel state pill switch larger */
-  .buttons :global(.pill-switch) {
-    min-width: 40px;
+  .buttons.channel-state :global(.pill-switch) {
+    min-width: 80px;
   }
 
-  .buttons :global(.pill-switch label) {
-    padding: 2px 10px;
+  .buttons.channel-state :global(.pill-switch label) {
+    padding: 0px 8px;
     font-size: 12px;
   }
 </style>
