@@ -2,12 +2,39 @@
   import { pipoio } from "../pipoio";
   import { activeConfigName } from "../services/config";
   import { get } from "svelte/store";
+  import { onMount, onDestroy } from "svelte";
 
   export let config: any;
   export let show: boolean = false;
   export let onSaveSuccess: () => void = () => {};
 
   let savingStatus: "none" | "loading" | "success" | "error" = "none";
+  let useAbsolutePosition = false;
+
+  function checkPosition() {
+    const mainContainer = document.querySelector(".main-container");
+    const main = document.querySelector("main");
+    if (mainContainer && main) {
+      const containerRect = mainContainer.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      // If main content bottom is above viewport bottom (page is shorter than viewport)
+      // Check if the bottom of main-container is above the viewport bottom with some buffer
+      useAbsolutePosition = containerRect.bottom + 100 < viewportHeight;
+    }
+  }
+
+  onMount(() => {
+    checkPosition();
+    window.addEventListener("resize", checkPosition);
+    window.addEventListener("scroll", checkPosition);
+  });
+
+  onDestroy(() => {
+    window.removeEventListener("resize", checkPosition);
+    window.removeEventListener("scroll", checkPosition);
+  });
 
   async function handleSave() {
     console.log("Saving config...");
@@ -51,7 +78,11 @@
 </script>
 
 {#if show}
-  <div class="floating-save-container" class:show>
+  <div
+    class="floating-save-container"
+    class:show
+    class:absolute={useAbsolutePosition}
+  >
     <button
       class="floating-save-btn"
       class:loading={savingStatus === "loading"}
@@ -78,18 +109,34 @@
   .floating-save-container {
     position: fixed;
     bottom: 24px;
-    right: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 24px;
+    box-sizing: border-box;
     z-index: 1000;
     opacity: 0;
-    transform: translateY(20px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
   }
 
   .floating-save-container.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     pointer-events: auto;
+  }
+
+  .floating-save-container.absolute {
+    position: static;
+    transform: translateX(0) translateY(0);
+    margin-top: 24px;
+    margin-bottom: 24px;
+    width: 100%;
+    left: auto;
+    bottom: auto;
   }
 
   .floating-save-btn {
