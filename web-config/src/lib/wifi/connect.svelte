@@ -221,11 +221,10 @@
 </script>
 
 <section class="connection" class:waiting>
-  <h3 style="text-align: center;">WiFiNetworks</h3>
-  <div class="ips">
+  <h3 style="text-align: center;">WiFi Networks</h3>
+  <!-- <div class="ips">
     <span><strong>APIP:</strong> {apIP}</span>
-    <span><strong>STAIP:</strong> {staIP}</span>
-  </div>
+  </div> -->
   <button class="primary" class:disabled={waiting} on:click={() => scan()}
     >Scan</button
   >
@@ -242,7 +241,12 @@
       <ul>
         {#each networks as { ssid, quality, known, connected }}
           <li on:click={() => onSelect(ssid, known)}>
-            <span class="ssid">{ssid}</span>
+            <div class="ssid-container">
+              <span class="ssid">{ssid}</span>
+              {#if connected && staIP}
+                <span class="sta-ip">Pipo IP: {staIP}</span>
+              {/if}
+            </div>
             {#if connected}
               <CircleCheck size={24} class="checkmark" />
             {:else}
@@ -288,7 +292,9 @@
                 {/if}
               </button>
 
-              <button on:click={() => onConnect(editing)}>connect</button>
+              <button class="connect" on:click={() => onConnect(editing)}
+                >connect</button
+              >
             </div>
           {/if}
         {/each}
@@ -341,7 +347,7 @@
     padding: 0;
     margin: 0;
     grid-template-columns: minmax(0, 1fr) 1em 1em 2em 4em;
-    grid-template-rows: repeat(auto-fill, 2em);
+    grid-template-rows: repeat(auto-fill, auto);
     justify-items: start;
     align-items: center;
     display: grid;
@@ -362,12 +368,23 @@
     gap: 1em;
     align-items: center;
   }
+  .ssid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    max-width: 100%;
+    overflow: hidden;
+  }
   .ssid {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     max-width: 100%;
-    align-items: center;
+  }
+  .sta-ip {
+    font-size: 0.8em;
+    color: var(--text-color);
+    opacity: 0.7;
   }
   button.lock-icon {
     width: fit-content;
@@ -404,6 +421,10 @@
     padding: 6px;
     height: fit-content;
   }
+
+  /* button.connect {
+    height: fit-content;
+  } */
   button.forget:hover {
     background-color: #c82333;
   }
