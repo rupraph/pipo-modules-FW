@@ -254,8 +254,18 @@ export const setupRoutes = (app: Express) => {
       res.status(500).send(`Error while measuring offset ${e}`);
     }
   });
-  app.get("/pause", (req, res) => {
-    res.send("Engine paused");
+  app.post("/pause", (req, res) => {
+    state.isPaused = true;
+    res.status(200).send("Engine paused");
+  });
+
+  app.post("/resume", (req, res) => {
+    state.isPaused = false;
+    res.status(200).send("Engine resumed");
+  });
+
+  app.get("/is-paused", (req, res) => {
+    res.status(200).send(state.isPaused ? "true" : "false");
   });
 
   // Preset routes

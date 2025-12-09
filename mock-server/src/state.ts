@@ -25,7 +25,9 @@ class State<T extends PipoTypes = "analog"> {
   private info: Info;
   public activeConfig: string;
   private type: T;
+  public isPaused: boolean;
   constructor(type: T) {
+    this.isPaused = false;
     this.battLevel = 34;
     this.type = type;
     this.wifi = {
@@ -201,4 +203,4 @@ class State<T extends PipoTypes = "analog"> {
   }
 }
 
-export const state = new State("range");
+export const state = new State("motion");
