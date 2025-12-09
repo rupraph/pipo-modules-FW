@@ -26,6 +26,8 @@
   } from "./services/config";
   import { uiState } from "./lib/ui-state";
   import Presets from "./lib/presets.svelte";
+  import PillSwitch from "./lib/form/PillSwitch.svelte";
+  import InfoModal from "./lib/InfoModal.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -58,11 +60,31 @@
       <Menu />
       <ConfigSelect />
       <section style="border-top: 2px solid var(--bg-tertiary);">
-        <h3>Channel Settings</h3>
-        {#if type === "analog"}
-          <AnalogChannels />
-        {:else if type === "motion"}
-          <MotionChannels />
+        {#if type !== "range"}
+          <h3>Channel Settings</h3>
+          {#if type === "analog"}
+            <AnalogChannels />
+          {:else if type === "motion"}
+            <MotionChannels />
+          {/if}
+        {:else}
+          <div class="row">
+            <h3>Hold mode</h3>
+            <InfoModal>
+              <p>
+                This defines the output behaviour when an obstacle is removed
+                from the field of view of the sensor: when hold is on, the last
+                value is maintained. if hold is off, the sensor returns min or
+                max.
+              </p>
+            </InfoModal>
+            {#if $currentConfig?.sensorconf}
+              <PillSwitch
+                label=""
+                bind:value={$currentConfig.sensorconf.hold_mode}
+              />
+            {/if}
+          </div>
         {/if}
         {#if type !== "motion" || $uiState[type]?.channelType !== "quaternion"}
           <div class="channel-settings">

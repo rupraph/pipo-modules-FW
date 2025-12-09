@@ -52,14 +52,13 @@
   {#if config}
     <div class="content">
       <div class="row">
-        <div class="left">
-          Ouput mode <InfoModal>
-            <p>
-              Select the output mode for your device. Different modes may offer
-              various functionalities and performance characteristics.
-            </p>
-          </InfoModal>
-        </div>
+        <span class="label">Ouput mode</span>
+        <InfoModal>
+          <p>
+            Select the general output mode for your device. This requires reboot
+            after saving.
+          </p>
+        </InfoModal>
         <div class="pill-switch">
           <div class="pill-indicator" class:midi={mode === "midi"}></div>
           <input
@@ -92,50 +91,64 @@
       </div>
       {#if mode === "osc"}
         <div class="row">
-          <div class="left">
-            Destination IP
-            <InfoModal>
-              <p>
-                Set the destination IP address for sending OSC or MIDI messages.
-                Ensure that the IP address is correct to establish a successful
-                connection.
-              </p>
-            </InfoModal>
-          </div>
+          <span class="label">Destination IP</span>
+          <InfoModal>
+            <p>
+              This is the IP address of the destination PC where OSC data will
+              be sent. The IP is subject to change when you switch network, make
+              sure this is correct.
+            </p>
+          </InfoModal>
           <input type="text" bind:value={config.general.OSC_IP} />
         </div>
 
         <div class="row">
-          <div class="left">
-            Port
-            <InfoModal>
-              <p>
-                Specify the port number used for communication. Make sure the
-                port is open and not blocked by any firewall settings.
-              </p>
-            </InfoModal>
-          </div>
+          <span class="label">Port</span>
+          <InfoModal>
+            <p>
+              This is the port number where the OSC data is sent. Make sure the
+              receiving device listens on this port, and that the port is open
+              and not blocked by any firewall settings.
+            </p>
+          </InfoModal>
           <input type="text" bind:value={config.general.OSC_PORT} />
+        </div>
+        <div class="row">
+          <span class="label">Send Battery level</span>
+          <InfoModal>
+            <p>
+              This option enables the battery level to be sent over OSC at
+              regular intervals.
+            </p>
+          </InfoModal>
+          <PillSwitch label="" bind:value={config.general.OSC_Batt} />
         </div>
       {:else}
         <div class="row">
-          <PillSwitch
-            label="Enable BLE"
-            bind:value={config.general.BLEEnabled}
-          />
+          <span class="label">Enable BLE</span>
+          <InfoModal>
+            <p>
+              This enables sending Midi over BLE (Bluetooth Low Energy). When
+              toggled, this requires a reboot aftyer saving. The BLE connection
+              process depends on your OS -- On MacOS, this is native and done
+              through the native "Audio MIDI Setup" panel -- On mobiles this is
+              done directly in the receiving music app -- On windows this
+              requires a third party bridge app.
+            </p>
+          </InfoModal>
+          <PillSwitch label="" bind:value={config.general.BLEEnabled} />
         </div>
       {/if}
       <div class="row">
-        <div class="left">
-          Pipo Name
-          <InfoModal>
-            <p>
-              The Pipo Name is used to identify your device on the network and
-              when connecting via Bluetooth. Choose a unique name without spaces
-              or special characters.
-            </p>
-          </InfoModal>
-        </div>
+        <span class="label">Pipo Name</span>
+        <InfoModal>
+          <p>
+            The Pipo Name is used to identify your device. It is used for the
+            WiFi name, access URL (pipo-xxx.local), BLE name and OSC address
+            prefix. Choose a unique name without spaces or special characters.
+            Please power cycle after saving the changes.
+          </p>
+        </InfoModal>
         <div style="width: 200px;">
           <Text
             label=""
@@ -147,14 +160,17 @@
         </div>
       </div>
       <div class="row">
-        <a
-          href="https://pipointerfaces.com/manual"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="manual-button"
-        >
-          Online Manual link
-        </a>
+        <span class="label">
+          <a
+            href="https://pipointerfaces.com/manual"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="manual-button"
+          >
+            Online Manual link
+          </a>
+        </span>
+        <div></div>
         <button class="primary" on:click={reboot} style="width: fit-content"
           >Reboot</button
         >
@@ -170,6 +186,25 @@
     gap: 16px;
     padding: 16px;
     box-sizing: border-box;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 40% 32px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .row > :nth-child(2) {
+    justify-self: center;
+  }
+
+  .row > :nth-child(3) {
+    justify-self: end;
+  }
+
+  .label {
+    text-align: left;
   }
 
   /* Pill Switch - Component Specific */

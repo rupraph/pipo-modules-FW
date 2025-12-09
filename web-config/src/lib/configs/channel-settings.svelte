@@ -28,6 +28,11 @@
       ? "OSC"
       : "MIDI";
 
+  // Initialize board state when type changes (ensures range board gets default channel)
+  $: if (type && type !== "unknown") {
+    uiState.initializeBoardState(type);
+  }
+
   $: console.log(
     "Mode changed:",
     mode,
@@ -151,6 +156,12 @@
     currentConfig.set(config);
   }
 
+  function toggleOverOut() {
+    if (!input) return;
+    input.over_out = !input.over_out;
+    currentConfig.set(config);
+  }
+
   // Compute if binary mode is active
   $: isBinaryMode = input
     ? aschema?.cat === "Touch"
@@ -172,7 +183,7 @@
           currentConfig.set(config);
         }}
       >
-        Mute
+        Enable
       </button>
     </div>
   </div>
@@ -211,6 +222,13 @@
           on:click={toggleBinaryMode}
         >
           Binary mode
+        </button>
+        <button
+          class="rounder primary"
+          class:enabled={isBinaryMode}
+          on:click={toggleOverOut}
+        >
+          Over mode
         </button>
         <div class="buttons">
           <button

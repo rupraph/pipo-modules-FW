@@ -32,12 +32,31 @@ function saveState(state: UIState): void {
 }
 
 /**
+ * Get default channel for a board type
+ * Returns the default channel ID that should be selected when no channel is chosen
+ */
+function getDefaultChannel(boardType: PipoTypes): string | undefined {
+  switch (boardType) {
+    case "range":
+      return "dist"; // Range board has only one channel
+    case "analog":
+      return "A01"; // Default to first analog channel
+    case "motion":
+      return "yaw"; // Default to yaw (most commonly used rotation channel)
+    case "unknown":
+      return undefined;
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Get default state for a board type
  */
-function getDefaultBoardState(): BoardUIState {
+function getDefaultBoardState(boardType?: PipoTypes): BoardUIState {
   return {
     collapses: {},
-    selectedChannel: undefined,
+    selectedChannel: boardType ? getDefaultChannel(boardType) : undefined,
   };
 }
 
@@ -86,7 +105,7 @@ function createUIStateStore() {
     ): void => {
       update((state) => {
         if (!state[boardType]) {
-          state[boardType] = getDefaultBoardState();
+          state[boardType] = getDefaultBoardState(boardType);
         }
         state[boardType]!.collapses[collapseId] = isOpen;
         return state;
@@ -102,6 +121,32 @@ function createUIStateStore() {
     },
 
     /**
+     * Initialize board state with defaults if not already set
+     * This ensures that boards like 'range' have their default channel selected
+     */
+    initializeBoardState: (boardType: PipoTypes): void => {
+      const state = get({ subscribe });
+      
+      // Only initialize if board state doesn't exist or selectedChannel is not set
+      if (!state[boardType] || state[boardType]?.selectedChannel === undefined) {
+        const defaultChannel = getDefaultChannel(boardType);
+        if (defaultChannel) {
+          update((currentState) => {
+            if (!currentState[boardType]) {
+              currentState[boardType] = getDefaultBoardState(boardType);
+            } else if (currentState[boardType]!.selectedChannel === undefined) {
+              currentState[boardType]!.selectedChannel = defaultChannel;
+            }
+            return currentState;
+          });
+          
+          // Monitor the default channel
+          pipoio.monitorAxis(defaultChannel);
+        }
+      }
+    },
+
+    /**
      * Set the selected channel for a specific board type
      */
     setSelectedChannel: (
@@ -110,10 +155,12 @@ function createUIStateStore() {
     ): void => {
       update((state) => {
         if (!state[boardType]) {
-          state[boardType] = getDefaultBoardState();
+          state[boardType] = getDefaultBoardState(boardType);
         }
         state[boardType]!.selectedChannel = channel;
-        pipoio.monitorAxis(channel);
+        if (channel) {
+          pipoio.monitorAxis(channel);
+        }
         return state;
         
       });
@@ -136,7 +183,7 @@ function createUIStateStore() {
     ): void => {
       update((state) => {
         if (!state[boardType]) {
-          state[boardType] = getDefaultBoardState();
+          state[boardType] = getDefaultBoardState(boardType);
         }
         state[boardType]!.channelType = channelType;
         return state;
@@ -148,7 +195,7 @@ function createUIStateStore() {
      */
     resetBoardState: (boardType: PipoTypes): void => {
       update((state) => {
-        state[boardType] = getDefaultBoardState();
+        state[boardType] = getDefaultBoardState(boardType);
         return state;
       });
     },
