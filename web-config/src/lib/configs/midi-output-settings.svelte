@@ -5,6 +5,7 @@
   import NoteConfig from "./note-config.svelte";
   import Number from "../form/Number.svelte";
   import InfoModal from "../InfoModal.svelte";
+  import { TriangleAlert } from "lucide-svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -23,6 +24,8 @@
           selectedChannel as keyof (typeof config.engine)["engine-midi"]
         ] as MidiConfig)
       : null;
+
+  $: isChannelEnabled = midiConfig?.enabled ?? false;
 
   function toggleEnabled() {
     if (!midiConfig) return;
@@ -51,7 +54,15 @@
 
 {#if config && selectedChannel && midiConfig && input}
   <div class="output-settings">
-    <h4>MIDI Output</h4>
+    <div class="header-row">
+      <h4>MIDI Output</h4>
+      {#if !isChannelEnabled}
+        <span class="warning-text">
+          <TriangleAlert color="var(--red)" size={14} />
+          Channel is disabled
+        </span>
+      {/if}
+    </div>
     <!-- Message Type: Note/CC Pill Switch -->
     <div class="row">
       <span class="output-label">Message Type</span>
@@ -100,7 +111,7 @@
 
     <!-- MIDI Channel -->
     <div class="row">
-      <span class="output-label">MIDI Channel</span>
+      <span class="output-label">Midi Channel</span>
       <span></span>
       <div class="input-container">
         <Number label="" bind:value={midiConfig.channel} min={1} max={16} />
@@ -172,6 +183,33 @@
 <style>
   .output-settings {
     width: 100%;
+  }
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+    min-height: 32px;
+  }
+
+  .header-row h4 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .warning-text {
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    padding: 4px 8px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-radius: 4px;
   }
 
   .row {

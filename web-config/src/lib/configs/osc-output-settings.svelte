@@ -4,6 +4,7 @@
   import { uiState } from "../ui-state/store";
   import Number from "../form/Number.svelte";
   import InfoModal from "../InfoModal.svelte";
+  import { TriangleAlert } from "lucide-svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -19,6 +20,8 @@
 
   // Create a reactive variable for mode_raw so the UI updates when it changes
   $: modeRaw = oscConfig?.mode_raw ?? false;
+
+  $: isChannelEnabled = oscConfig?.enabled ?? false;
 
   function toggleEnabled() {
     if (!oscConfig) return;
@@ -60,7 +63,15 @@
 
 {#if config && selectedChannel && oscConfig}
   <div class="output-settings">
-    <h4>OSC Output</h4>
+    <div class="header-row">
+      <h4>OSC Output</h4>
+      {#if !isChannelEnabled}
+        <span class="warning-text">
+          <TriangleAlert color="var(--red)" size={14} />
+          Channel is disabled
+        </span>
+      {/if}
+    </div>
     <!-- OSC Address -->
     <div class="row">
       <span class="output-label">OSC Address</span>
@@ -129,6 +140,33 @@
 <style>
   .output-settings {
     width: 100%;
+  }
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    margin-bottom: 8px;
+    min-height: 32px;
+  }
+
+  .header-row h4 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .warning-text {
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    padding: 4px 8px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-radius: 4px;
   }
 
   .row {
