@@ -150,6 +150,7 @@
     width: 100%;
     max-width: 600px;
     gap: 1em;
+    position: relative;
   }
 
   .channel-settings {

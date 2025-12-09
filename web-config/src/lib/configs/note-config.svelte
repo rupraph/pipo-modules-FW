@@ -117,53 +117,55 @@
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
-<div class="select-row">
-  <h3>Pattern</h3>
-  <div class="select-input-container pattern-select">
-    <Select
-      class={isThresholdMode ? "disabled" : ""}
-      label=""
-      options={patternTypes}
-      bind:value={config.pattern}
-    />
-  </div>
-</div>
-{#if config.pattern === "scale"}
+{#if !isThresholdMode}
   <div class="select-row">
-    <span class="output-label">Scale type</span>
-    <div class="select-input-container scale-type-select">
+    <h3>Pattern</h3>
+    <div class="select-input-container pattern-select">
       <Select
         class={isThresholdMode ? "disabled" : ""}
         label=""
-        options={scaleTypes}
-        bind:value={config.scaleType}
+        options={patternTypes}
+        bind:value={config.pattern}
       />
     </div>
   </div>
-{:else if config.pattern === "arpeggio"}
-  <div class="select-row">
-    <span class="output-label">Arpeggio type</span>
-    <div class="select-input-container scale-type-select">
-      <Select
-        class={isThresholdMode ? "disabled" : ""}
-        label=""
-        options={arpeggioTypes}
-        bind:value={config.scaleType}
-      />
+  {#if config.pattern === "scale"}
+    <div class="select-row">
+      <span class="output-label">Scale type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={scaleTypes}
+          bind:value={config.scaleType}
+        />
+      </div>
     </div>
-  </div>
-{:else if config.pattern === "interval"}
-  <div class="select-row">
-    <span class="output-label">Interval type</span>
-    <div class="select-input-container scale-type-select">
-      <Select
-        class={isThresholdMode ? "disabled" : ""}
-        label=""
-        options={intervals}
-        bind:value={config.scaleType}
-      />
+  {:else if config.pattern === "arpeggio"}
+    <div class="select-row">
+      <span class="output-label">Arpeggio type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={arpeggioTypes}
+          bind:value={config.scaleType}
+        />
+      </div>
     </div>
-  </div>
+  {:else if config.pattern === "interval"}
+    <div class="select-row">
+      <span class="output-label">Interval type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={intervals}
+          bind:value={config.scaleType}
+        />
+      </div>
+    </div>
+  {/if}
 {/if}
 <!-- </Tooltip> -->
 <!-- {/if} -->
@@ -178,13 +180,21 @@
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
-<div class="note-config-row">
-  <span class="output-label">Number of Notes</span>
-  <span></span>
-  <div class="note-input-container">
-    <Number label="" bind:value={config.nbOfNotes} min={1} max={50} step={1} />
+{#if !isThresholdMode}
+  <div class="note-config-row">
+    <span class="output-label">Number of Notes</span>
+    <span></span>
+    <div class="note-input-container">
+      <Number
+        label=""
+        bind:value={config.nbOfNotes}
+        min={1}
+        max={50}
+        step={1}
+      />
+    </div>
   </div>
-</div>
+{/if}
 <!-- </Tooltip> -->
 <!-- {/if} -->
 <div class="note-config-row">
