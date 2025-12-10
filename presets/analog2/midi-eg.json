@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi exemple",
-    "description": "T1-T8 to notes / A01-A02 to CC / A7 to harp"
+    "description": "This preset sends T1 to T8 to notes / A01 to A02 to CC / A7 to harp"
   },
   "engine": {
     "engine-hid": {

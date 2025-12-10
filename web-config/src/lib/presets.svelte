@@ -54,6 +54,12 @@
   <div class="row">
     <div class="left">
       <span>Factory Presets</span>
+      <InfoModal>
+        <p>
+          This loads a factory preset, applies and saves it to the current
+          configuration.
+        </p></InfoModal
+      >
     </div>
     <div>
       <Select

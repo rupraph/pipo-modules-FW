@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi eg 1 ",
-    "description": "Note scale on roll, CC on Pitch/Yaw and Gyros"
+    "description": "This preset sets: Note scale on roll, CC on Pitch/Yaw and Gyros"
   },
   "engine": {
     "engine-hid": {

@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi CC",
-    "description": "Range to CC"
+    "description": "This preset sets:Range to CC"
   },
   "engine": {
     "engine-hid": {
