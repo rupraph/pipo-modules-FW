@@ -79,7 +79,7 @@
 
   // Ensure maxSensorValue is always greater than the low value
   $: if (input && input.lmin > maxSensorValue) {
-    maxSensorValue = input.lmin + 1000;
+    maxSensorValue = input.lmin + 2000;
   }
 
   $: channelConfig =
@@ -185,6 +185,91 @@
 
   // Compute if over mode is active
   $: isOverOut = input ? input.over_out === true : false;
+
+  // Calibration state
+  let calibrating = false;
+
+  function calibrateZero() {
+    if (!selectedChannel || calibrating) return;
+
+    calibrating = true;
+
+    pipoio
+      .post("/offsetcal", null, { params: { axis: selectedChannel } })
+      .then(({ data }) => {
+        if (data.status === "measuring") {
+          // Start polling for completion
+          pollCalibrationCompletion();
+        }
+      })
+      .catch((error) => {
+        console.error("Offset calibration failed:", error);
+        calibrating = false;
+      });
+  }
+
+  function pollCalibrationCompletion() {
+    const pollInterval = setInterval(() => {
+      pipoio
+        .get("/offsetcal-status")
+        .then(({ data }) => {
+          if (data.status === "complete" && data.offsets) {
+            // Update the offset value for the current channel
+            if (selectedChannel && input) {
+              const offsetValue = data.offsets[selectedChannel];
+              if (offsetValue !== undefined) {
+                input.offset = offsetValue as number;
+                console.log(
+                  `Offset calibration completed for ${selectedChannel}:`,
+                  offsetValue
+                );
+                // Trigger config update
+                if (config) {
+                  currentConfig.set(config);
+                }
+              }
+            }
+            clearInterval(pollInterval);
+            calibrating = false;
+          }
+          // Continue polling if still measuring
+        })
+        .catch((error) => {
+          console.error("Offset status check failed:", error);
+          clearInterval(pollInterval);
+          calibrating = false;
+        });
+    }, 500); // Poll every 500ms
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      if (calibrating) {
+        console.error("Offset calibration timeout");
+        calibrating = false;
+      }
+    }, 10000);
+  }
+
+  function removeOffset() {
+    if (!selectedChannel) return;
+
+    pipoio
+      .post("/resetoffset", null, { params: { axis: selectedChannel } })
+      .then(() => {
+        if (input) {
+          input.offset = 0;
+          console.log(`Offset reset for ${selectedChannel}`);
+          // Trigger config update
+          if (config) {
+            currentConfig.set(config);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Reset offset failed:", error);
+      });
+  }
 </script>
 
 {#if config && selectedChannel && channelConfig}
@@ -281,9 +366,31 @@
   {/if}
   {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
-      <button class="rounded secondary"> Calibrate zero </button>
-      <button class="rounded secondary"> Remove offset </button>
-      <InfoModal>Information about calibration</InfoModal>
+      <button
+        class="rounded secondary"
+        on:click={calibrateZero}
+        disabled={calibrating}
+      >
+        {calibrating ? "Calibrating..." : "Calibrate zero"}
+      </button>
+      <button
+        class="rounded secondary"
+        on:click={removeOffset}
+        disabled={calibrating}
+      >
+        Remove offset
+      </button>
+      <InfoModal>
+        <p style="white-space: normal;">
+          <strong>Calibrate zero:</strong> Measures the current sensor reading and
+          sets it as the zero point (offset). Use this when the sensor should read
+          zero at its current position.
+        </p>
+        <p style="white-space: normal;">
+          <strong>Remove offset:</strong> Resets the offset to zero, returning to
+          the raw sensor readings.
+        </p>
+      </InfoModal>
     </div>
   {/if}
 {/if}
