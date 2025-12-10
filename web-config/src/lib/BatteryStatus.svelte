@@ -7,6 +7,7 @@
     BatteryMedium,
     BatteryLow,
   } from "lucide-svelte";
+  import { currentMode } from "../services/config";
 
   let battPercentage: number | null = null;
   let isPlugged: boolean = false;
@@ -46,6 +47,15 @@
 </script>
 
 <nav class="battery-status">
+  <div class="mode-indicator">
+    <span
+      class="mode-badge"
+      class:midi={$currentMode === "MIDI"}
+      class:osc={$currentMode === "OSC"}
+    >
+      {$currentMode}
+    </span>
+  </div>
   <div class="battery-info">
     <div class="battery-icon">
       {#if isPlugged}
@@ -58,16 +68,16 @@
         <BatteryLow size={20} color="red" />
       {/if}
     </div>
+    <span class="battery-text">
+      {#if battPercentage === null && !isPlugged}
+        <span>...</span>
+      {:else if isPlugged}
+        <span>Plugged</span>
+      {:else}
+        <span>{battPercentage}%</span>
+      {/if}
+    </span>
   </div>
-  <span class="battery-text">
-    {#if battPercentage === null && !isPlugged}
-      <span>...</span>
-    {:else if isPlugged}
-      <span>Plugged</span>
-    {:else}
-      <span>{battPercentage}%</span>
-    {/if}
-  </span>
 </nav>
 
 <style>
@@ -76,7 +86,33 @@
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    justify-content: flex-end;
+    justify-content: space-between;
+  }
+
+  .mode-indicator {
+    display: flex;
+    align-items: center;
+  }
+
+  .mode-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mode-badge.midi {
+    background-color: rgba(var(--main-rgb, 242, 253, 151), 0.2);
+    color: var(--main-darker);
+    /* border: 1px solid var(--main); */
+  }
+
+  .mode-badge.osc {
+    background-color: rgba(74, 158, 234, 0.2);
+    color: #4a9eea;
+    /* border: 1px solid #4a9eea; */
   }
 
   .battery-info {
