@@ -130,7 +130,7 @@ export const schema: Schema = {
     A01: {
       label: "Analog 1",
       cat: "Voltage",
-      unit: "%",
+      unit: "",
       min: 0,
       max: 3.3,
       step: 0.1,
@@ -139,7 +139,7 @@ export const schema: Schema = {
     A02: {
       label: "Analog 2",
       cat: "Voltage",
-      unit: "%",
+      unit: "",
       min: 0,
       max: 3.3,
       step: 0.1,
@@ -184,7 +184,7 @@ export const schema: Schema = {
     A07: {
       label: "Analog 7",
       cat: "Voltage",
-      unit: "%",
+      unit: "",
       min: 0,
       max: 3.3,
       step: 0.1,
@@ -193,7 +193,7 @@ export const schema: Schema = {
     A08: {
       label: "Analog 8",
       cat: "Voltage",
-      unit: "%",
+      unit: "",
       min: 0,
       max: 3.3,
       step: 0.1,
