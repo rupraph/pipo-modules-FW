@@ -364,7 +364,7 @@
       maxLabel={`Max`}
     />
   {/if}
-  {#if selectedChannel && aschema.cat === "Touch"}
+  <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
       <button
         class="rounded secondary"
@@ -382,17 +382,24 @@
       </button>
       <InfoModal>
         <p style="white-space: normal;">
-          <strong>Calibrate zero:</strong> Measures the current sensor reading and
-          sets it as the zero point (offset). Use this when the sensor should read
-          zero at its current position.
+          Touch inputs are very sensitive and are heavily affected by what you
+          will connect to it or its surroundings, requiring systematic
+          calibration whenever you change something in your setup. Pipo
+          calibrates the "no touch" (zero) reference at every startup to help
+          you with this. You can then adjust "touch" sensitivity by changing the
+          threshold with the channel slider.
         </p>
         <p style="white-space: normal;">
-          <strong>Remove offset:</strong> Resets the offset to zero, returning to
-          the raw sensor readings.
+          Calibrate zero: Measures the current touch reading and use it as "no
+          touch" reference (zero).
+        </p>
+        <p style="white-space: normal;">
+          Remove offset: Removes any calibration offset, value is the raw sensor
+          readings.
         </p>
       </InfoModal>
     </div>
-  {/if}
+  {/if} -->
 {/if}
 
 <style scoped>

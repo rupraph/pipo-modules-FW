@@ -18,18 +18,30 @@
     }
   }
 
-  function setPause() {
-    pipoio.post("/pause").then(() => {
+  async function setPause() {
+    try {
+      await pipoio.post("/pause");
       console.log("Toggling pause...");
-    });
-    isPaused = true;
+      // Fetch actual state from backend to ensure sync
+      await fetchPauseState();
+    } catch (e) {
+      console.error("Failed to pause:", e);
+      // Revert to actual backend state on error
+      await fetchPauseState();
+    }
   }
 
-  function setResume() {
-    pipoio.post("/resume").then(() => {
+  async function setResume() {
+    try {
+      await pipoio.post("/resume");
       console.log("Resuming...");
-    });
-    isPaused = false;
+      // Fetch actual state from backend to ensure sync
+      await fetchPauseState();
+    } catch (e) {
+      console.error("Failed to resume:", e);
+      // Revert to actual backend state on error
+      await fetchPauseState();
+    }
   }
 
   function togglePause() {

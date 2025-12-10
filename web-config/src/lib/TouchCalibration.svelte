@@ -2,6 +2,7 @@
   import { currentConfig, pipoType } from "../services/config";
   import { schema } from "../schema";
   import { pipoio } from "../pipoio";
+  import InfoModal from "../lib/InfoModal.svelte";
 
   let calibrating = false;
   $: type = $pipoType;
@@ -82,10 +83,44 @@
   }
 </script>
 
-<button
-  class="secondary"
-  on:click={calibrateAllTouch}
-  disabled={calibrating || type !== "analog"}
->
-  {calibrating ? "Calibrating..." : "Calibrate (zero) all touch"}
-</button>
+<div class="calibration-container">
+  <button
+    class="secondary"
+    on:click={calibrateAllTouch}
+    disabled={calibrating || type !== "analog"}
+  >
+    {calibrating ? "Calibrating..." : "Calibrate (zero) all touch"}
+  </button>
+  <InfoModal>
+    <p>
+      Touch inputs are very sensitive and are heavily affected by its
+      surroundings, and what you connect, requiring systematic calibration of
+      the zero reference. Whenever you change something in your setup or are
+      close to it.
+    </p>
+    <p>
+      Pipo calibrates the "no touch" (zero) reference at every startup to help
+      you with this (you should stay away from the setup during calibration).
+      You can adjust "touch" channel sensitivity by changing the threshold with
+      the channel slider.
+    </p>
+    <p>
+      Calibrate all touch: Measures all current touch readings and use them as
+      "no touch" reference (zero). This is for a live calibration during design.
+      (Reboot will anyway overwrite these with a fresh calibration at startup)
+    </p>
+  </InfoModal>
+</div>
+
+<style>
+  .calibration-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+</style>

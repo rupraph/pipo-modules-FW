@@ -111,7 +111,6 @@
     width: 145px;
     height: 32px;
     color: var(--text-color);
-    font: Instrument Sans;
     font-weight: 700;
     font-size: 14px;
     border: none;
@@ -138,7 +137,7 @@
     background-color: var(--bg-secondary);
     border: none;
     color: var(--grey);
-    font: Instrument Sans;
+    font-family: Instrument Sans;
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
