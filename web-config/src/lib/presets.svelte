@@ -10,6 +10,10 @@
   import LoadingButton from "./form/LoadingButton.svelte";
   import Select from "svelte-select";
   import InfoModal from "./InfoModal.svelte";
+  import { addToast } from "./toast";
+  import { pipoio } from "../pipoio";
+  import { currentConfig, originalConfig } from "../services/config";
+  import { get } from "svelte/store";
 
   let selectedPreset: Preset | null = null;
   let applying = false;
@@ -41,7 +45,39 @@
     applying = true;
 
     try {
+      // Get the original mode before loading preset
+      const originalMode = get(originalConfig)?.general.MidiEnabled
+        ? "MIDI"
+        : "OSC";
+
+      // Apply the preset
       await presetsService.applyPreset(selectedPreset.name);
+
+      // Get the new mode after loading preset
+      const newMode = get(currentConfig)?.general.MidiEnabled ? "MIDI" : "OSC";
+
+      // Check if mode changed
+      if (originalMode !== newMode) {
+        // Show countdown toast
+        addToast({
+          type: "error",
+          message:
+            "The preset changed the MIDI/OSC mode. The board needs to reboot. Please reload the page in a few seconds.(Make sure Wifi is reconnected)",
+          timeout: 10000,
+        });
+
+        // Trigger reboot after 5 seconds
+        setTimeout(() => {
+          pipoio
+            .get("/reboot")
+            .then(() => {
+              console.log("Rebooting device...");
+            })
+            .catch((err) => {
+              console.error("Failed to reboot:", err);
+            });
+        }, 5000);
+      }
     } catch (err) {
       // Error is handled by the service and stored in presetsError
     } finally {

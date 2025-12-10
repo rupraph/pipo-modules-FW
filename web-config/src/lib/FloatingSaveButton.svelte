@@ -1,8 +1,9 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
-  import { activeConfigName } from "../services/config";
+  import { activeConfigName, modeWillChange } from "../services/config";
   import { get } from "svelte/store";
   import { onMount, onDestroy } from "svelte";
+  import { addToast } from "./toast";
 
   export let config: any;
   export let show: boolean = false;
@@ -38,6 +39,7 @@
 
   async function handleSave() {
     console.log("Saving config...");
+    const willReboot = get(modeWillChange);
     savingStatus = "loading";
 
     const name = get(activeConfigName);
@@ -60,6 +62,25 @@
 
       console.log("Config saved successfully");
       savingStatus = "success";
+
+      // If mode changed, show toast and reboot immediately
+      if (willReboot) {
+        addToast({
+          type: "error",
+          message:
+            "The board will reboot to take into account the MIDI/OSC mode change. Please reload the page in a few seconds (Make sure Wifi is reconnected)",
+          timeout: 10000,
+        });
+
+        pipoio
+          .get("/reboot")
+          .then(() => {
+            console.log("Rebooting device...");
+          })
+          .catch((err) => {
+            console.error("Failed to reboot:", err);
+          });
+      }
 
       // Call success callback after a brief delay
       setTimeout(() => {
@@ -98,6 +119,8 @@
         ✓ Saved!
       {:else if savingStatus === "error"}
         ✗ Error
+      {:else if $modeWillChange}
+        Save and Reboot
       {:else}
         Save Changes
       {/if}

@@ -1,10 +1,7 @@
 <script>
   import { createEventDispatcher } from "svelte";
   import { fade } from "svelte/transition";
-  import SuccessIcon from "../icons/success.svelte";
-  import ErrorIcon from "../icons/error.svelte";
-  import InfoIcon from "../icons/info.svelte";
-  import CloseIcon from "../icons/close.svelte";
+  import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-svelte";
 
   const dispatch = createEventDispatcher();
 
@@ -13,13 +10,15 @@
 </script>
 
 <article class={type} role="alert" transition:fade>
-  {#if type === "success"}
-    <SuccessIcon width="1.1em" />
+  <!-- {#if type === "success"}
+    <CheckCircle2 size={20} />
   {:else if type === "error"}
-    <ErrorIcon width="1.1em" />
+    <XCircle size={20} />
+  {:else if type === "warning"}
+    <AlertTriangle size={20} />
   {:else}
-    <InfoIcon width="1.1em" />
-  {/if}
+    <Info size={20} />
+  {/if} -->
 
   <div class="text">
     <slot />
@@ -27,7 +26,7 @@
 
   {#if dismissible}
     <button class="close" on:click={() => dispatch("dismiss")}>
-      <CloseIcon width="0.8em" />
+      <X size={16} />
     </button>
   {/if}
 </article>
@@ -41,18 +40,22 @@
     align-items: center;
     margin: 0 auto 0.5rem auto;
     width: 20rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    /* opacity: 0.85; */
   }
   .error {
-    background: var(--red);
+    background: #e33333dd;
   }
   .success {
-    background: var(--main);
+    background: #3bb143dd;
   }
   .info {
-    background: var(--main-secondary);
+    background: #4a9eeadd;
   }
   .warning {
-    background: DarkOrange;
+    background: #ff8c00dd;
   }
   .text {
     margin-left: 1rem;
@@ -65,5 +68,6 @@
     margin: 0 0 0 auto;
     line-height: 1;
     font-size: 1rem;
+    cursor: pointer;
   }
 </style>
