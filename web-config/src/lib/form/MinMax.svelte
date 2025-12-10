@@ -42,15 +42,9 @@
   function toPercent(v: number, a: number, b: number) {
     return `${((v - a) / (b - a)) * 100}%`;
   }
-  $: if (
-    mode ||
-    min !== undefined ||
-    max !== undefined ||
-    low !== undefined ||
-    high !== undefined
-  ) {
-    color = fillColor();
-  }
+
+  // Recalculate color whenever any of these values change
+  $: (color = fillColor()), mode, min, max, low, high;
 </script>
 
 <div class="minmax-input" {id}>
@@ -82,11 +76,13 @@
           on:input={onMaxChange}
         />
       {/if}
-      <span
-        class="value"
-        class:cursorActive
-        style="--left:{toPercent(value, min, max)}"
-      ></span>
+      {#if value >= min}
+        <span
+          class="value"
+          class:cursorActive
+          style="--left:{toPercent(value, min, max)}"
+        ></span>
+      {/if}
     </div>
     <span>{max}</span>
   </div>

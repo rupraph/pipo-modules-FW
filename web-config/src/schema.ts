@@ -187,7 +187,7 @@ export const schema: Schema = {
       unit: "%",
       min: 0,
       max: 3.3,
-      step: 1,
+      step: 0.1,
       index: 4,
     },
     A08: {
@@ -196,7 +196,7 @@ export const schema: Schema = {
       unit: "%",
       min: 0,
       max: 3.3,
-      step: 1,
+      step: 0.1,
       index: 5,
     },
     T1: {

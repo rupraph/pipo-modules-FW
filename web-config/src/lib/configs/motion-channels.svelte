@@ -37,6 +37,7 @@
   // Update uiState when currentType changes
   $: if (currentType) {
     uiState.setChannelType(boardType, currentType);
+    uiState.setSelectedChannel(boardType, keys[0]);
   }
 
   $: config = $currentConfig;
@@ -63,8 +64,12 @@
 
   $: selectedChannel = $uiState[boardType]?.selectedChannel;
 
-  // Set first channel as default if none selected
-  $: if (config && keys.length > 0 && !selectedChannel) {
+  // Set first channel as default if none selected OR if selected channel is not in current keys
+  $: if (
+    config &&
+    keys.length > 0 &&
+    (!selectedChannel || !keys.includes(selectedChannel as Keys))
+  ) {
     uiState.setSelectedChannel(boardType, keys[0]);
   }
 

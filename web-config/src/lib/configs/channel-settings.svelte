@@ -56,16 +56,30 @@
 
   let sensorValue: number | undefined = undefined;
   let withinWindow = false;
-  let maxSensorValue = 3.3;
   let smoothValue: SmoothSensorValue = {
     new: 0,
     old: 0,
     dt: 0,
     timestamp: Date.now(),
   };
+  let maxSensorValue = 3.3;
 
-  $: if (aschema) {
+  // Reactive: Reset maxSensorValue and sensor readings when channel changes
+  $: if (selectedChannel && aschema) {
     maxSensorValue = aschema.max;
+    // Reset sensor value to prevent stale readings from affecting the new channel
+    sensorValue = undefined;
+    smoothValue = {
+      new: 0,
+      old: 0,
+      dt: 0,
+      timestamp: Date.now(),
+    };
+  }
+
+  // Ensure maxSensorValue is always greater than the low value
+  $: if (input && input.lmin > maxSensorValue) {
+    maxSensorValue = input.lmin + 1000;
   }
 
   $: channelConfig =
@@ -95,13 +109,13 @@
   }
   animateSensor();
 
-  $: console.log("Channel Settings State:", {
-    config: !!config,
-    selectedChannel,
-    channelConfig: !!channelConfig,
-    type,
-    uiState: $uiState,
-  });
+  // $: console.log("Channel Settings State:", {
+  //   config: !!config,
+  //   selectedChannel,
+  //   channelConfig: !!channelConfig,
+  //   type,
+  //   uiState: $uiState,
+  // });
 
   $: if (
     sensorValue !== undefined &&
