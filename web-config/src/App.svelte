@@ -75,10 +75,10 @@
               <h3 style="margin: 0; white-space: nowrap;">Hold mode</h3>
               <InfoModal>
                 <p style="white-space: normal;">
-                  This defines the output behaviour when an obstacle is removed
-                  from the field of view of the sensor: when hold is on, the
-                  last value is maintained. if hold is off, the sensor returns
-                  min or max.
+                  "Hold" defines the sensor behaviour when an obstacle is
+                  removed from the measuring range of the sensor: when hold is
+                  on, the last value is maintained. If hold is off, the sensor
+                  returns min or max (depending on Over mode position).
                 </p>
               </InfoModal>
             </div>
