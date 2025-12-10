@@ -21,9 +21,18 @@
 
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
-    config.general.MidiEnabled = newMode === "midi";
-    config.general.OSC_ENA = newMode === "osc";
-    currentConfig.set(config);
+
+    // Create a new config object to trigger Svelte reactivity
+    const updatedConfig = {
+      ...config,
+      general: {
+        ...config.general,
+        MidiEnabled: newMode === "midi",
+        OSC_ENA: newMode === "osc",
+      },
+    };
+
+    currentConfig.set(updatedConfig);
   }
 
   const validate = (name) => {

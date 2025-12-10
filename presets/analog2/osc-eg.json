@@ -643,7 +643,7 @@
     "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "OSC_Batt": false,
-    "MidiEnabled": true,
+    "MidiEnabled": false,
     "HidEnabled": false,
     "HidMode": 1,
     "PipoName": "analog",
