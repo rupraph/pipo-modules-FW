@@ -27,12 +27,16 @@
 
   $: isChannelEnabled = midiConfig?.enabled ?? false;
 
-  // Track specific values for reactivity
+  // Track specific values for reactivity - these will update when the underlying values change
   $: currentCCNumber = midiConfig?.cc_nb;
   $: currentMidiChannel = midiConfig?.channel;
   $: currentTlMode = midiConfig?.tl_mode;
   $: currentRootNote = midiConfig?.rootNote;
   $: currentEnabled = midiConfig?.enabled;
+
+  // Force reactivity by creating a composite key that changes when any relevant value changes
+  $: ccReactivityKey = `${currentMidiChannel}-${currentCCNumber}-${currentTlMode}`;
+  $: noteReactivityKey = `${currentMidiChannel}-${currentRootNote}-${currentTlMode}`;
 
   function toggleEnabled() {
     if (!midiConfig) return;
@@ -51,9 +55,11 @@
     if (!config || !midiConfig || !selectedChannel) return [];
     if (currentTlMode !== 0) return []; // Only check in CC mode
 
-    // Use tracked values to ensure reactivity
+    // Use tracked values and reactivity key to ensure reactivity
     const checkChannel = currentMidiChannel;
     const checkCC = currentCCNumber;
+    // Reference ccReactivityKey to ensure this recalculates when values change
+    const _ = ccReactivityKey;
 
     // Check all other channels and collect conflicting ones
     return Object.keys(config.engine["engine-midi"]).filter((key) => {
@@ -78,9 +84,11 @@
     if (!config || !midiConfig || !selectedChannel) return [];
     if (currentTlMode !== 1) return []; // Only check in Note mode
 
-    // Use tracked values to ensure reactivity
+    // Use tracked values and reactivity key to ensure reactivity
     const checkChannel = currentMidiChannel;
     const checkNote = currentRootNote;
+    // Reference noteReactivityKey to ensure this recalculates when note changes
+    const _ = noteReactivityKey;
 
     // Check all other channels and collect conflicting ones
     return Object.keys(config.engine["engine-midi"]).filter((key) => {

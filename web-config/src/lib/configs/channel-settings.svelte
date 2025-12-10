@@ -187,6 +187,9 @@
   // Compute if over mode is active
   $: isOverOut = input ? input.over_out === true : false;
 
+  // Compute if inverted is active
+  $: isInverted = input ? input.inverted === true : false;
+
   // Calibration state
   let calibrating = false;
 
@@ -308,7 +311,24 @@
     <div class="row">
       <div class="left">
         <span class="label">Options</span>
-        <InfoModal>Information about options</InfoModal>
+        <InfoModal>
+          <p>Range invert: This inverts the output range of the channel.</p>
+          <p>
+            Binary mode: When enabled, the channel will output only two states
+            (on/off). The ON/OFF zones are defined by the sliders position. When
+            disabled, the channel will output continuous values.
+          </p>
+          <p>
+            Over mode: When enabled, if the reading exceeds the maximum slider
+            value, the output is set to 0. Otherwise, it is clamped to the max
+            value.
+          </p>
+          <p>
+            Cyclic: When enabled, the output wraps within the min max slider,
+            allowing for continous cycling: Output will be 0 when at min and at
+            max, and will reach the maximum in the middle of the range.
+          </p>
+        </InfoModal>
       </div>
 
       <div class="buttons">
@@ -329,8 +349,8 @@
         <button
           class="rounder primary"
           class:enabled={isOverOut}
-          class:disabled={isBinaryMode}
-          disabled={isBinaryMode}
+          class:disabled={isBinaryMode || isInverted}
+          disabled={isBinaryMode || isInverted}
           on:click={toggleOverOut}
         >
           Over mode

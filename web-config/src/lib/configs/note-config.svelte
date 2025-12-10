@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pipoType } from "../../services";
+  import { pipoType, currentConfig } from "../../services";
   import type { NoteConfig, BaseMidiConfig } from "../../types";
   import NoteInput from "../form/NoteInput.svelte";
   import Number from "../form/Number.svelte";
@@ -12,6 +12,16 @@
   export let isThresholdMode = false;
   export let hasConflict = false;
   export let conflictChannels: string[] = [];
+
+  // Track rootNote changes and trigger config update to ensure reactivity
+  let lastRootNote = config.rootNote;
+  $: if (config.rootNote !== lastRootNote) {
+    lastRootNote = config.rootNote;
+    // Trigger store update to notify all subscribers
+    if ($currentConfig) {
+      currentConfig.set($currentConfig);
+    }
+  }
 
   const patternTypes = [
     { label: "Scale", value: "scale" },
