@@ -136,23 +136,29 @@ function createUIStateStore() {
      */
     initializeBoardState: (boardType: PipoTypes): void => {
       const state = get({ subscribe });
+      const defaultChannel = getDefaultChannel(boardType);
       
-      // Only initialize if board state doesn't exist or selectedChannel is not set
-      if (!state[boardType] || state[boardType]?.selectedChannel === undefined) {
-        const defaultChannel = getDefaultChannel(boardType);
-        if (defaultChannel) {
-          update((currentState) => {
-            if (!currentState[boardType]) {
-              currentState[boardType] = getDefaultBoardState(boardType);
-            } else if (currentState[boardType]!.selectedChannel === undefined) {
-              currentState[boardType]!.selectedChannel = defaultChannel;
-            }
-            return currentState;
-          });
-          
-          // Monitor the default channel
-          pipoio.monitorAxis(defaultChannel);
-        }
+      if (!defaultChannel) {
+        return;
+      }
+      
+      // Initialize if board state doesn't exist or selectedChannel is not set
+      const needsInitialization = !state[boardType] || state[boardType]?.selectedChannel === undefined;
+      
+      if (needsInitialization) {
+        update((currentState) => {
+          if (!currentState[boardType]) {
+            currentState[boardType] = getDefaultBoardState(boardType);
+          }
+          currentState[boardType]!.selectedChannel = defaultChannel;
+          return currentState;
+        });
+      }
+      
+      // Always monitor the default channel for range board (it only has one channel)
+      // For other boards, only monitor if we just initialized
+      if (boardType === "range" || needsInitialization) {
+        pipoio.monitorAxis(defaultChannel);
       }
     },
 
