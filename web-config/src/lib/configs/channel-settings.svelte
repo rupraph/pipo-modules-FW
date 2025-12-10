@@ -67,11 +67,12 @@
   // Reactive: Reset maxSensorValue and sensor readings when channel changes
   $: if (selectedChannel && aschema) {
     maxSensorValue = aschema.max;
-    // Reset sensor value to prevent stale readings from affecting the new channel
-    sensorValue = undefined;
+    // Reset sensor value to schema min to prevent stale readings from affecting maxSensorValue
+    // Using schema min instead of undefined prevents layout shifts
+    sensorValue = aschema.min;
     smoothValue = {
-      new: 0,
-      old: 0,
+      new: aschema.min,
+      old: aschema.min,
       dt: 0,
       timestamp: Date.now(),
     };
