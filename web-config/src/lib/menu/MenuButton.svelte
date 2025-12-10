@@ -2,9 +2,16 @@
   export let border = false;
   export let secondary = false;
   export let connected = false;
+  export let disconnected = false;
 </script>
 
-<button class:border class:secondary class:connected on:click>
+<button
+  class:border
+  class:secondary
+  class:connected
+  class:disconnected
+  on:click
+>
   <slot></slot>
 </button>
 
@@ -24,6 +31,10 @@
   button.connected {
     background-color: var(--main);
     color: var(--bg-primary);
+  }
+  button.disconnected {
+    background-color: var(--grey);
+    color: var(--text-color);
   }
   button.border {
     border: 1px solid var(--main);

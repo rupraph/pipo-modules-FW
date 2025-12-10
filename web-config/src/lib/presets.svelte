@@ -53,7 +53,7 @@
 <section class="preset-select">
   <div class="row">
     <div class="left">
-      <span>Preset</span>
+      <span>Factory Presets</span>
     </div>
     <div>
       <Select

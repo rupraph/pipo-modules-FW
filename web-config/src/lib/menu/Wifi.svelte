@@ -45,7 +45,11 @@
     });
 </script>
 
-<MenuButton connected={isConnected} on:click={() => (open = !open)}>
+<MenuButton
+  connected={isConnected}
+  disconnected={!isConnected}
+  on:click={() => (open = !open)}
+>
   <div class="icon">
     <WifiHigh color="var(--bg-primary)" size={30} strokeWidth={3} />
   </div>
