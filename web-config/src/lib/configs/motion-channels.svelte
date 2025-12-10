@@ -86,6 +86,44 @@
         )
       : ({} as Record<Keys, boolean>);
 
+  // Check if any channel in a category is enabled
+  function isCategoryEnabled(categoryValue: string): boolean {
+    if (!config) return false;
+
+    if (categoryValue === "quaternion") {
+      // For quaternion, check the special engine setting
+      return config.engine["engine-special"]["quat"]?.enabled ?? false;
+    }
+
+    // For other categories, check if any channel in that category is enabled
+    const categoryKeys =
+      categoryValue === "euler"
+        ? (["yaw", "pitch", "roll"] as Keys[])
+        : categoryValue === "linear_acceleration"
+          ? (["accX", "accY", "accZ"] as Keys[])
+          : categoryValue === "magnitude"
+            ? (["magX", "magY", "magZ"] as Keys[])
+            : categoryValue === "angular_acceleration"
+              ? (["gyroX", "gyroY", "gyroZ"] as Keys[])
+              : [];
+
+    return categoryKeys.some(
+      (key) => config.engine[engineKey][key]?.enabled ?? false
+    );
+  }
+
+  // Force reactivity for category enabled state
+  $: categoryEnabledStates =
+    config && $currentConfig
+      ? availableChannelTypes.reduce(
+          (acc, type) => {
+            acc[type.value] = isCategoryEnabled(type.value);
+            return acc;
+          },
+          {} as Record<string, boolean>
+        )
+      : {};
+
   function toggle(key: Keys) {
     if (!config) return;
     config.engine[engineKey][key].enabled =
@@ -107,6 +145,7 @@
     {#each availableChannelTypes as typeOption}
       <button
         class:selected={currentType === typeOption.value}
+        class:enabled={categoryEnabledStates[typeOption.value]}
         on:click={() => (currentType = typeOption.value)}
       >
         {typeOption.label}
@@ -151,7 +190,7 @@
     width: 100px;
     height: 32px;
     color: var(--text-color);
-    font: Instrument Sans;
+    font-family: Instrument Sans;
     font-weight: 700;
     font-size: 14px;
     border: none;
@@ -159,6 +198,9 @@
     cursor: pointer;
     padding: 0;
     border-radius: 0px;
+  }
+  .category > button.enabled {
+    color: var(--main);
   }
   .category > button.selected {
     outline: 3px solid var(--main);
@@ -176,15 +218,16 @@
     background-color: var(--bg-secondary);
     border: none;
     color: var(--grey);
-    font: Instrument Sans;
-    font-weight: 700;
-    font-size: 16px;
+    font-family: Instrument Sans;
+    font-weight: 00;
+    font-size: 14px;
     cursor: pointer;
     padding: 0;
   }
   .channels > button.enabled {
     /* background-color: var(--main); */
     color: var(--main);
+    font-weight: 1000;
   }
   .channels > button.selected {
     outline: 6px solid var(--main);

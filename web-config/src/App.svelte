@@ -28,6 +28,7 @@
   import Presets from "./lib/presets.svelte";
   import PillSwitch from "./lib/form/PillSwitch.svelte";
   import InfoModal from "./lib/InfoModal.svelte";
+  import Info from "./lib/icons/info.svelte";
 
   let type: PipoTypes = "unknown";
   function fetch() {
@@ -61,7 +62,16 @@
       <ConfigSelect />
       <section style="border-top: 2px solid var(--bg-tertiary);">
         {#if type !== "range"}
-          <h3>Channel Settings</h3>
+          <span class="row" style="align-items: center; gap: 0.5em; ">
+            <h3>Channel Settings</h3>
+            <InfoModal>
+              <p>
+                Select a channel category to display underlying channels. The
+                channels which are enabled have their name in yellow (Grey if
+                disabled).
+              </p>
+            </InfoModal>
+          </span>
           {#if type === "analog"}
             <AnalogChannels />
           {:else if type === "motion"}

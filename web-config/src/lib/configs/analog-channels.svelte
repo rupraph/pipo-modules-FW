@@ -58,6 +58,29 @@
         )
       : ({} as Record<Keys, boolean>);
 
+  // Check if any channel in a category is enabled
+  function isCategoryEnabled(categoryValue: "analog" | "touch"): boolean {
+    if (!config) return false;
+
+    const categoryKeys =
+      categoryValue === "analog"
+        ? Array.from({ length: 8 }, (_, i) => `A0${i + 1}` as Keys)
+        : Array.from({ length: 8 }, (_, i) => `T${i + 1}` as Keys);
+
+    return categoryKeys.some(
+      (key) => config.engine[engineKey][key]?.enabled ?? false
+    );
+  }
+
+  // Force reactivity for category enabled state
+  $: categoryEnabledStates =
+    config && $currentConfig
+      ? {
+          analog: isCategoryEnabled("analog"),
+          touch: isCategoryEnabled("touch"),
+        }
+      : { analog: false, touch: false };
+
   function toggle(key: Keys) {
     if (!config) return;
     config.engine[engineKey][key].enabled =
@@ -78,12 +101,14 @@
   <div class="category">
     <button
       class:selected={category === "analog"}
+      class:enabled={categoryEnabledStates.analog}
       on:click={() => (category = "analog")}
     >
       Analog
     </button>
     <button
       class:selected={category === "touch"}
+      class:enabled={categoryEnabledStates.touch}
       on:click={() => (category = "touch")}>Touch</button
     >
   </div>
@@ -118,6 +143,9 @@
     cursor: pointer;
     border-radius: 0px;
   }
+  .category > button.enabled {
+    color: var(--main);
+  }
   .category > button.selected {
     /* background-color: var(--main); */
     /* color: var(--bg-secondary); */
@@ -138,7 +166,7 @@
     border: none;
     color: var(--grey);
     font-family: Instrument Sans;
-    font-weight: 700;
+    font-weight: 100;
     font-size: 16px;
     cursor: pointer;
     padding: 0;
@@ -146,6 +174,8 @@
   .channels > button.enabled {
     /* background-color: var(--main); */
     color: var(--main);
+    font-family: Instrument Sans;
+    font-weight: 700;
   }
   .channels > button.selected {
     outline: 6px solid var(--main);
