@@ -187,9 +187,9 @@
   <span class="output-label">Root Note</span>
   {#if hasConflict}
     <span class="conflict-warning">
-      <TriangleAlert size={14} />
+      <TriangleAlert size={14} color="var(--red)" />
       <span class="conflict-text"
-        >Note also used in: {conflictChannels.join(", ")}</span
+        >Note also used in "{conflictChannels.join(", ")}"</span
       >
     </span>
   {:else}

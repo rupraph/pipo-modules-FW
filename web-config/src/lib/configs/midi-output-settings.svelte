@@ -33,10 +33,12 @@
   $: currentTlMode = midiConfig?.tl_mode;
   $: currentRootNote = midiConfig?.rootNote;
   $: currentEnabled = midiConfig?.enabled;
+  $: currentInputMode = input?.mode;
 
   // Force reactivity by creating a composite key that changes when any relevant value changes
   $: ccReactivityKey = `${currentMidiChannel}-${currentCCNumber}-${currentTlMode}`;
   $: noteReactivityKey = `${currentMidiChannel}-${currentRootNote}-${currentTlMode}`;
+  $: midiChannelReactivityKey = `${currentMidiChannel}-${currentTlMode}-${currentInputMode}`;
 
   function toggleEnabled() {
     if (!midiConfig) return;
@@ -49,6 +51,41 @@
     midiConfig.tl_mode = type === "note" ? 1 : 0;
     currentConfig.set(config);
   }
+
+  // Check if MIDI channel is occupied by another channel in Note+Continuous mode
+  $: midiChannelConflictChannels = (() => {
+    if (!config || !midiConfig || !selectedChannel || !input) return [];
+
+    // Use tracked values and reactivity key to ensure reactivity
+    const checkChannel = currentMidiChannel;
+    const checkTlMode = currentTlMode;
+    const checkInputMode = input.mode; // false = continuous, true = binary/threshold
+    // Reference midiChannelReactivityKey to ensure this recalculates when values change
+    const _ = midiChannelReactivityKey;
+
+    // Only check for conflicts if current channel is in Note mode + Continuous mode
+    if (checkTlMode !== 1 || checkInputMode !== false) return [];
+
+    // Check all other channels to see if any are occupying this MIDI channel
+    return Object.keys(config.engine["engine-midi"]).filter((key) => {
+      if (key === selectedChannel) return false; // Skip current channel
+      const otherMidiConfig = config.engine["engine-midi"][
+        key as keyof (typeof config.engine)["engine-midi"]
+      ] as MidiConfig;
+      const otherInput = config.inputs[
+        key as keyof typeof config.inputs
+      ] as InputSettings;
+
+      // Other channel occupies the MIDI channel if it's in Note mode + Continuous mode
+      const otherOccupiesChannel =
+        otherMidiConfig.tl_mode === 1 && otherInput.mode === false;
+
+      // Conflict exists if another channel occupies this MIDI channel
+      return otherMidiConfig.channel === checkChannel && otherOccupiesChannel;
+    });
+  })();
+
+  $: midiChannelConflict = midiChannelConflictChannels.length > 0;
 
   // Check if current CC number conflicts with other channels
   $: ccConflictChannels = (() => {
@@ -169,7 +206,16 @@
     <!-- MIDI Channel -->
     <div class="row">
       <span class="output-label">Midi Channel</span>
-      <span></span>
+      {#if midiChannelConflict}
+        <span class="conflict-warning">
+          <TriangleAlert size={14} color="var(--red)" />
+          <span class="conflict-text"
+            >"{midiChannelConflictChannels.join(", ")}" uses this channel too</span
+          >
+        </span>
+      {:else}
+        <span></span>
+      {/if}
       <div class="input-container">
         <Number label="" bind:value={midiConfig.channel} min={1} max={16} />
       </div>
@@ -181,9 +227,9 @@
         <span class="label">CC Number</span>
         {#if ccConflict}
           <span class="conflict-warning">
-            <TriangleAlert size={14} />
+            <TriangleAlert size={14} color="var(--red)" />
             <span class="conflict-text"
-              >CC also used in: {ccConflictChannels.join(", ")}</span
+              >CC also used in "{ccConflictChannels.join(", ")}"</span
             >
           </span>
         {:else}
