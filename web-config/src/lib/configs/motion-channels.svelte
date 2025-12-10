@@ -187,7 +187,7 @@
     max-width: 300px;
   }
   .category > button {
-    width: 100px;
+    width: 130px;
     height: 32px;
     color: var(--text-color);
     font-family: Instrument Sans;

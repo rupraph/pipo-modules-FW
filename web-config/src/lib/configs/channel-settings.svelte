@@ -197,6 +197,12 @@
     "tl_mode" in channelConfig &&
     channelConfig.tl_mode === 1;
 
+  // Check if current channel is an Euler angle (for motion board)
+  $: isEulerAngle =
+    type === "motion" &&
+    selectedChannel &&
+    ["yaw", "pitch", "roll"].includes(selectedChannel);
+
   // Calibration state
   let calibrating = false;
 
@@ -353,7 +359,7 @@
         >
           Binary mode
         </button>
-        {#if !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
+        {#if type !== "motion" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
           <button
             class="rounder primary"
             class:enabled={isOverOut}
@@ -364,7 +370,7 @@
             Over mode
           </button>
         {/if}
-        {#if !(type === "range")}
+        {#if type !== "range" && (type !== "motion" || isEulerAngle)}
           <div class="buttons">
             <button
               class="rounder primary"
