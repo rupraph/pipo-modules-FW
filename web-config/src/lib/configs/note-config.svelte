@@ -6,9 +6,12 @@
   import Select from "../form/Select.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
   import InfoModal from "../InfoModal.svelte";
+  import { TriangleAlert } from "lucide-svelte";
 
   export let config: NoteConfig & BaseMidiConfig;
   export let isThresholdMode = false;
+  export let hasConflict = false;
+  export let conflictChannels: string[] = [];
 
   const patternTypes = [
     { label: "Scale", value: "scale" },
@@ -172,7 +175,16 @@
 
 <div class="note-config-row">
   <span class="output-label">Root Note</span>
-  <span></span>
+  {#if hasConflict}
+    <span class="conflict-warning">
+      <TriangleAlert size={14} />
+      <span class="conflict-text"
+        >Note also used in: {conflictChannels.join(", ")}</span
+      >
+    </span>
+  {:else}
+    <span></span>
+  {/if}
   <div class="note-input-container">
     <NoteInput label="" bind:value={config.rootNote} />
   </div>
@@ -218,6 +230,22 @@
 </div>
 
 <style>
+  .conflict-warning {
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .conflict-text {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   .select-row {
     display: flex;
     justify-content: space-between;

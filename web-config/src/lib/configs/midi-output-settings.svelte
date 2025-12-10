@@ -27,6 +27,13 @@
 
   $: isChannelEnabled = midiConfig?.enabled ?? false;
 
+  // Track specific values for reactivity
+  $: currentCCNumber = midiConfig?.cc_nb;
+  $: currentMidiChannel = midiConfig?.channel;
+  $: currentTlMode = midiConfig?.tl_mode;
+  $: currentRootNote = midiConfig?.rootNote;
+  $: currentEnabled = midiConfig?.enabled;
+
   function toggleEnabled() {
     if (!midiConfig) return;
     midiConfig.enabled = !midiConfig.enabled;
@@ -39,17 +46,59 @@
     currentConfig.set(config);
   }
 
-  // Prepare structure for future MIDI channel conflict validation
-  // function getUsedMidiChannels(): Set<number> {
-  //   if (!config) return new Set();
-  //   const used = new Set<number>();
-  //   Object.keys(config.engine["engine-midi"]).forEach(key => {
-  //     if (key !== selectedChannel && config.engine["engine-midi"][key].enabled) {
-  //       used.add(config.engine["engine-midi"][key].channel);
-  //     }
-  //   });
-  //   return used;
-  // }
+  // Check if current CC number conflicts with other channels
+  $: ccConflictChannels = (() => {
+    if (!config || !midiConfig || !selectedChannel) return [];
+    if (currentTlMode !== 0) return []; // Only check in CC mode
+
+    // Use tracked values to ensure reactivity
+    const checkChannel = currentMidiChannel;
+    const checkCC = currentCCNumber;
+
+    // Check all other channels and collect conflicting ones
+    return Object.keys(config.engine["engine-midi"]).filter((key) => {
+      if (key === selectedChannel) return false; // Skip current channel
+      const otherMidiConfig = config.engine["engine-midi"][
+        key as keyof (typeof config.engine)["engine-midi"]
+      ] as MidiConfig;
+
+      return (
+        // Conflict if other channel is in CC mode (regardless of enabled state)
+        otherMidiConfig.tl_mode === 0 && // Other is in CC mode
+        otherMidiConfig.channel === checkChannel &&
+        otherMidiConfig.cc_nb === checkCC
+      );
+    });
+  })();
+
+  $: ccConflict = ccConflictChannels.length > 0;
+
+  // Check if current note conflicts with other channels
+  $: noteConflictChannels = (() => {
+    if (!config || !midiConfig || !selectedChannel) return [];
+    if (currentTlMode !== 1) return []; // Only check in Note mode
+
+    // Use tracked values to ensure reactivity
+    const checkChannel = currentMidiChannel;
+    const checkNote = currentRootNote;
+
+    // Check all other channels and collect conflicting ones
+    return Object.keys(config.engine["engine-midi"]).filter((key) => {
+      if (key === selectedChannel) return false; // Skip current channel
+      const otherMidiConfig = config.engine["engine-midi"][
+        key as keyof (typeof config.engine)["engine-midi"]
+      ] as MidiConfig;
+
+      return (
+        // Conflict if other channel is in Note mode (regardless of enabled state)
+        otherMidiConfig.tl_mode === 1 && // Other is in Note mode
+        otherMidiConfig.channel === checkChannel &&
+        otherMidiConfig.rootNote === checkNote
+      );
+    });
+  })();
+
+  $: noteConflict = noteConflictChannels.length > 0;
 </script>
 
 {#if config && selectedChannel && midiConfig && input}
@@ -122,7 +171,16 @@
     {#if midiConfig.tl_mode === 0}
       <div class="row">
         <span class="label">CC Number</span>
-        <span></span>
+        {#if ccConflict}
+          <span class="conflict-warning">
+            <TriangleAlert size={14} />
+            <span class="conflict-text"
+              >CC also used in: {ccConflictChannels.join(", ")}</span
+            >
+          </span>
+        {:else}
+          <span></span>
+        {/if}
         <div class="input-container">
           <Number
             label=""
@@ -175,7 +233,12 @@
 
     <!-- Note Mode Settings -->
     {#if midiConfig.tl_mode === 1}
-      <NoteConfig config={midiConfig} bind:isThresholdMode={input.mode} />
+      <NoteConfig
+        config={midiConfig}
+        bind:isThresholdMode={input.mode}
+        hasConflict={noteConflict}
+        conflictChannels={noteConflictChannels}
+      />
     {/if}
   </div>
 {/if}
@@ -212,6 +275,22 @@
     border-radius: 4px;
   }
 
+  .conflict-warning {
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .conflict-text {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
   .row {
     display: grid;
     grid-template-columns: auto 24px 1fr;
@@ -227,26 +306,6 @@
   .input-container,
   .pill-switch {
     justify-self: end;
-  }
-
-  /* Enable/Disable Button */
-  button {
-    border: 2px solid var(--main);
-    height: 29px;
-    padding: 0 16px;
-    background-color: var(--bg-secondary);
-    border-radius: 18px;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 700;
-    color: var(--main);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  button.enabled {
-    background-color: var(--main);
-    color: var(--bg-primary);
   }
 
   /* Input Container */
