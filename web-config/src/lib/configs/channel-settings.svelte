@@ -190,6 +190,13 @@
   // Compute if inverted is active
   $: isInverted = input ? input.inverted === true : false;
 
+  // Check if we're in MIDI Note mode
+  $: isNoteMode =
+    mode === "MIDI" &&
+    channelConfig &&
+    "tl_mode" in channelConfig &&
+    channelConfig.tl_mode === 1;
+
   // Calibration state
   let calibrating = false;
 
@@ -346,26 +353,30 @@
         >
           Binary mode
         </button>
-        <button
-          class="rounder primary"
-          class:enabled={isOverOut}
-          class:disabled={isBinaryMode || isInverted}
-          disabled={isBinaryMode || isInverted}
-          on:click={toggleOverOut}
-        >
-          Over mode
-        </button>
-        <div class="buttons">
+        {#if !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
           <button
             class="rounder primary"
-            class:enabled={input?.cyclic}
-            class:disabled={isBinaryMode}
-            disabled={isBinaryMode}
-            on:click={toggleCyclic}
+            class:enabled={isOverOut}
+            class:disabled={isBinaryMode || isInverted || isNoteMode}
+            disabled={isBinaryMode || isInverted || isNoteMode}
+            on:click={toggleOverOut}
           >
-            Cyclic
+            Over mode
           </button>
-        </div>
+        {/if}
+        {#if !(type === "range")}
+          <div class="buttons">
+            <button
+              class="rounder primary"
+              class:enabled={input?.cyclic}
+              class:disabled={isBinaryMode}
+              disabled={isBinaryMode}
+              on:click={toggleCyclic}
+            >
+              Cyclic
+            </button>
+          </div>
+        {/if}
       </div>
     </div>
   {/if}
@@ -383,6 +394,7 @@
       step={aschema.step}
       minLabel={`Min`}
       maxLabel={`Max`}
+      units={aschema.unit}
     />
   {/if}
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
