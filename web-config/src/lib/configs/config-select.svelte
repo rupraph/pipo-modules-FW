@@ -161,7 +161,7 @@
 <section>
   <div class="row">
     <div class="left">
-      <span> Current Config </span>
+      <span> Config Select </span>
       <InfoModal>
         <p>
           Select in the list the active configuration to use. To manage
@@ -194,20 +194,21 @@
       </InfoModal>
     </div>
     <div
+      class="select-container"
       on:dblclick={handleSelectDoubleClick}
       on:touchstart={handleTouchStart}
       on:touchend={handleTouchEnd}
       on:touchmove={handleTouchMove}
     >
       <Select
-        --height="25px"
-        --max-height="25px"
-        --width="130px"
+        --height="28px"
+        --max-height="28px"
+        --list-width="200px"
         --padding="0"
         --value-container-padding="0"
-        --selected-item-padding="0 0 0 10px"
+        --selected-item-padding="0 3px 0 10px"
         --selected-item-color="var(--bg-primary)"
-        --font-size="14px"
+        --font-size="16px"
         --color="var(--bg-primary)"
         --item-color="var(--bg-primary)"
         --item-bg="var(--bg-secondary)"
@@ -355,6 +356,30 @@
 </Modal>
 
 <style scoped>
+  .left {
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .select-container {
+    flex: 1;
+    min-width: 130px;
+    max-width: 200px;
+    margin: 5px;
+  }
+
+  .row :global(.svelte-select) {
+    width: 100% !important;
+  }
+
+  .row :global(.svelte-select-list) {
+    width: 200px !important;
+    min-width: 160px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+
   .row :global(.selected-item) {
     line-height: var(--font-size);
   }
