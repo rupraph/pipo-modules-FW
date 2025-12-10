@@ -7,6 +7,7 @@
   export let maxlength: number = 127;
   export let minlength: number = 0;
   export let validate: (value: string) => string = () => "";
+  export let onInput: ((e: Event) => void) | undefined = undefined;
   let validationError: string = "";
   let id = uid();
   // Reactive statement to validate the name length
@@ -30,6 +31,7 @@
     {readonly}
     {maxlength}
     {minlength}
+    on:input={onInput}
   />
 </Input>
 

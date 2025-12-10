@@ -25,6 +25,38 @@
   let touchTimer: number | null = null;
   let touchStartTime = 0;
 
+  function filterConfigName(value: string): string {
+    // Only allow alphanumeric characters and dashes
+    return value.replace(/[^a-zA-Z0-9-]/g, "");
+  }
+
+  function handleRenameInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const filtered = filterConfigName(input.value);
+    if (input.value !== filtered) {
+      newname = filtered;
+      input.value = filtered;
+    }
+  }
+
+  function handleCopyInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const filtered = filterConfigName(input.value);
+    if (input.value !== filtered) {
+      copyName = filtered;
+      input.value = filtered;
+    }
+  }
+
+  function handleCreateInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const filtered = filterConfigName(input.value);
+    if (input.value !== filtered) {
+      createName = filtered;
+      input.value = filtered;
+    }
+  }
+
   $: selectItems = $configNames.map((item) => ({ value: item, label: item }));
   $: selectedItem = $activeConfigName
     ? { value: $activeConfigName, label: $activeConfigName }
@@ -43,8 +75,9 @@
   }
 
   async function finishRename() {
-    if (newname.trim() && newname.trim() !== $activeConfigName) {
-      await configService.renameConfig($activeConfigName, newname.trim());
+    const trimmedName = newname.trim();
+    if (trimmedName && trimmedName !== $activeConfigName) {
+      await configService.renameConfig($activeConfigName, trimmedName);
     }
     showRenameModal = false;
     newname = "";
@@ -110,10 +143,11 @@
   }
 
   async function finishCopy() {
-    if (copyName.trim() && $currentConfig) {
+    const trimmedName = copyName.trim();
+    if (trimmedName && $currentConfig) {
       duplicating = true;
       try {
-        await configService.copyConfig(copyName.trim(), $currentConfig);
+        await configService.copyConfig(trimmedName, $currentConfig);
       } finally {
         duplicating = false;
         showCopyModal = false;
@@ -136,10 +170,11 @@
   }
 
   async function finishCreate() {
-    if (createName.trim()) {
+    const trimmedName = createName.trim();
+    if (trimmedName) {
       creating = true;
       try {
-        await configService.createConfig(createName.trim());
+        await configService.createConfig(trimmedName);
         showCreateModal = false;
         createName = "";
       } finally {
@@ -267,8 +302,9 @@
     <input
       type="text"
       bind:value={newname}
+      on:input={handleRenameInput}
       on:keyup={onRenameKeyup}
-      placeholder="Enter new name"
+      placeholder="Enter new name (letters, numbers, dashes)"
       autofocus
     />
     <div class="modal-buttons">
@@ -289,8 +325,9 @@
     <input
       type="text"
       bind:value={copyName}
+      on:input={handleCopyInput}
       on:keyup={onCopyKeyup}
-      placeholder="Enter copy name"
+      placeholder="Enter copy name (letters, numbers, dashes)"
       autofocus
     />
     <div class="modal-buttons">
@@ -337,8 +374,9 @@
     <input
       type="text"
       bind:value={createName}
+      on:input={handleCreateInput}
       on:keyup={onCreateKeyup}
-      placeholder="Enter configuration name"
+      placeholder="Enter configuration name (letters, numbers, dashes)"
       autofocus
     />
     <div class="modal-buttons">

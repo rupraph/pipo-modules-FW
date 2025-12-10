@@ -35,18 +35,50 @@
     currentConfig.set(updatedConfig);
   }
 
-  const validate = (name) => {
-    // firbid spaces
-    if (name.includes(" ")) {
-      return "Spaces are not allowed";
+  function filterPipoName(value: string): string {
+    // Only allow alphanumeric characters
+    return value.replace(/[^a-zA-Z0-9]/g, "");
+  }
+
+  function handlePipoNameInput(e: Event) {
+    if (!config) return;
+    const input = e.target as HTMLInputElement;
+    const filtered = filterPipoName(input.value);
+    if (input.value !== filtered) {
+      config.general.PipoName = filtered;
+      input.value = filtered;
     }
-    // forbid any other character than a-zA-Z0-9
-    const regex = /^[a-zA-Z0-9]+$/;
-    if (!regex.test(name)) {
-      return "Only letters and numbers are allowed";
+  }
+
+  function filterIPv4(value: string): string {
+    // Only allow numbers and dots for IPv4
+    return value.replace(/[^0-9.]/g, "");
+  }
+
+  function handleIPInput(e: Event) {
+    if (!config) return;
+    const input = e.target as HTMLInputElement;
+    const filtered = filterIPv4(input.value);
+    if (input.value !== filtered) {
+      config.general.OSC_IP = filtered;
+      input.value = filtered;
     }
-    return "";
-  };
+  }
+
+  function filterPort(value: string): string {
+    // Only allow numbers for port
+    return value.replace(/[^0-9]/g, "");
+  }
+
+  function handlePortInput(e: Event) {
+    if (!config) return;
+    const input = e.target as HTMLInputElement;
+    const filtered = filterPort(input.value);
+    if (input.value !== filtered) {
+      config.general.OSC_PORT = parseInt(filtered) || 0;
+      input.value = filtered;
+    }
+  }
 
   function reboot() {
     pipoio.get("/reboot").then(() => console.log("Rebooting..."));
@@ -108,7 +140,11 @@
               sure this is correct.
             </p>
           </InfoModal>
-          <input type="text" bind:value={config.general.OSC_IP} />
+          <input
+            type="text"
+            bind:value={config.general.OSC_IP}
+            on:input={handleIPInput}
+          />
         </div>
 
         <div class="row">
@@ -120,7 +156,11 @@
               and not blocked by any firewall settings.
             </p>
           </InfoModal>
-          <input type="text" bind:value={config.general.OSC_PORT} />
+          <input
+            type="text"
+            bind:value={config.general.OSC_PORT}
+            on:input={handlePortInput}
+          />
         </div>
         <div class="row">
           <span class="label">Send Battery level</span>
@@ -173,7 +213,7 @@
             bind:value={config.general.PipoName}
             maxlength={schema.name.max}
             minlength={schema.name.min}
-            {validate}
+            onInput={handlePipoNameInput}
           />
         </div>
       </div>

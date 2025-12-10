@@ -5,6 +5,7 @@
   import { uid } from "../../utils";
   export let label: string;
   export let clearable: boolean = false;
+  export let searchable: boolean = false;
   export let value: string | number;
   export let options: { value: string | number; label: string }[] = [];
   let selectedItem: { value: string | number; label: string };
@@ -29,6 +30,7 @@
   <Select
     items={options}
     {clearable}
+    {searchable}
     bind:value={selectedItem}
     --selected-item-color="var(--text-color)"
     --item-is-active-bg="var(--bg-lighter)"
