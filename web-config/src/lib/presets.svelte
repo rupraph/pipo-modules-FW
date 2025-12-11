@@ -62,7 +62,7 @@
         addToast({
           type: "error",
           message:
-            "The preset changed the MIDI/OSC mode. The board needs to reboot. Please reload the page in a few seconds.(Make sure Wifi is reconnected)",
+            "The preset changed the MIDI/OSC mode. Pipo needs to reboot. Please reload the page in a few seconds.(Make sure Wifi is reconnected)",
           timeout: 10000,
         });
 

@@ -68,7 +68,7 @@
         addToast({
           type: "error",
           message:
-            "The board will reboot to take into account the MIDI/OSC mode change. Please reload the page in a few seconds (Make sure Wifi is reconnected)",
+            "Pipo will reboot to take into account the MIDI/OSC mode change. Please reload the page in a few seconds (Make sure Wifi is reconnected)",
           timeout: 10000,
         });
 
