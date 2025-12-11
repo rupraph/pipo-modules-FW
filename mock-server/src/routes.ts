@@ -268,6 +268,18 @@ export const setupRoutes = (app: Express) => {
     res.status(200).send(state.isPaused ? "true" : "false");
   });
 
+  // Motion-specific routes
+  app.get("/setreference", (req, res) => {
+    console.log("Reference orientation reset");
+    res.status(200).send("Reference orientation reset");
+  });
+
+  app.get("/relative-mode", (req, res) => {
+    const config = state.getCurrentConfig();
+    const relativeMode = config?.sensorconf?.relative_mode ?? false;
+    res.status(200).send(relativeMode ? "true" : "false");
+  });
+
   // Preset routes
   app.get("/presets", (_req, res) => {
     res.status(200).json(state.presets);

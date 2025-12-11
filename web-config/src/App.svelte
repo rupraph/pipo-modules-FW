@@ -20,7 +20,6 @@
   import TouchCalibration from "./lib/TouchCalibration.svelte";
   import {
     currentConfig,
-    currentMode,
     hasUnsavedChanges,
     originalConfig,
   } from "./services/config";
@@ -49,6 +48,36 @@
       hasUnsavedChanges.set(false);
     }
   }
+
+  async function fetchRelativeModeState() {
+    try {
+      const response = await pipoio.get("/relative-mode");
+      const isRelative =
+        response.data === "true" ||
+        response.data === true ||
+        response.data === 1;
+      // Update the current config with the actual state from the server
+      if ($currentConfig?.sensorconf) {
+        $currentConfig.sensorconf.relative_mode = isRelative;
+        currentConfig.set($currentConfig);
+      }
+    } catch (error) {
+      console.error("Failed to fetch relative mode state:", error);
+    }
+  }
+
+  async function reset_orientation() {
+    try {
+      await pipoio.get("/setreference");
+      console.log("Reference orientation reset");
+      // Fetch actual state from backend to ensure sync
+      await fetchRelativeModeState();
+    } catch (error) {
+      console.error("Failed to reset orientation:", error);
+      // Revert to actual backend state on error
+      await fetchRelativeModeState();
+    }
+  }
 </script>
 
 <main>
@@ -62,6 +91,46 @@
       <ConfigSelect />
       <section style="border-top: 2px solid var(--bg-tertiary);">
         {#if type !== "range"}
+          {#if type === "motion"}
+            <div
+              class="row"
+              style="border-bottom: 1px dashed var(--bg-secondary); padding-bottom: 6px;"
+            >
+              <div
+                style="display: flex; align-items: center; gap: 0.5em; white-space: nowrap;"
+              >
+                <h3 style="margin: 0; white-space: nowrap;">Relative mode</h3>
+                <InfoModal>
+                  <p style="white-space: normal;">
+                    Choose whether the sensor uses relative or absolute
+                    orientation. Relative orientation "ON" means the sensor's
+                    measurement is relative to a reference orientation you can
+                    set. By opposition, absolute orientation relates to the
+                    North and the ground. This impacts the Euler angles and
+                    quaternions outputs.
+                  </p>
+                </InfoModal>
+              </div>
+              {#if $currentConfig?.sensorconf}
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <PillSwitch
+                    label=""
+                    bind:value={$currentConfig.sensorconf.relative_mode}
+                  />
+                  <button
+                    class="primary"
+                    class:disabled={!$currentConfig.sensorconf.relative_mode}
+                    disabled={!$currentConfig.sensorconf.relative_mode}
+                    on:click={() => {
+                      reset_orientation();
+                    }}
+                  >
+                    Capture Reference
+                  </button>
+                </div>
+              {/if}
+            </div>
+          {/if}
           <span class="row" style="align-items: center; gap: 0.5em; ">
             <h3>Channel Settings</h3>
             <InfoModal>

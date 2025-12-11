@@ -461,6 +461,14 @@ void PipoServer::setup_requests() {
     input_sensor.reset_reference_orientation();
     return request->send(200, "text/plain", "Reference orientation reset");
   });
+
+  server.on("/relative-mode", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    if (input_sensor.get_relative_mode()) {
+      return request->send(200, "text/plain", "true");
+    } else {
+      return request->send(200, "text/plain", "false");
+    }
+  });
 #endif
 
   // pause Engine
