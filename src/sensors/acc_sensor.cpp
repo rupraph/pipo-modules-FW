@@ -228,14 +228,15 @@ void MotionSensor::calc_differential_euler_angles() {
 
   // q_relative = q_ref_conjugate * q_current
   // where q_ref_conjugate = [quat_ref_w, -quat_ref_x, -quat_ref_y, -quat_ref_z]
-  float rel_w = quat_ref_w * curr_w - (-quat_ref_x) * curr_x -
-                (-quat_ref_y) * curr_y - (-quat_ref_z) * curr_z;
-  float rel_x = quat_ref_w * curr_x + (-quat_ref_x) * curr_w +
-                (-quat_ref_y) * curr_z - (-quat_ref_z) * curr_y;
-  float rel_y = quat_ref_w * curr_y - (-quat_ref_x) * curr_z +
-                (-quat_ref_y) * curr_w + (-quat_ref_z) * curr_x;
-  float rel_z = quat_ref_w * curr_z + (-quat_ref_x) * curr_y -
-                (-quat_ref_y) * curr_x + (-quat_ref_z) * curr_w;
+  // explicit calulation:
+  // float rel_w = quat_ref_w * curr_w - (-quat_ref_x) * curr_x -
+  //               (-quat_ref_y) * curr_y - (-quat_ref_z) * curr_z;
+  // float rel_x = quat_ref_w * curr_x + (-quat_ref_x) * curr_w +
+  //               (-quat_ref_y) * curr_z - (-quat_ref_z) * curr_y;
+  // float rel_y = quat_ref_w * curr_y - (-quat_ref_x) * curr_z +
+  //               (-quat_ref_y) * curr_w + (-quat_ref_z) * curr_x;
+  // float rel_z = quat_ref_w * curr_z + (-quat_ref_x) * curr_y -
+  //               (-quat_ref_y) * curr_x + (-quat_ref_z) * curr_w;
 
   // Simplify (removing double negatives):
   rel_w = quat_ref_w * curr_w + quat_ref_x * curr_x + quat_ref_y * curr_y +

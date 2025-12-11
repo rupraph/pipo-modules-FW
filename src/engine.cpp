@@ -427,7 +427,11 @@ void Engine::set_config(JsonObject config, bool debug) {
 #ifdef PIPO_MOTION
 void Engine::motion_quat_to_osc() {
   float quats[4];
-  input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
+  if (input_sensor.get_relative_mode() == true) {
+    input_sensor.get_relative_quat(quats[0], quats[1], quats[2], quats[3]);
+  } else {
+    input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
+  }
 
   // Round values to 3 decimals for comparison (consistent with osc_processor)
   float rounded_quats[4];
