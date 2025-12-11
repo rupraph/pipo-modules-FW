@@ -186,6 +186,9 @@ void loop() {
 #ifdef DEBUG_WATCHDOG
   static unsigned long overrunCount = 0;
   static unsigned long lastReportTime = 0;
+  static TickType_t maxExecutionTime = 0;
+  static unsigned long totalExecutionTime = 0;
+  static unsigned long sampleCount = 0;
 #endif
 
   if (first_run) {
@@ -207,15 +210,32 @@ void loop() {
 
 #ifdef DEBUG_WATCHDOG
   TickType_t executionTime = xTaskGetTickCount() - startTime;
+
+  // Track statistics
+  if (executionTime > maxExecutionTime) {
+    maxExecutionTime = executionTime;
+  }
+  totalExecutionTime += executionTime;
+  sampleCount++;
+
   if (executionTime >= xFrequency) {
     overrunCount++;
-    if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
-      log_w("loop() overruns: %lu (execution: %dms, target: %dms)",
-            overrunCount, pdTICKS_TO_MS(executionTime),
-            pdTICKS_TO_MS(xFrequency));
-      overrunCount = 0;
-      lastReportTime = millis();
-    }
+  }
+
+  if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
+    TickType_t avgExecutionTime =
+        sampleCount > 0 ? totalExecutionTime / sampleCount : 0;
+    log_w(
+        "loop() stats - overruns: %lu, last: %dms, max: %dms, avg: %dms, "
+        "target: %dms",
+        overrunCount, pdTICKS_TO_MS(executionTime),
+        pdTICKS_TO_MS(maxExecutionTime), pdTICKS_TO_MS(avgExecutionTime),
+        pdTICKS_TO_MS(xFrequency));
+    overrunCount = 0;
+    maxExecutionTime = 0;
+    totalExecutionTime = 0;
+    sampleCount = 0;
+    lastReportTime = millis();
   }
 #endif
 
