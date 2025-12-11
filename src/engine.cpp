@@ -192,7 +192,11 @@ void Engine::midi_processor(string axis_name, float sensor_val,
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
         } else {
-          midiio.sendNoteOff(thresh_note, 127, channel);
+          // Only send immediate note-off if sustain is 0 (infinite sustain mode)
+          // If sustain has a duration, let the sustain manager handle it
+          if (sustain_ms == 0) {
+            midiio.sendNoteOff(thresh_note, 127, channel);
+          }
         }
       } else  // mode is continuous
       {
