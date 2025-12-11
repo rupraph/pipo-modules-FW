@@ -202,7 +202,7 @@ export const schema: Schema = {
     T1: {
       label: "Touch 1",
       cat: "Touch",
-      unit: "-",
+      unit: "",
       min: 0,
       max: 5000,
       step: 1,
