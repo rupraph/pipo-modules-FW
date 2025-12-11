@@ -428,9 +428,27 @@ void Engine::set_config(JsonObject config, bool debug) {
 void Engine::motion_quat_to_osc() {
   float quats[4];
   input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
-  osc.add_to_bundle(quat_to_osc_address + "w", quats[0]);
-  osc.add_to_bundle(quat_to_osc_address + "x", quats[1]);
-  osc.add_to_bundle(quat_to_osc_address + "y", quats[2]);
-  osc.add_to_bundle(quat_to_osc_address + "z", quats[3]);
+
+  // Round values to 3 decimals for comparison (consistent with osc_processor)
+  float rounded_quats[4];
+  for (int i = 0; i < 4; i++) {
+    rounded_quats[i] = round_to(quats[i], 3);
+  }
+
+  // Only send if any component has changed
+  bool changed = false;
+  for (int i = 0; i < 4; i++) {
+    if (rounded_quats[i] != prev_quat[i]) {
+      changed = true;
+      prev_quat[i] = rounded_quats[i];
+    }
+  }
+
+  if (changed) {
+    osc.add_to_bundle(quat_to_osc_address + "w", rounded_quats[0]);
+    osc.add_to_bundle(quat_to_osc_address + "x", rounded_quats[1]);
+    osc.add_to_bundle(quat_to_osc_address + "y", rounded_quats[2]);
+    osc.add_to_bundle(quat_to_osc_address + "z", rounded_quats[3]);
+  }
 }
 #endif

@@ -67,6 +67,7 @@ class Engine {
   void motion_quat_to_osc();
   bool enable_quat_to_osc = false;
   string quat_to_osc_address = "motion/quat";
+  float prev_quat[4] = {0, 0, 0, 0};  // Store previous quaternion values
 #endif
 
  private:
