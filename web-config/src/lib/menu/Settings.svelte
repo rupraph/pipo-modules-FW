@@ -29,6 +29,8 @@
         ...config.general,
         MidiEnabled: newMode === "midi",
         OSC_ENA: newMode === "osc",
+        // Disable BLE when switching to OSC mode
+        BLEEnabled: newMode === "osc" ? false : config.general.BLEEnabled,
       },
     };
 
