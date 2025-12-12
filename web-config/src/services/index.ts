@@ -6,15 +6,29 @@ export * from "./presets";
 export const ip = writable<string>("unknown");
 export const isLive = writable<boolean>(false);
 
-let timeout: NodeJS.Timeout;
+let timeout: number;
+let reloadTimeout: number;
+
 pipoio
   .on("connect", () => {
     clearTimeout(timeout);
+    clearTimeout(reloadTimeout);
     isLive.set(true);
   })
   .on("disconnect", () => {
     console.log("Disconnect");
+    // Show overlay after 500ms to provide quick feedback
+    // Fast enough for reboots, still filters very quick reconnects
     timeout = setTimeout(() => {
       isLive.set(false);
-    }, 2000);
+    }, 500);
+    
+    // After 30 seconds of disconnection, reload the page
+    // This handles network changes (e.g., switching from AP to STA mode)
+    reloadTimeout = setTimeout(() => {
+      console.log("Connection not restored after 30s - reloading page");
+      // Don't reset isLoading - keep it false so after reload
+      // it shows troubleshooting overlay instead of "Connecting..."
+      window.location.reload();
+    }, 30000);
   });

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { isLive } from "../services";
   let live = false;
+
   isLive.subscribe((value) => {
     live = value;
   });
@@ -9,9 +10,15 @@
 {#if !live}
   <div class="overlay">
     <article class="scroll">
-      <h2>Pipo is offline, waiting for reconnection...</h2>
+      <h2>Connecting to Pipo...</h2>
       <p style="font-size: x-large;">¯\_(ツ)_/¯</p>
-      <p>Check your WiFi connection to Pipo</p>
+      <p style="margin-bottom: 1em;">If it persists:</p>
+      <ul
+        style="text-align: left; margin: 0 auto; max-width: 400px; font-size: 0.9em;"
+      >
+        <li>• Check your WiFi connection to Pipo</li>
+        <li>• Try restarting Pipo if the issue persists</li>
+      </ul>
       <ul>
         <li>
           <!-- <h4>Pipo could not be reached</h4> -->

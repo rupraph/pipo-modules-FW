@@ -46,6 +46,12 @@ class MotionSensor : public Sensor {
     y = quat_y;
     z = quat_z;
   }
+  void get_relative_quat(float& w, float& x, float& y, float& z) {
+    w = rel_w;
+    x = rel_x;
+    y = rel_y;
+    z = rel_z;
+  }
 
   //   void get_relative_quat(float& w, float& x, float& y, float& z);
 
@@ -104,6 +110,11 @@ class MotionSensor : public Sensor {
   float quat_x;
   float quat_y;
   float quat_z;
+
+  float rel_w;
+  float rel_x;
+  float rel_y;
+  float rel_z;
 
   // Reference quaternion for differential tracking
   float quat_ref_w = 1.0;

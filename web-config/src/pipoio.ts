@@ -23,9 +23,17 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private resurect = 0;
   private nMsgs = 0;
   private msgLen = 0;
+  private lastMsgDate = 0;
+  private reconnectAttempts = 0;
+  private reconnectTimeout = 0;
+  private readonly maxReconnectDelay = 5000; // Max 5 seconds
+  private readonly baseReconnectDelay = 500; // Start at 500ms
   constructor() {
     super();
     this.connect();
+    // Check for dead connections every 2 seconds
+    // If no messages received, close socket to trigger reconnection
+    // This ensures quick detection during server reboots
     this.resurect = setInterval(() => {
       const n = this.nMsgs;
       this.nMsgs = 0;
@@ -35,7 +43,7 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       }
       this.socket?.close();
       this.onDisconnect(true);
-    }, 10000) as any as number;
+    }, 2000) as any as number;
   }
 
   async pause() {
@@ -52,6 +60,10 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       clearInterval(this.heartbeat);
       this.heartbeat = 0;
     }
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = 0;
+    }
     if (this.socket) {
       this.socket.close();
       this.socket = undefined;
@@ -61,10 +73,34 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     if (sendEvent && !this.paused) {
       this.emit("disconnect");
     }
-    this.connect();
+    
+    // Clear any pending reconnection
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = 0;
+    }
+    
+    // Calculate exponential backoff with jitter
+    const delay = Math.min(
+      this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
+      this.maxReconnectDelay
+    );
+    // Add jitter (±25% randomness)
+    const jitter = delay * 0.25 * (Math.random() * 2 - 1);
+    const reconnectDelay = Math.max(this.baseReconnectDelay, delay + jitter);
+    
+    this.reconnectAttempts++;
+    console.log(`Reconnecting in ${Math.round(reconnectDelay)}ms (attempt ${this.reconnectAttempts})`);
+    
+    this.reconnectTimeout = window.setTimeout(() => {
+      this.reconnectTimeout = 0;
+      this.connect();
+    }, reconnectDelay);
   }
   private onOpen() {
     this.isConnecting = false;
+    // Reset reconnect attempts on successful connection
+    this.reconnectAttempts = 0;
     setTimeout(() => {
       this.emit("connect");
     }, 100);
