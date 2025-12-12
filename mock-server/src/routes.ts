@@ -254,8 +254,30 @@ export const setupRoutes = (app: Express) => {
       res.status(500).send(`Error while measuring offset ${e}`);
     }
   });
-  app.get("/pause", (req, res) => {
-    res.send("Engine paused");
+  app.post("/pause", (req, res) => {
+    state.isPaused = true;
+    res.status(200).send("Engine paused");
+  });
+
+  app.post("/resume", (req, res) => {
+    state.isPaused = false;
+    res.status(200).send("Engine resumed");
+  });
+
+  app.get("/is-paused", (req, res) => {
+    res.status(200).send(state.isPaused ? "true" : "false");
+  });
+
+  // Motion-specific routes
+  app.get("/setreference", (req, res) => {
+    console.log("Reference orientation reset");
+    res.status(200).send("Reference orientation reset");
+  });
+
+  app.get("/relative-mode", (req, res) => {
+    const config = state.getCurrentConfig();
+    const relativeMode = config?.sensorconf?.relative_mode ?? false;
+    res.status(200).send(relativeMode ? "true" : "false");
   });
 
   // Preset routes

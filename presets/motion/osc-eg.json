@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "OSC-eg",
-    "description": "Sends Euler in cyclic mode, gyro in raw mode"
+    "description": "This preset sets Euler in cyclic mode, gyro in raw mode"
   },
   "engine": {
     "engine-hid": {

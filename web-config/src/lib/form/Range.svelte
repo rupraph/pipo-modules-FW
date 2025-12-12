@@ -102,11 +102,12 @@
 
   input[type="number"] {
     -moz-appearance: textfield;
+    color: var(--text-color);
   }
   button {
     margin-right: 2px;
     background-color: transparent;
-    color: var(--color);
+    color: var(--text-color);
   }
   button:hover {
     color: var(--main);

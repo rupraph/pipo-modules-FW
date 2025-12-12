@@ -5,6 +5,7 @@ import { formatNumbers, debounce } from "../utils";
 import type {
   AxisSchema,
   InputSettings,
+  OutputMode,
   PipoConfig,
   PipoKeys,
   PipoTypes,
@@ -18,11 +19,72 @@ export const configValid = writable<boolean>(false);
 export const configNames = writable<string[]>([]);
 export const activeConfigName = writable<string>("");
 export const currentConfig = writable<PipoConfig<PipoTypes> | null>(null);
+//TODO: derive it from config, and have a global swith in config to switch modes.
+export const currentMode = writable<OutputMode>("MIDI");
+
+// Update currentMode when config changes
+currentConfig.subscribe((config) => {
+  if (config?.general) {
+    const mode: OutputMode = config.general.MidiEnabled ? "MIDI" : config.general.OSC_ENA ? "OSC" : "MIDI";
+    currentMode.set(mode);
+  }
+});
 
 // UI state stores
 export const configsLoading = writable<boolean>(false);
 export const configsError = writable<string | null>(null);
 export const configSaving = writable<boolean>(false);
+
+// Change detection stores
+export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
+export const hasUnsavedChanges = writable<boolean>(false);
+export const modeWillChange = writable<boolean>(false);
+
+// Helper function to detect if output mode has changed
+function hasOutputModeChanged(
+  original: PipoConfig<PipoTypes> | null,
+  current: PipoConfig<PipoTypes> | null
+): boolean {
+  if (!original || !current) return false;
+  
+  const originalMode: OutputMode = original.general.MidiEnabled ? "MIDI" : original.general.OSC_ENA ? "OSC" : "MIDI";
+  const currentMode: OutputMode = current.general.MidiEnabled ? "MIDI" : current.general.OSC_ENA ? "OSC" : "MIDI";
+  
+  return originalMode !== currentMode;
+}
+
+// Polling interval to check for deep changes in config
+let changeDetectionInterval: number | null = null;
+
+function startChangeDetection() {
+  if (changeDetectionInterval) return;
+  
+  changeDetectionInterval = window.setInterval(() => {
+    const current = get(currentConfig);
+    const original = get(originalConfig);
+    
+    if (!current || !original) {
+      hasUnsavedChanges.set(false);
+      modeWillChange.set(false);
+      return;
+    }
+    
+    // Deep comparison using JSON stringify
+    const hasChanges = JSON.stringify(current) !== JSON.stringify(original);
+    hasUnsavedChanges.set(hasChanges);
+    
+    // Check if output mode has changed
+    const modeChanged = hasOutputModeChanged(original, current);
+    modeWillChange.set(modeChanged);
+  }, 300); // Check every 300ms
+}
+
+function stopChangeDetection() {
+  if (changeDetectionInterval) {
+    window.clearInterval(changeDetectionInterval);
+    changeDetectionInterval = null;
+  }
+}
 
 class ConfigSave<T extends PipoTypes> {
   private previousConfig: PipoConfig<T> | null = null;
@@ -179,6 +241,9 @@ class ConfigService {
     const config = await this.fetchConfig(name);
     if (config) {
       currentConfig.set(config);
+      // Store a deep copy as the original for change detection
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
     }
   }
 
@@ -202,6 +267,9 @@ class ConfigService {
       const config = await this.fetchConfig(name);
       if (config) {
         currentConfig.set(config);
+        // Store a deep copy as the original for change detection
+        originalConfig.set(JSON.parse(JSON.stringify(config)));
+        hasUnsavedChanges.set(false);
       }
     } catch (err) {
       const errorMsg =
@@ -391,6 +459,9 @@ class ConfigService {
       const config = await this.fetchConfig(activeName);
       if (config) {
         currentConfig.set(config);
+        // Store a deep copy as the original for change detection
+        originalConfig.set(JSON.parse(JSON.stringify(config)));
+        hasUnsavedChanges.set(false);
       }
     } catch (err) {
       const errorMsg =
@@ -405,6 +476,8 @@ class ConfigService {
    */
   async initialize(): Promise<void> {
     await this.refresh();
+    // Start polling for changes after config is loaded
+    startChangeDetection();
   }
 }
 

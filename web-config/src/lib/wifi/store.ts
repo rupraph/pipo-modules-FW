@@ -42,18 +42,18 @@ export const setStatus = (status: WifiState["status"]) => {
   wifiState.update((state) => ({ ...state, status }));
 };
 
-const refreshInterval = setInterval(() => {
-  pipoio.requestRSSI();
-}, 30000);
-
 pipoio.on("rssi", ({ rssi }) => {
-  setSignal(rssiToSignalStrength(rssi));
-});
-
-// Handle cleanup during HMR
-if (import.meta.hot) {
-  import.meta.hot.accept();
-  import.meta.hot.dispose(() => {
-    clearInterval(refreshInterval);
+  const quality = rssiToSignalStrength(rssi);
+  setSignal(quality);
+  
+  // Update the connected network's quality in the networks list
+  wifiState.update((state) => {
+    const networks = state.networks.map((network) => {
+      if (network.connected) {
+        return { ...network, quality };
+      }
+      return network;
+    });
+    return { ...state, networks };
   });
-}
+});

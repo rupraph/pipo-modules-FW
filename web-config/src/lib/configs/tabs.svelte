@@ -103,7 +103,7 @@
     padding-bottom: 2px;
   }
   .tab > span {
-    background-color: var(--bg-color);
+    background-color: var(--bg-primary);
     grid-area: 1 / 3 / 4 / 5;
     font-size: 1.2em;
     border-top: 2px solid rgb(80, 80, 80);
@@ -117,7 +117,7 @@
     height: 100%;
     border-top: 2px solid rgb(80, 80, 80);
     min-width: 16px;
-    background: var(--bg-color);
+    background: var(--bg-primary);
   }
   .tab.active::before,
   .tab.active::after {
@@ -145,7 +145,7 @@
   .content {
     z-index: 10;
     padding-top: 1.5em;
-    background: var(--bg-color);
+    background: var(--bg-primary);
     transform: translate(0, -3px);
     width: 100%;
     max-width: 100%;
@@ -162,6 +162,6 @@
     /* transform: translate(-0.9em, -0.3em); */
   }
   :global(.tab .delete:hover) {
-    background: var(--bg-color);
+    background: var(--bg-primary);
   }
 </style>

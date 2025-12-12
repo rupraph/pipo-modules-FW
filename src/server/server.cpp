@@ -461,12 +461,33 @@ void PipoServer::setup_requests() {
     input_sensor.reset_reference_orientation();
     return request->send(200, "text/plain", "Reference orientation reset");
   });
+
+  server.on("/relative-mode", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    if (input_sensor.get_relative_mode()) {
+      return request->send(200, "text/plain", "true");
+    } else {
+      return request->send(200, "text/plain", "false");
+    }
+  });
 #endif
 
   // pause Engine
-  server.on("/pause", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    PAUSED = !PAUSED;
+  server.on("/pause", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    PAUSED = true;
     return request->send(200, "text/plain", "Engine paused");
+  });
+
+  server.on("/resume", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    PAUSED = false;
+    return request->send(200, "text/plain", "Engine resumed");
+  });
+
+  server.on("/is-paused", HTTP_GET, [&](AsyncWebServerRequest* request) {
+    if (PAUSED) {
+      return request->send(200, "text/plain", "true");
+    } else {
+      return request->send(200, "text/plain", "false");
+    }
   });
 
   // Add preset routes

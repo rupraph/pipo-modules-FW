@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "OSC-quats",
-    "description": "Send only quaternion to OSC"
+    "description": "This preset sends only quaternion to OSC"
   },
   "engine": {
     "engine-hid": {

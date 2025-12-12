@@ -182,9 +182,6 @@
       });
   }
 
-  function reboot() {
-    pipoio.get("/reboot").then(() => console.log("Rebooting..."));
-  }
   let isPaused = false;
   function pause() {
     pipoio.post("/pause").then(() => {

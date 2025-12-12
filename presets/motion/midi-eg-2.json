@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi eg 2 ",
-    "description": "Note on Z taps, CC on pitch/roll"
+    "description": "This preset sets:Notes on Z taps, CC on pitch/roll"
   },
   "engine": {
     "engine-hid": {

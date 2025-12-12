@@ -1,13 +1,27 @@
 <script lang="ts">
-  import { pipoType } from "../../services";
+  import { pipoType, currentConfig } from "../../services";
   import type { NoteConfig, BaseMidiConfig } from "../../types";
   import NoteInput from "../form/NoteInput.svelte";
-  import Range from "../form/Range.svelte";
+  import Number from "../form/Number.svelte";
   import Select from "../form/Select.svelte";
   import Tooltip from "../tooltip/Tooltip.svelte";
+  import InfoModal from "../InfoModal.svelte";
+  import { TriangleAlert } from "lucide-svelte";
 
   export let config: NoteConfig & BaseMidiConfig;
   export let isThresholdMode = false;
+  export let hasConflict = false;
+  export let conflictChannels: string[] = [];
+
+  // Track rootNote changes and trigger config update to ensure reactivity
+  let lastRootNote = config.rootNote;
+  $: if (config.rootNote !== lastRootNote) {
+    lastRootNote = config.rootNote;
+    // Trigger store update to notify all subscribers
+    if ($currentConfig) {
+      currentConfig.set($currentConfig);
+    }
+  }
 
   const patternTypes = [
     { label: "Scale", value: "scale" },
@@ -116,53 +130,161 @@
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
-<Select
-  class={isThresholdMode ? "disabled" : ""}
-  label="Pattern"
-  options={patternTypes}
-  bind:value={config.pattern}
-/>
-{#if config.pattern === "scale"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Scale type"
-    options={scaleTypes}
-    bind:value={config.scaleType}
-  />
-{:else if config.pattern === "arpeggio"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Arpeggio type"
-    options={arpeggioTypes}
-    bind:value={config.scaleType}
-  />
-{:else if config.pattern === "interval"}
-  <Select
-    class={isThresholdMode ? "disabled" : ""}
-    label="Interval type"
-    options={intervals}
-    bind:value={config.scaleType}
-  />
+{#if !isThresholdMode}
+  <div class="select-row">
+    <span class="output-label">Pattern</span>
+    <div class="select-input-container pattern-select">
+      <Select
+        class={isThresholdMode ? "disabled" : ""}
+        label=""
+        options={patternTypes}
+        bind:value={config.pattern}
+      />
+    </div>
+  </div>
+  {#if config.pattern === "scale"}
+    <div class="select-row">
+      <span class="output-label">Scale type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={scaleTypes}
+          bind:value={config.scaleType}
+        />
+      </div>
+    </div>
+  {:else if config.pattern === "arpeggio"}
+    <div class="select-row">
+      <span class="output-label">Arpeggio type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={arpeggioTypes}
+          bind:value={config.scaleType}
+        />
+      </div>
+    </div>
+  {:else if config.pattern === "interval"}
+    <div class="select-row">
+      <span class="output-label">Interval type</span>
+      <div class="select-input-container scale-type-select">
+        <Select
+          class={isThresholdMode ? "disabled" : ""}
+          label=""
+          options={intervals}
+          bind:value={config.scaleType}
+        />
+      </div>
+    </div>
+  {/if}
 {/if}
 <!-- </Tooltip> -->
 <!-- {/if} -->
 
-<NoteInput label="Root Note" bind:value={config.rootNote} />
+<div class="note-config-row">
+  <span class="output-label">Root Note</span>
+  {#if hasConflict}
+    <span class="conflict-warning">
+      <TriangleAlert size={14} color="var(--red)" />
+      <span class="conflict-text"
+        >Note also used in "{conflictChannels.join(", ")}"</span
+      >
+    </span>
+  {:else}
+    <span></span>
+  {/if}
+  <div class="note-input-container">
+    <NoteInput label="" bind:value={config.rootNote} />
+  </div>
+</div>
 
 <!-- {#if $pipoType !== "analog"} -->
 <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
-<Range
-  class={isThresholdMode ? "disabled" : ""}
-  label="Number of Notes"
-  tooltip="You are in threshold mode, this value is ignored."
-  bind:value={config.nbOfNotes}
-  min={1}
-  max={50}
-/>
+{#if !isThresholdMode}
+  <div class="note-config-row">
+    <span class="output-label">Number of Notes</span>
+    <span></span>
+    <div class="note-input-container">
+      <Number
+        label=""
+        bind:value={config.nbOfNotes}
+        min={1}
+        max={50}
+        step={1}
+      />
+    </div>
+  </div>
+{/if}
 <!-- </Tooltip> -->
 <!-- {/if} -->
-<Range label="Sustain" bind:value={config.sustain} min={0} max={5} />
-<Range label="Velocity" bind:value={config.velocity} min={0} max={127} />
+<div class="note-config-row">
+  <span class="output-label">Sustain</span>
+  <InfoModal>
+    <p>
+      This defines the note duration in seconds. Setting 0 will make sustain
+      infinite until going out of range).
+    </p>
+  </InfoModal>
+  <div class="note-input-container">
+    <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
+  </div>
+</div>
+<div class="note-config-row">
+  <span class="output-label">Velocity</span>
+  <span></span>
+  <div class="note-input-container">
+    <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
+  </div>
+</div>
 
 <style>
+  .conflict-warning {
+    color: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .conflict-text {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .select-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .note-config-row {
+    display: grid;
+    grid-template-columns: auto 24px 1fr;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 4px;
+  }
+
+  .output-label {
+    white-space: nowrap;
+  }
+
+  .note-input-container {
+    justify-self: end;
+  }
+
+  .select-input-container :global(.input-wrapper) {
+    width: 200px;
+  }
+
+  .note-input-container :global(.input label),
+  .select-input-container :global(.input label) {
+    display: none;
+  }
 </style>

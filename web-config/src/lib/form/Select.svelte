@@ -5,6 +5,7 @@
   import { uid } from "../../utils";
   export let label: string;
   export let clearable: boolean = false;
+  export let searchable: boolean = false;
   export let value: string | number;
   export let options: { value: string | number; label: string }[] = [];
   let selectedItem: { value: string | number; label: string };
@@ -29,8 +30,9 @@
   <Select
     items={options}
     {clearable}
+    {searchable}
     bind:value={selectedItem}
-    --selected-item-color="var(--text-color-secondary)"
+    --selected-item-color="var(--text-color)"
     --item-is-active-bg="var(--bg-lighter)"
     --item-is-active-color="var(--text-color)"
     --item-color="var(--text-color)"
@@ -38,11 +40,12 @@
     --input-color="var(--text-color)"
     --item-hover-color="var(--text-color)"
     --item-hover-bg="var(--bg-lighter)"
-    --border-radius="0"
+    --border-radius="2px"
     --border="0"
     --border-focused="0"
-    --list-background="var(--bg-secondary)"
-    --background="var(--bg-secondary)"
+    --list-background="var(--bg-primary)"
+    --background="var(--bg-primary)"
+    --font-size="12px"
     on:change={(e) => (value = e.detail.value)}
   />
 </Input>

@@ -156,7 +156,7 @@ export type AnalogOut = {
   lmax: number;
   lmin: number;
 };
-
+export type OutputMode = "OSC" | "MIDI" | "HID" | "NONE";
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {

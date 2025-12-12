@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi harp",
-    "description": "A midi harp"
+    "description": "This preset sets a midi harp"
   },
   "engine": {
     "engine-hid": {

@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "Midi exemple",
-    "description": "T1-T8 to notes / A01-A02 to CC / A7 to harp"
+    "description": "This preset sends T1 to T8 to notes / A01 to A02 to CC / A7 to harp"
   },
   "engine": {
     "engine-hid": {
@@ -486,7 +486,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -497,7 +497,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -508,7 +508,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -519,7 +519,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,

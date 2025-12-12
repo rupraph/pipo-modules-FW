@@ -9,6 +9,7 @@ export type BoardUIState = {
     [collapseId: string]: boolean; // true = open, false = closed
   };
   selectedChannel?: string; // currently selected channel in Channel settings
+  channelType?: string; // current channel type category (e.g., 'euler', 'analog', 'touch')
 };
 
 /**

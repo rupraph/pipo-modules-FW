@@ -1,7 +1,7 @@
 {
   "preset": {
     "name": "OSC eg",
-    "description": "A1-A4 as 0-1 output range, T1-T4 sends raw values"
+    "description": "This preset sets: A1 to A4 are scaled to 0-1, T1 to T4 send raw values"
   },
   "engine": {
     "engine-hid": {
@@ -486,7 +486,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -497,7 +497,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -508,7 +508,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -519,7 +519,7 @@
       "deadband": 0.02,
       "offset": 0.0,
       "inverted": false,
-      "lmax": 3.3,
+      "lmax": 3.1,
       "lmin": 0.0,
       "mode": false,
       "th_mode": false,
@@ -643,7 +643,7 @@
     "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "OSC_Batt": false,
-    "MidiEnabled": true,
+    "MidiEnabled": false,
     "HidEnabled": false,
     "HidMode": 1,
     "PipoName": "analog",

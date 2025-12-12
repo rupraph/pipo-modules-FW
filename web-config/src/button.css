@@ -12,7 +12,7 @@ button {
   line-height: 14px;
   margin: 0;
   outline-style: none;
-  padding: 0 18px;
+  padding: 0 10px;
   text-align: center;
   border: 1px solid transparent;
   font-size: 1em;
@@ -21,37 +21,54 @@ button {
   cursor: pointer;
   transition: color 0.25s;
 }
+
 button:hover {
   filter: brightness(120%);
 }
-
+button.rounded {
+  border: 2px solid var(--main);
+  height: 29px;
+  padding: 0 16px;
+  border-radius: 18px;
+  font-size: 12px;
+  line-height: 16px;
+}
 button.primary {
-  color: black;
-  background-color: var(--main);
-  padding: 18px;
-  border-radius: 5px;
+  background-color: var(--bg-secondary);
+  font-weight: 700;
+  color: var(--main);
 }
 
 button.secondary {
-  color:var(--main);
-  background-color: var(--bg-color);
-  /* background-color: var(--main); */
-  border-color: var(--main);
-  padding: 18px
+  color: var(--grey);
+  background-color: var(--bg-secondary);
+  border-color: var(--grey);
 }
 
-button.error{
+button.error {
   color: white;
   background-color: var(--red);
 }
-button.success{
-  color:white;
+
+button.success {
+  color: white;
   background-color: var(--green);
 }
+
 button.active {
   transform: scale(0.95);
   box-shadow: none;
 }
+
 button.disabled {
- cursor: not-allowed;
+  cursor: not-allowed;
+}
+
+button.enabled {
+  background-color: var(--main);
+  color: var(--bg-primary);
+}
+
+button.enabled:hover {
+  background-color: var(--main-lighter);
 }
