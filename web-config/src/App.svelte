@@ -230,7 +230,7 @@
   main {
     display: flex;
     flex-direction: column;
-    justify-section-borders: space-around;
+    justify-content: space-around;
     align-items: center;
     width: 100%;
     max-width: 600px;

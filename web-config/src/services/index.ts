@@ -5,6 +5,7 @@ export * from "./config";
 export * from "./presets";
 export const ip = writable<string>("unknown");
 export const isLive = writable<boolean>(false);
+export const isLoading = writable<boolean>(true); // True on initial load
 
 let timeout: number;
 let reloadTimeout: number;
@@ -14,6 +15,7 @@ pipoio
     clearTimeout(timeout);
     clearTimeout(reloadTimeout);
     isLive.set(true);
+    isLoading.set(false); // First connection means we're no longer loading
   })
   .on("disconnect", () => {
     console.log("Disconnect");
@@ -27,8 +29,6 @@ pipoio
     // This handles network changes (e.g., switching from AP to STA mode)
     reloadTimeout = setTimeout(() => {
       console.log("Connection not restored after 30s - reloading page");
-      // Don't reset isLoading - keep it false so after reload
-      // it shows troubleshooting overlay instead of "Connecting..."
       window.location.reload();
     }, 30000);
   });
