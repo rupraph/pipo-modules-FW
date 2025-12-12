@@ -169,10 +169,6 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     );
   }
 
-  requestRSSI() {
-    if (!this.canSendWSMessage()) return;
-    this.socket!.send("rssi:0");
-  }
   saveConfig<T extends PipoTypes>(config: PipoConfig<T>) {
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);

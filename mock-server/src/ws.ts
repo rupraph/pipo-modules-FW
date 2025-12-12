@@ -38,6 +38,7 @@ function getMsg(): string {
     })
     .filter((s) => s);
 
+  // RSSI is always included now (matches real device behavior)
   const rssi = `rssi,${state.wifi.rssi}`;
   return [fps, ...sens, rssi].join("\n");
 }
@@ -58,7 +59,6 @@ function updateConfig(path: string, value: string | number) {
 }
 export const setupWebSocket = (server: HttpServer) => {
   const wss = new WebSocketServer({ server });
-  let shouldSendRSSI = false;
   wss.on("connection", (ws: WebSocket) => {
     console.log("New WebSocket connection");
 
@@ -90,12 +90,6 @@ export const setupWebSocket = (server: HttpServer) => {
         );
         state.sensors[arg].monitoring = true;
         console.log(`Monitoring: ${arg}`);
-      } else if (command === "scanrssi") {
-        console.log("Scanning RSSI");
-        state.wifi.rssi += Math.round(Math.random() * 2) - 1;
-      } else if (command === "rssi") {
-        console.log("Requesting RSSI");
-        shouldSendRSSI = true;
       }
     });
 
@@ -105,6 +99,8 @@ export const setupWebSocket = (server: HttpServer) => {
   });
   setInterval(() => {
     updateSens();
+    // Simulate RSSI fluctuation (like real device auto-update)
+    state.wifi.rssi += Math.round(Math.random() * 2) - 1;
     const toSend = getMsg();
     wss.clients.forEach((client) => {
       client.send(toSend);

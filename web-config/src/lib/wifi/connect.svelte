@@ -15,14 +15,11 @@
   let password: string | undefined = undefined;
   let waiting = false;
   let wifiMode = "";
-  let networks: Network[];
-  let apIP = "";
-  let staIP = "";
-  wifiState.subscribe((v) => {
-    networks = v.networks;
-    apIP = v.apIP;
-    staIP = v.staIP;
-  });
+
+  // Use reactive declarations for better Svelte reactivity
+  $: networks = $wifiState.networks;
+  $: apIP = $wifiState.apIP;
+  $: staIP = $wifiState.staIP;
   $: onShow();
   async function onShow() {
     const now = Date.now();

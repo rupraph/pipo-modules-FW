@@ -41,7 +41,6 @@ class PipoSocket {
   int outMsgL = 0;
   char outMsg[256];
 
-  bool toSend[1] = {true};
   bool paused = false;
 };
 extern PipoSocket pipoSocket;

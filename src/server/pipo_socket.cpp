@@ -112,10 +112,6 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
       input_sensor.monitor_axis(inMsg + offset + 1);
-    } else if (strcmp("scanrssi", command) == 0) {
-      wifi.requestRSSI();
-    } else if (strcmp("rssi", command) == 0) {
-      toSend[0] = true;
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -208,7 +204,6 @@ void PipoSocket::loop() {
   // Append RSSI value if space allows
   size_t remaining = outMaxLen - strlen(outMsg) - 1;
   if (remaining > 12) {
-    toSend[0] = false;
     snprintf(outMsg + strlen(outMsg), remaining, "\nrssi,%d",
              (int)wifi.getRSSI());
   }

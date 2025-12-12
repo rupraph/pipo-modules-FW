@@ -13,6 +13,10 @@ void wifiTask(void* pvParameters) {
       if (!server.isRunning()) {
         server.resume();
       }
+      // Update RSSI periodically when connected to STA
+      if (wifi.getStatus() == PipoWifi::CONNECTED && staConnected) {
+        wifi.requestRSSI();
+      }
     }
   }
 }
