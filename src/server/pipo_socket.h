@@ -28,10 +28,17 @@ class PipoSocket {
 
  private:
   void onMessage(AsyncWebSocketClient* client);
+  void cleanupDeadClients();
+  void enforceOneClient(AsyncWebSocketClient* newClient);
+  bool shouldAcceptConnection(AsyncWebSocketClient* newClient);
   AsyncWebSocket* ws;
   unsigned long lastSendTime = 0;
   unsigned long lastCleanTime = 0;
   unsigned long lastPingTime = 0;
+  unsigned long lastConnectionTime = 0;
+  IPAddress lastClientIP = IPAddress(0, 0, 0, 0);
+  unsigned long MIN_CONNECTION_INTERVAL =
+      500;  // Minimum 500ms between connections
   unsigned long PING_INTERVAL = 1000;
   unsigned long iterations = 0;
   const int inMaxLen = 2048;

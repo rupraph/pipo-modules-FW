@@ -37,24 +37,26 @@ void PipoSocket::setup() {
                         size_t len) {
     log_v("WebSocket running on core: %d", xPortGetCoreID());
     if (type == WS_EVT_CONNECT) {
-      // Serial.printf("WS Client connected");
-      // // if more than 3 clients, delete the oldest one
-      // if (server->count() > 3) {
-      //   auto clients = server->getClients();
-      //   for (auto* c : clients) {
-      //     if (c != client) {
-      //       c->close();
-      //       break;
-      //     }
-      // }
-      //   ws->cleanupClients();
-      // }
+      // Rate limiting: reject connections that are too rapid
+      if (!shouldAcceptConnection(client)) {
+        log_w("Rejecting rapid reconnection from IP=%s (cooldown active)",
+              client->remoteIP().toString().c_str());
+        client->close(1008, "Too many connections");  // Policy violation
+        return;
+      }
+
+      log_i("WebSocket client connected: ID=%u IP=%s", client->id(),
+            client->remoteIP().toString().c_str());
+      enforceOneClient(client);
+
+      // Update rate limiting state
+      lastConnectionTime = millis();
+      lastClientIP = client->remoteIP();
     } else if (type == WS_EVT_DISCONNECT) {
-      log_d("WebSocket client disconnected");
-      // client->close();
+      log_i("WebSocket client disconnected: ID=%u", client->id());
     } else if (type == WS_EVT_ERROR) {
       uint16_t errorCode = *((uint16_t*)arg);
-      // client->close(true);
+      log_w("WebSocket error: ID=%u code=%u", client->id(), errorCode);
     } else if (type == WS_EVT_PONG) {
     } else if (type == WS_EVT_DATA) {
       if (DEBUG_HEAP)
@@ -86,6 +88,67 @@ void PipoSocket::setup() {
         pipoDebugHeap("WS : End Data");
     }
   });
+}
+
+void PipoSocket::cleanupDeadClients() {
+  if (ws == nullptr)
+    return;
+
+  auto clients = ws->getClients();
+  for (AsyncWebSocketClient* c : clients) {
+    // Remove clients that are disconnected/disconnecting or have null TCP client
+    if (c->status() != WS_CONNECTED || c->client() == nullptr) {
+      log_i("Removing dead WebSocket client: ID=%u status=%u", c->id(),
+            c->status());
+      c->close();
+    }
+  }
+}
+
+bool PipoSocket::shouldAcceptConnection(AsyncWebSocketClient* newClient) {
+  if (ws == nullptr)
+    return false;
+
+  unsigned long now = millis();
+
+  // If this is the first connection, always accept
+  if (lastConnectionTime == 0) {
+    return true;
+  }
+
+  // During WiFi transitions (e.g., AP to STA), be more lenient
+  // Allow connections after the initial transition period
+  unsigned long minInterval = MIN_CONNECTION_INTERVAL;
+  if (wifi.isChangingAP) {
+    minInterval = 200;  // More lenient during AP changes
+  }
+
+  // Check if enough time has passed since last connection
+  unsigned long timeSinceLastConnection = now - lastConnectionTime;
+  if (timeSinceLastConnection < minInterval) {
+    // Same IP trying to reconnect too quickly
+    if (newClient->remoteIP() == lastClientIP) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void PipoSocket::enforceOneClient(AsyncWebSocketClient* newClient) {
+  if (ws == nullptr)
+    return;
+
+  auto clients = ws->getClients();
+  for (AsyncWebSocketClient* c : clients) {
+    // Close all existing clients except the new one
+    if (c->id() != newClient->id()) {
+      log_i(
+          "Closing old WebSocket client ID=%u to enforce single-client policy",
+          c->id());
+      c->close();
+    }
+  }
 }
 
 void PipoSocket::onMessage(AsyncWebSocketClient* client) {
@@ -170,18 +233,14 @@ void PipoSocket::loop() {
     return;
   }
 
+  // Proactively cleanup dead clients every iteration
+  cleanupDeadClients();
+
   auto clients = ws->getClients();
   if (clients.length() == 0)
     return;
 
   unsigned long now = millis();
-
-  // Send periodic PING to keep connections alive
-  if (now - lastPingTime > PING_INTERVAL) {
-    // Serial.println("🔄 Sending WebSocket PING");
-    // ws->pingAll();
-    lastPingTime = now;
-  }
 
   outMsg[0] = 0;
   snprintf(outMsg, outMaxLen, "fps,%.2f,%.2f", (float)iterations,
@@ -220,21 +279,43 @@ void PipoSocket::loop() {
              logs.readLogs(true));
   }
 
-  // Send to connected clients
+  // Send to connected clients with defensive checks
   for (AsyncWebSocketClient* c : clients) {
-    if (!c->canSend()) {
-      log_d("client cannot send: ID = %u STATUS = %u", c->id(), c->status());
+    // Verify client is in a valid state before sending
+    if (c == nullptr || c->client() == nullptr) {
       continue;
     }
+
+    if (c->status() != WS_CONNECTED) {
+      continue;
+    }
+
+    if (!c->canSend()) {
+      continue;  // Queue is full, skip silently (will retry next iteration)
+    }
+
     c->text(outMsg);
   }
 }
 
 void PipoSocket::stop() {
-  log_d("Closing with clients: %u", ws->count());
-  this->ws->cleanupClients();
-  this->ws->closeAll();
-  this->ws->enable(false);
+  if (ws == nullptr)
+    return;
+
+  log_i("Stopping WebSocket with %u clients", ws->count());
+
+  // First disable to prevent new connections
+  ws->enable(false);
+
+  // Close all clients gracefully
+  ws->closeAll();
+
+  // Give time for close frames to be sent
+  delay(100);
+
+  // Final cleanup
+  cleanupDeadClients();
+
   this->ws = nullptr;
 }
 void PipoSocket::pause() {
