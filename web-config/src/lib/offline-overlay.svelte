@@ -1,32 +1,24 @@
 <script lang="ts">
-  import { isLive, isLoading } from "../services";
+  import { isLive } from "../services";
   let live = false;
-  let loading = true;
 
   isLive.subscribe((value) => {
     live = value;
-  });
-
-  isLoading.subscribe((value) => {
-    loading = value;
   });
 </script>
 
 {#if !live}
   <div class="overlay">
     <article class="scroll">
-      {#if loading}
-        <h2>Connecting to Pipo...</h2>
-        <p style="font-size: x-large;"></p>
-        <p>Please wait while we establish connection</p>
-      {:else}
-        <h2>Pipo is offline, reconnecting...</h2>
-        <p style="font-size: x-large;">¯\_(ツ)_/¯</p>
-        <p>Check your WiFi connection to Pipo</p>
-        <!-- <p style="margin-top: 1em; font-size: small; opacity: 0.8;">
-          Page will reload automatically if connection isn't restored
-        </p> -->
-      {/if}
+      <h2>Connecting to Pipo...</h2>
+      <p style="font-size: x-large;">¯\_(ツ)_/¯</p>
+      <p style="margin-bottom: 1em;">If it persists:</p>
+      <ul
+        style="text-align: left; margin: 0 auto; max-width: 400px; font-size: 0.9em;"
+      >
+        <li>• Check your WiFi connection to Pipo</li>
+        <li>• Try restarting Pipo if the issue persists</li>
+      </ul>
       <ul>
         <li>
           <!-- <h4>Pipo could not be reached</h4> -->

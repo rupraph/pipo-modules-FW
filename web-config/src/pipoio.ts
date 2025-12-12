@@ -31,8 +31,9 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   constructor() {
     super();
     this.connect();
-    // Check for dead connections every 6 seconds
+    // Check for dead connections every 2 seconds
     // If no messages received, close socket to trigger reconnection
+    // This ensures quick detection during server reboots
     this.resurect = setInterval(() => {
       const n = this.nMsgs;
       this.nMsgs = 0;
@@ -42,7 +43,7 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       }
       this.socket?.close();
       this.onDisconnect(true);
-    }, 4000) as any as number;
+    }, 2000) as any as number;
   }
 
   async pause() {
