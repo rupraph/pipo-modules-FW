@@ -2,7 +2,6 @@
   import {
     presets,
     presetsLoading,
-    presetsError,
     presetsService,
     type Preset,
   } from "../services/presets";
@@ -144,12 +143,6 @@
         Load
       </LoadingButton>
     </div>
-
-    {#if $presetsError}
-      <div class="error-message">
-        {$presetsError}
-      </div>
-    {/if}
   </div>
 </section>
 
@@ -183,15 +176,5 @@
     display: flex;
     gap: 8px;
     align-items: center;
-  }
-
-  .error-message {
-    margin-top: 8px;
-    padding: 8px 12px;
-    background-color: var(--bg-primary);
-    border: 1px solid var(--red);
-    border-radius: 8px;
-    color: var(--red);
-    font-size: 13px;
   }
 </style>

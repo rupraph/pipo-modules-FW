@@ -49,7 +49,8 @@
     background: #e33333dd;
   }
   .success {
-    background: #3bb143dd;
+    background: #f4ffb0;
+    color: var(--bg-primary);
   }
   .info {
     background: #4a9eeadd;

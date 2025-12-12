@@ -9,6 +9,7 @@
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
   import { pipoio } from "../../pipoio";
+  import { addToast } from "../toast";
 
   $: config = $currentConfig;
   $: mode = config?.general.MidiEnabled
@@ -83,6 +84,12 @@
   }
 
   function reboot() {
+    addToast({
+      type: "error",
+      message:
+        "Pipo is rebooting... Please wait a few seconds and reload the page. Make sure WiFi is reconnected.",
+      timeout: 8000,
+    });
     pipoio.get("/reboot").then(() => console.log("Rebooting..."));
   }
 </script>

@@ -38,6 +38,12 @@
         ip.set(data.ip);
         pipoType.set(type);
         return data;
+      })
+      .catch((error) => {
+        // Provide a more user-friendly error message
+        throw new Error(
+          "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected."
+        );
       });
   }
 
