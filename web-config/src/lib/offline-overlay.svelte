@@ -11,8 +11,8 @@
   <div class="overlay">
     <article class="scroll">
       <h2>Connecting to Pipo...</h2>
-      <p style="font-size: x-large;">¯\_(ツ)_/¯</p>
-      <p style="margin-bottom: 1em;">If it persists:</p>
+      <p style="font-size: x-large; text-align: center;">¯\_(ツ)_/¯</p>
+      <p style="margin-bottom: 1em; text-align: center;">If it persists:</p>
       <ul
         style="text-align: left; margin: 0 auto; max-width: 400px; font-size: 0.9em;"
       >
@@ -74,16 +74,19 @@
     padding-top: 10vw;
     margin: 0;
     font-size: x-large;
+    text-align: center;
   }
 
   h3 {
     margin: 0;
     font-size: large;
+    text-align: center;
   }
   article {
     padding: 1em;
     padding-bottom: 60px;
     max-width: min(100%, 600px);
+    text-align: center;
   }
   ul,
   li {
