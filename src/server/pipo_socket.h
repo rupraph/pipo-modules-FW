@@ -10,6 +10,7 @@
 #include <ESPAsyncWebServer.h>
 #include "esp_task_wdt.h"
 #include "server.h"
+#include <set>
 using namespace std;
 
 void websocketTask(void* pvParameters);
@@ -29,11 +30,16 @@ class PipoSocket {
  private:
   void onMessage(AsyncWebSocketClient* client);
   void cleanupDeadClients();
+  void clearAllClients();
   void enforceOneClient(AsyncWebSocketClient* newClient);
   bool shouldAcceptConnection(AsyncWebSocketClient* newClient);
   AsyncWebSocket* ws;
+  std::set<uint32_t>
+      closingClients;  // Track clients we've already asked to close
   unsigned long lastSendTime = 0;
   unsigned long lastCleanTime = 0;
+  unsigned long CLEANUP_INTERVAL =
+      1000;  // Cleanup every 1 second instead of every loop
   unsigned long lastPingTime = 0;
   unsigned long lastConnectionTime = 0;
   IPAddress lastClientIP = IPAddress(0, 0, 0, 0);

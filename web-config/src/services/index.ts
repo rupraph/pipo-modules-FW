@@ -14,7 +14,10 @@ pipoio
   })
   .on("disconnect", () => {
     console.log("Disconnect");
+    // Show overlay after 300ms - faster than first reconnect attempt (500ms)
+    // This ensures users see feedback during connection issues
+    // while still avoiding flashing on very quick reconnects
     timeout = setTimeout(() => {
       isLive.set(false);
-    }, 2000);
+    }, 300);
   });

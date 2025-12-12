@@ -54,6 +54,8 @@ void PipoSocket::setup() {
       lastClientIP = client->remoteIP();
     } else if (type == WS_EVT_DISCONNECT) {
       log_i("WebSocket client disconnected: ID=%u", client->id());
+      // Remove from our tracking set when disconnect event fires
+      closingClients.erase(client->id());
     } else if (type == WS_EVT_ERROR) {
       uint16_t errorCode = *((uint16_t*)arg);
       log_w("WebSocket error: ID=%u code=%u", client->id(), errorCode);
@@ -95,14 +97,61 @@ void PipoSocket::cleanupDeadClients() {
     return;
 
   auto clients = ws->getClients();
+
+  // Clean up tracking set - remove IDs that are no longer in the clients list
+  std::set<uint32_t> currentClientIds;
   for (AsyncWebSocketClient* c : clients) {
-    // Remove clients that are disconnected/disconnecting or have null TCP client
-    if (c->status() != WS_CONNECTED || c->client() == nullptr) {
-      log_i("Removing dead WebSocket client: ID=%u status=%u", c->id(),
-            c->status());
-      c->close();
+    currentClientIds.insert(c->id());
+  }
+
+  // Remove IDs from closingClients that are no longer in the actual client list
+  // (meaning they've been successfully removed by the library)
+  std::set<uint32_t> toRemove;
+  for (uint32_t id : closingClients) {
+    if (currentClientIds.find(id) == currentClientIds.end()) {
+      toRemove.insert(id);
     }
   }
+  for (uint32_t id : toRemove) {
+    closingClients.erase(id);
+  }
+
+  // Now close dead clients, but only if we haven't already asked them to close
+  for (AsyncWebSocketClient* c : clients) {
+    uint32_t clientId = c->id();
+
+    // Skip if we've already asked this client to close
+    if (closingClients.find(clientId) != closingClients.end()) {
+      continue;
+    }
+
+    // Check if client is dead
+    if (c->status() != WS_CONNECTED || c->client() == nullptr) {
+      log_i("Removing dead WebSocket client: ID=%u status=%u", clientId,
+            c->status());
+      c->close();
+      closingClients.insert(clientId);  // Track that we've closed this client
+    }
+  }
+}
+
+void PipoSocket::clearAllClients() {
+  if (ws == nullptr)
+    return;
+
+  log_i("Clearing all WebSocket clients (%u total)", ws->count());
+
+  auto clients = ws->getClients();
+  for (AsyncWebSocketClient* c : clients) {
+    log_i("Force closing WebSocket client ID=%u", c->id());
+    c->close();
+  }
+
+  // Clear tracking set
+  closingClients.clear();
+
+  // Force cleanup immediately
+  cleanupDeadClients();
 }
 
 bool PipoSocket::shouldAcceptConnection(AsyncWebSocketClient* newClient) {
@@ -233,14 +282,17 @@ void PipoSocket::loop() {
     return;
   }
 
-  // Proactively cleanup dead clients every iteration
-  cleanupDeadClients();
+  unsigned long now = millis();
+
+  // Cleanup dead clients periodically (not every loop iteration)
+  if (now - lastCleanTime > CLEANUP_INTERVAL) {
+    cleanupDeadClients();
+    lastCleanTime = now;
+  }
 
   auto clients = ws->getClients();
   if (clients.length() == 0)
     return;
-
-  unsigned long now = millis();
 
   outMsg[0] = 0;
   snprintf(outMsg, outMaxLen, "fps,%.2f,%.2f", (float)iterations,
@@ -323,4 +375,7 @@ void PipoSocket::pause() {
 }
 void PipoSocket::resume() {
   paused = false;
+  // Clear all clients to prevent rapid reconnection storms when resuming
+  // This ensures a clean slate when the page becomes visible again
+  clearAllClients();
 }
