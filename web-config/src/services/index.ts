@@ -19,12 +19,12 @@ pipoio
   })
   .on("disconnect", () => {
     console.log("Disconnect");
-    // Show overlay after 300ms - faster than first reconnect attempt (500ms)
-    // This ensures users see feedback during connection issues
-    // while still avoiding flashing on very quick reconnects
+    // Show overlay after 1s to avoid flashing on quick reconnects
+    // With 6s dead connection detection + 500ms first reconnect,
+    // this gives enough buffer to prevent unnecessary overlay flashing
     timeout = setTimeout(() => {
       isLive.set(false);
-    }, 300);
+    }, 1000);
     
     // After 30 seconds of disconnection, reload the page
     // This handles network changes (e.g., switching from AP to STA mode)

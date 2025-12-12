@@ -16,9 +16,9 @@ void websocketTask(void* pvParameters) {
     } else if (rssi > -70) {
       taskDelay = 80;  // Medium signal → Reduce frequency
     } else if (rssi > -80) {
-      taskDelay = 250;  // Weak signal → Send less often
+      taskDelay = 200;  // Weak signal → Send less often
     } else {
-      taskDelay = 500;  // Very poor signal → Minimize WebSocket activity
+      taskDelay = 300;  // Very poor signal → Minimize WebSocket activity
     }
 
     pipoSocket.loop();
