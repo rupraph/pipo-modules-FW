@@ -350,7 +350,7 @@
           class:enabled={input?.inverted}
           on:click={toggleRangeInvert}
         >
-          Range invert
+          Invert
         </button>
         <button
           class="rounder primary"
@@ -359,7 +359,7 @@
         >
           Binary mode
         </button>
-        {#if type !== "motion" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
+        {#if type !== "motion" && type !== "analog" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
           <button
             class="rounder primary"
             class:enabled={isOverOut}
@@ -446,6 +446,7 @@
     text-align: left;
   }
   .buttons {
+    max-width: 335px;
     display: flex;
     align-content: flex-start;
     /* align-items: center; */
