@@ -11,6 +11,7 @@
 
   let savingStatus: "none" | "loading" | "success" | "error" = "none";
   let useAbsolutePosition = false;
+  let observer: MutationObserver | null = null;
 
   function checkPosition() {
     const mainContainer = document.querySelector(".main-container");
@@ -30,11 +31,28 @@
     checkPosition();
     window.addEventListener("resize", checkPosition);
     window.addEventListener("scroll", checkPosition);
+    
+    // Watch for DOM changes that might affect layout
+    const mainContainer = document.querySelector(".main-container");
+    if (mainContainer) {
+      observer = new MutationObserver(() => {
+        checkPosition();
+      });
+      observer.observe(mainContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      });
+    }
   });
 
   onDestroy(() => {
     window.removeEventListener("resize", checkPosition);
     window.removeEventListener("scroll", checkPosition);
+    if (observer) {
+      observer.disconnect();
+    }
   });
 
   async function handleSave() {
