@@ -16,7 +16,7 @@ let isInitialConnection = true;
 
 pipoio
   .on("connect", () => {
-    console.log("📡 WebSocket connected");
+    // console.log("📡 WebSocket connected");
     clearTimeout(showOverlayTimeout);
     clearTimeout(reloadPageTimeout);
     
@@ -29,16 +29,16 @@ pipoio
     
     disconnectTime = 0;
     isInitialConnection = false;
-    console.log("✅ Setting isLive to TRUE");
+    // console.log("✅ Setting isLive to TRUE");
     isLive.set(true);
   })
   .on("disconnect", () => {
-    console.log("❌ WebSocket disconnected event received");
+    // console.log("❌ WebSocket disconnected event received");
     disconnectTime = Date.now();
     
     // Show overlay immediately on disconnect
     // User needs to know connection is lost right away
-    console.log("🚨 Setting isLive to FALSE - overlay should show");
+    // console.log("🚨 Setting isLive to FALSE - overlay should show");
     isLive.set(false);
     
     // After 5 seconds of disconnection, reload the page
