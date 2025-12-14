@@ -31,7 +31,7 @@
     checkPosition();
     window.addEventListener("resize", checkPosition);
     window.addEventListener("scroll", checkPosition);
-    
+
     // Watch for DOM changes that might affect layout
     const mainContainer = document.querySelector(".main-container");
     if (mainContainer) {
@@ -42,7 +42,7 @@
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['class', 'style']
+        attributeFilter: ["class", "style"],
       });
     }
   });
