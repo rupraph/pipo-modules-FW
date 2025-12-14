@@ -36,7 +36,7 @@
   }
   export async function scan() {
     if (waiting) return;
-    pipoio.pause();
+    await pipoio.pause();
     waiting = true;
     let toast = {
       type: "info" as const,
@@ -57,11 +57,11 @@
       // wait for the scan to complete
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await fetchNetworks();
-      pipoio.resume();
+      await pipoio.resume();
       setLastScan(Date.now());
       waiting = false;
     } catch (e) {
-      pipoio.resume();
+      await pipoio.resume();
       waiting = false;
       console.error(e);
     }
@@ -288,9 +288,14 @@
     gap: 1em;
     font-size: 1em;
     padding: 0 1em 0.5em 1em;
-    max-height: calc(100vh - 10em);
+    max-height: 80vh;
     overflow-y: auto;
+
+    /* Standard scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--main) transparent;
   }
+
   .connection.waiting,
   .connection.waiting * {
     cursor: wait;

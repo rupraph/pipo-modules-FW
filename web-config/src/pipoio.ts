@@ -31,9 +31,9 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     super();
     this.connect();
     
-    // Check for dead connections every 2 seconds
-    // If no messages received, close socket and emit disconnect immediately
-    // This ensures quick detection during server reboots
+    // Check for dead connections every 3 seconds
+    // If no messages received in that period, close socket and emit disconnect
+    // This ensures detection during server reboots while being forgiving of brief pauses
     this.resurrectInterval = setInterval(() => {
       const n = this.nMsgs;
       this.nMsgs = 0;
@@ -43,10 +43,10 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
         return;
       }
       
-      console.log('No websocket messages for 2s - connection appears dead');
+      console.log('No websocket messages for 3s - connection appears dead');
       this.socket?.close();
       this.onDisconnect(true);
-    }, 2000) as any as number;
+    }, 3000) as any as number;
   }
 
   private stopConnectionMonitoring() {
