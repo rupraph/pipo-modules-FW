@@ -3,6 +3,12 @@
   let live = false;
 
   isLive.subscribe((value) => {
+    console.log(
+      "OfflineOverlay: isLive changed to",
+      value,
+      "overlay will be",
+      value ? "hidden" : "visible"
+    );
     live = value;
   });
 </script>

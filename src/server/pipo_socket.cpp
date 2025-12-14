@@ -373,4 +373,3 @@ void PipoSocket::resume() {
   // Clear all clients to prevent rapid reconnection storms when resuming
   // This ensures a clean slate when the page becomes visible again
   clearAllClients();
-}
