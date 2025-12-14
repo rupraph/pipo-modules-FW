@@ -36,6 +36,7 @@
   }
   export async function scan() {
     if (waiting) return;
+    pipoio.pause();
     waiting = true;
     let toast = {
       type: "info" as const,
@@ -56,9 +57,11 @@
       // wait for the scan to complete
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await fetchNetworks();
+      pipoio.resume();
       setLastScan(Date.now());
       waiting = false;
     } catch (e) {
+      pipoio.resume();
       waiting = false;
       console.error(e);
     }

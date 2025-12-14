@@ -30,6 +30,8 @@
   import Info from "./lib/icons/info.svelte";
 
   let type: PipoTypes = "unknown";
+  let errorReloadTimeout: number | undefined;
+
   function fetch() {
     return pipoio
       .get<PipoInfo>("/info", { timeout: 5000 })
@@ -40,6 +42,13 @@
         return data;
       })
       .catch((error) => {
+        // Schedule page reload after 5 seconds if fetch fails
+        // This ensures the page keeps trying to connect
+        errorReloadTimeout = setTimeout(() => {
+          console.log("Initial fetch failed - reloading page to retry");
+          window.location.reload();
+        }, 5000) as any as number;
+
         // Provide a more user-friendly error message
         throw new Error(
           "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected."

@@ -17,11 +17,9 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private paused: boolean = false;
   private busy: boolean = false;
   private _currentPromise: Promise<any> = Promise.resolve();
-  private connectionCheckInterval = 0;
-  private lastMessageTime = 0;
+  private resurrectInterval = 0;
   private saveTimeout = 0;
   private isConnecting = false;
-  private disconnectEventEmitted = false;
   private nMsgs = 0;
   private msgLen = 0;
   private lastMsgDate = 0;
@@ -29,114 +27,70 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private reconnectTimeout = 0;
   private readonly maxReconnectDelay = 5000; // Max 5 seconds
   private readonly baseReconnectDelay = 500; // Start at 500ms
-  private readonly connectionCheckIntervalMs = 2000; // Check every 2s
-  private readonly maxSilenceMs = 5000; // Consider dead if no messages for 5s
   constructor() {
     super();
     this.connect();
-  }
-
-  private startConnectionMonitoring() {
-    this.stopConnectionMonitoring();
     
-    // Update last message time on start
-    this.lastMessageTime = Date.now();
-    
-    // Check every 2 seconds if we've received any websocket messages
-    // If no messages for 5 seconds, consider connection dead
-    this.connectionCheckInterval = setInterval(() => {
-      if (this.paused || !this.socket || this.socket.readyState !== WebSocket.OPEN) {
+    // Check for dead connections every 2 seconds
+    // If no messages received, close socket and emit disconnect immediately
+    // This ensures quick detection during server reboots
+    this.resurrectInterval = setInterval(() => {
+      const n = this.nMsgs;
+      this.nMsgs = 0;
+      this.msgLen = 0;
+      
+      if (this.busy || this.paused || n > 0 || this.isConnecting) {
         return;
       }
       
-      const timeSinceLastMessage = Date.now() - this.lastMessageTime;
-      
-      if (timeSinceLastMessage > this.maxSilenceMs) {
-        console.log(`No websocket messages for ${Math.round(timeSinceLastMessage / 1000)}s - connection appears dead`);
-        
-        // Emit disconnect event IMMEDIATELY for instant UI feedback
-        // Don't wait for the socket close event which can be delayed
-        if (!this.disconnectEventEmitted) {
-          this.disconnectEventEmitted = true;
-          this.emit("disconnect");
-        }
-        
-        // Force close to trigger reconnection flow
-        if (this.socket) {
-          this.socket.close();
-        }
-      }
-    }, this.connectionCheckIntervalMs) as any as number;
+      console.log('No websocket messages for 2s - connection appears dead');
+      this.socket?.close();
+      this.onDisconnect(true);
+    }, 2000) as any as number;
   }
 
   private stopConnectionMonitoring() {
-    if (this.connectionCheckInterval) {
-      clearInterval(this.connectionCheckInterval);
-      this.connectionCheckInterval = 0;
+    if (this.resurrectInterval) {
+      clearInterval(this.resurrectInterval);
+      this.resurrectInterval = 0;
     }
   }
 
   async pause() {
-    console.log('Pausing websocket connection');
     this.paused = true;
-    
-    // Stop connection monitoring
-    this.stopConnectionMonitoring();
-    
-    // Clean up any existing reconnection attempts
+    // Reset message counter to prevent resurrect interval from triggering
+    // during pause period (e.g., during WiFi scan)
+    this.nMsgs = 1; // Set to 1 so resurrect check sees "activity"
+    this.onDisconnect(false);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  
+  async resume() {
+    this.paused = false;
+    // Reset message counter on resume to give connection a fresh start
+    this.nMsgs = 1;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+  
+  private cleanup() {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = 0;
     }
-    
-    // Close socket without triggering reconnect
     if (this.socket) {
       this.socket.close();
       this.socket = undefined;
     }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  
-  async resume() {
-    console.log('Resuming websocket connection');
-    this.paused = false;
-    
-    // Reset reconnect attempts when resuming
-    this.reconnectAttempts = 0;
-    
-    // Reconnect immediately
-    this.connect();
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  
-  private cleanup() {
-    this.stopConnectionMonitoring();
-    
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = 0;
-    }
-    if (this.socket) {
-      // Remove event listeners before closing to prevent redundant onDisconnect calls
-      const socket = this.socket;
-      this.socket = undefined;
-      socket.close();
-    }
   }
   async onDisconnect(sendEvent = true) {
+    if (sendEvent && !this.paused) {
+      this.emit("disconnect");
+    }
+    
     // Don't attempt reconnection if paused, already connecting, or still connected
     if (this.paused || this.isConnecting || (this.socket?.readyState === WebSocket.OPEN)) {
       console.log("Disconnected but not reconnecting (paused or already connecting)");
       return;
-    }
-    
-    // Always emit disconnect event if requested (for UI feedback)
-    // This must happen AFTER the early return checks to avoid duplicate events
-    // but BEFORE we return, to ensure the UI is notified
-    // Only emit if we haven't already emitted it (e.g., from connection monitoring)
-    if (sendEvent && !this.disconnectEventEmitted) {
-      this.disconnectEventEmitted = true;
-      this.emit("disconnect");
     }
     
     // Clear any pending reconnection
@@ -154,11 +108,6 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     this.isConnecting = false;
     // Reset reconnect attempts on successful connection
     this.reconnectAttempts = 0;
-    // Reset disconnect event flag on new connection
-    this.disconnectEventEmitted = false;
-    
-    // Start monitoring connection health by tracking message flow
-    this.startConnectionMonitoring();
     
     setTimeout(() => {
       this.emit("connect");
@@ -171,9 +120,6 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     try {
       this.nMsgs++;
       this.msgLen += m.data.length;
-      
-      // Update last message time - connection is alive
-      this.lastMessageTime = Date.now();
       
       const lines = m.data.split("\n");
       lines.forEach((msg) => {
