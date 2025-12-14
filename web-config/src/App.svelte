@@ -118,12 +118,17 @@
                 <InfoModal>
                   <p style="white-space: normal;">
                     Choose whether the sensor uses relative or absolute
-                    orientation. Relative orientation "ON" means the sensor's
-                    measurement is relative to a reference orientation you can
-                    set. By opposition, absolute orientation relates to the
-                    North and the ground. This impacts the Euler angles and
-                    quaternions outputs.
+                    orientation.
                   </p>
+                  <p>
+                    When relative orientation is "ON" the sensor measurements
+                    are relative to a reference orientation you can capture (Use
+                    the "Capture Reference" button or the function button on
+                    Pipo). By opposition, absolute orientation will output
+                    measurements which are referenced to the North and the
+                    ground.
+                  </p>
+                  <p>This impacts the Euler angles and quaternions outputs.</p>
                 </InfoModal>
               </div>
               {#if $currentConfig?.sensorconf}
