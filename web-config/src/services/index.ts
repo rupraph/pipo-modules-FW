@@ -5,7 +5,6 @@ export * from "./config";
 export * from "./presets";
 export const ip = writable<string>("unknown");
 export const isLive = writable<boolean>(false);
-export const isLoading = writable<boolean>(true); // True on initial load
 
 let timeout: number;
 let reloadTimeout: number;
@@ -15,7 +14,6 @@ pipoio
     clearTimeout(timeout);
     clearTimeout(reloadTimeout);
     isLive.set(true);
-    isLoading.set(false); // First connection means we're no longer loading
   })
   .on("disconnect", () => {
     console.log("Disconnect");

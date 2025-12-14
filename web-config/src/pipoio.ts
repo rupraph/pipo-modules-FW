@@ -48,12 +48,25 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
 
   async pause() {
     this.paused = true;
-    this.onDisconnect(false);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Clean up any existing reconnection attempts
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = 0;
+    }
+    // Close socket without triggering reconnect
+    if (this.socket) {
+      this.socket.close();
+      this.socket = undefined;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
   async resume() {
     this.paused = false;
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Reset reconnect attempts when resuming
+    this.reconnectAttempts = 0;
+    // Reconnect immediately
+    this.connect();
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
   private cleanup() {
     if (this.heartbeat) {
@@ -70,7 +83,12 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     }
   }
   async onDisconnect(sendEvent = true) {
-    if (sendEvent && !this.paused) {
+    // Don't reconnect if paused
+    if (this.paused) {
+      return;
+    }
+    
+    if (sendEvent) {
       this.emit("disconnect");
     }
     
@@ -223,15 +241,18 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   }
 
   private _wrap<T>(fn: () => Promise<T>): Promise<T> {
-    this._currentPromise = this._currentPromise.then(async () => {
-      this.setBusy(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
-        return await fn();
-      } finally {
-        this.setBusy(false);
-      }
-    });
+    // Chain promise but catch errors to prevent chain poisoning
+    this._currentPromise = this._currentPromise
+      .then(async () => {
+        this.setBusy(true);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
+          return await fn();
+        } finally {
+          this.setBusy(false);
+        }
+      })
+      .catch(() => {}); // Catch errors to keep chain alive
 
     return this._currentPromise;
   }

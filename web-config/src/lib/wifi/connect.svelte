@@ -163,6 +163,7 @@
         params: { ssid, password },
         timeout: 1000,
       });
+      // Wait 5s for network connection to establish
       await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (e) {
       console.error(e);
