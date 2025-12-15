@@ -177,6 +177,7 @@
     border-right: 0.5em solid transparent;
     border-top: 0.5em solid var(--text-color);
     left: var(--left);
+    transform: translateX(-50%);
   }
   .value.cursorActive {
     border-top-color: var(--main);
