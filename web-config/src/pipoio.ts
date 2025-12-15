@@ -242,20 +242,24 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   }
 
   private _wrap<T>(fn: () => Promise<T>): Promise<T> {
-    // Chain promise but catch errors to prevent chain poisoning
-    this._currentPromise = this._currentPromise
-      .then(async () => {
-        this.setBusy(true);
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
-          return await fn();
-        } finally {
-          this.setBusy(false);
-        }
-      })
-      .catch(() => {}); // Catch errors to keep chain alive
+    // Create a new promise that will be returned to the caller
+    // This allows errors to propagate while keeping the chain alive
+    const resultPromise = this._currentPromise.then(async () => {
+      this.setBusy(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
+        const result = await fn();
+        return result;
+      } finally {
+        this.setBusy(false);
+      }
+    });
 
-    return this._currentPromise;
+    // Update the internal chain, catching errors to prevent chain poisoning
+    this._currentPromise = resultPromise.catch(() => {});
+
+    // Return the promise that propagates errors to the caller
+    return resultPromise;
   }
 
   get<T = any, R = AxiosResponse<T>, D = any>(

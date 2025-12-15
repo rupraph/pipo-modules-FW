@@ -109,9 +109,18 @@
       console.error("Failed to save config:", error);
       savingStatus = "error";
 
+      // Show error toast to inform user
+      addToast({
+        type: "error",
+        message: "Failed to save configuration. Please try again.",
+        timeout: 5000,
+      });
+
+      // Reset to normal state after showing error
+      // Keep the button visible so user can retry
       setTimeout(() => {
         savingStatus = "none";
-      }, 2000);
+      }, 3000);
     }
   }
 </script>
