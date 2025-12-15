@@ -21,6 +21,12 @@ void websocketTask(void* pvParameters) {
       taskDelay = 300;  // Very poor signal → Minimize WebSocket activity
     }
 
+    // Slow down websockets when BLE is connected to avoid conflicts
+    if (BTconnected) {
+      taskDelay =
+          max(taskDelay * 2, 100);  // At least double the delay, minimum 100ms
+    }
+
     pipoSocket.loop();
     esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
