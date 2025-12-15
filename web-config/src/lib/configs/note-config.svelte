@@ -224,7 +224,7 @@
   <InfoModal>
     <p>
       This defines the note duration in seconds. Setting 0 will make sustain
-      infinite until going out of range).
+      infinite. (Note stops when sensor goes out of range).
     </p>
   </InfoModal>
   <div class="note-input-container">

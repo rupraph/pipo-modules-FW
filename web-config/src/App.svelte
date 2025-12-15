@@ -111,9 +111,7 @@
               class="row"
               style="border-bottom: 1px dashed var(--bg-secondary); padding-bottom: 6px;"
             >
-              <div
-                style="display: flex; align-items: center; gap: 0.5em; white-space: nowrap;"
-              >
+              <div style="display: flex; align-items: center; gap: 0.5em;">
                 <h3 style="margin: 0; white-space: nowrap;">Relative mode</h3>
                 <InfoModal>
                   <p style="white-space: normal;">
