@@ -368,18 +368,22 @@ JsonDocument Engine::get_config(bool debug) {
   return j;
 }
 
-void Engine::set_config(JsonObject config, bool debug) {
+void Engine::set_config(JsonObject configin, bool debug) {
   if (debug) {
     log_d("will set engine config:");
-    serializeJsonPretty(config, Serial);
+    serializeJsonPretty(configin, Serial);
     log_d("");  // Empty line
   }
 
-  JsonDocument jmidi = config["engine-midi"];
+  JsonDocument jmidi = configin["engine-midi"];
 
   // set midi config from main config
   if (debug)
     log_d("set engine midi");
+  if (config.general_config["MidiEnabled"] == true) {
+    midiio.sendAllNotesOff(
+        0);  // stop all notes on all channels before changing config
+  }
   for (auto const& pair : Miditranslators) {
     if (jmidi[pair.first].is<JsonVariant>()) {
       // Serial.println(jmidi[pair.first].dump().c_str());
@@ -390,13 +394,13 @@ void Engine::set_config(JsonObject config, bool debug) {
   // set hid config from general config
   if (debug)
     log_d("set engine hid");
-  JsonDocument jhid = config["engine-hid"];
+  JsonDocument jhid = configin["engine-hid"];
   for (auto const& pair : HID_translators) {
     if (jhid[pair.first].is<JsonVariant>()) {
       HID_translators[pair.first].set_from_json(jhid[pair.first]);
     }
   }
-  JsonDocument josc = config["engine-osc"];
+  JsonDocument josc = configin["engine-osc"];
   if (debug)
     log_d("set engine osc");
   for (auto const& pair : Osctranslators) {
@@ -405,7 +409,7 @@ void Engine::set_config(JsonObject config, bool debug) {
     }
   }
 #ifdef PIPO_MOTION
-  JsonObject jspecial = config["engine-special"].as<JsonObject>();
+  JsonObject jspecial = configin["engine-special"].as<JsonObject>();
   if (debug)
     log_d("set engine special");
   // check how many elements are in the json object
@@ -424,6 +428,7 @@ void Engine::set_config(JsonObject config, bool debug) {
     log_d("engine config set");
   }
 }
+
 #ifdef PIPO_MOTION
 void Engine::motion_quat_to_osc() {
   float quats[4];
