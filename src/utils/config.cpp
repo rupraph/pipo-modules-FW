@@ -530,10 +530,10 @@ void Config::print() {
 void Config::gather(Engine& engine, bool debug) {
   log_d("gatherconfig sensor");
   current_config["inputs"].clear();
-  current_config["inputs"] = input_sensor.get_inputs_config();
+  input_sensor.get_inputs_config(current_config);
   log_d("gatherconfig engine");
   current_config["engine"].clear();
-  current_config["engine"] = engine.get_config();
+  engine.get_config(current_config);
   log_d("gatherconfig general");
   current_config["general"].clear();
   current_config["general"] = general_config;

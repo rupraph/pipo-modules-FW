@@ -97,7 +97,7 @@ class Sensor {
   void clear_completion_flag();
 
   // Get measured offset results for async responses
-  JsonDocument get_measured_offsets();
+  void get_measured_offsets(String& output);
   virtual void set_sensor_config(JsonObject config, bool debug = false) = 0;
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
@@ -122,7 +122,7 @@ class Sensor {
   unsigned long measured_interval_duration = 0;  //ms
 
   //config
-  JsonDocument get_inputs_config(bool debug = false);
+  void get_inputs_config(JsonDocument& doc, bool debug = false);
   void set_input_config(JsonObject config, bool debug = false);
 
   //Getter setters

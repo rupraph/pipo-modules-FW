@@ -396,14 +396,13 @@ void PipoServer::setup_requests() {
   server.on("/offsetcal-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
       if (input_sensor.is_offset_measurement_complete()) {
-        JsonDocument offsetData = input_sensor.get_measured_offsets();
+        String offsetJson;
+        input_sensor.get_measured_offsets(offsetJson);
         input_sensor.clear_completion_flag();
 
-        String response;
-        serializeJson(offsetData, response);
         return request->send(
             200, "application/json",
-            "{\"status\":\"complete\",\"offsets\":" + response + "}");
+            "{\"status\":\"complete\",\"offsets\":" + offsetJson + "}");
       }
       return request->send(200, "application/json",
                            "{\"status\":\"measuring\"}");

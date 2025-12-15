@@ -344,28 +344,26 @@ float Engine::round_to(float value, int decimal) {
   return round(value * pow(10, decimal)) / pow(10, decimal);
 }
 
-JsonDocument Engine::get_config(bool debug) {
-  JsonDocument j;
+void Engine::get_config(JsonDocument& doc, bool debug) {
+  doc["engine"].clear();
   for (auto const& pair : Miditranslators) {
-    j["engine-midi"][pair.first] = pair.second.get_json();
+    doc["engine"]["engine-midi"][pair.first] = pair.second.get_json();
   }
   for (auto const& pair : HID_translators) {
-    j["engine-hid"][pair.first] = pair.second.get_json();
+    doc["engine"]["engine-hid"][pair.first] = pair.second.get_json();
   }
   for (auto const& pair : Osctranslators) {
-    j["engine-osc"][pair.first] = pair.second.get_json();
+    doc["engine"]["engine-osc"][pair.first] = pair.second.get_json();
   }
 #ifdef PIPO_MOTION
-  j["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
-  j["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
+  doc["engine"]["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
+  doc["engine"]["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
 #endif
   if (debug) {
     log_d("engine_get_config");
-    serializeJsonPretty(j, Serial);
+    serializeJsonPretty(doc, Serial);
     log_d("engine_get_config_end");
   }
-
-  return j;
 }
 
 void Engine::set_config(JsonObject configin, bool debug) {
@@ -391,6 +389,7 @@ void Engine::set_config(JsonObject configin, bool debug) {
       Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
     }
   }
+  jmidi.clear();
   // set hid config from general config
   if (debug)
     log_d("set engine hid");
@@ -400,6 +399,7 @@ void Engine::set_config(JsonObject configin, bool debug) {
       HID_translators[pair.first].set_from_json(jhid[pair.first]);
     }
   }
+  jhid.clear();
   JsonDocument josc = configin["engine-osc"];
   if (debug)
     log_d("set engine osc");
@@ -408,6 +408,7 @@ void Engine::set_config(JsonObject configin, bool debug) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
   }
+  josc.clear();
 #ifdef PIPO_MOTION
   JsonObject jspecial = configin["engine-special"].as<JsonObject>();
   if (debug)
@@ -423,6 +424,7 @@ void Engine::set_config(JsonObject configin, bool debug) {
   } else {
     log_w("Engine: no special config found");
   }
+  jspecial.clear();
 #endif
   if (debug) {
     log_d("engine config set");

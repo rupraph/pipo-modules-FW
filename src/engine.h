@@ -56,7 +56,7 @@ class Engine {
                      float sensor_max);
 
   // config
-  JsonDocument get_config(bool debug = false);
+  void get_config(JsonDocument& doc, bool debug = false);
   void set_config(JsonObject config, bool debug = false);
 
   //utils
