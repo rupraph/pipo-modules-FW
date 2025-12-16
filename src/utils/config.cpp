@@ -115,7 +115,7 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
 
   try {
     if (DEBUG_HEAP)
-      pipoDebugHeap("Config: load config");
+      pipoDebugHeapFull("Config: load config");
 
     if (DEBUG_CONFIG) {
       log_d("config: before loading");
@@ -534,8 +534,9 @@ void Config::gather(Engine& engine, bool debug) {
   log_d("gatherconfig engine");
   current_config["engine"].clear();
   engine.get_config(current_config);
-  log_d("gatherconfig general");
-  current_config["general"].clear();
+  ral ");
+      current_config["general"]
+          .clear();
   current_config["general"] = general_config;
   log_d("gatherconfig sensorconf");
   current_config["sensorconf"].clear();
