@@ -49,7 +49,7 @@ class PipoSocket {
   unsigned long iterations = 0;
   const int inMaxLen = 2048;
   int inMsgL = 0;
-  char inMsg[2048];
+  char inMsg[512];
   const int outMaxLen = 256;
   int outMsgL = 0;
   char outMsg[256];
