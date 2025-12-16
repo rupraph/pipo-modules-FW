@@ -32,6 +32,12 @@ class OSC_handler;  // why do I need forward declaration here??
 class Engine {
  public:
   Engine() {
+    // Pre-allocate map capacity to prevent rehashing/fragmentation during initialization
+    const size_t num_axes = input_sensor.get_sensor_dat_map().size();
+    Miditranslators.reserve(num_axes);
+    Osctranslators.reserve(num_axes);
+    HID_translators.reserve(num_axes);
+
     for (const auto& axis : input_sensor.get_sensor_dat_map()) {
       Miditranslators[axis.first] = MidiTranslator();
       Osctranslators[axis.first] = OscTranslator();
