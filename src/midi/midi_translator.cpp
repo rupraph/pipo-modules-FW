@@ -58,7 +58,7 @@ void MidiTranslator::set_root_note(string rootNote) {
   }
 }
 
-void MidiTranslator::set_number_of_notes(int nbOfNotes) {
+void MidiTranslator::set_number_of_notes(uint8_t nbOfNotes) {
   if (nbOfNotes < 0 || nbOfNotes > 127) {
     cout << "Invalid number of notes." << endl;
     return;
