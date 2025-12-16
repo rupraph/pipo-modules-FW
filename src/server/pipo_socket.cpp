@@ -42,6 +42,21 @@ void PipoSocket::setup() {
                         AwsEventType type, void* arg, uint8_t* data,
                         size_t len) {
     log_v("WebSocket running on core: %d", xPortGetCoreID());
+
+    // Ignore ALL WebSocket activity when paused (e.g., during WiFi changes)
+    // The network change will naturally kill the connection
+    // The page will reload and reconnect with fresh state
+    if (paused) {
+      log_v("Ignoring WebSocket event while paused (type=%d)", type);
+      return;
+    }
+
+    // Ignore all frames from clients marked for termination
+    if (closingClients.find(client->id()) != closingClients.end()) {
+      log_v("Ignoring frame from terminating client ID=%u", client->id());
+      return;
+    }
+
     if (type == WS_EVT_CONNECT) {
       // Rate limiting: reject connections that are too rapid
       if (!shouldAcceptConnection(client)) {
@@ -71,6 +86,39 @@ void PipoSocket::setup() {
         pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
 
+      // Check for invalid opcodes - these indicate corrupted WebSocket stream
+      // Valid opcodes: 0=CONTINUATION, 1=TEXT, 2=BINARY, 8=CLOSE, 9=PING, 10=PONG
+      if (info->opcode > 10 && info->opcode != WS_DISCONNECT) {
+        log_e("WebSocket: Invalid opcode %d - terminating client ID=%u",
+              info->opcode, client->id());
+        closingClients.insert(client->id());
+        client->close(1002, "Protocol error");
+        inMsgL = 0;
+        return;
+      }
+
+      // Only accept TEXT frames for our application protocol
+      // Reject BINARY frames to prevent parser corruption
+      if (info->opcode == WS_BINARY) {
+        log_w("WebSocket: BINARY frame - terminating client ID=%u",
+              client->id());
+        closingClients.insert(client->id());
+        client->close(1003, "Unsupported data");
+        inMsgL = 0;
+        return;
+      }
+
+      // Only process TEXT and CONTINUATION frames
+      bool shouldProcess =
+          (info->opcode == WS_TEXT || info->opcode == WS_CONTINUATION);
+
+      if (!shouldProcess) {
+        // Control frames (PING, PONG) are handled by library, just skip
+        log_v("WebSocket: Skipping control/reserved frame (opcode=%d)",
+              info->opcode);
+        return;
+      }
+
       if (info->index == 0 && !info->final) {
         // Start of a fragmented message
         inMsgL = 0;
@@ -84,13 +132,41 @@ void PipoSocket::setup() {
         if (info->final) {
           // Message is complete
           inMsg[inMsgL] = '\0';  // Null-terminate the message
-          onMessage(client);     // Process the complete message
-          inMsgL = 0;            // Reset for the next message
+
+          // Validate message is printable text
+          bool isPrintable = true;
+          for (int i = 0; i < min(inMsgL, 64); i++) {
+            if (inMsg[i] < 32 || inMsg[i] > 126) {
+              isPrintable = false;
+              break;
+            }
+          }
+
+          if (isPrintable) {
+            log_v("WebSocket TEXT message (%d bytes): %.32s%s", inMsgL, inMsg,
+                  inMsgL > 32 ? "..." : "");
+            onMessage(client);  // Process the complete message
+          } else {
+            log_w(
+                "WebSocket: Non-printable TEXT data (%d bytes) - terminating "
+                "ID=%u",
+                inMsgL, client->id());
+            closingClients.insert(client->id());
+            client->close(1003, "Invalid text data");
+            inMsgL = 0;
+            return;
+          }
+
+          inMsgL = 0;  // Reset for the next message
         }
       } else {
         // Message too large or buffer overflow
-        log_e("WebSocket: Message exceeds buffer size");
+        log_e("WebSocket: Message exceeds buffer - terminating ID=%u",
+              client->id());
+        closingClients.insert(client->id());
+        client->close(1009, "Message too large");
         inMsgL = 0;
+        return;
       }
       if (DEBUG_HEAP)
         pipoDebugHeap("WS : End Data");
@@ -145,19 +221,11 @@ void PipoSocket::clearAllClients() {
   if (ws == nullptr)
     return;
 
-  log_i("Clearing all WebSocket clients (%u total)", ws->count());
-
-  auto clients = ws->getClients();
-  for (AsyncWebSocketClient* c : clients) {
-    log_i("Force closing WebSocket client ID=%u", c->id());
-    c->close();
-  }
-
-  // Clear tracking set
-  closingClients.clear();
-
-  // Force cleanup immediately
+  // Don't try to force-close clients - this causes iterator invalidation
+  // Just clean up dead ones and let paused state prevent new activity
+  log_i("Cleaning up dead WebSocket clients (%u total)", ws->count());
   cleanupDeadClients();
+  closingClients.clear();
 }
 
 bool PipoSocket::shouldAcceptConnection(AsyncWebSocketClient* newClient) {
@@ -213,13 +281,23 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
     char command[16];
     int offset = 0;
     int i = 0;
-    for (i = 0; i < inMsgL; i++) {
+    bool foundDelimiter = false;
+
+    for (i = 0; i < inMsgL && offset < 15; i++) {  // Prevent buffer overflow
       if (inMsg[i] == ':') {
-        command[offset] = 0;
+        foundDelimiter = true;
         break;
       }
       command[offset++] = inMsg[i];
     }
+    command[offset] = 0;  // Ensure null termination
+
+    // Ignore malformed messages without delimiter or with oversized commands
+    if (!foundDelimiter && offset >= 15) {
+      log_w("WebSocket: Ignoring message with oversized command (>15 chars)");
+      return;
+    }
+
     if (strcmp("config", command) == 0) {
       config.setValue(inMsg + offset + 1, inMsgL - offset - 1);
       config.apply(engine, osc, true);
@@ -337,7 +415,7 @@ void PipoSocket::loop() {
   if (msgLen == 0) {
     return;  // Nothing to send
   }
-  
+
   // Ensure null termination and prevent buffer overflow
   if (msgLen >= outMaxLen) {
     log_e("Message too large (%zu bytes), truncating", msgLen);
@@ -360,13 +438,13 @@ void PipoSocket::loop() {
       continue;  // Queue is full, skip silently (will retry next iteration)
     }
 
-    // Extra safety: when BLE active, skip if TCP layer also struggling
-    // This prevents radio conflicts from causing protocol errors
-    #ifdef INCLUDE_BLE
+// Extra safety: when BLE active, skip if TCP layer also struggling
+// This prevents radio conflicts from causing protocol errors
+#ifdef INCLUDE_BLE
     if (BTconnected && c->client() && c->client()->space() < 512) {
       continue;  // Give BLE priority, will retry next iteration
     }
-    #endif
+#endif
 
     c->text(outMsg);
   }
