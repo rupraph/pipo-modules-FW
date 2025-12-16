@@ -52,9 +52,14 @@ void PipoSocket::setup() {
     }
 
     // Ignore all frames from clients marked for termination
+    // EXCEPT disconnect events which clean up the tracking set
     if (closingClients.find(client->id()) != closingClients.end()) {
-      log_v("Ignoring frame from terminating client ID=%u", client->id());
-      return;
+      if (type == WS_EVT_DISCONNECT) {
+        // Allow disconnect to be processed for cleanup
+      } else {
+        // Silently ignore - don't flood logs with 100+ messages
+        return;
+      }
     }
 
     if (type == WS_EVT_CONNECT) {
