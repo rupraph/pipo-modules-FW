@@ -534,9 +534,8 @@ void Config::gather(Engine& engine, bool debug) {
   log_d("gatherconfig engine");
   current_config["engine"].clear();
   engine.get_config(current_config);
-  ral ");
-      current_config["general"]
-          .clear();
+  log_d("gatherconfig general");
+  current_config["general"].clear();
   current_config["general"] = general_config;
   log_d("gatherconfig sensorconf");
   current_config["sensorconf"].clear();
