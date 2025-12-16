@@ -461,7 +461,7 @@
   },
   "inputs": {
     "A01": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -472,7 +472,7 @@
       "over_out": false
     },
     "A02": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -483,7 +483,7 @@
       "over_out": false
     },
     "A03": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.1,
@@ -494,7 +494,7 @@
       "over_out": false
     },
     "A04": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.1,
@@ -505,7 +505,7 @@
       "over_out": false
     },
     "A05": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.1,
@@ -516,7 +516,7 @@
       "over_out": false
     },
     "A06": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.1,
@@ -527,7 +527,7 @@
       "over_out": false
     },
     "A07": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
@@ -538,7 +538,7 @@
       "over_out": false
     },
     "A08": {
-      "deadband": 0.02,
+      "deadband": 0.04,
       "offset": 0.0,
       "inverted": false,
       "lmax": 3.3,
