@@ -17,7 +17,7 @@ void init_filesystem() {
   // listDir(LittleFS, "/webpage", 2);
   log_i("Used filesystem bytes: %u", LittleFS.usedBytes());
   if (DEBUG_HEAP)
-    pipoDebugHeap("End setup filesystem");
+    pipoDebugHeapFull("End setup filesystem");
 }
 
 void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {

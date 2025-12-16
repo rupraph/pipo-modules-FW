@@ -37,6 +37,8 @@ button.primary {
   background-color: var(--bg-secondary);
   font-weight: 700;
   color: var(--main);
+  min-height: 25px;
+  min-width: 60px;
 }
 
 button.secondary {

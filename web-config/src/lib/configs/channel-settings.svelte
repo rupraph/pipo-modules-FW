@@ -331,16 +331,20 @@
             (on/off). The ON/OFF zones are defined by the sliders position. When
             disabled, the channel will output continuous values.
           </p>
-          <p>
-            Over mode: When enabled, if the reading exceeds the maximum slider
-            value, the output is set to 0. Otherwise, it is clamped to the max
-            value.
-          </p>
-          <p>
-            Cyclic: When enabled, the output wraps within the min max slider,
-            allowing for continous cycling: Output will be 0 when at min and at
-            max, and will reach the maximum in the middle of the range.
-          </p>
+          {#if type !== "motion" && type !== "analog" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
+            <p>
+              Over mode: When enabled, if the reading exceeds the maximum slider
+              value, the output is set to 0. Otherwise, it is clamped to the max
+              value.
+            </p>
+          {/if}
+          {#if type !== "range" && (type !== "motion" || isEulerAngle)}
+            <p>
+              Cyclic: When enabled, the output wraps within the min max slider,
+              allowing for continous cycling: Output will be 0 when at min and
+              at max, and will reach the maximum in the middle of the range.
+            </p>
+          {/if}
         </InfoModal>
       </div>
 

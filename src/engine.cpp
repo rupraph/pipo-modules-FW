@@ -88,10 +88,10 @@ void Engine::update() {
         Osctranslators.find(axis_name) != Osctranslators.end()) {
       osc_processor(axis_name, sensor_val, sensor_min, sensor_max);
     }
-    if (config.general_config["HidEnabled"] == true &&
-        HID_translators.find(axis_name) != HID_translators.end()) {
-      hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
-    }
+    // if (config.general_config["HidEnabled"] == true &&
+    //     HID_translators.find(axis_name) != HID_translators.end()) {
+    //   hid_processor(axis_name, sensor_val, sensor_min, sensor_max);
+    // }
   }
 
 #ifdef PIPO_MOTION
@@ -228,80 +228,80 @@ void Engine::midi_processor(string axis_name, float sensor_val,
   }
 }
 
-void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
-                           float sensor_max) {
+// void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
+//                            float sensor_max) {
 
-  HidTranslator& HID_translator = HID_translators[axis_name];
-  bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
-  if (HID_translator.is_enabled() == true) {
-    if (HID_translators.find(axis_name) != HID_translators.end()) {
+//   HidTranslator& HID_translator = HID_translators[axis_name];
+//   bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
+//   if (HID_translator.is_enabled() == true) {
+//     if (HID_translators.find(axis_name) != HID_translators.end()) {
 
-      string address = HID_translator.get_map_address();
-      string address2 = HID_translator.get_map_address2();
+//       string address = HID_translator.get_map_address();
+//       string address2 = HID_translator.get_map_address2();
 
-      switch ((int)config.general_config["HidMode"]) {
-        case 0:
-          //gamepad mode. to do
-          break;
-        case 1:
-          //continuous mode -> do not update if outise measuring range
-          if (input_sensor.get_mode(axis_name) == false) {
-            if (input_sensor.is_within_range(axis_name)) {
-              hidio.mouse_update(address,
-                                 HID_translator.get_mouse_int(
-                                     sensor_val, sensor_min, sensor_max),
-                                 sensor_bool_val);
-            }
-          } else {
-            hidio.mouse_update(address,
-                               HID_translator.get_mouse_int(
-                                   sensor_val, sensor_min, sensor_max),
-                               sensor_bool_val);
-          }
-          break;
-        case 2:
-          // keyboard mode. only compatible with axis in threshold mode
+//       switch ((int)config.general_config["HidMode"]) {
+//         case 0:
+//           //gamepad mode. to do
+//           break;
+//         case 1:
+//           //continuous mode -> do not update if outise measuring range
+//           if (input_sensor.get_mode(axis_name) == false) {
+//             if (input_sensor.is_within_range(axis_name)) {
+//               hidio.mouse_update(address,
+//                                  HID_translator.get_mouse_int(
+//                                      sensor_val, sensor_min, sensor_max),
+//                                  sensor_bool_val);
+//             }
+//           } else {
+//             hidio.mouse_update(address,
+//                                HID_translator.get_mouse_int(
+//                                    sensor_val, sensor_min, sensor_max),
+//                                sensor_bool_val);
+//           }
+//           break;
+//         case 2:
+//           // keyboard mode. only compatible with axis in threshold mode
 
-          //keystroke mode "once"
-          if (HID_translator.get_stroke_mode() == false) {
-            if (input_sensor.get_trigger_flag(axis_name, HID)) {
-              //Keyboard (it does not allow multiple key presses yet while it could)
-              hidio.keyboard_set_press(address);
-              // hidio.mouse_set_press(address);
-              input_sensor.set_trigger_flag(axis_name, HID, false);
-            }
-          } else {
-            // keystroke mode "maintained".
-            if (!input_sensor.get_threshold_mode(axis_name)) {
-              if (sensor_bool_val) {
-                hidio.keyboard_set_press(address);
-                // hidio.mouse_set_press(address);
-              }
-            } else {
-              //deal with 2 key addresses for true/false when basic threshold mode selected
-              //Todo: should not fetch input sensor value here I guess. like other processors
-              if (!sensor_bool_val) {
-                if (input_sensor.get_value(axis_name) >
-                    input_sensor.get_limit_max(axis_name)) {
-                  hidio.keyboard_set_press(address);
-                }
-                if (input_sensor.get_value(axis_name) <
-                    input_sensor.get_limit_min(axis_name)) {
-                  hidio.keyboard_set_press(address2);
-                }
-                // hidio.mouse_set_press(address);
-              }
-            }
-          }
-          break;
-      }
-    } else {
-      log_e("Engine: HID key not found");
-    }
-    hidio.update();
-  }
-  hidio.keyboard_release();
-}
+//           //keystroke mode "once"
+//           if (HID_translator.get_stroke_mode() == false) {
+//             if (input_sensor.get_trigger_flag(axis_name, HID)) {
+//               //Keyboard (it does not allow multiple key presses yet while it could)
+//               hidio.keyboard_set_press(address);
+//               // hidio.mouse_set_press(address);
+//               input_sensor.set_trigger_flag(axis_name, HID, false);
+//             }
+//           } else {
+//             // keystroke mode "maintained".
+//             if (!input_sensor.get_threshold_mode(axis_name)) {
+//               if (sensor_bool_val) {
+//                 hidio.keyboard_set_press(address);
+//                 // hidio.mouse_set_press(address);
+//               }
+//             } else {
+//               //deal with 2 key addresses for true/false when basic threshold mode selected
+//               //Todo: should not fetch input sensor value here I guess. like other processors
+//               if (!sensor_bool_val) {
+//                 if (input_sensor.get_value(axis_name) >
+//                     input_sensor.get_limit_max(axis_name)) {
+//                   hidio.keyboard_set_press(address);
+//                 }
+//                 if (input_sensor.get_value(axis_name) <
+//                     input_sensor.get_limit_min(axis_name)) {
+//                   hidio.keyboard_set_press(address2);
+//                 }
+//                 // hidio.mouse_set_press(address);
+//               }
+//             }
+//           }
+//           break;
+//       }
+//     } else {
+//       log_e("Engine: HID key not found");
+//     }
+//     hidio.update();
+//   }
+//   hidio.keyboard_release();
+// }
 
 void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
                            float sensor_max) {
@@ -344,42 +344,44 @@ float Engine::round_to(float value, int decimal) {
   return round(value * pow(10, decimal)) / pow(10, decimal);
 }
 
-JsonDocument Engine::get_config(bool debug) {
-  JsonDocument j;
+void Engine::get_config(JsonDocument& doc, bool debug) {
+  doc["engine"].clear();
   for (auto const& pair : Miditranslators) {
-    j["engine-midi"][pair.first] = pair.second.get_json();
+    doc["engine"]["engine-midi"][pair.first] = pair.second.get_json();
   }
-  for (auto const& pair : HID_translators) {
-    j["engine-hid"][pair.first] = pair.second.get_json();
-  }
+  // for (auto const& pair : HID_translators) {
+  //   doc["engine"]["engine-hid"][pair.first] = pair.second.get_json();
+  // }
   for (auto const& pair : Osctranslators) {
-    j["engine-osc"][pair.first] = pair.second.get_json();
+    doc["engine"]["engine-osc"][pair.first] = pair.second.get_json();
   }
 #ifdef PIPO_MOTION
-  j["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
-  j["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
+  doc["engine"]["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
+  doc["engine"]["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
 #endif
   if (debug) {
     log_d("engine_get_config");
-    serializeJsonPretty(j, Serial);
+    serializeJsonPretty(doc, Serial);
     log_d("engine_get_config_end");
   }
-
-  return j;
 }
 
-void Engine::set_config(JsonObject config, bool debug) {
+void Engine::set_config(JsonObject configin, bool debug) {
   if (debug) {
     log_d("will set engine config:");
-    serializeJsonPretty(config, Serial);
+    serializeJsonPretty(configin, Serial);
     log_d("");  // Empty line
   }
 
-  JsonDocument jmidi = config["engine-midi"];
+  JsonDocument jmidi = configin["engine-midi"];
 
   // set midi config from main config
   if (debug)
     log_d("set engine midi");
+  if (config.general_config["MidiEnabled"] == true) {
+    midiio.sendAllNotesOff(
+        0);  // stop all notes on all channels before changing config
+  }
   for (auto const& pair : Miditranslators) {
     if (jmidi[pair.first].is<JsonVariant>()) {
       // Serial.println(jmidi[pair.first].dump().c_str());
@@ -387,16 +389,18 @@ void Engine::set_config(JsonObject config, bool debug) {
       Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
     }
   }
+  jmidi.clear();
   // set hid config from general config
   if (debug)
     log_d("set engine hid");
-  JsonDocument jhid = config["engine-hid"];
-  for (auto const& pair : HID_translators) {
-    if (jhid[pair.first].is<JsonVariant>()) {
-      HID_translators[pair.first].set_from_json(jhid[pair.first]);
-    }
-  }
-  JsonDocument josc = config["engine-osc"];
+  // JsonDocument jhid = configin["engine-hid"];
+  // for (auto const& pair : HID_translators) {
+  //   if (jhid[pair.first].is<JsonVariant>()) {
+  //     HID_translators[pair.first].set_from_json(jhid[pair.first]);
+  //   }
+  // }
+  // jhid.clear();
+  JsonDocument josc = configin["engine-osc"];
   if (debug)
     log_d("set engine osc");
   for (auto const& pair : Osctranslators) {
@@ -404,8 +408,9 @@ void Engine::set_config(JsonObject config, bool debug) {
       Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
   }
+  josc.clear();
 #ifdef PIPO_MOTION
-  JsonObject jspecial = config["engine-special"].as<JsonObject>();
+  JsonObject jspecial = configin["engine-special"].as<JsonObject>();
   if (debug)
     log_d("set engine special");
   // check how many elements are in the json object
@@ -419,11 +424,13 @@ void Engine::set_config(JsonObject config, bool debug) {
   } else {
     log_w("Engine: no special config found");
   }
+  jspecial.clear();
 #endif
   if (debug) {
     log_d("engine config set");
   }
 }
+
 #ifdef PIPO_MOTION
 void Engine::motion_quat_to_osc() {
   float quats[4];

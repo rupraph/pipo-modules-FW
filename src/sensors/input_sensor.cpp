@@ -360,34 +360,32 @@ unsigned long Sensor::end_duration() {
 }
 
 //config
-JsonDocument Sensor::get_inputs_config(bool debug) {
-  JsonDocument config;
+void Sensor::get_inputs_config(JsonDocument& doc, bool debug) {
+  doc["inputs"].clear();
   try {
     for (auto const& pair : sensor_dat) {
       string axis_name = pair.first;
-      // config[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
-      config[axis_name]["inverted"] = sensor_dat[axis_name].inverted;
-      config[axis_name]["deadband"] = sensor_dat[axis_name].deadband;
-      // config[axis_name]["value"] = sensor_dat[axis_name].value;
-      config[axis_name]["offset"] = sensor_dat[axis_name].offset;
-      config[axis_name]["lmax"] = sensor_dat[axis_name].lmax;
-      config[axis_name]["lmin"] = sensor_dat[axis_name].lmin;
-      config[axis_name]["mode"] = sensor_dat[axis_name].mode;
-      config[axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
-      config[axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
-      config[axis_name]["over_out"] = sensor_dat[axis_name].over_out;
+      // doc[axis_name]["enabled"] = sensor_dat[axis_name].enabled;
+      doc["inputs"][axis_name]["inverted"] = sensor_dat[axis_name].inverted;
+      doc["inputs"][axis_name]["deadband"] = sensor_dat[axis_name].deadband;
+      // doc[axis_name]["value"] = sensor_dat[axis_name].value;
+      doc["inputs"][axis_name]["offset"] = sensor_dat[axis_name].offset;
+      doc["inputs"][axis_name]["lmax"] = sensor_dat[axis_name].lmax;
+      doc["inputs"][axis_name]["lmin"] = sensor_dat[axis_name].lmin;
+      doc["inputs"][axis_name]["mode"] = sensor_dat[axis_name].mode;
+      doc["inputs"][axis_name]["th_mode"] = sensor_dat[axis_name].th_mode;
+      doc["inputs"][axis_name]["cyclic"] = sensor_dat[axis_name].cyclic;
+      doc["inputs"][axis_name]["over_out"] = sensor_dat[axis_name].over_out;
     }
     if (debug) {
       Serial.println("returned_sensor_get_config");
-      serializeJsonPretty(config, Serial);
+      serializeJsonPretty(doc, Serial);
       Serial.println("returned_sensor_get_config_end");
     }
   } catch (const std::exception& e) {
     Serial.println("error: get_config");
     Serial.println(e.what());
   }
-
-  return config;
 }
 
 void Sensor::set_input_config(JsonObject config, bool debug) {
@@ -797,7 +795,7 @@ void Sensor::clear_completion_flag() {
   channels_to_measure.clear();
 }
 
-JsonDocument Sensor::get_measured_offsets() {
+void Sensor::get_measured_offsets(String& output) {
   JsonDocument result;
 
   if (measure_all) {
@@ -820,5 +818,6 @@ JsonDocument Sensor::get_measured_offsets() {
     }
   }
 
-  return result;
+  output.clear();
+  serializeJson(result, output);
 }

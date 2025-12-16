@@ -449,7 +449,6 @@ void PipoWifi::refresh() {
     scanning = WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     next.shouldScan = false;
   } else if (next.shouldRSSI) {
-    log_d("WiFi: Updating RSSI");
     rssi = WiFi.RSSI();
     next.shouldRSSI = false;
   } else if (isChangingAP) {

@@ -3,6 +3,12 @@
   let live = false;
 
   isLive.subscribe((value) => {
+    console.log(
+      "OfflineOverlay: isLive changed to",
+      value,
+      "overlay will be",
+      value ? "hidden" : "visible"
+    );
     live = value;
   });
 </script>
@@ -18,6 +24,7 @@
       >
         <li>• Check your WiFi connection to Pipo</li>
         <li>• Try restarting Pipo if the issue persists</li>
+        <li>• Make sure you only have one config page open</li>
       </ul>
       <ul>
         <li>

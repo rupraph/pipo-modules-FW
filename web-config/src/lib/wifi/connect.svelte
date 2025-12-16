@@ -9,18 +9,25 @@
   import Spinner from "../spinner.svelte";
   import type { Network } from "./types";
   import { fetchNetworks, fetchState } from "../../services/wifi";
+  import { onMount } from "svelte";
 
   let editing = "";
   let showPassword = false;
   let password: string | undefined = undefined;
   let waiting = false;
   let wifiMode = "";
+  let mounted = false;
 
   // Use reactive declarations for better Svelte reactivity
   $: networks = $wifiState.networks;
   $: apIP = $wifiState.apIP;
   $: staIP = $wifiState.staIP;
-  $: onShow();
+  $: if (mounted) onShow();
+
+  onMount(() => {
+    mounted = true;
+  });
+
   async function onShow() {
     const now = Date.now();
     if (get(wifiState).lastScan < now - 30000) {
@@ -29,7 +36,7 @@
   }
   export async function scan() {
     if (waiting) return;
-    pipoio.pause();
+    await pipoio.pause();
     waiting = true;
     let toast = {
       type: "info" as const,
@@ -50,11 +57,12 @@
       // wait for the scan to complete
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await fetchNetworks();
-      pipoio.resume();
+      await pipoio.resume();
       setLastScan(Date.now());
       waiting = false;
     } catch (e) {
-      pipoio.resume();
+      await pipoio.resume();
+      waiting = false;
       console.error(e);
     }
   }
@@ -141,15 +149,16 @@
   async function onConnect(ssid: string) {
     if (waiting) return;
     waiting = true;
-    let retry = 0;
-    const maxRetry = 5;
     let toast: Toast = {
       type: "info",
       message: `Connecting to ${ssid}...`,
       timeout: 5000,
     };
     addToast(toast);
+
+    // Pause websocket before network change since we'll reload anyway
     await pipoio.pause();
+
     try {
       await pipoio.request({
         method: "post",
@@ -157,63 +166,14 @@
         params: { ssid, password },
         timeout: 1000,
       });
+      // Wait 5s for network connection to establish
       await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (e) {
       console.error(e);
     }
-    return location.reload();
-    while (retry++ < maxRetry) {
-      try {
-        const [mode, status, ...info] = (
-          await pipoio.get("/wifi-state")
-        ).data.split(" ");
-        wifiMode = mode;
-        if (status === "CONNECTING") continue;
-        if (status === "UNKNOWN") {
-          toast = {
-            type: "error",
-            message: `Connection to ${ssid} return unexpected error, please restart PIPO`,
-            timeout: 5000,
-          };
-          break;
-        }
-        if (status === "CONNECTED") {
-          const [ip, newssid] = info;
-          if (newssid === ssid) {
-            toast = {
-              type: "success",
-              message: `Connected to ${ssid} with IP ${ip}`,
-              timeout: 5000,
-            };
-          } else if (newssid) {
-            toast = {
-              type: "warning",
-              message: `Could not connect to ${ssid}, fallback on ${newssid}`,
-              timeout: 5000,
-            };
-          } else {
-            toast = {
-              type: "error",
-              message: `Could not connect to ${ssid}, fallback on AP mode`,
-              timeout: 5000,
-            };
-          }
-          break;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
-    try {
-      await fetchNetworks();
-    } catch (e) {
-      console.error(e);
-    }
-    pipoio.resume();
-    waiting = false;
-    editing = "";
-    addToast(toast);
+
+    // Network changed - reload page to get new IP
+    location.reload();
   }
 </script>
 
@@ -328,9 +288,14 @@
     gap: 1em;
     font-size: 1em;
     padding: 0 1em 0.5em 1em;
-    max-height: calc(100vh - 10em);
+    max-height: 80vh;
     overflow-y: auto;
+
+    /* Standard scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: var(--main) transparent;
   }
+
   .connection.waiting,
   .connection.waiting * {
     cursor: wait;

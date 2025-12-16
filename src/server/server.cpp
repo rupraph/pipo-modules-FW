@@ -40,7 +40,7 @@ void PipoServer::setup() {
   is_running = true;
 
   if (DEBUG_HEAP)
-    pipoDebugHeap("End server setup");
+    pipoDebugHeapFull("End server setup");
 }
 void PipoServer::pause() {
   pipoSocket.pause();
@@ -101,7 +101,7 @@ void PipoServer::setup_requests() {
     }
     try {
       if (DEBUG_HEAP)
-        pipoDebugHeap("config request");
+        pipoDebugHeapFull("config request");
       config.set(request->getParam("config")->value());
 
       config.apply(engine, osc, DEBUG_CONFIG);
@@ -257,7 +257,7 @@ void PipoServer::setup_requests() {
             config.apply(engine, osc, DEBUG_CONFIG);
             received_configData.clear();
             if (DEBUG_HEAP)
-              pipoDebugHeap("Request: config saved");
+              pipoDebugHeapFull("Request: config saved");
             return request->send(200, "text/plain", "Config saved");
           }
         } catch (const std::exception& e) {
@@ -396,14 +396,13 @@ void PipoServer::setup_requests() {
   server.on("/offsetcal-status", HTTP_GET, [&](AsyncWebServerRequest* request) {
     try {
       if (input_sensor.is_offset_measurement_complete()) {
-        JsonDocument offsetData = input_sensor.get_measured_offsets();
+        String offsetJson;
+        input_sensor.get_measured_offsets(offsetJson);
         input_sensor.clear_completion_flag();
 
-        String response;
-        serializeJson(offsetData, response);
         return request->send(
             200, "application/json",
-            "{\"status\":\"complete\",\"offsets\":" + response + "}");
+            "{\"status\":\"complete\",\"offsets\":" + offsetJson + "}");
       }
       return request->send(200, "application/json",
                            "{\"status\":\"measuring\"}");

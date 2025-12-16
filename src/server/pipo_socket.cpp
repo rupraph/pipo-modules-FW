@@ -21,6 +21,12 @@ void websocketTask(void* pvParameters) {
       taskDelay = 300;  // Very poor signal → Minimize WebSocket activity
     }
 
+    // Slow down websockets when BLE is connected to avoid conflicts
+    if (BTconnected) {
+      taskDelay =
+          max(taskDelay * 2, 120);  // At least double the delay, minimum 120ms
+    }
+
     pipoSocket.loop();
     esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
@@ -326,6 +332,19 @@ void PipoSocket::loop() {
              logs.readLogs(true));
   }
 
+  // Validate message is safe to send (prevent 1002 protocol errors)
+  size_t msgLen = strlen(outMsg);
+  if (msgLen == 0) {
+    return;  // Nothing to send
+  }
+  
+  // Ensure null termination and prevent buffer overflow
+  if (msgLen >= outMaxLen) {
+    log_e("Message too large (%zu bytes), truncating", msgLen);
+    outMsg[outMaxLen - 1] = '\0';
+    msgLen = outMaxLen - 1;
+  }
+
   // Send to connected clients with defensive checks
   for (AsyncWebSocketClient* c : clients) {
     // Verify client is in a valid state before sending
@@ -340,6 +359,14 @@ void PipoSocket::loop() {
     if (!c->canSend()) {
       continue;  // Queue is full, skip silently (will retry next iteration)
     }
+
+    // Extra safety: when BLE active, skip if TCP layer also struggling
+    // This prevents radio conflicts from causing protocol errors
+    #ifdef INCLUDE_BLE
+    if (BTconnected && c->client() && c->client()->space() < 512) {
+      continue;  // Give BLE priority, will retry next iteration
+    }
+    #endif
 
     c->text(outMsg);
   }

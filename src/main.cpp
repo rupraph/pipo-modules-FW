@@ -130,7 +130,7 @@ void setup() {  // by default on core 1
   osc.setup();
 
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeapFull();
 
   log_i("Starting tasks");
 
@@ -148,15 +148,15 @@ void setup() {  // by default on core 1
 
   // We are using the main loop instead of a dedicated Sensor task to optimize ram usage in arduino framework
 
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 4096, NULL, 2,
+  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,
                           &websocketTaskHandle, 0);
   xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
                           0);
   xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
                           &battmonitorTaskHandle, 0);
 #ifdef PIPO_ANALOG
-  xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
-                          &oscreceiveTaskHandle, 0);
+  // xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
+  //                         &oscreceiveTaskHandle, 0);
 // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
 //                         &hwuiSoftPwmTaskHandle, 0);
 #endif

@@ -475,6 +475,11 @@ class ConfigService {
    * Initialize config service - fetch initial data
    */
   async initialize(): Promise<void> {
+    // Prevent multiple simultaneous initializations
+    if (get(configsLoading)) {
+      console.log("Config service already initializing, skipping...");
+      return;
+    }
     await this.refresh();
     // Start polling for changes after config is loaded
     startChangeDetection();
@@ -486,7 +491,12 @@ export const configService = new ConfigService();
 // Initialize ConfigSave to auto-subscribe to currentConfig changes
 export const configSave = new ConfigSave<PipoTypes>();
 
-// Auto-fetch configs on connection
+let isInitialized = false;
+
+// Auto-fetch configs on connection (but only once per session)
 pipoio.on("connect", () => {
-  configService.initialize();
+  if (!isInitialized) {
+    isInitialized = true;
+    configService.initialize();
+  }
 });

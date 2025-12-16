@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include "HW_CONFIG.h"
 #include "midi/midi_translator.h"
-#include "hid/usb_hid.h"
+// #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
 #include "midi/midi_io.h"
 #include <ArduinoJson.h>
@@ -32,31 +32,37 @@ class OSC_handler;  // why do I need forward declaration here??
 class Engine {
  public:
   Engine() {
+    // Pre-allocate map capacity to prevent rehashing/fragmentation during initialization
+    const size_t num_axes = input_sensor.get_sensor_dat_map().size();
+    Miditranslators.reserve(num_axes);
+    Osctranslators.reserve(num_axes);
+    // HID_translators.reserve(num_axes);
+
     for (const auto& axis : input_sensor.get_sensor_dat_map()) {
       Miditranslators[axis.first] = MidiTranslator();
       Osctranslators[axis.first] = OscTranslator();
-      HID_translators[axis.first] = HidTranslator();
+      // HID_translators[axis.first] = HidTranslator();
     }
   }
 
   unordered_map<string, MidiTranslator> Miditranslators;
   unordered_map<string, OscTranslator> Osctranslators;
-  unordered_map<string, HidTranslator> HID_translators;
+  // unordered_map<string, HidTranslator> HID_translators;
 
-  hid_gamepad_report_t gp;
-  hid_keyboard_report_t kb;
-  hid_mouse_report_t mouse;
+  // hid_gamepad_report_t gp;
+  // hid_keyboard_report_t kb;
+  // hid_mouse_report_t mouse;
 
   void update();
   void midi_processor(string axis_name, float sensor_val, float sensor_min,
                       float sensor_max);
-  void hid_processor(string axis_name, float sensor_val, float sensor_min,
-                     float sensor_max);
+  // void hid_processor(string axis_name, float sensor_val, float sensor_min,
+  //                    float sensor_max);
   void osc_processor(string axis_name, float sensor_val, float sensor_min,
                      float sensor_max);
 
   // config
-  JsonDocument get_config(bool debug = false);
+  void get_config(JsonDocument& doc, bool debug = false);
   void set_config(JsonObject config, bool debug = false);
 
   //utils

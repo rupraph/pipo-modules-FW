@@ -17,10 +17,9 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private paused: boolean = false;
   private busy: boolean = false;
   private _currentPromise: Promise<any> = Promise.resolve();
-  private heartbeat = 0;
+  private resurrectInterval = 0;
   private saveTimeout = 0;
   private isConnecting = false;
-  private resurect = 0;
   private nMsgs = 0;
   private msgLen = 0;
   private lastMsgDate = 0;
@@ -31,35 +30,49 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   constructor() {
     super();
     this.connect();
-    // Check for dead connections every 2 seconds
-    // If no messages received, close socket to trigger reconnection
-    // This ensures quick detection during server reboots
-    this.resurect = setInterval(() => {
+    
+    // Check for dead connections every 3 seconds
+    // If no messages received in that period, close socket and emit disconnect
+    // This ensures detection during server reboots while being forgiving of brief pauses
+    this.resurrectInterval = setInterval(() => {
       const n = this.nMsgs;
       this.nMsgs = 0;
       this.msgLen = 0;
-      if (this.busy || this.paused || n > 1 || this.isConnecting) {
+      
+      if (this.busy || this.paused || n > 0 || this.isConnecting) {
         return;
       }
+      
+      console.log('No websocket messages for 3s - connection appears dead');
       this.socket?.close();
       this.onDisconnect(true);
-    }, 2000) as any as number;
+    }, 3000) as any as number;
+  }
+
+  private stopConnectionMonitoring() {
+    if (this.resurrectInterval) {
+      clearInterval(this.resurrectInterval);
+      this.resurrectInterval = 0;
+    }
   }
 
   async pause() {
     this.paused = true;
+    // Reset message counter to prevent resurrect interval from triggering
+    // during pause period (e.g., during WiFi scan)
+    this.nMsgs = 1; // Set to 1 so resurrect check sees "activity"
     this.onDisconnect(false);
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
+  
   async resume() {
     this.paused = false;
+    // Reset message counter on resume to give connection a fresh start
+    this.nMsgs = 1;
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
+  
   private cleanup() {
-    if (this.heartbeat) {
-      clearInterval(this.heartbeat);
-      this.heartbeat = 0;
-    }
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = 0;
@@ -74,33 +87,28 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       this.emit("disconnect");
     }
     
+    // Don't attempt reconnection if paused, already connecting, or still connected
+    if (this.paused || this.isConnecting || (this.socket?.readyState === WebSocket.OPEN)) {
+      console.log("Disconnected but not reconnecting (paused or already connecting)");
+      return;
+    }
+    
     // Clear any pending reconnection
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = 0;
     }
     
-    // Calculate exponential backoff with jitter
-    const delay = Math.min(
-      this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
-      this.maxReconnectDelay
-    );
-    // Add jitter (±25% randomness)
-    const jitter = delay * 0.25 * (Math.random() * 2 - 1);
-    const reconnectDelay = Math.max(this.baseReconnectDelay, delay + jitter);
-    
-    this.reconnectAttempts++;
-    console.log(`Reconnecting in ${Math.round(reconnectDelay)}ms (attempt ${this.reconnectAttempts})`);
-    
-    this.reconnectTimeout = window.setTimeout(() => {
-      this.reconnectTimeout = 0;
-      this.connect();
-    }, reconnectDelay);
+    // Don't reconnect in the background
+    // The page will reload after 5s timeout (handled in services/index.ts)
+    // This prevents stale page state after network changes
+    console.log("Disconnected - waiting for page reload, no automatic reconnection");
   }
   private onOpen() {
     this.isConnecting = false;
     // Reset reconnect attempts on successful connection
     this.reconnectAttempts = 0;
+    
     setTimeout(() => {
       this.emit("connect");
     }, 100);
@@ -112,6 +120,7 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     try {
       this.nMsgs++;
       this.msgLen += m.data.length;
+      
       const lines = m.data.split("\n");
       lines.forEach((msg) => {
         const { command, args, isSensor, axis } = parse(msg);
@@ -154,6 +163,12 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   }
 
   private connect() {
+    // Prevent multiple simultaneous connection attempts
+    if (this.isConnecting || this.socket?.readyState === WebSocket.OPEN) {
+      console.log('Already connecting or connected, skipping connect()');
+      return;
+    }
+    
     this.isConnecting = true;
     const url = import.meta.env.VITE_STATIC_IP
       ? `${import.meta.env.VITE_STATIC_IP.replace(/http/, "ws")}/ws`
@@ -167,7 +182,11 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     });
     socket.addEventListener("close", () => {
       this.isConnecting = false;
-      this.onDisconnect();
+      // Only trigger disconnect if this was our active socket
+      if (this.socket === socket) {
+        this.socket = undefined;
+        this.onDisconnect();
+      }
     });
     socket.addEventListener("message", (m) => this.onMessage(m));
   }
@@ -205,6 +224,11 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     );
   }
 
+  requestRSSI() {
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send("rssi:0");
+  }
+
   saveConfig<T extends PipoTypes>(config: PipoConfig<T>) {
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
@@ -218,17 +242,24 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   }
 
   private _wrap<T>(fn: () => Promise<T>): Promise<T> {
-    this._currentPromise = this._currentPromise.then(async () => {
+    // Create a new promise that will be returned to the caller
+    // This allows errors to propagate while keeping the chain alive
+    const resultPromise = this._currentPromise.then(async () => {
       this.setBusy(true);
       try {
         await new Promise((resolve) => setTimeout(resolve, 25)); // Optional delay
-        return await fn();
+        const result = await fn();
+        return result;
       } finally {
         this.setBusy(false);
       }
     });
 
-    return this._currentPromise;
+    // Update the internal chain, catching errors to prevent chain poisoning
+    this._currentPromise = resultPromise.catch(() => {});
+
+    // Return the promise that propagates errors to the caller
+    return resultPromise;
   }
 
   get<T = any, R = AxiosResponse<T>, D = any>(
@@ -263,7 +294,6 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
 
   destroy() {
     this.cleanup();
-    clearInterval(this.resurect);
   }
 
   on<K extends keyof PipoEvents<T>>(
@@ -283,9 +313,7 @@ if (import.meta.hot) {
   // hook before the page reloads
   import.meta.hot.accept(); // Accept HMR updates for this module
   import.meta.hot.dispose(() => {
-    // @ts-expect-error private
-    clearInterval(pipoio.resurect); // Clear the interval when the module is replaced
-    // @ts-expect-error private
-    pipoio.resurect = null;
+    pipoio.destroy();
   });
 }
+

@@ -53,7 +53,7 @@
     color: var(--bg-primary);
   }
   .info {
-    background: #4a9eeadd;
+    background: blur(7px);
   }
   .warning {
     background: #ff8c00dd;

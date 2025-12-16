@@ -105,7 +105,12 @@ class PresetsService {
 
 export const presetsService = new PresetsService();
 
-// Auto-fetch presets on connection
+let isInitialized = false;
+
+// Auto-fetch presets on connection (but only once per session)
 pipoio.on("connect", () => {
-  presetsService.fetchPresets();
+  if (!isInitialized) {
+    isInitialized = true;
+    presetsService.fetchPresets();
+  }
 });

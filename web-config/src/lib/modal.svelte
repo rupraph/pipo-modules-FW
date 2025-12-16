@@ -37,16 +37,24 @@
 
 <style>
   .modal {
-    top: 50%;
-    left: 50%;
     z-index: 21;
     width: calc(100vw - 8px);
     max-width: 400px;
+    max-height: calc(100vh - 2em);
     background-color: var(--bg-network);
     position: fixed;
     overflow: hidden;
-    transform: translate(-50%, -50%);
     padding: 0 8px 8px 8px;
+
+    /* Center horizontally */
+    left: 50%;
+    transform: translateX(-50%);
+
+    /* Position vertically with constraint */
+    top: 1em;
+    bottom: 1em;
+    margin: auto 0;
+    height: fit-content;
   }
   .modal :global(p) {
     text-align: left;

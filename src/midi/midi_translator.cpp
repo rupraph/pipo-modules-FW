@@ -26,7 +26,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
   return current_scale[index];
 }
 
-void MidiTranslator::print_scale(vector<int> scale) {
+void MidiTranslator::print_scale(vector<uint8_t> scale) {
   log_d("Scale: ");
   for (int i = 0; i < scale.size(); i++) {
     log_d("%d-", scale[i]);
@@ -58,7 +58,7 @@ void MidiTranslator::set_root_note(string rootNote) {
   }
 }
 
-void MidiTranslator::set_number_of_notes(int nbOfNotes) {
+void MidiTranslator::set_number_of_notes(uint8_t nbOfNotes) {
   if (nbOfNotes < 0 || nbOfNotes > 127) {
     cout << "Invalid number of notes." << endl;
     return;
@@ -102,13 +102,13 @@ bool MidiTranslator::is_a_note(string noteName) {
   }
 }
 
-vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
-                                                string pattern,
-                                                string scaleType) {
-  vector<int> expandedScale;
+vector<uint8_t> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
+                                                    string pattern,
+                                                    string scaleType) {
+  vector<uint8_t> expandedScale;
   // expand over octaves for arpeggios and scales
   if (pattern != "interval") {
-    vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
+    vector<uint8_t> scale = generate_base_scale(rootNote, pattern, scaleType);
 
     int baseScaleSize = scale.size();
     int baseNoteIndex = 0;
@@ -141,12 +141,13 @@ vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   return expandedScale;
 }
 
-vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
-                                                string scaleType) {
+vector<uint8_t> MidiTranslator::generate_base_scale(int rootNote,
+                                                    string pattern,
+                                                    string scaleType) {
   if (pattern == "scale") {
     auto it = scales.find(scaleType);
     if (it != scales.end()) {
-      vector<int> scale = it->second;
+      vector<uint8_t> scale(it->second.begin(), it->second.end());
       for (int i = 0; i < scale.size(); i++) {
         scale[i] += rootNote;
       }
@@ -158,7 +159,7 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
   } else if (pattern == "arpeggio") {
     auto it = arpegios.find(scaleType);
     if (it != arpegios.end()) {
-      vector<int> scale = it->second;
+      vector<uint8_t> scale(it->second.begin(), it->second.end());
       for (int i = 0; i < scale.size(); i++) {
         scale[i] += rootNote;
       }
@@ -271,24 +272,24 @@ void MidiTranslator::set_hires(bool h) {
 }
 
 // Todo: should make setter more secure with value checking
-int MidiTranslator::get_channel() {
+uint8_t MidiTranslator::get_channel() {
   return channel;
 }
-void MidiTranslator::set_channel(int c) {
+void MidiTranslator::set_channel(uint8_t c) {
   channel = c;
 }
 
-int MidiTranslator::get_cc_number() {
+uint8_t MidiTranslator::get_cc_number() {
   return cc_nb;
 }
-void MidiTranslator::set_cc_number(int c) {
+void MidiTranslator::set_cc_number(uint8_t c) {
   cc_nb = c;
 }
 
-int MidiTranslator::get_translator_mode() {
+uint8_t MidiTranslator::get_translator_mode() {
   return tl_mode;
 }
-void MidiTranslator::set_translator_mode(int t) {
+void MidiTranslator::set_translator_mode(uint8_t t) {
   tl_mode = t;
 }
 
@@ -296,14 +297,14 @@ string MidiTranslator::get_scale_type() {
   return scaleType;
 }
 
-int MidiTranslator::get_root_note() {
+uint8_t MidiTranslator::get_root_note() {
   return rootNote;
 }
-void MidiTranslator::set_root_note(int r) {
+void MidiTranslator::set_root_note(uint8_t r) {
   rootNote = r;
 }
 
-int MidiTranslator::get_number_of_notes() {
+uint8_t MidiTranslator::get_number_of_notes() {
   return nbOfNotes;
 }
 
@@ -314,25 +315,25 @@ void MidiTranslator::set_sustain(float s) {
   sustain = s;
 }
 
-int MidiTranslator::get_max_output() {
+uint16_t MidiTranslator::get_max_output() {
   return cc_max;
 }
-void MidiTranslator::set_max_output(int m) {
+void MidiTranslator::set_max_output(uint16_t m) {
   cc_max = m;
 }
 
-int MidiTranslator::get_min_output() {
+uint16_t MidiTranslator::get_min_output() {
   return cc_min;
 }
-void MidiTranslator::set_min_output(int m) {
+void MidiTranslator::set_min_output(uint16_t m) {
   cc_min = m;
 }
 
-int MidiTranslator::get_velocity() {
+uint8_t MidiTranslator::get_velocity() {
   return velocity;
 }
 
-void MidiTranslator::set_velocity(int v) {
+void MidiTranslator::set_velocity(uint8_t v) {
   velocity = v;
 }
 
