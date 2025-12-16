@@ -130,7 +130,7 @@ void setup() {  // by default on core 1
   osc.setup();
 
   if (DEBUG_HEAP)
-    pipoDebugHeap();
+    pipoDebugHeapFull();
 
   log_i("Starting tasks");
 
