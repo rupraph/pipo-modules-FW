@@ -26,7 +26,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
   return current_scale[index];
 }
 
-void MidiTranslator::print_scale(vector<int> scale) {
+void MidiTranslator::print_scale(vector<uint8_t> scale) {
   log_d("Scale: ");
   for (int i = 0; i < scale.size(); i++) {
     log_d("%d-", scale[i]);
@@ -102,13 +102,13 @@ bool MidiTranslator::is_a_note(string noteName) {
   }
 }
 
-vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
-                                                string pattern,
-                                                string scaleType) {
-  vector<int> expandedScale;
+vector<uint8_t> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
+                                                    string pattern,
+                                                    string scaleType) {
+  vector<uint8_t> expandedScale;
   // expand over octaves for arpeggios and scales
   if (pattern != "interval") {
-    vector<int> scale = generate_base_scale(rootNote, pattern, scaleType);
+    vector<uint8_t> scale = generate_base_scale(rootNote, pattern, scaleType);
 
     int baseScaleSize = scale.size();
     int baseNoteIndex = 0;
@@ -141,12 +141,13 @@ vector<int> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   return expandedScale;
 }
 
-vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
-                                                string scaleType) {
+vector<uint8_t> MidiTranslator::generate_base_scale(int rootNote,
+                                                    string pattern,
+                                                    string scaleType) {
   if (pattern == "scale") {
     auto it = scales.find(scaleType);
     if (it != scales.end()) {
-      vector<int> scale = it->second;
+      vector<uint8_t> scale(it->second.begin(), it->second.end());
       for (int i = 0; i < scale.size(); i++) {
         scale[i] += rootNote;
       }
@@ -158,7 +159,7 @@ vector<int> MidiTranslator::generate_base_scale(int rootNote, string pattern,
   } else if (pattern == "arpeggio") {
     auto it = arpegios.find(scaleType);
     if (it != arpegios.end()) {
-      vector<int> scale = it->second;
+      vector<uint8_t> scale(it->second.begin(), it->second.end());
       for (int i = 0; i < scale.size(); i++) {
         scale[i] += rootNote;
       }

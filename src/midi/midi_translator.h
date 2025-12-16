@@ -34,7 +34,7 @@ class MidiTranslator
   string scaleType = "major";  // see maps below for keywords
   int rootNote = 45;
   int nbOfNotes = 25;
-  vector<int> current_scale;
+  vector<uint8_t> current_scale;
   float sustain = 1.0;  //in seconds. 0 for infinite
 
   //CC variables
@@ -47,7 +47,7 @@ class MidiTranslator
 
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
-  void print_scale(vector<int> scale);
+  void print_scale(vector<uint8_t> scale);
 
   int convert_note_name_to_number(string noteName);
   string convert_number_to_note_name(int noteNumber);
@@ -146,10 +146,10 @@ class MidiTranslator
   // }
 
  private:
-  vector<int> generate_full_scale(int rootNote, int nb_notes, string pattern,
-                                  string scaleType);
-  vector<int> generate_base_scale(int rootNote, string pattern,
-                                  string scaleType);
+  vector<uint8_t> generate_full_scale(int rootNote, int nb_notes,
+                                      string pattern, string scaleType);
+  vector<uint8_t> generate_base_scale(int rootNote, string pattern,
+                                      string scaleType);
 
   static const unordered_map<string, vector<int>> arpegios;
   static const unordered_map<string, vector<int>> scales;
