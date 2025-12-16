@@ -272,24 +272,24 @@ void MidiTranslator::set_hires(bool h) {
 }
 
 // Todo: should make setter more secure with value checking
-int MidiTranslator::get_channel() {
+uint8_t MidiTranslator::get_channel() {
   return channel;
 }
-void MidiTranslator::set_channel(int c) {
+void MidiTranslator::set_channel(uint8_t c) {
   channel = c;
 }
 
-int MidiTranslator::get_cc_number() {
+uint8_t MidiTranslator::get_cc_number() {
   return cc_nb;
 }
-void MidiTranslator::set_cc_number(int c) {
+void MidiTranslator::set_cc_number(uint8_t c) {
   cc_nb = c;
 }
 
-int MidiTranslator::get_translator_mode() {
+uint8_t MidiTranslator::get_translator_mode() {
   return tl_mode;
 }
-void MidiTranslator::set_translator_mode(int t) {
+void MidiTranslator::set_translator_mode(uint8_t t) {
   tl_mode = t;
 }
 
@@ -297,14 +297,14 @@ string MidiTranslator::get_scale_type() {
   return scaleType;
 }
 
-int MidiTranslator::get_root_note() {
+uint8_t MidiTranslator::get_root_note() {
   return rootNote;
 }
-void MidiTranslator::set_root_note(int r) {
+void MidiTranslator::set_root_note(uint8_t r) {
   rootNote = r;
 }
 
-int MidiTranslator::get_number_of_notes() {
+uint8_t MidiTranslator::get_number_of_notes() {
   return nbOfNotes;
 }
 
@@ -315,25 +315,25 @@ void MidiTranslator::set_sustain(float s) {
   sustain = s;
 }
 
-int MidiTranslator::get_max_output() {
+uint16_t MidiTranslator::get_max_output() {
   return cc_max;
 }
-void MidiTranslator::set_max_output(int m) {
+void MidiTranslator::set_max_output(uint16_t m) {
   cc_max = m;
 }
 
-int MidiTranslator::get_min_output() {
+uint16_t MidiTranslator::get_min_output() {
   return cc_min;
 }
-void MidiTranslator::set_min_output(int m) {
+void MidiTranslator::set_min_output(uint16_t m) {
   cc_min = m;
 }
 
-int MidiTranslator::get_velocity() {
+uint8_t MidiTranslator::get_velocity() {
   return velocity;
 }
 
-void MidiTranslator::set_velocity(int v) {
+void MidiTranslator::set_velocity(uint8_t v) {
   velocity = v;
 }
 

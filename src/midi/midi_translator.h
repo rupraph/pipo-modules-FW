@@ -24,26 +24,26 @@ class MidiTranslator
  public:
   MidiTranslator();
   bool enabled = false;
-  int channel = 1;  // should be in engine.
-  int cc_nb = 1;
+  uint8_t channel = 1;  // should be in engine.
+  uint8_t cc_nb = 1;
 
   //notes variables
-  int tl_mode = 0;  //0=cc, 1 note, 2 both
+  uint8_t tl_mode = 0;  //0=cc, 1 note, 2 both
 
   string pattern = "scale";  //can be scale, arpegio or interval (note interval
   string scaleType = "major";  // see maps below for keywords
-  int rootNote = 45;
-  int nbOfNotes = 25;
+  uint8_t rootNote = 45;
+  uint8_t nbOfNotes = 25;
   vector<uint8_t> current_scale;
   float sustain = 1.0;  //in seconds. 0 for infinite
 
   //CC variables
-  int cc_max;
-  int cc_min = 0;
+  uint16_t cc_max;
+  uint16_t cc_min = 0;
   // int interpolation_type = 0;  //0=linear, 1=step, 2=log
   bool hires = false;
 
-  int velocity = 100;  // default velocity for notes
+  uint8_t velocity = 100;  // default velocity for notes
 
   // Notes scale methods
   int get_note(float value, float min_input, float max_input);
@@ -68,33 +68,33 @@ class MidiTranslator
   bool get_hires() const;
   void set_hires(bool h);
 
-  int get_channel();
-  void set_channel(int c);
+  uint8_t get_channel();
+  void set_channel(uint8_t c);
 
-  int get_cc_number();
-  void set_cc_number(int c);
+  uint8_t get_cc_number();
+  void set_cc_number(uint8_t c);
 
-  int get_translator_mode();
-  void set_translator_mode(int t);
+  uint8_t get_translator_mode();
+  void set_translator_mode(uint8_t t);
 
   string get_scale_type();
   void set_scale_type(string scaleType);
 
-  int get_root_note();
+  uint8_t get_root_note();
   void set_root_note(string rootNote);
-  void set_root_note(int notenb);
+  void set_root_note(uint8_t notenb);
 
-  int get_number_of_notes();
-  void set_number_of_notes(int nbOfNotes);
+  uint8_t get_number_of_notes();
+  void set_number_of_notes(uint8_t nbOfNotes);
 
   float get_sustain();
   void set_sustain(float s);
 
-  int get_max_output();
-  void set_max_output(int m);
+  uint16_t get_max_output();
+  void set_max_output(uint16_t m);
 
-  int get_min_output();
-  void set_min_output(int m);
+  uint16_t get_min_output();
+  void set_min_output(uint16_t m);
 
   int get_interpolation_type();
   void set_interpolation_type(int i);
@@ -102,8 +102,8 @@ class MidiTranslator
   bool is_enabled();
   void set_enabled(bool e);
 
-  int get_velocity();
-  void set_velocity(int v);
+  uint8_t get_velocity();
+  void set_velocity(uint8_t v);
 
   // template <typename T>
   // void set_param(const string& param_name, const T& value) {
