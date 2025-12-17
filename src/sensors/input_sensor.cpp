@@ -29,7 +29,7 @@ bool Sensor::update() {
 
 void Sensor::measure_offset_iter() {
   measure_offset_counter++;
-  log_d("Offset measurement iteration: %d", measure_offset_counter);
+  // log_v("Offset measurement iteration: %d", measure_offset_counter);
   if (measure_all) {
     // Measure all channels
     for (auto const& pair : sensor_dat) {
