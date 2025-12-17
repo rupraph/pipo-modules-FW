@@ -46,8 +46,6 @@ void setup() {  // by default on core 1
 
   log_i("\n=== Pipo Setup Start ===");
 
-  config.cleanup_temp_files();  // Clean up any orphaned temp files from crashes
-
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
 
   if (DEBUG_HEAP)
@@ -59,6 +57,7 @@ void setup() {  // by default on core 1
 
   /////// Init filesystem
   init_filesystem();
+  config.cleanup_temp_files();  // Clean up any orphaned temp files from crashes
 
   /////// Load config
   log_i("config list: %s", config.get_list().c_str());

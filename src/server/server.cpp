@@ -315,6 +315,7 @@ void PipoServer::setup_requests() {
       wifi.setMode(
           WIFI_AP_STA);  // should likely be APSTA or STA depending on chosen mode.
     }
+    log_i("request to connect to SSID: %s", ssid.c_str());
     wifi.setSSID(ssid);
     wifi.setPassword(password);
   });
