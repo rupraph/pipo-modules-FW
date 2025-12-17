@@ -11,6 +11,7 @@
     currentConfig,
   } from "../../services/config";
   import { Plus, Trash2, CopyPlus } from "lucide-svelte";
+  import { schema } from "../../schema";
 
   let showRenameModal = false;
   let showCopyModal = false;
@@ -25,6 +26,8 @@
   let touchTimer: number | null = null;
   let touchStartTime = 0;
 
+  let config_name_max_length = 16;
+
   function filterConfigName(value: string): string {
     // Only allow alphanumeric characters and dashes
     return value.replace(/[^a-zA-Z0-9-]/g, "");
@@ -32,29 +35,41 @@
 
   function handleRenameInput(e: Event) {
     const input = e.target as HTMLInputElement;
-    const filtered = filterConfigName(input.value);
-    if (input.value !== filtered) {
-      newname = filtered;
+    let filtered = filterConfigName(input.value);
+
+    // Apply max length limit
+    if (filtered.length > config_name_max_length) {
+      filtered = filtered.slice(0, config_name_max_length);
       input.value = filtered;
     }
+
+    newname = filtered;
   }
 
   function handleCopyInput(e: Event) {
     const input = e.target as HTMLInputElement;
-    const filtered = filterConfigName(input.value);
-    if (input.value !== filtered) {
-      copyName = filtered;
+    let filtered = filterConfigName(input.value);
+
+    // Apply max length limit
+    if (filtered.length > config_name_max_length) {
+      filtered = filtered.slice(0, config_name_max_length);
       input.value = filtered;
     }
+
+    copyName = filtered;
   }
 
   function handleCreateInput(e: Event) {
     const input = e.target as HTMLInputElement;
-    const filtered = filterConfigName(input.value);
-    if (input.value !== filtered) {
-      createName = filtered;
+    let filtered = filterConfigName(input.value);
+
+    // Apply max length limit
+    if (filtered.length > config_name_max_length) {
+      filtered = filtered.slice(0, config_name_max_length);
       input.value = filtered;
     }
+
+    createName = filtered;
   }
 
   $: selectItems = $configNames.map((item) => ({ value: item, label: item }));
@@ -138,7 +153,10 @@
   }
 
   function startCopy() {
-    copyName = `${$activeConfigName} - Copy`;
+    const suffix = "-CPY";
+    const maxBaseLength = config_name_max_length - suffix.length;
+    const baseName = $activeConfigName.slice(0, maxBaseLength);
+    copyName = `${baseName}${suffix}`;
     showCopyModal = true;
   }
 
@@ -376,7 +394,7 @@
       bind:value={createName}
       on:input={handleCreateInput}
       on:keyup={onCreateKeyup}
-      placeholder="Enter configuration name (letters, numbers, dashes)"
+      placeholder="New name (letters, numbers, dashes)"
       autofocus
     />
     <div class="modal-buttons">
@@ -463,6 +481,7 @@
     padding: 2em;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1.5em;
   }
 
@@ -485,10 +504,11 @@
   .modal-content input {
     padding: 0.5em;
     font-size: 1em;
-    border: 1px solid var(--border-color, #ccc);
+    border: 1px solid var(--main);
     border-radius: 4px;
     background-color: var(--bg-primary);
     color: var(--text-color);
+    max-width: 220px;
   }
 
   .modal-buttons {

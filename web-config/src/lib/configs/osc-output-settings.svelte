@@ -6,6 +6,8 @@
   import InfoModal from "../InfoModal.svelte";
   import { TriangleAlert } from "lucide-svelte";
 
+  const OSC_ADDRESS_MAX_LENGTH = 32;
+
   $: config = $currentConfig;
   $: type = $pipoType;
   $: selectedChannel = $uiState[type]?.selectedChannel;
@@ -32,7 +34,13 @@
   function validateOscAddress(event: Event) {
     const input = event.target as HTMLInputElement;
     // Remove spaces and special characters, keep only alphanumeric, slash, hyphen, underscore, and dot
-    const cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
+    let cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
+
+    // Apply max length limit
+    if (cleaned.length > OSC_ADDRESS_MAX_LENGTH) {
+      cleaned = cleaned.slice(0, OSC_ADDRESS_MAX_LENGTH);
+    }
+
     if (cleaned !== input.value) {
       input.value = cleaned;
       if (oscConfig) {
@@ -87,7 +95,7 @@
           <input
             type="text"
             bind:value={config.engine["engine-special"]["quat"].osc_addr}
-            maxlength="255"
+            maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
             placeholder="/address"
             on:input={validateOscAddress}
@@ -97,7 +105,7 @@
           <input
             type="text"
             bind:value={oscConfig.osc_addr}
-            maxlength="255"
+            maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
             placeholder="/address"
             on:input={validateOscAddress}
