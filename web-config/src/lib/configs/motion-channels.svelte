@@ -4,6 +4,7 @@
   import { currentConfig, currentMode } from "../../services/config";
   import { uiState } from "../ui-state";
   import PillSwitch from "../form/PillSwitch.svelte";
+  import InfoModal from "../InfoModal.svelte";
 
   const channelTypes = [
     {
@@ -21,7 +22,7 @@
       value: "angular_acceleration",
     },
     {
-      label: "Quats",
+      label: "Quaternions",
       value: "quaternion",
     },
   ];
@@ -140,6 +141,38 @@
   }
 </script>
 
+<span class="row" style="align-items: center; gap: 0.5em; ">
+  <h3>Channel Settings</h3>
+  <InfoModal>
+    <p>
+      Select a channel category to display underlying channels. The channels
+      which are enabled have their name in yellow (Grey if disabled).
+    </p>
+    <p>
+      <u>Euler angles:</u> are angular position around the three principal axes (X,
+      Y, Z) representing roll, pitch, and yaw. (This are impactied by absolute or
+      relative orientation setting. As well, this way of acquiring orientation is
+      subject to gimbal lock)
+    </p>
+    <p>
+      <u>Linear Accelleration:</u> is the change of velocity along the three principal
+      axes (X, Y, Z) excluding the effect of gravity.
+    </p>
+    <p>
+      <u>Magnetometer readings:</u> represent the magnetic field strength along the
+      three principal axes (X, Y, Z)
+    </p>
+    <p>
+      <u>Gyroscope readings:</u> represent the angular velocity around the three
+      principal axes (X, Y, Z) measuring how fast the device is rotating.
+    </p>
+    <p>
+      <u>Quaternions:</u> are a four-dimensional number system that provides a robust
+      way to represent 3D orientations, avoiding issues like gimbal lock associated
+      with Euler angles. Their output depends on absolute or relative mode setting.
+    </p>
+  </InfoModal>
+</span>
 {#if config}
   <div class="category">
     {#each availableChannelTypes as typeOption}

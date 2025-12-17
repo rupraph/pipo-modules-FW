@@ -9,6 +9,7 @@
   import { currentConfig, currentMode } from "../../services/config";
   import { uiState } from "../ui-state";
   import TouchCalibration from "../TouchCalibration.svelte";
+  import InfoModal from "../InfoModal.svelte";
 
   let category: "analog" | "touch" = "analog";
   const boardType = "analog";
@@ -97,6 +98,26 @@
   }
 </script>
 
+<span class="row" style="align-items: center; gap: 0.5em; ">
+  <h3>Channel Settings</h3>
+  <InfoModal>
+    <p>
+      Select a category to display underlying channels. The channels which are
+      enabled have their label in yellow (Grey if disabled).
+    </p>
+    <p>
+      <u>Analog Channels:</u> These channels read voltage levels from analog sensors
+      connected to grove connectors. Inputs A1,A2,A7,A8 have a slide switch on the
+      board to select their max input voltage to be between 3.3V and 12V. Inputs
+      A3,A4,A5,A6 have 3.3V max input (but the reading range is up to 3.1v).
+    </p>
+    <p>
+      <u>Touch Channels:</u> These channels read capacitive touch inputs from the
+      back of the board, T1-T8. They can be calibrated and tuned for sensitivity
+      in the Touch Calibration section that appears when the Touch category is selected.
+    </p>
+  </InfoModal>
+</span>
 {#if config}
   <div class="category">
     <button
