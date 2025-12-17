@@ -412,4 +412,8 @@
     flex-wrap: wrap;
     gap: 1em;
   }
+
+  .input-wrapper {
+    border-color: var(--main);
+  }
 </style>

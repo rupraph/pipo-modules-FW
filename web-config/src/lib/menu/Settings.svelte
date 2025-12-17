@@ -23,19 +23,13 @@
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
 
-    // Create a new config object to trigger Svelte reactivity
-    const updatedConfig = {
-      ...config,
-      general: {
-        ...config.general,
-        MidiEnabled: newMode === "midi",
-        OSC_ENA: newMode === "osc",
-        // Disable BLE when switching to OSC mode
-        BLEEnabled: newMode === "osc" ? false : config.general.BLEEnabled,
-      },
-    };
-
-    currentConfig.set(updatedConfig);
+    // Mutate the config object directly to avoid replacing the entire config
+    config.general.MidiEnabled = newMode === "midi";
+    config.general.OSC_ENA = newMode === "osc";
+    // Disable BLE when switching to OSC mode
+    if (newMode === "osc") {
+      config.general.BLEEnabled = false;
+    }
   }
 
   function filterPipoName(value: string): string {
@@ -46,11 +40,15 @@
   function handlePipoNameInput(e: Event) {
     if (!config) return;
     const input = e.target as HTMLInputElement;
-    const filtered = filterPipoName(input.value);
-    if (input.value !== filtered) {
-      config.general.PipoName = filtered;
+    let filtered = filterPipoName(input.value);
+
+    // Apply max length limit
+    if (filtered.length > schema.name.max) {
+      filtered = filtered.slice(0, schema.name.max);
       input.value = filtered;
     }
+
+    config.general.PipoName = filtered;
   }
 
   function filterIPv4(value: string): string {
@@ -61,11 +59,15 @@
   function handleIPInput(e: Event) {
     if (!config) return;
     const input = e.target as HTMLInputElement;
-    const filtered = filterIPv4(input.value);
-    if (input.value !== filtered) {
-      config.general.OSC_IP = filtered;
+    let filtered = filterIPv4(input.value);
+
+    // Apply max length limit for IPv4 (xxx.xxx.xxx.xxx = 15 chars)
+    if (filtered.length > 15) {
+      filtered = filtered.slice(0, 15);
       input.value = filtered;
     }
+
+    config.general.OSC_IP = filtered;
   }
 
   function filterPort(value: string): string {
@@ -76,11 +78,15 @@
   function handlePortInput(e: Event) {
     if (!config) return;
     const input = e.target as HTMLInputElement;
-    const filtered = filterPort(input.value);
-    if (input.value !== filtered) {
-      config.general.OSC_PORT = parseInt(filtered) || 0;
+    let filtered = filterPort(input.value);
+
+    // Apply max length limit for port (65535 = 5 digits)
+    if (filtered.length > 5) {
+      filtered = filtered.slice(0, 5);
       input.value = filtered;
     }
+
+    config.general.OSC_PORT = parseInt(filtered) || 0;
   }
 
   function reboot() {
@@ -217,12 +223,10 @@
           </p>
         </InfoModal>
         <div class="text-input-wrapper">
-          <Text
-            label=""
+          <input
+            type="text"
             bind:value={config.general.PipoName}
-            maxlength={schema.name.max}
-            minlength={schema.name.min}
-            onInput={handlePipoNameInput}
+            on:input={handlePipoNameInput}
           />
         </div>
       </div>

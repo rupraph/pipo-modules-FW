@@ -3,7 +3,7 @@ import type { Schema } from "./types";
 export const schema: Schema = {
   name: {
     min: 4,
-    max: 254,
+    max: 10,
   },
   motion: {
     accX: {
