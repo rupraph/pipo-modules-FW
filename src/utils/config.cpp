@@ -38,7 +38,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
   // Additional validation: check that engine has its subsections
   if (config_doc["engine"].is<JsonObject>()) {
     JsonObject engine = config_doc["engine"].as<JsonObject>();
-    const char* engine_keys[] = {"engine-hid", "engine-midi", "engine-osc"};
+    const char* engine_keys[] = {"engine-midi", "engine-osc"};
 
     for (const char* key : engine_keys) {
       if (!engine.containsKey(key) || engine[key].isNull()) {

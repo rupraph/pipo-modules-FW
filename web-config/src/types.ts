@@ -71,12 +71,12 @@ export type GeneralConfig = {
   BLEEnabled: boolean;
 };
 
-export type HidConfig = {
-  enabled: boolean;
-  addr: string;
-  addr2: string;
-  stroke_mode: boolean;
-};
+// export type HidConfig = {
+//   enabled: boolean;
+//   addr: string;
+//   addr2: string;
+//   stroke_mode: boolean;
+// };
 
 export type PipoTypes = "motion" | "range" | "analog" | "unknown";
 export type PipoKeys = {
@@ -156,13 +156,10 @@ export type AnalogOut = {
   lmax: number;
   lmin: number;
 };
-export type OutputMode = "OSC" | "MIDI" | "HID" | "NONE";
+export type OutputMode = "OSC" | "MIDI" | "NONE";
 export type Axis<T extends PipoTypes> = [PipoKeys[T]];
 export type PipoConfig<T extends PipoTypes> = {
   engine: {
-    "engine-hid": {
-      [Key in PipoKeys[T]]: HidConfig;
-    };
     "engine-midi": {
       [Key in PipoKeys[T]]: MidiConfig;
     };
@@ -181,7 +178,6 @@ export type PipoConfig<T extends PipoTypes> = {
 };
 export type ChannelConfig = {
   input: InputSettings;
-  hid: HidConfig;
   midi: MidiConfig;
   osc: OscConfig;
 };

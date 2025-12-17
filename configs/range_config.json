@@ -1,13 +1,5 @@
 {
   "engine": {
-    "engine-hid": {
-      "dist": {
-        "enabled": false,
-        "addr": "KEY_DOWN",
-        "addr2": "KEY_UP",
-        "stroke_mode": true
-      }
-    },
     "engine-midi": {
       "dist": {
         "cc_nb": 14,
