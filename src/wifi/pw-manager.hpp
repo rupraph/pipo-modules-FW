@@ -15,6 +15,7 @@ class PipoPWManager {
   void setup() {
     preferences.begin("pipo-wifi", false);
     load();
+    print_stored_ssids();
     if (DEBUG_HEAP)
       pipoDebugHeap("End setup PipoPWManager");
   };
@@ -22,6 +23,18 @@ class PipoPWManager {
   void clear() {
     passwords.clear();
     scores.clear();
+  }
+
+  /**
+   * @brief Prints the stored SSIDs and their scores for debugging
+   */
+  void print_stored_ssids() {
+    log_d("Stored SSIDs and scores:");
+    for (const auto& pair : passwords) {
+      String ssid = String(pair.first.c_str());
+      unsigned char score = scores[pair.first];
+      log_d("  SSID: %s, Score: %d", ssid.c_str(), score);
+    }
   }
 
   /**
