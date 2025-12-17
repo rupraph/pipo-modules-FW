@@ -5,11 +5,13 @@
   import { Lock, LockOpen, Eye, EyeOff, CircleCheck } from "lucide-svelte";
   import { addToast, type Toast } from "../toast";
   import { pipoio } from "../../pipoio";
+  import { pipoInfo } from "../../services";
   import { setLastScan, wifiState } from "./store";
   import Spinner from "../spinner.svelte";
   import type { Network } from "./types";
   import { fetchNetworks, fetchState } from "../../services/wifi";
   import { onMount } from "svelte";
+  import { encodePassword } from "./encoding";
 
   let editing = "";
   let showPassword = false;
@@ -160,10 +162,19 @@
     await pipoio.pause();
 
     try {
+      // Encode password using MAC address for basic obfuscation
+      const info = get(pipoInfo);
+      const encodedPassword =
+        info && password ? encodePassword(password, info.mac) : password;
+
       await pipoio.request({
         method: "post",
         url: "/wifi-connect",
-        params: { ssid, password },
+        params: {
+          ssid,
+          password: encodedPassword || "",
+          encoded: encodedPassword ? "true" : "false",
+        },
         timeout: 1000,
       });
       // Wait 5s for network connection to establish

@@ -1,9 +1,11 @@
 import { pipoio } from "../pipoio";
 import { writable } from "svelte/store";
+import type { PipoInfo } from "../types";
 
 export * from "./config";
 export * from "./presets";
 export const ip = writable<string>("unknown");
+export const pipoInfo = writable<PipoInfo | null>(null);
 
 // Start with overlay showing (false = not live = show overlay)
 // This ensures the overlay displays during initial page load

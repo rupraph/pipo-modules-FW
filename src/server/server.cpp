@@ -2,6 +2,51 @@
 
 PipoServer server;
 
+// Decode base64 string
+String base64Decode(const String& encoded) {
+  const char* base64_chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  String decoded = "";
+  std::vector<int> T(256, -1);
+
+  for (int i = 0; i < 64; i++)
+    T[base64_chars[i]] = i;
+
+  int val = 0, valb = -8;
+  for (unsigned char c : encoded) {
+    if (T[c] == -1)
+      break;
+    val = (val << 6) + T[c];
+    valb += 6;
+    if (valb >= 0) {
+      decoded += char((val >> valb) & 0xFF);
+      valb -= 8;
+    }
+  }
+  return decoded;
+}
+
+// XOR decode password using MAC address as key
+String decodePassword(const String& encoded, const String& mac) {
+  if (encoded.isEmpty())
+    return "";
+
+  // Base64 decode first
+  String decoded = base64Decode(encoded);
+
+  // Remove colons from MAC to get consistent key
+  String key = mac;
+  key.replace(":", "");
+
+  String password = "";
+  for (size_t i = 0; i < decoded.length(); i++) {
+    char charCode = decoded[i] ^ key[i % key.length()];
+    password += charCode;
+  }
+
+  return password;
+}
+
 void PipoServer::setup() {
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods",
@@ -298,23 +343,38 @@ void PipoServer::setup_requests() {
       wifi.setMode(WIFI_AP_STA);
     }
   });
+
   server.on("/wifi-connect", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("ssid")) {
-      return request->send(400, "text/plain", "Error: no ssid  parameter");
+      return request->send(400, "text/plain", "Error: no ssid parameter");
     }
-    request->send(200, "text/plain", "Try to connect to wifi");
+
     String ssid = request->getParam("ssid")->value();
     String password = "";
+    bool isEncoded = false;
+
     if (request->hasParam("password")) {
       password = request->getParam("password")->value();
     }
-    // String previous_ssid = wifi.ssid(); //unused
-    // bool isAPSTA = WiFi.getMode() == WIFI_MODE_APSTA; //unused
+
+    if (request->hasParam("encoded")) {
+      isEncoded = request->getParam("encoded")->value() == "true";
+    }
+
+    // Decode password if it was encoded
+    if (isEncoded && !password.isEmpty()) {
+      String mac = WiFi.macAddress();
+      password = decodePassword(password, mac);
+      log_d("Password decoded using MAC");
+    }
+
+    request->send(200, "text/plain", "Try to connect to wifi");
+
     pause();
     if (WiFi.getMode() == WIFI_MODE_AP) {
-      wifi.setMode(
-          WIFI_AP_STA);  // should likely be APSTA or STA depending on chosen mode.
+      wifi.setMode(WIFI_AP_STA);
     }
+
     log_i("request to connect to SSID: %s", ssid.c_str());
     wifi.setSSID(ssid);
     wifi.setPassword(password);

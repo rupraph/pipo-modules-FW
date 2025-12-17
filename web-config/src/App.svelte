@@ -2,7 +2,7 @@
   import Logs from "./lib/logs.svelte";
   import Toasts from "./lib/toast/toasts.svelte";
   import type { PipoInfo, PipoTypes } from "./types";
-  import { pipoType, ip } from "./services";
+  import { pipoType, ip, pipoInfo } from "./services";
   import Collapse from "./lib/collapse.svelte";
   import Configs from "./lib/configs/index.svelte";
   import ConfigSelect from "./lib/configs/config-select.svelte";
@@ -39,6 +39,7 @@
         type = data.type.toLowerCase().replace("pipo_", "") as PipoTypes;
         ip.set(data.ip);
         pipoType.set(type);
+        pipoInfo.set(data); // Store globally for other components
         return data;
       })
       .catch((error) => {
