@@ -82,6 +82,23 @@
     }
   }
 
+  async function fetchHoldModeState() {
+    try {
+      const response = await pipoio.get("/hold-mode");
+      const isHold =
+        response.data === "true" ||
+        response.data === true ||
+        response.data === 1;
+      // Update the current config with the actual state from the server
+      if ($currentConfig?.sensorconf) {
+        $currentConfig.sensorconf.hold_mode = isHold;
+        currentConfig.set($currentConfig);
+      }
+    } catch (error) {
+      console.error("Failed to fetch hold mode state:", error);
+    }
+  }
+
   async function reset_orientation() {
     try {
       await pipoio.get("/setreference");
@@ -135,6 +152,16 @@
                   <PillSwitch
                     label=""
                     bind:value={$currentConfig.sensorconf.relative_mode}
+                    onChange={async () => {
+                      try {
+                        // Fetch actual state from backend to ensure sync
+                        await fetchRelativeModeState();
+                      } catch (error) {
+                        console.error("Failed to sync relative mode:", error);
+                        // Revert to actual backend state on error
+                        await fetchRelativeModeState();
+                      }
+                    }}
                   />
                   <button
                     class="primary"
@@ -175,6 +202,16 @@
               <PillSwitch
                 label=""
                 bind:value={$currentConfig.sensorconf.hold_mode}
+                onChange={async () => {
+                  try {
+                    // Fetch actual state from backend to ensure sync
+                    await fetchHoldModeState();
+                  } catch (error) {
+                    console.error("Failed to sync hold mode:", error);
+                    // Revert to actual backend state on error
+                    await fetchHoldModeState();
+                  }
+                }}
               />
             {/if}
           </div>
