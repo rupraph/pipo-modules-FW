@@ -149,23 +149,54 @@ void setup() {  // by default on core 1
 
   // We are using the main loop instead of a dedicated Sensor task to optimize ram usage in arduino framework
 
-  xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,
-                          &websocketTaskHandle, 0);
-  xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1, &hwuiTaskHandle,
-                          0);
-  xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
-                          &battmonitorTaskHandle, 0);
+  // Create critical tasks with error checking
+  if (xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,
+                              &websocketTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create websocketTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
+
+  if (xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1,
+                              &hwuiTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create hwuiTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
+
+  if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
+                              &battmonitorTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create battmonitorTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
+
 #ifdef PIPO_ANALOG
   // xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
   //                         &oscreceiveTaskHandle, 0);
 // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
 //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 3, &wifiTaskHandle,
-                          0);
+
+  if (xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 3,
+                              &wifiTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create wifiTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
+
 #if HW_REV >= 11
-  xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,
-                          &buttonTaskHandle, 0);
+  if (xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,
+                              &buttonTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create buttonTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
 #endif
   // xTaskCreatePinnedToCore(
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
