@@ -33,6 +33,11 @@
     }, 200);
   }
   function check() {
+    // Handle null, undefined, NaN, or empty string
+    if (value == null || isNaN(value) || value === "") {
+      value = min;
+      return;
+    }
     if (value < min) {
       value = min;
     }
@@ -51,8 +56,13 @@
     check();
   }, 100);
   $: {
-    if (value < min) value = min;
-    if (value > max) value = max;
+    // Handle null, undefined, NaN, or empty string
+    if (value == null || isNaN(value) || value === "") {
+      value = min;
+    } else {
+      if (value < min) value = min;
+      if (value > max) value = max;
+    }
   }
 </script>
 
