@@ -16,23 +16,43 @@ void MotionSensor::init() {
 
 void MotionSensor::setup() {
   // Load last relative orientation reference
-  motiondata.begin("motion-store", false);
+  if (!motiondata.begin("motion-store", false)) {
+    log_e("Failed to open motion-store namespace");
+    reference_set = false;
+    return;
+  }
+
   // Default to identity quaternion (no rotation) if not stored
   quat_ref_w = motiondata.getFloat("quat_ref_w", 1.0);
   quat_ref_x = motiondata.getFloat("quat_ref_x", 0.0);
   quat_ref_y = motiondata.getFloat("quat_ref_y", 0.0);
   quat_ref_z = motiondata.getFloat("quat_ref_z", 0.0);
 
-  // Check if this is a valid stored reference (not identity)
-  // If it's identity quaternion, treat as not set
-  if (quat_ref_w == 1.0 && quat_ref_x == 0.0 && quat_ref_y == 0.0 &&
-      quat_ref_z == 0.0) {
+  // Validate quaternion integrity - check if normalized
+  float magnitude = sqrt(quat_ref_w * quat_ref_w + quat_ref_x * quat_ref_x +
+                         quat_ref_y * quat_ref_y + quat_ref_z * quat_ref_z);
+  bool is_identity = (quat_ref_w == 1.0 && quat_ref_x == 0.0 &&
+                      quat_ref_y == 0.0 && quat_ref_z == 0.0);
+  bool is_corrupted = (abs(magnitude - 1.0) > 0.1) && !is_identity;
+
+  if (is_corrupted) {
+    log_w("Corrupted quaternion data detected (magnitude: %.4f)", magnitude);
+    log_w("Clearing corrupted data - will be set on first update");
+    motiondata.clear();  // Clear all corrupted data
+    quat_ref_w = 1.0;
+    quat_ref_x = 0.0;
+    quat_ref_y = 0.0;
+    quat_ref_z = 0.0;
+    reference_set = false;
+  } else if (is_identity) {
     reference_set = false;
     log_i("No stored reference orientation - will be set on first update");
   } else {
     reference_set = true;
-    log_i("Loaded stored reference orientation");
+    log_i("Loaded stored reference orientation (magnitude: %.4f)", magnitude);
   }
+
+  motiondata.end();  // Close namespace after reading
 
   if (DEBUG_HEAP)
     pipoDebugHeap();
@@ -92,14 +112,29 @@ bool MotionSensor::measure_sensor() {
         quat_ref_y = quat_y;
         quat_ref_z = quat_z;
         normalize_quaternion(quat_ref_w, quat_ref_x, quat_ref_y, quat_ref_z);
-        motiondata.putFloat("quat_ref_w", quat_ref_w);
-        motiondata.putFloat("quat_ref_x", quat_ref_x);
-        motiondata.putFloat("quat_ref_y", quat_ref_y);
-        motiondata.putFloat("quat_ref_z", quat_ref_z);
-        reference_set = true;
-        log_i("Reference orientation set");
-        log_i("Ref quat: w=%.4f x=%.4f y=%.4f z=%.4f", quat_ref_w, quat_ref_x,
-              quat_ref_y, quat_ref_z);
+
+        // Open namespace for writing
+        if (!motiondata.begin("motion-store", false)) {
+          log_e("Failed to open motion-store for writing");
+        } else {
+          // Write with error checking (putFloat returns 4 on success, 0 on failure)
+          bool write_success = true;
+          write_success &= (motiondata.putFloat("quat_ref_w", quat_ref_w) == 4);
+          write_success &= (motiondata.putFloat("quat_ref_x", quat_ref_x) == 4);
+          write_success &= (motiondata.putFloat("quat_ref_y", quat_ref_y) == 4);
+          write_success &= (motiondata.putFloat("quat_ref_z", quat_ref_z) == 4);
+
+          motiondata.end();  // Close namespace
+
+          if (write_success) {
+            reference_set = true;
+            log_i("Reference orientation saved");
+            log_i("Ref quat: w=%.4f x=%.4f y=%.4f z=%.4f", quat_ref_w,
+                  quat_ref_x, quat_ref_y, quat_ref_z);
+          } else {
+            log_e("Failed to save reference orientation to NVS");
+          }
+        }
       }
       calc_differential_euler_angles();
       data_ready = true;
