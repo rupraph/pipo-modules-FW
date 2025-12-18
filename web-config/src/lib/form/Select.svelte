@@ -41,7 +41,7 @@
     --item-hover-color="var(--text-color)"
     --item-hover-bg="var(--bg-lighter)"
     --border-radius="2px"
-    --border="0"
+    --border="1px"
     --border-focused="0"
     --list-background="var(--bg-primary)"
     --background="var(--bg-primary)"
