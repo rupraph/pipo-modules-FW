@@ -20,6 +20,8 @@
   let wifiMode = "";
   let mounted = false;
 
+  const WIFI_PASSWORD_MAX_LENGTH = 63; // WPA/WPA2 standard max length
+
   // Use reactive declarations for better Svelte reactivity
   $: networks = $wifiState.networks;
   $: apIP = $wifiState.apIP;
@@ -69,7 +71,16 @@
     }
   }
   function onInput(evt: Event) {
-    password = (evt.target as HTMLInputElement).value;
+    const input = evt.target as HTMLInputElement;
+    let value = input.value;
+
+    // Apply max length limit (WPA/WPA2 standard)
+    if (value.length > WIFI_PASSWORD_MAX_LENGTH) {
+      value = value.slice(0, WIFI_PASSWORD_MAX_LENGTH);
+      input.value = value;
+    }
+
+    password = value;
   }
   function onLockClick(ssid: string, known: boolean) {
     if (!known) return;
@@ -251,6 +262,7 @@
                 on:input={onInput}
                 type={showPassword ? "text" : "password"}
                 id="network-password"
+                maxlength={WIFI_PASSWORD_MAX_LENGTH}
               />
               <button class="showhide" on:click={hideShowPassword}>
                 {#if showPassword}
