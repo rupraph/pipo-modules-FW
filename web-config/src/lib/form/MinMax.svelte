@@ -1,5 +1,9 @@
 <script lang="ts">
   import { uid } from "../../utils";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
+
   export let min: number = 0;
   export let max: number = 1;
   export let mode: "double" | "single" = "double";
@@ -21,6 +25,7 @@
     const v = +target.value;
     low = Math.min(v, high);
     color = fillColor();
+    dispatch("lowChange", low);
   }
 
   function onMaxChange(evt: Event) {
@@ -28,6 +33,7 @@
     const v = +target.value;
     high = Math.max(v, low);
     color = fillColor();
+    dispatch("highChange", high);
   }
 
   function fillColor() {

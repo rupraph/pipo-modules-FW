@@ -106,10 +106,10 @@
       enabled have their label in yellow (Grey if disabled).
     </p>
     <p>
-      <u>Analog Channels:</u> These channels read voltage levels from analog sensors
-      connected to grove connectors. Inputs A1,A2,A7,A8 have a slide switch on the
-      board to select their max input voltage to be between 3.3V and 12V. Inputs
-      A3,A4,A5,A6 have 3.3V max input (but the reading range is up to 3.1v).
+      <u>Analog Channels:</u> These inputs read voltage levels from grove connectors.
+      Inputs A1/A2 & A7/A8 have a slide switch on the board to choose their input
+      voltage range to be 3.3V, 5V or 12V. Inputs A3,A4,A5,A6 have a fixed range
+      up to 3.1v (With a max at 3.3V)
     </p>
     <p>
       <u>Touch Channels:</u> These channels read capacitive touch inputs from the

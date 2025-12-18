@@ -62,7 +62,48 @@
     dt: 0,
     timestamp: Date.now(),
   };
-  let maxSensorValue = 3.3;
+  let maxSensorValue = 100;
+
+  // Conversion constants for analog boards (voltage to percentage)
+  const ANALOG_VOLTAGE_MAX = 3.1;
+
+  // Convert voltage to percentage for analog boards (rounded to 1 decimal)
+  function voltageToPercent(voltage: number): number {
+    return Math.round((voltage / ANALOG_VOLTAGE_MAX) * 100 * 10) / 10;
+  }
+
+  // Convert percentage to voltage for analog boards (rounded to 2 decimals)
+  function percentToVoltage(percent: number): number {
+    return Math.round((percent / 100) * ANALOG_VOLTAGE_MAX * 100) / 100;
+  }
+
+  // Reactive variables for analog conversion
+  // These provide the UI values (percentage) while storing actual values (voltage)
+  $: displaySensorValue =
+    type === "analog" && sensorValue !== undefined
+      ? voltageToPercent(sensorValue)
+      : sensorValue;
+
+  $: displayLmin =
+    type === "analog" && input?.lmin !== undefined
+      ? voltageToPercent(input.lmin)
+      : input?.lmin;
+
+  $: displayLmax =
+    type === "analog" && input?.lmax !== undefined
+      ? voltageToPercent(input.lmax)
+      : input?.lmax;
+
+  // Setters for analog conversion - convert from UI percentage back to voltage
+  function setDisplayLmin(value: number) {
+    if (!input) return;
+    input.lmin = type === "analog" ? percentToVoltage(value) : value;
+  }
+
+  function setDisplayLmax(value: number) {
+    if (!input) return;
+    input.lmax = type === "analog" ? percentToVoltage(value) : value;
+  }
 
   // Reactive: Reset maxSensorValue and sensor readings when channel changes
   $: if (selectedChannel && aschema) {
@@ -391,22 +432,43 @@
     </div>
   {/if}
   {#if input && aschema && selectedChannel}
-    <MinMax
-      bind:low={input.lmin}
-      bind:high={input.lmax}
-      value={sensorValue}
-      mode={isContinuousMode(input) || isHisteresisMode(input)
-        ? "double"
-        : "single"}
-      cursorActive={withinWindow}
-      min={aschema.min}
-      bind:max={maxSensorValue}
-      step={aschema.step}
-      minLabel={`Min`}
-      maxLabel={`Max`}
-      units={aschema.unit}
-    />
+    {#if type === "analog"}
+      <MinMax
+        low={displayLmin}
+        high={displayLmax}
+        on:lowChange={(e) => setDisplayLmin(e.detail)}
+        on:highChange={(e) => setDisplayLmax(e.detail)}
+        value={displaySensorValue}
+        mode={isContinuousMode(input) || isHisteresisMode(input)
+          ? "double"
+          : "single"}
+        cursorActive={withinWindow}
+        min={0}
+        max={100}
+        step={1}
+        minLabel={`Min`}
+        maxLabel={`Max`}
+        units={"%"}
+      />
+    {:else}
+      <MinMax
+        bind:low={input.lmin}
+        bind:high={input.lmax}
+        value={sensorValue}
+        mode={isContinuousMode(input) || isHisteresisMode(input)
+          ? "double"
+          : "single"}
+        cursorActive={withinWindow}
+        min={aschema.min}
+        bind:max={maxSensorValue}
+        step={aschema.step}
+        minLabel={`Min`}
+        maxLabel={`Max`}
+        units={aschema.unit}
+      />
+    {/if}
   {/if}
+
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
       <button
