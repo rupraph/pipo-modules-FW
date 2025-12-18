@@ -371,9 +371,9 @@ void PipoServer::setup_requests() {
     request->send(200, "text/plain", "Try to connect to wifi");
 
     pause();
-    if (WiFi.getMode() == WIFI_MODE_AP) {
-      wifi.setMode(WIFI_AP_STA);
-    }
+    // if (WiFi.getMode() == WIFI_MODE_AP) {
+    //   wifi.setMode(WIFI_AP_STA);
+    // }
 
     // User manually connecting - clear disconnect flag (safe in HTTP handler context)
     wifi.pwm.clearDisconnectRequest();
