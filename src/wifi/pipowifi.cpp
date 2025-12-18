@@ -6,6 +6,8 @@
 void wifiTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
   unsigned long lastStackCheck = 0;
+  unsigned long serverPausedTime = 0;
+  const unsigned long SERVER_PAUSE_TIMEOUT = 10000; // 10 seconds max pause
 
   for (;;) {
     wifi.refresh();
@@ -20,10 +22,26 @@ void wifiTask(void* pvParameters) {
       lastStackCheck = millis();
     }
 
-    // Resume server if AP is configured, regardless of STA status
-    // This ensures web interface remains available during STA connection attempts
-    if (apConfigured && !server.isRunning()) {
+    // Track when server was paused
+    if (!server.isRunning() && serverPausedTime == 0) {
+      serverPausedTime = millis();
+    }
+
+    // Resume server if:
+    // 1. AP is started (even if not fully configured yet), OR
+    // 2. Server has been paused for more than timeout (failsafe)
+    bool shouldResume = apStarted || 
+                        (serverPausedTime > 0 && (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
+    
+    if (shouldResume && !server.isRunning()) {
+      log_i("Resuming server (apStarted=%d, timeout=%d)", apStarted, 
+            serverPausedTime > 0 && (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
       server.resume();
+      serverPausedTime = 0;
+    }
+    
+    if (server.isRunning()) {
+      serverPausedTime = 0; // Reset if running
     }
 
     // Update RSSI periodically when connected to STA
