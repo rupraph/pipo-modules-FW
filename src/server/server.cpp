@@ -531,16 +531,6 @@ void PipoServer::setup_requests() {
   });
 #endif
 
-#ifdef PIPO_RANGE
-  server.on("/hold-mode", HTTP_GET, [&](AsyncWebServerRequest* request) {
-    if (input_sensor.get_hold_mode()) {
-      return request->send(200, "text/plain", "true");
-    } else {
-      return request->send(200, "text/plain", "false");
-    }
-  });
-#endif
-
   // pause Engine
   server.on("/pause", HTTP_POST, [&](AsyncWebServerRequest* request) {
     PAUSED = true;
