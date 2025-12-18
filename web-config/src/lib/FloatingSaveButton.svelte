@@ -4,6 +4,10 @@
   import { get } from "svelte/store";
   import { onMount, onDestroy } from "svelte";
   import { addToast } from "./toast";
+  import {
+    validateConfigForSave,
+    getValidationErrorSummary,
+  } from "../utils/config-validator";
 
   export let config: any;
   export let show: boolean = false;
@@ -57,6 +61,26 @@
 
   async function handleSave() {
     console.log("Saving config...");
+
+    // Validate config before saving
+    const validationResult = validateConfigForSave(config);
+    if (!validationResult.valid) {
+      console.error("Config validation failed:", validationResult.errors);
+
+      const errorMessage = getValidationErrorSummary(validationResult);
+      addToast({
+        type: "error",
+        message: `Cannot save configuration:\n${errorMessage}`,
+        timeout: 8000,
+      });
+
+      savingStatus = "error";
+      setTimeout(() => {
+        savingStatus = "none";
+      }, 2000);
+      return;
+    }
+
     const willReboot = get(modeWillChange);
     savingStatus = "loading";
 
