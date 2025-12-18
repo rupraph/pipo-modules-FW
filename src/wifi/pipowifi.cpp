@@ -7,7 +7,7 @@ void wifiTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
   unsigned long lastStackCheck = 0;
   unsigned long serverPausedTime = 0;
-  const unsigned long SERVER_PAUSE_TIMEOUT = 10000; // 10 seconds max pause
+  const unsigned long SERVER_PAUSE_TIMEOUT = 10000;  // 10 seconds max pause
 
   for (;;) {
     wifi.refresh();
@@ -30,24 +30,23 @@ void wifiTask(void* pvParameters) {
     // Resume server if:
     // 1. AP is started (even if not fully configured yet), OR
     // 2. Server has been paused for more than timeout (failsafe)
-    bool shouldResume = apStarted || 
-                        (serverPausedTime > 0 && (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
-    
+    bool shouldResume =
+        apStarted || (serverPausedTime > 0 &&
+                      (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
+
     if (shouldResume && !server.isRunning()) {
-      log_i("Resuming server (apStarted=%d, timeout=%d)", apStarted, 
-            serverPausedTime > 0 && (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
+      log_i("Resuming server (apStarted=%d, timeout=%d)", apStarted,
+            serverPausedTime > 0 &&
+                (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
       server.resume();
       serverPausedTime = 0;
     }
-    
+
     if (server.isRunning()) {
-      serverPausedTime = 0; // Reset if running
+      serverPausedTime = 0;  // Reset if running
     }
 
-    // Update RSSI periodically when connected to STA
-    if (wifi.getStatus() == PipoWifi::CONNECTED && staConnected) {
-      wifi.requestRSSI();
-    }
+    // RSSI is now read directly when needed via getRSSI()
   }
 }
 
@@ -438,7 +437,11 @@ bool PipoWifi::ready() {
 }
 
 int8_t PipoWifi::getRSSI() {
-  return rssi;
+  // Return live RSSI value if connected, otherwise return cached value
+  if (WiFi.getMode() != WIFI_MODE_NULL && WiFi.status() == WL_CONNECTED) {
+    return WiFi.RSSI();
+  }
+  return rssi;  // Fallback to cached scan result
 }
 
 void PipoWifi::getFreeSubNet() {
@@ -526,9 +529,6 @@ void PipoWifi::refresh() {
     log_d("WiFi: Starting network scan");
     scanning = WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
     next.shouldScan = false;
-  } else if (next.shouldRSSI) {
-    rssi = WiFi.RSSI();
-    next.shouldRSSI = false;
   }
 }
 void PipoWifi::setMode(wifi_mode_t mode) {
@@ -550,9 +550,6 @@ void PipoWifi::setPassword(String password) {
 }
 void PipoWifi::requestScan() {
   next.shouldScan = true;
-}
-void PipoWifi::requestRSSI() {
-  next.shouldRSSI = true;
 }
 void PipoWifi::forgetNetwork(String ssid) {
   pwm.remove(ssid);

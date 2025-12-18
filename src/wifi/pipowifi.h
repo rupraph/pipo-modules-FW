@@ -47,7 +47,6 @@ struct PipoWState {
   String ssid = "";
   String password = "";
   bool shouldScan = false;
-  bool shouldRSSI = false;
   bool shouldDisconnect = false;
 };
 
@@ -67,7 +66,6 @@ class PipoWifi {
   IPAddress apIP = IPAddress(192, 168, subnetBase, 1);
   IPAddress apMask = IPAddress(255, 255, 255, 0);
   unsigned long lastScan = 0;
-  bool shouldRefreshRSSI = true;
 
   void getFreeSubNet();
 
@@ -150,7 +148,6 @@ class PipoWifi {
   void setSSID(String ssid);
   void setPassword(String password);
   void requestScan();
-  void requestRSSI();
   /**
    * @brief Forgets a network by removing it from the password manager
    * @param ssid the ssid of the network to forget
