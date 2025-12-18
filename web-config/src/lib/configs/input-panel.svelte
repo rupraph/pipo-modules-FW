@@ -77,57 +77,67 @@
   // $: display_max = (maxSensorValue - input.offset).toFixed(2);
 </script>
 
-<MinMax
-  bind:low={input.lmin}
-  bind:high={input.lmax}
-  value={sensorValues[currentAxis]}
-  mode={isContinuousMode(input) || isHisteresisMode(input)
-    ? "double"
-    : "single"}
-  cursorActive={Boolean(withinWindowValues[currentAxis])}
-  min={aschema.min}
-  bind:max={maxSensorValue}
-  step={aschema.step}
-  minLabel={`LowLim (${aschema.unit})`}
-  maxLabel={`HighLim (${aschema.unit})`}
-  units={aschema.unit}
-/>
+{#if input}
+  <MinMax
+    bind:low={input.lmin}
+    bind:high={input.lmax}
+    value={sensorValues[currentAxis]}
+    mode={isContinuousMode(input) || isHisteresisMode(input)
+      ? "double"
+      : "single"}
+    cursorActive={Boolean(withinWindowValues[currentAxis])}
+    min={aschema.min}
+    bind:max={maxSensorValue}
+    step={aschema.step}
+    minLabel={`LowLim (${aschema.unit})`}
+    maxLabel={`HighLim (${aschema.unit})`}
+    units={aschema.unit}
+  />
 
-<!-- {#if aschema.cat === "Touch"  } -->
+  <!-- {#if aschema.cat === "Touch"  } -->
 
-<div class="container">
-  {#if aschema.cat !== "Touch"}
+  <div class="container">
+    {#if aschema.cat !== "Touch"}
+      <div class="item">
+        <Tooltip title="On/Off output above/below level">
+          <Switch label="Threshold" bind:value={input.mode} design="slider" />
+        </Tooltip>
+      </div>
+      <div class="item" class:disabled={!input.mode}>
+        <Switch
+          label="2-level threshold"
+          bind:value={input.th_mode}
+          design="slider"
+        />
+      </div>
+      <div class="item">
+        <Tooltip title="Output will loop to min" enabled>
+          <Switch label="Cyclic" bind:value={input.cyclic} design="slider" />
+        </Tooltip>
+      </div>
+    {/if}
     <div class="item">
-      <Tooltip title="On/Off output above/below level">
-        <Switch label="Threshold" bind:value={input.mode} design="slider" />
+      <Tooltip title="Invert the sensor output" enabled={true}>
+        <Switch label="Invert" bind:value={input.inverted} design="slider" />
       </Tooltip>
     </div>
-    <div class="item" class:disabled={!input.mode}>
-      <Switch
-        label="2-level threshold"
-        bind:value={input.th_mode}
-        design="slider"
-      />
-    </div>
-    <div class="item">
-      <Tooltip title="Output will loop to min" enabled>
-        <Switch label="Cyclic" bind:value={input.cyclic} design="slider" />
-      </Tooltip>
-    </div>
-  {/if}
-  <div class="item">
-    <Tooltip title="Invert the sensor output" enabled={true}>
-      <Switch label="Invert" bind:value={input.inverted} design="slider" />
-    </Tooltip>
+    {#if aschema.cat === "dist"}
+      <div class="item">
+        <Tooltip title="no object retunrs max or 0" enabled={true}>
+          <Switch
+            label="Over-out"
+            bind:value={input.over_out}
+            design="slider"
+          />
+        </Tooltip>
+      </div>
+    {/if}
   </div>
-  {#if aschema.cat === "dist"}
-    <div class="item">
-      <Tooltip title="no object retunrs max or 0" enabled={true}>
-        <Switch label="Over-out" bind:value={input.over_out} design="slider" />
-      </Tooltip>
-    </div>
-  {/if}
-</div>
+{:else}
+  <p style="color: var(--grey); text-align: center; padding: 1em;">
+    Loading input configuration...
+  </p>
+{/if}
 
 <!-- {/if} -->
 

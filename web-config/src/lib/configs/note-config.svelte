@@ -128,116 +128,128 @@
   }
 </script>
 
-<!-- {#if $pipoType !== "analog"} -->
-<!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
-{#if !isThresholdMode}
-  <div class="select-row">
-    <span class="output-label">Pattern</span>
-    <div class="select-input-container pattern-select">
-      <Select
-        class={isThresholdMode ? "disabled" : ""}
-        label=""
-        options={patternTypes}
-        bind:value={config.pattern}
-      />
-    </div>
-  </div>
-  {#if config.pattern === "scale"}
+{#if config}
+  <!-- {#if $pipoType !== "analog"} -->
+  <!-- <Tooltip title="The axis is in threshold mode" bind:enabled={isThresholdMode}> -->
+  {#if !isThresholdMode}
     <div class="select-row">
-      <span class="output-label">Scale type</span>
-      <div class="select-input-container scale-type-select">
+      <span class="output-label">Pattern</span>
+      <div class="select-input-container pattern-select">
         <Select
           class={isThresholdMode ? "disabled" : ""}
           label=""
-          options={scaleTypes}
-          bind:value={config.scaleType}
+          options={patternTypes}
+          bind:value={config.pattern}
         />
       </div>
     </div>
-  {:else if config.pattern === "arpeggio"}
-    <div class="select-row">
-      <span class="output-label">Arpeggio type</span>
-      <div class="select-input-container scale-type-select">
-        <Select
-          class={isThresholdMode ? "disabled" : ""}
-          label=""
-          options={arpeggioTypes}
-          bind:value={config.scaleType}
-        />
+    {#if config.pattern === "scale"}
+      <div class="select-row">
+        <span class="output-label">Scale type</span>
+        <div class="select-input-container scale-type-select">
+          <Select
+            class={isThresholdMode ? "disabled" : ""}
+            label=""
+            options={scaleTypes}
+            bind:value={config.scaleType}
+          />
+        </div>
       </div>
-    </div>
-  {:else if config.pattern === "interval"}
-    <div class="select-row">
-      <span class="output-label">Interval type</span>
-      <div class="select-input-container scale-type-select">
-        <Select
-          class={isThresholdMode ? "disabled" : ""}
-          label=""
-          options={intervals}
-          bind:value={config.scaleType}
-        />
+    {:else if config.pattern === "arpeggio"}
+      <div class="select-row">
+        <span class="output-label">Arpeggio type</span>
+        <div class="select-input-container scale-type-select">
+          <Select
+            class={isThresholdMode ? "disabled" : ""}
+            label=""
+            options={arpeggioTypes}
+            bind:value={config.scaleType}
+          />
+        </div>
       </div>
-    </div>
+    {:else if config.pattern === "interval"}
+      <div class="select-row">
+        <span class="output-label">Interval type</span>
+        <div class="select-input-container scale-type-select">
+          <Select
+            class={isThresholdMode ? "disabled" : ""}
+            label=""
+            options={intervals}
+            bind:value={config.scaleType}
+          />
+        </div>
+      </div>
+    {/if}
   {/if}
-{/if}
-<!-- </Tooltip> -->
-<!-- {/if} -->
+  <!-- </Tooltip> -->
+  <!-- {/if} -->
 
-<div class="note-config-row">
-  <span class="output-label">Root Note</span>
-  {#if hasConflict}
-    <span class="conflict-warning">
-      <TriangleAlert size={14} color="var(--red)" />
-      <span class="conflict-text"
-        >Note also used in "{conflictChannels.join(", ")}"</span
-      >
-    </span>
-  {:else}
-    <span></span>
-  {/if}
-  <div class="note-input-container">
-    <NoteInput label="" bind:value={config.rootNote} />
-  </div>
-</div>
-
-<!-- {#if $pipoType !== "analog"} -->
-<!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
-{#if !isThresholdMode}
   <div class="note-config-row">
-    <span class="output-label">Number of Notes</span>
+    <span class="output-label">Root Note</span>
+    {#if hasConflict}
+      <span class="conflict-warning">
+        <TriangleAlert size={14} color="var(--red)" />
+        <span class="conflict-text"
+          >Note also used in "{conflictChannels.join(", ")}"</span
+        >
+      </span>
+    {:else}
+      <span></span>
+    {/if}
+    <div class="note-input-container">
+      <NoteInput label="" bind:value={config.rootNote} />
+    </div>
+  </div>
+
+  <!-- {#if $pipoType !== "analog"} -->
+  <!-- <Tooltip title="The axis is in threshold mode" enabled={isThresholdMode}> -->
+  {#if !isThresholdMode}
+    <div class="note-config-row">
+      <span class="output-label">Number of Notes</span>
+      <span></span>
+      <div class="nb-input-container">
+        <Number
+          label=""
+          bind:value={config.nbOfNotes}
+          min={1}
+          max={50}
+          step={1}
+        />
+      </div>
+    </div>
+  {/if}
+  <!-- </Tooltip> -->
+  <!-- {/if} -->
+  <div class="note-config-row">
+    <span class="output-label">Sustain</span>
+    <InfoModal>
+      <p>
+        This defines the note duration in seconds. Setting 0 will make sustain
+        infinite. (Note stops when sensor goes out of range).
+      </p>
+    </InfoModal>
+    <div class="nb-input-container">
+      <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
+    </div>
+  </div>
+  <div class="note-config-row">
+    <span class="output-label">Velocity</span>
     <span></span>
     <div class="nb-input-container">
       <Number
         label=""
-        bind:value={config.nbOfNotes}
-        min={1}
-        max={50}
+        bind:value={config.velocity}
+        min={0}
+        max={127}
         step={1}
       />
     </div>
   </div>
+{:else}
+  <p style="color: var(--grey); text-align: center; padding: 1em;">
+    Loading configuration...
+  </p>
 {/if}
-<!-- </Tooltip> -->
-<!-- {/if} -->
-<div class="note-config-row">
-  <span class="output-label">Sustain</span>
-  <InfoModal>
-    <p>
-      This defines the note duration in seconds. Setting 0 will make sustain
-      infinite. (Note stops when sensor goes out of range).
-    </p>
-  </InfoModal>
-  <div class="nb-input-container">
-    <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
-  </div>
-</div>
-<div class="note-config-row">
-  <span class="output-label">Velocity</span>
-  <span></span>
-  <div class="nb-input-container">
-    <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
-  </div>
-</div>
 
 <style>
   .conflict-warning {

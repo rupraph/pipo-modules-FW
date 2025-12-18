@@ -222,7 +222,7 @@
     </div>
 
     <!-- CC Mode Settings -->
-    {#if midiConfig.tl_mode === 0}
+    {#if midiConfig.tl_mode === 0 && midiConfig}
       <div class="row">
         <span class="label">CC Number</span>
         {#if ccConflict}
@@ -286,7 +286,7 @@
     {/if}
 
     <!-- Note Mode Settings -->
-    {#if midiConfig.tl_mode === 1}
+    {#if midiConfig.tl_mode === 1 && midiConfig}
       <NoteConfig
         config={midiConfig}
         bind:isThresholdMode={input.mode}
