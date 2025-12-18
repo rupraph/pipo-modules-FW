@@ -241,7 +241,9 @@
   <!-- <div class="ips">
     <span><strong>APIP:</strong> {apIP}</span>
   </div> -->
-  <div style="display: flex; gap: 8px; width: 100%;">
+  <div
+    style="display: flex; gap: 8px; width: 100%; align-items: center; justify-content: center;"
+  >
     <button class="primary" class:disabled={waiting} on:click={() => scan()}
       >Scan</button
     >
@@ -286,7 +288,11 @@
                 <Lock size={20} />
               {/if}
             </button>
-            <Signal signal={quality} bars={5} />
+            {#if connected}
+              <Signal signal={quality} bars={5} />
+            {:else}
+              <span></span>
+            {/if}
             {#if known}
               <button class="forget" on:click={() => onForget(ssid)}
                 >forget</button
