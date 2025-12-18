@@ -9,8 +9,16 @@
 void init_filesystem() {
   // Init LittleFS
   if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
-    log_e("LittleFS Mount Failed");
-    return;
+    log_e("CRITICAL: LittleFS Mount Failed - retrying in 5 seconds");
+    delay(5000);
+    if (!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)) {
+      log_e("FATAL: LittleFS Mount Failed twice - system halted");
+      log_e("Device requires service - possible flash hardware failure");
+      while (1) {
+        delay(1000);  // Halt forever - LED patterns could indicate error state
+      }
+    }
+    log_w("LittleFS mounted successfully on retry");
   }
   log_i("LittleFS Mount Success");
   // listDir(LittleFS, "/config", 2);
