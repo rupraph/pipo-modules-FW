@@ -134,16 +134,32 @@ class PipoPWManager {
       return;
     }
 
-    String buffer = "";
-    String indexes = "";
-    String orders = "";
+    // Pre-calculate sizes to reduce heap fragmentation
+    size_t bufferSize = 0;
+    size_t indexesSize = 0;
+    size_t ordersSize = 0;
+
+    for (auto const& pair : passwords) {
+      bufferSize += pair.first.length() + pair.second.length();
+      indexesSize += 12;  // Enough for "255,255," worst case
+      ordersSize += 12;   // Enough for max ulong digits + comma
+    }
+
+    // Pre-allocate to avoid repeated reallocations
+    String buffer;
+    String indexes;
+    String orders;
+    buffer.reserve(bufferSize + 16);
+    indexes.reserve(indexesSize + 16);
+    orders.reserve(ordersSize + 16);
+
     for (auto const& pair : passwords) {
       indexes += pair.first.length();
       indexes += ',';
       indexes += pair.second.length();
       indexes += ',';
-      buffer += String(pair.first.c_str());
-      buffer += String(pair.second.c_str());
+      buffer += pair.first.c_str();  // Avoid temporary String() construction
+      buffer += pair.second.c_str();
       // Store order as text (avoid binary null bytes issue with Arduino String)
       orders += String(orderNumbers[pair.first]);
       orders += ',';
