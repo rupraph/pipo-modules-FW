@@ -20,14 +20,15 @@ void wifiTask(void* pvParameters) {
       lastStackCheck = millis();
     }
 
-    if (wifi.ready()) {
-      if (!server.isRunning()) {
-        server.resume();
-      }
-      // Update RSSI periodically when connected to STA
-      if (wifi.getStatus() == PipoWifi::CONNECTED && staConnected) {
-        wifi.requestRSSI();
-      }
+    // Resume server if AP is configured, regardless of STA status
+    // This ensures web interface remains available during STA connection attempts
+    if (apConfigured && !server.isRunning()) {
+      server.resume();
+    }
+
+    // Update RSSI periodically when connected to STA
+    if (wifi.getStatus() == PipoWifi::CONNECTED && staConnected) {
+      wifi.requestRSSI();
     }
   }
 }
