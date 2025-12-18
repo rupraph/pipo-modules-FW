@@ -39,7 +39,7 @@
   }
 
   .input-wrapper:hover {
-    border: 1px solid var(--main);
+    /* border: 1px solid var(--main); */
   }
 
   .validation {

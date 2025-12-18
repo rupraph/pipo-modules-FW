@@ -206,7 +206,7 @@
   <div class="note-config-row">
     <span class="output-label">Number of Notes</span>
     <span></span>
-    <div class="note-input-container">
+    <div class="nb-input-container">
       <Number
         label=""
         bind:value={config.nbOfNotes}
@@ -227,14 +227,14 @@
       infinite. (Note stops when sensor goes out of range).
     </p>
   </InfoModal>
-  <div class="note-input-container">
+  <div class="nb-input-container">
     <Number label="" bind:value={config.sustain} min={0} max={5} step={1} />
   </div>
 </div>
 <div class="note-config-row">
   <span class="output-label">Velocity</span>
   <span></span>
-  <div class="note-input-container">
+  <div class="nb-input-container">
     <Number label="" bind:value={config.velocity} min={0} max={127} step={1} />
   </div>
 </div>
@@ -279,8 +279,13 @@
     justify-self: end;
   }
 
+  .nb-input-container {
+    justify-self: end;
+  }
+
   .select-input-container :global(.input-wrapper) {
-    width: 200px;
+    width: 165px;
+    max-width: 180px;
   }
 
   .note-input-container :global(.input label),
