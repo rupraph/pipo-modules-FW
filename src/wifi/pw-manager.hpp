@@ -92,8 +92,12 @@ class PipoPWManager {
   PipoPWManager() : orderCounter(0), lastConnectedSSID("") {};
 
   void setup() {
-    preferences.begin("pipo-wifi", false);
+    if (!preferences.begin("pipo-wifi", false)) {
+      log_e("Failed to open pipo-wifi namespace");
+      return;
+    }
     load();
+    preferences.end();  // Close after loading
     print_stored_ssids();
     if (DEBUG_HEAP)
       pipoDebugHeap("End setup PipoPWManager");
@@ -124,6 +128,12 @@ class PipoPWManager {
   * @brief Saves the passwords to the preferences
   */
   void save() {
+    // Open namespace for writing
+    if (!preferences.begin("pipo-wifi", false)) {
+      log_e("Failed to open pipo-wifi namespace for saving");
+      return;
+    }
+
     String buffer = "";
     String indexes = "";
     String orders = "";
@@ -138,12 +148,26 @@ class PipoPWManager {
       orders += String(orderNumbers[pair.first]);
       orders += ',';
     }
-    preferences.putString("indexes", indexes);
-    preferences.putString("buffer", buffer);
-    preferences.putString("orders", orders);
-    preferences.putBool("userDisconnect", userWantsDisconnected);
-    preferences.putString("lastSSID", String(lastConnectedSSID.c_str()));
-    preferences.putULong("orderCtr", orderCounter);
+
+    // Write with error checking
+    bool write_success = true;
+    write_success &= (preferences.putString("indexes", indexes) > 0);
+    write_success &= (preferences.putString("buffer", buffer) > 0);
+    write_success &= (preferences.putString("orders", orders) > 0);
+    write_success &=
+        (preferences.putBool("userDisconnect", userWantsDisconnected));
+    write_success &= (preferences.putString(
+                          "lastSSID", String(lastConnectedSSID.c_str())) > 0);
+    // putULong returns 4 on success, 0 on failure
+    write_success &= (preferences.putULong("orderCtr", orderCounter) == 4);
+
+    preferences.end();  // Close namespace
+
+    if (!write_success) {
+      log_e("Failed to save some WiFi credentials to NVS");
+    } else {
+      log_d("WiFi credentials saved successfully");
+    }
   };
 
   /**
@@ -218,10 +242,11 @@ class PipoPWManager {
 
     // Validate loaded data and recover from corruption
     if (!validateData()) {
-      log_w(
-          "Corrupted data detected during load, clearing all stored networks");
+      log_w("Corrupted WiFi data detected, clearing all stored networks");
       clear();
-      save();  // Persist the cleared state to prevent repeated corruption
+      // Clear the NVS namespace completely
+      preferences.clear();
+      log_d("NVS namespace cleared due to corruption");
     }
   }
 
