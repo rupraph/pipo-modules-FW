@@ -382,12 +382,21 @@ void Config::delete_config(String filename) {
   logs.writeLog("delete config: " + filename);
   if (filename == this->filename) {
     File root = LittleFS.open(configs_root);
+    if (!root) {
+      log_e("Failed to open configs directory");
+      return;
+    }
+
     File file = root.openNextFile();
     if (!file) {
+      root.close();  // Close before early return
       load_config();
       logs.writeLog("deleted last config, creating new default");
     } else {
       String name = String(file.name());
+      file.close();  // Close file early since we only needed the name
+      root.close();  // Close root early
+
       bool success = load_config(name.substring(0, name.length() - 5));
       if (!success) {
         log_w("Next config corrupted, falling back to default");
@@ -396,8 +405,6 @@ void Config::delete_config(String filename) {
         load_config();
       }
     }
-    root.close();
-    file.close();
   }
 }
 void Config::rename(String old_name, String new_name) {
