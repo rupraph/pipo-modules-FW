@@ -23,25 +23,28 @@ class PipoPWManager {
       return;
     }
 
-    // Create sorted list of (ssid, order) pairs
-    std::vector<std::pair<std::string, unsigned long>> sorted;
-    for (const auto& pair : orderNumbers) {
-      sorted.push_back(pair);
+    // Find the network with the lowest order number
+    // Repeatedly find and reassign in order - simple O(n^2) but only 5 networks max
+    unsigned long newOrder = 0;
+    for (int i = 0; i < (int)orderNumbers.size(); i++) {
+      unsigned long minOrder = ULONG_MAX;
+      std::string minSSID = "";
+
+      // Find the next lowest order that hasn't been reassigned yet
+      for (const auto& pair : orderNumbers) {
+        if (pair.second < minOrder && pair.second > newOrder) {
+          minOrder = pair.second;
+          minSSID = pair.first;
+        }
+      }
+
+      if (!minSSID.empty()) {
+        newOrder++;
+        orderNumbers[minSSID] = newOrder;
+      }
     }
 
-    // Sort by order number (ascending)
-    std::sort(sorted.begin(), sorted.end(),
-              [](const std::pair<std::string, unsigned long>& a,
-                 const std::pair<std::string, unsigned long>& b) {
-                return a.second < b.second;
-              });
-
-    // Reassign sequential order numbers starting from 1
-    orderCounter = 0;
-    for (const auto& pair : sorted) {
-      orderNumbers[pair.first] = ++orderCounter;
-    }
-
+    orderCounter = newOrder;
     log_d("Normalized order numbers, new orderCounter: %lu", orderCounter);
   }
 
