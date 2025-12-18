@@ -25,6 +25,7 @@
         <li>• Check your WiFi connection to Pipo</li>
         <li>• Try restarting Pipo if the issue persists</li>
         <li>• Make sure you only have one config page open</li>
+        <li>• Make sure you only have 1 device connected to the Pipo Wifi</li>
       </ul>
       <ul>
         <li>
