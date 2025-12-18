@@ -77,6 +77,8 @@ class PipoWifi {
   bool isChangingAP = false;  // means switching from one AP to another ?
   bool intentionalDisconnect =
       false;  // flag to distinguish user-initiated disconnects
+  bool needsSave = false;  // Flag to save pwm from task context (not interrupt)
+  bool stateChanged = false;  // Flag set by event handlers, cleared by refresh()
   PipoWState next;
   PipoPWManager pwm;
   std::map<String, int> signals;

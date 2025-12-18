@@ -159,6 +159,34 @@
     editing = "";
     addToast(toast);
   }
+  async function onDisconnect() {
+    if (waiting) return;
+    waiting = true;
+    let toast: Toast = {
+      type: "info",
+      message: `Disconnecting from WiFi...`,
+      timeout: 3000,
+    };
+    addToast(toast);
+
+    // Pause websocket before disconnect
+    await pipoio.pause();
+
+    try {
+      await pipoio.request({
+        method: "post",
+        url: "/wifi-disconnect",
+        timeout: 1000,
+      });
+      // Wait 3s for disconnection
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Reload page to show new state
+    location.reload();
+  }
   async function onConnect(ssid: string) {
     if (waiting) return;
     waiting = true;
@@ -204,9 +232,20 @@
   <!-- <div class="ips">
     <span><strong>APIP:</strong> {apIP}</span>
   </div> -->
-  <button class="primary" class:disabled={waiting} on:click={() => scan()}
-    >Scan</button
-  >
+  <div style="display: flex; gap: 8px; width: 100%;">
+    <button class="primary" class:disabled={waiting} on:click={() => scan()}
+      >Scan</button
+    >
+    {#if networks.find((n) => n.connected)}
+      <button
+        class="secondary"
+        class:disabled={waiting}
+        on:click={onDisconnect}
+      >
+        Disconnect
+      </button>
+    {/if}
+  </div>
   {#if waiting && networks.length === 0}
     <Spinner />
     <p>Scanning for networks...</p>

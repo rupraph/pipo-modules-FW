@@ -85,13 +85,13 @@ void onScanDoneHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] SCAN_DONE");
   wifi.scanning = false;
   wifi.saveScanResult();
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTAStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] STA_START");
   staStarted = true;
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -108,7 +108,7 @@ void onSTAStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     osc.start();                    // Restart for AP interface
   }
 
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -117,13 +117,13 @@ void onSTAConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   staConnected = true;
   wifi.pwm.add(wifi.next.ssid, wifi.next.password);
   wifi.pwm.promote(wifi.next.ssid);
-  wifi.pwm.save();
+  wifi.needsSave = true;  // Mark that we need to save from task context
   wifi.rssi = wifi.signals[wifi.next.ssid];
   wifi.reconnectAttempts = 0;  // Reset counter on successful connection
   wifi.next.ssid = "";
   wifi.next.password = "";
   wifi.isChangingAP = false;
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -135,11 +135,17 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     log_d("  Intentional disconnect, resetting counter");
     wifi.reconnectAttempts = 0;
     wifi.intentionalDisconnect = false;
-    wifi.next.ssid = "";
-    wifi.next.password = "";
+    
+    // If we have a new AP to connect to (switching networks), keep the credentials
+    // Otherwise clear them (user-initiated disconnect)
+    if (wifi.next.ssid.length() > 0) {
+      log_i("  Have new AP queued (%s), will attempt connection", wifi.next.ssid.c_str());
+    } else {
+      log_d("  No new AP queued, staying disconnected");
+    }
   } else {
-    // we disconnected from the asked AP: means wrong credentials,
-    // erase the ssid and password to allow fallback to other APs
+    // Unintentional disconnect - connection failed or dropped
+    // Check if this was the AP we were trying to connect to
     if (strcmp((char*)info.wifi_sta_disconnected.ssid,
                wifi.next.ssid.c_str()) == 0) {
       wifi.reconnectAttempts++;
@@ -147,7 +153,8 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
             wifi.MAX_RECONNECT_ATTEMPTS);
 
       if (wifi.reconnectAttempts >= wifi.MAX_RECONNECT_ATTEMPTS) {
-        log_w("  Max reconnect attempts reached, giving up");
+        log_w("  Max reconnect attempts reached for %s, clearing credentials", wifi.next.ssid.c_str());
+        // Don't save these credentials - connection failed
         wifi.next.ssid = "";
         wifi.next.password = "";
         wifi.reconnectAttempts = 0;
@@ -157,6 +164,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
       }
     }
   }
+  
   wifi.isChangingAP = false;
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
@@ -169,7 +177,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     osc.start();                    // Restart for AP interface
   }
 
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -180,14 +188,14 @@ void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
   osc.start();  // Network ready, start UDP
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP6 - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
   osc.start();  // Network ready with IPv6, start UDP
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -202,7 +210,7 @@ void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
     osc.start();                    // Restart for AP interface
   }
 
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -210,7 +218,7 @@ void onAPStartHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apStarted = true;
   // Note: apStarted means the AP has started, but not necessarily configured yet
   // Wait for configureAP() to set apConfigured, then start UDP
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -218,7 +226,7 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   apStarted = false;
   apConfigured = false;
   osc.stop();  // AP stopped, stop UDP
-  wifi.step();
+  wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -417,15 +425,24 @@ void PipoWifi::step() {
   }
   if (staStarted && status != CONNECTING && (status != CONNECTED)) {
     // STA is ready, and we need to connect
-    if (next.ssid.length() && next.password.length() &&
-        connect(next.ssid, next.password)) {
-      return;
+    // User manually requested connection (next.ssid is set)
+    if (next.ssid.length() && next.password.length()) {
+      if (connect(next.ssid, next.password)) {
+        return;
+      }
     }
-    if (next.ssid.length() && connect(next.ssid)) {
-      return;
+    if (next.ssid.length()) {
+      if (connect(next.ssid)) {
+        return;
+      }
     }
-    if (connect()) {
-      return;
+    // Only auto-connect if user hasn't requested disconnect
+    if (pwm.shouldAutoConnect()) {
+      if (connect()) {
+        return;
+      }
+    } else {
+      log_i("User requested disconnect - skipping auto-connect");
     }
   }
 
@@ -442,6 +459,20 @@ void PipoWifi::step() {
 void PipoWifi::refresh() {
   if (scanning || status == CONNECTING)
     return;
+  
+  // Save password manager changes from task context (safe to write to flash here)
+  if (needsSave) {
+    pwm.save();
+    needsSave = false;
+  }
+  
+  // Run state machine if events triggered a state change
+  // This ensures step() only runs in task context, never from event handlers
+  if (stateChanged) {
+    stateChanged = false;
+    step();
+  }
+  
   wifi_mode_t prevMode = WiFi.getMode();
 
   if (next.shouldScan) {
@@ -452,14 +483,17 @@ void PipoWifi::refresh() {
     rssi = WiFi.RSSI();
     next.shouldRSSI = false;
   } else if (isChangingAP) {
+    log_i("WiFi: Processing AP change request");
     isChangingAP = false;
     if (status == CONNECTED) {
-      log_d("WiFi: Disconnecting for AP change");
+      log_i("WiFi: Disconnecting from current AP to switch networks");
       intentionalDisconnect = true;
       WiFi.disconnect();
-    } else if (status == DISCONNECTED && apStarted) {
-      scanning =
-          WiFi.scanNetworks(true, false, true, 300U) == WIFI_SCAN_RUNNING;
+      // Don't call step() here - wait for disconnect event to trigger it
+    } else if (status == DISCONNECTED) {
+      // Already disconnected, ready to connect to new AP
+      log_i("WiFi: Ready to connect to new AP");
+      step();  // Trigger connection attempt
     }
   }
 }
@@ -495,6 +529,8 @@ void PipoWifi::forgetNetwork(String ssid) {
 
 void PipoWifi::disconnect() {
   log_i("User-initiated disconnect");
+  pwm.setDisconnectRequest();  // Set flag (no save in method)
+  pwm.save();  // Safe to save here - called from HTTP handler task context
   intentionalDisconnect = true;
   WiFi.disconnect();
 }

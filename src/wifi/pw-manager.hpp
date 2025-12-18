@@ -8,6 +8,8 @@
 #include "utils/debug.h"
 
 class PipoPWManager {
+ private:
+  bool userWantsDisconnected = false;  // Persisted flag for user disconnect request
 
  public:
   PipoPWManager() {};
@@ -54,6 +56,7 @@ class PipoPWManager {
     }
     preferences.putString("indexes", indexes);
     preferences.putString("buffer", buffer);
+    preferences.putBool("userDisconnect", userWantsDisconnected);
   };
 
   /**
@@ -62,6 +65,7 @@ class PipoPWManager {
   void load() {
     String indexes = preferences.getString("indexes", "");
     String buffer = preferences.getString("buffer", "");
+    userWantsDisconnected = preferences.getBool("userDisconnect", false);
 #ifndef UNIT_TEST
 // Add your wifi here for quick debug and wifi setup
 #endif
@@ -168,6 +172,36 @@ class PipoPWManager {
    */
   bool hasSSID(String ssid) {
     return passwords.find(std::string(ssid.c_str())) != passwords.end();
+  }
+
+  /**
+   * @brief Clear user disconnect request (called when user manually connects)
+   * Note: Does not save immediately - call save() later from non-interrupt context
+   */
+  void clearDisconnectRequest() {
+    if (userWantsDisconnected) {
+      log_i("Clearing user disconnect request");
+      userWantsDisconnected = false;
+      // Don't save here - will be saved by caller in safe context
+    }
+  }
+
+  /**
+   * @brief Set user disconnect request (called when user clicks disconnect)
+   * Note: Does not save immediately - call save() later from non-interrupt context
+   */
+  void setDisconnectRequest() {
+    log_i("Setting user disconnect request");
+    userWantsDisconnected = true;
+    // Don't save here - will be saved by caller in safe context
+  }
+
+  /**
+   * @brief Check if board should auto-connect at boot
+   * @return false if user has requested disconnect, true otherwise
+   */
+  bool shouldAutoConnect() {
+    return !userWantsDisconnected;
   }
 
   /**

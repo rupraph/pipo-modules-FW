@@ -375,6 +375,10 @@ void PipoServer::setup_requests() {
       wifi.setMode(WIFI_AP_STA);
     }
 
+    // User manually connecting - clear disconnect flag (safe in HTTP handler context)
+    wifi.pwm.clearDisconnectRequest();
+    wifi.needsSave = true;  // Mark for save in task context
+
     log_i("request to connect to SSID: %s", ssid.c_str());
     wifi.setSSID(ssid);
     wifi.setPassword(password);
@@ -404,6 +408,12 @@ void PipoServer::setup_requests() {
     String ssid = request->getParam("ssid")->value();
     wifi.forgetNetwork(ssid);
     return request->send(200, "text/plain", "Network forgotten");
+  });
+
+  server.on("/wifi-disconnect", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    log_i("Disconnect requested via HTTP");
+    request->send(200, "text/plain", "Disconnecting");
+    wifi.disconnect();
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {
