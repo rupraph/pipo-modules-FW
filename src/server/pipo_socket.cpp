@@ -244,16 +244,10 @@ bool PipoSocket::shouldAcceptConnection(AsyncWebSocketClient* newClient) {
     return true;
   }
 
-  // During WiFi transitions (e.g., AP to STA), be more lenient
-  // Allow connections after the initial transition period
-  unsigned long minInterval = MIN_CONNECTION_INTERVAL;
-  if (wifi.isChangingAP) {
-    minInterval = 200;  // More lenient during AP changes
-  }
-
   // Check if enough time has passed since last connection
+  // Use fixed interval - page reloads after WiFi changes handle reconnection cleanly
   unsigned long timeSinceLastConnection = now - lastConnectionTime;
-  if (timeSinceLastConnection < minInterval) {
+  if (timeSinceLastConnection < MIN_CONNECTION_INTERVAL) {
     // Same IP trying to reconnect too quickly
     if (newClient->remoteIP() == lastClientIP) {
       return false;

@@ -365,7 +365,7 @@ void PipoServer::setup_requests() {
     if (isEncoded && !password.isEmpty()) {
       String mac = WiFi.macAddress();
       password = decodePassword(password, mac);
-      log_d("Password decoded using MAC");
+      log_d("Password decoded");
     }
 
     request->send(200, "text/plain", "Try to connect to wifi");
@@ -382,6 +382,7 @@ void PipoServer::setup_requests() {
     log_i("request to connect to SSID: %s", ssid.c_str());
     wifi.setSSID(ssid);
     wifi.setPassword(password);
+    wifi.stateChanged = true;  // Trigger state machine to process connection
   });
 
   server.on("/wifi-state", HTTP_GET, [&](AsyncWebServerRequest* request) {
@@ -414,6 +415,12 @@ void PipoServer::setup_requests() {
     log_i("Disconnect requested via HTTP");
     request->send(200, "text/plain", "Disconnecting");
     wifi.disconnect();
+  });
+
+  server.on("/wifi-clear-all", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    log_w("Factory reset: clearing all WiFi credentials via HTTP");
+    wifi.pwm.clearAll();
+    request->send(200, "application/json", "{\"status\":\"cleared\"}");
   });
 
   server.on("/logs", HTTP_GET, [&](AsyncWebServerRequest* request) {

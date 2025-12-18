@@ -4,6 +4,7 @@
   import { slide } from "svelte/transition";
   import { Lock, LockOpen, Eye, EyeOff, CircleCheck } from "lucide-svelte";
   import { addToast, type Toast } from "../toast";
+  import Modal from "../modal.svelte";
   import { pipoio } from "../../pipoio";
   import { pipoInfo } from "../../services";
   import { setLastScan, wifiState } from "./store";
@@ -19,6 +20,7 @@
   let waiting = false;
   let wifiMode = "";
   let mounted = false;
+  let showConnectedWarning = false;
 
   const WIFI_PASSWORD_MAX_LENGTH = 63; // WPA/WPA2 standard max length
 
@@ -90,6 +92,13 @@
   function onSelect(ssid: string, known: boolean) {
     const current = networks.find((n) => n.connected);
     if (waiting || (current && ssid === current.ssid)) return;
+
+    // Check if already connected to a different network
+    if (current && ssid !== current.ssid) {
+      showConnectedWarning = true;
+      return;
+    }
+
     if (known) {
       password = undefined;
       return onConnect(ssid);
@@ -340,6 +349,14 @@
     </div> -->
   {/if}
 </section>
+
+<Modal bind:open={showConnectedWarning}>
+  <h3 style="text-align: center;">Already Connected</h3>
+  <p style="text-align: center; margin: 1em;">
+    You are already connected to a network. Please disconnect first before
+    connecting to another network.
+  </p>
+</Modal>
 
 <style scoped>
   .connection {

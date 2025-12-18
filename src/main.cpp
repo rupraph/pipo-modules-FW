@@ -161,7 +161,7 @@ void setup() {  // by default on core 1
 // xTaskCreatePinnedToCore(hwuiSoftPwmTask, "hwuiSoftPwmTask", 4096, NULL, 1,
 //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
-  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 2048, NULL, 3, &wifiTaskHandle,
+  xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 3, &wifiTaskHandle,
                           0);
 #if HW_REV >= 11
   xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,

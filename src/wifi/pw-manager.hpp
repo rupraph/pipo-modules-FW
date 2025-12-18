@@ -9,10 +9,84 @@
 
 class PipoPWManager {
  private:
-  bool userWantsDisconnected = false;  // Persisted flag for user disconnect request
+  bool userWantsDisconnected =
+      false;  // Persisted flag for user disconnect request
+
+  /**
+   * @brief Normalizes order numbers to maintain relative ordering while keeping values small
+   * Resets all order numbers to sequential values (1, 2, 3...) based on current ordering
+   * This prevents orderCounter overflow and keeps numbers manageable
+   */
+  void normalizeOrderNumbers() {
+    if (orderNumbers.empty()) {
+      orderCounter = 0;
+      return;
+    }
+
+    // Create sorted list of (ssid, order) pairs
+    std::vector<std::pair<std::string, unsigned long>> sorted;
+    for (const auto& pair : orderNumbers) {
+      sorted.push_back(pair);
+    }
+
+    // Sort by order number (ascending)
+    std::sort(sorted.begin(), sorted.end(),
+              [](const std::pair<std::string, unsigned long>& a,
+                 const std::pair<std::string, unsigned long>& b) {
+                return a.second < b.second;
+              });
+
+    // Reassign sequential order numbers starting from 1
+    orderCounter = 0;
+    for (const auto& pair : sorted) {
+      orderNumbers[pair.first] = ++orderCounter;
+    }
+
+    log_d("Normalized order numbers, new orderCounter: %lu", orderCounter);
+  }
+
+  /**
+   * @brief Validates data integrity after loading from preferences
+   * @return true if data is valid, false if corrupted
+   */
+  bool validateData() {
+    // Check password/order consistency
+    if (passwords.size() != orderNumbers.size()) {
+      log_e("Data corruption: password count %zu != order count %zu",
+            passwords.size(), orderNumbers.size());
+      return false;
+    }
+
+    // Verify all passwords have order numbers
+    for (const auto& pair : passwords) {
+      if (orderNumbers.find(pair.first) == orderNumbers.end()) {
+        log_e("Data corruption: password '%s' has no order number",
+              pair.first.c_str());
+        return false;
+      }
+    }
+
+    // Verify all order numbers have passwords
+    for (const auto& pair : orderNumbers) {
+      if (passwords.find(pair.first) == passwords.end()) {
+        log_e("Data corruption: order for '%s' has no password",
+              pair.first.c_str());
+        return false;
+      }
+    }
+
+    // Check network count limit
+    if (passwords.size() > MAX_NETWORKS) {
+      log_e("Data corruption: stored %zu networks exceeds limit %d",
+            passwords.size(), MAX_NETWORKS);
+      return false;
+    }
+
+    return true;
+  }
 
  public:
-  PipoPWManager() {};
+  PipoPWManager() : orderCounter(0), lastConnectedSSID("") {};
 
   void setup() {
     preferences.begin("pipo-wifi", false);
@@ -24,18 +98,22 @@ class PipoPWManager {
 
   void clear() {
     passwords.clear();
-    scores.clear();
+    orderNumbers.clear();
+    orderCounter = 0;
+    lastConnectedSSID = "";
   }
 
   /**
    * @brief Prints the stored SSIDs and their scores for debugging
    */
   void print_stored_ssids() {
-    log_d("Stored SSIDs and scores:");
+    log_d("Stored SSIDs and order:");
+    log_d("  Last connected: %s",
+          lastConnectedSSID.empty() ? "(none)" : lastConnectedSSID.c_str());
     for (const auto& pair : passwords) {
       String ssid = String(pair.first.c_str());
-      unsigned char score = scores[pair.first];
-      log_d("  SSID: %s, Score: %d", ssid.c_str(), score);
+      unsigned long order = orderNumbers[pair.first];
+      log_d("  SSID: %s, Order: %lu", ssid.c_str(), order);
     }
   }
 
@@ -45,6 +123,7 @@ class PipoPWManager {
   void save() {
     String buffer = "";
     String indexes = "";
+    String orders = "";
     for (auto const& pair : passwords) {
       indexes += pair.first.length();
       indexes += ',';
@@ -52,11 +131,16 @@ class PipoPWManager {
       indexes += ',';
       buffer += String(pair.first.c_str());
       buffer += String(pair.second.c_str());
-      buffer += (char)scores[pair.first];
+      // Store order as text (avoid binary null bytes issue with Arduino String)
+      orders += String(orderNumbers[pair.first]);
+      orders += ',';
     }
     preferences.putString("indexes", indexes);
     preferences.putString("buffer", buffer);
+    preferences.putString("orders", orders);
     preferences.putBool("userDisconnect", userWantsDisconnected);
+    preferences.putString("lastSSID", String(lastConnectedSSID.c_str()));
+    preferences.putULong("orderCtr", orderCounter);
   };
 
   /**
@@ -65,7 +149,11 @@ class PipoPWManager {
   void load() {
     String indexes = preferences.getString("indexes", "");
     String buffer = preferences.getString("buffer", "");
+    String orders = preferences.getString("orders", "");
     userWantsDisconnected = preferences.getBool("userDisconnect", false);
+    lastConnectedSSID =
+        std::string(preferences.getString("lastSSID", "").c_str());
+    orderCounter = preferences.getULong("orderCtr", 0);
 #ifndef UNIT_TEST
 // Add your wifi here for quick debug and wifi setup
 #endif
@@ -75,6 +163,8 @@ class PipoPWManager {
     int pwdLen = 0;
     int offset = 0;
     int L = indexes.length();
+
+    // Parse indexes and buffer for SSIDs and passwords
     for (int i = 0; i < L; i++) {
       if (indexes[i] != ',') {
         n *= 10;
@@ -91,38 +181,95 @@ class PipoPWManager {
         String ssid = buffer.substring(offset, pwdOffset);
         String password = buffer.substring(pwdOffset, pwdOffset + pwdLen);
         passwords[std::string(ssid.c_str())] = std::string(password.c_str());
-        scores[std::string(ssid.c_str())] = buffer[pwdOffset + pwdLen];
-        offset += (ssidLen + pwdLen + 1);
+        offset += (ssidLen + pwdLen);
         isSSID = true;
         ssidLen = 0;
         pwdLen = 0;
         n = 0;
       }
     }
+
+    // Parse orders (comma-separated list)
+    n = 0;
+    int orderIndex = 0;
+    L = orders.length();
+    for (int i = 0; i <= L; i++) {  // <= to process last number
+      if (i == L || orders[i] == ',') {
+        if (n > 0 || i > 0) {  // Have a valid order number
+          // Find corresponding SSID by index
+          int currentIndex = 0;
+          for (const auto& pair : passwords) {
+            if (currentIndex == orderIndex) {
+              orderNumbers[pair.first] = n;
+              break;
+            }
+            currentIndex++;
+          }
+          orderIndex++;
+          n = 0;
+        }
+      } else {
+        n = n * 10 + (orders[i] - '0');
+      }
+    }
+
+    // Validate loaded data and recover from corruption
+    if (!validateData()) {
+      log_w(
+          "Corrupted data detected during load, clearing all stored networks");
+      clear();
+      save();  // Persist the cleared state to prevent repeated corruption
+    }
   }
 
   /**
-  * @brief Adds a ssid and password to the list (do not saves it)
+  * @brief Adds a ssid and password to the list (does not save it)
+  * If network already exists, updates password only (order unchanged)
+  * If at capacity, evicts the oldest network (lowest order number)
   */
   void add(String ssid, String password) {
     std::string c_ssid = std::string(ssid.c_str());
-    if (passwords.size() == MAX_NETWORKS) {
-      unsigned char minScore = MAX_SCORE;
-      std::string minSSID = "";
-      for (auto const& pair : scores) {
-        if (pair.second > minScore)
-          continue;
-        minScore = pair.second;
-        minSSID = pair.first;
-      }
-      passwords.erase(minSSID);
-      scores.erase(minSSID);
-    }
-    passwords[c_ssid] = std::string(password.c_str());
-    // check if score exists already
-    if (scores.find(c_ssid) != scores.end())
+
+    // If network already exists, just update password (keep existing order)
+    if (passwords.find(c_ssid) != passwords.end()) {
+      passwords[c_ssid] = std::string(password.c_str());
+      log_d("Updated password for existing network '%s'", ssid.c_str());
       return;
-    scores[c_ssid] = BASE_SCORE;
+    }
+
+    // Normalize order numbers periodically to prevent overflow and keep values small
+    // Do this before adding to ensure we have room for the new entry
+    if (orderCounter > 1000 ||
+        (orderCounter > 100 && passwords.size() < MAX_NETWORKS)) {
+      normalizeOrderNumbers();
+    }
+
+    // FIFO eviction: remove network with lowest order number if at capacity
+    if (passwords.size() >= MAX_NETWORKS) {
+      unsigned long minOrder = ULONG_MAX;
+      std::string oldestSSID = "";
+      for (const auto& pair : orderNumbers) {
+        if (pair.second < minOrder) {
+          minOrder = pair.second;
+          oldestSSID = pair.first;
+        }
+      }
+      if (!oldestSSID.empty()) {
+        log_i(
+            "Network limit reached, evicting oldest network '%s' (order: %lu)",
+            oldestSSID.c_str(), minOrder);
+        passwords.erase(oldestSSID);
+        orderNumbers.erase(oldestSSID);
+        if (lastConnectedSSID == oldestSSID) {
+          lastConnectedSSID = "";
+        }
+      }
+    }
+
+    // Add new network with next order number
+    passwords[c_ssid] = std::string(password.c_str());
+    orderNumbers[c_ssid] = ++orderCounter;
+    log_d("Added network '%s' with order %lu", ssid.c_str(), orderCounter);
   }
 
   /**
@@ -132,29 +279,29 @@ class PipoPWManager {
   void remove(String ssid) {
     std::string c_ssid = std::string(ssid.c_str());
     passwords.erase(c_ssid);
-    scores.erase(c_ssid);
+    orderNumbers.erase(c_ssid);
+    if (lastConnectedSSID == c_ssid) {
+      lastConnectedSSID = "";
+    }
   }
 
   /**
-   * @brief Updates the score of a given ssid
-   * @param ssid the ssid of the network
-   *
+   * @brief Marks a network as connected - updates its order to be most recent and sets as lastConnected
+   * @param ssid the ssid of the network that was connected
    */
-  void promote(String ssid) {
+  void markAsConnected(String ssid) {
     std::string c_ssid = std::string(ssid.c_str());
-    if (scores.find(c_ssid) == scores.end()) {
+    if (orderNumbers.find(c_ssid) == orderNumbers.end()) {
+      log_w("Attempted to mark unknown network '%s' as connected",
+            ssid.c_str());
       return;
     }
-    unsigned char score = scores[std::string(ssid.c_str())];
-    // downgrade all other scores
-    for (auto& pair : scores) {
-      if (pair.first == c_ssid) {
-        pair.second =
-            std::min(MAX_SCORE, (unsigned char)(pair.second + MAX_NETWORKS));
-      } else {
-        pair.second = std::max(MIN_SCORE, (unsigned char)(pair.second - 1));
-      }
-    }
+
+    // Update to most recent order
+    orderNumbers[c_ssid] = ++orderCounter;
+    lastConnectedSSID = c_ssid;
+    log_d("Marked '%s' as connected with order %lu", ssid.c_str(),
+          orderCounter);
   }
 
   /**
@@ -173,6 +320,12 @@ class PipoPWManager {
   bool hasSSID(String ssid) {
     return passwords.find(std::string(ssid.c_str())) != passwords.end();
   }
+
+  /**
+   * @brief Returns the last connected SSID
+   * @return the SSID of the last connected network, empty string if none
+   */
+  String getLastConnectedSSID() { return String(lastConnectedSSID.c_str()); }
 
   /**
    * @brief Clear user disconnect request (called when user manually connects)
@@ -200,16 +353,19 @@ class PipoPWManager {
    * @brief Check if board should auto-connect at boot
    * @return false if user has requested disconnect, true otherwise
    */
-  bool shouldAutoConnect() {
-    return !userWantsDisconnected;
-  }
+  bool shouldAutoConnect() { return !userWantsDisconnected; }
 
   /**
-   * @brief Min possible score for a network, cannot be 0 because of string encoding
+   * @brief Clears all stored networks and resets user preferences (factory reset)
+   * Useful for troubleshooting or resetting device to clean state
    */
-  const unsigned char MIN_SCORE = 1;
-  const unsigned char MAX_SCORE = 255;
-  const unsigned char BASE_SCORE = 128;
+  void clearAll() {
+    log_i("Factory reset: clearing all stored networks and preferences");
+    clear();
+    userWantsDisconnected = false;
+    save();
+  }
+
   /**
    * @brief Maximum number of networks to remember
    */
@@ -222,9 +378,18 @@ class PipoPWManager {
    */
   std::map<std::string, std::string> passwords;
   /**
-   * @brief score for each wifi (higher is more used) 
+   * @brief Order number for each network (for FIFO eviction and tracking last used)
+   * Higher values = more recently used/added
    */
-  std::map<std::string, unsigned char> scores;
+  std::map<std::string, unsigned long> orderNumbers;
+  /**
+   * @brief Counter to generate monotonically increasing order numbers
+   */
+  unsigned long orderCounter;
+  /**
+   * @brief SSID of the last successfully connected network
+   */
+  std::string lastConnectedSSID;
 };
 
 #endif  // PIPOPWMANAGER_H

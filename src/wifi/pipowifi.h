@@ -74,17 +74,18 @@ class PipoWifi {
  public:
   // Public state accessible by event handlers - embedded systems pragmatic approach
   bool scanning = false;
-  bool isChangingAP = false;  // means switching from one AP to another ?
   bool intentionalDisconnect =
-      false;  // flag to distinguish user-initiated disconnects
+      false;               // flag to distinguish user-initiated disconnects
   bool needsSave = false;  // Flag to save pwm from task context (not interrupt)
-  bool stateChanged = false;  // Flag set by event handlers, cleared by refresh()
+  bool stateChanged =
+      false;  // Flag set by event handlers, cleared by refresh()
   PipoWState next;
   PipoPWManager pwm;
   std::map<String, int> signals;
   int8_t rssi;
   uint8_t reconnectAttempts = 0;
   unsigned long lastReconnectAttempt = 0;
+  String currentConnectingSSID = "";  // Track SSID for reconnect attempts
 
   /**
   * @brief The current status of the wifi
