@@ -18,11 +18,25 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
     return 0;  // or handle the error as needed
   }
 
+  // Check if current_scale is empty (can happen with invalid config)
+  if (current_scale.empty()) {
+    log_e("Error: current_scale is empty, cannot get note");
+    return rootNote;  // Return root note as safe fallback
+  }
+
   // scale value from 0 to 1 to the range of the current scale
   // map value from input range to 0-1
   float scaled_value = (value - min_input) / (max_input - min_input);
   int index = round(scaled_value * (nbOfNotes - 1));
   index = constrain(index, 0, nbOfNotes - 1);
+
+  // Additional safety check for index bounds
+  if (index >= current_scale.size()) {
+    log_e("Error: index %d out of bounds for scale size %d", index,
+          current_scale.size());
+    index = current_scale.size() - 1;
+  }
+
   return current_scale[index];
 }
 
@@ -110,6 +124,21 @@ vector<uint8_t> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   if (pattern != "interval") {
     vector<uint8_t> scale = generate_base_scale(rootNote, pattern, scaleType);
 
+    // Check if scale generation failed (empty vector)
+    if (scale.empty()) {
+      log_e("Failed to generate scale - using default major scale");
+      // Fallback to major scale to prevent crash
+      scale = generate_base_scale(rootNote, "scale", "major");
+      if (scale.empty()) {
+        // Last resort: return chromatic scale starting from rootNote
+        log_e("Critical: default scale failed, using chromatic fallback");
+        for (int i = 0; i < nb_notes && (rootNote + i) <= 127; i++) {
+          expandedScale.push_back(rootNote + i);
+        }
+        return expandedScale;
+      }
+    }
+
     int baseScaleSize = scale.size();
     int baseNoteIndex = 0;
     int expandedNote = scale[baseNoteIndex];
@@ -122,18 +151,31 @@ vector<uint8_t> MidiTranslator::generate_full_scale(int rootNote, int nb_notes,
   } else {
     // build intervals
     int expandedNote = rootNote;
-    for (int i = 0; i < nb_notes; i++) {
 
-      if (intervals.find(scaleType) != intervals.end()) {
-        expandedScale.push_back(expandedNote);
-        expandedNote += intervals.at(scaleType)[1];
-        log_d("Note: %d", expandedNote);
-      } else {
-        log_w("Invalid interval type");
+    // Validate interval type exists
+    if (intervals.find(scaleType) == intervals.end()) {
+      log_e("Invalid interval type '%s' - using octave interval as fallback",
+            scaleType.c_str());
+      scaleType = "octave";  // Safe fallback
+    }
+
+    int intervalStep = intervals.at(scaleType)[1];
+
+    for (int i = 0; i < nb_notes; i++) {
+      expandedScale.push_back(expandedNote);
+      expandedNote += intervalStep;
+
+      // Prevent MIDI note overflow
+      if (expandedNote > 127) {
+        log_w("Interval exceeded MIDI range, capping at note %d",
+              expandedScale.back());
+        break;
       }
+
+      log_d("Note: %d", expandedNote);
       log_d("Interval: ");
-      for (int i = 0; i < expandedScale.size(); i++) {
-        log_d("%d-", expandedScale[i]);
+      for (int j = 0; j < expandedScale.size(); j++) {
+        log_d("%d-", expandedScale[j]);
       }
       log_d("");
     }
@@ -249,7 +291,20 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_min = j["cc_min"];
     hires = j["hires"];
     velocity = j["velocity"];  // Assuming velocity is a member variable
+
+    // Update scale and verify it succeeded
     this->update_scale();
+
+    if (current_scale.empty()) {
+      log_e(
+          "Failed to generate valid scale from config - pattern: %s, "
+          "scaleType: %s",
+          pattern.c_str(), scaleType.c_str());
+      // Force safe defaults
+      pattern = "scale";
+      scaleType = "major";
+      this->update_scale();
+    }
 
   } catch (std::exception& e) {
     log_e("MIDI translator error: %s", e.what());
