@@ -69,24 +69,25 @@ class PresetsService {
         presetData.general.PipoName = current.general.PipoName;
       }
       
-      const configName = get(activeConfigName);
-      await configService.saveConfig(presetData, configName);
-      await configService.refreshActiveConfig();
+      // Update the current config without saving
+      // This will trigger the change detection and show the floating save button
+      currentConfig.set(presetData);
+      
       addToast({
         type: "success",
-        message: `Preset "${name}" applied successfully`,
+        message: `Preset "${name}" loaded. Click Save to apply the changes.`,
         timeout: 5000,
       });
-      console.log(`Applied preset: ${name}`);
+      console.log(`Loaded preset: ${name}`);
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : "Failed to apply preset. Please reload page and try again.";
+        err instanceof Error ? err.message : "Failed to load preset. Please reload page and try again.";
       addToast({
         type: "error",
         message: errorMsg,
         timeout: 5000,
       });
-      console.error("Error applying preset:", err);
+      console.error("Error loading preset:", err);
       throw err;
     } finally {
       presetsLoading.set(false);
