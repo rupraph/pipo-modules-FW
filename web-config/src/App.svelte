@@ -204,7 +204,7 @@
         </Collapse> -->
         <div class="row" style="color: var(--bg-secondary);">
           <div class="left">
-            <h3>SW:</h3>
+            <p>SW:</p>
             <span>{resp.version}</span>
           </div>
         </div>

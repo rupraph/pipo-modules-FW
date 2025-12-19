@@ -104,7 +104,7 @@ void PipoServer::setup_requests() {
     if (DEBUG_HEAP)
       pipoDebugHeap("info request");
 #ifdef PIPO_FW_VERSION
-    const char* version = stringify(PIPO_FW_VERSION);
+    const char* version = PIPO_FW_VERSION;
 #else
     const char* version = "unknown";
 #endif

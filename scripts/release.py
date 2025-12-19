@@ -5,7 +5,7 @@ import shutil
 
 # This should be run from platformio terminal
 
-ENVS = ["motion", "motion_rev1_1", "range", "range_rev1_1", "analog", "analog_rev2"]
+ENVS = ["motion_rev1_1", "range_rev1_1", "analog_rev2"]
 
 
 def get_latest_tag():

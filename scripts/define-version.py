@@ -1,20 +1,26 @@
 import shutil
+
 Import("env")
 import subprocess
 
+
 def getVersion():
-  tags = subprocess.check_output(['git', 'show-ref', '--tags']).decode().split('\n')
-  tags = list(map(lambda x: x.split(' '), tags))
-  head = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
-  for tag in tags:
-    if len(tag[0]) == 0:
-      continue
-    chash, name = tag
-    if head in chash:
-      return name.split('/')[2]
-  return head[:10]
+    try:
+        # Get the most recent tag reachable from HEAD
+        tag = (
+            subprocess.check_output(
+                ["git", "describe", "--tags", "--abbrev=0"], stderr=subprocess.DEVNULL
+            )
+            .decode()
+            .strip()
+        )
+        return tag
+    except subprocess.CalledProcessError:
+        # No tags found, fall back to commit hash
+        head = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+        return head[:10]
+
+
 version = getVersion()
 print("Pipo software version: ", version)
-env.Append(CPPDEFINES=[
-  ("PIPO_FW_VERSION", version)
-])
+env.Append(CPPDEFINES=[f'PIPO_FW_VERSION=\\"{version}\\"'])
