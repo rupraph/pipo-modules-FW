@@ -62,6 +62,13 @@ class PresetsService {
       // Get the preset data
       const presetData = await this.getPreset(name);
       delete presetData.preset;
+      
+      // Preserve the current PipoName (and any other fields we don't want to overwrite)
+      const current = get(currentConfig);
+      if (current?.general?.PipoName) {
+        presetData.general.PipoName = current.general.PipoName;
+      }
+      
       const configName = get(activeConfigName);
       await configService.saveConfig(presetData, configName);
       await configService.refreshActiveConfig();
