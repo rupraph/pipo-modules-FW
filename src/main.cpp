@@ -70,10 +70,7 @@ void setup() {  // by default on core 1
   }
 
   /////// Init midi and hid
-  String deviceName =
-      "Pipo-" + String(config.general_config["PipoName"].as<String>());
-  midiio.setup(deviceName.c_str());  //50k heap
-
+  midiio.setup();  //50k heap
 #ifndef DISABLE_USB_COMM
   // hidio.setup(config.general_config["HidMode"]);
 #endif

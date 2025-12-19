@@ -37,7 +37,7 @@ class midi_io {
   bool off_before_next_note = false;
   // set if off previous note before sending note
 
-  void setup(const char* deviceName = "PipoUSB");
+  void setup();
 
   void sendNoteOn(int note, int velocity, int channel,
                   unsigned long sustainmil = 0);

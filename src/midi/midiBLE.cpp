@@ -6,13 +6,16 @@
 #include <hardware/BLEMIDI_ESP32_NimBLE.h>
 
 // Newer BLE-MIDI lib allows for custom settings (and choosing lower min connection interval)
-// Using generic name initially, will be updated in setup with device name from caller
-BLEMIDI_CREATE_INSTANCE("Pipo-BLE", MidiBle);
 
-void midiBLESetup(const char* deviceName) {
-  // Set BLE name from passed parameter for consistency with USB, mDNS, and OSC naming
-  BLEMidiBle.setName(deviceName);
+#ifdef PIPO_MOTION
+BLEMIDI_CREATE_INSTANCE("PipoMotionBLE", MidiBle);
+#elif PIPO_RANGE
+BLEMIDI_CREATE_INSTANCE("PipoRangeBLE", MidiBle);
+#elif PIPO_ANALOG
+BLEMIDI_CREATE_INSTANCE("PipoAnalogBLE", MidiBle);
+#endif
 
+void midiBLESetup() {
   MidiBle.begin();
   BLEMidiBle.setHandleConnected(OnConnected);
   BLEMidiBle.setHandleDisconnected(OnDisconnected);

@@ -2,16 +2,14 @@
 
 midi_io midiio;
 
-void midi_io::setup(const char* deviceName) {
+void midi_io::setup() {
   log_i("midi_io setup started");
 
   if (DEBUG_HEAP)
     pipoDebugHeap("Start setup midi_io");
-
 #ifndef DISABLE_USB_COMM
   log_i("midiUSBSetup");
-  String usbName = String(deviceName) + "-USB";
-  MidiUSBSetup(usbName.c_str());
+  MidiUSBSetup();
 #endif
 
   log_i("midiBLESetup");
@@ -19,8 +17,7 @@ void midi_io::setup(const char* deviceName) {
     pipoDebugHeap("MidiBLESetup: start");
 #ifdef INCLUDE_BLE
   if (config.general_config["BLEEnabled"]) {
-    String bleName = String(deviceName) + "-BLE";
-    midiBLESetup(bleName.c_str());
+    midiBLESetup();
   }
 #endif
   log_i("midiBLESetup done");
