@@ -63,10 +63,18 @@ class PresetsService {
       const presetData = await this.getPreset(name);
       delete presetData.preset;
       
-      // Preserve the current PipoName (and any other fields we don't want to overwrite)
+      // Preserve the current PipoName, IP, and Port (fields we don't want to overwrite)
       const current = get(currentConfig);
-      if (current?.general?.PipoName) {
-        presetData.general.PipoName = current.general.PipoName;
+      if (current?.general) {
+        if (current.general.PipoName) {
+          presetData.general.PipoName = current.general.PipoName;
+        }
+        if (current.general.OSC_IP) {
+          presetData.general.OSC_IP = current.general.OSC_IP;
+        }
+        if (current.general.OSC_PORT !== undefined) {
+          presetData.general.OSC_PORT = current.general.OSC_PORT;
+        }
       }
       
       // Update the current config without saving

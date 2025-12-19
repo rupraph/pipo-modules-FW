@@ -57,8 +57,7 @@
       <span>Factory Presets</span>
       <InfoModal>
         <p>
-          This loads a factory preset, applies and saves it to the current
-          configuration.
+          This loads a factory preset as basic example configuration.
         </p></InfoModal
       >
     </div>
