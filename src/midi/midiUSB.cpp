@@ -6,8 +6,14 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 // Todo. should be carefull not to send midi too fast
 
 void MidiUSBSetup() {
-  TinyUSBDevice.setManufacturerDescriptor("Rup");
-  TinyUSBDevice.setProductDescriptor("PipoUSB");
+  TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
+#if defined(PIPO_MOTION)
+  TinyUSBDevice.setProductDescriptor("PipoMotion");
+#elif defined(PIPO_RANGE)
+  TinyUSBDevice.setProductDescriptor("PipoRange");
+#elif defined(PIPO_ANALOG)
+  TinyUSBDevice.setProductDescriptor("PipoAnalog");
+#endif
   // while (!TinyUSBDevice.mounted())
   //     delay(1);
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
