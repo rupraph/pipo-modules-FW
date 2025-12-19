@@ -8,20 +8,12 @@ MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 void MidiUSBSetup(const char* deviceName) {
   log_i("MIDI USB setup: %s", deviceName);
 
-  // Detach USB to change descriptors
-  TinyUSBDevice.detach();
-  delay(100);  // Wait for host to detect disconnect
-
-  // Set new descriptors while detached
   TinyUSBDevice.setManufacturerDescriptor("PipoInterfaces");
   TinyUSBDevice.setProductDescriptor(deviceName);
-  // Re-attach USB - this triggers re-enumeration with new descriptors
-  TinyUSBDevice.attach();
-  delay(100);  // Wait for re-enumeration
-
-  // Now initialize MIDI
+  // while (!TinyUSBDevice.mounted())
+  //     delay(1);
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
-
+  log_i("MIDI USB setup complete");
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
