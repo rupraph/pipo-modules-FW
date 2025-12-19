@@ -12,11 +12,20 @@
   } from "../../services/config";
   import { Plus, Trash2, CopyPlus } from "lucide-svelte";
   import { schema } from "../../schema";
+  import { pipoio } from "../../pipoio";
+  import { addToast } from "../toast";
 
   let showRenameModal = false;
   let showCopyModal = false;
   let showDeleteModal = false;
   let showCreateModal = false;
+  let showApplyConfigModal = false;
+  let pendingConfigName = "";
+  let pendingConfigData: any = null;
+  let willRebootForMode = false;
+  let willRebootForName = false;
+  let loadingPendingConfig = false;
+  let applyingConfig = false;
   let newname = "";
   let copyName = "";
   let createName = "";
@@ -76,12 +85,101 @@
   $: selectedItem = $activeConfigName
     ? { value: $activeConfigName, label: $activeConfigName }
     : null;
+  $: willReboot = willRebootForMode || willRebootForName;
 
   async function handleSelect(event: CustomEvent) {
     const selected = event.detail;
     if (selected && selected.value !== $activeConfigName) {
-      await configService.setActiveConfig(selected.value);
+      // Store pending config and show confirmation modal
+      pendingConfigName = selected.value;
+      loadingPendingConfig = true;
+      showApplyConfigModal = true;
+
+      try {
+        // Fetch the pending config to check for mode/name changes
+        pendingConfigData = await configService.fetchConfig(selected.value);
+
+        if (pendingConfigData && $currentConfig) {
+          // Check if mode will change
+          const currentMode = $currentConfig.general.MidiEnabled
+            ? "MIDI"
+            : "OSC";
+          const pendingMode = pendingConfigData.general.MidiEnabled
+            ? "MIDI"
+            : "OSC";
+          willRebootForMode = currentMode !== pendingMode;
+
+          // Check if PipoName will change
+          willRebootForName =
+            $currentConfig.general.PipoName !==
+            pendingConfigData.general.PipoName;
+        }
+      } catch (err) {
+        console.error("Error fetching pending config:", err);
+        showApplyConfigModal = false;
+      } finally {
+        loadingPendingConfig = false;
+      }
     }
+  }
+
+  async function confirmApplyConfig() {
+    if (!pendingConfigName) return;
+
+    const needsReboot = willRebootForMode || willRebootForName;
+    applyingConfig = true;
+    try {
+      await configService.setActiveConfig(pendingConfigName);
+      showApplyConfigModal = false;
+      pendingConfigName = "";
+      pendingConfigData = null;
+
+      // If reboot is needed, show toast and trigger reboot
+      if (needsReboot) {
+        let rebootReason = "";
+        if (willRebootForMode && willRebootForName) {
+          rebootReason = "MIDI/OSC mode and Pipo name changes";
+        } else if (willRebootForMode) {
+          rebootReason = "MIDI/OSC mode change";
+        } else if (willRebootForName) {
+          rebootReason = "Pipo name change";
+        }
+
+        addToast({
+          type: "error",
+          message: `Pipo will reboot to take into account the ${rebootReason}. Please reload the page in a few seconds (Make sure Wifi is reconnected)`,
+          timeout: 10000,
+        });
+
+        pipoio
+          .get("/reboot")
+          .then(() => {
+            console.log("Rebooting device...");
+          })
+          .catch((err) => {
+            console.error("Failed to reboot:", err);
+          });
+      }
+
+      willRebootForMode = false;
+      willRebootForName = false;
+    } catch (err) {
+      console.error("Error applying config:", err);
+    } finally {
+      applyingConfig = false;
+    }
+  }
+
+  function cancelApplyConfig() {
+    showApplyConfigModal = false;
+    pendingConfigName = "";
+    pendingConfigData = null;
+    willRebootForMode = false;
+    willRebootForName = false;
+    // Reset the select to current active config
+    selectedItem = $activeConfigName
+      ? { value: $activeConfigName, label: $activeConfigName }
+      : null;
   }
 
   function startRename() {
@@ -412,6 +510,55 @@
   </div>
 </Modal>
 
+<Modal bind:open={showApplyConfigModal}>
+  <div class="modal-content">
+    <h3>Apply Configuration</h3>
+    {#if loadingPendingConfig}
+      <p>Loading configuration...</p>
+    {:else}
+      <p>
+        Do you want to apply the configuration <strong
+          >"{pendingConfigName}"</strong
+        >?
+      </p>
+      {#if willReboot}
+        <div class="warning-box">
+          <p style="margin: 0; font-weight: 600; color: var(--red);">
+            This will trigger a reboot of the board.
+          </p>
+          <p style="margin: 0.5em 0 0 0; font-size: 14px;">
+            {#if willRebootForMode && willRebootForName}
+              This config has a different MIDI/OSC mode and Pipo name.
+            {:else if willRebootForMode}
+              This config has a different MIDI/OSC mode.
+            {:else if willRebootForName}
+              This config has a different Pipo name.
+            {/if}
+          </p>
+        </div>
+      {/if}
+    {/if}
+    <div class="modal-buttons">
+      <button on:click={cancelApplyConfig} disabled={applyingConfig}>
+        Cancel
+      </button>
+      <button
+        on:click={confirmApplyConfig}
+        disabled={loadingPendingConfig || applyingConfig}
+        class:reboot-btn={willReboot}
+      >
+        {#if applyingConfig}
+          Applying...
+        {:else if willReboot}
+          Apply and Reboot
+        {:else}
+          Apply
+        {/if}
+      </button>
+    </div>
+  </div>
+</Modal>
+
 <style scoped>
   .left {
     flex-wrap: wrap;
@@ -544,6 +691,26 @@
   }
 
   .modal-buttons .delete-confirm-btn:hover:not(:disabled) {
+    background-color: #cc0000;
+    border-color: #cc0000;
+  }
+
+  .warning-box {
+    background-color: rgba(255, 68, 68, 0.1);
+    border: 2px solid var(--red, #ff4444);
+    border-radius: 8px;
+    padding: 1em;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modal-buttons .reboot-btn {
+    background-color: var(--red, #ff4444);
+    color: white;
+    border-color: var(--red, #ff4444);
+  }
+
+  .modal-buttons .reboot-btn:hover:not(:disabled) {
     background-color: #cc0000;
     border-color: #cc0000;
   }

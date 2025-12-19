@@ -104,7 +104,7 @@
     <div class="main-container">
       <BatteryStatus />
       <Menu />
-      <ConfigSelect />
+      <!-- <ConfigSelect /> -->
       <section style="border-top: 2px solid var(--bg-tertiary);">
         {#if type !== "range"}
           {#if type === "motion"}
