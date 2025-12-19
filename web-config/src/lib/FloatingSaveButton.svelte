@@ -1,6 +1,10 @@
 <script lang="ts">
   import { pipoio } from "../pipoio";
-  import { activeConfigName, modeWillChange } from "../services/config";
+  import {
+    activeConfigName,
+    modeWillChange,
+    pipoNameWillChange,
+  } from "../services/config";
   import { get } from "svelte/store";
   import { onMount, onDestroy } from "svelte";
   import { addToast } from "./toast";
@@ -81,7 +85,9 @@
       return;
     }
 
-    const willReboot = get(modeWillChange);
+    const willRebootForMode = get(modeWillChange);
+    const willRebootForName = get(pipoNameWillChange);
+    const willReboot = willRebootForMode || willRebootForName;
     savingStatus = "loading";
 
     const name = get(activeConfigName);
@@ -105,12 +111,20 @@
       console.log("Config saved successfully");
       savingStatus = "success";
 
-      // If mode changed, show toast and reboot immediately
+      // If mode or name changed, show toast and reboot immediately
       if (willReboot) {
+        let rebootReason = "";
+        if (willRebootForMode && willRebootForName) {
+          rebootReason = "MIDI/OSC mode and Pipo name changes";
+        } else if (willRebootForMode) {
+          rebootReason = "MIDI/OSC mode change";
+        } else if (willRebootForName) {
+          rebootReason = "Pipo name change";
+        }
+
         addToast({
           type: "error",
-          message:
-            "Pipo will reboot to take into account the MIDI/OSC mode change. Please reload the page in a few seconds (Make sure Wifi is reconnected)",
+          message: `Pipo will reboot to take into account the ${rebootReason}. Please reload the page in a few seconds (Make sure Wifi is reconnected)`,
           timeout: 10000,
         });
 
@@ -170,7 +184,7 @@
         ✓ Saved!
       {:else if savingStatus === "error"}
         ✗ Error
-      {:else if $modeWillChange}
+      {:else if $modeWillChange || $pipoNameWillChange}
         Save and Reboot
       {:else}
         Save Changes

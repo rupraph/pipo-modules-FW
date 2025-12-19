@@ -39,6 +39,7 @@ export const configSaving = writable<boolean>(false);
 export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
 export const hasUnsavedChanges = writable<boolean>(false);
 export const modeWillChange = writable<boolean>(false);
+export const pipoNameWillChange = writable<boolean>(false);
 
 // Helper function to detect if output mode has changed
 function hasOutputModeChanged(
@@ -51,6 +52,16 @@ function hasOutputModeChanged(
   const currentMode: OutputMode = current.general.MidiEnabled ? "MIDI" : current.general.OSC_ENA ? "OSC" : "MIDI";
   
   return originalMode !== currentMode;
+}
+
+// Helper function to detect if PipoName has changed
+function hasPipoNameChanged(
+  original: PipoConfig<PipoTypes> | null,
+  current: PipoConfig<PipoTypes> | null
+): boolean {
+  if (!original || !current) return false;
+  
+  return original.general.PipoName !== current.general.PipoName;
 }
 
 // Polling interval to check for deep changes in config
@@ -66,6 +77,7 @@ function startChangeDetection() {
     if (!current || !original) {
       hasUnsavedChanges.set(false);
       modeWillChange.set(false);
+      pipoNameWillChange.set(false);
       return;
     }
     
@@ -76,6 +88,10 @@ function startChangeDetection() {
     // Check if output mode has changed
     const modeChanged = hasOutputModeChanged(original, current);
     modeWillChange.set(modeChanged);
+    
+    // Check if PipoName has changed
+    const nameChanged = hasPipoNameChanged(original, current);
+    pipoNameWillChange.set(nameChanged);
   }, 300); // Check every 300ms
 }
 
