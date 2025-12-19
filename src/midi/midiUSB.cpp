@@ -21,27 +21,30 @@ void MidiUSBSetup(const char* deviceName) {
   }
 
   // Serial: Last 3 MAC bytes (6 hex) + 16-bit hash (4 hex) = 10 chars
-  char serial[12];  // Extra byte for safety
+  char serial[11];
   snprintf(serial, sizeof(serial), "%02X%02X%02X%04X", mac[3], mac[4], mac[5],
            (uint16_t)(nameHash & 0xFFFF));
+  serial[10] = '\0';  // Ensure null termination
 
-  log_i("Setting serial number: %s", serial);
+  // Detach USB to change descriptors
+  TinyUSBDevice.detach();
+  delay(100);  // Wait for host to detect disconnect
 
-  // Set descriptors BEFORE detaching
+  // Set new descriptors while detached
   TinyUSBDevice.setManufacturerDescriptor("PipoInterfaces");
   TinyUSBDevice.setProductDescriptor(deviceName);
-  TinyUSBDevice.setSerialDescriptor(serial);
 
-  // Detach and re-attach to force re-enumeration with new descriptors
-  TinyUSBDevice.detach();
-  delay(250);  // Wait for host to detect disconnect
+  TinyUSBDevice.setSerialDescriptor(
+      serial);  // Different serial = different device to macOS
+
+  // Re-attach USB - this triggers re-enumeration with new descriptors
   TinyUSBDevice.attach();
-  delay(250);  // Wait for re-enumeration
+  delay(100);  // Wait for re-enumeration
 
   // Now initialize MIDI
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
 
-  log_i("MIDI USB setup complete");
+  log_i("MIDI USB setup complete - Serial: %s", serial);
   if (DEBUG_HEAP)
     pipoDebugHeap();
 }
