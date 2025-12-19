@@ -18,10 +18,11 @@
   import { pipoio, PipoIO } from "../../pipoio";
   import PillSwitch from "../form/PillSwitch.svelte";
 
-  let category: "analog" | "touch" = "analog";
-
   $: config = $currentConfig;
   $: type = $pipoType;
+
+  // Get category from uiState instead of local variable
+  $: category = ($uiState[type]?.channelType as "analog" | "touch") || "analog";
   $: mode = config?.general.MidiEnabled
     ? "MIDI"
     : config?.general.OSC_ENA
@@ -80,29 +81,35 @@
   // Reactive variables for analog conversion
   // These provide the UI values (percentage) while storing actual values (voltage)
   $: displaySensorValue =
-    type === "analog" && sensorValue !== undefined
+    type === "analog" && category === "analog" && sensorValue !== undefined
       ? voltageToPercent(sensorValue)
       : sensorValue;
 
   $: displayLmin =
-    type === "analog" && input?.lmin !== undefined
+    type === "analog" && category === "analog" && input?.lmin !== undefined
       ? voltageToPercent(input.lmin)
       : input?.lmin;
 
   $: displayLmax =
-    type === "analog" && input?.lmax !== undefined
+    type === "analog" && category === "analog" && input?.lmax !== undefined
       ? voltageToPercent(input.lmax)
       : input?.lmax;
 
   // Setters for analog conversion - convert from UI percentage back to voltage
   function setDisplayLmin(value: number) {
     if (!input) return;
-    input.lmin = type === "analog" ? percentToVoltage(value) : value;
+    input.lmin =
+      type === "analog" && category === "analog"
+        ? percentToVoltage(value)
+        : value;
   }
 
   function setDisplayLmax(value: number) {
     if (!input) return;
-    input.lmax = type === "analog" ? percentToVoltage(value) : value;
+    input.lmax =
+      type === "analog" && category === "analog"
+        ? percentToVoltage(value)
+        : value;
   }
 
   // Reactive: Reset maxSensorValue and sensor readings when channel changes
@@ -432,7 +439,7 @@
     </div>
   {/if}
   {#if input && aschema && selectedChannel}
-    {#if type === "analog"}
+    {#if type === "analog" && category === "analog"}
       <MinMax
         low={displayLmin}
         high={displayLmax}
