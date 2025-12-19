@@ -252,7 +252,7 @@ void loop() {
   if (millis() - lastReportTime > 5000) {  // Report every 5 seconds
     TickType_t avgExecutionTime =
         sampleCount > 0 ? totalExecutionTime / sampleCount : 0;
-    log_w(
+    log_d(
         "loop() stats - overruns: %lu, last: %dms, max: %dms, avg: %dms, "
         "target: %dms",
         overrunCount, pdTICKS_TO_MS(executionTime),

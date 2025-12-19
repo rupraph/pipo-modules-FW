@@ -5,7 +5,7 @@
 
 void wifiTask(void* pvParameters) {
   esp_task_wdt_add(NULL);
-  unsigned long lastStackCheck = 0;
+  // unsigned long lastStackCheck = 0;
   unsigned long serverPausedTime = 0;
   const unsigned long SERVER_PAUSE_TIMEOUT = 10000;  // 10 seconds max pause
 
@@ -14,13 +14,13 @@ void wifiTask(void* pvParameters) {
     esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    // Monitor stack usage every 30 seconds
-    if (millis() - lastStackCheck > 30000) {
-      UBaseType_t stackHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
-      log_i("wifiTask stack high water mark: %d bytes free",
-            stackHighWaterMark);
-      lastStackCheck = millis();
-    }
+    // // Monitor stack usage every 30 seconds
+    // if (millis() - lastStackCheck > 30000) {
+    //   UBaseType_t stackHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    //   log_i("wifiTask stack high water mark: %d bytes free",
+    //         stackHighWaterMark);
+    //   lastStackCheck = millis();
+    // }
 
     // Track when server was paused
     if (!server.isRunning() && serverPausedTime == 0) {

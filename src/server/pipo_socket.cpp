@@ -8,17 +8,23 @@ void websocketTask(void* pvParameters) {
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;
     }
-    int rssi = wifi.getRSSI();
+
     int taskDelay;
-    // Adjust task delay based on RSSI
-    if (rssi > -65) {
-      taskDelay = 40;  // Strong signal → High frequency
-    } else if (rssi > -70) {
-      taskDelay = 80;  // Medium signal → Reduce frequency
-    } else if (rssi > -80) {
-      taskDelay = 200;  // Weak signal → Send less often
+    bool isStaConnected = (WiFi.status() == WL_CONNECTED);
+    if (isStaConnected) {
+      int rssi = wifi.getRSSI();
+      // Adjust task delay based on RSSI
+      if (rssi > -65) {
+        taskDelay = 40;  // Strong signal → High frequency
+      } else if (rssi > -70) {
+        taskDelay = 80;  // Medium signal → Reduce frequency
+      } else if (rssi > -80) {
+        taskDelay = 200;  // Weak signal → Send less often
+      } else {
+        taskDelay = 300;  // Very poor signal → Minimize WebSocket activity
+      }
     } else {
-      taskDelay = 300;  // Very poor signal → Minimize WebSocket activity
+      taskDelay = 80;  // Not connected or AP → Moderate frequency
     }
 
     // Slow down websockets when BLE is connected to avoid conflicts

@@ -46,7 +46,7 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
       console.log('No websocket messages for 3s - connection appears dead');
       this.socket?.close();
       this.onDisconnect(true);
-    }, 3000) as any as number;
+    }, 4000) as any as number;
   }
 
   private stopConnectionMonitoring() {

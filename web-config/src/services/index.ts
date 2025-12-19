@@ -48,5 +48,5 @@ pipoio
     reloadPageTimeout = setTimeout(() => {
       console.log("Connection lost for 5s - reloading page");
       window.location.reload();
-    }, 5000) as any as number;
+    }, 7000) as any as number;
   });
