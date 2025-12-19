@@ -217,9 +217,9 @@
         <InfoModal>
           <p>
             The Pipo Name is used to identify your device. It is used for the
-            WiFi name, access URL (pipo-xxx.local), BLE name and OSC address
-            prefix. Choose a unique name without spaces or special characters.
-            Please power cycle after saving the changes.
+            WiFi name, access URL (pipo-xxx.local), and OSC address prefix.
+            Choose a unique name without spaces or special characters. Please
+            power cycle after saving the changes.
           </p>
         </InfoModal>
         <div class="text-input-wrapper">

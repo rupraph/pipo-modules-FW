@@ -106,12 +106,12 @@ void setup() {  // by default on core 1
 #endif
 
   // wait for initial offsets to be measured if needed
-  log_i("Waiting for boot offset measurement...");
+  log_i("Waiting for boot offset measurement if needed...");
   while (input_sensor.is_offset_measurement_complete() == false) {
     input_sensor.update();
   }
 
-  log_i("Boot offsets measured, gather and save config");
+  log_i("Gather and save config");
   config.gather(engine, DEBUG_CONFIG);
   config.save(config.filename);
 

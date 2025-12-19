@@ -13,39 +13,48 @@ class PipoPWManager {
       false;  // Persisted flag for user disconnect request
 
   /**
-   * @brief Normalizes order numbers to maintain relative ordering while keeping values small
-   * Resets all order numbers to sequential values (1, 2, 3...) based on current ordering
-   * This prevents orderCounter overflow and keeps numbers manageable
+   * @brief Renumbers all networks from 1 to N to keep order values small and manageable
+   * Called on every connection to maintain simple sequential ordering
    */
-  void normalizeOrderNumbers() {
+  void renumberNetworks() {
     if (orderNumbers.empty()) {
       orderCounter = 0;
       return;
     }
 
-    // Find the network with the lowest order number
-    // Repeatedly find and reassign in order - simple O(n^2) but only 5 networks max
-    unsigned long newOrder = 0;
-    for (int i = 0; i < (int)orderNumbers.size(); i++) {
-      unsigned long minOrder = ULONG_MAX;
-      std::string minSSID = "";
+    // Simple array to hold SSIDs and their current orders (max 5 networks)
+    struct NetworkOrder {
+      std::string ssid;
+      unsigned long order;
+    };
+    NetworkOrder networks[MAX_NETWORKS];
+    int count = 0;
 
-      // Find the next lowest order that hasn't been reassigned yet
-      for (const auto& pair : orderNumbers) {
-        if (pair.second < minOrder && pair.second > newOrder) {
-          minOrder = pair.second;
-          minSSID = pair.first;
-        }
-      }
-
-      if (!minSSID.empty()) {
-        newOrder++;
-        orderNumbers[minSSID] = newOrder;
-      }
+    // Collect all networks
+    for (const auto& pair : orderNumbers) {
+      networks[count].ssid = pair.first;
+      networks[count].order = pair.second;
+      count++;
     }
 
-    orderCounter = newOrder;
-    log_d("Normalized order numbers, new orderCounter: %lu", orderCounter);
+    // Simple insertion sort by order (efficient for small N <= 5)
+    for (int i = 1; i < count; i++) {
+      NetworkOrder key = networks[i];
+      int j = i - 1;
+      while (j >= 0 && networks[j].order > key.order) {
+        networks[j + 1] = networks[j];
+        j--;
+      }
+      networks[j + 1] = key;
+    }
+
+    // Reassign sequential order numbers 1, 2, 3... (oldest to newest)
+    for (int i = 0; i < count; i++) {
+      orderNumbers[networks[i].ssid] = i + 1;
+    }
+
+    orderCounter = count;
+    log_d("Renumbered %d networks, orderCounter: %lu", count, orderCounter);
   }
 
   /**
@@ -281,13 +290,6 @@ class PipoPWManager {
       return;
     }
 
-    // Normalize order numbers periodically to prevent overflow and keep values small
-    // Do this before adding to ensure we have room for the new entry
-    if (orderCounter > 1000 ||
-        (orderCounter > 100 && passwords.size() < MAX_NETWORKS)) {
-      normalizeOrderNumbers();
-    }
-
     // FIFO eviction: remove network with lowest order number if at capacity
     if (passwords.size() >= MAX_NETWORKS) {
       unsigned long minOrder = ULONG_MAX;
@@ -310,10 +312,11 @@ class PipoPWManager {
       }
     }
 
-    // Add new network with next order number
+    // Add new network with initial order of 0 (will be set properly by markAsConnected)
     passwords[c_ssid] = std::string(password.c_str());
-    orderNumbers[c_ssid] = ++orderCounter;
-    log_d("Added network '%s' with order %lu", ssid.c_str(), orderCounter);
+    orderNumbers[c_ssid] = 0;
+    log_d("Added new network '%s' (order will be set on connection)",
+          ssid.c_str());
   }
 
   /**
@@ -330,7 +333,7 @@ class PipoPWManager {
   }
 
   /**
-   * @brief Marks a network as connected - updates its order to be most recent and sets as lastConnected
+   * @brief Marks a network as connected - renumbers all networks and makes this one the newest
    * @param ssid the ssid of the network that was connected
    */
   void markAsConnected(String ssid) {
@@ -341,11 +344,11 @@ class PipoPWManager {
       return;
     }
 
-    // Update to most recent order
+    // Renumber all networks 1 to N, then make this one the newest (N+1)
+    renumberNetworks();
     orderNumbers[c_ssid] = ++orderCounter;
     lastConnectedSSID = c_ssid;
-    log_d("Marked '%s' as connected with order %lu", ssid.c_str(),
-          orderCounter);
+    log_d("Marked '%s' as most recent (order %lu)", ssid.c_str(), orderCounter);
   }
 
   /**
