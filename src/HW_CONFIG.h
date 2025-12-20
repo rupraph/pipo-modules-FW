@@ -21,6 +21,13 @@
 #define LOG_RECEIVED_OSC false
 #define INCLUDE_BLE
 
+// WebSocket queue size optimization for BLE coexistence
+// Reduce queue depth when BLE enabled to prefer fresh data over buffering
+// This prevents 1-2 second delays when WiFi STA + BLE are both active
+#ifdef INCLUDE_BLE
+#define WS_MAX_QUEUED_MESSAGES 8  // Smaller queue = fresher data with BLE
+#endif
+
 //HW PINS
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
 #define WIFI_LED 9

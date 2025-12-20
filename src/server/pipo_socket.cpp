@@ -442,6 +442,9 @@ void PipoSocket::loop() {
     if (!c->canSend()) {
       continue;  // Queue is full, skip silently (will retry next iteration)
     }
+    if (c->queueIsFull()) {
+      continue;
+    }
 
 // Extra safety: when BLE active, skip if TCP layer also struggling
 // This prevents radio conflicts from causing protocol errors
