@@ -87,7 +87,7 @@ void PipoWifi::setup() {
   WiFi.setAutoReconnect(true);
   // allow to connect to (WHY SO WEAK?) wep networks
   WiFi.setMinSecurity(WIFI_AUTH_WEP);
-  // prevent from the Wifi to sleep: avoid latency in websockets
+  // prevent from the Wifi to sleep: avoid latency in websockets. But removed because incompatible with BLE.
   scanning = true;
   log_i("WiFi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
