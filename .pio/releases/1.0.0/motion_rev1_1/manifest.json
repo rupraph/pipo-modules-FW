@@ -1,0 +1,15 @@
+{
+  "name": "Pipo motion_rev1_1",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "merged_motion_rev1_1_1.0.0.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
