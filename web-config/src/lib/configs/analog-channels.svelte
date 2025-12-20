@@ -102,8 +102,9 @@
   <h3>Channel Settings</h3>
   <InfoModal>
     <p>
-      Select a category to display underlying channels. The channels which are
-      enabled have their label in yellow (Grey if disabled).
+      Select a channel category to view the associated channels. Enabled
+      channels have a yellow label (grey when disabled). Select a channel to
+      view its live value or adjust its settings below.
     </p>
     <p>
       <u>Analog Channels:</u> These inputs read voltage levels from grove connectors.

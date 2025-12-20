@@ -145,8 +145,9 @@
   <h3>Channel Settings</h3>
   <InfoModal>
     <p>
-      Select a channel category to display underlying channels. The channels
-      which are enabled have their name in yellow (Grey if disabled).
+      Select a channel category to view the associated channels. Enabled
+      channels have a yellow label (grey when disabled). Select a channel to
+      view its live value or adjust its settings below.
     </p>
     <p>
       <u>Euler angles:</u> are angular position around the three principal axes (X,
