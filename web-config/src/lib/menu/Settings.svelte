@@ -111,9 +111,10 @@
         <span class="label">Ouput mode</span>
         <InfoModal>
           <p>
-            Select the general output mode for your device. This requires reboot
-            after saving.
+            Select the general output mode of the Pipo: MIDI or OSC. MIDI can
+            only be sent over USB or BLE, OSC can only be sent over Wifi.
           </p>
+          <p>This requires reboot after saving.</p>
         </InfoModal>
         <div class="pill-switch">
           <div class="pill-indicator" class:midi={mode === "midi"}></div>

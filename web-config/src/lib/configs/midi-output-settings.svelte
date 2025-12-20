@@ -163,9 +163,15 @@
       <InfoModal>
         <p>
           You can choose to translate the sensor data into Midi Continous
-          Controls, or to Midi Notes. If the sensor is put into "binary mode",
-          this allows to trigger only one note. If not you can choose a note
-          pattern and it will behave like a harp.
+          Controls, or to Midi Notes.
+        </p>
+        <p>
+          If the sensor is put into "binary mode" (above), this allows to
+          trigger only one note.
+        </p>
+        <p>
+          If in continuous mode, you can choose a note pattern and it will
+          behave like a harp.
         </p>
       </InfoModal>
       <div class="pill-switch">

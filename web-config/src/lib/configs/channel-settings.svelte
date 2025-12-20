@@ -373,24 +373,24 @@
       <div class="left">
         <span class="label">Options</span>
         <InfoModal>
-          <p>Range invert: This inverts the output range of the channel.</p>
+          <p><u>Invert:</u> This inverts the output range of the channel.</p>
           <p>
-            Binary mode: When enabled, the channel will output only two states
-            (on/off). The ON/OFF zones are defined by the sliders position. When
-            disabled, the channel will output continuous values.
+            <u>Binary mode:</u> When enabled, the channel outputs only a true or
+            false state. Truewithin the sliders, false outside. When disabled, the
+            channel outputs continuous values.
           </p>
           {#if type !== "motion" && type !== "analog" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
             <p>
-              Over mode: When enabled, if the reading exceeds the maximum slider
-              value, the output is set to 0. Otherwise, it is clamped to the max
-              value.
+              <u>Over mode:</u> When enabled, if the reading exceeds the maximum
+              slider value, the output is set to 0. Otherwise, it is clamped to the
+              max value.
             </p>
           {/if}
           {#if type !== "range" && (type !== "motion" || isEulerAngle)}
             <p>
-              Cyclic: When enabled, the output wraps within the min max slider,
-              allowing for continous cycling: Output will be 0 when at min and
-              at max, and will reach the maximum in the middle of the range.
+              <u>Cyclic:</u> When enabled, the output wraps within the min max slider,
+              allowing for continous cycling: output will be 0 when at min and at
+              max. maximum is reached in the middle of the range.
             </p>
           {/if}
         </InfoModal>

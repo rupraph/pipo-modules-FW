@@ -98,7 +98,7 @@
       whenever something changes in your setup
     </p>
     <p>
-      Calibrate all touch: Measures all current touch readings and use them as
+      <u>"Calibrate all touch":</u> Measures the current readings to use them as
       "no touch" reference (zero). This is for a live calibration during design.
       Note: Pipo always recalibrate at startup.
     </p>
