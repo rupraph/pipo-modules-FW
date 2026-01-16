@@ -1,30 +1,28 @@
 This repo contains the code for Pipo _motion_, _analog_, and _range_ with the UI.
 
 > [!IMPORTANT]
-> The last stable and tested version of the code is in branch `main`
+> The last stable and tested version of the code is in branch `develop`
 
 # Minimal Quick Start guide (linux/mac)
 
 ## Embedded software
 
-To run the project, you need:
+To setup the environment, you need:
 
 - VSCode with PlatformIO extension
 - Install the `espressif32` platform in PIO
+- install `node.js` (and `npm`)
 
 The project is configured to deal with separate environments for each module so don't use the usual PIO build/upload buttons at the bottom of vscode, these will likely not work.
 
-To compile/upload, there are 2 options:
+To compile/upload, use the `npm` commands from vs code terminal (which are just shortcuts for pio CLI commands, see `package.json`)
+For eg, you can run: `npm run full:motion_rev1_1` to build and upload the Firware to a Pipo motion.
 
-- [optional] Using `npm` commands from vs code terminal (which are just shortcuts for pio CLI commands, see `package.json`)
-- Directly use pio commands from the pio CLI
-
-Use module build flags when necessary: "motion", "analog", "range"
+Use module build flags as necessary: "motion_rev1_1", "analog_rev1_1", "range_rev1_1"
 
 ## UI
 
-The UI is built with web technologies so that it can run in any browser.
-To develop or compile the UI, install `node` and `npm`.
+The web UI is built with svelte.
 
 - From the `web-config` directory, install the dependencies: `npm install`
 - Run development or build commands (see `package.json`)
@@ -34,16 +32,15 @@ To develop or compile the UI, install `node` and `npm`.
 Compilation/upload Steps for "motion":
 
 - [optional] Rebuild UI web page files: `npm run build:web`
-- Build module filesystem: `npm run build:fs:motion`
-- Build firmware: `npm run build:motion`
-- Put the module in receive mode: maintain boot clicked while clicking reset, then release boot.
-- Upload firmware: `npm run upload:motion`
-- Upload filesystem: `npm run upload:fs`
+- Build module filesystem: `npm run build:fs:motion_rev1_1`
+- Build firmware: `npm run build:motion_rev1_1`
+- Put the module in receive mode: maintain boot clicked while clicking reset once, then release boot.
+- Upload firmware: `npm run upload:motion_rev1_1`
+- Upload filesystem: `npm run upload:fs_rev1_1`
 - Hit reset on the module.
 
-(Other combinations of scripts command are possible, this is the most detailed one)
+You can also rebuild/upload everything at once: 'npm run full:motion_rev1_1'.
 
-## CI
+## Roadmap
 
-By default the CI runs only the web tests, full tests are run only on PRs pointing at main. 
-If you which to run full tests on the CI, add the `ci:piotest` tag to the PR.
+There are plans to make this project more flexible to be easily portable and usable on any common esp32-s3 dev-board to build various types of sensing devices. If you are interested to contribute to this effort, let me know !
