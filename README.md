@@ -44,8 +44,3 @@ You can also rebuild/upload everything at once: 'npm run full:motion_rev1_1'.
 ## Roadmap
 
 There are plans to make this project more flexible to be easily portable and usable on any common esp32-s3 dev-board to build various types of sensing devices. If you are interested to contribute to this effort, let me know !
-
-## Rights
-
-You are welcome to use, study, and modify the firmware for personal or internal non-commercial purposes. Commercial use, resale, or use in competing products is not permitted without authorization.
-If you want to use this firmware in a commercial product, please contact pipointerfaces@protonmail.com
