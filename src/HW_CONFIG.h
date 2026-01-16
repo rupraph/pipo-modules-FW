@@ -13,8 +13,6 @@
 #define HW_REV 20  // 1.0 or 1.1
 #endif
 
-// #define BETA_OUT
-
 // DEBUG FLAGS
 #define DEBUG_HEAP true
 #define DEBUG_CONFIG false
@@ -111,3 +109,5 @@
 
 // other global definitions
 #define FORMAT_LITTLEFS_IF_FAILED true
+
+// #define BETA_OUT

@@ -1,12 +1,4 @@
 #include "sensors/input_sensor.h"
-// #include "acc_sensor.h"
-// #include "range_sensor.h"
-// #include "analog_sensor.h"
-
-//Todo: replace throw with Serial
-
-//Todo: deadband should be in percentage or max or in value ?
-// true if outside deadband
 
 bool Sensor::update() {
   store_previous_values();
@@ -79,21 +71,6 @@ void Sensor::measure_offset_iter() {
     // in clear_completion_flag() after the client retrieves the offsets
   }
 }
-
-// bool Sensor::test_outside_deadband(const std::string& axis) {
-//   if (sensor_dat.find(axis) != sensor_dat.end()) {
-
-//     if (abs(sensor_dat[axis].value) > sensor_dat[axis].deadband) {
-//       return true;
-//     } else {
-//       return false;
-//     }
-
-//   } else {
-//     // Serial.println("error: Axis not found");
-//     return false;
-//   }
-// }
 
 //measure single axis offset
 void Sensor::start_measure_offset(const std::string& sensor_name) {
@@ -198,37 +175,6 @@ void Sensor::store_previous_values() {
     dat.second.value_prev = dat.second.value_ready;
   }
 }
-
-// void Sensor::offset_handler() {
-
-//   if (!measure_offset_flag) {
-//     //
-//   }
-
-//   if (measure_offset_flag) {
-//     measure_offset_counter++;
-//     offset += sensor_dat[axis_to_measure_offset].value;
-//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
-//       sensor_dat[axis_to_measure_offset].offset =
-//           offset / OFFSET_CAL_SAMPLES_NB;
-//       measure_offset_flag = false;
-//       Serial.print("offset of ");
-//       Serial.print(axis_to_measure_offset.c_str());
-//       Serial.print(" is: ");
-//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
-//     }
-//   }
-// }
-
-// void Sensor::reset_offset(const std::string& input) {
-//   if (sensor_dat.find(input) != sensor_dat.end()) {
-//     sensor_dat[input].offset = 0;
-//     Serial.print("reset offset for ");
-//     Serial.println(input.c_str());
-//   } else {
-//     Serial.println("error: Axis not found");
-//   }
-// }
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
@@ -619,20 +565,6 @@ float Sensor::get_limit_min(const std::string& axis) {
     throw std::invalid_argument("Axis not found: " + axis);
 }
 
-// bool Sensor::get_triggered(const std::string& axis) {
-//   if (sensor_dat.find(axis) != sensor_dat.end())
-//     return sensor_dat[axis].triggered;
-//   else
-//     throw std::invalid_argument("Axis not found: " + axis);
-// }
-
-// bool Sensor::get_untriggered(const std::string& axis) {
-//   if (sensor_dat.find(axis) != sensor_dat.end())
-//     return sensor_dat[axis].untriggered;
-//   else
-//     throw std::invalid_argument("Axis not found: " + axis);
-// }
-
 bool Sensor::get_mode(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end())
     return sensor_dat[axis].mode;
@@ -660,13 +592,6 @@ bool Sensor::get_bool_value(const std::string& axis) {
 }
 
 //Setters
-
-// void Sensor::set_enabled(const std::string& axis, bool value) {
-//     if(sensor_dat.find(axis) != sensor_dat.end())
-//         sensor_dat[axis].enabled = value;
-//     else
-//         throw std::invalid_argument("Axis not found: " + axis);
-// }
 
 void Sensor::set_inverted(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())
@@ -718,20 +643,6 @@ void Sensor::set_limit_min(const std::string& axis, float value) {
   else
     throw std::invalid_argument("Axis not found: " + axis);
 }
-
-// void Sensor::set_triggered(const std::string& axis, bool value) {
-//   if (sensor_dat.find(axis) != sensor_dat.end())
-//     sensor_dat[axis].triggered = value;
-//   else
-//     throw std::invalid_argument("Axis not found: " + axis);
-// }
-
-// void Sensor::set_untriggered(const std::string& axis, bool value) {
-//   if (sensor_dat.find(axis) != sensor_dat.end())
-//     sensor_dat[axis].untriggered = value;
-//   else
-//     throw std::invalid_argument("Axis not found: " + axis);
-// }
 
 void Sensor::set_mode(const std::string& axis, bool value) {
   if (sensor_dat.find(axis) != sensor_dat.end())

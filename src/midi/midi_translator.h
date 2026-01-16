@@ -16,9 +16,6 @@ class MidiTranslator
 
 // Todo:
 // move all members to private and write methods to public
-// change all set/get in engine
-// add option to accomodate full turn ie back to beginning at end of range to avoid sawtooth
-// replace limit_max by a range. propagate to Hid ?
 
 {
  public:
@@ -104,46 +101,6 @@ class MidiTranslator
 
   uint8_t get_velocity();
   void set_velocity(uint8_t v);
-
-  // template <typename T>
-  // void set_param(const string& param_name, const T& value) {
-  //     if (param_name == "tl_mode") {
-  //         tl_mode = value;
-  //     }
-  //     else if (param_name == "channel") {
-  //         channel = value;
-  //     }
-  //     else if (param_name == "cc_nb") {
-  //         cc_nb = value;
-  //     }
-  //     else if (param_name == "scaleType") {
-  //         scaleType = value;
-  //     }
-  //     else if (param_name == "rootNote") {
-  //         rootNote = value;
-  //     }
-  //     else if (param_name == "nbOfNotes") {
-  //         nbOfNotes = value;
-  //     }
-  //     else if (param_name == "max_output") {
-  //         max_output = value;
-  //     }
-  //     else if (param_name == "min_output") {
-  //         min_output = value;
-  //     }
-  //     else if (param_name == "interpolation_type") {
-  //         interpolation_type = value;
-  //     }
-  //     else if (param_name == "hires") {
-  //         hires = value;
-  //     }
-  //     else if (param_name == "enabled") {
-  //         enabled = value;
-  //     }
-  //     else {
-  //         Serial.println("Error: unknown parameter name");
-  //     }
-  // }
 
  private:
   vector<uint8_t> generate_full_scale(int rootNote, int nb_notes,

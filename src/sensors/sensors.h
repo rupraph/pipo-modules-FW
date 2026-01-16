@@ -3,14 +3,12 @@
 
 #ifdef PIPO_MOTION
 #include "sensors/acc_sensor.h"
-// string sensor_type = "motion";
 extern MotionSensor input_sensor;
 #endif
 
 #ifdef PIPO_RANGE
 #include "sensors/pipo_range_sensor.h"
 extern PipoRangeSensor input_sensor;
-// string sensor_type = "range";
 #endif
 
 #ifdef PIPO_ANALOG

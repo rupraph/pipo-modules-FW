@@ -40,8 +40,6 @@ class Config {
   // load config from files into current_config
   bool load_config(String filename, bool addJsonExtension = true);
   void load_config();
-  // void shouldSave();
-  // void saveIfNecessary();
   void set(const String& config);
   void setValue(char input[], int len);
   void setValues(char input[], int len);
@@ -55,7 +53,7 @@ class Config {
 
   JsonDocument get();            // return current_config
   JsonDocument get(string key);  // return current_config[key]
-  // void save_for_key(string key, json data);
+
   void print();
   void gather(Engine& engine, bool debug = false);
   void apply(Engine& engine, OSC_handler& osc, bool debug = false);

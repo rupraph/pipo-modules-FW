@@ -3,9 +3,6 @@
 // the engine takes the sensor data and outputs it to the selected interfaces
 // based on the configuration
 
-// Todo engine.
-// could use combination mode to have note from orientation, and trigger from
-// acceleration
 Engine engine;
 
 // using the main loop instead to optimize ram usage
@@ -114,19 +111,14 @@ void Engine::midi_processor(string axis_name, float sensor_val,
 
   if (/*input_sensor.test_outside_deadzone(axis_name) &&*/
       midi_translator.is_enabled() == true) {
-    // Serial.print("min:");
-    // Serial.print(sensor_min);
-    // Serial.print(" max:");
-    // Serial.print(sensor_max);
-    // Serial.print("val");
-    // Serial.println(sensor_val);
+
     // if CC MODE:
     if (midi_translator.tl_mode == 0) {
       int cc_nb = midi_translator.cc_nb;
 
       // sensor uses continuous mode
       if (input_sensor.get_mode(axis_name) == 0) {
-        // if (input_sensor.is_within_range(axis_name)) {
+
         // Todo: hires not tested
         if (midi_translator.get_hires()) {
           uint16_t cc_val =
@@ -141,9 +133,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                                                     sensor_max, 0),
                          127));
 
-          // Serial.println(cc_val);
           midiio.sendControlChange(cc_nb, cc_val, channel, false);
-          //Serial.println(sensor_min);
         }
         // }
       } else  // sensor uses trigger mode

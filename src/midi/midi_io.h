@@ -30,7 +30,6 @@ class midi_io {
   typedef unordered_map<int, NoteSatus> Notelist;
   Notelist channel_note_list[16];
 
-  // this should be taken care differently since this takes a significant amount of memory
   //should likley be in engine
   uint8_t lastcc[16][128];
 

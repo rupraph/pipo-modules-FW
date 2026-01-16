@@ -3,8 +3,6 @@
 Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 
-// Todo. should be carefull not to send midi too fast
-
 void MidiUSBSetup() {
   TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
   TinyUSBDevice.setProductDescriptor("PipoUSB");

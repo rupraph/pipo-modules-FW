@@ -27,12 +27,9 @@ class MotionSensor : public Sensor {
 
   void init() override;
   void setup() override;
-  //   void update() override;
   bool measure_sensor() override;
   void set_sensor_config(JsonObject config, bool debug = false) override;
   JsonDocument get_sensor_config(bool debug = false) override;
-  //   void measure_offset(const std::string& axis_name) override;
-  //   void measure_offset_all();
 
   void calc_euler_angles();
   void convert_accell();
@@ -52,8 +49,6 @@ class MotionSensor : public Sensor {
     y = rel_y;
     z = rel_z;
   }
-
-  //   void get_relative_quat(float& w, float& x, float& y, float& z);
 
   bool enable_send_vizualizer =
       false;  //set on/off serial messages for vizualizer
@@ -122,15 +117,6 @@ class MotionSensor : public Sensor {
   float quat_ref_y = 0.0;
   float quat_ref_z = 0.0;
   bool reference_set = false;
-
-  // holds raw data from sensor
-  //   float raw_accX;
-  //   float raw_accY;
-  //   float raw_accZ;
-
-  //   float raw_magX;
-  //   float raw_magY;
-  //   float raw_magZ;
 
   Preferences motiondata;
 };

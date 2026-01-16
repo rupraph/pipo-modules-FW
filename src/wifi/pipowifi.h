@@ -11,16 +11,6 @@
 #include "shared_flags.h"
 #include "esp_task_wdt.h"
 
-// enum WiFiTransition {
-//   NONE,
-//   AP_TO_STA,
-//   STA_TO_AP,
-//   STA_TO_APSTA,
-//   APSTA_TO_STA,
-//   AP_TO_APSTA,
-//   APSTA_TO_AP
-// };
-
 // Forward declarations for WiFi event handlers
 void onWiFiReadyHandler(WiFiEvent_t event, WiFiEventInfo_t info);
 void onScanDoneHandler(WiFiEvent_t event, WiFiEventInfo_t info);

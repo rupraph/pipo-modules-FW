@@ -1,15 +1,10 @@
 <script lang="ts">
-  import Logs from "./lib/logs.svelte";
   import Toasts from "./lib/toast/toasts.svelte";
   import type { PipoInfo, PipoTypes } from "./types";
   import { pipoType, ip, pipoInfo } from "./services";
-  import Collapse from "./lib/collapse.svelte";
-  import Configs from "./lib/configs/index.svelte";
-  import ConfigSelect from "./lib/configs/config-select.svelte";
   import { pipoio } from "./pipoio";
   import Menu from "./lib/menu/menu.svelte";
   import OfflineOverlay from "./lib/offline-overlay.svelte";
-  import Pipoinfo from "./lib/pipoinfo.svelte";
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
   import MotionChannels from "./lib/configs/motion-channels.svelte";
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
@@ -17,7 +12,6 @@
   import BatteryStatus from "./lib/BatteryStatus.svelte";
   import MidiOutputSettings from "./lib/configs/midi-output-settings.svelte";
   import OscOutputSettings from "./lib/configs/osc-output-settings.svelte";
-  import TouchCalibration from "./lib/TouchCalibration.svelte";
   import {
     currentConfig,
     hasUnsavedChanges,
@@ -27,7 +21,6 @@
   import Presets from "./lib/presets.svelte";
   import PillSwitch from "./lib/form/PillSwitch.svelte";
   import InfoModal from "./lib/InfoModal.svelte";
-  import Info from "./lib/icons/info.svelte";
 
   let type: PipoTypes = "unknown";
   let errorReloadTimeout: number | undefined;

@@ -6,10 +6,7 @@ AnalogOut analog_out;
 
 // LedC controller used for controlling the leds conflicts with the servo library
 
-void AnalogOut::setup() {
-
-  // Serial.println("Setting up HW output");
-}
+void AnalogOut::setup() {}
 
 void AnalogOut::update() {
   // Serial.println("Updating HW output");

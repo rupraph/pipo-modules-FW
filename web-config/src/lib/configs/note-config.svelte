@@ -4,7 +4,6 @@
   import NoteInput from "../form/NoteInput.svelte";
   import Number from "../form/Number.svelte";
   import Select from "../form/Select.svelte";
-  import Tooltip from "../tooltip/Tooltip.svelte";
   import InfoModal from "../InfoModal.svelte";
   import { TriangleAlert } from "lucide-svelte";
 

@@ -68,35 +68,6 @@ void MotionSensor::set_new_reference_orientation() {
   log_i("New reference orientation set");
 }
 
-// void MotionSensor::update() {
-//   measure_sensor();
-//   //should add step counter
-//   process_sensor_neutral_filter();
-//   process_sensor_triggers();
-
-//   //Todo: this is not the best way to do the offset measurement. Should be updated when better task management is implemented
-//   // each class should control its own update task ? (so that it can be paused)
-//   if (!measure_offset_flag) {
-//     for (auto const& pair : sensor_dat) {
-//       sensor_dat[pair.first].value -= sensor_dat[pair.first].offset;
-//     }
-//   }
-
-//   if (measure_offset_flag) {
-//     measure_offset_counter++;
-//     offset += sensor_dat[axis_to_measure_offset].value;
-//     if (measure_offset_counter >= OFFSET_CAL_SAMPLES_NB) {
-//       sensor_dat[axis_to_measure_offset].offset =
-//           offset / OFFSET_CAL_SAMPLES_NB;
-//       measure_offset_flag = false;
-//       Serial.print("offset of ");
-//       Serial.print(axis_to_measure_offset.c_str());
-//       Serial.print(" is: ");
-//       Serial.println(sensor_dat[axis_to_measure_offset].offset);
-//     }
-//   }
-// }
-
 bool MotionSensor::measure_sensor() {
   icm20948.task();
   bool data_ready = false;
@@ -354,15 +325,6 @@ void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
     z /= norm;
   }
 }
-
-// void MotionSensor::get_relative_quat(float& w, float& x, float& y, float& z) {
-//   if (!reference_set) {
-//     w = 1.0f;
-//     x = 0.0f;
-//     y = 0.0f;
-//     z = 0.0f;
-//     return;
-//   }
 
 //   // Normalize current quaternion
 //   float curr_w = quat_w, curr_x = quat_x, curr_y = quat_y, curr_z = quat_z;

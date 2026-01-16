@@ -603,11 +603,6 @@ void Config::apply(Engine& engine, OSC_handler& osc, bool debug) {
   log_i("config applied: %s", filename.c_str());
   logs.writeLog("config applied: " + filename);
 }
-// catch (const std::exception& e) {
-//   Serial.println("error applying config");
-//   Serial.println(e.what());
-// }
-// }
 
 String Config::get_path(String filename, bool addExtension) {
   if (addExtension) {

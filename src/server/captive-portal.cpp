@@ -10,10 +10,6 @@ void CaptivePortal::start(AsyncWebServer* server) {
     return;
   }
   log_d("Yes");
-  // dns_server = new DNSServer();
-  // dns_server->setErrorReplyCode(DNSReplyCode::NoError);
-  // TODO: if Pipo changes IP ip, we need to update this
-  // dns_server->start(53, "*", WiFi.softAPIP());
 }
 void CaptivePortal::stop() {
   if (dns_server != nullptr) {

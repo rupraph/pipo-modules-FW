@@ -142,8 +142,6 @@ bool PipoRangeSensor::measure_sensor() {
 
       //Todo: optimize filter choices
       //sensor_dat["dist"].value = km_filter.process(dist);
-      // process_sensor_neutral_filter();
-      // process_sensor_triggers();
     }
     if (status == 0) {
 #if HW_REV == 10
@@ -157,14 +155,6 @@ bool PipoRangeSensor::measure_sensor() {
   // end_duration();
   // measured_loop_duration();
 }
-
-// void PipoRangeSensor::measure_offset(const string& axis_name) {
-//   sensor_dat[axis_name].offset = sensor_dat[axis_name].raw_value;
-//   Serial.print("offset for ");
-//   Serial.print(axis_name.c_str());
-//   Serial.print(" : ");
-//   Serial.println(sensor_dat[axis_name].offset);
-// }
 
 void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
   if (debug) {

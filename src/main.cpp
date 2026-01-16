@@ -137,12 +137,7 @@ void setup() {  // by default on core 1
   esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
 #endif
 
-  //CAREFULL:
-  // fileserving reports running on core 1 for now. it should be on 0
-  // websocket events (not loop) reports running on core 1 for now. it should be on 0
-  // saving increases fragmentation from 15 to 40%
-
-  // We are using the main loop instead of a dedicated Sensor task to optimize ram usage in arduino framework
+  // We are using the main loop instead of a dedicated Sensor task to optimize ram usage due to arduino framework
 
   // Create critical tasks with error checking
   if (xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,

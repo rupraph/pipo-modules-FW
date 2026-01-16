@@ -49,15 +49,12 @@ void OSC_handler::set_config() {
   if (config.general_config["OSC_IP"].is<JsonVariant>()) {
     string ip = config.general_config["OSC_IP"];
     set_dest_ip(ip);
-    // Serial.println("OSC IP set to: " + dest_ip.toString());
   }
   if (config.general_config["OSC_PORT"].is<JsonVariant>()) {
     set_out_port(config.general_config["OSC_PORT"]);
-    // Serial.println("OSC port set to: " + String(out_port));
   }
   if (config.general_config["OSC_ENA"].is<JsonVariant>()) {
     set_enabled(config.general_config["OSC_ENA"]);
-    // Serial.println("OSC enabled: " + String(enabled));
   }
 
   // Reset failure tracking when config changes (new destination)
@@ -152,8 +149,6 @@ void OSC_handler::receive() {
     int size;
 
     if ((size = Udp.parsePacket()) > 0) {
-      // Serial.print("Packet size: ");
-      // Serial.println(size);
       while (size--)
         bundleIN.fill(Udp.read());
 
@@ -186,28 +181,6 @@ void OSC_handler::set_dest_ip(string ip) {
 void OSC_handler::set_out_port(int port) {
   out_port = port;
 }
-
-// void OSC_handler::send_osc_message(string address, float value) {
-//   if (!isStarted || !enabled) {
-//     return;
-//   }
-//   if (dest_ip != IPAddress(0, 0, 0, 0) && out_port != 0) {
-//     //OSCMessage msg(("/" + string(PIPO_TYPE) + "/" + address).c_str()); default address
-//     address = config.general_config["PipoName"].as<string>() + "/" + address;
-//     if (address[0] != '/') {
-//       address = "/" + address;
-//     }
-//     OSCMessage msg((address).c_str());
-//     msg.add(value);
-//     Udp.beginPacket(dest_ip, out_port);
-//     msg.send(Udp);
-//     Udp.endPacket();
-//     hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
-//     msg.empty();
-//   } else {
-//     Serial.println(F("No destination IP or port set"));
-//   }
-// }
 
 void OSC_handler::add_to_bundle(string address, float value) {
   if (mutex == NULL) {

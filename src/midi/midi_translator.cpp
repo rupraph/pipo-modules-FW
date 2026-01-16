@@ -241,12 +241,7 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
     cc_max = 127;
   }
 
-  // if (interpolation_type == 0) {
   return map_linear(value, min_input, max_input);
-  // } else {
-  //   // not implemented yet
-  //   return 0;
-  // }
 }
 
 int MidiTranslator::map_linear(float value, float min_input, float max_input) {
@@ -272,7 +267,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["cc_max"] = cc_max;
   j["cc_min"] = cc_min;
   j["hires"] = hires;
-  j["velocity"] = velocity;  // Assuming velocity is a member variable
+  j["velocity"] = velocity; 
   return j;
 }
 
@@ -290,7 +285,7 @@ void MidiTranslator::set_from_json(const JsonDocument& j) {
     cc_max = j["cc_max"];
     cc_min = j["cc_min"];
     hires = j["hires"];
-    velocity = j["velocity"];  // Assuming velocity is a member variable
+    velocity = j["velocity"];
 
     // Update scale and verify it succeeded
     this->update_scale();
@@ -391,13 +386,6 @@ uint8_t MidiTranslator::get_velocity() {
 void MidiTranslator::set_velocity(uint8_t v) {
   velocity = v;
 }
-
-// int MidiTranslator::get_interpolation_type() {
-//   return interpolation_type;
-// }
-// void MidiTranslator::set_interpolation_type(int i) {
-//   interpolation_type = i;
-// }
 
 bool MidiTranslator::is_enabled() {
   return enabled;
