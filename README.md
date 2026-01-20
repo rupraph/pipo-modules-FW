@@ -2,6 +2,8 @@ This repo contains the code for Pipo _motion_, _analog_, and _range_ with the UI
 
 > [!IMPORTANT]
 > The last stable and tested version of the code is in branch `develop`
+>
+Discord Server: ZMVstP7zh9
 
 # Minimal Quick Start guide (linux/mac)
 
