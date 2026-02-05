@@ -16,4 +16,9 @@ extern PipoRangeSensor input_sensor;
 extern AnalogSensor input_sensor;
 #endif
 
+#ifdef PIPO_MGC3130
+#include "sensors/mgc3130_sensor.h"
+extern MGC3130Sensor input_sensor;
+#endif
+
 #endif  // PIPO_SENSORS

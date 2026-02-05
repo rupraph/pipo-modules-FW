@@ -3,6 +3,8 @@
 #elif defined(PIPO_RANGE)
 #define PIPO_TYPE "range"
 #define USE_I2C_2V8
+#elif defined(PIPO_MGC3130)
+#define PIPO_TYPE "mgc3130"
 #elif defined(PIPO_ANALOG)
 #define PIPO_TYPE "analog"
 #else
@@ -27,7 +29,7 @@
 #endif
 
 //HW PINS
-#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE) || defined(PIPO_MGC3130)
 #define WIFI_LED 9
 #define BT_LED 10
 #define SEND_LED 11
