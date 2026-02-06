@@ -1,4 +1,8 @@
-- add in sensor h/cpp
+- add in sensors.h/cpp
 - add 2 sensor files
 - add in platformio
 - add a midi ble name instance
+- add in HW config
+- add a config file
+- add an npm build script
+- update copy default config

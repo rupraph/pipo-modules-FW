@@ -24,7 +24,7 @@ class MGC3130Sensor : public Sensor {
   JsonDocument get_sensor_config(bool debug = false) override;
 
  private:
-  DFRobot_MGC3130 mgc3130{14, 12, &Wire};
+  DFRobot_MGC3130 mgc3130{12, 14};
 };
 
 #endif  //MGC3130_SENSOR_H

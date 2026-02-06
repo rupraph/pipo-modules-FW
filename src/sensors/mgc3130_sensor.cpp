@@ -3,7 +3,7 @@
 #include "sensors/mgc3130_sensor.h"
 
 void MGC3130Sensor::init() {
-  Wire.begin(17, 18, 400000);
+  Wire.begin(1, 7);  // SDA=1, SCL=7
 }
 
 void MGC3130Sensor::setup() {

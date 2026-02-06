@@ -26,6 +26,9 @@ def copy():
     elif "-DPIPO_RANGE=1" in build_flags:
         path = f"configs/range_config.json"
         preset_type = "range"
+    elif "-DPIPO_MGC3130=1" in build_flags:
+        path = f"configs/mgc3130_config.json"
+        preset_type = "mgc3130"
     else:
         raise Exception("No config file for build type")
 

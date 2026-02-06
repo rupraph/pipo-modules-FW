@@ -23,6 +23,7 @@
     "build:range": "./scripts/pio.sh run -e range",
     "build:range_rev1_1": "./scripts/pio.sh run -e range_rev1_1",
     "build:dev_range_rev1_1": "./scripts/pio.sh run -e dev_range_rev1_1",
+    "build:mgc3130_rev1_1": "./scripts/pio.sh run -e mgc3130_rev1_1",
     "build:web": "./scripts/build-web.sh",
     "build:cli": "node cli/build-cli.mjs",
     "build": "./scripts/build-web.sh",
@@ -36,6 +37,7 @@
     "upload:analog": "./scripts/pio.sh run -t upload -e analog",
     "upload:analog_rev2": "./scripts/pio.sh run -t upload -e analog_rev2",
     "upload:dev_analog_rev2": "./scripts/pio.sh run -t upload -e dev_analog_rev2",
+    "upload:mgc3130_rev1_1": "./scripts/pio.sh run -t upload -e mgc3130_rev1_1",
     "build:fs:motion": "./scripts/pio.sh run -t buildfs -e motion",
     "build:fs:motion_rev1_1": "./scripts/pio.sh run -t buildfs -e motion_rev1_1",
     "build:fs:motiondebug": "./scripts/pio.sh run -t buildfs -e motion",
@@ -43,6 +45,7 @@
     "build:fs:analog_rev2": "./scripts/pio.sh run -t buildfs -e analog_rev2",
     "build:fs:range": "./scripts/pio.sh run -t buildfs -e range",
     "build:fs:range_rev1_1": "./scripts/pio.sh run -t buildfs -e range_rev1_1",
+    "build:fs:mgc3130_rev1_1": "./scripts/pio.sh run -t buildfs -e mgc3130_rev1_1",
     "upload:fs": "./scripts/pio.sh run -t uploadfs",
     "test": "./scripts/pio.sh test -vvv -e native",
     "test:websockets": "vitest -c vitest.config.ts",
@@ -54,7 +57,8 @@
     "full:range": "npm run build:web && npm run build:fs:range && npm run erase &&npm run upload:fs && npm run upload:range",
     "full:range_rev1_1": "npm run build:web && npm run build:fs:range_rev1_1 && npm run erase && npm run upload:fs && npm run upload:range_rev1_1",
     "full:analog_rev2": "npm run build:web && npm run build:fs:analog_rev2 && npm run erase && npm run upload:fs && npm run upload:analog_rev2",
-    "decode_backtrace": "bash -c 'PROJECT_DIR=$(pwd) && cd $HOME/.platformio/packages/toolchain-xtensa-esp32/bin && ./xtensa-esp32-elf-addr2line -a -s -p -C -f -i -r -e \"$PROJECT_DIR/.pio/build/$0/firmware.elf\" ${@:1}'"
+    "decode_backtrace": "bash -c 'PROJECT_DIR=$(pwd) && cd $HOME/.platformio/packages/toolchain-xtensa-esp32/bin && ./xtensa-esp32-elf-addr2line -a -s -p -C -f -i -r -e \"$PROJECT_DIR/.pio/build/$0/firmware.elf\" ${@:1}'",
+    "full:mgc3130_rev1_1": "npm run build:web && npm run build:fs:mgc3130_rev1_1 && npm run erase && npm run upload:fs && npm run upload:mgc3130_rev1_1"
   },
   "author": "",
   "license": "ISC",

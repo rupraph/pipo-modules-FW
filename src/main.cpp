@@ -35,14 +35,14 @@ void setup() {  // by default on core 1
   Serial.begin(115200);
   Serial.setDebugOutput(true);
 
-#if defined(DISABLE_USB_COMM)
+  // #if defined(DISABLE_USB_COMM)
   // Wait press to start setup
   log_i("Press any key to start...");
   while (!Serial.available()) {
     delay(10);
   }
   delay(100);  // Extra time for terminal to be ready
-#endif
+               // #endif
 
   log_i("\n=== Pipo Setup Start ===");
 
@@ -225,6 +225,9 @@ void loop() {
 
   input_sensor.update();
   engine.update();
+  input_sensor.teleplot_data("x");
+  input_sensor.teleplot_data("y");
+  input_sensor.teleplot_data("z");
 
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
   analog_out.update();

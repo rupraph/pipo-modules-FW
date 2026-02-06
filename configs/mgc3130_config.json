@@ -1,0 +1,124 @@
+{
+  "engine": {
+    "engine-midi": {
+      "x": {
+        "cc_nb": 14,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 12,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "y": {
+        "cc_nb": 15,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 12,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "z": {
+        "cc_nb": 16,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 12,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      }
+    },
+    "engine-osc": {
+      "x": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "x"
+      },
+      "y": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "y"
+      },
+      "z": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "z"
+      }
+    }
+  },
+  "inputs": {
+    "x": {
+      "deadband": 0.4,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 60.0,
+      "lmin": 2.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "y": {
+      "deadband": 0.4,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 60.0,
+      "lmin": 2.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "z": {
+      "deadband": 0.4,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 60.0,
+      "lmin": 2.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    }
+  },
+  "general": {
+    "Wifi_mode": "STA",
+    "OSC_ENA": false,
+    "OSC_IP": "192.168.10.2",
+    "OSC_PORT": 8000,
+    "OSC_Batt": false,
+    "MidiEnabled": true,
+    "HidEnabled": false,
+    "HidMode": 2,
+    "PipoName": "range",
+    "BLEEnabled": true
+  },
+  "sensorconf": {
+    "hold_mode": true
+  }
+}
