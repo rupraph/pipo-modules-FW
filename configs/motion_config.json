@@ -180,6 +180,21 @@
         "scaleType": "major",
         "tl_mode": 0,
         "velocity": 100
+      },
+      "AccComb": {
+        "cc_nb": 16,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
@@ -266,6 +281,13 @@
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "gyroZ"
+      },
+      "AccComb": {
+        "enabled": false,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "AccComb"
       }
     },
     "engine-special": {
@@ -403,6 +425,17 @@
       "inverted": false,
       "lmax": 2000,
       "lmin": -2000,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "AccComb": {
+      "deadband": 0.05,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 8.0,
+      "lmin": -8.0,
       "mode": false,
       "th_mode": false,
       "cyclic": false,
