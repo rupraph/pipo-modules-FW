@@ -50,7 +50,8 @@
     "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "range",
-    "BLEEnabled": true
+    "BLEEnabled": true,
+    "Button_disa": false
   },
   "sensorconf": {
     "hold_mode": true

@@ -13,6 +13,7 @@
 #include "../engine.h"
 #include "../sensors/sensors.h"
 #include "../osc/osc_handler.h"
+#include "hw_ui.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ class Config {
     general_config["HidMode"] = 2;
     general_config["PipoName"] = "default";
     general_config["BLEEnabled"] = false;
+    general_config["Button_disa"] = false;
   }
   String filename;              // raw config file name (no extension)
   JsonDocument current_config;  // stores all configs (gather)

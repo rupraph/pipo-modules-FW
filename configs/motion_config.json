@@ -419,7 +419,8 @@
     "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "motion",
-    "BLEEnabled": false
+    "BLEEnabled": false,
+    "Button_disa": false
   },
   "sensorconf": {
     "relative_mode": true
