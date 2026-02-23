@@ -152,3 +152,17 @@ void midi_io::printNoteList(int channel) {
           is_note_playing(pair.first, channel));
   }
 }
+
+void midi_io::sendPitchBend(int value, int channel) {
+  if (lastpb[channel] == value) {
+    return;
+  }
+  MidiUSBsendPitchBend(value, channel);
+#ifdef INCLUDE_BLE
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEsendPitchBend(value, channel);
+  }
+#endif
+  lastpb[channel] = value;
+  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+}

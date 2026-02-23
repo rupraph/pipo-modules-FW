@@ -56,4 +56,10 @@ void MidiBLEsendNoteOff(int note, int velocity, int channel) {
   }
 }
 
+void MidiBLEsendPitchBend(int value, int channel) {
+  if (BTconnected) {
+    MidiBle.sendPitchBend(value, channel);
+  }
+}
+
 #endif  //INCLUDE_BLE

@@ -19,5 +19,7 @@ void MidiBLEsendCC(int control, int value, int channel);
 void MidiBLEsendNoteOn(int note, int velocity, int channel);
 void MidiBLEsendNoteOff(int note, int velocity, int channel);
 
+void MidiBLEsendPitchBend(int value, int channel);
+
 #endif
 #endif  //MIDIBLE_H

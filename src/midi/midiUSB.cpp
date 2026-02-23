@@ -37,3 +37,7 @@ void MidiUSBsendNoteOn(int note, int velocity, int channel) {
 void MidiUSBsendNoteOff(int note, int velocity, int channel) {
   MidiUsb.sendNoteOff(note, velocity, channel);
 }
+
+void MidiUSBsendPitchBend(int value, int channel) {
+  MidiUsb.sendPitchBend(value, channel);
+}
