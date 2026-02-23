@@ -46,9 +46,30 @@
     currentConfig.set(config);
   }
 
-  function setMessageType(type: "note" | "cc") {
+  function setMessageType(type: "note" | "cc" | "pitchbend") {
     if (!midiConfig) return;
-    midiConfig.tl_mode = type === "note" ? 1 : 0;
+    
+    const previousMode = midiConfig.tl_mode;
+    const newMode = type === "note" ? 1 : type === "pitchbend" ? 2 : 0;
+    
+    // Scale cc_min and cc_max when switching between CC and Pitch Bend
+    if (previousMode !== newMode) {
+      // From CC (non-hires) to Pitch Bend: scale up (0-127 -> 0-16383)
+      if (previousMode === 0 && newMode === 2 && !midiConfig.hires) {
+        const scaleFactor = 16383 / 127;
+        midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+        midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+      }
+      // From Pitch Bend to CC (non-hires): scale down (0-16383 -> 0-127)
+      else if (previousMode === 2 && newMode === 0 && !midiConfig.hires) {
+        const scaleFactor = 127 / 16383;
+        midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+        midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+      }
+      // Note: No scaling needed when hires is enabled (both use 0-16383 range)
+    }
+    
+    midiConfig.tl_mode = newMode;
     currentConfig.set(config);
   }
 
@@ -163,7 +184,7 @@
       <InfoModal>
         <p>
           You can choose to translate the sensor data into Midi Continous
-          Controls, or to Midi Notes.
+          Controls, Pitch Bend, or Midi Notes.
         </p>
         <p>
           If the sensor is put into "binary mode" (above), this allows to
@@ -175,7 +196,7 @@
         </p>
       </InfoModal>
       <div class="pill-switch">
-        <div class="pill-indicator" class:note={midiConfig.tl_mode === 1}></div>
+        <div class="pill-indicator" class:note={midiConfig.tl_mode === 1} class:pitchbend={midiConfig.tl_mode === 2}></div>
         <input
           type="radio"
           name="message-type-{selectedChannel}"
@@ -192,6 +213,14 @@
           checked={midiConfig.tl_mode === 1}
           on:change={() => setMessageType("note")}
         />
+        <input
+          type="radio"
+          name="message-type-{selectedChannel}"
+          value="pitchbend"
+          id="pitchbend-{selectedChannel}"
+          checked={midiConfig.tl_mode === 2}
+          on:change={() => setMessageType("pitchbend")}
+        />
         <label
           for="cc-{selectedChannel}"
           on:click={() => setMessageType("cc")}
@@ -205,6 +234,13 @@
           class:active={midiConfig.tl_mode === 1}
         >
           Note
+        </label>
+        <label
+          for="pitchbend-{selectedChannel}"
+          on:click={() => setMessageType("pitchbend")}
+          class:active={midiConfig.tl_mode === 2}
+        >
+          PB
         </label>
       </div>
     </div>
@@ -300,6 +336,32 @@
         conflictChannels={noteConflictChannels}
       />
     {/if}
+
+    {#if midiConfig.tl_mode === 2 && midiConfig}
+      <div class="row">
+        <span class="label">Pitch Bend Out Min</span>
+        <span></span>
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_min}
+            min={0}
+            max={midiConfig.cc_max}
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="label">Pitch Bend Out Max</span>
+        <span></span>
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_max}
+            min={0}
+            max={16383}
+          />
+        </div>
   </div>
 {/if}
 
@@ -392,12 +454,20 @@
   }
 
   /* Pill Switch - Component Specific */
+  .pill-switch .pill-indicator {
+    width: calc(33.333% - 2.67px);
+  }
+
   .pill-indicator.note {
     transform: translateX(calc(100% + 2px));
   }
 
-  /* Balance label widths for CC (2 chars) and Note (4 chars) */
+  .pill-indicator.pitchbend {
+    transform: translateX(calc(200% + 4px));
+  }
+
+  /* Balance label widths for 3 options */
   .pill-switch label {
-    min-width: 40px;
+    min-width: 33px;
   }
 </style>
