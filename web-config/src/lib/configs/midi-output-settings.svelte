@@ -38,6 +38,7 @@
   // Force reactivity by creating a composite key that changes when any relevant value changes
   $: ccReactivityKey = `${currentMidiChannel}-${currentCCNumber}-${currentTlMode}`;
   $: noteReactivityKey = `${currentMidiChannel}-${currentRootNote}-${currentTlMode}`;
+  $: pitchBendReactivityKey = `${currentMidiChannel}-${currentTlMode}`;
   $: midiChannelReactivityKey = `${currentMidiChannel}-${currentTlMode}-${currentInputMode}`;
 
   function toggleEnabled() {
@@ -48,10 +49,10 @@
 
   function setMessageType(type: "note" | "cc" | "pitchbend") {
     if (!midiConfig) return;
-    
+
     const previousMode = midiConfig.tl_mode;
     const newMode = type === "note" ? 1 : type === "pitchbend" ? 2 : 0;
-    
+
     // Scale cc_min and cc_max when switching between CC and Pitch Bend
     if (previousMode !== newMode) {
       // From CC (non-hires) to Pitch Bend: scale up (0-127 -> 0-16383)
@@ -68,7 +69,7 @@
       }
       // Note: No scaling needed when hires is enabled (both use 0-16383 range)
     }
-    
+
     midiConfig.tl_mode = newMode;
     currentConfig.set(config);
   }
@@ -165,6 +166,33 @@
   })();
 
   $: noteConflict = noteConflictChannels.length > 0;
+
+  // Check if current pitch bend conflicts with other channels
+  $: pitchBendConflictChannels = (() => {
+    if (!config || !midiConfig || !selectedChannel) return [];
+    if (currentTlMode !== 2) return []; // Only check in Pitch Bend mode
+
+    // Use tracked values and reactivity key to ensure reactivity
+    const checkChannel = currentMidiChannel;
+    // Reference pitchBendReactivityKey to ensure this recalculates when values change
+    const _ = pitchBendReactivityKey;
+
+    // Check all other channels and collect conflicting ones
+    return Object.keys(config.engine["engine-midi"]).filter((key) => {
+      if (key === selectedChannel) return false; // Skip current channel
+      const otherMidiConfig = config.engine["engine-midi"][
+        key as keyof (typeof config.engine)["engine-midi"]
+      ] as MidiConfig;
+
+      return (
+        // Conflict if other channel is in Pitch Bend mode on same MIDI channel
+        otherMidiConfig.tl_mode === 2 && // Other is in Pitch Bend mode
+        otherMidiConfig.channel === checkChannel
+      );
+    });
+  })();
+
+  $: pitchBendConflict = pitchBendConflictChannels.length > 0;
 </script>
 
 {#if config && selectedChannel && midiConfig && input}
@@ -196,7 +224,11 @@
         </p>
       </InfoModal>
       <div class="pill-switch">
-        <div class="pill-indicator" class:note={midiConfig.tl_mode === 1} class:pitchbend={midiConfig.tl_mode === 2}></div>
+        <div
+          class="pill-indicator"
+          class:note={midiConfig.tl_mode === 1}
+          class:pitchbend={midiConfig.tl_mode === 2}
+        ></div>
         <input
           type="radio"
           name="message-type-{selectedChannel}"
@@ -339,6 +371,22 @@
 
     {#if midiConfig.tl_mode === 2 && midiConfig}
       <div class="row">
+        <span class="output-label">Pitch Bend</span>
+        {#if pitchBendConflict}
+          <span class="conflict-warning">
+            <TriangleAlert size={14} color="var(--red)" />
+            <span class="conflict-text"
+              >Channel "{pitchBendConflictChannels.join(", ")}" also uses Pitch
+              Bend</span
+            >
+          </span>
+        {:else}
+          <span></span>
+        {/if}
+        <span class="info-text">Channel {midiConfig.channel}</span>
+      </div>
+
+      <div class="row">
         <span class="label">Pitch Bend Out Min</span>
         <span></span>
         <div class="input-container">
@@ -355,13 +403,10 @@
         <span class="label">Pitch Bend Out Max</span>
         <span></span>
         <div class="input-container">
-          <Number
-            label=""
-            bind:value={midiConfig.cc_max}
-            min={0}
-            max={16383}
-          />
+          <Number label="" bind:value={midiConfig.cc_max} min={0} max={16383} />
         </div>
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -411,6 +456,13 @@
   .conflict-text {
     font-size: 12px;
     font-weight: 700;
+  }
+
+  .info-text {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: right;
   }
 
   .row {
