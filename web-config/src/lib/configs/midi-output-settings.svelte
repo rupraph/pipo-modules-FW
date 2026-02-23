@@ -6,6 +6,8 @@
   import Number from "../form/Number.svelte";
   import InfoModal from "../InfoModal.svelte";
   import { TriangleAlert } from "lucide-svelte";
+  import OutputValueDisplay from "./output-value-display.svelte";
+  import { pipoio } from "../../pipoio";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -144,6 +146,14 @@
   })();
 
   $: noteConflict = noteConflictChannels.length > 0;
+
+  // Listen for output values from the device
+  let outputValue: number | undefined = undefined;
+
+  pipoio.on("sensor", ({ axis, outputValue: outVal }) => {
+    if (axis !== selectedChannel) return;
+    outputValue = outVal;
+  });
 </script>
 
 {#if config && selectedChannel && midiConfig && input}
@@ -300,6 +310,13 @@
         conflictChannels={noteConflictChannels}
       />
     {/if}
+
+    <!-- Output Value Display -->
+    <OutputValueDisplay
+      value={outputValue}
+      type={midiConfig.tl_mode === 0 ? "midi-cc" : "midi-note"}
+      label={midiConfig.tl_mode === 0 ? "CC Value" : "Note Value"}
+    />
   </div>
 {/if}
 

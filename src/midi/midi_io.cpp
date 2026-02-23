@@ -43,7 +43,6 @@ void midi_io::sendNoteOn(int note, int velocity, int channel,
   }
 #endif
 
-  // pipoSocket.sendNoteOn(note, velocity,channel);
   hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 
   // insert or update note to channel_note_list
@@ -68,7 +67,6 @@ void midi_io::sendNoteOff(int note, int velocity, int channel) {
       MidiBLEsendNoteOff(note, velocity, channel);
     }
 #endif
-    // pipoSocket.sendNoteOff(note, velocity,channel);
     channel_note_list[channel].erase(note);
   }
 }

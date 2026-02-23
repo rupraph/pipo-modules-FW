@@ -324,38 +324,6 @@ void PipoSocket::start(AsyncWebSocket* ws) {
   this->ws = ws;
   this->ws->enable(true);
 }
-void PipoSocket::sendNoteOn(int note, int velocity, int channel) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "noteon";
-  msg += channel;
-  msg += ",";
-  msg += note;
-  msg += ",";
-  msg += velocity;
-  ws->textAll(msg.c_str());
-}
-void PipoSocket::sendNoteOff(int note, int velocity, int channel) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "noteoff";
-  msg += channel;
-  msg += ",";
-  msg += note;
-  msg += ",";
-  msg += velocity;
-  ws->textAll(msg.c_str());
-}
-
-void PipoSocket::sendSensorValue(std::string axis, float value) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "sensor";
-  msg += axis.c_str();
-  msg += ",";
-  msg += value;
-  ws->textAll(msg.c_str());
-}
 
 void PipoSocket::loop() {
   if (ws == nullptr || paused)
