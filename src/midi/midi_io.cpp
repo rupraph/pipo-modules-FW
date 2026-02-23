@@ -92,20 +92,18 @@ void midi_io::sendAllNotesOff(int channel) {
 
 void midi_io::sendControlChange(int control, int value, int channel,
                                 bool hires) {
-  if (lastcc[channel][control] != value) {
-    if (hires) {
-      sendHiResControlChange(control, value, channel);
-    } else {
-      MidiUSBsendCC(control, value, channel);
+  // Deduplication now handled by MidiTranslator::should_send_cc()
+  if (hires) {
+    sendHiResControlChange(control, value, channel);
+  } else {
+    MidiUSBsendCC(control, value, channel);
 #ifdef INCLUDE_BLE
-      if (config.general_config["BLEEnabled"]) {
-        MidiBLEsendCC(control, value, channel);
-      }
-#endif
+    if (config.general_config["BLEEnabled"]) {
+      MidiBLEsendCC(control, value, channel);
     }
-    lastcc[channel][control] = value;
-    hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+#endif
   }
+  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
 }
 
 void midi_io::sendHiResControlChange(int control, int value, int channel) {

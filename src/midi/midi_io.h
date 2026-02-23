@@ -30,8 +30,8 @@ class midi_io {
   typedef unordered_map<int, NoteSatus> Notelist;
   Notelist channel_note_list[16];
 
-  //should likley be in engine
-  uint8_t lastcc[16][128];
+  // Note: CC deduplication now handled by MidiTranslator::should_send_cc()
+  // Removed: uint8_t lastcc[16][128]; (saved 2KB)
 
   bool off_before_next_note = false;
   // set if off previous note before sending note

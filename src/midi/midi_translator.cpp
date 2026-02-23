@@ -267,7 +267,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["cc_max"] = cc_max;
   j["cc_min"] = cc_min;
   j["hires"] = hires;
-  j["velocity"] = velocity; 
+  j["velocity"] = velocity;
   return j;
 }
 
@@ -443,3 +443,53 @@ const unordered_map<string, vector<int>> MidiTranslator::intervals = {
     {"fifth", {0, 7}},     {"sixth", {0, 9}},    {"seventh", {0, 11}},
     {"octave", {0, 12}},   {"ninth", {0, 14}},   {"tenth", {0, 16}},
     {"eleventh", {0, 17}}, {"twelveth", {0, 19}}};
+
+// Value storage and change detection methods
+uint8_t MidiTranslator::get_last_cc() const {
+  return (uint8_t)(last_sent_cc & 0x7F);  // Return 7-bit value
+}
+
+uint16_t MidiTranslator::get_last_cc_hires() const {
+  return last_sent_cc;
+}
+
+uint8_t MidiTranslator::get_last_note() const {
+  return last_sent_note;
+}
+
+uint16_t MidiTranslator::get_last_pitch_bend() const {
+  return last_sent_pb;
+}
+
+bool MidiTranslator::should_send_cc(uint8_t new_val) {
+  uint16_t new_val_16 = new_val;
+  if (new_val_16 != last_sent_cc) {
+    last_sent_cc = new_val_16;
+    return true;
+  }
+  return false;
+}
+
+bool MidiTranslator::should_send_cc_hires(uint16_t new_val) {
+  if (new_val != last_sent_cc) {
+    last_sent_cc = new_val;
+    return true;
+  }
+  return false;
+}
+
+bool MidiTranslator::should_send_note(uint8_t new_val) {
+  if (new_val != last_sent_note) {
+    last_sent_note = new_val;
+    return true;
+  }
+  return false;
+}
+
+bool MidiTranslator::should_send_pitch_bend(uint16_t new_val) {
+  if (new_val != last_sent_pb) {
+    last_sent_pb = new_val;
+    return true;
+  }
+  return false;
+}
