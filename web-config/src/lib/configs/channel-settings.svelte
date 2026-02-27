@@ -474,7 +474,24 @@
         units={aschema.unit}
       />
     {/if}
-  {/if}
+    {#if mode === "OSC"}
+      <div class="row">
+        <span class="label">Noise Filter size </span>
+        <InfoModal>
+          <p>
+            To prevent sending too much data out, the sensor variations which are smaler than a certain magnitude are ignored. This setting determines the size of the window for this noise filter: the bigger, the more variations are ignored. Set to 0 to disable.
+          </p>
+        </InfoModal>
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={input.deadband}
+            min={0}
+            max={input.lmax}
+          />
+        </div>
+      </div>
+    {/if}
 
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">

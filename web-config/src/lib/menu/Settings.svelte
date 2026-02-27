@@ -10,6 +10,7 @@
   import { schema } from "../../schema";
   import { pipoio } from "../../pipoio";
   import { addToast } from "../toast";
+  import { uiState } from "../ui-state";
 
   $: config = $currentConfig;
   $: mode = config?.general.MidiEnabled
@@ -19,6 +20,11 @@
       : "osc";
 
   let open = false;
+  let advancedMode = uiState.getAdvancedMode();
+
+  $: {
+    uiState.setAdvancedMode(advancedMode);
+  }
 
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
@@ -230,6 +236,16 @@
             on:input={handlePipoNameInput}
           />
         </div>
+      </div>
+      <div class="row">
+        <span class="label">Advanced Mode</span>
+        <InfoModal>
+          <p>
+            When enabled, additional advanced settings will be displayed
+            throughout the configuration interface.
+          </p>
+        </InfoModal>
+        <PillSwitch label="" bind:value={advancedMode} />
       </div>
       <div class="row">
         <span class="label">
