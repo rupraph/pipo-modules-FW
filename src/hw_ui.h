@@ -103,12 +103,9 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  static const int NUM_LEDS = 4;
-  static const int led_pins[NUM_LEDS];  // WIFI_LED, BT_LED, SEND_LED, LOW_BAT_LED
-  unsigned long blink_once[NUM_LEDS];   // Array indexed by LED index, stores blink end time
-  int blink_once_brightness = 100;      // brightness for blink_once led
-  
-  int get_led_index(int led_pin);  // Helper to find array index for a pin
+  std::unordered_map<int, unsigned long>
+      blink_once;                   // Maps pin -> blink end time
+  int blink_once_brightness = 100;  // brightness for blink_once led
   void init();
   void setup();
   void update();

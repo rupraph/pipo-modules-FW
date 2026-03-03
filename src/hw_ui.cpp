@@ -164,10 +164,6 @@ void HwUi::setup() {
   ledcAttach(SEND_LED, PWM_FREQ, PWM_Resolution);
   ledcAttach(LOW_BAT_LED, PWM_FREQ, PWM_Resolution);
   mode_sw.setup_button(MODE_SW);
-  // Initialize blink_once array
-  for (int i = 0; i < NUM_LEDS; i++) {
-    blink_once[i] = 0;
-  }
 #endif
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   leds_base_color[WIFI_LED] = CRGB::DarkMagenta;
@@ -475,34 +471,21 @@ void HwUi::pulse() {
   }
 }
 
-// Define the LED pins array
-const int HwUi::led_pins[NUM_LEDS] = {WIFI_LED, BT_LED, SEND_LED, LOW_BAT_LED};
-
-// Helper function to find array index for a given LED pin
-int HwUi::get_led_index(int led_pin) {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    if (led_pins[i] == led_pin) {
-      return i;
-    }
-  }
-  return -1; // Not found
-}
-
 void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
-  int idx = get_led_index(led_name);
-  if (idx >= 0) {
-    blink_once[idx] = millis() + blink_time;
-  }
+  blink_once[led_name] = millis() + blink_time;
 }
 
 void HwUi::single_blink() {
-  for (int i = 0; i < NUM_LEDS; i++) {
-    if (blink_once[i] != 0) {
-      if (millis() < blink_once[i]) {
-        set_led(led_pins[i], blink_once_brightness);
+  for (auto& pair : blink_once) {
+    int led_pin = pair.first;
+    unsigned long end_time = pair.second;
+
+    if (end_time != 0) {
+      if (millis() < end_time) {
+        set_led(led_pin, blink_once_brightness);
       } else {
-        set_led(led_pins[i], 0);
-        blink_once[i] = 0;
+        set_led(led_pin, 0);
+        blink_once[led_pin] = 0;
       }
     }
   }
