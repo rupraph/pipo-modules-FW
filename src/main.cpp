@@ -131,10 +131,14 @@ void setup() {  // by default on core 1
   log_i("Starting tasks");
 
 #ifdef DEBUG_WATCHDOG
-  esp_task_wdt_init(1000, false);  // 1 second timeout in debug mode
+  esp_task_wdt_config_t twdt_config = {
+      .timeout_ms = 1000, .idle_core_mask = 0, .trigger_panic = false};
+  esp_task_wdt_init(&twdt_config);
   log_w("DEBUG_WATCHDOG enabled: 1000ms timeout");
 #else
-  esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
+  esp_task_wdt_config_t twdt_config = {
+      .timeout_ms = 2000, .idle_core_mask = 0, .trigger_panic = false};
+  esp_task_wdt_init(&twdt_config);
 #endif
 
   // We are using the main loop instead of a dedicated Sensor task to optimize ram usage due to arduino framework
