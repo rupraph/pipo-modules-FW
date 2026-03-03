@@ -1,14 +1,17 @@
 #include "midiUSB.h"
 
-Adafruit_USBD_MIDI usb_midi;
-MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
+USBMIDI usb_midi;
+MIDI_CREATE_INSTANCE(USBMIDI, usb_midi, MidiUsb);
 
 void MidiUSBSetup() {
-  TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
-  TinyUSBDevice.setProductDescriptor("PipoUSB");
+  USB.manufacturerName("Pipo-Interfaces");
+  USB.productName("PipoUSB");
+  USB.begin();
+  usb_midi.begin();
 
-  // while (!TinyUSBDevice.mounted())
-  //     delay(1);
+  // Wait for USB to initialize
+  delay(100);
+
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
   log_i("MIDI USB setup complete");
   if (DEBUG_HEAP)

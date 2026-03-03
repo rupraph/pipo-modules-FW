@@ -1,7 +1,8 @@
 #ifndef MIDIUSB_H
 #define MIDIUSB_H
 
-#include <Adafruit_TinyUSB.h>
+#include "USB.h"
+#include "USBMIDI.h"
 #include <MIDI.h>
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
