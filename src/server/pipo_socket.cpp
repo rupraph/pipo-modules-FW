@@ -189,12 +189,12 @@ void PipoSocket::cleanupDeadClients() {
   if (ws == nullptr)
     return;
 
-  auto clients = ws->getClients();
+  auto& clients = ws->getClients();
 
   // Clean up tracking set - remove IDs that are no longer in the clients list
   std::set<uint32_t> currentClientIds;
-  for (AsyncWebSocketClient* c : clients) {
-    currentClientIds.insert(c->id());
+  for (auto& c : clients) {
+    currentClientIds.insert(c.id());
   }
 
   // Remove IDs from closingClients that are no longer in the actual client list
@@ -210,8 +210,8 @@ void PipoSocket::cleanupDeadClients() {
   }
 
   // Now close dead clients, but only if we haven't already asked them to close
-  for (AsyncWebSocketClient* c : clients) {
-    uint32_t clientId = c->id();
+  for (auto& c : clients) {
+    uint32_t clientId = c.id();
 
     // Skip if we've already asked this client to close
     if (closingClients.find(clientId) != closingClients.end()) {
@@ -219,10 +219,10 @@ void PipoSocket::cleanupDeadClients() {
     }
 
     // Check if client is dead
-    if (c->status() != WS_CONNECTED || c->client() == nullptr) {
+    if (c.status() != WS_CONNECTED || c.client() == nullptr) {
       log_i("Removing dead WebSocket client: ID=%u status=%u", clientId,
-            c->status());
-      c->close();
+            c.status());
+      c.close();
       closingClients.insert(clientId);  // Track that we've closed this client
     }
   }
@@ -267,14 +267,14 @@ void PipoSocket::enforceOneClient(AsyncWebSocketClient* newClient) {
   if (ws == nullptr)
     return;
 
-  auto clients = ws->getClients();
-  for (AsyncWebSocketClient* c : clients) {
+  auto& clients = ws->getClients();
+  for (auto& c : clients) {
     // Close all existing clients except the new one
-    if (c->id() != newClient->id()) {
+    if (c.id() != newClient->id()) {
       log_i(
           "Closing old WebSocket client ID=%u to enforce single-client policy",
-          c->id());
-      c->close();
+          c.id());
+      c.close();
     }
   }
 }
@@ -375,8 +375,8 @@ void PipoSocket::loop() {
     lastCleanTime = now;
   }
 
-  auto clients = ws->getClients();
-  if (clients.length() == 0)
+  auto& clients = ws->getClients();
+  if (clients.size() == 0)
     return;
 
   outMsg[0] = 0;
@@ -429,32 +429,32 @@ void PipoSocket::loop() {
   }
 
   // Send to connected clients with defensive checks
-  for (AsyncWebSocketClient* c : clients) {
+  for (auto& c : clients) {
     // Verify client is in a valid state before sending
-    if (c == nullptr || c->client() == nullptr) {
+    if (c.client() == nullptr) {
       continue;
     }
 
-    if (c->status() != WS_CONNECTED) {
+    if (c.status() != WS_CONNECTED) {
       continue;
     }
 
-    if (!c->canSend()) {
+    if (!c.canSend()) {
       continue;  // Queue is full, skip silently (will retry next iteration)
     }
-    if (c->queueIsFull()) {
+    if (c.queueIsFull()) {
       continue;
     }
 
 // Extra safety: when BLE active, skip if TCP layer also struggling
 // This prevents radio conflicts from causing protocol errors
 #ifdef INCLUDE_BLE
-    if (BTconnected && c->client() && c->client()->space() < 512) {
+    if (BTconnected && c.client() && c.client()->space() < 512) {
       continue;  // Give BLE priority, will retry next iteration
     }
 #endif
 
-    c->text(outMsg);
+    c.text(outMsg);
   }
 }
 
