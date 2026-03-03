@@ -3,7 +3,6 @@
 
 #include "USB.h"
 #include "USBMIDI.h"
-#include <MIDI.h>
 #include "HW_CONFIG.h"
 #include "utils/debug.h"
 
