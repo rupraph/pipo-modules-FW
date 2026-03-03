@@ -146,9 +146,6 @@ void HwUi::init() {
   pinMode(BAT_VOLTAGE, INPUT);
   pinMode(PP_SW, INPUT);
 
-  led_channel_map = {
-      {WIFI_LED, 0}, {BT_LED, 1}, {SEND_LED, 2}, {LOW_BAT_LED, 3}};
-
   led_blink_table = {{WIFI_LED, {false, 500, 0.5, 0, 0, false, 30}},
                      {BT_LED, {false, 500, 0.5, 0, 0, false, 30}},
                      {SEND_LED, {false, 500, 0.5, 0, 0, false, 100}},
@@ -161,16 +158,16 @@ void HwUi::init() {
 
 void HwUi::setup() {
 #if !defined(PIPO_ANALOG)
-  // led setup
-  ledcSetup(0, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
-  ledcSetup(1, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(BT_LED, led_channel_map[BT_LED]);
-  ledcSetup(2, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
-  ledcSetup(3, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+  // led setup - Arduino 3.x: ledcAttach(pin, freq, resolution)
+  ledcAttach(WIFI_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(BT_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(SEND_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(LOW_BAT_LED, PWM_FREQ, PWM_Resolution);
   mode_sw.setup_button(MODE_SW);
+  // Initialize blink_once array
+  for (int i = 0; i < NUM_LEDS; i++) {
+    blink_once[i] = 0;
+  }
 #endif
 #if defined(PIPO_ANALOG) && HW_REV >= 20
   leds_base_color[WIFI_LED] = CRGB::DarkMagenta;
@@ -337,7 +334,7 @@ void HwUi::update_switches() {
  */
 void HwUi::set_led(int led_name, int value) {
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
-  ledcWrite(led_channel_map[led_name], value);
+  ledcWrite(led_name, value);  // Arduino 3.x: ledcWrite takes pin directly
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;
 #elif defined(PIPO_ANALOG) && HW_REV == 20
@@ -478,22 +475,35 @@ void HwUi::pulse() {
   }
 }
 
+// Define the LED pins array
+const int HwUi::led_pins[NUM_LEDS] = {WIFI_LED, BT_LED, SEND_LED, LOW_BAT_LED};
+
+// Helper function to find array index for a given LED pin
+int HwUi::get_led_index(int led_pin) {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    if (led_pins[i] == led_pin) {
+      return i;
+    }
+  }
+  return -1; // Not found
+}
+
 void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
-  // carfull led_pos used for index in blink_once but comes from channel number
-  int led_pos = led_channel_map[led_name];
-  // set_led(led_name, brightness);
-  blink_once[led_pos] = millis() + blink_time;
+  int idx = get_led_index(led_name);
+  if (idx >= 0) {
+    blink_once[idx] = millis() + blink_time;
+  }
 }
 
 void HwUi::single_blink() {
-  for (auto& pair : led_channel_map) {
-    int i = pair.second;
+  for (int i = 0; i < NUM_LEDS; i++) {
     if (blink_once[i] != 0) {
-      set_led(pair.first, blink_once_brightness);
-    }
-    if (millis() > blink_once[i] && blink_once[i] != 0) {
-      set_led(pair.first, 0);
-      blink_once[i] = 0;
+      if (millis() < blink_once[i]) {
+        set_led(led_pins[i], blink_once_brightness);
+      } else {
+        set_led(led_pins[i], 0);
+        blink_once[i] = 0;
+      }
     }
   }
 }

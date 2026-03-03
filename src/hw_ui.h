@@ -65,7 +65,6 @@ class HwUi {
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;
-  std::unordered_map<int, int> led_channel_map;
 
   unsigned long soft_pwm_prediod_micros = 5000;
 
@@ -96,8 +95,6 @@ class HwUi {
     int brightness;
   };
 
-  static const int NUM_LEDS = 4;
-
   //Todo: avoid assigning both blink and pulse to same led
 
   std::unordered_map<int, led_blink>
@@ -106,9 +103,12 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  unsigned long blink_once
-      [NUM_LEDS];  // register blink start time // the position in table are the channel nb.
-  int blink_once_brightness = 100;  // brightness for blink_once led
+  static const int NUM_LEDS = 4;
+  static const int led_pins[NUM_LEDS];  // WIFI_LED, BT_LED, SEND_LED, LOW_BAT_LED
+  unsigned long blink_once[NUM_LEDS];   // Array indexed by LED index, stores blink end time
+  int blink_once_brightness = 100;      // brightness for blink_once led
+  
+  int get_led_index(int led_pin);  // Helper to find array index for a pin
   void init();
   void setup();
   void update();
@@ -166,7 +166,7 @@ class HwUi {
   ButtonCallback pause_long_press_cb = nullptr;
   ButtonCallback mode_short_press_cb = nullptr;
   ButtonCallback mode_long_press_cb = nullptr;
-#ifdef PIPO_ANALOG&& HW_REV >= 20
+#if defined(PIPO_ANALOG) && HW_REV >= 20
   CRGB leds[NB_RGB_LEDS];
   CRGB leds_base_color[NB_RGB_LEDS];
 
