@@ -44,7 +44,7 @@ class PipoPresets {
         JsonDocument doc;
         DeserializationError error = deserializeJson(doc, buf.get(), size);
 
-        if (!error && doc.containsKey("preset")) {
+        if (!error && doc["preset"].is<JsonObject>()) {
           PresetInfo info;
           info.filename = filename;
           info.name = doc["preset"]["name"].as<String>();

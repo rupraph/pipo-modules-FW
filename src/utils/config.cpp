@@ -10,7 +10,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
   const char* required_keys[] = {"engine", "inputs", "general", "sensorconf"};
 
   for (const char* key : required_keys) {
-    if (!config_doc.containsKey(key)) {
+    if (config_doc[key].isNull()) {
       log_e("Config validation failed: missing key '%s'", key);
       logs.writeError("Config validation: missing key '" + String(key) + "'");
       return false;
@@ -41,7 +41,7 @@ bool Config::validate_config(JsonDocument& config_doc) {
     const char* engine_keys[] = {"engine-midi", "engine-osc"};
 
     for (const char* key : engine_keys) {
-      if (!engine.containsKey(key) || engine[key].isNull()) {
+      if (engine[key].isNull()) {
         log_e("Config validation failed: engine missing or null key '%s'", key);
         logs.writeError("Config validation: engine missing/null key '" +
                         String(key) + "'");
@@ -108,7 +108,7 @@ bool Config::restore_from_default(String target_filename) {
   return true;
 }
 
-bool Config::load_config(String filename, bool addJsonExtension = true) {
+bool Config::load_config(String filename, bool addJsonExtension) {
   this->filename = filename;
   String configPath = get_path(filename, addJsonExtension);
   log_i("load config: %s", configPath.c_str());

@@ -2,8 +2,8 @@
 #define OSC_TRANSLATORS_H
 
 #include <Arduino.h>
-#include "utils/config.h"
 #include <ArduinoJson.h>
+#include <string>
 
 using namespace std;
 
