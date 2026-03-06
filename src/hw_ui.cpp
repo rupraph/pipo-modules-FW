@@ -40,10 +40,9 @@ void shutdown_esp32() {
 }
 
 void hwuiTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // HWUI task is non-critical - don't subscribe to watchdog
   for (;;) {
     hwui.update();
-    esp_task_wdt_reset();
 #if defined(PIPO_ANALOG) && HW_REV >= 20
     vTaskDelay(pdMS_TO_TICKS(20));
 #else
@@ -53,16 +52,15 @@ void hwuiTask(void* pvParameters) {
 }
 
 void buttonTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Button task is non-critical - don't subscribe to watchdog
   for (;;) {
     hwui.update_switches();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
 void battmonitorTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Battery monitor is non-critical - don't subscribe to watchdog
   static int prev_bat_percentage = -1;
   static bool prev_plugged_state = false;
   static bool prev_low_battery_state = false;
@@ -73,7 +71,7 @@ void battmonitorTask(void* pvParameters) {
       10;  // Require 10 consecutive low readings (5 seconds)
 
   for (;;) {
-    hwui.measure_battery_step();
+    // hwui.measure_battery_step();
 
     // Update the shared state flags
     battery_plugged = hwui.is_plugged();
@@ -109,8 +107,8 @@ void battmonitorTask(void* pvParameters) {
       // Always send on first measurement (prev_bat_percentage == -1)
       if (prev_bat_percentage == -1 || percentage_changed || state_changed ||
           low_battery_changed) {
-        osc.send_battery_level(current_bat_percentage, current_plugged_state,
-                               current_low_battery_state);
+        // osc.send_battery_level(current_bat_percentage, current_plugged_state,
+        //                        current_low_battery_state);
         prev_bat_percentage = current_bat_percentage;
         prev_plugged_state = current_plugged_state;
         prev_low_battery_state = current_low_battery_state;

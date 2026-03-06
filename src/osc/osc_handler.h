@@ -13,7 +13,7 @@
 #include "esp_task_wdt.h"
 
 #ifdef PIPO_ANALOG
-#include "sensors/analog_out.h"
+// #include "sensors/analog_out.h"
 #endif
 
 class Config;

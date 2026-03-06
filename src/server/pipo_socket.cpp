@@ -2,7 +2,7 @@
 
 // takes 2-3 ms for motion
 void websocketTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Websocket task is non-critical - don't subscribe to watchdog
   for (;;) {
     if (!pipoNetworkReady()) {
       vTaskDelay(pdMS_TO_TICKS(500));
@@ -34,7 +34,6 @@ void websocketTask(void* pvParameters) {
     }
 
     pipoSocket.loop();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
   }
 }

@@ -4,14 +4,13 @@
 //TODO: Should move content from callback (only put flags)
 
 void wifiTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
-  // unsigned long lastStackCheck = 0;
+  // WiFi task is non-critical - don't subscribe to watchdog
+  // unsigned long lastStackCheck = 0;k
   unsigned long serverPausedTime = 0;
   const unsigned long SERVER_PAUSE_TIMEOUT = 10000;  // 10 seconds max pause
 
   for (;;) {
     wifi.refresh();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
 
     // // Monitor stack usage every 30 seconds
@@ -346,7 +345,7 @@ bool PipoWifi::configureAP() {
     log_i("AP started successfully");
     apConfigured = true;
     // AP has IP address now, start UDP for communication
-    osc.start();
+    // osc.start();
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     log_e("Failed to start AP");
@@ -467,7 +466,7 @@ void PipoWifi::step() {
     intentionalDisconnect = true;
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_MODE_NULL);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    // vTaskDelay(pdMS_TO_TICKS(100));
     WiFi.mode(next.mode);
     apStarted = false;
     apConfigured = false;
