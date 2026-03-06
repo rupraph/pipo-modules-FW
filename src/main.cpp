@@ -152,29 +152,29 @@ void setup() {  // by default on core 1
   // We are using the main loop instead of a dedicated Sensor task to optimize ram usage due to arduino framework
 
   // Create critical tasks with error checking
-  // if (xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,
-  //                             &websocketTaskHandle, 0) != pdPASS) {
-  //   log_e("FATAL: Failed to create websocketTask - halting");
-  //   while (1) {
-  //     delay(1000);
-  //   }
-  // }
+  if (xTaskCreatePinnedToCore(websocketTask, "websocketTask", 3072, NULL, 2,
+                              &websocketTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create websocketTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
 
-  // if (xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1,
-  //                             &hwuiTaskHandle, 0) != pdPASS) {
-  //   log_e("FATAL: Failed to create hwuiTask - halting");
-  //   while (1) {
-  //     delay(1000);
-  //   }
-  // }
+  if (xTaskCreatePinnedToCore(hwuiTask, "hwuiTask", 2048, NULL, 1,
+                              &hwuiTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create hwuiTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
 
-  // if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 4096, NULL, 1,
-  //                             &battmonitorTaskHandle, 1) != pdPASS) {
-  //   log_e("FATAL: Failed to create battmonitorTask - halting");
-  //   while (1) {
-  //     delay(1000);
-  //   }
-  // }
+  if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 4096, NULL, 1,
+                              &battmonitorTaskHandle, 1) != pdPASS) {
+    log_e("FATAL: Failed to create battmonitorTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
 
 #ifdef PIPO_ANALOG
   // xTaskCreatePinnedToCore(oscreceiveTask, "oscreceiveTask", 2048, NULL, 1,
@@ -183,13 +183,13 @@ void setup() {  // by default on core 1
 //                         &hwuiSoftPwmTaskHandle, 0);
 #endif
 
-  // if (xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 3,
-  //                             &wifiTaskHandle, 0) != pdPASS) {
-  //   log_e("FATAL: Failed to create wifiTask - halting");
-  //   while (1) {
-  //     delay(1000);
-  //   }
-  // }
+  if (xTaskCreatePinnedToCore(wifiTask, "wifiTask", 4096, NULL, 3,
+                              &wifiTaskHandle, 0) != pdPASS) {
+    log_e("FATAL: Failed to create wifiTask - halting");
+    while (1) {
+      delay(1000);
+    }
+  }
 
 #if HW_REV >= 11
   if (xTaskCreatePinnedToCore(buttonTask, "buttonTask", 2048, NULL, 1,

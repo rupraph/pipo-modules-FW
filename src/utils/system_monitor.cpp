@@ -182,22 +182,32 @@ void SystemMonitor::checkStackHealth() {
   bool foundIssues = false;
 
   for (UBaseType_t i = 0; i < taskCount; i++) {
-    if (taskStatusArray[i].usStackHighWaterMark <
-        MONITOR_STACK_WARNING_THRESHOLD) {
+    const char* taskName = taskStatusArray[i].pcTaskName;
+    UBaseType_t stackFree = taskStatusArray[i].usStackHighWaterMark;
+
+    // System tasks (IDLE and ipc) have smaller stacks (1024 bytes) and legitimately use 700-800 bytes
+    // These are managed by ESP-IDF and their usage is normal
+    bool isSystemTask =
+        (strncmp(taskName, "IDLE", 4) == 0 || strncmp(taskName, "ipc", 3) == 0);
+
+    UBaseType_t threshold = isSystemTask ? MONITOR_SYSTEM_TASK_STACK_THRESHOLD
+                                         : MONITOR_STACK_WARNING_THRESHOLD;
+
+    if (stackFree < threshold) {
       if (!foundIssues) {
         log_w("STACK WARNINGS:");
         foundIssues = true;
       }
-      log_w("  %s: Only %u bytes free! (threshold: %u)",
-            taskStatusArray[i].pcTaskName,
-            taskStatusArray[i].usStackHighWaterMark,
-            MONITOR_STACK_WARNING_THRESHOLD);
+      log_w("  %s: Only %u bytes free! (threshold: %u)%s", taskName, stackFree,
+            threshold, isSystemTask ? " [system task - may be normal]" : "");
     }
   }
 
   if (!foundIssues) {
-    log_i("STACK: All tasks healthy (>%u bytes free)",
-          MONITOR_STACK_WARNING_THRESHOLD);
+    log_i(
+        "STACK: All tasks healthy (user tasks >%u, system tasks >%u bytes "
+        "free)",
+        MONITOR_STACK_WARNING_THRESHOLD, MONITOR_SYSTEM_TASK_STACK_THRESHOLD);
   }
 
   delete[] taskStatusArray;

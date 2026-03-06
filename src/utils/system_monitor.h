@@ -39,8 +39,11 @@
 #include "freertos/task.h"
 
 // System monitoring configuration
-#define MONITOR_INTERVAL_MS 10000            // Report every 10 seconds
-#define MONITOR_STACK_WARNING_THRESHOLD 512  // Warn if stack < 512 bytes free
+#define MONITOR_INTERVAL_MS 10000  // Report every 10 seconds
+#define MONITOR_STACK_WARNING_THRESHOLD \
+  512  // Warn if user task stack < 512 bytes free
+#define MONITOR_SYSTEM_TASK_STACK_THRESHOLD \
+  200  // System tasks (IDLE/ipc) use smaller stacks
 
 class SystemMonitor {
  public:
