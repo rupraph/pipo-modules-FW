@@ -24,6 +24,13 @@
 
 void init_filesystem();
 
+// In a .cpp file (like main.cpp or create stubs.cpp)
+extern "C" void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
+                                           uint8_t const* report,
+                                           uint16_t len) {
+  // Empty - Host mode disabled in config
+}
+
 void setup() {  // by default on core 1
 
   //Pulldown all pins (avoid floating)
