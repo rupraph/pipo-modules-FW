@@ -16,6 +16,7 @@
     currentConfig,
     hasUnsavedChanges,
     originalConfig,
+    settingsModalOpen,
   } from "./services/config";
   import { uiState } from "./lib/ui-state";
   import Presets from "./lib/presets.svelte";
@@ -45,17 +46,9 @@
 
         // Provide a more user-friendly error message
         throw new Error(
-          "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected."
+          "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected.",
         );
       });
-  }
-
-  function handleSaveSuccess() {
-    // Reset the original config to the current config after successful save
-    if ($currentConfig) {
-      originalConfig.set(JSON.parse(JSON.stringify($currentConfig)));
-      hasUnsavedChanges.set(false);
-    }
   }
 
   async function fetchRelativeModeState() {
@@ -207,11 +200,10 @@
       </article> -->
     </div>
 
-    <!-- Floating Save Button -->
+    <!-- Floating Save Button (hidden when Settings modal is open) -->
     <FloatingSaveButton
       config={$currentConfig}
-      show={$hasUnsavedChanges}
-      onSaveSuccess={handleSaveSuccess}
+      show={$hasUnsavedChanges && !$settingsModalOpen}
     />
   {:catch e}
     <article>
