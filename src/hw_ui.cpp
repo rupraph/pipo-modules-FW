@@ -397,7 +397,7 @@ void HwUi::stop_blink(int led_name) {
     return;  // not blinking
 
   led_blink_table[led_name].enabled = false;
-  // set_led(led_name, 0);
+  set_led(led_name, 0);
 }
 
 bool HwUi::is_blinking(int led_name) {
