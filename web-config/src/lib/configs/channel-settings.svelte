@@ -17,7 +17,7 @@
   import { schema } from "../../schema";
   import { pipoio, PipoIO } from "../../pipoio";
   import PillSwitch from "../form/PillSwitch.svelte";
-  import Number from "../form/Number.svelte";
+  import { getDefaultDeadband } from "../../defaults";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -224,6 +224,17 @@
     if (!input) return;
     input.over_out = !input.over_out;
     currentConfig.set(config);
+  }
+
+  // Default and current state for the noise filter (deadband)
+  $: defaultDeadband = selectedChannel
+    ? getDefaultDeadband(type, selectedChannel)
+    : 0;
+  $: deadbandEnabled = input ? input.deadband !== 0 : false;
+
+  function handleDeadbandToggle() {
+    if (!input) return;
+    input.deadband = deadbandEnabled ? 0 : defaultDeadband;
   }
 
   // Compute if binary mode is active
@@ -478,17 +489,20 @@
   {/if}
   {#if mode === "OSC"}
     <div class="row">
-      <span class="label">Noise Filter size </span>
-      <InfoModal>
-        <p>
-          This filters out small sensor variations to reduce network traffic.
-          Choosing a larger filter window value will ignore larger variations,
-          sending fewer updates. Set to 0 to disable filtering.
-        </p>
-      </InfoModal>
-      <div class="input-container">
-        <Number label="" bind:value={input.deadband} min={0} max={input.lmax} />
+      <div class="left">
+        <span class="label">Noise Filter</span>
+        <InfoModal>
+          <p>
+            This filters out small sensor variations to reduce network
+            traffic.Disable for full sensitivity, unfiltered readings.
+          </p>
+        </InfoModal>
       </div>
+      <PillSwitch
+        label=""
+        value={deadbandEnabled}
+        on:change={handleDeadbandToggle}
+      />
     </div>
   {/if}
 
