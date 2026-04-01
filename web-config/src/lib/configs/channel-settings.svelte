@@ -17,9 +17,17 @@
   import { schema } from "../../schema";
   import { pipoio, PipoIO } from "../../pipoio";
   import PillSwitch from "../form/PillSwitch.svelte";
+  import Number from "../form/Number.svelte";
 
   $: config = $currentConfig;
   $: type = $pipoType;
+
+  // Subscribe to advanced mode changes
+  $: advancedMode = uiState.getAdvancedMode();
+  // Update when uiState changes
+  $: if ($uiState) {
+    advancedMode = uiState.getAdvancedMode();
+  }
 
   // Get category from uiState instead of local variable
   $: category = ($uiState[type]?.channelType as "analog" | "touch") || "analog";
@@ -40,7 +48,7 @@
     "MidiEnabled:",
     config?.general.MidiEnabled,
     "OSC_ENA:",
-    config?.general.OSC_ENA
+    config?.general.OSC_ENA,
   );
 
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
@@ -286,7 +294,7 @@
                 input.offset = offsetValue as number;
                 console.log(
                   `Offset calibration completed for ${selectedChannel}:`,
-                  offsetValue
+                  offsetValue,
                 );
                 // Trigger config update
                 if (config) {
@@ -474,24 +482,22 @@
         units={aschema.unit}
       />
     {/if}
-    {#if mode === "OSC"}
-      <div class="row">
-        <span class="label">Noise Filter size </span>
-        <InfoModal>
-          <p>
-            To prevent sending too much data out, the sensor variations which are smaler than a certain magnitude are ignored. This setting determines the size of the window for this noise filter: the bigger, the more variations are ignored. Set to 0 to disable.
-          </p>
-        </InfoModal>
-        <div class="input-container">
-          <Number
-            label=""
-            bind:value={input.deadband}
-            min={0}
-            max={input.lmax}
-          />
-        </div>
+  {/if}
+  {#if mode === "OSC" && advancedMode === true}
+    <div class="row">
+      <span class="label">Noise Filter size </span>
+      <InfoModal>
+        <p>
+          This filters out small sensor variations to reduce network traffic.
+          Choosing a larger filter window value will ignore larger variations,
+          sending fewer updates. Set to 0 to disable filtering.
+        </p>
+      </InfoModal>
+      <div class="input-container">
+        <Number label="" bind:value={input.deadband} min={0} max={input.lmax} />
       </div>
-    {/if}
+    </div>
+  {/if}
 
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
