@@ -223,23 +223,7 @@ function createUIStateStore() {
       set({});
     },
 
-    /**
-     * Get the advanced mode state
-     */
-    getAdvancedMode: (): boolean => {
-      const state = get({ subscribe });
-      return state.advancedMode ?? false;
-    },
 
-    /**
-     * Set the advanced mode state
-     */
-    setAdvancedMode: (enabled: boolean): void => {
-      update((state) => {
-        state.advancedMode = enabled;
-        return state;
-      });
-    },
   };
 }
 

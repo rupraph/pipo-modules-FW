@@ -22,13 +22,6 @@
   $: config = $currentConfig;
   $: type = $pipoType;
 
-  // Subscribe to advanced mode changes
-  $: advancedMode = uiState.getAdvancedMode();
-  // Update when uiState changes
-  $: if ($uiState) {
-    advancedMode = uiState.getAdvancedMode();
-  }
-
   // Get category from uiState instead of local variable
   $: category = ($uiState[type]?.channelType as "analog" | "touch") || "analog";
   $: mode = config?.general.MidiEnabled
@@ -483,7 +476,7 @@
       />
     {/if}
   {/if}
-  {#if mode === "OSC" && advancedMode === true}
+  {#if mode === "OSC"}
     <div class="row">
       <span class="label">Noise Filter size </span>
       <InfoModal>

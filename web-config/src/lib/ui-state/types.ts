@@ -17,5 +17,4 @@ export type BoardUIState = {
  */
 export type UIState = {
   [K in PipoTypes]?: BoardUIState;
-  advancedMode?: boolean; // Global advanced mode toggle
 };
