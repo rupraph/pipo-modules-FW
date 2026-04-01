@@ -4,7 +4,8 @@
   import { SettingsIcon } from "lucide-svelte";
   import InfoModal from "../InfoModal.svelte";
   import Text from "../form/Text.svelte";
-  import { currentConfig } from "../../services";
+  import { currentConfig, pipoType } from "../../services";
+  import { getDefaultDeadband } from "../../defaults";
   import Switch from "../form/Switch.svelte";
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
@@ -29,6 +30,13 @@
     // Disable BLE when switching to OSC mode
     if (newMode === "osc") {
       config.general.BLEEnabled = false;
+    }
+    // Restore default deadbands when switching to MIDI (filter is OSC-only UI)
+    if (newMode === "midi") {
+      const type = $pipoType;
+      for (const channel of Object.keys(config.inputs)) {
+        config.inputs[channel].deadband = getDefaultDeadband(type, channel);
+      }
     }
   }
 
