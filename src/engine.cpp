@@ -37,15 +37,37 @@ void Engine::update() {
   // loop through sensor data
   const auto& sensor_dat = input_sensor.get_sensor_dat_map();
   for (auto const& pair : sensor_dat) {
-    string axis_name = pair.first;
-    // Serial.println(axis_name.c_str());
-    float sensor_val = input_sensor.get_value_constrained(
-        axis_name);  // could add invert here so that I get the inverted value here.
-    bool sensor_invert = input_sensor.get_inverted(axis_name);
-    bool sensor_cycle = input_sensor.get_cyclic(axis_name);
-    bool sensor_over_out = input_sensor.get_over_out(axis_name);
-    float sensor_min = input_sensor.get_limit_min(axis_name);
-    float sensor_max = input_sensor.get_limit_max(axis_name);
+    const string& axis_name = pair.first;
+    const SensorDat& dat = pair.second;
+
+    // Read fields directly from SensorDat — no hash lookups
+    bool sensor_invert = dat.inverted;
+    bool sensor_cycle = dat.cyclic;
+    bool sensor_over_out = dat.over_out;
+    float sensor_min = dat.lmin;
+    float sensor_max = dat.lmax;
+
+    // Inline constrained value logic (was get_value_constrained)
+    float sensor_val;
+    if (axis_name == "pitch" || axis_name == " yaw" || axis_name == "roll") {
+      float range = dat.lmax - dat.lmin;
+      if (dat.value_ready < dat.lmin) {
+        sensor_val = dat.value_ready + range;
+      } else if (dat.value_ready > dat.lmax) {
+        sensor_val = dat.value_ready - range;
+      } else {
+        sensor_val = dat.value_ready;
+      }
+    } else {
+      if (dat.value_ready < dat.lmin) {
+        sensor_val = dat.lmin;
+      } else if (dat.value_ready > dat.lmax) {
+        sensor_val = dat.lmax;
+      } else {
+        sensor_val = dat.value_ready;
+      }
+    }
+
     float sensor_midpoint;
 
     // Store original values before any transformations
@@ -79,11 +101,11 @@ void Engine::update() {
 
     if (config.general_config["MidiEnabled"] == true &&
         Miditranslators.find(axis_name) != Miditranslators.end()) {
-      midi_processor(axis_name, sensor_val, sensor_min, sensor_max);
+      midi_processor(axis_name, dat, sensor_val, sensor_min, sensor_max);
     }
     if (config.general_config["OSC_ENA"] == true &&
         Osctranslators.find(axis_name) != Osctranslators.end()) {
-      osc_processor(axis_name, sensor_val, sensor_min, sensor_max);
+      osc_processor(axis_name, dat, sensor_val, sensor_min, sensor_max);
     }
     // if (config.general_config["HidEnabled"] == true &&
     //     HID_translators.find(axis_name) != HID_translators.end()) {
@@ -103,8 +125,9 @@ void Engine::update() {
   // monitor_sensors(sensor);
 }
 
-void Engine::midi_processor(string axis_name, float sensor_val,
-                            float sensor_min, float sensor_max) {
+void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
+                            float sensor_val, float sensor_min,
+                            float sensor_max) {
   MidiTranslator& midi_translator = Miditranslators[axis_name];
   // check if axis is enabled, outside deadzone and not disabled
   int channel = midi_translator.channel;
@@ -112,12 +135,16 @@ void Engine::midi_processor(string axis_name, float sensor_val,
   if (/*input_sensor.test_outside_deadzone(axis_name) &&*/
       midi_translator.is_enabled() == true) {
 
+    // Read sensor fields directly — no hash lookups
+    bool sensor_mode = dat.mode;
+    bool sensor_bool = dat.inverted ? !dat.bool_value : dat.bool_value;
+
     // if CC MODE:
     if (midi_translator.tl_mode == 0) {
       int cc_nb = midi_translator.cc_nb;
 
       // sensor uses continuous mode
-      if (input_sensor.get_mode(axis_name) == 0) {
+      if (sensor_mode == 0) {
 
         // Todo: hires not tested
         if (midi_translator.get_hires()) {
@@ -139,7 +166,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
       } else  // sensor uses trigger mode
       {
 
-        if (input_sensor.get_bool_value(axis_name)) {
+        if (sensor_bool) {
           uint16_t cc_val = midi_translator.get_max_output();
           if (midi_translator.get_hires()) {
             midiio.sendControlChange(cc_nb, cc_val, channel, true);
@@ -171,12 +198,12 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                                      // shutoff note after delay
 
       // mode is threshold
-      if (input_sensor.get_mode(axis_name) == 1) {
+      if (sensor_mode == 1) {
         int thresh_note = midi_translator.get_root_note();
         // midiio.printNoteList(channel);
-        if (input_sensor.get_bool_value(axis_name)) {
+        if (sensor_bool) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
-              input_sensor.get_trigger_flag(axis_name, MIDI)) {
+              dat.trigger_flags.midi_trig) {
             midiio.sendNoteOn(thresh_note, midi_translator.get_velocity(),
                               channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
@@ -194,18 +221,18 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         // sensor in range
         // AND note not already playing
         // AND (note is diff from previous OR we entered the range)
-        if (input_sensor.is_within_range(axis_name) &&
+        if (dat.in_range &&
             // !midiio.is_note_playing(note_val[axis_name], channel) &&
             (note_val[axis_name] != note_val_prev[axis_name] ||
-             input_sensor.get_trigger_flag(axis_name, MIDI))) {
+             dat.trigger_flags.midi_trig)) {
           midiio.sendNoteOn(note_val[axis_name], midi_translator.get_velocity(),
                             channel, sustain_ms);
-          if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
+          if (dat.trigger_flags.midi_trig) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
           }
         }
 
-        if (input_sensor.get_untrigger_flag(axis_name, MIDI))
+        if (dat.untrigger_flags.midi_trig)
         // &&!sensor.is_within_range(axis_name))
         {
           midiio.sendAllNotesOff(channel);
@@ -293,11 +320,9 @@ void Engine::midi_processor(string axis_name, float sensor_val,
 //   hidio.keyboard_release();
 // }
 
-void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
+void Engine::osc_processor(const string& axis_name, const SensorDat& dat,
+                           float sensor_val, float sensor_min,
                            float sensor_max) {
-  // Todo: loop through sensor data -> indentical for 3 processor, should be
-  // factorized
-
   OscTranslator& osc_translator = Osctranslators[axis_name];
   string address = osc_translator.get_osc_addr();
 
@@ -308,13 +333,14 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
     if (osc_translator.get_mode_raw()) {
       new_osc_val = round_to(sensor_val, 3);
     } else {
-      if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
-        // if (input_sensor.is_within_range(axis_name)) {
+      if (dat.mode == 0) {  // continuous mode
+        // if (dat.in_range) {
         new_osc_val = round_to(
             osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
         // }
       } else {  // sensor uses trigger mode
-        if (input_sensor.get_bool_value(axis_name)) {
+        bool sensor_bool = dat.inverted ? !dat.bool_value : dat.bool_value;
+        if (sensor_bool) {
           new_osc_val = round_to(osc_translator.get_output_max(), 3);
         } else {
           new_osc_val = round_to(osc_translator.get_output_min(), 3);

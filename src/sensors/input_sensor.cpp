@@ -389,7 +389,7 @@ void Sensor::monitor_axis(const std::string& axis) {
 
 //getter / setters
 
-unordered_map<string, SensorDat> Sensor::get_sensor_dat_map() {
+const unordered_map<string, SensorDat>& Sensor::get_sensor_dat_map() const {
   return sensor_dat;
 }
 

@@ -141,7 +141,7 @@ class Sensor {
   void set_input_config(JsonObject config, bool debug = false);
 
   //Getter setters
-  unordered_map<string, SensorDat> get_sensor_dat_map();
+  const unordered_map<string, SensorDat>& get_sensor_dat_map() const;
 
   bool get_inverted(const std::string& axis);
   void set_inverted(const std::string& axis, bool value);

@@ -389,9 +389,10 @@ void PipoSocket::loop() {
   for (auto const& pair : sensor_dat) {
     if (!pair.second.ws_monitor)
       continue;
-    string axis_name = pair.first;
-    float sensor_val = input_sensor.get_value(axis_name);
-    bool sensor_bool = input_sensor.get_bool_value(axis_name);
+    const string& axis_name = pair.first;
+    const SensorDat& dat = pair.second;
+    float sensor_val = dat.value_ready;
+    bool sensor_bool = dat.inverted ? !dat.bool_value : dat.bool_value;
 
     // if (!input_sensor.test_outside_deadzone(axis_name))
     //   continue;

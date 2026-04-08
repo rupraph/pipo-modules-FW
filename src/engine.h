@@ -54,12 +54,12 @@ class Engine {
   // hid_mouse_report_t mouse;
 
   void update();
-  void midi_processor(string axis_name, float sensor_val, float sensor_min,
-                      float sensor_max);
+  void midi_processor(const string& axis_name, const SensorDat& dat,
+                      float sensor_val, float sensor_min, float sensor_max);
   // void hid_processor(string axis_name, float sensor_val, float sensor_min,
   //                    float sensor_max);
-  void osc_processor(string axis_name, float sensor_val, float sensor_min,
-                     float sensor_max);
+  void osc_processor(const string& axis_name, const SensorDat& dat,
+                     float sensor_val, float sensor_min, float sensor_max);
 
   // config
   void get_config(JsonDocument& doc, bool debug = false);
