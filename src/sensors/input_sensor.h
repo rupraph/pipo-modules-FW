@@ -38,12 +38,23 @@ struct SensorDat {
 
   // Live attributes
   float raw_value;       // raw value from sensor (pure reading)
-  float value;           // after sensor-specific filtering
-  float value_offset;    // after offset applied
-  float value_ready;     // final value after neutral filter
-  float value_prev;      // previous value_ready for comparison
+  float value;                // after sensor-specific filtering
+  float value_prev_measure;   // .value before last measure_sensor() — for hold_mode
+  float value_offset;         // after offset applied
+  float value_ready;          // final value after neutral filter
+  float value_prev;           // previous value_ready for comparison
   bool bool_value;       // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
+
+  // Range state: whether the sensor reading is within [lmin, lmax]
+  // For sensors that can lose signal (e.g. ToF range), set in_range explicitly
+  // in measure_sensor() and mark in_range_set_by_sensor = true.
+  // For always-valid sensors (IMU, ADC), the base class auto-computes this
+  // from value_ready vs [lmin, lmax] after filtering.
+  bool in_range = true;
+  bool in_range_prev = true;
+  bool in_range_set_by_sensor = false;  // true = sensor driver sets in_range explicitly
+  bool hold_mode = false;  // when true and !in_range, hold previous value instead of updating
 
   struct trigger_flag {
     bool osc_trig = false;
@@ -65,6 +76,7 @@ struct SensorDat {
         inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
+        value_prev_measure(0.0),
         value_offset(0.0),
         value_ready(0.0),
         value_prev(0.0),
@@ -74,6 +86,9 @@ struct SensorDat {
         th_mode(false),
         bool_value(false),
         bool_value_prev(false),
+        in_range(true),
+        in_range_prev(true),
+        in_range_set_by_sensor(false),
         NeutralFilter(0) {}
 };
 

@@ -62,17 +62,14 @@ void PipoRangeSensor::setup() {
 }
 
 void PipoRangeSensor::toggle_hold_mode() {
-  hold_mode = !hold_mode;
-  log_i("Hold mode %s", hold_mode ? "ENABLED" : "DISABLED");
+  sensor_dat["dist"].hold_mode = !sensor_dat["dist"].hold_mode;
+  log_i("Hold mode %s", sensor_dat["dist"].hold_mode ? "ENABLED" : "DISABLED");
 }
 
 bool PipoRangeSensor::measure_sensor() {
   // start_duration();
   int j;
   bool data_ready = false;
-
-  // Store previous range state
-  within_range_prev = within_range;
 
 #if HW_REV == 10
   status = vl53l4cx.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
@@ -95,7 +92,6 @@ bool PipoRangeSensor::measure_sensor() {
         pMultiRangingData->RangeData[0].RangeMilliMeter / 10.0;
 
     // process result
-    // when out of range
     int8_t range_status =
 #if HW_REV == 10
         range_status = pMultiRangingData->RangeData[0].RangeStatus ==
@@ -106,42 +102,37 @@ bool PipoRangeSensor::measure_sensor() {
 
 #endif
 
-    if (sensor_dat["dist"].raw_value < 0 || !range_status) {
-      within_range = false;
-      if (!hold_mode) {
-        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-        sensor_dat["dist"].value = abs_max;
-        data_ready = true;
-      }
-      // Serial.println("Out of range");
+    // Determine if reading is within usable range:
+    // HW must report valid AND raw value must be within [lmin, lmax)
+    bool hw_valid = (sensor_dat["dist"].raw_value >= 0 && range_status);
+    bool value_in_bounds = hw_valid &&
+                           sensor_dat["dist"].raw_value >= sensor_dat["dist"].lmin &&
+                           sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax;
 
-    }
-    // not sure if capping is optimal to be here in sensor class or better in engine/translators
-    // when in range
-    else {
-      within_range = true;
+    sensor_dat["dist"].in_range = value_in_bounds;
+
+    if (!hw_valid) {
+      // HW reports no valid reading (nothing detected / too far)
+      sensor_dat["dist"].value = abs_max;
+      data_ready = true;
+
+    } else if (!value_in_bounds) {
+      // Valid HW reading but outside [lmin, lmax) — e.g. obstacle beyond lmax
+      sensor_dat["dist"].value =
+          ma_filter.process(sensor_dat["dist"].raw_value);
+      data_ready = true;
+
+    } else {
+      // In range: valid HW AND within [lmin, lmax)
 
       // Reset filter when transitioning into valid range to prevent spurious values
-      if (within_range && !within_range_prev) {
+      if (sensor_dat["dist"].in_range && !sensor_dat["dist"].in_range_prev) {
         ma_filter.reset(sensor_dat["dist"].raw_value);
       }
 
-      if ((hold_mode &&
-           sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax) ||
-          !hold_mode) {
-        // sensor_dat["dist"].value_prev = sensor_dat["dist"].value;
-        // interval.stop();
-        // interval.report();
-        // interval.start();
-        sensor_dat["dist"].value =
-            ma_filter.process(sensor_dat["dist"].raw_value);
-        data_ready = true;
-      }
-
-      //  ma_filter.process(lp_filter.process(dist));
-
-      //Todo: optimize filter choices
-      //sensor_dat["dist"].value = km_filter.process(dist);
+      sensor_dat["dist"].value =
+          ma_filter.process(sensor_dat["dist"].raw_value);
+      data_ready = true;
     }
     if (status == 0) {
 #if HW_REV == 10
@@ -164,14 +155,14 @@ void PipoRangeSensor::set_sensor_config(JsonObject config, bool debug) {
     set_hold_mode(config["hold_mode"].as<bool>());
   }
   if (debug) {
-    log_d("%d", hold_mode);
+    log_d("%d", sensor_dat["dist"].hold_mode);
     log_d("set_sensor_config_end");
   }
 }
 
 JsonDocument PipoRangeSensor::get_sensor_config(bool debug) {
   JsonDocument config;
-  config["hold_mode"] = hold_mode;
+  config["hold_mode"] = sensor_dat["dist"].hold_mode;
   return config;
 }
 

@@ -4,17 +4,43 @@ bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
   bool data_changed = false;
-  if (!newdata)
+
+  // Check if any axis changed in_range state (e.g. hold_mode: value held but range exited)
+  bool in_range_changed = false;
+  for (const auto& dat : sensor_dat) {
+    if (dat.second.in_range != dat.second.in_range_prev) {
+      in_range_changed = true;
+      break;
+    }
+  }
+
+  if (!newdata && !in_range_changed)
     return false;
+
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
-    apply_offset();
-    data_changed = process_sensor_neutral_filter();
+    if (newdata) {
+      // Hold mode: revert .value for out-of-range axes so downstream
+      // (offset, neutral filter, engine) keeps seeing the last in-range value.
+      for (auto& pair : sensor_dat) {
+        if (pair.second.hold_mode && !pair.second.in_range) {
+          pair.second.value = pair.second.value_prev_measure;
+        }
+      }
+      apply_offset();
+      data_changed = process_sensor_neutral_filter();
+    }
+    // Auto-compute in_range for axes that don't set it explicitly (motion, analog)
+    for (auto& dat : sensor_dat) {
+      if (!dat.second.in_range_set_by_sensor) {
+        dat.second.in_range = (dat.second.value_ready > dat.second.lmin &&
+                               dat.second.value_ready < dat.second.lmax);
+      }
+    }
     bool triggers_changed = process_sensor_triggers();
     data_changed =
-        data_changed ||
-        triggers_changed;  // data changed if either filter or triggers changed
+        data_changed || triggers_changed || in_range_changed;
   }
   return data_changed;
 }
@@ -173,17 +199,14 @@ void Sensor::reset_all_offset() {
 void Sensor::store_previous_values() {
   for (auto& dat : sensor_dat) {
     dat.second.value_prev = dat.second.value_ready;
+    dat.second.value_prev_measure = dat.second.value;
+    dat.second.in_range_prev = dat.second.in_range;
   }
 }
 
 bool Sensor::is_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value_ready > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value_ready < sensor_dat[axis].lmax) {
-      return true;
-    } else {
-      return false;
-    }
+    return sensor_dat[axis].in_range;
   } else {
     Serial.println("error: Axis not found");
     return false;
@@ -192,12 +215,7 @@ bool Sensor::is_within_range(const std::string& axis) {
 
 bool Sensor::is_prev_within_range(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value_prev > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value_prev < sensor_dat[axis].lmax) {
-      return true;
-    } else {
-      return false;
-    }
+    return sensor_dat[axis].in_range_prev;
   } else {
     Serial.println("error: Axis not found");
     return false;
@@ -219,13 +237,11 @@ bool Sensor::process_sensor_triggers() {
 
     // flags for continuous mode
     if (axis_data.mode == 0) {
-      if (is_within_range(axis) == false &&
-          is_prev_within_range(axis) == true) {
+      if (!axis_data.in_range && axis_data.in_range_prev) {
         set_all_untrigger(axis, true);
         flags_changed = true;
       }
-      if (is_within_range(axis) == true &&
-          is_prev_within_range(axis) == false) {
+      if (axis_data.in_range && !axis_data.in_range_prev) {
         set_all_trigger(axis, true);
         flags_changed = true;
       }
@@ -706,6 +722,7 @@ void Sensor::clear_completion_flag() {
   channels_to_measure.clear();
 }
 
+#ifndef UNIT_TEST
 void Sensor::get_measured_offsets(String& output) {
   JsonDocument result;
 
@@ -732,3 +749,4 @@ void Sensor::get_measured_offsets(String& output) {
   output.clear();
   serializeJson(result, output);
 }
+#endif

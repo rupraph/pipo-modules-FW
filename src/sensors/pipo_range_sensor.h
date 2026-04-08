@@ -15,7 +15,13 @@
 
 class PipoRangeSensor : public Sensor {
  public:
-  PipoRangeSensor() { sensor_dat["dist"] = SensorDat(); };
+  PipoRangeSensor() {
+    sensor_dat["dist"] = SensorDat();
+    sensor_dat["dist"].in_range = false;
+    sensor_dat["dist"].in_range_prev = false;
+    sensor_dat["dist"].in_range_set_by_sensor = true;
+    sensor_dat["dist"].hold_mode = false;
+  };
 
   void init() override;
   void setup() override;
@@ -25,17 +31,11 @@ class PipoRangeSensor : public Sensor {
 
   // Button action methods
   void toggle_hold_mode();
-  bool get_hold_mode() const { return hold_mode; }
-  void set_hold_mode(bool mode) { hold_mode = mode; }
+  bool get_hold_mode() const { return sensor_dat.at("dist").hold_mode; }
+  void set_hold_mode(bool mode) { sensor_dat["dist"].hold_mode = mode; }
 
  private:
-  bool within_range = false;
-  bool within_range_prev = false;
-
   float abs_max = 400.0;
-
-  bool hold_mode =
-      false;  // define wether to hold the last value or max when no object is detected. true->hold, false->max
 
 #if HW_REV == 10
   VL53L4CX vl53l4cx;
