@@ -235,6 +235,7 @@
   function handleDeadbandToggle() {
     if (!input) return;
     input.deadband = deadbandEnabled ? 0 : defaultDeadband;
+    currentConfig.set(config);
   }
 
   // Compute if binary mode is active
