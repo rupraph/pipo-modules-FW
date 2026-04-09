@@ -10,12 +10,15 @@
     hasUnsavedChanges,
     modeWillChange,
     pipoNameWillChange,
+    pipoType,
   } from "../../services";
+  import { getDefaultDeadband } from "../../defaults";
   import Switch from "../form/Switch.svelte";
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
   import { pipoio } from "../../pipoio";
   import { addToast } from "../toast";
+  import { uiState } from "../ui-state";
   import { saveConfig, savingStatus } from "../../services/config-saver";
 
   $: config = $currentConfig;
@@ -29,7 +32,6 @@
 
   // Sync modal state with store
   $: settingsModalOpen.set(open);
-
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
 
@@ -39,6 +41,13 @@
     // Disable BLE when switching to OSC mode
     if (newMode === "osc") {
       config.general.BLEEnabled = false;
+    }
+    // Restore default deadbands when switching to MIDI (filter is OSC-only UI)
+    if (newMode === "midi") {
+      const type = $pipoType;
+      for (const channel of Object.keys(config.inputs)) {
+        config.inputs[channel].deadband = getDefaultDeadband(type, channel);
+      }
     }
   }
 
@@ -248,6 +257,7 @@
         </InfoModal>
         <PillSwitch label="" bind:value={config.general.Button_disa} />
       </div>
+
       <div class="row">
         <span class="label">
           <a

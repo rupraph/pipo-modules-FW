@@ -17,6 +17,7 @@
   import { schema } from "../../schema";
   import { pipoio, PipoIO } from "../../pipoio";
   import PillSwitch from "../form/PillSwitch.svelte";
+  import { getDefaultDeadband } from "../../defaults";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -40,7 +41,7 @@
     "MidiEnabled:",
     config?.general.MidiEnabled,
     "OSC_ENA:",
-    config?.general.OSC_ENA
+    config?.general.OSC_ENA,
   );
 
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
@@ -225,6 +226,17 @@
     currentConfig.set(config);
   }
 
+  // Default and current state for the noise filter (deadband)
+  $: defaultDeadband = selectedChannel
+    ? getDefaultDeadband(type, selectedChannel)
+    : 0;
+  $: deadbandEnabled = input ? input.deadband !== 0 : false;
+
+  function handleDeadbandToggle() {
+    if (!input) return;
+    input.deadband = deadbandEnabled ? 0 : defaultDeadband;
+  }
+
   // Compute if binary mode is active
   $: isBinaryMode = input
     ? aschema?.cat === "Touch"
@@ -286,7 +298,7 @@
                 input.offset = offsetValue as number;
                 console.log(
                   `Offset calibration completed for ${selectedChannel}:`,
-                  offsetValue
+                  offsetValue,
                 );
                 // Trigger config update
                 if (config) {
@@ -475,6 +487,24 @@
       />
     {/if}
   {/if}
+  {#if mode === "OSC"}
+    <div class="row">
+      <div class="left">
+        <span class="label">Noise Filter</span>
+        <InfoModal>
+          <p>
+            This filter removes small sensor variations to reduce network
+            traffic. Disable for full sensitivity, unfiltered readings.
+          </p>
+        </InfoModal>
+      </div>
+      <PillSwitch
+        label=""
+        value={deadbandEnabled}
+        on:change={handleDeadbandToggle}
+      />
+    </div>
+  {/if}
 
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
@@ -517,6 +547,7 @@
 <style scoped>
   .label {
     text-align: left;
+    white-space: nowrap;
   }
   .buttons {
     max-width: 335px;
