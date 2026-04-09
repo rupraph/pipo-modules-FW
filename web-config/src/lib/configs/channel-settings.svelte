@@ -493,8 +493,8 @@
         <span class="label">Noise Filter</span>
         <InfoModal>
           <p>
-            This filters out small sensor variations to reduce network
-            traffic.Disable for full sensitivity, unfiltered readings.
+            This filter removes small sensor variations to reduce network
+            traffic. Disable for full sensitivity, unfiltered readings.
           </p>
         </InfoModal>
       </div>
@@ -547,6 +547,7 @@
 <style scoped>
   .label {
     text-align: left;
+    white-space: nowrap;
   }
   .buttons {
     max-width: 335px;
