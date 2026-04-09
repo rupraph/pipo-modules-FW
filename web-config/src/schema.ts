@@ -33,6 +33,15 @@ export const schema: Schema = {
       step: 0.1,
       index: 5,
     },
+    AccComb: {
+      label: "Combined Acceleration",
+      cat: "Linear Acceleration",
+      unit: "m/s²",
+      min: 0,
+      max: 30,
+      step: 0.1,
+      index: 12,
+    },
     pitch: {
       label: "Pitch",
       cat: "Rotations",

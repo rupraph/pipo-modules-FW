@@ -84,6 +84,7 @@ export type PipoKeys = {
     | "accX"
     | "accY"
     | "accZ"
+    | "AccComb"
     | "pitch"
     | "roll"
     | "yaw"
