@@ -232,6 +232,13 @@
         </div>
       </div>
       <div class="row">
+        <span class="label">Lock buttons</span>
+        <InfoModal>
+          <p>This option disables all physical buttons on the device</p>
+        </InfoModal>
+        <PillSwitch label="" bind:value={config.general.Button_disa} />
+      </div>
+      <div class="row">
         <span class="label">
           <a
             href="https://pipointerfaces.com/manual"
