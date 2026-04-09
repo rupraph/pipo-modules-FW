@@ -34,6 +34,7 @@ currentConfig.subscribe((config) => {
 export const configsLoading = writable<boolean>(false);
 export const configsError = writable<string | null>(null);
 export const configSaving = writable<boolean>(false);
+export const settingsModalOpen = writable<boolean>(false);
 
 // Change detection stores
 export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
