@@ -232,7 +232,7 @@
         </div>
       </div>
       <div class="row">
-        <span class="label">Ignore buttons</span>
+        <span class="label">Lock buttons</span>
         <InfoModal>
           <p>This option disables all physical buttons on the device</p>
         </InfoModal>
