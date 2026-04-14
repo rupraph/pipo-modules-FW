@@ -154,13 +154,16 @@ void midi_io::printNoteList(int channel) {
 }
 
 void midi_io::sendPitchBend(int value, int channel) {
-  if (lastpb[channel] == value) {
+  if (abs(value - lastpb[channel]) < 2) {
     return;
   }
-  MidiUSBsendPitchBend(value, channel);
+  // MIDI library expects signed pitch bend: -8192 to +8191
+  // Convert from 0-16383 raw range to signed range
+  int signed_pb = value - 8192;
+  MidiUSBsendPitchBend(signed_pb, channel);
 #ifdef INCLUDE_BLE
   if (config.general_config["BLEEnabled"]) {
-    MidiBLEsendPitchBend(value, channel);
+    MidiBLEsendPitchBend(signed_pb, channel);
   }
 #endif
   lastpb[channel] = value;
