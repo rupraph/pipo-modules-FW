@@ -126,14 +126,18 @@ void Engine::midi_processor(string axis_name, float sensor_val,
                                                     sensor_max, 1),
                          16383));
 
-          midiio.sendControlChange(cc_nb, cc_val, channel, true);
+          if (midi_translator.should_send_cc_hires(cc_val)) {
+            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+          }
         } else {
           uint8_t cc_val =
               max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
                                                     sensor_max, 0),
                          127));
 
-          midiio.sendControlChange(cc_nb, cc_val, channel, false);
+          if (midi_translator.should_send_cc(cc_val)) {
+            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+          }
         }
         // }
       } else  // sensor uses trigger mode
@@ -142,16 +146,24 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         if (input_sensor.get_bool_value(axis_name)) {
           uint16_t cc_val = midi_translator.get_max_output();
           if (midi_translator.get_hires()) {
-            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            if (midi_translator.should_send_cc_hires(cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            }
           } else {
-            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            if (midi_translator.should_send_cc((uint8_t)cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            }
           }
         } else {
           uint16_t cc_val = midi_translator.get_min_output();
           if (midi_translator.get_hires()) {
-            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            if (midi_translator.should_send_cc_hires(cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            }
           } else {
-            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            if (midi_translator.should_send_cc((uint8_t)cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            }
           }
         }
         //vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
@@ -164,7 +176,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
       // getting note for continuous mode
       note_val_prev[axis_name] = note_val[axis_name];
       int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
-      note_val[axis_name] = max(0, min(note, 127));  // clip between 0 and 127
+      uint8_t current_note = max(0, min(note, 127));  // clip between 0 and 127
 
       int sustain_ms = int(midi_translator.get_sustain() *
                            1000.0);  // 0 means sustain manager will not
@@ -176,7 +188,8 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         // midiio.printNoteList(channel);
         if (input_sensor.get_bool_value(axis_name)) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
-              input_sensor.get_trigger_flag(axis_name, MIDI)) {
+              input_sensor.get_trigger_flag(axis_name, MIDI) &&
+              midi_translator.should_send_note(thresh_note)) {
             midiio.sendNoteOn(thresh_note, midi_translator.get_velocity(),
                               channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
@@ -193,12 +206,12 @@ void Engine::midi_processor(string axis_name, float sensor_val,
         // send note on if:
         // sensor in range
         // AND note not already playing
-        // AND (note is diff from previous OR we entered the range)
+        // AND (note changed OR we entered the range)
         if (input_sensor.is_within_range(axis_name) &&
-            // !midiio.is_note_playing(note_val[axis_name], channel) &&
-            (note_val[axis_name] != note_val_prev[axis_name] ||
+            // !midiio.is_note_playing(current_note, channel) &&
+            (midi_translator.should_send_note(current_note) ||
              input_sensor.get_trigger_flag(axis_name, MIDI))) {
-          midiio.sendNoteOn(note_val[axis_name], midi_translator.get_velocity(),
+          midiio.sendNoteOn(current_note, midi_translator.get_velocity(),
                             channel, sustain_ms);
           if (input_sensor.get_trigger_flag(axis_name, MIDI)) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
@@ -330,9 +343,8 @@ void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
       }
     }
 
-    // Single check for value change
-    if (new_osc_val != osc_val[axis_name]) {
-      osc_val[axis_name] = new_osc_val;
+    // Check for value change and send if changed
+    if (osc_translator.should_send(new_osc_val)) {
       osc.add_to_bundle(address, new_osc_val);
     }
   }
