@@ -224,239 +224,240 @@ void Engine::midi_processor(string axis_name, float sensor_val,
       }
     }
   }
+}
 
-  // void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
-  //                            float sensor_max) {
+// void Engine::hid_processor(string axis_name, float sensor_val, float sensor_min,
+//                            float sensor_max) {
 
-  //   HidTranslator& HID_translator = HID_translators[axis_name];
-  //   bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
-  //   if (HID_translator.is_enabled() == true) {
-  //     if (HID_translators.find(axis_name) != HID_translators.end()) {
+//   HidTranslator& HID_translator = HID_translators[axis_name];
+//   bool sensor_bool_val = input_sensor.get_bool_value(axis_name);
+//   if (HID_translator.is_enabled() == true) {
+//     if (HID_translators.find(axis_name) != HID_translators.end()) {
 
-  //       string address = HID_translator.get_map_address();
-  //       string address2 = HID_translator.get_map_address2();
+//       string address = HID_translator.get_map_address();
+//       string address2 = HID_translator.get_map_address2();
 
-  //       switch ((int)config.general_config["HidMode"]) {
-  //         case 0:
-  //           //gamepad mode. to do
-  //           break;
-  //         case 1:
-  //           //continuous mode -> do not update if outise measuring range
-  //           if (input_sensor.get_mode(axis_name) == false) {
-  //             if (input_sensor.is_within_range(axis_name)) {
-  //               hidio.mouse_update(address,
-  //                                  HID_translator.get_mouse_int(
-  //                                      sensor_val, sensor_min, sensor_max),
-  //                                  sensor_bool_val);
-  //             }
-  //           } else {
-  //             hidio.mouse_update(address,
-  //                                HID_translator.get_mouse_int(
-  //                                    sensor_val, sensor_min, sensor_max),
-  //                                sensor_bool_val);
-  //           }
-  //           break;
-  //         case 2:
-  //           // keyboard mode. only compatible with axis in threshold mode
+//       switch ((int)config.general_config["HidMode"]) {
+//         case 0:
+//           //gamepad mode. to do
+//           break;
+//         case 1:
+//           //continuous mode -> do not update if outise measuring range
+//           if (input_sensor.get_mode(axis_name) == false) {
+//             if (input_sensor.is_within_range(axis_name)) {
+//               hidio.mouse_update(address,
+//                                  HID_translator.get_mouse_int(
+//                                      sensor_val, sensor_min, sensor_max),
+//                                  sensor_bool_val);
+//             }
+//           } else {
+//             hidio.mouse_update(address,
+//                                HID_translator.get_mouse_int(
+//                                    sensor_val, sensor_min, sensor_max),
+//                                sensor_bool_val);
+//           }
+//           break;
+//         case 2:
+//           // keyboard mode. only compatible with axis in threshold mode
 
-  //           //keystroke mode "once"
-  //           if (HID_translator.get_stroke_mode() == false) {
-  //             if (input_sensor.get_trigger_flag(axis_name, HID)) {
-  //               //Keyboard (it does not allow multiple key presses yet while it could)
-  //               hidio.keyboard_set_press(address);
-  //               // hidio.mouse_set_press(address);
-  //               input_sensor.set_trigger_flag(axis_name, HID, false);
-  //             }
-  //           } else {
-  //             // keystroke mode "maintained".
-  //             if (!input_sensor.get_threshold_mode(axis_name)) {
-  //               if (sensor_bool_val) {
-  //                 hidio.keyboard_set_press(address);
-  //                 // hidio.mouse_set_press(address);
-  //               }
-  //             } else {
-  //               //deal with 2 key addresses for true/false when basic threshold mode selected
-  //               //Todo: should not fetch input sensor value here I guess. like other processors
-  //               if (!sensor_bool_val) {
-  //                 if (input_sensor.get_value(axis_name) >
-  //                     input_sensor.get_limit_max(axis_name)) {
-  //                   hidio.keyboard_set_press(address);
-  //                 }
-  //                 if (input_sensor.get_value(axis_name) <
-  //                     input_sensor.get_limit_min(axis_name)) {
-  //                   hidio.keyboard_set_press(address2);
-  //                 }
-  //                 // hidio.mouse_set_press(address);
-  //               }
-  //             }
-  //           }
-  //           break;
-  //       }
-  //     } else {
-  //       log_e("Engine: HID key not found");
-  //     }
-  //     hidio.update();
-  //   }
-  //   hidio.keyboard_release();
-  // }
+//           //keystroke mode "once"
+//           if (HID_translator.get_stroke_mode() == false) {
+//             if (input_sensor.get_trigger_flag(axis_name, HID)) {
+//               //Keyboard (it does not allow multiple key presses yet while it could)
+//               hidio.keyboard_set_press(address);
+//               // hidio.mouse_set_press(address);
+//               input_sensor.set_trigger_flag(axis_name, HID, false);
+//             }
+//           } else {
+//             // keystroke mode "maintained".
+//             if (!input_sensor.get_threshold_mode(axis_name)) {
+//               if (sensor_bool_val) {
+//                 hidio.keyboard_set_press(address);
+//                 // hidio.mouse_set_press(address);
+//               }
+//             } else {
+//               //deal with 2 key addresses for true/false when basic threshold mode selected
+//               //Todo: should not fetch input sensor value here I guess. like other processors
+//               if (!sensor_bool_val) {
+//                 if (input_sensor.get_value(axis_name) >
+//                     input_sensor.get_limit_max(axis_name)) {
+//                   hidio.keyboard_set_press(address);
+//                 }
+//                 if (input_sensor.get_value(axis_name) <
+//                     input_sensor.get_limit_min(axis_name)) {
+//                   hidio.keyboard_set_press(address2);
+//                 }
+//                 // hidio.mouse_set_press(address);
+//               }
+//             }
+//           }
+//           break;
+//       }
+//     } else {
+//       log_e("Engine: HID key not found");
+//     }
+//     hidio.update();
+//   }
+//   hidio.keyboard_release();
+// }
 
-  void Engine::osc_processor(string axis_name, float sensor_val,
-                             float sensor_min, float sensor_max) {
-    // Todo: loop through sensor data -> indentical for 3 processor, should be
-    // factorized
+void Engine::osc_processor(string axis_name, float sensor_val, float sensor_min,
+                           float sensor_max) {
+  // Todo: loop through sensor data -> indentical for 3 processor, should be
+  // factorized
 
-    OscTranslator& osc_translator = Osctranslators[axis_name];
-    string address = osc_translator.get_osc_addr();
+  OscTranslator& osc_translator = Osctranslators[axis_name];
+  string address = osc_translator.get_osc_addr();
 
-    if (osc_translator.is_enabled() /* &&
+  if (osc_translator.is_enabled() /* &&
       input_sensor.test_outside_deadzone(axis_name)*/) {
 
-      float new_osc_val;
-      if (osc_translator.get_mode_raw()) {
-        new_osc_val = round_to(sensor_val, 3);
-      } else {
-        if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
-          // if (input_sensor.is_within_range(axis_name)) {
-          new_osc_val = round_to(
-              osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
-          // }
-        } else {  // sensor uses trigger mode
-          if (input_sensor.get_bool_value(axis_name)) {
-            new_osc_val = round_to(osc_translator.get_output_max(), 3);
-          } else {
-            new_osc_val = round_to(osc_translator.get_output_min(), 3);
-          }
+    float new_osc_val;
+    if (osc_translator.get_mode_raw()) {
+      new_osc_val = round_to(sensor_val, 3);
+    } else {
+      if (input_sensor.get_mode(axis_name) == 0) {  // continuous mode
+        // if (input_sensor.is_within_range(axis_name)) {
+        new_osc_val = round_to(
+            osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
+        // }
+      } else {  // sensor uses trigger mode
+        if (input_sensor.get_bool_value(axis_name)) {
+          new_osc_val = round_to(osc_translator.get_output_max(), 3);
+        } else {
+          new_osc_val = round_to(osc_translator.get_output_min(), 3);
         }
       }
+    }
 
-      // Single check for value change
-      if (new_osc_val != osc_val[axis_name]) {
-        osc_val[axis_name] = new_osc_val;
-        osc.add_to_bundle(address, new_osc_val);
-      }
+    // Single check for value change
+    if (new_osc_val != osc_val[axis_name]) {
+      osc_val[axis_name] = new_osc_val;
+      osc.add_to_bundle(address, new_osc_val);
     }
   }
+}
 
-  float Engine::round_to(float value, int decimal) {
-    return round(value * pow(10, decimal)) / pow(10, decimal);
+float Engine::round_to(float value, int decimal) {
+  return round(value * pow(10, decimal)) / pow(10, decimal);
+}
+
+void Engine::get_config(JsonDocument& doc, bool debug) {
+  doc["engine"].clear();
+  for (auto const& pair : Miditranslators) {
+    doc["engine"]["engine-midi"][pair.first] = pair.second.get_json();
   }
-
-  void Engine::get_config(JsonDocument & doc, bool debug) {
-    doc["engine"].clear();
-    for (auto const& pair : Miditranslators) {
-      doc["engine"]["engine-midi"][pair.first] = pair.second.get_json();
-    }
-    // for (auto const& pair : HID_translators) {
-    //   doc["engine"]["engine-hid"][pair.first] = pair.second.get_json();
-    // }
-    for (auto const& pair : Osctranslators) {
-      doc["engine"]["engine-osc"][pair.first] = pair.second.get_json();
-    }
+  // for (auto const& pair : HID_translators) {
+  //   doc["engine"]["engine-hid"][pair.first] = pair.second.get_json();
+  // }
+  for (auto const& pair : Osctranslators) {
+    doc["engine"]["engine-osc"][pair.first] = pair.second.get_json();
+  }
 #ifdef PIPO_MOTION
-    doc["engine"]["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
-    doc["engine"]["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
+  doc["engine"]["engine-special"]["quat"]["enabled"] = enable_quat_to_osc;
+  doc["engine"]["engine-special"]["quat"]["osc_addr"] = quat_to_osc_address;
 #endif
-    if (debug) {
-      log_d("engine_get_config");
-      serializeJsonPretty(doc, Serial);
-      log_d("engine_get_config_end");
-    }
+  if (debug) {
+    log_d("engine_get_config");
+    serializeJsonPretty(doc, Serial);
+    log_d("engine_get_config_end");
+  }
+}
+
+void Engine::set_config(JsonObject configin, bool debug) {
+  if (debug) {
+    log_d("will set engine config:");
+    serializeJsonPretty(configin, Serial);
+    log_d("");  // Empty line
   }
 
-  void Engine::set_config(JsonObject configin, bool debug) {
-    if (debug) {
-      log_d("will set engine config:");
-      serializeJsonPretty(configin, Serial);
-      log_d("");  // Empty line
-    }
+  JsonDocument jmidi = configin["engine-midi"];
 
-    JsonDocument jmidi = configin["engine-midi"];
-
-    // set midi config from main config
-    if (debug)
-      log_d("set engine midi");
-    if (config.general_config["MidiEnabled"] == true) {
-      midiio.sendAllNotesOff(
-          0);  // stop all notes on all channels before changing config
+  // set midi config from main config
+  if (debug)
+    log_d("set engine midi");
+  if (config.general_config["MidiEnabled"] == true) {
+    midiio.sendAllNotesOff(
+        0);  // stop all notes on all channels before changing config
+  }
+  for (auto const& pair : Miditranslators) {
+    if (jmidi[pair.first].is<JsonVariant>()) {
+      // Serial.println(jmidi[pair.first].dump().c_str());
+      // Serial.println(pair.first.c_str());
+      Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
     }
-    for (auto const& pair : Miditranslators) {
-      if (jmidi[pair.first].is<JsonVariant>()) {
-        // Serial.println(jmidi[pair.first].dump().c_str());
-        // Serial.println(pair.first.c_str());
-        Miditranslators[pair.first].set_from_json(jmidi[pair.first]);
-      }
+  }
+  jmidi.clear();
+  // set hid config from general config
+  if (debug)
+    log_d("set engine hid");
+  // JsonDocument jhid = configin["engine-hid"];
+  // for (auto const& pair : HID_translators) {
+  //   if (jhid[pair.first].is<JsonVariant>()) {
+  //     HID_translators[pair.first].set_from_json(jhid[pair.first]);
+  //   }
+  // }
+  // jhid.clear();
+  JsonDocument josc = configin["engine-osc"];
+  if (debug)
+    log_d("set engine osc");
+  for (auto const& pair : Osctranslators) {
+    if (josc[pair.first].is<JsonVariant>()) {
+      Osctranslators[pair.first].set_from_json(josc[pair.first]);
     }
-    jmidi.clear();
-    // set hid config from general config
-    if (debug)
-      log_d("set engine hid");
-    // JsonDocument jhid = configin["engine-hid"];
-    // for (auto const& pair : HID_translators) {
-    //   if (jhid[pair.first].is<JsonVariant>()) {
-    //     HID_translators[pair.first].set_from_json(jhid[pair.first]);
-    //   }
-    // }
-    // jhid.clear();
-    JsonDocument josc = configin["engine-osc"];
-    if (debug)
-      log_d("set engine osc");
-    for (auto const& pair : Osctranslators) {
-      if (josc[pair.first].is<JsonVariant>()) {
-        Osctranslators[pair.first].set_from_json(josc[pair.first]);
-      }
-    }
-    josc.clear();
+  }
+  josc.clear();
 #ifdef PIPO_MOTION
-    JsonObject jspecial = configin["engine-special"].as<JsonObject>();
-    if (debug)
-      log_d("set engine special");
-    // check how many elements are in the json object
-    if (jspecial.size() > 0) {
-      for (JsonPair pair : jspecial) {
-        if (pair.key() == "quat") {
-          enable_quat_to_osc = jspecial["quat"]["enabled"].as<bool>();
-          quat_to_osc_address = jspecial["quat"]["osc_addr"].as<string>();
-        }
+  JsonObject jspecial = configin["engine-special"].as<JsonObject>();
+  if (debug)
+    log_d("set engine special");
+  // check how many elements are in the json object
+  if (jspecial.size() > 0) {
+    for (JsonPair pair : jspecial) {
+      if (pair.key() == "quat") {
+        enable_quat_to_osc = jspecial["quat"]["enabled"].as<bool>();
+        quat_to_osc_address = jspecial["quat"]["osc_addr"].as<string>();
       }
-    } else {
-      log_w("Engine: no special config found");
     }
-    jspecial.clear();
+  } else {
+    log_w("Engine: no special config found");
+  }
+  jspecial.clear();
 #endif
-    if (debug) {
-      log_d("engine config set");
-    }
+  if (debug) {
+    log_d("engine config set");
   }
+}
 
 #ifdef PIPO_MOTION
-  void Engine::motion_quat_to_osc() {
-    float quats[4];
-    if (input_sensor.get_relative_mode() == true) {
-      input_sensor.get_relative_quat(quats[0], quats[1], quats[2], quats[3]);
-    } else {
-      input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
-    }
+void Engine::motion_quat_to_osc() {
+  float quats[4];
+  if (input_sensor.get_relative_mode() == true) {
+    input_sensor.get_relative_quat(quats[0], quats[1], quats[2], quats[3]);
+  } else {
+    input_sensor.get_quat(quats[0], quats[1], quats[2], quats[3]);
+  }
 
-    // Round values to 3 decimals for comparison (consistent with osc_processor)
-    float rounded_quats[4];
-    for (int i = 0; i < 4; i++) {
-      rounded_quats[i] = round_to(quats[i], 3);
-    }
+  // Round values to 3 decimals for comparison (consistent with osc_processor)
+  float rounded_quats[4];
+  for (int i = 0; i < 4; i++) {
+    rounded_quats[i] = round_to(quats[i], 3);
+  }
 
-    // Only send if any component has changed
-    bool changed = false;
-    for (int i = 0; i < 4; i++) {
-      if (rounded_quats[i] != prev_quat[i]) {
-        changed = true;
-        prev_quat[i] = rounded_quats[i];
-      }
-    }
-
-    if (changed) {
-      osc.add_to_bundle(quat_to_osc_address + "w", rounded_quats[0]);
-      osc.add_to_bundle(quat_to_osc_address + "x", rounded_quats[1]);
-      osc.add_to_bundle(quat_to_osc_address + "y", rounded_quats[2]);
-      osc.add_to_bundle(quat_to_osc_address + "z", rounded_quats[3]);
+  // Only send if any component has changed
+  bool changed = false;
+  for (int i = 0; i < 4; i++) {
+    if (rounded_quats[i] != prev_quat[i]) {
+      changed = true;
+      prev_quat[i] = rounded_quats[i];
     }
   }
+
+  if (changed) {
+    osc.add_to_bundle(quat_to_osc_address + "w", rounded_quats[0]);
+    osc.add_to_bundle(quat_to_osc_address + "x", rounded_quats[1]);
+    osc.add_to_bundle(quat_to_osc_address + "y", rounded_quats[2]);
+    osc.add_to_bundle(quat_to_osc_address + "z", rounded_quats[3]);
+  }
+}
 #endif
