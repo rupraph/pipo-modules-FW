@@ -160,7 +160,7 @@ void Engine::midi_processor(string axis_name, float sensor_val,
     }
 
     // if Note mode
-    else {
+    else if (midi_translator.tl_mode == 1) {
       // getting note for continuous mode
       note_val_prev[axis_name] = note_val[axis_name];
       int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
@@ -214,6 +214,14 @@ void Engine::midi_processor(string axis_name, float sensor_val,
       }
 
       // #endif
+    } else if (midi_translator.tl_mode == 2) {
+      if (input_sensor.get_mode(axis_name) == 0) {
+
+        int pb_val = max(0, min(midi_translator.get_cc_val(
+                                    sensor_val, sensor_min, sensor_max, 1),
+                                16383));
+        midiio.sendPitchBend(pb_val, channel);
+      }
     }
   }
 }

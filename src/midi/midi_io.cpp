@@ -152,3 +152,20 @@ void midi_io::printNoteList(int channel) {
           is_note_playing(pair.first, channel));
   }
 }
+
+void midi_io::sendPitchBend(int value, int channel) {
+  if (abs(value - lastpb[channel]) < 2) {
+    return;
+  }
+  // MIDI library expects signed pitch bend: -8192 to +8191
+  // Convert from 0-16383 raw range to signed range
+  int signed_pb = value - 8192;
+  MidiUSBsendPitchBend(signed_pb, channel);
+#ifdef INCLUDE_BLE
+  if (config.general_config["BLEEnabled"]) {
+    MidiBLEsendPitchBend(signed_pb, channel);
+  }
+#endif
+  lastpb[channel] = value;
+  hwui.init_blink_once(SEND_LED, NOTE_BLINK_TIME, NOTE_BLINK_BRIGHTNESS);
+}

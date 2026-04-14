@@ -235,11 +235,11 @@ int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
   // this returns a scaled value from the input range (max_input/min_input) to
   // the output range (max_output/min_output)
 
-  if (hires) {
-    cc_max = 16383;
-  } else {
-    cc_max = 127;
-  }
+  // if (hires) {
+  //   cc_max = 16383;
+  // } else {
+  //   cc_max = 127;
+  // }
 
   return map_linear(value, min_input, max_input);
 }
@@ -267,7 +267,7 @@ JsonDocument MidiTranslator::get_json() const {
   j["cc_max"] = cc_max;
   j["cc_min"] = cc_min;
   j["hires"] = hires;
-  j["velocity"] = velocity; 
+  j["velocity"] = velocity;
   return j;
 }
 

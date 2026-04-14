@@ -25,7 +25,7 @@ class MidiTranslator
   uint8_t cc_nb = 1;
 
   //notes variables
-  uint8_t tl_mode = 0;  //0=cc, 1 note, 2 both
+  uint8_t tl_mode = 0;  //0=cc, 1 note, 2 pitch bend
 
   string pattern = "scale";  //can be scale, arpegio or interval (note interval
   string scaleType = "major";  // see maps below for keywords
