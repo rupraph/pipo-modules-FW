@@ -65,14 +65,15 @@
     }
   }
   // Compute input width based on the widest possible value (max digits or min digits if negative)
-  $: inputChars = Math.max(
-    String(max).length,
-    String(min).length,
-    2
-  );
+  $: inputChars = Math.max(String(max).length, String(min).length, 2);
 </script>
 
-<Input class={"number-input-container "} {label} {id} --input-chars="{inputChars}">
+<Input
+  class={"number-input-container "}
+  {label}
+  {id}
+  --input-chars={inputChars}
+>
   <button
     class:disabled={value <= min}
     on:click={() => {

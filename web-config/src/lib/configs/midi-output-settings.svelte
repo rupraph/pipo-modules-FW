@@ -67,6 +67,19 @@
         midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
         midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
       }
+      // From Note to Pitch Bend: scale up if values are in 0-127 range
+      else if (previousMode === 1 && newMode === 2 && !midiConfig.hires) {
+        if (midiConfig.cc_max <= 127) {
+          const scaleFactor = 16383 / 127;
+          midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+          midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+        }
+      }
+      // From Note to CC: clamp to 0-127 range if needed
+      else if (previousMode === 1 && newMode === 0 && !midiConfig.hires) {
+        midiConfig.cc_min = Math.min(midiConfig.cc_min, 127);
+        midiConfig.cc_max = Math.min(midiConfig.cc_max, 127);
+      }
       // Note: No scaling needed when hires is enabled (both use 0-16383 range)
     }
 
