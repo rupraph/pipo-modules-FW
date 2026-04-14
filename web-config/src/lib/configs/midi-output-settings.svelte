@@ -212,7 +212,7 @@
       <InfoModal>
         <p>
           You can choose to translate the sensor data into Midi Continous
-          Controls, Pitch Bend, or Midi Notes.
+          Controls(CC), Pitch Bend (PB), or Midi Notes.
         </p>
         <p>
           If the sensor is put into "binary mode" (above), this allows to
@@ -371,7 +371,6 @@
 
     {#if midiConfig.tl_mode === 2 && midiConfig}
       <div class="row">
-        <span class="output-label">Pitch Bend</span>
         {#if pitchBendConflict}
           <span class="conflict-warning">
             <TriangleAlert size={14} color="var(--red)" />
@@ -383,7 +382,6 @@
         {:else}
           <span></span>
         {/if}
-        <span class="info-text">Channel {midiConfig.channel}</span>
       </div>
 
       <div class="row">
@@ -500,9 +498,9 @@
     display: none;
   }
 
-  .input-container :global(.input-wrapper) {
+  .input-container :global(.input.number-input-container .input-wrapper) {
     width: auto;
-    min-width: 80px;
+    grid-template-columns: 27px 52px 27px;
   }
 
   /* Pill Switch - Component Specific */
