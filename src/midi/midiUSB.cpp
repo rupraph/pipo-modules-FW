@@ -4,8 +4,10 @@ Adafruit_USBD_MIDI usb_midi;
 MIDI_CREATE_INSTANCE(Adafruit_USBD_MIDI, usb_midi, MidiUsb);
 
 void MidiUSBSetup() {
-  TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
-  TinyUSBDevice.setProductDescriptor("PipoUSB");
+  // Note: On ESP32, USB descriptors are set at compile time via -DUSB_MANUFACTURER and
+  // -DUSB_PRODUCT in platformio.ini. These runtime calls are kept as fallback for non-ESP32.
+  // TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
+  // TinyUSBDevice.setProductDescriptor("PipoUSB");
 
   // while (!TinyUSBDevice.mounted())
   //     delay(1);
