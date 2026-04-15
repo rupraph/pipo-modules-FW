@@ -29,14 +29,22 @@
   let confirmOpen = false;
   let confirmMessage = "";
   let confirmAction: (() => Promise<void>) | null = null;
+  let confirmAltAction: (() => Promise<void>) | null = null;
+  let confirmAltLabel = "";
 
   $: metas = $configMetas;
   $: names = metas.map((m) => m.name);
   $: atLimit = metas.length >= MAX_CONFIGS;
 
-  function showConfirm(message: string, action: () => Promise<void>) {
+  function showConfirm(
+    message: string,
+    action: () => Promise<void>,
+    alt?: { label: string; action: () => Promise<void> },
+  ) {
     confirmMessage = message;
     confirmAction = action;
+    confirmAltAction = alt?.action ?? null;
+    confirmAltLabel = alt?.label ?? "";
     confirmOpen = true;
   }
 
@@ -46,11 +54,22 @@
       await confirmAction();
       confirmAction = null;
     }
+    confirmAltAction = null;
+  }
+
+  async function handleConfirmAlt() {
+    confirmOpen = false;
+    if (confirmAltAction) {
+      await confirmAltAction();
+      confirmAltAction = null;
+    }
+    confirmAction = null;
   }
 
   function handleConfirmCancel() {
     confirmOpen = false;
     confirmAction = null;
+    confirmAltAction = null;
   }
 
   // ---- NEW CONFIG ----
@@ -132,10 +151,11 @@
 
       const current = get(currentConfig);
       let willReboot = false;
-      let rebootReasons: string[] = [];
+      let warnings: string[] = [];
+      let oscConflict = false;
 
       if (current) {
-        // 2. Check mode change
+        // Check mode change
         const currentIsMidi = current.general.MidiEnabled;
         const targetIsMidi = targetConfig.general.MidiEnabled;
         const currentIsOsc = current.general.OSC_ENA;
@@ -143,57 +163,71 @@
 
         if (currentIsMidi !== targetIsMidi || currentIsOsc !== targetIsOsc) {
           willReboot = true;
-          rebootReasons.push("output mode will change (MIDI ↔ OSC)");
+          warnings.push("Output mode will change (MIDI ↔ OSC) → reboot");
         }
 
-        // 3. Check PipoName change
-        if (current.general.PipoName !== targetConfig.general.PipoName) {
-          willReboot = true;
-          rebootReasons.push(
-            `Pipo name will change to "${targetConfig.general.PipoName}" (reconnect needed)`,
-          );
-        }
+        // Preserve PipoName — switching configs should not change device name
+        targetConfig.general.PipoName = current.general.PipoName;
 
-        // 4. Check OSC IP/port
-        if (targetConfig.general.OSC_ENA && current.general.OSC_ENA) {
+        // Check OSC IP/port — only when both configs are OSC and mode isn't changing
+        const bothOsc = targetConfig.general.OSC_ENA && current.general.OSC_ENA;
+        const modeChanging =
+          currentIsMidi !== targetIsMidi || currentIsOsc !== targetIsOsc;
+
+        if (bothOsc && !modeChanging) {
           const ipChanged =
             current.general.OSC_IP !== targetConfig.general.OSC_IP;
           const portChanged =
             current.general.OSC_PORT !== targetConfig.general.OSC_PORT;
 
           if (ipChanged || portChanged) {
-            loading = false;
-            showConfirm(
-              `This config uses OSC ${targetConfig.general.OSC_IP}:${targetConfig.general.OSC_PORT}.\n\nKeep your current network settings (${current.general.OSC_IP}:${current.general.OSC_PORT})?`,
-              async () => {
-                // Keep current IP/port
-                targetConfig.general.OSC_IP = current.general.OSC_IP;
-                targetConfig.general.OSC_PORT = current.general.OSC_PORT;
-                // Save the patched config back then activate
-                await configService.saveConfig(
-                  targetConfig as PipoConfig<PipoTypes>,
-                  meta.name,
-                );
-                await activateConfig(meta.name, willReboot, rebootReasons);
-              },
+            oscConflict = true;
+            warnings.push(
+              `OSC destination differs:\n  Target: ${targetConfig.general.OSC_IP}:${targetConfig.general.OSC_PORT}\n  Current: ${current.general.OSC_IP}:${current.general.OSC_PORT}`,
             );
-            // Add second option as "Use config's" — we handle this by
-            // providing the "Cancel" path which proceeds without patching
-            return;
           }
         }
       }
 
-      if (willReboot) {
-        loading = false;
-        showConfirm(
-          `Loading "${meta.name}" will:\n• ${rebootReasons.join("\n• ")}\n\nThe device will reboot. Continue?`,
-          () => activateConfig(meta.name, true, rebootReasons),
-        );
+      // No conflicts — load directly
+      if (warnings.length === 0) {
+        await activateConfig(meta.name, false, []);
         return;
       }
 
-      await activateConfig(meta.name, false, []);
+      // Show all conflicts in one dialog
+      loading = false;
+      let message = `Loading "${meta.name}":\n\n• ${warnings.join("\n• ")}`;
+      if (willReboot) {
+        message += "\n\nThe device will reboot.";
+      }
+      message += "\n\nContinue?";
+
+      showConfirm(
+        message,
+        async () => {
+          // "Keep Current" — patch target with current OSC settings
+          if (oscConflict) {
+            const cur = get(currentConfig)!;
+            targetConfig.general.OSC_IP = cur.general.OSC_IP;
+            targetConfig.general.OSC_PORT = cur.general.OSC_PORT;
+            await configService.saveConfig(
+              targetConfig as PipoConfig<PipoTypes>,
+              meta.name,
+            );
+          }
+          await activateConfig(meta.name, willReboot, warnings);
+        },
+        oscConflict
+          ? {
+              label: "Use Target",
+              action: async () => {
+                // Load as-is, don't patch OSC
+                await activateConfig(meta.name, willReboot, warnings);
+              },
+            }
+          : undefined,
+      );
     } catch (err) {
       addToast({
         type: "error",
@@ -369,7 +403,12 @@
       <p class="confirm-message">{confirmMessage}</p>
       <div class="confirm-actions">
         <button class="secondary" on:click={handleConfirmCancel}>Cancel</button>
-        <button class="primary" on:click={handleConfirmOk}>Continue</button>
+        {#if confirmAltAction}
+          <button class="secondary" on:click={handleConfirmAlt}>{confirmAltLabel}</button>
+        {/if}
+        <button class="primary" on:click={handleConfirmOk}>
+          {confirmAltAction ? 'Keep Current' : 'Continue'}
+        </button>
       </div>
     </div>
   </div>
@@ -485,6 +524,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(5px);
   }
   .confirm-box {
     background-color: var(--bg-network);

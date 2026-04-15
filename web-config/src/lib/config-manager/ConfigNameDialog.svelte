@@ -64,7 +64,6 @@
   }
 </script>
 
-<Modal bind:open>
   <div class="dialog">
     <h3>{title}</h3>
     <div class="input-group">
