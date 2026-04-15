@@ -13,7 +13,7 @@
     originalConfig,
   } from "../../services/config";
   import type { ConfigMeta, PipoConfig, PipoTypes } from "../../types";
-  import { Copy, Pencil, Trash2, Upload } from "lucide-svelte";
+  import { Copy, Pencil, Play, Trash2 } from "lucide-svelte";
 
   export let open = false;
 
@@ -334,11 +334,11 @@
             {#if !meta.active}
               <button
                 class="icon-btn"
-                title="Load"
+                title="Load Config"
                 on:click={() => handleLoad(meta)}
                 disabled={loading}
               >
-                <Upload size={14} />
+                <Play size={14} />
               </button>
             {/if}
             <button
@@ -404,10 +404,12 @@
       <div class="confirm-actions">
         <button class="secondary" on:click={handleConfirmCancel}>Cancel</button>
         {#if confirmAltAction}
-          <button class="secondary" on:click={handleConfirmAlt}>{confirmAltLabel}</button>
+          <button class="secondary" on:click={handleConfirmAlt}
+            >{confirmAltLabel}</button
+          >
         {/if}
         <button class="primary" on:click={handleConfirmOk}>
-          {confirmAltAction ? 'Keep Current' : 'Continue'}
+          {confirmAltAction ? "Keep Current" : "Continue"}
         </button>
       </div>
     </div>
