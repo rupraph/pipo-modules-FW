@@ -218,3 +218,9 @@ export type QuatConfig = {
   enabled: boolean;
   osc_addr: string;
 };
+
+export type ConfigMeta = {
+  name: string;
+  mode: "midi" | "osc";
+  active: boolean;
+};

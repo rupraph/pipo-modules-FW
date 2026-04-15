@@ -279,6 +279,31 @@ void Config::load_config() {
   }
 }
 
+bool Config::validate_config_name(const String& name) {
+  if (name.length() == 0 || name.length() > 12) return false;
+  for (unsigned int i = 0; i < name.length(); i++) {
+    char c = name.charAt(i);
+    if (!isalnum(c) && c != '-' && c != '_') return false;
+  }
+  return true;
+}
+
+int Config::count_configs() {
+  int count = 0;
+  File root = LittleFS.open(configs_root);
+  if (!root || !root.isDirectory()) return 0;
+  File file = root.openNextFile();
+  while (file) {
+    String name = String(file.name());
+    if (name.endsWith(".json") && !name.endsWith(temp_suffix)) {
+      count++;
+    }
+    file = root.openNextFile();
+  }
+  root.close();
+  return count;
+}
+
 String Config::get_list() {
   File root = LittleFS.open(configs_root);
   if (!root || !root.isDirectory()) {
@@ -301,6 +326,51 @@ String Config::get_list() {
   root.close();
   file.close();
   return list;
+}
+
+String Config::get_list_json() {
+  File root = LittleFS.open(configs_root);
+  if (!root || !root.isDirectory()) {
+    log_e("failed to open config root");
+    return "[]";
+  }
+
+  JsonDocument doc;
+  JsonArray arr = doc.to<JsonArray>();
+
+  File file = root.openNextFile();
+  while (file) {
+    String name = String(file.name());
+    if (name.endsWith(".json") && !name.endsWith(temp_suffix)) {
+      String configName = name.substring(0, name.length() - 5);
+
+      // Peek into file to determine mode
+      String mode = "midi";  // default
+      String fullPath = String(configs_root) + "/" + name;
+      File cf = LittleFS.open(fullPath.c_str(), FILE_READ);
+      if (cf) {
+        JsonDocument tmp;
+        DeserializationError err = deserializeJson(tmp, cf);
+        cf.close();
+        if (!err && tmp.containsKey("general")) {
+          bool oscEna = tmp["general"]["OSC_ENA"] | false;
+          bool midiEna = tmp["general"]["MidiEnabled"] | true;
+          mode = oscEna ? "osc" : "midi";
+        }
+      }
+
+      JsonObject entry = arr.add<JsonObject>();
+      entry["name"] = configName;
+      entry["mode"] = mode;
+      entry["active"] = (configName == filename);
+    }
+    file = root.openNextFile();
+  }
+  root.close();
+
+  String result;
+  serializeJson(doc, result);
+  return result;
 }
 // void Config::shouldSave() {
 //   _should_save = true;

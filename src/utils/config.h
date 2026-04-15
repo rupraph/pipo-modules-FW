@@ -50,6 +50,10 @@ class Config {
   void rename(String old_name, String new_name);
   void new_config(String name);
   String get_list();
+  String get_list_json();
+  int count_configs();
+  static bool validate_config_name(const String& name);
+  static const int MAX_CONFIGS = 8;
 
   JsonDocument get();            // return current_config
   JsonDocument get(string key);  // return current_config[key]

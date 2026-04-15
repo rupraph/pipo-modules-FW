@@ -56,7 +56,7 @@ export const setupRoutes = (app: Express) => {
   app.get("/configs/:name?", (req: ReqQ<ConfigsGetParams>, res) => {
     const { name } = req.query;
     if (!name) {
-      res.status(200).send(Object.keys(state.getConfigs()).join(","));
+      res.status(200).json(state.getConfigMetas());
       return;
     }
     if (!state.configs[name]) {
@@ -87,6 +87,10 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("No name received");
       return;
     }
+    if (name === state.activeConfig) {
+      res.status(400).send("Cannot delete active config");
+      return;
+    }
     state.deleteConfig(name);
     res.send("Config deleted");
   });
@@ -94,6 +98,14 @@ export const setupRoutes = (app: Express) => {
     const { name } = req.query;
     if (!name) {
       res.status(400).send("No name received");
+      return;
+    }
+    if (!state.validateConfigName(name)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      return;
+    }
+    if (Object.keys(state.configs).length >= 8) {
+      res.status(400).send("Maximum 8 configs reached");
       return;
     }
     try {
@@ -109,6 +121,14 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("No name or config received");
       return;
     }
+    if (!state.validateConfigName(name)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      return;
+    }
+    if (Object.keys(state.configs).length >= 8) {
+      res.status(400).send("Maximum 8 configs reached");
+      return;
+    }
     try {
       state.copyConfig(name, config);
       res.status(200).send("Config copied");
@@ -120,6 +140,10 @@ export const setupRoutes = (app: Express) => {
     const { oldname, newname } = req.query;
     if (!oldname || !newname) {
       res.status(400).send("No old or new name received");
+      return;
+    }
+    if (!state.validateConfigName(newname)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
       return;
     }
     try {

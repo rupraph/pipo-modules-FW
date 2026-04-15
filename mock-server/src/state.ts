@@ -164,6 +164,16 @@ class State<T extends PipoTypes = "analog"> {
   getConfigs() {
     return this.configs;
   }
+  getConfigMetas() {
+    return Object.entries(this.configs).map(([name, cfg]) => ({
+      name,
+      mode: (cfg as any).general?.OSC_ENA ? "osc" : "midi",
+      active: name === this.activeConfig,
+    }));
+  }
+  validateConfigName(name: string): boolean {
+    return /^[a-zA-Z0-9_-]{1,12}$/.test(name);
+  }
   deleteConfig(name: string) {
     delete this.configs[name];
     if (!Object.keys(this.configs).length) {

@@ -4,6 +4,7 @@ import { schema } from "../schema";
 import { formatNumbers, debounce } from "../utils";
 import type {
   AxisSchema,
+  ConfigMeta,
   InputSettings,
   OutputMode,
   PipoConfig,
@@ -15,8 +16,8 @@ import type {
 export const pipoType = writable<PipoTypes>("unknown");
 export const configValid = writable<boolean>(false);
 
-// New stores for config state management
-export const configNames = writable<string[]>([]);
+// Config state management stores
+export const configMetas = writable<ConfigMeta[]>([]);
 export const activeConfigName = writable<string>("");
 export const currentConfig = writable<PipoConfig<PipoTypes> | null>(null);
 //TODO: derive it from config, and have a global swith in config to switch modes.
@@ -112,10 +113,21 @@ class ConfigService {
       configsLoading.set(true);
       configsError.set(null);
 
-      const response = await pipoio.get<string>("/configs");
-      const names = response.data.split(",");
+      const response = await pipoio.get<ConfigMeta[] | string>("/configs");
+      let names: string[];
+      let metas: ConfigMeta[];
 
-      configNames.set(names);
+      if (typeof response.data === "string") {
+        // Legacy CSV format fallback
+        names = response.data.split(",").filter(Boolean);
+        metas = names.map((n) => ({ name: n, mode: "midi" as const, active: false }));
+      } else {
+        // New JSON array format
+        metas = response.data;
+        names = metas.map((m) => m.name);
+      }
+
+      configMetas.set(metas);
       return names;
     } catch (err) {
       const errorMsg =

@@ -165,10 +165,10 @@ void PipoServer::setup_requests() {
     if (!request->hasParam("name")) {
       if (DEBUG_HEAP)
         pipoDebugHeap("request: retrieving config list");
-      String list = config.get_list();
+      String list = config.get_list_json();
       if (DEBUG_HEAP)
         pipoDebugHeap("retrived config list");
-      return request->send(200, "text/plain", list);
+      return request->send(200, "application/json", list);
     }
     try {
       String name = request->getParam("name")->value();
@@ -217,8 +217,12 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
     try {
-      config.delete_config(request->getParam("name")->value());
-      config.apply(engine, osc, DEBUG_CONFIG);
+      String name = request->getParam("name")->value();
+      if (name == config.filename) {
+        return request->send(400, "text/plain",
+                             "Cannot delete active config");
+      }
+      config.delete_config(name);
       return request->send(200, "text/plain", "Config deleted");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
@@ -230,7 +234,16 @@ void PipoServer::setup_requests() {
       return request->send(400, "text/plain", "Error: no name parameter");
     }
     try {
-      config.new_config(request->getParam("name")->value());
+      String name = request->getParam("name")->value();
+      if (!Config::validate_config_name(name)) {
+        return request->send(400, "text/plain",
+                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      }
+      if (config.count_configs() >= Config::MAX_CONFIGS) {
+        return request->send(400, "text/plain",
+                             "Maximum 8 configs reached");
+      }
+      config.new_config(name);
       return request->send(200, "text/plain", "Config created");
     } catch (const std::exception& e) {
       return request->send(500, "text/plain",
@@ -243,7 +256,16 @@ void PipoServer::setup_requests() {
                            "Error: no name or config parameter");
     }
     try {
-      config.save(request->getParam("name")->value(),
+      String name = request->getParam("name")->value();
+      if (!Config::validate_config_name(name)) {
+        return request->send(400, "text/plain",
+                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      }
+      if (config.count_configs() >= Config::MAX_CONFIGS) {
+        return request->send(400, "text/plain",
+                             "Maximum 8 configs reached");
+      }
+      config.save(name,
                   request->getParam("config")->value());
       return request->send(200, "text/plain", "Config copied");
     } catch (const std::exception e) {
@@ -257,8 +279,12 @@ void PipoServer::setup_requests() {
                            "Error: no old or new name parameter");
     }
     try {
-      config.rename(request->getParam("oldname")->value(),
-                    request->getParam("newname")->value());
+      String newname = request->getParam("newname")->value();
+      if (!Config::validate_config_name(newname)) {
+        return request->send(400, "text/plain",
+                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      }
+      config.rename(request->getParam("oldname")->value(), newname);
       return request->send(200, "text/plain", "Config renamed");
     } catch (const std::exception e) {
       return request->send(500, "text/plain",
