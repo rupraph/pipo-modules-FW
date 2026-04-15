@@ -221,6 +221,5 @@ export type QuatConfig = {
 
 export type ConfigMeta = {
   name: string;
-  mode: "midi" | "osc";
   active: boolean;
 };

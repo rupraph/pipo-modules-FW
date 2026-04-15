@@ -3,7 +3,6 @@ import multer from "multer";
 import { state } from "./state";
 import {
   ActiveConfigGetParams,
-  ConfigCopyPostParams,
   ConfigGetParams,
   ConfigNewGetParams,
   ConfigRenamePostParams,
@@ -115,13 +114,13 @@ export const setupRoutes = (app: Express) => {
       res.status(500).send(`Error while creating config ${e}`);
     }
   });
-  app.post("/config-copy", (req: ReqQ<ConfigCopyPostParams>, res) => {
-    const { name, config } = req.query;
-    if (!name || !config) {
-      res.status(400).send("No name or config received");
+  app.post("/config-duplicate", (req: ReqQ<{ source: string; target: string }>, res) => {
+    const { source, target } = req.query;
+    if (!source || !target) {
+      res.status(400).send("No source or target received");
       return;
     }
-    if (!state.validateConfigName(name)) {
+    if (!state.validateConfigName(target)) {
       res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
       return;
     }
@@ -129,11 +128,15 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("Maximum 8 configs reached");
       return;
     }
+    if (state.configs[target]) {
+      res.status(400).send("Config already exists");
+      return;
+    }
     try {
-      state.copyConfig(name, config);
-      res.status(200).send("Config copied");
+      state.duplicateConfig(source, target);
+      res.status(200).send("Config duplicated");
     } catch (e) {
-      res.status(500).send(`Error while copying config ${e}`);
+      res.status(500).send(`Error while duplicating config ${e}`);
     }
   });
   app.post("/config-rename", (req: ReqQ<ConfigRenamePostParams>, res) => {

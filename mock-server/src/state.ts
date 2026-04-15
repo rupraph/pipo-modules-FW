@@ -167,7 +167,6 @@ class State<T extends PipoTypes = "analog"> {
   getConfigMetas() {
     return Object.entries(this.configs).map(([name, cfg]) => ({
       name,
-      mode: (cfg as any).general?.OSC_ENA ? "osc" : "midi",
       active: name === this.activeConfig,
     }));
   }
@@ -195,8 +194,9 @@ class State<T extends PipoTypes = "analog"> {
       defaultAnalog;
     this.configs[name] = JSON.parse(JSON.stringify(defaultConfig));
   }
-  copyConfig(name: string, config: PipoConfig<T>) {
-    this.configs[name] = config;
+  duplicateConfig(source: string, target: string) {
+    if (!this.configs[source]) throw new Error(`Config not found: ${source}`);
+    this.configs[target] = JSON.parse(JSON.stringify(this.configs[source]));
   }
   renameConfig(oldname: string, newname: string) {
     this.configs[newname] = this.configs[oldname];

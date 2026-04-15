@@ -193,6 +193,9 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     general_config.clear();
     general_config = current_config["general"];
 
+    // Persist active config name so it survives reboot
+    writeFile(LittleFS, last_config_path, filename.c_str());
+
     if (DEBUG_CONFIG) {
       log_d("loaded config:");
       serializeJsonPretty(current_config, Serial);
@@ -280,10 +283,12 @@ void Config::load_config() {
 }
 
 bool Config::validate_config_name(const String& name) {
-  if (name.length() == 0 || name.length() > 12) return false;
+  if (name.length() == 0 || name.length() > 12)
+    return false;
   for (unsigned int i = 0; i < name.length(); i++) {
     char c = name.charAt(i);
-    if (!isalnum(c) && c != '-' && c != '_') return false;
+    if (!isalnum(c) && c != '-' && c != '_')
+      return false;
   }
   return true;
 }
@@ -291,7 +296,8 @@ bool Config::validate_config_name(const String& name) {
 int Config::count_configs() {
   int count = 0;
   File root = LittleFS.open(configs_root);
-  if (!root || !root.isDirectory()) return 0;
+  if (!root || !root.isDirectory())
+    return 0;
   File file = root.openNextFile();
   while (file) {
     String name = String(file.name());
@@ -344,24 +350,8 @@ String Config::get_list_json() {
     if (name.endsWith(".json") && !name.endsWith(temp_suffix)) {
       String configName = name.substring(0, name.length() - 5);
 
-      // Peek into file to determine mode
-      String mode = "midi";  // default
-      String fullPath = String(configs_root) + "/" + name;
-      File cf = LittleFS.open(fullPath.c_str(), FILE_READ);
-      if (cf) {
-        JsonDocument tmp;
-        DeserializationError err = deserializeJson(tmp, cf);
-        cf.close();
-        if (!err && tmp.containsKey("general")) {
-          bool oscEna = tmp["general"]["OSC_ENA"] | false;
-          bool midiEna = tmp["general"]["MidiEnabled"] | true;
-          mode = oscEna ? "osc" : "midi";
-        }
-      }
-
       JsonObject entry = arr.add<JsonObject>();
       entry["name"] = configName;
-      entry["mode"] = mode;
       entry["active"] = (configName == filename);
     }
     file = root.openNextFile();
@@ -442,9 +432,41 @@ void Config::save(String filename) {
   }
 }
 
-// saving from a string
-void Config::save(String filename, String config) {
-  writeFile(LittleFS, get_path(filename).c_str(), config.c_str());
+void Config::duplicate_config(String source, String target) {
+  String sourcePath = get_path(source);
+  String targetPath = get_path(target);
+
+  if (!LittleFS.exists(sourcePath.c_str())) {
+    log_e("Source config not found: %s", sourcePath.c_str());
+    logs.writeError("Duplicate failed: source not found " + source);
+    return;
+  }
+
+  // Copy via temp file for atomicity
+  String tempPath = targetPath + temp_suffix;
+  copyFile(LittleFS, sourcePath.c_str(), tempPath.c_str());
+
+  // Verify temp file
+  File verifyFile = LittleFS.open(tempPath.c_str(), FILE_READ);
+  if (!verifyFile || verifyFile.size() < 10) {
+    log_e("Duplicate failed: temp file verification failed");
+    logs.writeError("Duplicate failed: verify failed for " + target);
+    if (verifyFile)
+      verifyFile.close();
+    LittleFS.remove(tempPath.c_str());
+    return;
+  }
+  verifyFile.close();
+
+  // Atomic rename
+  if (LittleFS.rename(tempPath.c_str(), targetPath.c_str())) {
+    log_i("Config duplicated: %s -> %s", source.c_str(), target.c_str());
+    logs.writeLog("duplicate config: " + source + " -> " + target);
+  } else {
+    log_e("Duplicate failed: rename failed");
+    logs.writeError("Duplicate rename failed: " + target);
+    LittleFS.remove(tempPath.c_str());
+  }
 }
 
 void Config::delete_config(String filename) {
@@ -489,9 +511,7 @@ void Config::rename(String old_name, String new_name) {
   }
 }
 void Config::new_config(String name) {
-  // should check if file already exists.
   copyFile(LittleFS, config_model_path, get_path(name).c_str());
-  this->filename = name;
   logs.writeLog("new config: " + name);
 }
 

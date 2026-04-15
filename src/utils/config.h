@@ -45,7 +45,7 @@ class Config {
   void setValues(char input[], int len);
   void save();
   void save(String filename);
-  void save(String filename, String config);
+  void duplicate_config(String source, String target);
   void delete_config(String filename);
   void rename(String old_name, String new_name);
   void new_config(String name);

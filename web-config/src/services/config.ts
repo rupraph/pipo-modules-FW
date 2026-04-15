@@ -120,7 +120,7 @@ class ConfigService {
       if (typeof response.data === "string") {
         // Legacy CSV format fallback
         names = response.data.split(",").filter(Boolean);
-        metas = names.map((n) => ({ name: n, mode: "midi" as const, active: false }));
+        metas = names.map((n) => ({ name: n, active: false }));
       } else {
         // New JSON array format
         metas = response.data;
@@ -259,6 +259,10 @@ class ConfigService {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // Reset change detection after successful save
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
+
       console.log(`Config saved: ${configName}`);
     } catch (err) {
       const errorMsg =
@@ -375,26 +379,26 @@ class ConfigService {
   }
 
   /**
-   * Copy a config
+   * Duplicate a config on the device (backend file copy)
    */
-  async copyConfig(name: string, config: PipoConfig<PipoTypes>): Promise<void> {
+  async duplicateConfig(source: string, target: string): Promise<void> {
     try {
       configsLoading.set(true);
       configsError.set(null);
 
       await pipoio.request({
         method: "post",
-        url: "/config-copy",
-        params: { name, config: JSON.stringify(config) },
+        url: "/config-duplicate",
+        params: { source, target },
       });
 
       // Refresh config list
       await this.fetchConfigNames();
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : "Failed to copy config";
+        err instanceof Error ? err.message : "Failed to duplicate config";
       configsError.set(errorMsg);
-      console.error("Error copying config:", err);
+      console.error("Error duplicating config:", err);
       throw err;
     } finally {
       configsLoading.set(false);

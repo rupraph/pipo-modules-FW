@@ -84,25 +84,22 @@
 
   // ---- DELETE ----
   function handleDelete(meta: ConfigMeta) {
-    showConfirm(
-      `Delete "${meta.name}"? This cannot be undone.`,
-      async () => {
-        loading = true;
-        try {
-          await configService.deleteConfig(meta.name);
-          await configService.fetchConfigNames();
-          addToast({ type: "info", message: "Config deleted", timeout: 2000 });
-        } catch (err) {
-          addToast({
-            type: "error",
-            message: "Failed to delete config",
-            timeout: 4000,
-          });
-        } finally {
-          loading = false;
-        }
+    showConfirm(`Delete "${meta.name}"? This cannot be undone.`, async () => {
+      loading = true;
+      try {
+        await configService.deleteConfig(meta.name);
+        await configService.fetchConfigNames();
+        addToast({ type: "info", message: "Config deleted", timeout: 2000 });
+      } catch (err) {
+        addToast({
+          type: "error",
+          message: "Failed to delete config",
+          timeout: 4000,
+        });
+      } finally {
+        loading = false;
       }
-    );
+    });
   }
 
   // ---- LOAD ----
@@ -111,7 +108,7 @@
     if (get(hasUnsavedChanges)) {
       showConfirm(
         "You have unsaved changes. Discard and load this config?",
-        () => doLoad(meta)
+        () => doLoad(meta),
       );
       return;
     }
@@ -153,7 +150,7 @@
         if (current.general.PipoName !== targetConfig.general.PipoName) {
           willReboot = true;
           rebootReasons.push(
-            `Pipo name will change to "${targetConfig.general.PipoName}" (reconnect needed)`
+            `Pipo name will change to "${targetConfig.general.PipoName}" (reconnect needed)`,
           );
         }
 
@@ -173,12 +170,12 @@
                 targetConfig.general.OSC_IP = current.general.OSC_IP;
                 targetConfig.general.OSC_PORT = current.general.OSC_PORT;
                 // Save the patched config back then activate
-                await configService.copyConfig(
+                await configService.saveConfig(
+                  targetConfig as PipoConfig<PipoTypes>,
                   meta.name,
-                  targetConfig as PipoConfig<PipoTypes>
                 );
                 await activateConfig(meta.name, willReboot, rebootReasons);
-              }
+              },
             );
             // Add second option as "Use config's" — we handle this by
             // providing the "Cancel" path which proceeds without patching
@@ -191,7 +188,7 @@
         loading = false;
         showConfirm(
           `Loading "${meta.name}" will:\n• ${rebootReasons.join("\n• ")}\n\nThe device will reboot. Continue?`,
-          () => activateConfig(meta.name, true, rebootReasons)
+          () => activateConfig(meta.name, true, rebootReasons),
         );
         return;
       }
@@ -211,7 +208,7 @@
   async function activateConfig(
     name: string,
     reboot: boolean,
-    reasons: string[]
+    reasons: string[],
   ) {
     loading = true;
     try {
@@ -228,9 +225,7 @@
         pipoio
           .get("/reboot")
           .then(() => console.log("Rebooting device..."))
-          .catch((err: unknown) =>
-            console.error("Failed to reboot:", err)
-          );
+          .catch((err: unknown) => console.error("Failed to reboot:", err));
       } else {
         addToast({
           type: "info",
@@ -263,18 +258,12 @@
           timeout: 2000,
         });
       } else if (nameDialogAction === "duplicate") {
-        const sourceConfig = await configService.fetchConfig(nameDialogTarget);
-        if (sourceConfig) {
-          await configService.copyConfig(
-            newName,
-            sourceConfig as PipoConfig<PipoTypes>
-          );
-          addToast({
-            type: "info",
-            message: `Config duplicated as "${newName}"`,
-            timeout: 2000,
-          });
-        }
+        await configService.duplicateConfig(nameDialogTarget, newName);
+        addToast({
+          type: "info",
+          message: `Config duplicated as "${newName}"`,
+          timeout: 2000,
+        });
       } else if (nameDialogAction === "rename") {
         await configService.renameConfig(nameDialogTarget, newName);
         addToast({
@@ -285,8 +274,7 @@
       }
       await configService.fetchConfigNames();
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Operation failed";
+      const msg = err instanceof Error ? err.message : "Operation failed";
       addToast({ type: "error", message: msg, timeout: 4000 });
     } finally {
       loading = false;
@@ -304,9 +292,6 @@
         <div class="config-row" class:active={meta.active}>
           <div class="config-info">
             <span class="config-name">{meta.name}</span>
-            <span class="mode-badge" class:midi={meta.mode === "midi"}
-              >{meta.mode.toUpperCase()}</span
-            >
             {#if meta.active}
               <span class="active-badge">Active</span>
             {/if}
@@ -375,12 +360,12 @@
 
 <!-- Confirmation dialog -->
 {#if confirmOpen}
-  <div class="confirm-overlay" on:click={handleConfirmCancel} on:keyup={() => {}}>
-    <div
-      class="confirm-box"
-      on:click|stopPropagation
-      on:keyup={() => {}}
-    >
+  <div
+    class="confirm-overlay"
+    on:click={handleConfirmCancel}
+    on:keyup={() => {}}
+  >
+    <div class="confirm-box" on:click|stopPropagation on:keyup={() => {}}>
       <p class="confirm-message">{confirmMessage}</p>
       <div class="confirm-actions">
         <button class="secondary" on:click={handleConfirmCancel}>Cancel</button>
@@ -440,19 +425,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  .mode-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 3px;
-    background-color: #3b82f6;
-    color: white;
-    flex-shrink: 0;
-    text-transform: uppercase;
-  }
-  .mode-badge.midi {
-    background-color: #8b5cf6;
   }
   .active-badge {
     font-size: 10px;

@@ -219,8 +219,7 @@ void PipoServer::setup_requests() {
     try {
       String name = request->getParam("name")->value();
       if (name == config.filename) {
-        return request->send(400, "text/plain",
-                             "Cannot delete active config");
+        return request->send(400, "text/plain", "Cannot delete active config");
       }
       config.delete_config(name);
       return request->send(200, "text/plain", "Config deleted");
@@ -236,12 +235,15 @@ void PipoServer::setup_requests() {
     try {
       String name = request->getParam("name")->value();
       if (!Config::validate_config_name(name)) {
-        return request->send(400, "text/plain",
-                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+        return request->send(
+            400, "text/plain",
+            "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
       }
       if (config.count_configs() >= Config::MAX_CONFIGS) {
-        return request->send(400, "text/plain",
-                             "Maximum 8 configs reached");
+        return request->send(400, "text/plain", "Maximum 8 configs reached");
+      }
+      if (LittleFS.exists(config.get_path(name).c_str())) {
+        return request->send(400, "text/plain", "Config already exists");
       }
       config.new_config(name);
       return request->send(200, "text/plain", "Config created");
@@ -250,29 +252,34 @@ void PipoServer::setup_requests() {
                            "Error creating config: " + String(e.what()));
     }
   });
-  server.on("/config-copy", HTTP_POST, [&](AsyncWebServerRequest* request) {
-    if (!request->hasParam("name") || !request->hasParam("config")) {
-      return request->send(400, "text/plain",
-                           "Error: no name or config parameter");
-    }
-    try {
-      String name = request->getParam("name")->value();
-      if (!Config::validate_config_name(name)) {
-        return request->send(400, "text/plain",
-                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
-      }
-      if (config.count_configs() >= Config::MAX_CONFIGS) {
-        return request->send(400, "text/plain",
-                             "Maximum 8 configs reached");
-      }
-      config.save(name,
-                  request->getParam("config")->value());
-      return request->send(200, "text/plain", "Config copied");
-    } catch (const std::exception e) {
-      return request->send(500, "text/plain",
-                           "Error copying config: " + String(e.what()));
-    }
-  });
+  server.on(
+      "/config-duplicate", HTTP_POST, [&](AsyncWebServerRequest* request) {
+        if (!request->hasParam("source") || !request->hasParam("target")) {
+          return request->send(400, "text/plain",
+                               "Error: no source or target parameter");
+        }
+        try {
+          String source = request->getParam("source")->value();
+          String target = request->getParam("target")->value();
+          if (!Config::validate_config_name(target)) {
+            return request->send(
+                400, "text/plain",
+                "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+          }
+          if (config.count_configs() >= Config::MAX_CONFIGS) {
+            return request->send(400, "text/plain",
+                                 "Maximum 8 configs reached");
+          }
+          if (LittleFS.exists(config.get_path(target).c_str())) {
+            return request->send(400, "text/plain", "Config already exists");
+          }
+          config.duplicate_config(source, target);
+          return request->send(200, "text/plain", "Config duplicated");
+        } catch (const std::exception& e) {
+          return request->send(500, "text/plain",
+                               "Error duplicating config: " + String(e.what()));
+        }
+      });
   server.on("/config-rename", HTTP_POST, [&](AsyncWebServerRequest* request) {
     if (!request->hasParam("oldname") || !request->hasParam("newname")) {
       return request->send(400, "text/plain",
@@ -281,8 +288,9 @@ void PipoServer::setup_requests() {
     try {
       String newname = request->getParam("newname")->value();
       if (!Config::validate_config_name(newname)) {
-        return request->send(400, "text/plain",
-                             "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+        return request->send(
+            400, "text/plain",
+            "Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
       }
       config.rename(request->getParam("oldname")->value(), newname);
       return request->send(200, "text/plain", "Config renamed");
@@ -309,24 +317,23 @@ void PipoServer::setup_requests() {
           received_configData.append((char*)data, len);
 
           if (final) {
-            // This is the end of the file upload
-            // Here I am doing save first then load. so parsing happen with load function.
-            // this avoids parsing in here and trying to pass the json to config.set().
-            // after solving other issues, not sure if this has any value after all.
-
             if (DEBUG_HEAP)
               pipoDebugHeap("Request: config data received");
-            config.save(config.filename, received_configData.c_str());
+
+            // Deserialize into current_config, then atomic save
+            config.set(received_configData.c_str());
+            received_configData.clear();
+
+            config.save(config.filename);
+            // Reload to validate the saved file
             bool success = config.load_config(config.filename);
             if (!success) {
-              received_configData.clear();
               if (DEBUG_HEAP)
                 pipoDebugHeap("Request: config load failed");
               return request->send(500, "text/plain",
                                    "Error: Uploaded config is invalid");
             }
             config.apply(engine, osc, DEBUG_CONFIG);
-            received_configData.clear();
             if (DEBUG_HEAP)
               pipoDebugHeapFull("Request: config saved");
             return request->send(200, "text/plain", "Config saved");
