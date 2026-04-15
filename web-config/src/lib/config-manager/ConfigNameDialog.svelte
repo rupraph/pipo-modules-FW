@@ -16,7 +16,7 @@
   let value = "";
   let error = "";
 
-  const NAME_REGEX = /^[a-zA-Z0-9_-]{1,12}$/;
+  const NAME_REGEX = /^[a-zA-Z0-9_-]{1,16}$/;
 
   $: if (open) {
     value = initialValue;
@@ -25,12 +25,12 @@
 
   function validate(name: string): string {
     if (!name) return "Name is required";
-    if (name.length > 12) return "Max 12 characters";
+    if (name.length > 16) return "Max 16 characters";
     if (!/^[a-zA-Z0-9_-]+$/.test(name))
       return "Only letters, numbers, - and _ allowed";
     if (
       existingNames.some(
-        (n) => n.toLowerCase() === name.toLowerCase() && n !== initialValue
+        (n) => n.toLowerCase() === name.toLowerCase() && n !== initialValue,
       )
     )
       return "Name already exists";
@@ -40,7 +40,7 @@
   function handleInput(e: Event) {
     const input = e.target as HTMLInputElement;
     // Filter disallowed chars in real-time
-    value = input.value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 12);
+    value = input.value.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 16);
     input.value = value;
     error = validate(value);
   }
@@ -64,6 +64,12 @@
   }
 </script>
 
+<Modal
+  bind:open
+  --modal-overlay-bg="rgba(0,0,0,0.7)"
+  --modal-overlay-blur="blur(5px)"
+  --modal-z="25"
+>
   <div class="dialog">
     <h3>{title}</h3>
     <div class="input-group">
@@ -73,12 +79,12 @@
         on:input={handleInput}
         on:keydown={handleKeydown}
         placeholder="Config name"
-        maxlength="12"
+        maxlength="16"
       />
       {#if error}
         <span class="error">{error}</span>
       {/if}
-      <span class="hint">a-z, 0-9, dash, underscore — max 12 chars</span>
+      <span class="hint">a-z, 0-9, dash, underscore — max 16 chars</span>
     </div>
     <div class="actions">
       <button class="secondary" on:click={handleCancel}>Cancel</button>

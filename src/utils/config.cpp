@@ -283,7 +283,7 @@ void Config::load_config() {
 }
 
 bool Config::validate_config_name(const String& name) {
-  if (name.length() == 0 || name.length() > 12)
+  if (name.length() == 0 || name.length() > 16)
     return false;
   for (unsigned int i = 0; i < name.length(); i++) {
     char c = name.charAt(i);
