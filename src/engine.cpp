@@ -173,8 +173,6 @@ void Engine::midi_processor(string axis_name, float sensor_val,
 
     // if Note mode
     else if (midi_translator.tl_mode == 1) {
-      // getting note for continuous mode
-      note_val_prev[axis_name] = note_val[axis_name];
       int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
       uint8_t current_note = max(0, min(note, 127));  // clip between 0 and 127
 
