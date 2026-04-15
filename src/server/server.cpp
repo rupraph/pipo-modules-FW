@@ -320,13 +320,21 @@ void PipoServer::setup_requests() {
             if (DEBUG_HEAP)
               pipoDebugHeap("Request: config data received");
 
+            // Use the uploaded filename from multipart form, not the
+            // currently active config — the frontend specifies which
+            // config to save to.
+            String targetName = filename;
+            if (targetName.endsWith(".json")) {
+              targetName = targetName.substring(0, targetName.length() - 5);
+            }
+
             // Deserialize into current_config, then atomic save
             config.set(received_configData.c_str());
             received_configData.clear();
 
-            config.save(config.filename);
+            config.save(targetName);
             // Reload to validate the saved file
-            bool success = config.load_config(config.filename);
+            bool success = config.load_config(targetName);
             if (!success) {
               if (DEBUG_HEAP)
                 pipoDebugHeap("Request: config load failed");
