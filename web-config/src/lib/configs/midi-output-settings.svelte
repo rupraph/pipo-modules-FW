@@ -432,8 +432,16 @@
     <!-- Output Value Display -->
     <OutputValueDisplay
       value={outputValue}
-      type={midiConfig.tl_mode === 0 ? "midi-cc" : "midi-note"}
-      label={midiConfig.tl_mode === 0 ? "CC Value" : "Note Value"}
+      type={midiConfig.tl_mode === 0
+        ? "midi-cc"
+        : midiConfig.tl_mode === 1
+          ? "midi-note"
+          : "midi-pb"}
+      label={midiConfig.tl_mode === 0
+        ? "CC Value"
+        : midiConfig.tl_mode === 1
+          ? "Note Value"
+          : "Pitch Bend"}
     />
   </div>
 {/if}

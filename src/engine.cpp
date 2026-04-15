@@ -228,10 +228,12 @@ void Engine::midi_processor(string axis_name, float sensor_val,
     } else if (midi_translator.tl_mode == 2) {
       if (input_sensor.get_mode(axis_name) == 0) {
 
-        int pb_val = max(0, min(midi_translator.get_cc_val(
+        uint16_t pb_val = max(0, min(midi_translator.get_cc_val(
                                     sensor_val, sensor_min, sensor_max, 1),
                                 16383));
-        midiio.sendPitchBend(pb_val, channel);
+        if (midi_translator.should_send_pitch_bend(pb_val)) {
+          midiio.sendPitchBend(pb_val, channel);
+        }
       }
     }
   }

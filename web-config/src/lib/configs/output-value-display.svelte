@@ -1,6 +1,6 @@
 <script lang="ts">
   export let value: number | undefined;
-  export let type: "osc" | "midi-cc" | "midi-note" = "osc";
+  export let type: "osc" | "midi-cc" | "midi-note" | "midi-pb" = "osc";
   export let label: string = "Output";
 
   // Convert MIDI note number to note name (e.g., 60 -> "C4")

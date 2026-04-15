@@ -395,11 +395,18 @@ void PipoSocket::loop() {
                 midi.get_hires() ? (float)last_cc : (float)midi.get_last_cc();
             has_output = true;
           }
-        } else {  // Note mode
+        } else if (midi.tl_mode == 1) {  // Note mode
           uint8_t last_note = midi.get_last_note();
           if (last_note !=
               255) {  // Check if value has been sent (not initial value)
             output_val = (float)last_note;
+            has_output = true;
+          }
+        } else if (midi.tl_mode == 2) {  // Pitch Bend mode
+          uint16_t last_pb = midi.get_last_pitch_bend();
+          if (last_pb !=
+              8192) {  // Check if value has changed from center
+            output_val = (float)last_pb;
             has_output = true;
           }
         }
