@@ -102,38 +102,25 @@ bool PipoRangeSensor::measure_sensor() {
 
 #endif
 
-    // Determine if reading is within usable range:
-    // HW must report valid AND raw value must be within [lmin, lmax)
+    // Determine HW validity: sensor returned a physically meaningful measurement
     bool hw_valid = (sensor_dat["dist"].raw_value >= 0 && range_status);
-    bool value_in_bounds = hw_valid &&
-                           sensor_dat["dist"].raw_value >= sensor_dat["dist"].lmin &&
-                           sensor_dat["dist"].raw_value < sensor_dat["dist"].lmax;
-
-    sensor_dat["dist"].in_range = value_in_bounds;
+    sensor_dat["dist"].reading_valid = hw_valid;
 
     if (!hw_valid) {
       // HW reports no valid reading (nothing detected / too far)
       sensor_dat["dist"].value = abs_max;
-      data_ready = true;
-
-    } else if (!value_in_bounds) {
-      // Valid HW reading but outside [lmin, lmax) — e.g. obstacle beyond lmax
-      sensor_dat["dist"].value =
-          ma_filter.process(sensor_dat["dist"].raw_value);
-      data_ready = true;
-
     } else {
-      // In range: valid HW AND within [lmin, lmax)
-
-      // Reset filter when transitioning into valid range to prevent spurious values
-      if (sensor_dat["dist"].in_range && !sensor_dat["dist"].in_range_prev) {
+      // Valid HW reading — apply filter
+      // Reset filter when transitioning from invalid to valid to prevent spurious values
+      if (sensor_dat["dist"].reading_valid &&
+          !sensor_dat["dist"].reading_valid_prev) {
         ma_filter.reset(sensor_dat["dist"].raw_value);
       }
 
       sensor_dat["dist"].value =
           ma_filter.process(sensor_dat["dist"].raw_value);
-      data_ready = true;
     }
+    data_ready = true;
     if (status == 0) {
 #if HW_REV == 10
       status = vl53l4cx.VL53L4CX_ClearInterruptAndStartMeasurement();

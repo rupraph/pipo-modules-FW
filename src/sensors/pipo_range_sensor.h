@@ -17,9 +17,8 @@ class PipoRangeSensor : public Sensor {
  public:
   PipoRangeSensor() {
     sensor_dat["dist"] = SensorDat();
-    sensor_dat["dist"].in_range = false;
-    sensor_dat["dist"].in_range_prev = false;
-    sensor_dat["dist"].in_range_set_by_sensor = true;
+    sensor_dat["dist"].reading_valid = false;
+    sensor_dat["dist"].reading_valid_prev = false;
     sensor_dat["dist"].hold_mode = false;
   };
 

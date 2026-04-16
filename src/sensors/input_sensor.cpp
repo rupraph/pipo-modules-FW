@@ -1,46 +1,77 @@
 #include "sensors/input_sensor.h"
 
+// Number of consecutive invalid-reading frames before acting.
+// At 400Hz, 3 frames = 7.5ms — filters single-frame HW glitches.
+static constexpr uint8_t READING_VALID_DEBOUNCE_FRAMES = 3;
+
 bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
   bool data_changed = false;
 
-  // Check if any axis changed in_range state (e.g. hold_mode: value held but range exited)
-  bool in_range_changed = false;
-  for (const auto& dat : sensor_dat) {
-    if (dat.second.in_range != dat.second.in_range_prev) {
-      in_range_changed = true;
-      break;
-    }
-  }
-
-  if (!newdata && !in_range_changed)
+  // No new sample from HW (e.g. IMU not ready yet) — skip processing entirely
+  if (!newdata)
     return false;
 
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
-    if (newdata) {
-      // Hold mode: revert .value for out-of-range axes so downstream
-      // (offset, neutral filter, engine) keeps seeing the last in-range value.
-      for (auto& pair : sensor_dat) {
-        if (pair.second.hold_mode && !pair.second.in_range) {
-          pair.second.value = pair.second.value_prev_measure;
+    // Revert .value when reading is invalid:
+    // - During debounce window: prevent spurious values from affecting within_bounds
+    // - With hold_mode: keep last valid value indefinitely while sensor has no signal
+    // Without hold_mode and past debounce, the invalid value flows through normally.
+    for (auto& pair : sensor_dat) {
+      SensorDat& d = pair.second;
+      if (!d.reading_valid) {
+        // +1 because invalid_count hasn't been incremented yet this frame
+        bool in_debounce =
+            (d.invalid_count + 1) < READING_VALID_DEBOUNCE_FRAMES;
+        if (d.hold_mode || in_debounce) {
+          d.value = d.value_prev_measure;
         }
       }
-      apply_offset();
-      data_changed = process_sensor_neutral_filter();
     }
-    // Auto-compute in_range for axes that don't set it explicitly (motion, analog)
-    for (auto& dat : sensor_dat) {
-      if (!dat.second.in_range_set_by_sensor) {
-        dat.second.in_range = (dat.second.value_ready > dat.second.lmin &&
-                               dat.second.value_ready < dat.second.lmax);
+
+    apply_offset();
+    data_changed = process_sensor_neutral_filter();
+
+    // Compute within_bounds for ALL axes uniformly (after filtering)
+    for (auto& pair : sensor_dat) {
+      SensorDat& d = pair.second;
+      d.within_bounds = (d.value_ready >= d.lmin && d.value_ready <= d.lmax);
+    }
+
+    // Debounce reading_valid: require N consecutive invalid frames before acting.
+    // Immediate recovery when reading becomes valid again.
+    for (auto& pair : sensor_dat) {
+      SensorDat& d = pair.second;
+      bool debounced_valid;
+      if (d.reading_valid) {
+        d.invalid_count = 0;
+        debounced_valid = true;
+      } else {
+        d.invalid_count =
+            min((int)d.invalid_count + 1, (int)READING_VALID_DEBOUNCE_FRAMES);
+        debounced_valid = (d.invalid_count < READING_VALID_DEBOUNCE_FRAMES);
+      }
+      // Composite: sensor has valid data AND value within user bounds
+      d.in_range = debounced_valid && d.within_bounds;
+    }
+
+    bool triggers_changed = process_sensor_triggers();
+
+    // Check if in_range or within_bounds transitioned
+    bool range_changed = false;
+    for (const auto& pair : sensor_dat) {
+      const SensorDat& d = pair.second;
+      if (d.in_range != d.in_range_prev ||
+          d.within_bounds != d.within_bounds_prev) {
+        range_changed = true;
+        break;
       }
     }
-    bool triggers_changed = process_sensor_triggers();
-    data_changed =
-        data_changed || triggers_changed || in_range_changed;
+
+    data_changed = data_changed || triggers_changed || range_changed;
   }
   return data_changed;
 }
@@ -200,6 +231,8 @@ void Sensor::store_previous_values() {
   for (auto& dat : sensor_dat) {
     dat.second.value_prev = dat.second.value_ready;
     dat.second.value_prev_measure = dat.second.value;
+    dat.second.reading_valid_prev = dat.second.reading_valid;
+    dat.second.within_bounds_prev = dat.second.within_bounds;
     dat.second.in_range_prev = dat.second.in_range;
   }
 }

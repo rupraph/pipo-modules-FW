@@ -37,13 +37,14 @@ struct SensorDat {
       cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
 
   // Live attributes
-  float raw_value;       // raw value from sensor (pure reading)
-  float value;                // after sensor-specific filtering
-  float value_prev_measure;   // .value before last measure_sensor() — for hold_mode
-  float value_offset;         // after offset applied
-  float value_ready;          // final value after neutral filter
-  float value_prev;           // previous value_ready for comparison
-  bool bool_value;       // boolean output when in trigger mode
+  float raw_value;  // raw value from sensor (pure reading)
+  float value;      // after sensor-specific filtering
+  float
+      value_prev_measure;  // .value before last measure_sensor() — for hold_mode
+  float value_offset;      // after offset applied
+  float value_ready;       // final value after neutral filter
+  float value_prev;        // previous value_ready for comparison
+  bool bool_value;         // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
   // Range state: whether the sensor reading is within [lmin, lmax]
@@ -51,10 +52,26 @@ struct SensorDat {
   // in measure_sensor() and mark in_range_set_by_sensor = true.
   // For always-valid sensors (IMU, ADC), the base class auto-computes this
   // from value_ready vs [lmin, lmax] after filtering.
+
+  // -- Sensor validity: did the HW produce a meaningful measurement?
+  // Sensors that can lose signal (e.g. ToF) set this to false in measure_sensor().
+  // Always-valid sensors (IMU, ADC) leave it at default true.
+  bool reading_valid = true;
+  bool reading_valid_prev = true;
+  uint8_t invalid_count = 0;  // consecutive frames with reading_valid == false
+
+  // -- Bounds check: is value_ready within [lmin, lmax]?
+  // Computed by base class for ALL axes after filtering — never set by drivers.
+  bool within_bounds = true;
+  bool within_bounds_prev = true;
+
+  // -- Composite: debounced(reading_valid) && within_bounds
+  // This is what triggers/untriggers and the engine use.
   bool in_range = true;
   bool in_range_prev = true;
-  bool in_range_set_by_sensor = false;  // true = sensor driver sets in_range explicitly
-  bool hold_mode = false;  // when true and !in_range, hold previous value instead of updating
+
+  bool hold_mode =
+      false;  // when true and !reading_valid, hold previous value instead of updating
 
   struct trigger_flag {
     bool osc_trig = false;
@@ -86,9 +103,13 @@ struct SensorDat {
         th_mode(false),
         bool_value(false),
         bool_value_prev(false),
+        reading_valid(true),
+        reading_valid_prev(true),
+        invalid_count(0),
+        within_bounds(true),
+        within_bounds_prev(true),
         in_range(true),
         in_range_prev(true),
-        in_range_set_by_sensor(false),
         NeutralFilter(0) {}
 };
 
