@@ -46,22 +46,25 @@ void Engine::update() {
     bool sensor_over_out = input_sensor.get_over_out(axis_name);
     float sensor_min = input_sensor.get_limit_min(axis_name);
     float sensor_max = input_sensor.get_limit_max(axis_name);
-    float sensor_midpoint;
 
     // Store original values before any transformations
     float original_sensor_val = sensor_val;
     float original_min = sensor_min;
     float original_max = sensor_max;
 
-    // Handle cyclic mode (split range at midpoint)
-    sensor_midpoint = sensor_min + (sensor_max - sensor_min) / 2.0f;
+    // Handle cyclic mode: phase-shifted triangle wave mapping.
+    // Phase 0.25 places output 0.5 at the sensor boundary (the discontinuity),
+    // so both sides wrap to the same output value with no jump.
+    // Phase 0.0 gives the old behaviour (peak at midpoint).
+    static const float CYCLIC_PHASE = 0.25f;
     if (sensor_cycle) {
-      if (sensor_val < sensor_midpoint) {
-        sensor_max = sensor_midpoint;
-      } else {
-        sensor_min = sensor_max;
-        sensor_max = sensor_midpoint;
-      }
+      float range = sensor_max - sensor_min;
+      float norm = (sensor_val - sensor_min) / range;           // [0, 1]
+      float t = norm - CYCLIC_PHASE + 1.5f;
+      t = t - (float)(int)t;                                    // wrap to [0, 1]
+      float tri = 2.0f * t - 1.0f;
+      if (tri < 0.0f) tri = -tri;                               // triangle wave [0, 1]
+      sensor_val = sensor_min + tri * range;                    // back to sensor units
     }
 
     // Apply over_out: if ORIGINAL value exceeds max, return the OUTPUT minimum
