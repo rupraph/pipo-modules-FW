@@ -4,7 +4,7 @@
 
 The trigger/untrigger flags tell the engine when a sensor _enters_ or _exits_ the active range, enabling note-on/note-off and OSC start/stop events.
 
-| Row | in_range_prev | in_range | hold_mode | Action               | Trigger | Untrigger | Value output                       |
+| Row | engaged_prev | engaged | hold_mode | Action               | Trigger | Untrigger | Value output                       |
 | --- | ------------- | -------- | --------- | -------------------- | ------- | --------- | ---------------------------------- |
 | 1   | false         | false    | false     | Stay out of range    | —       | —         | Current (no data or abs_max)       |
 | 2   | false         | false    | true      | Stay out, hold value | —       | —         | Held (last in-range value)         |
@@ -24,7 +24,7 @@ The trigger/untrigger flags tell the engine when a sensor _enters_ or _exits_ th
 
 ## Threshold Mode (mode=1)
 
-Uses `bool_value` (computed from `value_ready` vs `lmin`/`lmax`) instead of `in_range`:
+Uses `bool_value` (computed from `value_ready` vs `lmin`/`lmax`) instead of `engaged`:
 
 | th_mode    | bool_value = true when                      |
 | ---------- | ------------------------------------------- |
@@ -37,9 +37,9 @@ Uses `bool_value` (computed from `value_ready` vs `lmin`/`lmax`) instead of `in_
 | true            | false      | Set untrigger flags |
 | same            | same       | No action           |
 
-## Where in_range is set
+## Where engaged is set
 
-| Sensor       | in_range_set_by_sensor | How in_range is determined                                                        |
+| Sensor       | reading_valid set by sensor | How engaged is determined                                                        |
 | ------------ | ---------------------- | --------------------------------------------------------------------------------- |
 | Range (ToF)  | **true**               | Hardware validity + `raw_value` within `[lmin, lmax)` — set in `measure_sensor()` |
 | Motion (IMU) | false                  | Auto-computed by base class: `value_ready > lmin && value_ready < lmax`           |

@@ -66,7 +66,7 @@ class TestSensor : public Sensor {
 };
 
 // ============================================================================
-// store_previous_values: saves value_ready, reading_valid, within_bounds, in_range
+// store_previous_values: saves value_ready, reading_valid, within_bounds, engaged
 // ============================================================================
 
 TEST_CASE("store_previous_values saves all _prev fields") {
@@ -75,12 +75,12 @@ TEST_CASE("store_previous_values saves all _prev fields") {
   s.dat("x").value_ready = 50.0;
   s.dat("x").reading_valid = true;
   s.dat("x").within_bounds = true;
-  s.dat("x").in_range = true;
+  s.dat("x").engaged = true;
 
   s.dat("x").value_prev = 0.0;
   s.dat("x").reading_valid_prev = false;
   s.dat("x").within_bounds_prev = false;
-  s.dat("x").in_range_prev = false;
+  s.dat("x").engaged_prev = false;
 
   s.dat("x").lmin = 0.0;
   s.dat("x").lmax = 100.0;
@@ -94,31 +94,31 @@ TEST_CASE("store_previous_values saves all _prev fields") {
   CHECK(s.dat("x").value_prev == 50.0);
   CHECK(s.dat("x").reading_valid_prev == true);
   CHECK(s.dat("x").within_bounds_prev == true);
-  CHECK(s.dat("x").in_range_prev == true);
+  CHECK(s.dat("x").engaged_prev == true);
 }
 
 // ============================================================================
-// is_within_range: returns the in_range flag (composite)
+// is_engaged: returns the engaged flag (composite)
 // ============================================================================
 
-TEST_CASE("is_within_range returns in_range flag") {
+TEST_CASE("is_engaged returns engaged flag") {
   TestSensor s;
   s.add_axis("x");
-  s.dat("x").in_range = true;
-  CHECK(s.is_within_range("x") == true);
+  s.dat("x").engaged = true;
+  CHECK(s.is_engaged("x") == true);
 
-  s.dat("x").in_range = false;
-  CHECK(s.is_within_range("x") == false);
+  s.dat("x").engaged = false;
+  CHECK(s.is_engaged("x") == false);
 }
 
-TEST_CASE("is_prev_within_range returns in_range_prev flag") {
+TEST_CASE("was_engaged returns engaged_prev flag") {
   TestSensor s;
   s.add_axis("x");
-  s.dat("x").in_range_prev = true;
-  CHECK(s.is_prev_within_range("x") == true);
+  s.dat("x").engaged_prev = true;
+  CHECK(s.was_engaged("x") == true);
 
-  s.dat("x").in_range_prev = false;
-  CHECK(s.is_prev_within_range("x") == false);
+  s.dat("x").engaged_prev = false;
+  CHECK(s.was_engaged("x") == false);
 }
 
 // ============================================================================
@@ -139,7 +139,7 @@ TEST_CASE("within_bounds computed true when value inside [lmin, lmax]") {
   s.update();
 
   CHECK(s.dat("pitch").within_bounds == true);
-  CHECK(s.dat("pitch").in_range ==
+  CHECK(s.dat("pitch").engaged ==
         true);  // reading_valid=true (default) && within_bounds=true
 }
 
@@ -157,11 +157,11 @@ TEST_CASE("within_bounds computed false when value outside [lmin, lmax]") {
   s.update();
 
   CHECK(s.dat("x").within_bounds == false);
-  CHECK(s.dat("x").in_range == false);
+  CHECK(s.dat("x").engaged == false);
 }
 
 TEST_CASE(
-    "in_range is false when reading_valid=false even if within_bounds=true") {
+    "engaged is false when reading_valid=false even if within_bounds=true") {
   TestSensor s;
   s.add_axis("dist");
   s.dat("dist").lmin = 2.0;
@@ -176,14 +176,14 @@ TEST_CASE(
   s.update();
 
   CHECK(s.dat("dist").within_bounds == true);
-  CHECK(s.dat("dist").in_range == false);  // reading_valid debounced to false
+  CHECK(s.dat("dist").engaged == false);  // reading_valid debounced to false
 }
 
 // ============================================================================
 // Truth table: trigger/untrigger flags in continuous mode
 // ============================================================================
 
-TEST_CASE("Truth table row 1: in_range stays true — no trigger flags") {
+TEST_CASE("Truth table row 1: engaged stays true — no trigger flags") {
   TestSensor s;
   s.add_axis("x");
   s.dat("x").mode = 0;  // continuous
@@ -194,11 +194,11 @@ TEST_CASE("Truth table row 1: in_range stays true — no trigger flags") {
   s.dat("x").value = 30.0;
   s.dat("x").value_ready = 30.0;
   s.dat("x").reading_valid = true;
-  s.dat("x").in_range = true;
-  s.dat("x").in_range_prev = true;
+  s.dat("x").engaged = true;
+  s.dat("x").engaged_prev = true;
   s.next_measure_result = true;
 
-  // First update: in_range stays true → no transition
+  // First update: engaged stays true → no transition
   s.update();
 
   CHECK(s.dat("x").trigger_flags.midi_trig == false);
@@ -220,11 +220,11 @@ TEST_CASE("Truth table row 2: enter range — TRIGGER fires") {
   // Start out of bounds
   s.dat("x").reading_valid = true;
   s.dat("x").within_bounds = false;
-  s.dat("x").in_range = false;
-  s.dat("x").in_range_prev = false;
+  s.dat("x").engaged = false;
+  s.dat("x").engaged_prev = false;
   s.next_measure_result = true;
 
-  // First update to establish in_range_prev = false
+  // First update to establish engaged_prev = false
   s.update();
 
   // Schedule transition to within bounds
@@ -247,15 +247,15 @@ TEST_CASE("Truth table row 3: exit range (value > lmax) — UNTRIGGER fires") {
 
   // Start in range
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
-  s.dat("dist").in_range_prev = true;
+  s.dat("dist").engaged = true;
+  s.dat("dist").engaged_prev = true;
   s.dat("dist").within_bounds = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
   s.dat("dist").value_prev = 30.0;
   s.next_measure_result = true;
 
-  // First update: establish in_range_prev = true
+  // First update: establish engaged_prev = true
   s.update();
 
   // Now exit: value goes above lmax (base class will compute within_bounds=false)
@@ -263,7 +263,7 @@ TEST_CASE("Truth table row 3: exit range (value > lmax) — UNTRIGGER fires") {
   s.update();
 
   CHECK(s.dat("dist").within_bounds == false);
-  CHECK(s.dat("dist").in_range == false);
+  CHECK(s.dat("dist").engaged == false);
   CHECK(s.dat("dist").untrigger_flags.midi_trig == true);
   CHECK(s.dat("dist").untrigger_flags.osc_trig == true);
   CHECK(s.dat("dist").trigger_flags.midi_trig == false);
@@ -284,11 +284,11 @@ TEST_CASE("Truth table row 4: stays out of range — no flags") {
   s.dat("dist").value_ready = 100.0;
   s.dat("dist").value_prev = 100.0;
   s.dat("dist").within_bounds = false;
-  s.dat("dist").in_range = false;
-  s.dat("dist").in_range_prev = false;
+  s.dat("dist").engaged = false;
+  s.dat("dist").engaged_prev = false;
   s.next_measure_result = true;
 
-  // First update: in_range_prev = false
+  // First update: engaged_prev = false
   s.update();
 
   // Still out of bounds
@@ -311,8 +311,8 @@ TEST_CASE(
 
   // In range
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
-  s.dat("dist").in_range_prev = true;
+  s.dat("dist").engaged = true;
+  s.dat("dist").engaged_prev = true;
   s.dat("dist").within_bounds = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
@@ -326,18 +326,18 @@ TEST_CASE(
   s.set_next_value(400.0);  // abs_max
   s.next_measure_result = true;
   s.update();                             // frame 1: still debounced as valid
-  CHECK(s.dat("dist").in_range == true);  // debounce holds
+  CHECK(s.dat("dist").engaged == true);  // debounce holds
 
   s.set_next_reading_valid(false);
   s.set_next_value(400.0);
   s.update();  // frame 2: still debounced
-  CHECK(s.dat("dist").in_range == true);
+  CHECK(s.dat("dist").engaged == true);
 
   s.set_next_reading_valid(false);
   s.set_next_value(400.0);
-  s.update();  // frame 3: debounce expires → in_range goes false
+  s.update();  // frame 3: debounce expires → engaged goes false
 
-  CHECK(s.dat("dist").in_range == false);
+  CHECK(s.dat("dist").engaged == false);
   CHECK(s.dat("dist").untrigger_flags.midi_trig == true);
   CHECK(s.dat("dist").untrigger_flags.osc_trig == true);
 }
@@ -355,8 +355,8 @@ TEST_CASE("Truth table row 8: re-enter range — TRIGGER fires") {
   s.dat("dist").reading_valid = false;
   s.dat("dist").invalid_count = 10;
   s.dat("dist").within_bounds = false;
-  s.dat("dist").in_range = false;
-  s.dat("dist").in_range_prev = false;
+  s.dat("dist").engaged = false;
+  s.dat("dist").engaged_prev = false;
   s.dat("dist").value = 400.0;
   s.dat("dist").value_ready = 400.0;
   s.dat("dist").value_prev = 400.0;
@@ -371,13 +371,13 @@ TEST_CASE("Truth table row 8: re-enter range — TRIGGER fires") {
 
   CHECK(s.dat("dist").reading_valid == true);
   CHECK(s.dat("dist").within_bounds == true);
-  CHECK(s.dat("dist").in_range == true);
+  CHECK(s.dat("dist").engaged == true);
   CHECK(s.dat("dist").trigger_flags.midi_trig == true);
   CHECK(s.dat("dist").trigger_flags.osc_trig == true);
 }
 
 // ============================================================================
-// Hold mode scenario: value unchanged but in_range transitions
+// Hold mode scenario: value unchanged but engaged transitions
 // This is THE core bug fix test — update() must not early-exit
 // ============================================================================
 
@@ -393,7 +393,7 @@ TEST_CASE("Hold mode: update() processes triggers even when value unchanged") {
 
   // Start in range
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
+  s.dat("dist").engaged = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
   s.next_measure_result = true;
@@ -401,7 +401,7 @@ TEST_CASE("Hold mode: update() processes triggers even when value unchanged") {
   s.update();
 
   // Sensor loses signal — value goes to abs_max but hold_mode reverts it.
-  // reading_valid goes false. After debounce, in_range should transition.
+  // reading_valid goes false. After debounce, engaged should transition.
   // Run enough frames to pass debounce (3 frames)
   for (int i = 0; i < 3; i++) {
     s.set_next_reading_valid(false);
@@ -410,7 +410,7 @@ TEST_CASE("Hold mode: update() processes triggers even when value unchanged") {
     s.update();
   }
 
-  CHECK(s.dat("dist").in_range == false);
+  CHECK(s.dat("dist").engaged == false);
   CHECK(s.dat("dist").untrigger_flags.midi_trig == true);
   CHECK(s.dat("dist").untrigger_flags.osc_trig == true);
   // Value should be held at 30 due to hold_mode
@@ -429,7 +429,7 @@ TEST_CASE("Hold mode: value preserved when reading_valid=false") {
 
   // Start in range with value 30
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
+  s.dat("dist").engaged = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
   s.next_measure_result = true;
@@ -460,7 +460,7 @@ TEST_CASE("No hold mode: value updates after debounce expires") {
 
   // Start in range with value 30
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
+  s.dat("dist").engaged = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
   s.next_measure_result = true;
@@ -484,8 +484,8 @@ TEST_CASE("Normal mode: update() returns false when no new sample") {
   TestSensor s;
   s.add_axis("x");
   s.dat("x").mode = 0;
-  s.dat("x").in_range = true;
-  s.dat("x").in_range_prev = true;
+  s.dat("x").engaged = true;
+  s.dat("x").engaged_prev = true;
   s.dat("x").value_ready = 50.0;
   s.dat("x").value_prev = 50.0;
   s.next_measure_result = false;  // HW not ready
@@ -568,8 +568,8 @@ TEST_CASE("Debounce: single invalid frame does not cause untrigger") {
 
   // Start in range
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
-  s.dat("dist").in_range_prev = true;
+  s.dat("dist").engaged = true;
+  s.dat("dist").engaged_prev = true;
   s.dat("dist").within_bounds = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
@@ -583,8 +583,8 @@ TEST_CASE("Debounce: single invalid frame does not cause untrigger") {
   s.set_next_value(400.0);
   s.update();
 
-  // Should still be in_range due to debounce
-  CHECK(s.dat("dist").in_range == true);
+  // Should still be engaged due to debounce
+  CHECK(s.dat("dist").engaged == true);
   CHECK(s.dat("dist").untrigger_flags.midi_trig == false);
 
   // Recovery: valid reading returns
@@ -592,7 +592,7 @@ TEST_CASE("Debounce: single invalid frame does not cause untrigger") {
   s.set_next_value(30.0);
   s.update();
 
-  CHECK(s.dat("dist").in_range == true);
+  CHECK(s.dat("dist").engaged == true);
   CHECK(s.dat("dist").invalid_count == 0);
 }
 
@@ -606,7 +606,7 @@ TEST_CASE("Debounce: recovery resets counter immediately") {
   s.dat("dist").NeutralFilter.setDeadband(0);
 
   s.dat("dist").reading_valid = true;
-  s.dat("dist").in_range = true;
+  s.dat("dist").engaged = true;
   s.dat("dist").value = 30.0;
   s.dat("dist").value_ready = 30.0;
   s.next_measure_result = true;
@@ -619,7 +619,7 @@ TEST_CASE("Debounce: recovery resets counter immediately") {
     s.set_next_value(400.0);
     s.update();
   }
-  CHECK(s.dat("dist").in_range == true);
+  CHECK(s.dat("dist").engaged == true);
   CHECK(s.dat("dist").invalid_count == 2);
 
   // Recovery
@@ -628,5 +628,5 @@ TEST_CASE("Debounce: recovery resets counter immediately") {
   s.update();
 
   CHECK(s.dat("dist").invalid_count == 0);
-  CHECK(s.dat("dist").in_range == true);
+  CHECK(s.dat("dist").engaged == true);
 }

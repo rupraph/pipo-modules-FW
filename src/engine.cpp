@@ -221,7 +221,7 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
         // sensor in range
         // AND note not already playing
         // AND (note is diff from previous OR we entered the range)
-        if (dat.in_range &&
+        if (dat.engaged &&
             // !midiio.is_note_playing(note_val[axis_name], channel) &&
             (note_val[axis_name] != note_val_prev[axis_name] ||
              dat.trigger_flags.midi_trig)) {
@@ -233,7 +233,7 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
         }
 
         if (dat.untrigger_flags.midi_trig)
-        // &&!sensor.is_within_range(axis_name))
+        // &&!sensor.is_engaged(axis_name))
         {
           midiio.sendAllNotesOff(channel);
           input_sensor.set_untrigger_flag(axis_name, MIDI, false);
@@ -263,7 +263,7 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
 //         case 1:
 //           //continuous mode -> do not update if outise measuring range
 //           if (input_sensor.get_mode(axis_name) == false) {
-//             if (input_sensor.is_within_range(axis_name)) {
+//             if (input_sensor.is_engaged(axis_name)) {
 //               hidio.mouse_update(address,
 //                                  HID_translator.get_mouse_int(
 //                                      sensor_val, sensor_min, sensor_max),
@@ -334,7 +334,7 @@ void Engine::osc_processor(const string& axis_name, const SensorDat& dat,
       new_osc_val = round_to(sensor_val, 3);
     } else {
       if (dat.mode == 0) {  // continuous mode
-        // if (dat.in_range) {
+        // if (dat.engaged) {
         new_osc_val = round_to(
             osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
         // }

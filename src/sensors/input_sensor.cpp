@@ -55,16 +55,16 @@ bool Sensor::update() {
         debounced_valid = (d.invalid_count < READING_VALID_DEBOUNCE_FRAMES);
       }
       // Composite: sensor has valid data AND value within user bounds
-      d.in_range = debounced_valid && d.within_bounds;
+      d.engaged = debounced_valid && d.within_bounds;
     }
 
     bool triggers_changed = process_sensor_triggers();
 
-    // Check if in_range or within_bounds transitioned
+    // Check if engaged or within_bounds transitioned
     bool range_changed = false;
     for (const auto& pair : sensor_dat) {
       const SensorDat& d = pair.second;
-      if (d.in_range != d.in_range_prev ||
+      if (d.engaged != d.engaged_prev ||
           d.within_bounds != d.within_bounds_prev) {
         range_changed = true;
         break;
@@ -233,22 +233,22 @@ void Sensor::store_previous_values() {
     dat.second.value_prev_measure = dat.second.value;
     dat.second.reading_valid_prev = dat.second.reading_valid;
     dat.second.within_bounds_prev = dat.second.within_bounds;
-    dat.second.in_range_prev = dat.second.in_range;
+    dat.second.engaged_prev = dat.second.engaged;
   }
 }
 
-bool Sensor::is_within_range(const std::string& axis) {
+bool Sensor::is_engaged(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    return sensor_dat[axis].in_range;
+    return sensor_dat[axis].engaged;
   } else {
     Serial.println("error: Axis not found");
     return false;
   }
 }
 
-bool Sensor::is_prev_within_range(const std::string& axis) {
+bool Sensor::was_engaged(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    return sensor_dat[axis].in_range_prev;
+    return sensor_dat[axis].engaged_prev;
   } else {
     Serial.println("error: Axis not found");
     return false;
@@ -270,11 +270,11 @@ bool Sensor::process_sensor_triggers() {
 
     // flags for continuous mode
     if (axis_data.mode == 0) {
-      if (!axis_data.in_range && axis_data.in_range_prev) {
+      if (!axis_data.engaged && axis_data.engaged_prev) {
         set_all_untrigger(axis, true);
         flags_changed = true;
       }
-      if (axis_data.in_range && !axis_data.in_range_prev) {
+      if (axis_data.engaged && !axis_data.engaged_prev) {
         set_all_trigger(axis, true);
         flags_changed = true;
       }

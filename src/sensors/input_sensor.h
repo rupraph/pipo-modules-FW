@@ -47,11 +47,10 @@ struct SensorDat {
   bool bool_value;         // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
-  // Range state: whether the sensor reading is within [lmin, lmax]
-  // For sensors that can lose signal (e.g. ToF range), set in_range explicitly
-  // in measure_sensor() and mark in_range_set_by_sensor = true.
-  // For always-valid sensors (IMU, ADC), the base class auto-computes this
-  // from value_ready vs [lmin, lmax] after filtering.
+  // Engaged state: whether the sensor axis is actively producing usable output.
+  // Composite of debounced(reading_valid) && within_bounds.
+  // For sensors that can lose signal (e.g. ToF range), reading_valid is set
+  // in measure_sensor(). For always-valid sensors (IMU, ADC), it stays true.
 
   // -- Sensor validity: did the HW produce a meaningful measurement?
   // Sensors that can lose signal (e.g. ToF) set this to false in measure_sensor().
@@ -67,8 +66,8 @@ struct SensorDat {
 
   // -- Composite: debounced(reading_valid) && within_bounds
   // This is what triggers/untriggers and the engine use.
-  bool in_range = true;
-  bool in_range_prev = true;
+  bool engaged = true;
+  bool engaged_prev = true;
 
   bool hold_mode =
       false;  // when true and !reading_valid, hold previous value instead of updating
@@ -108,8 +107,8 @@ struct SensorDat {
         invalid_count(0),
         within_bounds(true),
         within_bounds_prev(true),
-        in_range(true),
-        in_range_prev(true),
+        engaged(true),
+        engaged_prev(true),
         NeutralFilter(0) {}
 };
 
@@ -138,8 +137,8 @@ class Sensor {
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
   // bool test_outside_deadband(const std::string& axis);
-  bool is_within_range(const std::string& axis);
-  bool is_prev_within_range(const std::string& axis);
+  bool is_engaged(const std::string& axis);
+  bool was_engaged(const std::string& axis);
   bool process_sensor_triggers();        //return true if any flags were toggled
   bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
