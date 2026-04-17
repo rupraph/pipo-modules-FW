@@ -290,6 +290,9 @@ void HwUi::monitor_wifiBT_flags() {
 }
 
 void HwUi::update_switches() {
+  if (config.general_config["Button_disa"] == true) {
+    return;  // Button disabled in config, skip processing
+  }
   // PAUSE has a pullup
   pause_sw.read_debounce();
   if (pause_sw.get_flag()) {

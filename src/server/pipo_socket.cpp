@@ -324,38 +324,6 @@ void PipoSocket::start(AsyncWebSocket* ws) {
   this->ws = ws;
   this->ws->enable(true);
 }
-void PipoSocket::sendNoteOn(int note, int velocity, int channel) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "noteon";
-  msg += channel;
-  msg += ",";
-  msg += note;
-  msg += ",";
-  msg += velocity;
-  ws->textAll(msg.c_str());
-}
-void PipoSocket::sendNoteOff(int note, int velocity, int channel) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "noteoff";
-  msg += channel;
-  msg += ",";
-  msg += note;
-  msg += ",";
-  msg += velocity;
-  ws->textAll(msg.c_str());
-}
-
-void PipoSocket::sendSensorValue(std::string axis, float value) {
-  if (ws == nullptr || paused)
-    return;
-  String msg = "sensor";
-  msg += axis.c_str();
-  msg += ",";
-  msg += value;
-  ws->textAll(msg.c_str());
-}
 
 void PipoSocket::loop() {
   if (ws == nullptr || paused)
@@ -396,9 +364,63 @@ void PipoSocket::loop() {
     // if (!input_sensor.test_outside_deadzone(axis_name))
     //   continue;
 
+    // Get output value from enabled translator (OSC has priority over MIDI)
+    float output_val = -1.0f;  // -1 indicates no output configured/sent yet
+    bool has_output = false;
+
+    // Check OSC first
+    if (config.general_config["OSC_ENA"] == true &&
+        engine.Osctranslators.find(axis_name) != engine.Osctranslators.end()) {
+      OscTranslator& osctr = engine.Osctranslators[axis_name];
+      if (osctr.is_enabled()) {
+        float last_val = osctr.get_last_value();
+        if (!isnan(last_val)) {  // Check if value has been sent
+          output_val = last_val;
+          has_output = true;
+        }
+      }
+    }
+
+    // If no OSC output, check MIDI
+    if (!has_output && config.general_config["MidiEnabled"] == true &&
+        engine.Miditranslators.find(axis_name) !=
+            engine.Miditranslators.end()) {
+      MidiTranslator& midi = engine.Miditranslators[axis_name];
+      if (midi.is_enabled()) {
+        if (midi.tl_mode == 0) {  // CC mode
+          uint16_t last_cc = midi.get_last_cc_hires();
+          if (last_cc !=
+              65535) {  // Check if value has been sent (not initial value)
+            output_val =
+                midi.get_hires() ? (float)last_cc : (float)midi.get_last_cc();
+            has_output = true;
+          }
+        } else if (midi.tl_mode == 1) {  // Note mode
+          uint8_t last_note = midi.get_last_note();
+          if (last_note !=
+              255) {  // Check if value has been sent (not initial value)
+            output_val = (float)last_note;
+            has_output = true;
+          }
+        } else if (midi.tl_mode == 2) {  // Pitch Bend mode
+          uint16_t last_pb = midi.get_last_pitch_bend();
+          if (last_pb !=
+              8192) {  // Check if value has changed from center
+            output_val = (float)last_pb;
+            has_output = true;
+          }
+        }
+      }
+    }
+
     size_t remaining = outMaxLen - strlen(outMsg) - 1;
-    snprintf(outMsg + strlen(outMsg), remaining, "\nsensor,%s,%.2f,%d",
-             axis_name.c_str(), sensor_val, sensor_bool);
+    if (has_output) {
+      snprintf(outMsg + strlen(outMsg), remaining, "\nsensor,%s,%.2f,%d,%.2f",
+               axis_name.c_str(), sensor_val, sensor_bool, output_val);
+    } else {
+      snprintf(outMsg + strlen(outMsg), remaining, "\nsensor,%s,%.2f,%d",
+               axis_name.c_str(), sensor_val, sensor_bool);
+    }
   }
 
   // Append RSSI value if space allows

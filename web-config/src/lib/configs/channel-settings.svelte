@@ -17,6 +17,7 @@
   import { schema } from "../../schema";
   import { pipoio, PipoIO } from "../../pipoio";
   import PillSwitch from "../form/PillSwitch.svelte";
+  import { getDefaultDeadband } from "../../defaults";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -40,7 +41,7 @@
     "MidiEnabled:",
     config?.general.MidiEnabled,
     "OSC_ENA:",
-    config?.general.OSC_ENA
+    config?.general.OSC_ENA,
   );
 
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
@@ -225,6 +226,18 @@
     currentConfig.set(config);
   }
 
+  // Default and current state for the noise filter (deadband)
+  $: defaultDeadband = selectedChannel
+    ? getDefaultDeadband(type, selectedChannel)
+    : 0;
+  $: deadbandEnabled = input ? input.deadband !== 0 : false;
+
+  function handleDeadbandToggle() {
+    if (!input) return;
+    input.deadband = deadbandEnabled ? 0 : defaultDeadband;
+    currentConfig.set(config);
+  }
+
   // Compute if binary mode is active
   $: isBinaryMode = input
     ? aschema?.cat === "Touch"
@@ -286,7 +299,7 @@
                 input.offset = offsetValue as number;
                 console.log(
                   `Offset calibration completed for ${selectedChannel}:`,
-                  offsetValue
+                  offsetValue,
                 );
                 // Trigger config update
                 if (config) {
@@ -388,9 +401,15 @@
           {/if}
           {#if type !== "range" && (type !== "motion" || isEulerAngle)}
             <p>
-              <u>Cyclic:</u> When enabled, the output wraps within the min max slider,
-              allowing for continous cycling: output will be 0 when at min and at
-              max. maximum is reached in the middle of the range.
+              <u>Cyclic:</u> This mode can be useful with input channels that have
+              discontinuities at their ends (For e.g. a angular input that will jump
+              from -180° to +180°). This mode will rescale and transform the output
+              to provide a virtually continuous triangular signal on the output.
+              This is usefull to tweak the data and send to parameters that are not
+              circular (like a Midi CC) and avoid jumps. However, this signal transformation
+              breaks the direct relation between input and output that exist in normal
+              mode (in cyclic, an output value can correspond to 2 input positions,
+              which is not suited for all applications)
             </p>
           {/if}
         </InfoModal>
@@ -475,6 +494,24 @@
       />
     {/if}
   {/if}
+  {#if mode === "OSC"}
+    <div class="row">
+      <div class="left">
+        <span class="label">Noise Filter</span>
+        <InfoModal>
+          <p>
+            This filter removes small sensor variations to reduce network
+            traffic. Disable for full sensitivity, unfiltered readings.
+          </p>
+        </InfoModal>
+      </div>
+      <PillSwitch
+        label=""
+        value={deadbandEnabled}
+        on:change={handleDeadbandToggle}
+      />
+    </div>
+  {/if}
 
   <!-- {#if selectedChannel && aschema.cat === "Touch"}
     <div class="row centered">
@@ -517,6 +554,7 @@
 <style scoped>
   .label {
     text-align: left;
+    white-space: nowrap;
   }
   .buttons {
     max-width: 335px;

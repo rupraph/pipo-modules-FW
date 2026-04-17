@@ -23,9 +23,12 @@
         style="text-align: left; margin: 0 auto; max-width: 400px; font-size: 0.9em;"
       >
         <li>• Check your WiFi connection to Pipo</li>
-        <li>• Try restarting Pipo if the issue persists</li>
-        <li>• Make sure you only have one config page open</li>
+        <li>
+          • Make sure you only have one browser page trying open the
+          configuration page at once
+        </li>
         <li>• Make sure you only have 1 device connected to the Pipo Wifi</li>
+        <li>• Try restarting Pipo if the issue persists</li>
       </ul>
       <ul>
         <li>
