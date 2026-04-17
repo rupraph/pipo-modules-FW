@@ -183,7 +183,7 @@
           if (ipChanged || portChanged) {
             oscConflict = true;
             warnings.push(
-              `OSC destination differs:\n  Target: ${targetConfig.general.OSC_IP}:${targetConfig.general.OSC_PORT}\n  Current: ${current.general.OSC_IP}:${current.general.OSC_PORT}`,
+              `OSC destination differs:\n  Target: IP: ${targetConfig.general.OSC_IP} Port: ${targetConfig.general.OSC_PORT}\n  Current: IP: ${current.general.OSC_IP} Port: ${current.general.OSC_PORT}`,
             );
           }
         }
@@ -440,6 +440,12 @@
     gap: 6px;
     max-height: 320px;
     overflow-y: auto;
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  .config-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
   }
   .config-row {
     display: flex;
