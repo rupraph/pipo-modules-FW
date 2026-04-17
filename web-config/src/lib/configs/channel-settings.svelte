@@ -401,9 +401,15 @@
           {/if}
           {#if type !== "range" && (type !== "motion" || isEulerAngle)}
             <p>
-              <u>Cyclic:</u> When enabled, the output wraps within the min max slider,
-              allowing for continous cycling: output will be 0 when at min and at
-              max. maximum is reached in the middle of the range.
+              <u>Cyclic:</u> This mode can be useful with input channels that have
+              discontinuities at their ends (For e.g. a angular input that will jump
+              from -180° to +180°). This mode will rescale and transform the output
+              to provide a virtually continuous triangular signal on the output.
+              This is usefull to tweak the data and send to parameters that are not
+              circular (like a Midi CC) and avoid jumps. However, this signal transformation
+              breaks the direct relation between input and output that exist in normal
+              mode (in cyclic, an output value can correspond to 2 input positions,
+              which is not suited for all applications)
             </p>
           {/if}
         </InfoModal>
