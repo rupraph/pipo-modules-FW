@@ -303,13 +303,7 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
       return;
     }
 
-    if (strcmp("config", command) == 0) {
-      config.setValue(inMsg + offset + 1, inMsgL - offset - 1);
-      config.apply(engine, osc, true);
-    } else if (strcmp("configs", command) == 0) {
-      config.setValues(inMsg + offset + 1, inMsgL - offset - 1);
-      config.apply(engine, osc, true);
-    } else if (strcmp("save", command) == 0) {
+    if (strcmp("save", command) == 0) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
       input_sensor.monitor_axis(inMsg + offset + 1);

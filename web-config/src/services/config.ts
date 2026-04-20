@@ -114,19 +114,9 @@ class ConfigService {
       configsLoading.set(true);
       configsError.set(null);
 
-      const response = await pipoio.get<ConfigMeta[] | string>("/configs");
-      let names: string[];
-      let metas: ConfigMeta[];
-
-      if (typeof response.data === "string") {
-        // Legacy CSV format fallback
-        names = response.data.split(",").filter(Boolean);
-        metas = names.map((n) => ({ name: n, active: false }));
-      } else {
-        // New JSON array format
-        metas = response.data;
-        names = metas.map((m) => m.name);
-      }
+      const response = await pipoio.get<ConfigMeta[]>("/configs");
+      const metas = response.data;
+      const names = metas.map((m) => m.name);
 
       configMetas.set(metas);
       return names;

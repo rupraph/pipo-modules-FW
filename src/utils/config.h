@@ -43,8 +43,6 @@ class Config {
   bool load_config(String filename, bool addJsonExtension = true);
   void load_config();
   void set(const String& config);
-  void setValue(char input[], int len);
-  void setValues(char input[], int len);
   void save();
   void save(String filename);
   void duplicate_config(String source, String target);
@@ -70,6 +68,8 @@ class Config {
   std::vector<std::string> split(const std::string& str, char delimiter);
   bool validate_config(JsonDocument& config_doc);
   bool restore_from_default(String target_filename);
+  bool atomic_copy_file(const char* sourcePath, const char* targetPath,
+                        const String& logContext);
 
   // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";

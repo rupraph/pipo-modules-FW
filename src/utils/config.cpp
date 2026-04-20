@@ -59,57 +59,15 @@ bool Config::validate_config(JsonDocument& config_doc) {
 /// @return true if restore succeeded, false otherwise
 bool Config::restore_from_default(String target_filename) {
   log_w("Attempting to restore config from default.json");
-  logs.writeLog("Restoring config from default.json to " + target_filename);
+  String targetPath = get_path(target_filename);
+  String logMsg = "restore config from default.json: " + target_filename;
 
-  // Check if default.json exists
-  if (!LittleFS.exists(config_model_path)) {
-    log_e("CRITICAL: default.json not found, cannot restore");
-    logs.writeError("CRITICAL: default.json not found");
-    return false;
-  }
-
-  String target_path = get_path(target_filename);
-
-  // Delete the corrupted file first
-  if (LittleFS.exists(target_path.c_str())) {
-    LittleFS.remove(target_path.c_str());
-    log_i("Removed corrupted config: %s", target_path.c_str());
-  }
-
-  // Copy default.json to target (copyFile returns void, so we verify afterward)
-  copyFile(LittleFS, config_model_path, target_path.c_str());
-
-  // Verify the copy succeeded by checking if the file exists and has content
-  if (!LittleFS.exists(target_path.c_str())) {
-    log_e("Failed to restore config: file not created");
-    logs.writeError("Failed to restore config: " + target_filename);
-    return false;
-  }
-
-  File verifyFile = LittleFS.open(target_path.c_str(), FILE_READ);
-  if (!verifyFile) {
-    log_e("Failed to restore config: cannot open file");
-    logs.writeError("Failed to restore config (cannot open): " +
-                    target_filename);
-    return false;
-  }
-
-  size_t fileSize = verifyFile.size();
-  verifyFile.close();
-
-  if (fileSize < 10) {
-    log_e("Failed to restore config: file too small");
-    logs.writeError("Failed to restore config (too small): " + target_filename);
-    return false;
-  }
-
-  log_i("Successfully restored config from default.json");
-  logs.writeLog("Config restored successfully: " + target_filename);
-  return true;
+  return atomic_copy_file(config_model_path, targetPath.c_str(), logMsg);
 }
 
 bool Config::load_config(String filename, bool addJsonExtension = true) {
-  this->filename = filename;
+  // Save old filename in case load fails
+  String oldFilename = this->filename;
   String configPath = get_path(filename, addJsonExtension);
   log_i("load config: %s", configPath.c_str());
 
@@ -193,6 +151,9 @@ bool Config::load_config(String filename, bool addJsonExtension = true) {
     general_config.clear();
     general_config = current_config["general"];
 
+    // Only update filename member after successful validation
+    this->filename = filename;
+
     // Persist active config name so it survives reboot
     writeFile(LittleFS, last_config_path, filename.c_str());
 
@@ -238,47 +199,61 @@ void Config::cleanup_temp_files() {
 }
 
 /// @brief Load the last config used, if it exists, otherwise load the default
-/// config.
+/// config. Never hardcodes Config-1 to prevent resurrection after deletion.
 void Config::load_config() {
-  // if no default config, create default
-  if (!LittleFS.exists(get_path("Config-1").c_str())) {
-    log_i("no default config, creating one");
-    new_config("Config-1");
-  }
-  // if last config exists, load it
+  // Step 1: Try last_config.txt if it exists
   if (LittleFS.exists(last_config_path)) {
     String name = String(readFile(LittleFS, last_config_path).c_str());
-    if (LittleFS.exists(get_path(name).c_str())) {
+    // Filter out empty or whitespace-only names
+    name.trim();
+    if (name.length() > 0 && LittleFS.exists(get_path(name).c_str())) {
       log_i("last config found: %s", name.c_str());
       bool success = load_config(name);
-      if (!success) {
-        // Config is corrupted, delete it and fallback to default
-        log_w("Config corrupted, deleting: %s", name.c_str());
-        logs.writeError("Deleting corrupted config: " + name);
-        LittleFS.remove(get_path(name).c_str());
-
-        // Load default config
-        log_i("Falling back to default config");
-        bool defaultSuccess = load_config("Config-1");
-        if (!defaultSuccess) {
-          log_e("CRITICAL: Default config is also corrupted!");
-          logs.writeError("CRITICAL: Default config corrupted, recreating");
-          // Recreate default from model
-          new_config("Config-1");
-          load_config("Config-1");
-        }
+      if (success) {
+        return;  // Successfully loaded
       }
-      return;
+      // Config is corrupted, delete it and continue to scan
+      log_w("Config corrupted, deleting: %s", name.c_str());
+      logs.writeError("Deleting corrupted config: " + name);
+      LittleFS.remove(get_path(name).c_str());
     }
-    log_i("last config not found, loading default");
   }
-  // if no last config, load default
-  bool success = load_config("Config-1");
+
+  // Step 2: Scan /configs/ for any valid .json file
+  log_i("Scanning /configs/ for available configs");
+  File root = LittleFS.open(configs_root);
+  if (root && root.isDirectory()) {
+    File file = root.openNextFile();
+    while (file) {
+      String name = String(file.name());
+      file.close();
+
+      if (name.endsWith(".json") && !name.endsWith(temp_suffix)) {
+        String configName = name.substring(0, name.length() - 5);
+        log_i("Found config: %s", configName.c_str());
+        bool success = load_config(configName);
+        if (success) {
+          root.close();
+          return;  // Successfully loaded
+        }
+        // This config is corrupted, try next
+        log_w("Config corrupted: %s", configName.c_str());
+        logs.writeError("Skipping corrupted config: " + configName);
+        LittleFS.remove(get_path(configName).c_str());
+      }
+      file = root.openNextFile();
+    }
+    root.close();
+  }
+
+  // Step 3: No valid configs found, create fresh "default" from /default.json
+  log_w("No valid configs found, creating fresh default from default.json");
+  logs.writeLog("Creating default config from default.json");
+  new_config("default");
+  bool success = load_config("default");
   if (!success) {
-    log_e("CRITICAL: Default config corrupted, recreating");
-    logs.writeError("CRITICAL: Default config corrupted, recreating");
-    new_config("Config-1");
-    load_config("Config-1");
+    log_e("CRITICAL: Failed to create/load default config!");
+    logs.writeError("CRITICAL: Default config creation failed");
   }
 }
 
@@ -435,38 +410,9 @@ void Config::save(String filename) {
 void Config::duplicate_config(String source, String target) {
   String sourcePath = get_path(source);
   String targetPath = get_path(target);
+  String logMsg = "duplicate config: " + source + " -> " + target;
 
-  if (!LittleFS.exists(sourcePath.c_str())) {
-    log_e("Source config not found: %s", sourcePath.c_str());
-    logs.writeError("Duplicate failed: source not found " + source);
-    return;
-  }
-
-  // Copy via temp file for atomicity
-  String tempPath = targetPath + temp_suffix;
-  copyFile(LittleFS, sourcePath.c_str(), tempPath.c_str());
-
-  // Verify temp file
-  File verifyFile = LittleFS.open(tempPath.c_str(), FILE_READ);
-  if (!verifyFile || verifyFile.size() < 10) {
-    log_e("Duplicate failed: temp file verification failed");
-    logs.writeError("Duplicate failed: verify failed for " + target);
-    if (verifyFile)
-      verifyFile.close();
-    LittleFS.remove(tempPath.c_str());
-    return;
-  }
-  verifyFile.close();
-
-  // Atomic rename
-  if (LittleFS.rename(tempPath.c_str(), targetPath.c_str())) {
-    log_i("Config duplicated: %s -> %s", source.c_str(), target.c_str());
-    logs.writeLog("duplicate config: " + source + " -> " + target);
-  } else {
-    log_e("Duplicate failed: rename failed");
-    logs.writeError("Duplicate rename failed: " + target);
-    LittleFS.remove(tempPath.c_str());
-  }
+  atomic_copy_file(sourcePath.c_str(), targetPath.c_str(), logMsg);
 }
 
 void Config::delete_config(String filename) {
@@ -511,8 +457,10 @@ void Config::rename(String old_name, String new_name) {
   }
 }
 void Config::new_config(String name) {
-  copyFile(LittleFS, config_model_path, get_path(name).c_str());
-  logs.writeLog("new config: " + name);
+  String targetPath = get_path(name);
+  String logMsg = "new config: " + name;
+
+  atomic_copy_file(config_model_path, targetPath.c_str(), logMsg);
 }
 
 JsonDocument Config::get(string key) {
@@ -551,72 +499,53 @@ std::vector<std::string> Config::split(const std::string& str, char delimiter) {
   return tokens;
 }
 
-void Config::setValues(char input[], int len) {
-  int start = 0;
-  char c;
-  for (int i = 0; i < len; i++) {
-    c = input[i];
-    if (c != '\n')
-      continue;
-    start = i + 1;
-    setValue(input + start, i - start);
+/// @brief Atomically copy a file using temp→verify→rename pattern
+/// @param sourcePath Full path to source file
+/// @param targetPath Full path to target file (without .tmp)
+/// @param logContext Description for logging
+/// @return true if copy succeeded, false otherwise
+bool Config::atomic_copy_file(const char* sourcePath, const char* targetPath,
+                              const String& logContext) {
+  if (!LittleFS.exists(sourcePath)) {
+    log_e("Source file not found: %s", sourcePath);
+    logs.writeError(logContext + ": source not found");
+    return false;
   }
-  setValue(input + start, len - start);
-}
 
-void Config::setValue(char input[], int len) {
-  // char value[64];
-  // char key[64];
-  // bool isValue = false;
-  // int offset = 0;
-  // int i = 0;
-  // char c;
-  // tmp = &current_config;
+  String tempPath = String(targetPath) + temp_suffix;
 
-  // for (int i = 0; i < len; i++) {
-  //   c = input[i];
-  //   if (c == '\0') {
-  //     break;
-  //   }
-  //   if (c == ':') {
-  //     offset = 0;
-  //     isValue = true;
-  //     continue;
-  //   }
-  //   if (c == '/') {
-  //     if (!tmp->contains(key)) {
-  //       return;
-  //     }
-  //     tmp = &(*tmp)[key];
-  //     offset = 0;
-  //     isValue = c == ':';
-  //     continue;
-  //   }
-  //   if (isValue) {
-  //     value[offset++] = c;
-  //     value[offset] = '\0';
-  //   } else {
-  //     key[offset++] = c;
-  //     key[offset] = '\0';
-  //   }
-  // }
-  // if (!tmp->contains(key)) {
-  //   return;
-  // }
+  // Copy to temp file
+  copyFile(LittleFS, sourcePath, tempPath.c_str());
 
-  // Todo: to be updated with newer json lib
-  // json* target = &(*tmp)[key];
-  // // Assign the value to the final key
-  // if (target->type() == json::value_t::string) {
-  //   (*tmp)[key] = value;
-  // } else if (target->type() == json::value_t::number_integer) {
-  //   (*tmp)[key] = std::stoi(value);
-  // } else if (target->type() == json::value_t::number_float) {
-  //   (*tmp)[key] = std::stof(value);
-  // } else if (target->type() == json::value_t::boolean) {
-  //   (*tmp)[key] = value == "true";
-  // }
-  // target = nullptr;
+  // Verify temp file
+  if (!LittleFS.exists(tempPath.c_str())) {
+    log_e("Temp file not created during copy");
+    logs.writeError(logContext + ": temp file not created");
+    return false;
+  }
+
+  File verifyFile = LittleFS.open(tempPath.c_str(), FILE_READ);
+  if (!verifyFile || verifyFile.size() < 10) {
+    log_e("Temp file verification failed");
+    logs.writeError(logContext + ": temp file invalid");
+    if (verifyFile)
+      verifyFile.close();
+    LittleFS.remove(tempPath.c_str());
+    return false;
+  }
+  verifyFile.close();
+
+  // Atomic rename
+  if (LittleFS.rename(tempPath.c_str(), targetPath)) {
+    log_i("Atomic copy succeeded: %s", logContext.c_str());
+    logs.writeLog(logContext);
+    return true;
+  } else {
+    log_e("Failed to rename temp file to final target");
+    logs.writeError(logContext + ": rename failed");
+    LittleFS.remove(tempPath.c_str());
+    return false;
+  }
 }
 
 void Config::print() {
