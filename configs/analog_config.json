@@ -413,7 +413,8 @@
     "HidEnabled": false,
     "HidMode": 1,
     "PipoName": "analog",
-    "BLEEnabled": false
+    "BLEEnabled": false,
+    "Button_disa": false
   },
   "sensorconf": {
     "analogout": {

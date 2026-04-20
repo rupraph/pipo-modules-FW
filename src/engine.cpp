@@ -68,22 +68,25 @@ void Engine::update() {
       }
     }
 
-    float sensor_midpoint;
-
     // Store original values before any transformations
     float original_sensor_val = sensor_val;
     float original_min = sensor_min;
     float original_max = sensor_max;
 
-    // Handle cyclic mode (split range at midpoint)
-    sensor_midpoint = sensor_min + (sensor_max - sensor_min) / 2.0f;
+    // Handle cyclic mode: phase-shifted triangle wave mapping.
+    // Phase 0.25 places output 0.5 at the sensor boundary (the discontinuity),
+    // so both sides wrap to the same output value with no jump.
+    // Phase 0.0 gives the old behaviour (peak at midpoint).
+    static const float CYCLIC_PHASE = 0.25f;
     if (sensor_cycle) {
-      if (sensor_val < sensor_midpoint) {
-        sensor_max = sensor_midpoint;
-      } else {
-        sensor_min = sensor_max;
-        sensor_max = sensor_midpoint;
-      }
+      float range = sensor_max - sensor_min;
+      float norm = (sensor_val - sensor_min) / range;  // [0, 1]
+      float t = norm - CYCLIC_PHASE + 1.5f;
+      t = t - (float)(int)t;  // wrap to [0, 1]
+      float tri = 2.0f * t - 1.0f;
+      if (tri < 0.0f)
+        tri = -tri;                           // triangle wave [0, 1]
+      sensor_val = sensor_min + tri * range;  // back to sensor units
     }
 
     // Apply over_out: if ORIGINAL value exceeds max, return the OUTPUT minimum
@@ -156,14 +159,18 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
                                                     sensor_max, 1),
                          16383));
 
-          midiio.sendControlChange(cc_nb, cc_val, channel, true);
+          if (midi_translator.should_send_cc_hires(cc_val)) {
+            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+          }
         } else {
           uint8_t cc_val =
               max(0, min(midi_translator.get_cc_val(sensor_val, sensor_min,
                                                     sensor_max, 0),
                          127));
 
-          midiio.sendControlChange(cc_nb, cc_val, channel, false);
+          if (midi_translator.should_send_cc(cc_val)) {
+            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+          }
         }
         // }
       } else  // sensor uses trigger mode
@@ -172,16 +179,24 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
         if (sensor_bool) {
           uint16_t cc_val = midi_translator.get_max_output();
           if (midi_translator.get_hires()) {
-            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            if (midi_translator.should_send_cc_hires(cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            }
           } else {
-            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            if (midi_translator.should_send_cc((uint8_t)cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            }
           }
         } else {
           uint16_t cc_val = midi_translator.get_min_output();
           if (midi_translator.get_hires()) {
-            midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            if (midi_translator.should_send_cc_hires(cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, true);
+            }
           } else {
-            midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            if (midi_translator.should_send_cc((uint8_t)cc_val)) {
+              midiio.sendControlChange(cc_nb, cc_val, channel, false);
+            }
           }
         }
         //vTaskDelay(pdTICKS_TO_MS(5));  // virtually delay cc send. will be
@@ -190,11 +205,9 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
     }
 
     // if Note mode
-    else {
-      // getting note for continuous mode
-      note_val_prev[axis_name] = note_val[axis_name];
+    else if (midi_translator.tl_mode == 1) {
       int note = (midi_translator.get_note(sensor_val, sensor_min, sensor_max));
-      note_val[axis_name] = max(0, min(note, 127));  // clip between 0 and 127
+      uint8_t current_note = max(0, min(note, 127));  // clip between 0 and 127
 
       int sustain_ms = int(midi_translator.get_sustain() *
                            1000.0);  // 0 means sustain manager will not
@@ -223,12 +236,12 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
         // send note on if:
         // sensor in range
         // AND note not already playing
-        // AND (note is diff from previous OR we entered the range)
+        // AND (note changed OR we entered the range)
         if (dat.engaged &&
-            // !midiio.is_note_playing(note_val[axis_name], channel) &&
-            (note_val[axis_name] != note_val_prev[axis_name] ||
+            // !midiio.is_note_playing(current_note, channel) &&
+            (midi_translator.should_send_note(current_note) ||
              dat.trigger_flags.midi_trig)) {
-          midiio.sendNoteOn(note_val[axis_name], midi_translator.get_velocity(),
+          midiio.sendNoteOn(current_note, midi_translator.get_velocity(),
                             channel, sustain_ms);
           if (dat.trigger_flags.midi_trig) {
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
@@ -244,6 +257,16 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
       }
 
       // #endif
+    } else if (midi_translator.tl_mode == 2) {
+      if (input_sensor.get_mode(axis_name) == 0) {
+
+        uint16_t pb_val = max(0, min(midi_translator.get_cc_val(
+                                         sensor_val, sensor_min, sensor_max, 1),
+                                     16383));
+        if (midi_translator.should_send_pitch_bend(pb_val)) {
+          midiio.sendPitchBend(pb_val, channel);
+        }
+      }
     }
   }
 }
@@ -352,9 +375,8 @@ void Engine::osc_processor(const string& axis_name, const SensorDat& dat,
       }
     }
 
-    // Single check for value change
-    if (new_osc_val != osc_val[axis_name]) {
-      osc_val[axis_name] = new_osc_val;
+    // Check for value change and send if changed
+    if (osc_translator.should_send(new_osc_val)) {
       osc.add_to_bundle(address, new_osc_val);
     }
   }

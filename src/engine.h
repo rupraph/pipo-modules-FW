@@ -77,12 +77,9 @@ class Engine {
 #endif
 
  private:
-  unordered_map<string, uint8_t> note_val;  // indexed by axis_name, not channel
-  unordered_map<string, uint8_t>
-      note_val_prev;  // indexed by axis_name, not channel
-
-  unordered_map<string, float> osc_val;
-  unordered_map<string, float> osc_val_prev;
+  // Note: Output value storage moved to translator classes for better memory efficiency
+  // Previously: unordered_map<string, uint8_t> note_val/note_val_prev
+  // Previously: unordered_map<string, float> osc_val/osc_val_prev
 };
 
 extern Engine engine;

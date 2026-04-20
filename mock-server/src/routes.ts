@@ -3,7 +3,6 @@ import multer from "multer";
 import { state } from "./state";
 import {
   ActiveConfigGetParams,
-  ConfigCopyPostParams,
   ConfigGetParams,
   ConfigNewGetParams,
   ConfigRenamePostParams,
@@ -56,7 +55,7 @@ export const setupRoutes = (app: Express) => {
   app.get("/configs/:name?", (req: ReqQ<ConfigsGetParams>, res) => {
     const { name } = req.query;
     if (!name) {
-      res.status(200).send(Object.keys(state.getConfigs()).join(","));
+      res.status(200).json(state.getConfigMetas());
       return;
     }
     if (!state.configs[name]) {
@@ -87,6 +86,10 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("No name received");
       return;
     }
+    if (name === state.activeConfig) {
+      res.status(400).send("Cannot delete active config");
+      return;
+    }
     state.deleteConfig(name);
     res.send("Config deleted");
   });
@@ -96,6 +99,14 @@ export const setupRoutes = (app: Express) => {
       res.status(400).send("No name received");
       return;
     }
+    if (!state.validateConfigName(name)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      return;
+    }
+    if (Object.keys(state.configs).length >= 8) {
+      res.status(400).send("Maximum 8 configs reached");
+      return;
+    }
     try {
       state.createConfig(name);
       res.status(200).send("Config created");
@@ -103,23 +114,39 @@ export const setupRoutes = (app: Express) => {
       res.status(500).send(`Error while creating config ${e}`);
     }
   });
-  app.post("/config-copy", (req: ReqQ<ConfigCopyPostParams>, res) => {
-    const { name, config } = req.query;
-    if (!name || !config) {
-      res.status(400).send("No name or config received");
+  app.post("/config-duplicate", (req: ReqQ<{ source: string; target: string }>, res) => {
+    const { source, target } = req.query;
+    if (!source || !target) {
+      res.status(400).send("No source or target received");
+      return;
+    }
+    if (!state.validateConfigName(target)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
+      return;
+    }
+    if (Object.keys(state.configs).length >= 8) {
+      res.status(400).send("Maximum 8 configs reached");
+      return;
+    }
+    if (state.configs[target]) {
+      res.status(400).send("Config already exists");
       return;
     }
     try {
-      state.copyConfig(name, config);
-      res.status(200).send("Config copied");
+      state.duplicateConfig(source, target);
+      res.status(200).send("Config duplicated");
     } catch (e) {
-      res.status(500).send(`Error while copying config ${e}`);
+      res.status(500).send(`Error while duplicating config ${e}`);
     }
   });
   app.post("/config-rename", (req: ReqQ<ConfigRenamePostParams>, res) => {
     const { oldname, newname } = req.query;
     if (!oldname || !newname) {
       res.status(400).send("No old or new name received");
+      return;
+    }
+    if (!state.validateConfigName(newname)) {
+      res.status(400).send("Invalid config name (a-z, A-Z, 0-9, -, _ only, max 12 chars)");
       return;
     }
     try {

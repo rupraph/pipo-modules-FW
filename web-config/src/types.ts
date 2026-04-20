@@ -69,6 +69,7 @@ export type GeneralConfig = {
   HidMode: number;
   PipoName: string;
   BLEEnabled: boolean;
+  Button_disa: boolean;
 };
 
 // export type HidConfig = {
@@ -84,6 +85,7 @@ export type PipoKeys = {
     | "accX"
     | "accY"
     | "accZ"
+    | "AccComb"
     | "pitch"
     | "roll"
     | "yaw"
@@ -217,4 +219,9 @@ export type PipoInfo = {
 export type QuatConfig = {
   enabled: boolean;
   osc_addr: string;
+};
+
+export type ConfigMeta = {
+  name: string;
+  active: boolean;
 };
