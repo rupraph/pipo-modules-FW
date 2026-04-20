@@ -47,10 +47,8 @@ struct SensorDat {
   bool bool_value;         // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
 
-  // Engaged state: whether the sensor axis is actively producing usable output.
+  // Engaged state: whether the sensor axis is actively producing usable output that should be processed by the engine.
   // Composite of debounced(reading_valid) && within_bounds.
-  // For sensors that can lose signal (e.g. ToF range), reading_valid is set
-  // in measure_sensor(). For always-valid sensors (IMU, ADC), it stays true.
 
   // -- Sensor validity: did the HW produce a meaningful measurement?
   // Sensors that can lose signal (e.g. ToF) set this to false in measure_sensor().
@@ -139,7 +137,6 @@ class Sensor {
   // bool test_outside_deadband(const std::string& axis);
   bool is_engaged(const std::string& axis);
   bool was_engaged(const std::string& axis);
-  bool process_sensor_triggers();        //return true if any flags were toggled
   bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
 
