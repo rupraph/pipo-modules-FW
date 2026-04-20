@@ -145,6 +145,9 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
 
       // sensor uses continuous mode
       if (sensor_mode == 0) {
+        // Only send when engaged — last CC value holds when not engaged
+        if (!dat.engaged && dat.hold_mode)
+          return;
 
         // Todo: hires not tested
         if (midi_translator.get_hires()) {
@@ -334,7 +337,8 @@ void Engine::osc_processor(const string& axis_name, const SensorDat& dat,
       new_osc_val = round_to(sensor_val, 3);
     } else {
       if (dat.mode == 0) {  // continuous mode
-        // if (dat.engaged) {
+        if (!dat.engaged && dat.hold_mode)
+          return;
         new_osc_val = round_to(
             osc_translator.get_value(sensor_val, sensor_min, sensor_max), 3);
         // }
