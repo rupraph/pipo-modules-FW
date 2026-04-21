@@ -108,7 +108,7 @@ bool PipoRangeSensor::measure_sensor() {
 
     if (!hw_valid) {
       // HW reports no valid reading (nothing detected / too far)
-      sensor_dat["dist"].value = abs_max;
+      // sensor_dat["dist"].value = abs_max;
     } else {
       // Valid HW reading — apply filter
       // Reset filter when transitioning from invalid to valid to prevent spurious values
