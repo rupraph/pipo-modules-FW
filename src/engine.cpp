@@ -357,7 +357,9 @@ void Engine::osc_processor(const string& axis_name, const SensorDat& dat,
 
     float new_osc_val;
     if (osc_translator.get_mode_raw()) {
-      new_osc_val = round_to(sensor_val, 3);
+      if (!dat.engaged && dat.hold_mode)
+        return;
+      new_osc_val = round_to(dat.value_ready, 3);
     } else {
       if (dat.mode == 0) {  // continuous mode
         if (!dat.engaged && dat.hold_mode)
