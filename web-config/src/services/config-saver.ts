@@ -101,14 +101,17 @@ export async function saveConfig(
         });
     }
 
-    // Call success callback and reset state after a brief delay
-    setTimeout(() => {
-      // Reset the original config to the current config after successful save
-      if (config) {
-        originalConfig.set(JSON.parse(JSON.stringify(config)));
-        hasUnsavedChanges.set(false);
-      }
+    // Reset baseline immediately so new edits made during the success display
+    // are detected by the change-detection polling right away.
+    if (config) {
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
+    }
 
+    // Keep the success label visible briefly, then clear the status.
+    // The button stays rendered during this period via FloatingSaveButton's
+    // shouldShow fallback ($savingStatus !== "none").
+    setTimeout(() => {
       // Call custom success callback if provided
       if (onSuccess) {
         onSuccess();

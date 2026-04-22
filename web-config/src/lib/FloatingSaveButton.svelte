@@ -56,12 +56,17 @@
     if (!config) return;
     await saveConfig(config, onSaveSuccess);
   }
+
+  // Keep the button rendered and visible while a save is in progress or
+  // showing the success/error label, even if hasUnsavedChanges just flipped
+  // to false (because the baseline was reset immediately after the HTTP call).
+  $: shouldShow = show || $savingStatus !== "none";
 </script>
 
-{#if show}
+{#if shouldShow}
   <div
     class="floating-save-container"
-    class:show
+    class:show={shouldShow}
     class:absolute={useAbsolutePosition}
   >
     <button
