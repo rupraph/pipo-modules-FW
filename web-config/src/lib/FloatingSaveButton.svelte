@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { modeWillChange, pipoNameWillChange } from "../services/config";
+  import {
+    modeWillChange,
+    pipoNameWillChange,
+    bleWillChange,
+  } from "../services/config";
   import { saveConfig, savingStatus } from "../services/config-saver";
   import { onMount, onDestroy } from "svelte";
 
@@ -79,7 +83,7 @@
         ✓ Saved!
       {:else if $savingStatus === "error"}
         ✗ Error
-      {:else if $modeWillChange || $pipoNameWillChange}
+      {:else if $modeWillChange || $pipoNameWillChange || $bleWillChange}
         Save and Reboot
       {:else}
         Save Changes

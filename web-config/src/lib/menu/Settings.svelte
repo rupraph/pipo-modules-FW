@@ -10,6 +10,7 @@
     hasUnsavedChanges,
     modeWillChange,
     pipoNameWillChange,
+    bleWillChange,
     pipoType,
   } from "../../services";
   import { getDefaultDeadband } from "../../defaults";
@@ -293,7 +294,7 @@
               ✓ Saved!
             {:else if $savingStatus === "error"}
               ✗ Error
-            {:else if $modeWillChange || $pipoNameWillChange}
+            {:else if $modeWillChange || $pipoNameWillChange || $bleWillChange}
               Save and Reboot
             {:else}
               Save Changes

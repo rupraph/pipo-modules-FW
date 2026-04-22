@@ -9,6 +9,7 @@ import {
   activeConfigName,
   modeWillChange,
   pipoNameWillChange,
+  bleWillChange,
   originalConfig,
   hasUnsavedChanges,
 } from "./config";
@@ -50,7 +51,8 @@ export async function saveConfig(
 
   const willRebootForMode = get(modeWillChange);
   const willRebootForName = get(pipoNameWillChange);
-  const willReboot = willRebootForMode || willRebootForName;
+  const willRebootForBLE = get(bleWillChange);
+  const willReboot = willRebootForMode || willRebootForName || willRebootForBLE;
   savingStatus.set("loading");
 
   const name = get(activeConfigName);
@@ -76,14 +78,11 @@ export async function saveConfig(
 
     // If mode or name changed, show toast and reboot immediately
     if (willReboot) {
-      let rebootReason = "";
-      if (willRebootForMode && willRebootForName) {
-        rebootReason = "MIDI/OSC mode and Pipo name changes";
-      } else if (willRebootForMode) {
-        rebootReason = "MIDI/OSC mode change";
-      } else if (willRebootForName) {
-        rebootReason = "Pipo name change";
-      }
+      const reasons: string[] = [];
+      if (willRebootForMode) reasons.push("MIDI/OSC mode change");
+      if (willRebootForName) reasons.push("Pipo name change");
+      if (willRebootForBLE) reasons.push("BLE change");
+      const rebootReason = reasons.join(" and ");
 
       addToast({
         type: "error",
@@ -101,14 +100,17 @@ export async function saveConfig(
         });
     }
 
-    // Call success callback and reset state after a brief delay
-    setTimeout(() => {
-      // Reset the original config to the current config after successful save
-      if (config) {
-        originalConfig.set(JSON.parse(JSON.stringify(config)));
-        hasUnsavedChanges.set(false);
-      }
+    // Reset baseline immediately so new edits made during the success display
+    // are detected by the change-detection polling right away.
+    if (config) {
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
+    }
 
+    // Keep the success label visible briefly, then clear the status.
+    // The button stays rendered during this period via FloatingSaveButton's
+    // shouldShow fallback ($savingStatus !== "none").
+    setTimeout(() => {
       // Call custom success callback if provided
       if (onSuccess) {
         onSuccess();
