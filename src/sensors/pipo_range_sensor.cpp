@@ -105,6 +105,7 @@ bool PipoRangeSensor::measure_sensor() {
     // Determine HW validity: sensor returned a physically meaningful measurement
     bool hw_valid = (sensor_dat["dist"].raw_value >= 0 && range_status);
     sensor_dat["dist"].reading_valid = hw_valid;
+    sensor_dat["presence"].value = sensor_dat["dist"].engaged ? 1.0 : 0.0;
 
     if (!hw_valid) {
       // HW reports no valid reading (nothing detected / too far)

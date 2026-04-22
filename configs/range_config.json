@@ -15,6 +15,21 @@
         "scaleType": "major pentatonic",
         "tl_mode": 0,
         "velocity": 100
+      },
+      "presence": {
+        "cc_nb": 15,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
+        "sustain": 0,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
@@ -24,6 +39,13 @@
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "dist"
+      },
+      "presence": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "detect"
       }
     }
   },
@@ -36,6 +58,17 @@
       "lmin": 2.0,
       "mode": false,
       "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "presence": {
+      "deadband": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 1.0,
+      "lmin": 0.5,
+      "mode": true,
+      "th_mode": true,
       "cyclic": false,
       "over_out": false
     }

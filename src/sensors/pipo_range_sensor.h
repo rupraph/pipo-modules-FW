@@ -20,6 +20,10 @@ class PipoRangeSensor : public Sensor {
     sensor_dat["dist"].reading_valid = false;
     sensor_dat["dist"].reading_valid_prev = false;
     sensor_dat["dist"].hold_mode = false;
+    sensor_dat["presence"] = SensorDat();
+    sensor_dat["presence"].reading_valid = false;
+    sensor_dat["presence"].reading_valid_prev = false;
+    sensor_dat["presence"].hold_mode = false;
   };
 
   void init() override;
