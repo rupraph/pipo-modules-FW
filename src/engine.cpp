@@ -255,16 +255,32 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
           input_sensor.set_untrigger_flag(axis_name, MIDI, false);
         }
       }
-
       // #endif
     } else if (midi_translator.tl_mode == 2) {
-      if (input_sensor.get_mode(axis_name) == 0) {
 
+      // sensor uses continuous mode
+      if (sensor_mode == 0) {
+        // Only send when engaged — last CC value holds when not engaged
+        if (!dat.engaged && dat.hold_mode)
+          return;
         uint16_t pb_val = max(0, min(midi_translator.get_cc_val(
                                          sensor_val, sensor_min, sensor_max, 1),
                                      16383));
         if (midi_translator.should_send_pitch_bend(pb_val)) {
           midiio.sendPitchBend(pb_val, channel);
+        }
+      } else  // sensor uses trigger mode
+      {
+        if (sensor_bool) {
+          uint16_t pb_val = midi_translator.get_max_output();
+          if (midi_translator.should_send_pitch_bend(pb_val)) {
+            midiio.sendPitchBend(pb_val, channel);
+          }
+        } else {
+          uint16_t pb_val = midi_translator.get_min_output();
+          if (midi_translator.should_send_pitch_bend(pb_val)) {
+            midiio.sendPitchBend(pb_val, channel);
+          }
         }
       }
     }
