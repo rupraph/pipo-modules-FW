@@ -15,7 +15,7 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
   float input_range = max_input - min_input;
   if (input_range == 0) {
     log_e("Error: Invalid input range");
-    return 0;  // or handle the error as needed
+    return 0;
   }
 
   // Check if current_scale is empty (can happen with invalid config)
@@ -24,20 +24,34 @@ int MidiTranslator::get_note(float value, float min_input, float max_input) {
     return rootNote;  // Return root note as safe fallback
   }
 
-  // scale value from 0 to 1 to the range of the current scale
-  // map value from input range to 0-1
-  float scaled_value = (value - min_input) / (max_input - min_input);
-  int index = round(scaled_value * (nbOfNotes - 1));
-  index = constrain(index, 0, nbOfNotes - 1);
+  // Map input value to a continuous index in [0, nbOfNotes-1]
+  float scaled_value = (value - min_input) / input_range;
+  float float_index = scaled_value * (nbOfNotes - 1);
 
-  // Additional safety check for index bounds
-  if (index >= current_scale.size()) {
-    log_e("Error: index %d out of bounds for scale size %d", index,
-          current_scale.size());
-    index = current_scale.size() - 1;
+  if (last_note_index < 0) {
+    // First call after init/scale-change: snap to nearest note
+    last_note_index = constrain((int)round(float_index), 0, nbOfNotes - 1);
+  } else {
+    // Hysteresis: only commit to a new note when the input has moved
+    // NOTE_BOUNDARY_HYSTERESIS past the midpoint boundary of the current slot.
+    float threshold_up = last_note_index + 0.5f + NOTE_BOUNDARY_HYSTERESIS;
+    float threshold_down = last_note_index - 0.5f - NOTE_BOUNDARY_HYSTERESIS;
+
+    if (float_index >= threshold_up || float_index <= threshold_down) {
+      // Large or deliberate movement: snap to nearest note
+      last_note_index = constrain((int)round(float_index), 0, nbOfNotes - 1);
+    }
+    // else: stay on last_note_index (hold current note through the dead zone)
   }
 
-  return current_scale[index];
+  // Safety check for scale size consistency
+  if (last_note_index >= (int)current_scale.size()) {
+    log_e("Error: index %d out of bounds for scale size %d", last_note_index,
+          current_scale.size());
+    last_note_index = current_scale.size() - 1;
+  }
+
+  return current_scale[last_note_index];
 }
 
 void MidiTranslator::print_scale(vector<uint8_t> scale) {
@@ -228,6 +242,7 @@ void MidiTranslator::update_scale() {
   current_scale.clear();
   current_scale = generate_full_scale(this->rootNote, this->nbOfNotes,
                                       this->pattern, this->scaleType);
+  last_note_index = -1;  // reset hysteresis state on scale change
 }
 
 int MidiTranslator::get_cc_val(float value, float min_input, float max_input,
