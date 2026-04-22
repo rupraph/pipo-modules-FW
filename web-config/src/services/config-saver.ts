@@ -9,6 +9,7 @@ import {
   activeConfigName,
   modeWillChange,
   pipoNameWillChange,
+  bleWillChange,
   originalConfig,
   hasUnsavedChanges,
 } from "./config";
@@ -50,7 +51,8 @@ export async function saveConfig(
 
   const willRebootForMode = get(modeWillChange);
   const willRebootForName = get(pipoNameWillChange);
-  const willReboot = willRebootForMode || willRebootForName;
+  const willRebootForBLE = get(bleWillChange);
+  const willReboot = willRebootForMode || willRebootForName || willRebootForBLE;
   savingStatus.set("loading");
 
   const name = get(activeConfigName);
@@ -76,14 +78,11 @@ export async function saveConfig(
 
     // If mode or name changed, show toast and reboot immediately
     if (willReboot) {
-      let rebootReason = "";
-      if (willRebootForMode && willRebootForName) {
-        rebootReason = "MIDI/OSC mode and Pipo name changes";
-      } else if (willRebootForMode) {
-        rebootReason = "MIDI/OSC mode change";
-      } else if (willRebootForName) {
-        rebootReason = "Pipo name change";
-      }
+      const reasons: string[] = [];
+      if (willRebootForMode) reasons.push("MIDI/OSC mode change");
+      if (willRebootForName) reasons.push("Pipo name change");
+      if (willRebootForBLE) reasons.push("BLE change");
+      const rebootReason = reasons.join(" and ");
 
       addToast({
         type: "error",

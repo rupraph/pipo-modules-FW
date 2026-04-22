@@ -42,6 +42,7 @@ export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
 export const hasUnsavedChanges = writable<boolean>(false);
 export const modeWillChange = writable<boolean>(false);
 export const pipoNameWillChange = writable<boolean>(false);
+export const bleWillChange = writable<boolean>(false);
 
 // Helper function to detect if output mode has changed
 function hasOutputModeChanged(
@@ -52,7 +53,7 @@ function hasOutputModeChanged(
   
   const originalMode: OutputMode = original.general.MidiEnabled ? "MIDI" : original.general.OSC_ENA ? "OSC" : "MIDI";
   const currentMode: OutputMode = current.general.MidiEnabled ? "MIDI" : current.general.OSC_ENA ? "OSC" : "MIDI";
-  
+
   return originalMode !== currentMode;
 }
 
@@ -64,6 +65,16 @@ function hasPipoNameChanged(
   if (!original || !current) return false;
   
   return original.general.PipoName !== current.general.PipoName;
+}
+
+// Helper function to detect if BLE state has changed (requires reboot)
+function hasBLEChanged(
+  original: PipoConfig<PipoTypes> | null,
+  current: PipoConfig<PipoTypes> | null
+): boolean {
+  if (!original || !current) return false;
+
+  return original.general.BLEEnabled !== current.general.BLEEnabled;
 }
 
 // Polling interval to check for deep changes in config
@@ -80,6 +91,7 @@ function startChangeDetection() {
       hasUnsavedChanges.set(false);
       modeWillChange.set(false);
       pipoNameWillChange.set(false);
+      bleWillChange.set(false);
       return;
     }
     
@@ -94,6 +106,10 @@ function startChangeDetection() {
     // Check if PipoName has changed
     const nameChanged = hasPipoNameChanged(original, current);
     pipoNameWillChange.set(nameChanged);
+
+    // Check if BLE state has changed
+    const bleChanged = hasBLEChanged(original, current);
+    bleWillChange.set(bleChanged);
   }, 300); // Check every 300ms
 }
 

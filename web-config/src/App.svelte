@@ -18,6 +18,7 @@
     originalConfig,
     settingsModalOpen,
   } from "./services/config";
+  import { savingStatus } from "./services/config-saver";
   import { uiState } from "./lib/ui-state";
   import Presets from "./lib/presets.svelte";
   import PillSwitch from "./lib/form/PillSwitch.svelte";
@@ -200,10 +201,14 @@
       </article> -->
     </div>
 
-    <!-- Floating Save Button (hidden when Settings modal is open) -->
+    <!-- Floating Save Button (hidden when Settings modal is open).
+         Also kept visible while a save is in-progress/success so the
+         status label stays on screen, but never when the modal is open
+         (the modal has its own inline save feedback). -->
     <FloatingSaveButton
       config={$currentConfig}
-      show={$hasUnsavedChanges && !$settingsModalOpen}
+      show={($hasUnsavedChanges || $savingStatus !== "none") &&
+        !$settingsModalOpen}
     />
   {:catch e}
     <article>

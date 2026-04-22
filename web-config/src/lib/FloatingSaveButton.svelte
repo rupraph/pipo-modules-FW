@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { modeWillChange, pipoNameWillChange } from "../services/config";
+  import {
+    modeWillChange,
+    pipoNameWillChange,
+    bleWillChange,
+  } from "../services/config";
   import { saveConfig, savingStatus } from "../services/config-saver";
   import { onMount, onDestroy } from "svelte";
 
@@ -56,17 +60,12 @@
     if (!config) return;
     await saveConfig(config, onSaveSuccess);
   }
-
-  // Keep the button rendered and visible while a save is in progress or
-  // showing the success/error label, even if hasUnsavedChanges just flipped
-  // to false (because the baseline was reset immediately after the HTTP call).
-  $: shouldShow = show || $savingStatus !== "none";
 </script>
 
-{#if shouldShow}
+{#if show}
   <div
     class="floating-save-container"
-    class:show={shouldShow}
+    class:show
     class:absolute={useAbsolutePosition}
   >
     <button
@@ -84,7 +83,7 @@
         ✓ Saved!
       {:else if $savingStatus === "error"}
         ✗ Error
-      {:else if $modeWillChange || $pipoNameWillChange}
+      {:else if $modeWillChange || $pipoNameWillChange || $bleWillChange}
         Save and Reboot
       {:else}
         Save Changes
