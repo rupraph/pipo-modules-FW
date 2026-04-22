@@ -9,6 +9,21 @@ void MidiUSBSetup() {
   // TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
   // TinyUSBDevice.setProductDescriptor("PipoUSB");
 
+  // Disconnect from host before registering MIDI interface.
+  // The ESP32 USB task starts before setup() runs, so the host may have
+  // already enumerated CDC-only by the time we reach this call.
+  // detach() forces a clean disconnect; the host re-enumerates after attach()
+  // and sees the complete CDC+MIDI descriptor.
+  TinyUSBDevice.detach();
+  delay(
+      50);  // ~50ms: enough for host to register disconnect (USB spec min: 2ms)
+  MidiUsb.begin(MIDI_CHANNEL_OMNI);  // registers MIDI interface in descriptor
+  TinyUSBDevice.attach();
+
+  uint32_t timeout = millis() + 3000;
+  while (!TinyUSBDevice.mounted() && millis() < timeout) {
+    delay(1);
+  }
   // while (!TinyUSBDevice.mounted())
   //     delay(1);
   MidiUsb.begin(MIDI_CHANNEL_OMNI);
