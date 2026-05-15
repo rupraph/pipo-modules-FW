@@ -84,10 +84,11 @@
 #define SHUTDOWN_LEVEL 3100   // in mV (seams like it lead vbat 3.35v )
 //for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
 #elif HW_REV >= 11
-#define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.1
+#define LOW_BAT_VOLTAGE \
+  3400  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
 #define NO_BOOT_VOLTAGE 3150  // in mV
 #define CHARGING_LEVEL 4300   // in mV
-#define SHUTDOWN_LEVEL 3100   // in mV
+#define SHUTDOWN_LEVEL 3100   // in mV (on range test cut at 3.17)
 #endif
 
 #define BAT_SAMPLE_SIZE 20
