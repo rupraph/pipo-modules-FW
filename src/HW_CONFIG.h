@@ -33,7 +33,7 @@
 #define SEND_LED 11
 #define LOW_BAT_LED 34
 
-#define MODE_SW 3
+#define MODE_SW 0
 #define BAT_VOLTAGE 5
 #define PP_SW 8
 
