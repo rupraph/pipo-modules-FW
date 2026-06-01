@@ -86,7 +86,9 @@ def merge_env(env):
 if __name__ == "__main__":
     try:
         tag = get_latest_tag()
+        print(f"Latest tag: {tag}")
         tag_only = tag.split("-")[0]
+        print(f"Tag only: {tag_only}")
         run(["npm", "run", f"build:web"])
         results = {}
         for env in ENVS:
