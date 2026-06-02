@@ -314,7 +314,7 @@ void HwUi::update_switches() {
     pause_sw.reset_button();
   }
 
-#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE) || defined(PIPO_RANGE_L5CX)
   mode_sw.read_debounce();
   if (mode_sw.get_flag()) {
     if (mode_sw.is_short_press()) {
@@ -339,7 +339,7 @@ void HwUi::update_switches() {
  * @brief sets brightness of led
  */
 void HwUi::set_led(int led_name, int value) {
-#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE) || defined(PIPO_RANGE_L5CX)
   ledcWrite(led_channel_map[led_name], value);
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;

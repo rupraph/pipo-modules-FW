@@ -39,6 +39,8 @@ function getDefaultChannel(boardType: PipoTypes): string | undefined {
   switch (boardType) {
     case "range":
       return "dist"; // Range board has only one channel
+    case "range_l5cx":
+      return "dist"; // L5CX also exposes a single dist channel
     case "analog":
       return "A01"; // Default to first analog channel
     case "motion":

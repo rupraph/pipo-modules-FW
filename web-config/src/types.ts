@@ -79,7 +79,7 @@ export type GeneralConfig = {
 //   stroke_mode: boolean;
 // };
 
-export type PipoTypes = "motion" | "range" | "analog" | "unknown";
+export type PipoTypes = "motion" | "range" | "range_l5cx" | "analog" | "unknown";
 export type PipoKeys = {
   motion:
     | "accX"
@@ -96,6 +96,7 @@ export type PipoKeys = {
     | "gyroY"
     | "gyroZ";
   range: "dist";
+  range_l5cx: "dist";
   analog:
     | "A01"
     | "A02"
@@ -144,6 +145,9 @@ export type SensorSettings = {
     relative_mode: boolean;
   };
   range: {
+    hold_mode: boolean;
+  };
+  range_l5cx: {
     hold_mode: boolean;
   };
   analog: {

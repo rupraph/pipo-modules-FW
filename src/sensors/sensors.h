@@ -11,6 +11,11 @@ extern MotionSensor input_sensor;
 extern PipoRangeSensor input_sensor;
 #endif
 
+#ifdef PIPO_RANGE_L5CX
+#include "sensors/pipo_range_sensor_l5cx.h"
+extern PipoRangeSensorL5CX input_sensor;
+#endif
+
 #ifdef PIPO_ANALOG
 #include "sensors/analog_sensor.h"
 extern AnalogSensor input_sensor;

@@ -10,10 +10,13 @@
 
   let wifiOpen = false;
 
+  // range_l5cx reuses the range SVG — its filename would exceed LittleFS's 32-char limit
+  $: svgType = $pipoType === "range_l5cx" ? "l5cx" : $pipoType;
+
   function fetchImage() {
     // debugger;
     return pipoio
-      .get(`/${$pipoType}-Horizontal-Yellow.svg`, {
+      .get(`/${svgType}-Horizontal-Yellow.svg`, {
         responseType: "arraybuffer",
       })
       .then(({ data }) => {

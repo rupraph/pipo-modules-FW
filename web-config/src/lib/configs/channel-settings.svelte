@@ -21,6 +21,7 @@
 
   $: config = $currentConfig;
   $: type = $pipoType;
+  $: isRangeVariant = type === "range" || type === "range_l5cx";
 
   // Get category from uiState instead of local variable
   $: category = ($uiState[type]?.channelType as "analog" | "touch") || "analog";
@@ -351,7 +352,7 @@
 </script>
 
 {#if config && selectedChannel && channelConfig}
-  {#if type !== "range"}
+  {#if type !== "range" && type !== "range_l5cx"}
     <div class="row">
       <span class="label">Channel state</span>
       <div class="buttons channel-state">
@@ -392,14 +393,14 @@
             false state. Truewithin the sliders, false outside. When disabled, the
             channel outputs continuous values.
           </p>
-          {#if type !== "motion" && type !== "analog" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
+          {#if type !== "motion" && type !== "analog" && !(isRangeVariant && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
             <p>
               <u>Over mode:</u> When enabled, if the reading exceeds the maximum
               slider value, the output is set to 0. Otherwise, it is clamped to the
               max value.
             </p>
           {/if}
-          {#if type !== "range" && (type !== "motion" || isEulerAngle)}
+          {#if !isRangeVariant && (type !== "motion" || isEulerAngle)}
             <p>
               <u>Cyclic:</u> This mode can be useful with input channels that have
               discontinuities at their ends (For e.g. a angular input that will jump
@@ -430,7 +431,7 @@
         >
           Binary mode
         </button>
-        {#if type !== "motion" && type !== "analog" && !(type === "range" && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
+        {#if type !== "motion" && type !== "analog" && !(isRangeVariant && config?.sensorconf && "hold_mode" in config.sensorconf && config.sensorconf.hold_mode)}
           <button
             class="rounder primary"
             class:enabled={isOverOut}
@@ -441,7 +442,7 @@
             Over mode
           </button>
         {/if}
-        {#if type !== "range" && (type !== "motion" || isEulerAngle)}
+        {#if !isRangeVariant && (type !== "motion" || isEulerAngle)}
           <div class="buttons">
             <button
               class="rounder primary"

@@ -3,6 +3,9 @@
 #elif defined(PIPO_RANGE)
 #define PIPO_TYPE "range"
 #define USE_I2C_2V8
+#elif defined(PIPO_RANGE_L5CX)
+#define PIPO_TYPE "range_l5cx"
+#define USE_I2C_2V8
 #elif defined(PIPO_ANALOG)
 #define PIPO_TYPE "analog"
 #else
@@ -27,7 +30,7 @@
 #endif
 
 //HW PINS
-#if defined(PIPO_MOTION) || defined(PIPO_RANGE)
+#if defined(PIPO_MOTION) || defined(PIPO_RANGE) || defined(PIPO_RANGE_L5CX)
 #define WIFI_LED 9
 #define BT_LED 10
 #define SEND_LED 11

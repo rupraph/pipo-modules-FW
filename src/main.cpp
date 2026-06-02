@@ -105,6 +105,11 @@ void setup() {  // by default on core 1
   log_i("Range sensor button callbacks registered");
 #endif
 
+#ifdef PIPO_RANGE_L5CX
+  hwui.set_mode_short_press_callback([]() { input_sensor.toggle_hold_mode(); });
+  log_i("Range L5CX sensor button callbacks registered");
+#endif
+
   // wait for initial offsets to be measured if needed
   log_i("Waiting for boot offset measurement if needed...");
   while (input_sensor.is_offset_measurement_complete() == false) {

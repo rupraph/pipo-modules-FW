@@ -93,7 +93,7 @@
       <Menu />
       <!-- <ConfigSelect /> -->
       <section style="border-top: 2px solid var(--bg-tertiary);">
-        {#if type !== "range"}
+        {#if type !== "range" && type !== "range_l5cx"}
           {#if type === "motion"}
             <div
               class="row"

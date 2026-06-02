@@ -135,6 +135,17 @@ export const schema: Schema = {
       index: 0,
     },
   },
+  range_l5cx: {
+    dist: {
+      label: "Distance",
+      cat: "dist",
+      unit: "cm",
+      min: 0,
+      max: 300,
+      step: 1,
+      index: 0,
+    },
+  },
   analog: {
     A01: {
       label: "Analog 1",

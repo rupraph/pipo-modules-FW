@@ -1,0 +1,92 @@
+{
+  "engine": {
+    "engine-midi": {
+      "dist": {
+        "cc_nb": 14,
+        "channel": 1,
+        "enabled": true,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 12,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "presence": {
+        "cc_nb": 15,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
+        "sustain": 0,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      }
+    },
+    "engine-osc": {
+      "dist": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "dist"
+      },
+      "presence": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "detect"
+      }
+    }
+  },
+  "inputs": {
+    "dist": {
+      "deadband": 0.4,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 60.0,
+      "lmin": 2.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "presence": {
+      "deadband": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 1.0,
+      "lmin": 0.5,
+      "mode": true,
+      "th_mode": true,
+      "cyclic": false,
+      "over_out": false
+    }
+  },
+  "general": {
+    "Wifi_mode": "STA",
+    "OSC_ENA": true,
+    "OSC_IP": "192.168.10.2",
+    "OSC_PORT": 8000,
+    "OSC_Batt": false,
+    "MidiEnabled": false,
+    "HidEnabled": false,
+    "HidMode": 2,
+    "PipoName": "range-l5cx",
+    "BLEEnabled": true,
+    "Button_disa": false
+  },
+  "sensorconf": {
+    "hold_mode": true
+  }
+}
