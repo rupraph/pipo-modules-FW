@@ -193,7 +193,12 @@ void HwUi::setup() {
 
   pause_sw.setup_button(PP_SW);
 
-  log_i("HW UI setup complete");
+  //Battery ADC warmup (scrap first 10 measurements, needed to stabilize reading)
+  for (int i = 0; i < 20; i++) {
+    analogReadMilliVolts(BAT_VOLTAGE);
+    delay(5);
+  }
+
   hwui.measure_battery();
 
   //Prevent boot if battery is too low
@@ -222,6 +227,8 @@ void HwUi::setup() {
 
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup hwui");
+
+  log_i("HW UI setup complete");
 }
 
 void HwUi::update() {
