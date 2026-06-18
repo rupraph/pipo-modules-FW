@@ -12,6 +12,7 @@
     pipoNameWillChange,
     bleWillChange,
     pipoType,
+    pipoInfo,
   } from "../../services";
   import { getDefaultDeadband } from "../../defaults";
   import Switch from "../form/Switch.svelte";
@@ -258,6 +259,20 @@
         </InfoModal>
         <PillSwitch label="" bind:value={config.general.Button_disa} />
       </div>
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-label">Firmware</span>
+          <span class="info-value">{$pipoInfo?.version ?? "—"}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Board Rev</span>
+          <span class="info-value">{$pipoInfo?.hw_rev ?? "—"}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Battery type</span>
+          <span class="info-value">{$pipoInfo?.batt_type ?? "—"}</span>
+        </div>
+      </div>
 
       <div class="row">
         <span class="label">
@@ -449,4 +464,30 @@
     background-color: var(--main);
     color: var(--bg-secondary);
   } */
+
+  .info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .info-label {
+    font-size: 13px;
+    color: var(--text-secondary, #888);
+  }
+
+  .info-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
 </style>

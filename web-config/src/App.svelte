@@ -189,12 +189,6 @@
         <!-- <Collapse title="Info" collapseId="info">
           <Pipoinfo info={resp} />
         </Collapse> -->
-        <div class="row" style="color: var(--bg-secondary);">
-          <div class="left">
-            <p>SW:</p>
-            <span>{resp.version}</span>
-          </div>
-        </div>
       </section>
       <!-- <article class="content section-borders">
         <Logs />

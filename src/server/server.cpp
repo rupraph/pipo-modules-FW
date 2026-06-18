@@ -121,6 +121,12 @@ void PipoServer::setup_requests() {
     info += "\",";
     info += "\"mac\":\"";
     info += WiFi.macAddress();
+    info += "\",";
+    info += "\"hw_rev\":\"";
+    info += String(HW_REV);
+    info += "\",";
+    info += "\"batt_type\":\"";
+    info += String(BATT_TYPE);
     info += "\"}";
     if (DEBUG_HEAP)
       pipoDebugHeap("end info request");

@@ -214,6 +214,8 @@ export type PipoInfo = {
   type: string;
   version: string;
   name: string;
+  hw_rev: string;
+  batt_type: string;
 };
 
 export type QuatConfig = {
