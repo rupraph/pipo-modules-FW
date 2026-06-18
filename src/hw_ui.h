@@ -27,6 +27,24 @@ void battmonitorTask(void* pvParameters);
 
 enum PressType { PRESS_NONE = 0, PRESS_SHORT = 1, PRESS_LONG = 2 };
 
+//LUT for HSZ 602040 1st batch
+static const uint16_t batt_lut_1[51] PROGMEM = {
+    3300, 3325, 3353, 3379, 3404, 3426, 3445, 3460, 3473, 3485, 3494,
+    3504, 3512, 3522, 3532, 3542, 3554, 3567, 3581, 3596, 3611, 3627,
+    3643, 3659, 3675, 3691, 3707, 3722, 3736, 3751, 3764, 3778, 3792,
+    3806, 3819, 3833, 3847, 3862, 3876, 3890, 3904, 3917, 3930, 3943,
+    3955, 3968, 3982, 3998, 4020, 4051, 4096,
+};
+
+// LUT for HSZ 602040 2nd batch
+static const uint16_t batt_lut_2[51] PROGMEM = {
+    3450, 3498, 3531, 3554, 3570, 3581, 3590, 3598, 3605, 3611, 3618,
+    3626, 3633, 3641, 3648, 3655, 3663, 3670, 3676, 3683, 3689, 3695,
+    3702, 3708, 3715, 3722, 3729, 3737, 3746, 3755, 3765, 3775, 3786,
+    3798, 3810, 3822, 3834, 3847, 3860, 3873, 3886, 3900, 3914, 3929,
+    3945, 3962, 3981, 4002, 4025, 4051, 4079,
+};
+
 // Callback type for button press handlers
 using ButtonCallback = void (*)();
 
@@ -172,6 +190,8 @@ class HwUi {
 
 #endif
   int bat_sampling[BAT_SAMPLE_SIZE];
+  int raw_sampling[BAT_SAMPLE_SIZE];
+  int raw_bat_voltage = 0;
   int bat_sampling_index = 0;
   int bat_voltage = 0;
   // previous-state tracking for flag transitions

@@ -13,6 +13,10 @@
 #define HW_REV 20  // 1.0 or 1.1
 #endif
 
+#ifndef BATT_TYPE
+#define BATT_TYPE 1
+#endif
+
 // DEBUG FLAGS
 #define DEBUG_HEAP true
 #define DEBUG_CONFIG false
@@ -77,18 +81,26 @@
 #define BT_PULSE_MIN_BRIGHTNESS 20
 // #define ANALOG_TO_VOLTS 0.000806
 
-//ANALOG SETTINGS
 #if HW_REV == 10
 #define LOW_BAT_VOLTAGE 3400  // in mV //for HW rev 1.0
 #define NO_BOOT_VOLTAGE 3100  // in mV (boot if vbat > 3.65)
 #define SHUTDOWN_LEVEL 3100   // in mV (seams like it lead vbat 3.35v )
 //for HW rev 1.0 (this leads 3.1v at esp under load)   (should have 3v min at esp)
 #elif HW_REV >= 11
+#define CHARGING_LEVEL 4300
+#if BATT_TYPE == 1  //HSZ 602040 1st batch
 #define LOW_BAT_VOLTAGE \
-  3400  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
-#define NO_BOOT_VOLTAGE 3150  // in mV
-#define CHARGING_LEVEL 4300   // in mV
-#define SHUTDOWN_LEVEL 3100   // in mV (on range test cut at 3.17)
+  3440  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
+#define NO_BOOT_VOLTAGE 3440  // 3.4
+// in mV
+#define SHUTDOWN_LEVEL 3300   // 3.3
+
+#elif BATT_TYPE == 2  //HSZ 602040 2nd batch
+#define LOW_BAT_VOLTAGE \
+  3590  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
+#define NO_BOOT_VOLTAGE 3590  // in mV
+#define SHUTDOWN_LEVEL 3450   // 3.45
+#endif
 #endif
 
 #define BAT_SAMPLE_SIZE 20
@@ -98,7 +110,9 @@
 #define BATT_COEF 2.0  //2.56
 // battery drops hard after 3.3v -> 0% // max at 4.1. // =>percentage = volt * 125 -412.5
 #elif HW_REV >= 11
-#define BATT_COEF 1.44  //1.436  // divider is 0.7015  // leads 2.95 @4.2
+#define BATT_COEF \
+  1.355  // PREVIOUS : 1.44 (without offset)  //1.436  // divider is 0.7015  // leads 2.95 @4.2
+#define BATT_OFFSET -181  //
 #endif
 
 #define DEBOUNCE_TIME 50      // in ms

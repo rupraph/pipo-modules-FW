@@ -514,7 +514,7 @@ void HwUi::measure_battery_step() {
     bat_sampling_index = 0;
   }
   bat_sampling[bat_sampling_index] =
-      analogReadMilliVolts(BAT_VOLTAGE) * BATT_COEF;
+      (analogReadMilliVolts(BAT_VOLTAGE) + BATT_OFFSET) * BATT_COEF;
   bat_sampling_index++;
 
   float sum = 0;
@@ -546,21 +546,35 @@ int HwUi::get_bat_voltage() {
 }
 
 float HwUi::get_bat_percentage() {
-  // Use same formula as UI: percentage = voltage * 133.3 - 439.8
-  // This maps: 3.3V = 0%, 4.05V = 100%
-  // bat_voltage is in mV, convert to V first
-  float voltage_in_volts = bat_voltage / 1000.0f;
+  //OLD
+  // // Use same formula as UI: percentage = voltage * 133.3 - 439.8
+  // // This maps: 3.3V = 0%, 4.05V = 100%
+  // // bat_voltage is in mV, convert to V first
+  // float voltage_in_volts = bat_voltage / 1000.0f;
 
-  // Calculate percentage using UI formula
-  float percentage = voltage_in_volts * 133.3f - 439.8f;
+  // // Calculate percentage using UI formula
+  // float percentage = voltage_in_volts * 133.3f - 439.8f;
 
-  // Clamp to 0-100 range
-  if (percentage < 0.0f)
-    percentage = 0.0f;
-  if (percentage > 100.0f)
-    percentage = 100.0f;
+  //New using LUT
+  const uint16_t* lut = (BATT_TYPE == 2) ? batt_lut_2 : batt_lut_1;
 
-  return percentage;
+  if (bat_voltage <= lut[0])
+    return 0.0f;
+  if (bat_voltage >= lut[50])
+    return 100.0f;
+
+  // binary search
+  int lo = 0, hi = 50;
+  while (hi - lo > 1) {
+    int mid = (lo + hi) / 2;
+    if (bat_voltage < lut[mid])
+      hi = mid;
+    else
+      lo = mid;
+  }
+
+  // linear interpolate between lo and hi (each step = 2%)
+  return lo * 2.0f + 2.0f * (bat_voltage - lut[lo]) / (lut[hi] - lut[lo]);
 }
 
 int HwUi::get_bat_percentage_int() {
