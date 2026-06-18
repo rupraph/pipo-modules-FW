@@ -111,7 +111,7 @@
 // battery drops hard after 3.3v -> 0% // max at 4.1. // =>percentage = volt * 125 -412.5
 #elif HW_REV >= 11
 #define BATT_COEF \
-  1.355  // PREVIOUS : 1.44 (without offset)  //1.436  // divider is 0.7015  // leads 2.95 @4.2
+  1.355f  // PREVIOUS : 1.44 (without offset)  //1.436  // divider is 0.7015  // leads 2.95 @4.2
 #define BATT_OFFSET -181  //
 #endif
 

@@ -514,7 +514,7 @@ void HwUi::measure_battery_step() {
     bat_sampling_index = 0;
   }
   bat_sampling[bat_sampling_index] =
-      (analogReadMilliVolts(BAT_VOLTAGE) + BATT_OFFSET) * BATT_COEF;
+      (analogReadMilliVolts(BAT_VOLTAGE) - BATT_OFFSET) * BATT_COEF;
   bat_sampling_index++;
 
   float sum = 0;
