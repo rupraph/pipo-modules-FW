@@ -155,7 +155,7 @@ void setup() {  // by default on core 1
       delay(1000);
     }
   }
-
+  // Go as low as 580 bytes remaining on range
   if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
                               &battmonitorTaskHandle, 0) != pdPASS) {
     log_e("FATAL: Failed to create battmonitorTask - halting");

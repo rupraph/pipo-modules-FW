@@ -96,9 +96,8 @@
 #define SHUTDOWN_LEVEL 3300   // 3.3
 
 #elif BATT_TYPE == 2  //HSZ 602040 2nd batch
-#define LOW_BAT_VOLTAGE
-
-3600  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
+#define LOW_BAT_VOLTAGE \
+  3600  // in mV //for HW rev 1.1 ((3.44v at bat during discharge)
 #define NO_BOOT_VOLTAGE 3590  // in mV
 #define SHUTDOWN_LEVEL 3450   // 3.45
 #endif

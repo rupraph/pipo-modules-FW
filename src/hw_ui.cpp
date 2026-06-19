@@ -106,9 +106,12 @@ void battmonitorTask(void* pvParameters) {
       bool low_battery_changed =
           current_low_battery_state != prev_low_battery_state;
 
+      // Force a periodic heartbeat every 10s even if nothing changed
+      bool heartbeat = (millis() - last_send_time >= SEND_INTERVAL * 10);
+
       // Always send on first measurement (prev_bat_percentage == -1)
       if (prev_bat_percentage == -1 || percentage_changed || state_changed ||
-          low_battery_changed) {
+          low_battery_changed || heartbeat) {
         osc.send_battery_level(current_bat_percentage, current_plugged_state,
                                current_low_battery_state);
         prev_bat_percentage = current_bat_percentage;
