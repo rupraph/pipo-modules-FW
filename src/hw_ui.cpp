@@ -353,7 +353,7 @@ void HwUi::set_led(int led_name, int value) {
   ledcWrite(led_channel_map[led_name], value);
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;
-#elif defined(PIPO_ANALOG) && HW_REV == 20
+#elif defined(PIPO_ANALOG) && HW_REV >= 20
   CRGB color = leds_base_color[led_name];
   color.nscale8_video(value);
   leds[led_name] = color;

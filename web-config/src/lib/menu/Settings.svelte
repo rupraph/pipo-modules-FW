@@ -259,20 +259,6 @@
         </InfoModal>
         <PillSwitch label="" bind:value={config.general.Button_disa} />
       </div>
-      <div class="info-section">
-        <div class="info-row">
-          <span class="info-label">Firmware</span>
-          <span class="info-value">{$pipoInfo?.version ?? "—"}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Board Rev</span>
-          <span class="info-value">{$pipoInfo?.hw_rev ?? "—"}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Battery type</span>
-          <span class="info-value">{$pipoInfo?.batt_type ?? "—"}</span>
-        </div>
-      </div>
 
       <div class="row">
         <span class="label">
@@ -289,6 +275,22 @@
         <button class="primary" on:click={reboot} style="width: fit-content"
           >Reboot</button
         >
+      </div>
+      <div class="info-section">
+        <div class="info-col">
+          <span class="info-label">Firmware</span>
+          <span class="info-value">{$pipoInfo?.version ?? "—"}</span>
+        </div>
+        <div class="info-col">
+          <span class="info-label">Board Rev</span>
+          <span class="info-value"
+            >{$pipoInfo?.hw_rev[0] + "." + $pipoInfo?.hw_rev[1] ?? "—"}</span
+          >
+        </div>
+        <div class="info-col">
+          <span class="info-label">Battery type</span>
+          <span class="info-value">{$pipoInfo?.batt_type ?? "—"}</span>
+        </div>
       </div>
 
       <!-- Save Button (shown when there are unsaved changes) -->
@@ -467,26 +469,28 @@
 
   .info-section {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
     gap: 6px;
-    padding: 12px;
-    background-color: var(--bg-secondary);
+    /* padding: 8px; */
+    /* background-color: var(--bg-secondary); */
     border-radius: 8px;
   }
 
-  .info-row {
+  .info-col {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    gap: 4px;
     align-items: center;
   }
 
   .info-label {
-    font-size: 13px;
+    font-size: 10px;
     color: var(--text-secondary, #888);
   }
 
   .info-value {
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 600;
     color: var(--text-color);
   }
