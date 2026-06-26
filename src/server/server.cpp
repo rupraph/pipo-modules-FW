@@ -1,4 +1,5 @@
 #include "server/server.h"
+#include <Preferences.h>
 
 PipoServer server;
 
@@ -127,7 +128,17 @@ void PipoServer::setup_requests() {
     info += "\",";
     info += "\"batt_type\":\"";
     info += String(BATT_TYPE);
-    info += "\"}";
+    info += "\",";
+    // Read tutorial initialized flag from NVS (defaults to false if absent)
+    Preferences prefs;
+    bool initialized = false;
+    if (prefs.begin("pipo", true)) {  // read-only
+      initialized = prefs.getBool("tutorial_done", false);
+      prefs.end();
+    }
+    info += "\"initialized\":";
+    info += initialized ? "true" : "false";
+    info += "}";
     if (DEBUG_HEAP)
       pipoDebugHeap("end info request");
     return request->send(200, "text/json", info.c_str());
@@ -363,6 +374,33 @@ void PipoServer::setup_requests() {
     request->send(200, "text/plain", "Rebooting");
     vTaskDelay(pdMS_TO_TICKS(3000));
     ESP.restart();
+  });
+
+  // Tutorial completion — marks the introductory tutorial as done
+  server.on("/tutorial-complete", HTTP_POST,
+            [&](AsyncWebServerRequest* request) {
+              Preferences prefs;
+              if (prefs.begin("pipo", false)) {  // read-write
+                prefs.putBool("tutorial_done", true);
+                prefs.end();
+                log_i("Tutorial marked as complete");
+                return request->send(200, "text/plain", "Tutorial complete");
+              }
+              log_e("Failed to open NVS for tutorial-complete");
+              return request->send(500, "text/plain", "Failed to save");
+            });
+
+  // Tutorial reset — allows re-showing the tutorial (for debugging/support)
+  server.on("/tutorial-reset", HTTP_POST, [&](AsyncWebServerRequest* request) {
+    Preferences prefs;
+    if (prefs.begin("pipo", false)) {  // read-write
+      prefs.putBool("tutorial_done", false);
+      prefs.end();
+      log_i("Tutorial reset");
+      return request->send(200, "text/plain", "Tutorial reset");
+    }
+    log_e("Failed to open NVS for tutorial-reset");
+    return request->send(500, "text/plain", "Failed to reset");
   });
 
   server.on("/wifi-mode", HTTP_POST, [&](AsyncWebServerRequest* request) {

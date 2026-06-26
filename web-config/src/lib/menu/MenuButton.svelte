@@ -3,6 +3,7 @@
   export let secondary = false;
   export let connected = false;
   export let disconnected = false;
+  export let dataTutorial: string | undefined = undefined;
 </script>
 
 <button
@@ -11,6 +12,7 @@
   class:connected
   class:disconnected
   on:click
+  data-tutorial={dataTutorial || undefined}
 >
   <slot></slot>
 </button>

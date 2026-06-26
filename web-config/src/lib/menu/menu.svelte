@@ -7,8 +7,14 @@
   import Wifi from "./Wifi.svelte";
   import PlayPause from "./PlayPause.svelte";
   import ConfigManagerButton from "./ConfigManagerButton.svelte";
+  import { GraduationCap } from "lucide-svelte";
+  import { tutorialService } from "../../tutorial/store";
 
   let wifiOpen = false;
+
+  function startTutorial() {
+    tutorialService.replay();
+  }
 
   function fetchImage() {
     // debugger;
@@ -32,9 +38,16 @@
       <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
       <div class="centered">
         <ConfigManagerButton />
-        <Settings />
-        <Wifi />
+        <span data-tutorial="menu-settings"><Settings /></span>
+        <span data-tutorial="menu-wifi"><Wifi /></span>
         <PlayPause />
+        <button
+          class="tutorial-btn"
+          on:click={startTutorial}
+          title="Tutorial"
+        >
+          <GraduationCap size={18} color="var(--grey)" />
+        </button>
       </div>
     </div>
   {/await}
@@ -62,5 +75,19 @@
   .logo-image {
     width: 200px;
     height: auto;
+  }
+  .tutorial-btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: background-color 0.15s;
+  }
+  .tutorial-btn:hover {
+    background-color: var(--bg-secondary);
   }
 </style>
