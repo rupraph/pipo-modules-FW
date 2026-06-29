@@ -21,7 +21,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const signals = [
   [`"Dlink-Home"`, -40, 1, 1],
-  [`"MyRouter-345"`, -50, 0, 1],
+  [`"MyRouter-345-superlong-test-nolimitlikecrazyadrimnistrators"`, -50, 0, 1],
   [`"HomeSpot"`, -60, 0, 0],
   [`"WiFi-2.4-7662"`, -80, 0, 0],
 ];
