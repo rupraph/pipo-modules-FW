@@ -284,7 +284,7 @@
         <div class="info-col">
           <span class="info-label">Board Rev</span>
           <span class="info-value"
-            >{$pipoInfo?.hw_rev[0] + "." + $pipoInfo?.hw_rev[1] ?? "—"}</span
+            >{$pipoInfo?.hw_rev ? $pipoInfo.hw_rev[0] + "." + $pipoInfo.hw_rev[1] : "—"}</span
           >
         </div>
         <div class="info-col">
