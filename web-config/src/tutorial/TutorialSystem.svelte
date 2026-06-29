@@ -17,17 +17,15 @@
     totalChapters,
     isLastChapter,
     tutorialService,
+    tutorialPanelOpen,
   } from "./store";
   import { pipoType } from "../services/config";
   import type { TutorialStep, TutorialChapter } from "./types";
 
-  // ── Filter steps by current board variant ─────────────────────────
   function filterByVariant(steps: TutorialStep[]): TutorialStep[] {
     const type = get(pipoType);
     return steps.filter((s) => !s.variant || s.variant.includes(type));
   }
-
-  // ── Filter chapters to only those with at least one valid step ────
   function filterChapters(
     chapters: TutorialChapter[],
     validStepIds: Set<string>,
@@ -37,17 +35,14 @@
     );
   }
 
-  // ── Apply variant filtering on mount ──────────────────────────────
+  // Apply variant filtering
   $: if ($tutorialActive) {
     const rawSteps = get(tutorialSteps);
     const rawChapters = get(tutorialChapters);
-
     const filteredSteps = filterByVariant(rawSteps);
     const validIds = new Set(filteredSteps.map((s) => s.id));
     const filteredChapters = filterChapters(rawChapters, validIds);
-
     if (filteredSteps.length === 0) {
-      // No valid steps for this variant — dismiss
       tutorialService.dismiss();
     } else if (
       filteredSteps.length !== rawSteps.length ||
@@ -59,61 +54,71 @@
     }
   }
 
-  // ── Derived values ────────────────────────────────────────────────
   $: step = $currentStep;
   $: target = step?.target ?? null;
 
-  // ── Navigation handlers ───────────────────────────────────────────
-  function nextStep() {
-    const steps = get(tutorialSteps);
-    const idx = get(tutorialStep);
-    if (idx < steps.length - 1) {
-      tutorialStep.set(idx + 1);
+  // ── Auto-open panels on step enter / close on leave ───────────────
+  let previousStep: TutorialStep | null = null;
+
+  $: if (step && step !== previousStep) {
+    const prev = previousStep;
+    const cur = step;
+    previousStep = step;
+
+    const prevAutoTarget = prev?.autoOpen ? prev.target : null;
+    const curAutoTarget = cur.autoOpen ? cur.target : null;
+
+    // Only write the store when the desired open target actually changes
+    if (prevAutoTarget !== curAutoTarget) {
+      tutorialPanelOpen.set(curAutoTarget ?? null);
     }
   }
 
+  // ── Dynamic panel position (top when target is in lower half) ─────
+  let panelPosition: "top" | "bottom" = "bottom";
+
+  function computePanelPosition(): "top" | "bottom" {
+    if (!target) return "bottom";
+    const el = document.querySelector(`[data-tutorial="${target}"]`);
+    if (!el) return "bottom";
+    const rect = el.getBoundingClientRect();
+    return rect.top + rect.height / 2 > window.innerHeight / 2
+      ? "top"
+      : "bottom";
+  }
+
+  $: if (step) panelPosition = computePanelPosition();
+
+  // ── Navigation ────────────────────────────────────────────────────
+  function nextStep() {
+    const idx = get(tutorialStep);
+    if (idx < get(tutorialSteps).length - 1) tutorialStep.set(idx + 1);
+  }
   function prevStep() {
     const idx = get(tutorialStep);
-    if (idx > 0) {
-      tutorialStep.set(idx - 1);
-    }
+    if (idx > 0) tutorialStep.set(idx - 1);
   }
-
   function skipChapter() {
     const steps = get(tutorialSteps);
     const idx = get(tutorialStep);
     const currentCh = steps[idx]?.chapterId;
-
-    // Find first step of next chapter
     let nextIdx = idx;
-    while (nextIdx < steps.length && steps[nextIdx].chapterId === currentCh) {
+    while (nextIdx < steps.length && steps[nextIdx].chapterId === currentCh)
       nextIdx++;
-    }
-
-    if (nextIdx < steps.length) {
-      tutorialStep.set(nextIdx);
-    } else {
-      // No next chapter — complete
-      handleComplete();
-    }
+    if (nextIdx < steps.length) tutorialStep.set(nextIdx);
+    else handleComplete();
   }
-
   function handleSkipAll() {
-    const mode = get(tutorialMode);
-    if (mode === "replay") {
-      tutorialService.dismiss();
-    } else {
-      tutorialService.skip();
-    }
+    tutorialPanelOpen.set(null);
+    get(tutorialMode) === "replay"
+      ? tutorialService.dismiss()
+      : tutorialService.skip();
   }
-
   function handleComplete() {
-    const mode = get(tutorialMode);
-    if (mode === "replay") {
-      tutorialService.dismiss();
-    } else {
-      tutorialService.complete();
-    }
+    tutorialPanelOpen.set(null);
+    get(tutorialMode) === "replay"
+      ? tutorialService.dismiss()
+      : tutorialService.complete();
   }
 </script>
 
@@ -129,6 +134,7 @@
     isLastStepInChapter={$isLastStepInChapter}
     isLastChapter={$isLastChapter}
     isLastStepOverall={$isLastStepOverall}
+    position={panelPosition}
     onNext={nextStep}
     onPrev={prevStep}
     onSkipChapter={skipChapter}

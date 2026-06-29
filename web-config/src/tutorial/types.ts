@@ -15,6 +15,8 @@ export interface TutorialStep {
   description: string;
   icon?: string;
   variant?: PipoTypes[];
+  /** If true, the target element is clicked on step enter/leave to toggle its associated panel (e.g. WiFi modal). */
+  autoOpen?: boolean;
 }
 
 /**

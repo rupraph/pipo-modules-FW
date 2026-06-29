@@ -49,6 +49,9 @@ export const tutorialMode = writable<TutorialMode>(null);
 /** Current step index (0-based, relative to tutorialSteps). */
 export const tutorialStep = writable<number>(0);
 
+/** ID of the panel the tutorial wants open (null = close all). */
+export const tutorialPanelOpen = writable<string | null>(null);
+
 /** Steps for the current tutorial session. */
 export const tutorialSteps = writable<TutorialStep[]>([]);
 
@@ -159,6 +162,7 @@ class TutorialService {
 
   /** Mark tutorial as complete (called on "Got it!" or "Skip All"). */
   async complete(): Promise<void> {
+    tutorialPanelOpen.set(null);
     try {
       await pipoio.request({ method: 'post', url: '/tutorial-complete' });
     } catch (e) {
@@ -193,6 +197,7 @@ class TutorialService {
 
   /** Dismiss without marking complete (used during replay). */
   dismiss(): void {
+    tutorialPanelOpen.set(null);
     tutorialActive.set(false);
     tutorialMode.set(null);
   }

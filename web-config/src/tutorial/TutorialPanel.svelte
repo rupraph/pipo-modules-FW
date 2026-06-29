@@ -17,12 +17,17 @@
   export let onSkipChapter: () => void = () => {};
   export let onSkipAll: () => void = () => {};
   export let onComplete: () => void = () => {};
+
+  /** Panel position: 'top' when spotlight target is in the bottom half of the viewport. */
+  export let position: "top" | "bottom" = "bottom";
 </script>
 
 {#if step}
   <div
     class="tutorial-panel"
-    in:fly={{ y: 80, duration: 300 }}
+    class:panel-top={position === "top"}
+    class:panel-bottom={position === "bottom"}
+    in:fly={{ y: position === "bottom" ? 80 : -80, duration: 300 }}
     out:fade={{ duration: 200 }}
   >
     <!-- Chapter progress dots -->
@@ -104,7 +109,6 @@
 <style>
   .tutorial-panel {
     position: fixed;
-    bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     z-index: 110;
@@ -112,9 +116,7 @@
     max-width: 560px;
     background: var(--bg-primary, #232024);
     border: 1px solid var(--main, #f2fd97);
-    border-radius: 16px 16px 0 0;
     padding: 16px 20px 12px;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -241,5 +243,17 @@
   .complete {
     background: var(--bg-secondary, #353535);
     padding: 6px 14px;
+  }
+
+  /* ── Position variants ──────────────────────────── */
+  .panel-bottom {
+    bottom: 0;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+  }
+  .panel-top {
+    top: 0;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
   }
 </style>

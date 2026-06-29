@@ -68,6 +68,7 @@ export const coreSteps: TutorialStep[] = [
     target: 'menu-wifi',
     title: 'Connect to WiFi',
     icon: '📶',
+    autoOpen: true,
     description:
       'Tap the WiFi icon in the top menu to open network settings. ' +
       'You can scan for nearby networks and connect Pipo to your local WiFi ' +
@@ -79,6 +80,7 @@ export const coreSteps: TutorialStep[] = [
     target: 'menu-wifi',
     title: 'Stay Connected',
     icon: '🔗',
+    autoOpen: true,
     description:
       'Once connected to WiFi, Pipo can send OSC messages over your network ' +
       'and serve this configuration page. ' +
