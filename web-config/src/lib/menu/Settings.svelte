@@ -251,9 +251,15 @@
         <InfoModal>
           <p>
             The Pipo Name is used to identify your device. It is used for the
-            WiFi name, access URL (pipo-xxx.local), and OSC address prefix.
-            Choose a unique name without spaces or special characters. Please
-            power cycle after saving the changes.
+            WiFi name, config access URL (pipo-xxx.local), and OSC address
+            prefix.<br /><br />
+            Choose a unique name without spaces or special characters. Please power
+            cycle after saving the change.<br /><br />
+            Note: After changing the name, your computer might take a while to display
+            the new wifi name due to caching (you can try enabling/disabling your
+            PC wifi to force a refresh, or search in "other networks"). When connected
+            again, make sure to use the new address to access this configuration
+            page.
           </p>
         </InfoModal>
         <div class="text-input-wrapper">
