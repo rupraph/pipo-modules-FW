@@ -50,6 +50,7 @@
       for (const channel of Object.keys(config.inputs)) {
         config.inputs[channel].deadband = getDefaultDeadband(type, channel);
       }
+      config.general.BLEEnabled = true;
     }
   }
 
@@ -132,8 +133,19 @@
         <span class="label">Ouput mode</span>
         <InfoModal>
           <p>
-            Select the general output mode of the Pipo: MIDI or OSC. MIDI can
-            only be sent over USB or BLE, OSC can only be sent over Wifi.
+            Select the general data output mode of the Pipo: MIDI or OSC.<br />
+            <br />
+            MIDI: sends Midi data as a USB controller, or wirelessly using BLE (Bluetooth
+            Low Energy). Midi is easier to setup with music software but has a lower
+            resolution format. Also, when using BLE, connection must be manually
+            established each time.
+            <br />
+            <br />
+            OSC: sends data wirelessly over Wifi. It allows for connecting multiple
+            devices, use high resolution data, and is more flexible and convenient
+            for advanced users (allows for auto-reconnection, device swapping, etc...).
+            However, initial setup requires some network configuration, which is
+            less straightforward than MIDI.
           </p>
           <p>This requires reboot after saving.</p>
         </InfoModal>
@@ -284,7 +296,9 @@
         <div class="info-col">
           <span class="info-label">Board Rev</span>
           <span class="info-value"
-            >{$pipoInfo?.hw_rev ? $pipoInfo.hw_rev[0] + "." + $pipoInfo.hw_rev[1] : "—"}</span
+            >{$pipoInfo?.hw_rev
+              ? $pipoInfo.hw_rev[0] + "." + $pipoInfo.hw_rev[1]
+              : "—"}</span
           >
         </div>
         <div class="info-col">
