@@ -45,8 +45,8 @@ def run(cmd):
 
 
 def build_env(env):
-    run(["pio", "run", "-e", env])
-    run(["pio", "run", "-t", "buildfs", "-e", env])
+    run(["./scripts/pio.sh", "run", "-e", env])
+    run(["./scripts/pio.sh", "run", "-t", "buildfs", "-e", env])
 
 
 def merge_env(env, batt_type):
