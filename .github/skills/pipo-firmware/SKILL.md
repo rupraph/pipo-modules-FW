@@ -77,23 +77,25 @@ scripts/                 — build-web.sh, release.py, define-version.py, copy_d
 ## Architecture Overview
 
 ### Dual-Core RTOS Design
+
 - **Core 1** (real-time): Main loop at 400Hz — sensor read → engine.update() → MIDI/OSC output
 - **Core 0** (network/UI): WiFi state machine, WebSocket broadcast, LED control, battery monitor, button debounce
 
 ### RTOS Tasks
 
-| Task | Stack | Pri | Core | Period | Purpose |
-|------|-------|-----|------|--------|---------|
-| Main loop (Arduino) | 8KB | 1 | 1 | 2.5ms | Sensor + engine |
-| websocketTask | 3KB | 2 | 0 | 40-300ms adaptive | WS telemetry |
-| wifiTask | 4KB | 3 | 0 | 500ms | WiFi state machine |
-| hwuiTask | 2KB | 1 | 0 | 10-20ms | LED patterns |
-| battmonitorTask | 2KB | 1 | 0 | 500ms | Battery sampling |
-| buttonTask | 2KB | 1 | 0 | 5ms | Debounce + press |
+| Task                | Stack | Pri | Core | Period            | Purpose            |
+| ------------------- | ----- | --- | ---- | ----------------- | ------------------ |
+| Main loop (Arduino) | 8KB   | 1   | 1    | 2.5ms             | Sensor + engine    |
+| websocketTask       | 3KB   | 2   | 0    | 40-300ms adaptive | WS telemetry       |
+| wifiTask            | 4KB   | 3   | 0    | 500ms             | WiFi state machine |
+| hwuiTask            | 2KB   | 1   | 0    | 10-20ms           | LED patterns       |
+| battmonitorTask     | 2KB   | 1   | 0    | 500ms             | Battery sampling   |
+| buttonTask          | 2KB   | 1   | 0    | 5ms               | Debounce + press   |
 
 All tasks register with ESP32 watchdog (2s timeout).
 
 ### Sensor Pipeline
+
 ```
 Raw reading
   → Sensor-specific filter (EMA / Median / LowPass+MA+Kalman)
@@ -118,6 +120,7 @@ Raw reading
 **Atomic writes**: Write `.tmp` → verify size → `LittleFS.rename()` → update `last_config.txt`. Temp files cleaned on boot.
 
 **Key class**: `Config` in `src/utils/config.h` — owns `current_config` JsonDocument.
+
 - `apply(engine, osc)` pushes config to subsystems
 - `gather(engine)` collects runtime state back to JsonDocument
 - `validate_config()` checks all 4 sections present and non-null
@@ -129,12 +132,14 @@ Raw reading
 Single-client enforced. TEXT frames only. Custom protocol:
 
 **Inbound** (512B buffer): `command:payload`
+
 - `config:path/to/key:value` — single config edit
 - `configs:key:val\nkey:val` — batch edit
 - `save:` — persist to flash
 - `monitor:axis_name` — subscribe to axis telemetry
 
 **Outbound** (256B buffer, adaptive rate):
+
 ```
 fps,25.00,40.00
 sensor,pitch,45.32,1
@@ -160,12 +165,15 @@ cc,1,14,64,0
 - **Captive Portal**: `/generate_204`, `/hotspot-detect.html`, `/success.html` → redirect to `/`
 
 ### WiFi State Machine
+
 Event-driven via 13 Arduino WiFi event handlers → volatile shared_flags.
+
 - Boot: APSTA mode → async scan → try last known STA (max 3 retries) → fallback to AP
 - Password Manager (`pw-manager.hpp`): NVS storage, LRU eviction, `userWantsDisconnected` flag
 - Network readiness: `pipoNetworkReady()` = STA connected OR AP configured + client IP assigned
 
 ### Web Frontend (Svelte)
+
 - **State**: Svelte stores in `services/config.ts` — change detection via `JSON.stringify` every 300ms
 - **WS Client** (`pipoio.ts`): EventEmitter, dead connection detection (3s), promise-based queue serialization, 25ms inter-operation delay
 - **Save**: `FloatingSaveButton` validates → multipart POST → triggers reboot if output mode or PipoName changed
@@ -178,18 +186,19 @@ Event-driven via 13 Arduino WiFi event handlers → volatile shared_flags.
 
 ### PlatformIO Environments
 
-| Environment | PIPO_TYPE | HW_REV | lib_extra_dirs |
-|-------------|-----------|--------|----------------|
-| motion | motion | 10 | lib-variants/motion |
-| motion_rev1_1 | motion | 11 | lib-variants/motion |
-| range | range | 10 | lib-variants/range |
-| range_rev1_1 | range | 11 | lib-variants/range |
-| analog | analog | 10 | lib-variants/analog |
-| analog_rev2 | analog | 20 | lib-variants/analog |
+| Environment   | PIPO_TYPE | HW_REV | lib_extra_dirs      |
+| ------------- | --------- | ------ | ------------------- |
+| motion        | motion    | 10     | lib-variants/motion |
+| motion_rev1_1 | motion    | 11     | lib-variants/motion |
+| range         | range     | 10     | lib-variants/range  |
+| range_rev1_1  | range     | 11     | lib-variants/range  |
+| analog        | analog    | 10     | lib-variants/analog |
+| analog_rev2   | analog    | 20     | lib-variants/analog |
 
 Dev variants add `DISABLE_USB_COMM` + `CORE_DEBUG_LEVEL=5`.
 
 ### Common Build Commands
+
 ```bash
 npm run build:motion_rev1_1      # Build firmware
 npm run upload:motion_rev1_1     # Flash firmware
@@ -203,6 +212,7 @@ npm run release                  # Full release (3 variants, merged bins, manife
 ```
 
 ### Partition Layout (8MB flash)
+
 ```
 nvs     0x9000   20KB    NVS key-value storage
 otadata 0xe000   8KB     OTA metadata
@@ -220,12 +230,14 @@ spiffs  0x410000 3MB     LittleFS (configs, presets, web UI)
 ## Development Guidelines
 
 ### When Modifying the Sensor Pipeline
+
 - Filters are per-variant in sensor subclasses — don't add filters in engine.cpp
 - `SensorDat` struct owns all per-axis state — extend it for new per-axis features
 - Trigger flags are per-protocol; set in `process_sensor_triggers()`, consumed in engine
 - Main loop is 400Hz on Core 1 — keep processing under 2.5ms budget
 
 ### When Modifying Config
+
 - Always maintain the 4-section schema (engine/inputs/general/sensorconf)
 - After adding config fields: update `default.json` for ALL 3 variants in `configs/`
 - After adding config fields: update TypeScript types in `web-config/src/types.ts`
@@ -234,6 +246,7 @@ spiffs  0x410000 3MB     LittleFS (configs, presets, web UI)
 - Test atomic save: power-loss during write must not corrupt config
 
 ### When Modifying WebSocket Protocol
+
 - Inbound buffer is 512B, outbound is 256B — respect these limits
 - Add new message types to both firmware (`pipo-ws.cpp`) and frontend (`pipoio.ts`)
 - Frontend `_wrap()` queues WS commands — don't bypass it for new commands
@@ -241,12 +254,14 @@ spiffs  0x410000 3MB     LittleFS (configs, presets, web UI)
 - Single-client enforced — new connections close old ones
 
 ### When Modifying HTTP Endpoints
+
 - Add routes in `src/server/server.cpp`
 - CORS headers added globally via `DefaultHeaders`
 - For file operations: use atomic write pattern (`.tmp` → rename)
 - For frontend integration: update Axios calls + add to mock-server routes
 
 ### When Modifying Web Frontend
+
 - State lives in Svelte stores (`services/config.ts`) — don't duplicate state in components
 - Change detection is `JSON.stringify` comparison — works for all nested changes
 - New config fields need: TypeScript type + schema entry + form component binding
@@ -255,12 +270,14 @@ spiffs  0x410000 3MB     LittleFS (configs, presets, web UI)
 - Sequential loader in postbuild.js prevents FOUC on slow ESP32 WiFi
 
 ### When Modifying Build Configuration
+
 - `lib_extra_dirs` in platformio.ini selects variant-specific sensor drivers
 - `copy_default_config.py` runs at buildfs time — copies variant config + presets to `data/`
 - Don't exceed 2MB firmware partition or 3MB LittleFS partition
 - Total heap after setup: ~60KB free; ~50KB consumed by MIDI, ~50KB by WiFi, ~30KB by web server
 
 ### Memory Budget
+
 ```
 Total SRAM: 520KB
 After boot:  ~60KB free heap (typical)
@@ -268,7 +285,7 @@ Fragmentation: 38-43%
 
 Major consumers:
   MIDI setup:    ~50KB
-  WiFi setup:    ~50KB  
+  WiFi setup:    ~50KB
   Web server:    ~30KB
   Config JSON:   5-15KB (unbounded JsonDocument — improvement needed)
   Per-axis maps: ~7.5KB (std::string in translators)
