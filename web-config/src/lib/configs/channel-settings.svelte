@@ -500,8 +500,8 @@
         <span class="label">Noise Filter</span>
         <InfoModal>
           <p>
-            This filter removes small sensor variations to reduce network
-            traffic. Disable for full sensitivity, unfiltered readings.
+            ON by default. Filters out negligible sensor variations to limit
+            network traffic. Disabling it will send unfiltered sensor readings.
           </p>
         </InfoModal>
       </div>
