@@ -26,7 +26,7 @@ void MidiUSBSetup() {
   }
   // while (!TinyUSBDevice.mounted())
   //     delay(1);
-  MidiUsb.begin(MIDI_CHANNEL_OMNI);
+  // MidiUsb.begin(MIDI_CHANNEL_OMNI);
   log_i("MIDI USB setup complete");
   if (DEBUG_HEAP)
     pipoDebugHeap();
