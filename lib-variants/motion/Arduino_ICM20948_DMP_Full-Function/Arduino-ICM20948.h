@@ -36,40 +36,41 @@ typedef struct {
   Class
 *************************************************************************/
 
-class ArduinoICM20948
-{
-  public:
+class ArduinoICM20948 {
+ public:
+  ArduinoICM20948();
 
-    ArduinoICM20948();
+  //void init(TwoWire *theWire = &Wire, JTICM20948Settings settings);
+  void init(ArduinoICM20948Settings settings);
+  void task();
 
-    //void init(TwoWire *theWire = &Wire, JTICM20948Settings settings);
-    void init(ArduinoICM20948Settings settings);
-    void task();
+  bool gyroDataIsReady();
+  bool accelDataIsReady();
+  bool magDataIsReady();
+  bool gravDataIsReady();
+  bool linearAccelDataIsReady();
+  bool quat6DataIsReady();
+  bool euler6DataIsReady();
+  bool quat9DataIsReady();
+  bool euler9DataIsReady();
+  bool harDataIsReady();
+  bool stepsDataIsReady();
 
-    bool gyroDataIsReady();
-    bool accelDataIsReady();
-    bool magDataIsReady();
-    bool gravDataIsReady();
-    bool linearAccelDataIsReady();
-    bool quat6DataIsReady();
-    bool euler6DataIsReady();
-    bool quat9DataIsReady();
-    bool euler9DataIsReady();
-    bool harDataIsReady();
-    bool stepsDataIsReady();
+  void readGyroData(float* x, float* y, float* z);
+  void readAccelData(float* x, float* y, float* z);
+  void readMagData(float* x, float* y, float* z);
+  void readGravData(float* x, float* y, float* z);
+  void readLinearAccelData(float* x, float* y, float* z);
+  void readQuat6Data(float* w, float* x, float* y, float* z);
+  void readEuler6Data(float* roll, float* pitch, float* yaw);
+  void readQuat9Data(float* w, float* x, float* y, float* z);
+  void readEuler9Data(float* roll, float* pitch, float* yaw);
+  void readHarData(char* activity);
+  void readStepsData(unsigned long* steps_count);
 
-    void readGyroData(float *x, float *y, float *z);
-    void readAccelData(float *x, float *y, float *z);
-    void readMagData(float *x, float *y, float *z);
-    void readGravData(float* x, float* y, float* z);
-    void readLinearAccelData(float* x, float* y, float* z);
-    void readQuat6Data(float *w, float *x, float *y, float *z);
-    void readEuler6Data(float *roll, float *pitch, float *yaw);
-    void readQuat9Data(float* w, float* x, float* y, float* z);
-    void readEuler9Data(float* roll, float* pitch, float* yaw);
-    void readHarData(char* activity);
-    void readStepsData(unsigned long* steps_count);
+  // Set accelerometer full-scale range (±2g, ±4g, ±8g, ±16g)
+  // Can be called at runtime without disabling the sensor
+  void setAccelFSR(int32_t fsr);
 };
-
 
 #endif
