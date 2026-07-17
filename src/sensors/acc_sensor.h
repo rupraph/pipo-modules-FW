@@ -59,10 +59,15 @@ class MotionSensor : public Sensor {
   void set_new_reference_orientation();
   bool get_relative_mode() const { return relative_mode; }
 
+  // Apply accelerometer FSR to hardware (called after init and on config changes)
+  void applyAccelFSR();
+
  private:
   //config
   bool relative_mode =
       true;  //true = differential tracking (pure relative), false = quat9 absolute orientation
+  int32_t acc_fsr = 4;  // accelerometer full scale range in g (2, 4, 8, 16)
+  bool sensor_initialized = false;  // tracks whether icm20948.init() has completed
 
   //theses filters are for noise reduction.
   unordered_map<string, EMAFilter> filter_map = {

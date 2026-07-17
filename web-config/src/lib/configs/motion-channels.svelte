@@ -188,6 +188,39 @@
       </button>
     {/each}
   </div>
+  {#if currentType === "linear_acceleration" && $currentConfig?.sensorconf}
+    <div
+      class="row"
+      style="border-bottom: 1px dashed var(--bg-secondary); padding-bottom: 6px; margin-top: 8px;"
+    >
+      <div style="display: flex; align-items: center; gap: 0.5em;">
+        <span class="label">Accel Range</span>
+        <InfoModal>
+          <p style="white-space: normal;">
+            Sets the accelerometer full-scale range. Lower values give higher
+            sensitivity but clip at lower forces.
+          </p>
+          <ul>
+            <li>
+              <strong>±2g</strong> — highest sensitivity, best for subtle motion
+            </li>
+            <li><strong>±4g</strong> — balanced (default)</li>
+            <li><strong>±8g</strong> — moderate range</li>
+            <li><strong>±16g</strong> — widest range, lowest sensitivity</li>
+          </ul>
+        </InfoModal>
+      </div>
+      <select
+        bind:value={$currentConfig.sensorconf.acc_fsr}
+        style="padding: 4px 8px; border-radius: 4px;"
+      >
+        <option value={2}>±2g</option>
+        <option value={4}>±4g</option>
+        <option value={8}>±8g</option>
+        <option value={16}>±16g</option>
+      </select>
+    </div>
+  {/if}
   {#if currentType === "quaternion"}
     <div class="row">
       <div class="label">Quaternion</div>
