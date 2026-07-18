@@ -10,6 +10,7 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
+#include "utils/board_identity.h"
 #include "esp_task_wdt.h"
 #include <set>
 #if defined(PIPO_ANALOG)
@@ -45,6 +46,14 @@ void setup() {  // by default on core 1
 #endif
 
   log_i("\n=== Pipo Setup Start ===");
+
+  // Read immutable board identity from eFuse BLOCK3 (burned at manufacturing)
+  BoardIdentity board_id = read_board_identity();
+  if (board_id.programmed) {
+    log_i("Board identity: %s", board_id.to_string());
+  } else {
+    log_w("Board identity: NOT PROGRAMMED — eFuse BLOCK3 is empty");
+  }
 
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
 
