@@ -21,6 +21,8 @@
   let wifiMode = "";
   let mounted = false;
   let showConnectedWarning = false;
+  let showIpWarning = false;
+  let pendingSsid = "";
 
   const WIFI_PASSWORD_MAX_LENGTH = 63; // WPA/WPA2 standard max length
 
@@ -28,6 +30,7 @@
   $: networks = $wifiState.networks;
   $: apIP = $wifiState.apIP;
   $: staIP = $wifiState.staIP;
+  $: hasStoredNetworks = networks.some((n) => n.known);
   $: if (mounted) onShow();
 
   onMount(() => {
@@ -101,7 +104,13 @@
 
     if (known) {
       password = undefined;
-      return onConnect(ssid);
+      // Only warn about IP change on first-time setup (no stored networks)
+      if (hasStoredNetworks) {
+        return onConnect(ssid);
+      }
+      pendingSsid = ssid;
+      showIpWarning = true;
+      return;
     }
     password = "";
     editing = ssid;
@@ -199,6 +208,14 @@
   async function onConnect(ssid: string) {
     if (waiting) return;
     waiting = true;
+
+    // Warn that IP will change after connecting
+    addToast({
+      type: "info",
+      message: `Please check the destination OSC IP adress after connecting to a router`,
+      timeout: 6000,
+    });
+
     let toast: Toast = {
       type: "info",
       message: `Connecting to ${ssid}...`,
@@ -326,8 +343,16 @@
                 {/if}
               </button>
 
-              <button class="connect" on:click={() => onConnect(editing)}
-                >connect</button
+              <button
+                class="connect"
+                on:click={() => {
+                  if (hasStoredNetworks) {
+                    onConnect(editing);
+                  } else {
+                    pendingSsid = editing;
+                    showIpWarning = true;
+                  }
+                }}>connect</button
               >
             </div>
           {/if}
@@ -362,6 +387,38 @@
     You are already connected to a network. Please disconnect first before
     connecting to another network.
   </p>
+</Modal>
+
+<Modal bind:open={showIpWarning}>
+  <h3 style="text-align: center;">IP Address Will Change</h3>
+  <p style="text-align: center; margin: 0.5em 1em 1em 1em;">
+    The destination PC IP address will change when switching its connection from
+    Pipo to a router. Make sure you update the OSC destination IP address set in
+    Pipo after the switch. Do note some software might need to be restarted
+    after a connection change.
+  </p>
+  <div
+    style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
+  >
+    <button
+      class="secondary"
+      on:click={() => {
+        showIpWarning = false;
+        pendingSsid = "";
+      }}
+    >
+      Cancel
+    </button>
+    <button
+      class="primary"
+      on:click={() => {
+        showIpWarning = false;
+        onConnect(pendingSsid);
+      }}
+    >
+      Connect
+    </button>
+  </div>
 </Modal>
 
 <style scoped>
