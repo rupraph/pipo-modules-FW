@@ -363,8 +363,10 @@
     force a refresh, or search in "other networks").
   </p>
   <p style="text-align: left; margin: 1em; line-height: 1.5;">
-    When connected again, make sure to use the new address to access this
-    configuration page.
+    When trying to access the page, make sure to use the new address: "pipo-<new-name
+      >.local" to access this configuration page. The OSC address prefix will
+      also change to the new name.
+    </new-name>
   </p>
   <div
     style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
