@@ -220,6 +220,7 @@ void Engine::midi_processor(const string& axis_name, const SensorDat& dat,
         if (sensor_bool) {
           if (  //!midiio.is_note_playing(thresh_note, channel) &&
               dat.trigger_flags.midi_trig) {
+            midi_translator.should_send_note(thresh_note);  // track last sent note for WS output display
             midiio.sendNoteOn(thresh_note, midi_translator.get_velocity(),
                               channel, sustain_ms);
             input_sensor.set_trigger_flag(axis_name, MIDI, false);
