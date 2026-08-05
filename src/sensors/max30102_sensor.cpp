@@ -56,13 +56,18 @@ void Max30102Sensor::setup() {
   particleSensor_.enableDIETEMPRDY();  // required for readTemperature()
   particleSensor_.clearFIFO();
 
-  // Initialize DC estimator state
-  ir_dc_avg_reg_ = 0;
-  red_dc_avg_reg_ = 0;
+  // Initialize per-channel PPG processing state
+  ir_ch_ = PPGChannel{};
+  red_ch_ = PPGChannel{};
 
-  // Per-axis NeutralFilter: already processed by DC estimator + FIR,
-  // so set deadband to 0 (pass-through) for AC/DC/computed axes.
-  // Raw axes get a small deadband for noise rejection.
+  // Reset heart rate tracking
+  memset(rates_, 0, sizeof(rates_));
+  rate_spot_ = 0;
+  last_beat_ms_ = 0;
+  bpm_ = 0;
+
+  // Per-axis NeutralFilter: already processed by DC + AC + envelope pipeline,
+  // so set deadband to 0 (pass-through) for all axes.
   sensor_dat["ir_raw"].NeutralFilter.setDeadband(0.0);
   sensor_dat["red_raw"].NeutralFilter.setDeadband(0.0);
   sensor_dat["ir_ac"].NeutralFilter.setDeadband(0.0);
@@ -84,6 +89,15 @@ void Max30102Sensor::setup() {
 //
 // Sensor runs at 1600Hz internally (max for Red+IR 2-LED mode).
 // Each 400Hz Pipo loop iteration drains ~4 samples from the FIFO.
+//
+// Per-channel pipeline (IR and Red processed independently):
+//   raw → [slow LPF, fc=0.5Hz] → DC estimate
+//       → [raw - DC] → AC signal
+//       → [light LPF, fc=8Hz] → cleaned AC
+//       → [envelope tracker w/decay] → env_min, env_max
+//       → [(ac - env_min) / (env_max - env_min)] → [0, 1] normalized
+//
+// Beat detection: rising edge of normalized IR crossing 0.6 → beat → BPM.
 // ---------------------------------------------------------------------------
 bool Max30102Sensor::measure_sensor() {
   bool data_ready = false;
@@ -99,32 +113,25 @@ bool Max30102Sensor::measure_sensor() {
     uint32_t red_raw_val = particleSensor_.getFIFORed();
     particleSensor_.nextSample();  // advance tail
 
-    // --- Raw axes ---
-    sensor_dat["ir_raw"].raw_value = static_cast<float>(ir_raw_val);
-    sensor_dat["red_raw"].raw_value = static_cast<float>(red_raw_val);
-    sensor_dat["ir_raw"].value = sensor_dat["ir_raw"].raw_value;
-    sensor_dat["red_raw"].value = sensor_dat["red_raw"].raw_value;
+    float ir_raw_f = static_cast<float>(ir_raw_val);
+    float red_raw_f = static_cast<float>(red_raw_val);
 
-    // --- DC estimation (EMA, α≈0.0625) ---
-    int16_t ir_dc_est =
-        averageDCEstimator(&ir_dc_avg_reg_, static_cast<uint16_t>(ir_raw_val));
-    int16_t red_dc_est = averageDCEstimator(&red_dc_avg_reg_,
-                                            static_cast<uint16_t>(red_raw_val));
+    // --- Raw axes (pass-through) ---
+    sensor_dat["ir_raw"].raw_value = ir_raw_f;
+    sensor_dat["red_raw"].raw_value = red_raw_f;
+    sensor_dat["ir_raw"].value = ir_raw_f;
+    sensor_dat["red_raw"].value = red_raw_f;
 
-    sensor_dat["ir_dc"].value = static_cast<float>(ir_dc_est);
-    sensor_dat["red_dc"].value = static_cast<float>(red_dc_est);
+    // --- Per-channel PPG pipeline ---
+    processPPGChannel(ir_ch_, ir_raw_f, "ir_dc", "ir_ac");
+    processPPGChannel(red_ch_, red_raw_f, "red_dc", "red_ac");
 
-    // --- AC extraction (raw - DC → low-pass FIR) ---
-    int16_t ir_ac_val =
-        lowPassFIRFilter(static_cast<int16_t>(ir_raw_val) - ir_dc_est);
-    int16_t red_ac_val =
-        lowPassFIRFilter(static_cast<int16_t>(red_raw_val) - red_dc_est);
+    // --- Beat detection on normalized IR signal ---
+    // Rising edge crossing systolic threshold (0.6) → beat detected.
+    // Hysteresis: must drop below diastolic threshold (0.4) before next beat.
+    if (ir_ch_.normalized > kSystolicThreshold && !ir_ch_.was_above_systolic) {
+      ir_ch_.was_above_systolic = true;
 
-    sensor_dat["ir_ac"].value = static_cast<float>(ir_ac_val);
-    sensor_dat["red_ac"].value = static_cast<float>(red_ac_val);
-
-    // --- Heart rate detection (PBA algorithm on IR AC) ---
-    if (checkForBeat(static_cast<int32_t>(ir_ac_val))) {
       unsigned long now = millis();
       if (last_beat_ms_ != 0) {
         unsigned long delta_ms = now - last_beat_ms_;
@@ -146,12 +153,13 @@ bool Max30102Sensor::measure_sensor() {
         }
       }
       last_beat_ms_ = now;
+    } else if (ir_ch_.normalized <= kDiastolicThreshold) {
+      ir_ch_.was_above_systolic = false;
     }
     sensor_dat["hr_bpm"].value = bpm_;
 
-    // --- Finger detection ---
-    // When IR DC is very low, no finger is on the sensor → mark invalid
-    bool finger_present = (ir_dc_est > 5000);
+    // --- Finger detection (use raw IR — immediate, no filter lag) ---
+    bool finger_present = (ir_raw_val > 5000);
     sensor_dat["ir_raw"].reading_valid = finger_present;
     sensor_dat["red_raw"].reading_valid = finger_present;
     sensor_dat["ir_ac"].reading_valid = finger_present;
@@ -170,6 +178,60 @@ bool Max30102Sensor::measure_sensor() {
   }
 
   return data_ready;
+}
+
+// ---------------------------------------------------------------------------
+// processPPGChannel — per-channel PPG pipeline
+//
+//  1. DC tracking: slow low-pass (fc≈0.5Hz) rejects heartbeat, tracks baseline
+//  2. AC extraction: raw - DC
+//  3. AC filtering: light low-pass (fc≈8Hz) removes high-freq noise
+//  4. Envelope tracking: peak/valley detectors with instant attack + decay
+//  5. Normalize to [0, 1] using current envelope bounds
+// ---------------------------------------------------------------------------
+void Max30102Sensor::processPPGChannel(PPGChannel& ch, float raw_val,
+                                       const char* dc_axis,
+                                       const char* ac_axis) {
+  // 1. DC tracking — first sample primes the filter with raw value
+  if (!ch.dc_primed) {
+    ch.dc_value = raw_val;
+    ch.dc_filter.process(raw_val, kSampleDeltaT);  // seed filter state
+    ch.dc_primed = true;
+  } else {
+    ch.dc_value = ch.dc_filter.process(raw_val, kSampleDeltaT);
+  }
+  sensor_dat[dc_axis].value = ch.dc_value;
+
+  // 2. AC extraction
+  float ac_raw = raw_val - ch.dc_value;
+
+  // 3. Light low-pass on AC
+  ch.ac_value = ch.ac_filter.process(ac_raw, kSampleDeltaT);
+
+  // 4. Envelope tracking with decay (sliding-window equivalent, O(1) memory)
+  if (ch.ac_value > ch.env_max) {
+    ch.env_max = ch.ac_value;  // instant attack
+  } else {
+    ch.env_max *= ch.kEnvDecay;  // exponential decay
+  }
+  if (ch.ac_value < ch.env_min) {
+    ch.env_min = ch.ac_value;  // instant attack
+  } else {
+    ch.env_min *= ch.kEnvDecay;  // exponential decay
+  }
+
+  // 5. Normalize to [0, 1]
+  float amplitude = ch.env_max - ch.env_min;
+  if (amplitude < ch.kMinAmplitude) {
+    ch.normalized = 0.5f;  // insufficient signal → mid-value
+  } else {
+    ch.normalized = (ch.ac_value - ch.env_min) / amplitude;
+    if (ch.normalized < 0.0f)
+      ch.normalized = 0.0f;
+    if (ch.normalized > 1.0f)
+      ch.normalized = 1.0f;
+  }
+  sensor_dat[ac_axis].value = ch.normalized;
 }
 
 // ---------------------------------------------------------------------------
