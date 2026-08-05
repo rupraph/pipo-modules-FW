@@ -1,6 +1,7 @@
 import motionDefaults from "../../configs/motion_config.json";
 import analogDefaults from "../../configs/analog2_config.json";
 import rangeDefaults from "../../configs/range_config.json";
+import max30102Defaults from "../../configs/max30102_config.json";
 import type { PipoTypes } from "./types";
 
 type InputDefaults = Record<string, { deadband: number }>;
@@ -9,6 +10,7 @@ const configInputs: Record<Exclude<PipoTypes, "unknown">, InputDefaults> = {
   motion: motionDefaults.inputs as InputDefaults,
   analog: analogDefaults.inputs as InputDefaults,
   range: rangeDefaults.inputs as InputDefaults,
+  max30102: max30102Defaults.inputs as InputDefaults,
 };
 
 export function getDefaultDeadband(type: PipoTypes, channel: string): number {

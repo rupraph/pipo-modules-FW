@@ -79,7 +79,7 @@ export type GeneralConfig = {
 //   stroke_mode: boolean;
 // };
 
-export type PipoTypes = "motion" | "range" | "analog" | "unknown";
+export type PipoTypes = "motion" | "range" | "analog" | "max30102" | "unknown";
 export type PipoKeys = {
   motion:
     | "accX"
@@ -113,6 +113,15 @@ export type PipoKeys = {
     | "T6"
     | "T7"
     | "T8";
+  max30102:
+    | "ir_raw"
+    | "red_raw"
+    | "ir_ac"
+    | "red_ac"
+    | "ir_dc"
+    | "red_dc"
+    | "hr_bpm"
+    | "temperature";
   unknown: "";
 };
 
@@ -148,6 +157,12 @@ export type SensorSettings = {
   };
   analog: {
     analogout: { [Key in AnalogOutKeys]: AnalogOut };
+  };
+  max30102: {
+    led_brightness: number;
+    sample_rate: number;
+    pulse_width: number;
+    adc_range: number;
   };
   unknown: {};
 };

@@ -11,6 +11,11 @@ extern MotionSensor input_sensor;
 extern PipoRangeSensor input_sensor;
 #endif
 
+#ifdef PIPO_MAX30102
+#include "sensors/max30102_sensor.h"
+extern Max30102Sensor input_sensor;
+#endif
+
 #ifdef PIPO_ANALOG
 #include "sensors/analog_sensor.h"
 extern AnalogSensor input_sensor;

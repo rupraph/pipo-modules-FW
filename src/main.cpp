@@ -105,6 +105,15 @@ void setup() {  // by default on core 1
   log_i("Range sensor button callbacks registered");
 #endif
 
+#ifdef PIPO_MAX30102
+  hwui.set_mode_short_press_callback([]() {
+    // Toggle LED brightness between low (0x0A) and default (0x1F)
+    uint8_t current = input_sensor.get_led_brightness();
+    input_sensor.set_led_brightness(current == 0x1F ? 0x0A : 0x1F);
+  });
+  log_i("MAX30102 sensor button callbacks registered");
+#endif
+
   // wait for initial offsets to be measured if needed
   log_i("Waiting for boot offset measurement if needed...");
   while (input_sensor.is_offset_measurement_complete() == false) {

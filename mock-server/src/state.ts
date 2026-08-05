@@ -1,6 +1,7 @@
 import defaultAnalog from "../../configs/analog2_config.json";
 import defaultMotion from "../../configs/motion_config.json";
 import defaultRange from "../../configs/range_config.json";
+import defaultMax30102 from "../../configs/max30102_config.json";
 import { PipoConfig, PipoKeys, PipoTypes } from "../../web-config/src/types";
 import {
   ANALOG_AXIS,
@@ -8,6 +9,7 @@ import {
   MOTION_AXIS,
   Preset,
   RANGE_AXIS,
+  MAX30102_AXIS,
   Sensor,
   Sensors,
   UNKNOWN_AXIS,
@@ -50,6 +52,7 @@ class State<T extends PipoTypes = "analog"> {
     const defaultConfig = 
       type === "motion" ? defaultMotion :
       type === "range" ? defaultRange :
+      type === "max30102" ? defaultMax30102 :
       defaultAnalog;
     
     this.configs = {
@@ -68,6 +71,8 @@ class State<T extends PipoTypes = "analog"> {
         ? ANALOG_AXIS
         : type === "range"
         ? RANGE_AXIS
+        : type === "max30102"
+        ? MAX30102_AXIS
         : UNKNOWN_AXIS;
 
     this.sensors = Object.fromEntries(

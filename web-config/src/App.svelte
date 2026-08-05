@@ -7,6 +7,7 @@
   import OfflineOverlay from "./lib/offline-overlay.svelte";
   import AnalogChannels from "./lib/configs/analog-channels.svelte";
   import MotionChannels from "./lib/configs/motion-channels.svelte";
+  import Max30102Channels from "./lib/configs/max30102-channels.svelte";
   import ChannelSettings from "./lib/configs/channel-settings.svelte";
   import FloatingSaveButton from "./lib/FloatingSaveButton.svelte";
   import BatteryStatus from "./lib/BatteryStatus.svelte";
@@ -142,6 +143,8 @@
             <AnalogChannels />
           {:else if type === "motion"}
             <MotionChannels />
+          {:else if type === "max30102"}
+            <Max30102Channels />
           {/if}
         {:else}
           <div class="row">

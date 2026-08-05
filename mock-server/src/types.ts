@@ -89,6 +89,16 @@ export const MOTION_AXIS = [
   "gyroZ",
 ] as const;
 export const RANGE_AXIS = ["dist"] as const;
+export const MAX30102_AXIS = [
+  "ir_raw",
+  "red_raw",
+  "ir_ac",
+  "red_ac",
+  "ir_dc",
+  "red_dc",
+  "hr_bpm",
+  "temperature",
+] as const;
 export const ANALOG_AXIS = [
   "A01",
   "A02",

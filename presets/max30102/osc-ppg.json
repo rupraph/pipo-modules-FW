@@ -1,0 +1,98 @@
+{
+  "preset": {
+    "name": "PPG to OSC",
+    "description": "IR AC → /ir_ac, Heart Rate → /hr, IR Raw → /ir_raw"
+  },
+  "engine": {
+    "engine-midi": {
+      "ir_ac": {
+        "cc_nb": 14,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 12,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      },
+      "hr_bpm": {
+        "cc_nb": 16,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 1,
+        "sustain": 0,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major pentatonic",
+        "tl_mode": 0,
+        "velocity": 100
+      }
+    },
+    "engine-osc": {
+      "ir_ac": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "/ir_ac"
+      },
+      "hr_bpm": {
+        "enabled": true,
+        "mode_raw": false,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "/hr"
+      },
+      "ir_raw": {
+        "enabled": true,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "/ir_raw"
+      }
+    }
+  },
+  "inputs": {
+    "ir_ac": {
+      "deadband": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 5000.0,
+      "lmin": -5000.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "hr_bpm": {
+      "deadband": 5,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 200.0,
+      "lmin": 40.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    },
+    "ir_raw": {
+      "deadband": 0,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 262143.0,
+      "lmin": 0.0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
+    }
+  }
+}

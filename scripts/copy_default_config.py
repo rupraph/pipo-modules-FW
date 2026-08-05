@@ -26,6 +26,9 @@ def copy():
     elif "-DPIPO_RANGE=1" in build_flags:
         path = f"configs/range_config.json"
         preset_type = "range"
+    elif "-DPIPO_MAX30102=1" in build_flags:
+        path = f"configs/max30102_config.json"
+        preset_type = "max30102"
     else:
         raise Exception("No config file for build type")
 

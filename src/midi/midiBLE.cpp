@@ -13,6 +13,8 @@ BLEMIDI_CREATE_INSTANCE("PipoMotionBLE", MidiBle);
 BLEMIDI_CREATE_INSTANCE("PipoRangeBLE", MidiBle);
 #elif PIPO_ANALOG
 BLEMIDI_CREATE_INSTANCE("PipoAnalogBLE", MidiBle);
+#elif PIPO_MAX30102
+BLEMIDI_CREATE_INSTANCE("PipoMax30102BLE", MidiBle);
 #endif
 
 void midiBLESetup() {
