@@ -213,12 +213,10 @@ JsonDocument Max30102Sensor::get_sensor_config(bool debug) {
 }
 
 // ---------------------------------------------------------------------------
-// set_led_brightness — live LED current adjustment
+// set_led_brightness — stores value; applied to HW in setup()
 // ---------------------------------------------------------------------------
 void Max30102Sensor::set_led_brightness(uint8_t val) {
   led_brightness_ = val;
-  particleSensor_.setPulseAmplitudeRed(val);
-  particleSensor_.setPulseAmplitudeIR(val);
   log_i("LED brightness set to 0x%02X", val);
 }
 

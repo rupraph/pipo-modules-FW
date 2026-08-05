@@ -273,15 +273,15 @@
   },
   "general": {
     "Wifi_mode": "STA",
-    "OSC_ENA": false,
+    "OSC_ENA": true,
     "OSC_IP": "192.168.10.2",
     "OSC_PORT": 8000,
     "OSC_Batt": false,
-    "MidiEnabled": true,
+    "MidiEnabled": false,
     "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "max30102",
-    "BLEEnabled": true,
+    "BLEEnabled": false,
     "Button_disa": false
   },
   "sensorconf": {

@@ -13,7 +13,7 @@
   function fetchImage() {
     // debugger;
     return pipoio
-      .get(`/${$pipoType}-Horizontal-Yellow.svg`, {
+      .get(`/${$pipoType}-Hori-Yellow.svg`, {
         responseType: "arraybuffer",
       })
       .then(({ data }) => {
