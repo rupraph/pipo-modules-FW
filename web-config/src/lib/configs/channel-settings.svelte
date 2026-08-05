@@ -399,7 +399,7 @@
               max value.
             </p>
           {/if}
-          {#if type !== "range" && (type !== "motion" || isEulerAngle)}
+          {#if type !== "range" && type !== "max30102" && (type !== "motion" || isEulerAngle)}
             <p>
               <u>Cyclic:</u> This mode can be useful with input channels that have
               discontinuities at their ends (For e.g. a angular input that will jump
@@ -441,7 +441,7 @@
             Over mode
           </button>
         {/if}
-        {#if type !== "range" && (type !== "motion" || isEulerAngle)}
+        {#if type !== "range" && type !== "max30102" && (type !== "motion" || isEulerAngle)}
           <div class="buttons">
             <button
               class="rounder primary"

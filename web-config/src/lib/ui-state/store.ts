@@ -43,6 +43,8 @@ function getDefaultChannel(boardType: PipoTypes): string | undefined {
       return "A01"; // Default to first analog channel
     case "motion":
       return "yaw"; // Default to yaw (most commonly used rotation channel)
+    case "max30102":
+      return "ir_ac"; // Default to IR pulsatile (primary PPG signal)
     case "unknown":
       return undefined;
     default:

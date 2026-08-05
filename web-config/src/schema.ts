@@ -138,7 +138,7 @@ export const schema: Schema = {
   max30102: {
     ir_raw: {
       label: "IR Raw",
-      cat: "Raw PPG",
+      cat: "IR",
       unit: "raw",
       min: 0,
       max: 262143,
@@ -147,7 +147,7 @@ export const schema: Schema = {
     },
     red_raw: {
       label: "Red Raw",
-      cat: "Raw PPG",
+      cat: "Red",
       unit: "raw",
       min: 0,
       max: 262143,
@@ -156,7 +156,7 @@ export const schema: Schema = {
     },
     ir_ac: {
       label: "IR Pulsatile",
-      cat: "Preconditioned",
+      cat: "IR",
       unit: "Δraw",
       min: -5000,
       max: 5000,
@@ -165,7 +165,7 @@ export const schema: Schema = {
     },
     red_ac: {
       label: "Red Pulsatile",
-      cat: "Preconditioned",
+      cat: "Red",
       unit: "Δraw",
       min: -5000,
       max: 5000,
@@ -174,7 +174,7 @@ export const schema: Schema = {
     },
     ir_dc: {
       label: "IR Baseline",
-      cat: "Preconditioned",
+      cat: "IR",
       unit: "raw",
       min: 0,
       max: 262143,
@@ -183,7 +183,7 @@ export const schema: Schema = {
     },
     red_dc: {
       label: "Red Baseline",
-      cat: "Preconditioned",
+      cat: "Red",
       unit: "raw",
       min: 0,
       max: 262143,
@@ -192,7 +192,7 @@ export const schema: Schema = {
     },
     hr_bpm: {
       label: "Heart Rate",
-      cat: "Computed",
+      cat: "Other",
       unit: "BPM",
       min: 0,
       max: 255,
@@ -201,7 +201,7 @@ export const schema: Schema = {
     },
     temperature: {
       label: "Temperature",
-      cat: "Raw PPG",
+      cat: "Other",
       unit: "°C",
       min: -40,
       max: 85,

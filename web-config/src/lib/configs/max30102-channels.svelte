@@ -5,12 +5,12 @@
   import { uiState } from "../ui-state";
 
   const categories = [
-    { label: "Preconditioned", value: "preconditioned" },
-    { label: "Raw", value: "raw" },
-    { label: "Computed", value: "computed" },
+    { label: "IR", value: "ir" },
+    { label: "Red", value: "red" },
+    { label: "Other", value: "other" },
   ];
 
-  let category: string = "preconditioned";
+  let category: string = "ir";
   const boardType = "max30102";
 
   // Initialize category from uiState or use default
@@ -31,11 +31,11 @@
     | "engine-osc";
 
   $: keys =
-    category === "preconditioned"
-      ? (["ir_ac", "red_ac", "ir_dc", "red_dc"] as Keys[])
-      : category === "raw"
-        ? (["ir_raw", "red_raw", "temperature"] as Keys[])
-        : (["hr_bpm"] as Keys[]);
+    category === "ir"
+      ? (["ir_ac", "ir_raw", "ir_dc"] as Keys[])
+      : category === "red"
+        ? (["red_ac", "red_raw", "red_dc"] as Keys[])
+        : (["hr_bpm", "temperature"] as Keys[]);
 
   $: selectedChannel = $uiState[boardType]?.selectedChannel;
 
@@ -63,55 +63,52 @@
   function isCategoryEnabled(cat: string): boolean {
     if (!config) return false;
     const catKeys =
-      cat === "preconditioned"
-        ? ["ir_ac", "red_ac", "ir_dc", "red_dc"]
-        : cat === "raw"
-          ? ["ir_raw", "red_raw", "temperature"]
-          : ["hr_bpm"];
+      cat === "ir"
+        ? ["ir_ac", "ir_raw", "ir_dc"]
+        : cat === "red"
+          ? ["red_ac", "red_raw", "red_dc"]
+          : ["hr_bpm", "temperature"];
     return catKeys.some(
       (key) => config.engine[engineKey][key as Keys]?.enabled ?? false,
     );
   }
 
+  // Use reduce with explicit Record type so the template can index by string
   $: categoryEnabledStates =
     config && $currentConfig
-      ? {
-          preconditioned: isCategoryEnabled("preconditioned"),
-          raw: isCategoryEnabled("raw"),
-          computed: isCategoryEnabled("computed"),
-        }
-      : { preconditioned: false, raw: false, computed: false };
+      ? categories.reduce(
+          (acc, cat) => {
+            acc[cat.value] = isCategoryEnabled(cat.value);
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        )
+      : ({} as Record<string, boolean>);
 </script>
 
 <div class="channel-list">
   <!-- Category tabs -->
-  <div class="row">
+  <div class="category">
     {#each categories as cat}
       <button
-        class="primary"
-        class:active={category === cat.value}
+        class:selected={category === cat.value}
+        class:enabled={categoryEnabledStates[cat.value]}
         on:click={() => (category = cat.value)}
       >
         {cat.label}
-        {#if categoryEnabledStates[cat.value]}
-          <span class="enabled-dot" />
-        {/if}
       </button>
     {/each}
   </div>
 
   <!-- Channel tabs -->
-  <div class="row" style="margin-top: 8px;">
+  <div class="channels">
     {#each keys as key}
       <button
-        class="primary"
-        class:active={selectedChannel === key}
+        class:enabled={channelStates[key]}
+        class:selected={key === selectedChannel}
         on:click={() => uiState.setSelectedChannel(boardType, key)}
       >
         {key}
-        {#if channelStates[key]}
-          <span class="enabled-dot" />
-        {/if}
       </button>
     {/each}
   </div>
@@ -121,27 +118,58 @@
   .channel-list {
     margin-bottom: 8px;
   }
-  .row {
+  .category {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    justify-content: space-evenly;
+    gap: 10px 12px;
+    max-width: 300px;
   }
-  button {
-    position: relative;
-    padding: 4px 10px;
-    font-size: 0.85em;
+  .category > button {
+    width: 130px;
+    height: 32px;
+    color: var(--text-color);
+    font-family: Instrument Sans;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    background-color: var(--bg-secondary);
+    cursor: pointer;
+    padding: 0;
+    border-radius: 0px;
   }
-  button.active {
-    background: var(--accent);
-    color: white;
+  .category > button.enabled {
+    color: var(--main);
   }
-  .enabled-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--success, #4caf50);
-    margin-left: 4px;
-    vertical-align: middle;
+  .category > button.selected {
+    outline: 3px solid var(--main);
+    outline-offset: -3px;
+  }
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 64px);
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .channels > button {
+    width: 64px;
+    height: 48px;
+    background-color: var(--bg-secondary);
+    border: none;
+    color: var(--grey);
+    font-family: Instrument Sans;
+    font-weight: 400;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 6px;
+    box-sizing: border-box;
+  }
+  .channels > button.enabled {
+    color: var(--main);
+    font-weight: 1000;
+  }
+  .channels > button.selected {
+    outline: 6px solid var(--main);
+    outline-offset: -6px;
   }
 </style>
