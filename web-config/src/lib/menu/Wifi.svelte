@@ -8,9 +8,11 @@
   import { wifiState } from "../wifi/store";
   import { fetchNetworks, fetchState } from "../../services/wifi";
   import MenuButton from "./MenuButton.svelte";
+  import { tutorialPanelOpen } from "../../tutorial/store";
 
   let wifiSignal = 4;
   let open = false;
+  let openedByTutorial = false;
   let wifiSsid = "";
   let apIP = "";
   let staIP = "";
@@ -30,6 +32,16 @@
   });
 
   $: fetchNetworks().then(() => fetchState());
+
+  // Tutorial: open when instructed, close when tutorial leaves this panel
+  $: if ($tutorialPanelOpen === "menu-wifi" && !open) {
+    open = true;
+    openedByTutorial = true;
+  }
+  $: if ($tutorialPanelOpen !== "menu-wifi" && openedByTutorial) {
+    open = false;
+    openedByTutorial = false;
+  }
 
   let fps = 0;
   const max = 10;

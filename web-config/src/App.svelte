@@ -23,6 +23,8 @@
   import Presets from "./lib/presets.svelte";
   import PillSwitch from "./lib/form/PillSwitch.svelte";
   import InfoModal from "./lib/InfoModal.svelte";
+  import TutorialSystem from "./tutorial/TutorialSystem.svelte";
+  import { tutorialService } from "./tutorial/store";
 
   let type: PipoTypes = "unknown";
   let errorReloadTimeout: number | undefined;
@@ -35,6 +37,10 @@
         ip.set(data.ip);
         pipoType.set(type);
         pipoInfo.set(data); // Store globally for other components
+
+        // Check if tutorial should auto-show (first boot or version upgrade)
+        tutorialService.checkAutoShow(data);
+
         return data;
       })
       .catch((error) => {
@@ -85,6 +91,7 @@
 
 <main>
   <Toasts />
+  <TutorialSystem />
   {#await fetch()}
     <p>Waiting for Pipo to respond...</p>
   {:then resp}
@@ -139,9 +146,9 @@
           {/if}
 
           {#if type === "analog"}
-            <AnalogChannels />
+            <span data-tutorial="channel-list"><AnalogChannels /></span>
           {:else if type === "motion"}
-            <MotionChannels />
+            <span data-tutorial="channel-list"><MotionChannels /></span>
           {/if}
         {:else}
           <div class="row">
@@ -167,12 +174,12 @@
           </div>
         {/if}
         {#if type !== "motion" || $uiState[type]?.channelType !== "quaternion"}
-          <div class="channel-settings">
+          <div class="channel-settings" data-tutorial="channel-settings">
             <ChannelSettings />
           </div>
         {/if}
       </section>
-      <section class="output-settings">
+      <section class="output-settings" data-tutorial="section-output">
         <!-- Output settings based on board's general output mode -->
         {#if $currentConfig?.general.MidiEnabled}
           <MidiOutputSettings />
@@ -182,6 +189,7 @@
       </section>
       <section
         style="border-top: 2px solid var(--bg-tertiary);border-bottom: 2px solid var(--bg-tertiary);"
+        data-tutorial="section-presets"
       >
         <Presets />
       </section>
@@ -199,11 +207,13 @@
          Also kept visible while a save is in-progress/success so the
          status label stays on screen, but never when the modal is open
          (the modal has its own inline save feedback). -->
-    <FloatingSaveButton
-      config={$currentConfig}
-      show={($hasUnsavedChanges || $savingStatus !== "none") &&
-        !$settingsModalOpen}
-    />
+    <span data-tutorial="save-button">
+      <FloatingSaveButton
+        config={$currentConfig}
+        show={($hasUnsavedChanges || $savingStatus !== "none") &&
+          !$settingsModalOpen}
+      />
+    </span>
   {:catch e}
     <article>
       <h3>Network error</h3>
