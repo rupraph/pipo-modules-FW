@@ -27,29 +27,71 @@
 
   $: isChannelEnabled = oscConfig?.enabled ?? false;
 
+  // Single source of truth: display prefix for both reactive display and handler
+  $: oscDisplayPrefix =
+    "/" +
+    (config?.general.PipoName || "") +
+    (config?.general.PipoName ? "/" : "");
+
+  // Reactive display values for OSC address
+  let oscAddressDisplay = "";
+  let quatOscAddressDisplay = "";
+
+  $: if (oscConfig) {
+    oscAddressDisplay = oscDisplayPrefix + (oscConfig.osc_addr || "");
+  }
+
+  $: if (config?.engine?.["engine-special"]?.quat) {
+    quatOscAddressDisplay =
+      oscDisplayPrefix + (config.engine["engine-special"].quat.osc_addr || "");
+  }
+
   function toggleEnabled() {
     if (!oscConfig) return;
     oscConfig.enabled = !oscConfig.enabled;
     currentConfig.set(config);
   }
 
-  function validateOscAddress(event: Event) {
+  function onOscAddressInput(event: Event) {
     const input = event.target as HTMLInputElement;
-    // Remove spaces and special characters, keep only alphanumeric, slash, hyphen, underscore, and dot
-    let cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
+    if (!config) return;
+
+    const prefix = oscDisplayPrefix;
+    let raw = input.value;
+
+    // Strip the known display prefix to get the user-editable address part.
+    // Three cases:
+    //  1. raw starts with full prefix → strip it exactly, get the address
+    //  2. raw is a prefix of prefix (user backspaced into the display-only part) → empty address
+    //  3. otherwise → treat whole raw value as address (e.g., pasted text)
+    let cleaned: string;
+    if (raw.startsWith(prefix)) {
+      cleaned = raw.substring(prefix.length);
+    } else if (prefix.startsWith(raw)) {
+      cleaned = "";
+    } else {
+      cleaned = raw;
+    }
+
+    // Remove spaces and special characters
+    cleaned = cleaned.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
 
     // Apply max length limit
-    if (cleaned.length > OSC_ADDRESS_MAX_LENGTH) {
-      cleaned = cleaned.slice(0, OSC_ADDRESS_MAX_LENGTH);
-    }
+    cleaned = cleaned.slice(0, OSC_ADDRESS_MAX_LENGTH);
 
-    if (cleaned !== input.value) {
-      input.value = cleaned;
-      if (oscConfig) {
-        oscConfig.osc_addr = cleaned;
-        currentConfig.set(config);
+    // Rebuild display using the same prefix (single source of truth)
+    input.value = prefix + cleaned;
+
+    // Update the correct config property (store only the address, no prefix)
+    if (channelType === "quaternion") {
+      const quat = config.engine?.["engine-special"]?.quat;
+      if (quat) {
+        quat.osc_addr = cleaned;
       }
+    } else if (oscConfig) {
+      oscConfig.osc_addr = cleaned;
     }
+    currentConfig.set(config);
   }
 
   function handleOscAddressKeydown(event: KeyboardEvent) {
@@ -95,30 +137,29 @@
       <span class="output-label">OSC Address</span>
       <InfoModal>
         <p>
-          Define the OSC address for this channel. It is prefixed by the Pipo
-          Name (in settings pannel). No spaces or special characters are
+          Defines the OSC address for this channel. It is always prefixed by the
+          Pipo Name (in settings pannel). No spaces or special characters are
           allowed.
         </p>
       </InfoModal>
       <div class="input-container">
+        <!-- <span> /{config.general.PipoName}/</span> -->
         {#if channelType === "quaternion"}
           <input
             type="text"
-            bind:value={config.engine["engine-special"]["quat"].osc_addr}
-            maxlength={OSC_ADDRESS_MAX_LENGTH}
+            value={quatOscAddressDisplay}
             class="text-input"
-            placeholder="/address"
-            on:input={validateOscAddress}
+            placeholder="address"
+            on:input={onOscAddressInput}
             on:keydown={handleOscAddressKeydown}
           />
         {:else}
           <input
             type="text"
-            bind:value={oscConfig.osc_addr}
-            maxlength={OSC_ADDRESS_MAX_LENGTH}
+            value={oscAddressDisplay}
             class="text-input"
-            placeholder="/address"
-            on:input={validateOscAddress}
+            placeholder="address"
+            on:input={onOscAddressInput}
             on:keydown={handleOscAddressKeydown}
           />
         {/if}
@@ -225,7 +266,7 @@
 
   /* Text Input */
   .text-input {
-    width: 150px;
+    /* width: 150px; */
     /* height: 32px; */
     padding: 0 12px;
     border: 2px solid var(--main);
