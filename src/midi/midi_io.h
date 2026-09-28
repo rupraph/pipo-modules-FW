@@ -32,6 +32,7 @@ class midi_io {
 
   //should likley be in engine
   uint8_t lastcc[16][128];
+  uint16_t lastpb[16];
 
   bool off_before_next_note = false;
   // set if off previous note before sending note

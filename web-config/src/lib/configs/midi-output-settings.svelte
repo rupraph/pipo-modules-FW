@@ -6,6 +6,8 @@
   import Number from "../form/Number.svelte";
   import InfoModal from "../InfoModal.svelte";
   import { TriangleAlert } from "lucide-svelte";
+  import OutputValueDisplay from "./output-value-display.svelte";
+  import { pipoio } from "../../pipoio";
 
   $: config = $currentConfig;
   $: type = $pipoType;
@@ -38,6 +40,7 @@
   // Force reactivity by creating a composite key that changes when any relevant value changes
   $: ccReactivityKey = `${currentMidiChannel}-${currentCCNumber}-${currentTlMode}`;
   $: noteReactivityKey = `${currentMidiChannel}-${currentRootNote}-${currentTlMode}`;
+  $: pitchBendReactivityKey = `${currentMidiChannel}-${currentTlMode}`;
   $: midiChannelReactivityKey = `${currentMidiChannel}-${currentTlMode}-${currentInputMode}`;
 
   function toggleEnabled() {
@@ -46,9 +49,43 @@
     currentConfig.set(config);
   }
 
-  function setMessageType(type: "note" | "cc") {
+  function setMessageType(type: "note" | "cc" | "pitchbend") {
     if (!midiConfig) return;
-    midiConfig.tl_mode = type === "note" ? 1 : 0;
+
+    const previousMode = midiConfig.tl_mode;
+    const newMode = type === "note" ? 1 : type === "pitchbend" ? 2 : 0;
+
+    // Scale cc_min and cc_max when switching between CC and Pitch Bend
+    if (previousMode !== newMode) {
+      // From CC (non-hires) to Pitch Bend: scale up (0-127 -> 0-16383)
+      if (previousMode === 0 && newMode === 2 && !midiConfig.hires) {
+        const scaleFactor = 16383 / 127;
+        midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+        midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+      }
+      // From Pitch Bend to CC (non-hires): scale down (0-16383 -> 0-127)
+      else if (previousMode === 2 && newMode === 0 && !midiConfig.hires) {
+        const scaleFactor = 127 / 16383;
+        midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+        midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+      }
+      // From Note to Pitch Bend: scale up if values are in 0-127 range
+      else if (previousMode === 1 && newMode === 2 && !midiConfig.hires) {
+        if (midiConfig.cc_max <= 127) {
+          const scaleFactor = 16383 / 127;
+          midiConfig.cc_min = Math.round(midiConfig.cc_min * scaleFactor);
+          midiConfig.cc_max = Math.round(midiConfig.cc_max * scaleFactor);
+        }
+      }
+      // From Note to CC: clamp to 0-127 range if needed
+      else if (previousMode === 1 && newMode === 0 && !midiConfig.hires) {
+        midiConfig.cc_min = Math.min(midiConfig.cc_min, 127);
+        midiConfig.cc_max = Math.min(midiConfig.cc_max, 127);
+      }
+      // Note: No scaling needed when hires is enabled (both use 0-16383 range)
+    }
+
+    midiConfig.tl_mode = newMode;
     currentConfig.set(config);
   }
 
@@ -144,6 +181,41 @@
   })();
 
   $: noteConflict = noteConflictChannels.length > 0;
+
+  // Listen for output values from the device
+  let outputValue: number | undefined = undefined;
+
+  pipoio.on("sensor", ({ axis, outputValue: outVal }) => {
+    if (axis !== selectedChannel) return;
+    outputValue = outVal;
+  });
+
+  // Check if current pitch bend conflicts with other channels
+  $: pitchBendConflictChannels = (() => {
+    if (!config || !midiConfig || !selectedChannel) return [];
+    if (currentTlMode !== 2) return []; // Only check in Pitch Bend mode
+
+    // Use tracked values and reactivity key to ensure reactivity
+    const checkChannel = currentMidiChannel;
+    // Reference pitchBendReactivityKey to ensure this recalculates when values change
+    const _ = pitchBendReactivityKey;
+
+    // Check all other channels and collect conflicting ones
+    return Object.keys(config.engine["engine-midi"]).filter((key) => {
+      if (key === selectedChannel) return false; // Skip current channel
+      const otherMidiConfig = config.engine["engine-midi"][
+        key as keyof (typeof config.engine)["engine-midi"]
+      ] as MidiConfig;
+
+      return (
+        // Conflict if other channel is in Pitch Bend mode on same MIDI channel
+        otherMidiConfig.tl_mode === 2 && // Other is in Pitch Bend mode
+        otherMidiConfig.channel === checkChannel
+      );
+    });
+  })();
+
+  $: pitchBendConflict = pitchBendConflictChannels.length > 0;
 </script>
 
 {#if config && selectedChannel && midiConfig && input}
@@ -163,7 +235,7 @@
       <InfoModal>
         <p>
           You can choose to translate the sensor data into Midi Continous
-          Controls, or to Midi Notes.
+          Controls(CC), Pitch Bend (PB), or Midi Notes.
         </p>
         <p>
           If the sensor is put into "binary mode" (above), this allows to
@@ -175,7 +247,11 @@
         </p>
       </InfoModal>
       <div class="pill-switch">
-        <div class="pill-indicator" class:note={midiConfig.tl_mode === 1}></div>
+        <div
+          class="pill-indicator"
+          class:note={midiConfig.tl_mode === 1}
+          class:pitchbend={midiConfig.tl_mode === 2}
+        ></div>
         <input
           type="radio"
           name="message-type-{selectedChannel}"
@@ -192,6 +268,14 @@
           checked={midiConfig.tl_mode === 1}
           on:change={() => setMessageType("note")}
         />
+        <input
+          type="radio"
+          name="message-type-{selectedChannel}"
+          value="pitchbend"
+          id="pitchbend-{selectedChannel}"
+          checked={midiConfig.tl_mode === 2}
+          on:change={() => setMessageType("pitchbend")}
+        />
         <label
           for="cc-{selectedChannel}"
           on:click={() => setMessageType("cc")}
@@ -205,6 +289,13 @@
           class:active={midiConfig.tl_mode === 1}
         >
           Note
+        </label>
+        <label
+          for="pitchbend-{selectedChannel}"
+          on:click={() => setMessageType("pitchbend")}
+          class:active={midiConfig.tl_mode === 2}
+        >
+          PB
         </label>
       </div>
     </div>
@@ -300,6 +391,58 @@
         conflictChannels={noteConflictChannels}
       />
     {/if}
+
+    {#if midiConfig.tl_mode === 2 && midiConfig}
+      <div class="row">
+        {#if pitchBendConflict}
+          <span class="conflict-warning">
+            <TriangleAlert size={14} color="var(--red)" />
+            <span class="conflict-text"
+              >Channel "{pitchBendConflictChannels.join(", ")}" also uses Pitch
+              Bend</span
+            >
+          </span>
+        {:else}
+          <span></span>
+        {/if}
+      </div>
+
+      <div class="row">
+        <span class="label">Pitch Bend Out Min</span>
+        <span></span>
+        <div class="input-container">
+          <Number
+            label=""
+            bind:value={midiConfig.cc_min}
+            min={0}
+            max={midiConfig.cc_max}
+          />
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="label">Pitch Bend Out Max</span>
+        <span></span>
+        <div class="input-container">
+          <Number label="" bind:value={midiConfig.cc_max} min={0} max={16383} />
+        </div>
+      </div>
+    {/if}
+
+    <!-- Output Value Display -->
+    <OutputValueDisplay
+      value={outputValue}
+      type={midiConfig.tl_mode === 0
+        ? "midi-cc"
+        : midiConfig.tl_mode === 1
+          ? "midi-note"
+          : "midi-pb"}
+      label={midiConfig.tl_mode === 0
+        ? "CC Value"
+        : midiConfig.tl_mode === 1
+          ? "Note Value"
+          : "Pitch Bend"}
+    />
   </div>
 {/if}
 
@@ -351,6 +494,13 @@
     font-weight: 700;
   }
 
+  .info-text {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: right;
+  }
+
   .row {
     display: grid;
     grid-template-columns: auto 24px 1fr;
@@ -386,18 +536,26 @@
     display: none;
   }
 
-  .input-container :global(.input-wrapper) {
+  .input-container :global(.input.number-input-container .input-wrapper) {
     width: auto;
-    min-width: 80px;
+    grid-template-columns: 27px 52px 27px;
   }
 
   /* Pill Switch - Component Specific */
+  .pill-switch .pill-indicator {
+    width: calc(33.333% - 2.67px);
+  }
+
   .pill-indicator.note {
     transform: translateX(calc(100% + 2px));
   }
 
-  /* Balance label widths for CC (2 chars) and Note (4 chars) */
+  .pill-indicator.pitchbend {
+    transform: translateX(calc(200% + 4px));
+  }
+
+  /* Balance label widths for 3 options */
   .pill-switch label {
-    min-width: 40px;
+    min-width: 33px;
   }
 </style>

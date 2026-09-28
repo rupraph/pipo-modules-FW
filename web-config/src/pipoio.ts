@@ -133,20 +133,8 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
             axis,
             value: numargs[1],
             withinWindow: Boolean(numargs[2]),
+            outputValue: numargs[3], // 4th field: translated output value
           });
-        }
-        if (command === "noteon" || command === "noteoff") {
-          const [channel, note, velocity] = numargs;
-
-          return this.emit(command === "noteon" ? "noteOn" : "noteOff", {
-            channel,
-            note,
-            velocity,
-          });
-        }
-        if (command === "cc") {
-          const [channel, control, value, hires] = numargs;
-          return this.emit("controlChange", { channel, control, value, hires });
         }
         if (command === "fps") {
           const [frames, dt] = numargs;
@@ -300,7 +288,6 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
     event: K,
     listener: (evt: PipoEvents<T>[K]) => void
   ): this {
-    // @ts-expect-error
     return super.on(event, listener);
   }
 }

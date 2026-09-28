@@ -215,74 +215,9 @@ void OSC_handler::add_to_bundle(string address, float value) {
 
 void OSC_handler::send_battery_level(int percentage, bool is_plugged,
                                      bool is_low_battery) {
-  if (mutex == NULL) {
-    return;  // Not initialized yet
-  }
-  if (xSemaphoreTake(mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-    // Check if UDP is started and OSC is enabled
-    if (!isStarted || !enabled) {
-      xSemaphoreGive(mutex);
-      return;
-    }
-
-    // Check connection: STA connected OR AP configured
-    if (!staConnected && !apConfigured) {
-      xSemaphoreGive(mutex);
-      return;
-    }
-
-    // Wait for network stack to stabilize after connection
-    if (millis() - lastConnectionTime < 100) {
-      xSemaphoreGive(mutex);
-      return;
-    }
-
-    if (dest_ip == IPAddress(0, 0, 0, 0) || out_port == 0) {
-      xSemaphoreGive(mutex);
-      return;
-    }
-
-    String pipoName = config.general_config["PipoName"].as<const char*>();
-
-    // Send battery percentage: /PipoName/Battery <percentage>
-    String batteryAddress = "/" + pipoName + "/Battery";
-    OSCMessage batteryMsg(batteryAddress.c_str());
-    batteryMsg.add((int32_t)percentage);
-
-    // Send plugged state: /PipoName/Plugged <0 or 1>
-    String pluggedAddress = "/" + pipoName + "/Plugged";
-    OSCMessage pluggedMsg(pluggedAddress.c_str());
-    pluggedMsg.add((int32_t)(is_plugged ? 1 : 0));
-
-    // Send low battery state: /PipoName/LowBattery <0 or 1>
-    String lowBatteryAddress = "/" + pipoName + "/LowBattery";
-    OSCMessage lowBatteryMsg(lowBatteryAddress.c_str());
-    lowBatteryMsg.add((int32_t)(is_low_battery ? 1 : 0));
-
-    // Send all three messages (UDP best-effort, failures are expected)
-    int packetStatus = Udp.beginPacket(dest_ip, out_port);
-    if (packetStatus != 0) {
-      batteryMsg.send(Udp);
-      Udp.endPacket();  // Ignore return value, UDP is best-effort
-    }
-    batteryMsg.empty();
-
-    packetStatus = Udp.beginPacket(dest_ip, out_port);
-    if (packetStatus != 0) {
-      pluggedMsg.send(Udp);
-      Udp.endPacket();
-    }
-    pluggedMsg.empty();
-
-    packetStatus = Udp.beginPacket(dest_ip, out_port);
-    if (packetStatus != 0) {
-      lowBatteryMsg.send(Udp);
-      Udp.endPacket();
-    }
-    lowBatteryMsg.empty();
-
-    xSemaphoreGive(mutex);
-  }
+  add_to_bundle("Battery", (float)percentage);
+  add_to_bundle("Plugged", (float)(is_plugged ? 1 : 0));
+  add_to_bundle("LowBattery", (float)(is_low_battery ? 1 : 0));
 }
 
 void OSC_handler::send_bundle() {

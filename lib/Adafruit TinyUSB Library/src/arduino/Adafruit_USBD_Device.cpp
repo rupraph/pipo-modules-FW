@@ -80,11 +80,11 @@
 #endif
 
 #ifndef USB_LANGUAGE
-#define USB_LANGUAGE 0x0409 // default is English
+#define USB_LANGUAGE 0x0409  // default is English
 #endif
 
 #ifndef USB_CONFIG_POWER
-#define USB_CONFIG_POWER 100
+#define USB_CONFIG_POWER 500
 #endif
 
 enum { STRID_LANGUAGE = 0, STRID_MANUFACTURER, STRID_PRODUCT, STRID_SERIAL };
@@ -98,7 +98,7 @@ Adafruit_USBD_Device::Adafruit_USBD_Device(void) {
 #endif
 }
 
-void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t *buf,
+void Adafruit_USBD_Device::setConfigurationBuffer(uint8_t* buf,
                                                   uint32_t buflen) {
   if (buflen < _desc_cfg_maxlen) {
     return;
@@ -123,24 +123,24 @@ void Adafruit_USBD_Device::setDeviceVersion(uint16_t bcd) {
 }
 
 void Adafruit_USBD_Device::setLanguageDescriptor(uint16_t language_id) {
-  _desc_str_arr[STRID_LANGUAGE] = (const char *)((uint32_t)language_id);
+  _desc_str_arr[STRID_LANGUAGE] = (const char*)((uint32_t)language_id);
 }
 
-void Adafruit_USBD_Device::setManufacturerDescriptor(const char *s) {
+void Adafruit_USBD_Device::setManufacturerDescriptor(const char* s) {
   _desc_str_arr[STRID_MANUFACTURER] = s;
 }
 
-void Adafruit_USBD_Device::setProductDescriptor(const char *s) {
+void Adafruit_USBD_Device::setProductDescriptor(const char* s) {
   _desc_str_arr[STRID_PRODUCT] = s;
 }
 
-void Adafruit_USBD_Device::setSerialDescriptor(const char *s) {
+void Adafruit_USBD_Device::setSerialDescriptor(const char* s) {
   _desc_str_arr[STRID_SERIAL] = s;
 }
 
 // Add a string descriptor to the device's pool
 // Return string index
-uint8_t Adafruit_USBD_Device::addStringDescriptor(const char *s) {
+uint8_t Adafruit_USBD_Device::addStringDescriptor(const char* s) {
   if (_desc_str_count >= STRING_DESCRIPTOR_MAX || s == NULL) {
     return 0;
   }
@@ -150,36 +150,50 @@ uint8_t Adafruit_USBD_Device::addStringDescriptor(const char *s) {
   return index;
 }
 
-void Adafruit_USBD_Device::task(void) { tud_task(); }
+void Adafruit_USBD_Device::task(void) {
+  tud_task();
+}
 
-bool Adafruit_USBD_Device::mounted(void) { return tud_mounted(); }
+bool Adafruit_USBD_Device::mounted(void) {
+  return tud_mounted();
+}
 
-bool Adafruit_USBD_Device::suspended(void) { return tud_suspended(); }
+bool Adafruit_USBD_Device::suspended(void) {
+  return tud_suspended();
+}
 
-bool Adafruit_USBD_Device::ready(void) { return tud_ready(); }
+bool Adafruit_USBD_Device::ready(void) {
+  return tud_ready();
+}
 
-bool Adafruit_USBD_Device::remoteWakeup(void) { return tud_remote_wakeup(); }
+bool Adafruit_USBD_Device::remoteWakeup(void) {
+  return tud_remote_wakeup();
+}
 
-bool Adafruit_USBD_Device::detach(void) { return tud_disconnect(); }
+bool Adafruit_USBD_Device::detach(void) {
+  return tud_disconnect();
+}
 
-bool Adafruit_USBD_Device::attach(void) { return tud_connect(); }
+bool Adafruit_USBD_Device::attach(void) {
+  return tud_connect();
+}
 
 void Adafruit_USBD_Device::clearConfiguration(void) {
-  tusb_desc_device_t const desc_dev = {.bLength = sizeof(tusb_desc_device_t),
-                                       .bDescriptorType = TUSB_DESC_DEVICE,
-                                       .bcdUSB = 0x0200,
-                                       .bDeviceClass = 0,
-                                       .bDeviceSubClass = 0,
-                                       .bDeviceProtocol = 0,
-                                       .bMaxPacketSize0 =
-                                           CFG_TUD_ENDPOINT0_SIZE,
-                                       .idVendor = USB_VID,
-                                       .idProduct = USB_PID,
-                                       .bcdDevice = 0x0100,
-                                       .iManufacturer = STRID_MANUFACTURER,
-                                       .iProduct = STRID_PRODUCT,
-                                       .iSerialNumber = STRID_SERIAL,
-                                       .bNumConfigurations = 0x01};
+  tusb_desc_device_t const desc_dev = {
+      .bLength = sizeof(tusb_desc_device_t),
+      .bDescriptorType = TUSB_DESC_DEVICE,
+      .bcdUSB = 0x0200,
+      .bDeviceClass = 0,
+      .bDeviceSubClass = 0,
+      .bDeviceProtocol = 0,
+      .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
+      .idVendor = USB_VID,
+      .idProduct = USB_PID,
+      .bcdDevice = 0x0100,
+      .iManufacturer = STRID_MANUFACTURER,
+      .iProduct = STRID_PRODUCT,
+      .iSerialNumber = STRID_SERIAL,
+      .bNumConfigurations = 0x01};
 
   _desc_device = desc_dev;
 
@@ -201,7 +215,7 @@ void Adafruit_USBD_Device::clearConfiguration(void) {
   _epin_count = _epout_count = 1;
 
   memset(_desc_str_arr, 0, sizeof(_desc_str_arr));
-  _desc_str_arr[STRID_LANGUAGE] = (const char *)((uint32_t)USB_LANGUAGE);
+  _desc_str_arr[STRID_LANGUAGE] = (const char*)((uint32_t)USB_LANGUAGE);
   _desc_str_arr[STRID_MANUFACTURER] = USB_MANUFACTURER;
   _desc_str_arr[STRID_PRODUCT] = USB_PRODUCT;
   _desc_str_arr[STRID_SERIAL] = nullptr;
@@ -213,8 +227,8 @@ void Adafruit_USBD_Device::clearConfiguration(void) {
 // Add interface descriptor
 // - Interface number will be updated to match current count
 // - Endpoint number is updated to be unique
-bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
-  uint8_t *desc = _desc_cfg + _desc_cfg_len;
+bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface& itf) {
+  uint8_t* desc = _desc_cfg + _desc_cfg_len;
   uint16_t const len = itf.getInterfaceDescriptor(
       _itf_count, desc, _desc_cfg_maxlen - _desc_cfg_len);
 
@@ -225,7 +239,7 @@ bool Adafruit_USBD_Device::addInterface(Adafruit_USBD_Interface &itf) {
   _desc_cfg_len += len;
 
   // Update configuration descriptor
-  tusb_desc_configuration_t *config = (tusb_desc_configuration_t *)_desc_cfg;
+  tusb_desc_configuration_t* config = (tusb_desc_configuration_t*)_desc_cfg;
   config->wTotalLength = _desc_cfg_len;
   config->bNumInterfaces = _itf_count;
 
@@ -255,7 +269,7 @@ bool Adafruit_USBD_Device::begin(uint8_t rhport) {
   _desc_cfg_len += sizeof(desc_cdc);
 
   // Update configuration descriptor
-  tusb_desc_configuration_t *config = (tusb_desc_configuration_t *)_desc_cfg;
+  tusb_desc_configuration_t* config = (tusb_desc_configuration_t*)_desc_cfg;
   config->wTotalLength = _desc_cfg_len;
   config->bNumInterfaces = _itf_count;
 #endif
@@ -269,9 +283,9 @@ bool Adafruit_USBD_Device::begin(uint8_t rhport) {
   return true;
 }
 
-static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize);
+static int strcpy_utf16(const char* s, uint16_t* buf, int bufsize);
 
-uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t *serial_utf16) {
+uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t* serial_utf16) {
 
   if (!_desc_str_arr[STRID_SERIAL]) {
     uint8_t serial_id[16] __attribute__((aligned(4)));
@@ -283,7 +297,7 @@ uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t *serial_utf16) {
                                         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
         uint8_t nibble = (serial_id[i] >> (j * 4)) & 0xf;
-        serial_utf16[1 + i * 2 + (1 - j)] = nibble_to_hex[nibble]; // UTF-16-LE
+        serial_utf16[1 + i * 2 + (1 - j)] = nibble_to_hex[nibble];  // UTF-16-LE
       }
     }
 
@@ -293,30 +307,30 @@ uint8_t Adafruit_USBD_Device::getSerialDescriptor(uint16_t *serial_utf16) {
   }
 }
 
-uint16_t const *Adafruit_USBD_Device::descriptor_string_cb(uint8_t index,
+uint16_t const* Adafruit_USBD_Device::descriptor_string_cb(uint8_t index,
                                                            uint16_t langid) {
   (void)langid;
 
   uint8_t chr_count;
 
   switch (index) {
-  case STRID_LANGUAGE:
-    _desc_str[1] = ((uint16_t)((uint32_t)_desc_str_arr[STRID_LANGUAGE]));
-    chr_count = 1;
-    break;
+    case STRID_LANGUAGE:
+      _desc_str[1] = ((uint16_t)((uint32_t)_desc_str_arr[STRID_LANGUAGE]));
+      chr_count = 1;
+      break;
 
-  case STRID_SERIAL:
-    chr_count = getSerialDescriptor(_desc_str);
-    break;
+    case STRID_SERIAL:
+      chr_count = getSerialDescriptor(_desc_str);
+      break;
 
-  default:
-    // Invalid index
-    if (index >= _desc_str_count) {
-      return NULL;
-    }
+    default:
+      // Invalid index
+      if (index >= _desc_str_count) {
+        return NULL;
+      }
 
-    chr_count = strcpy_utf16(_desc_str_arr[index], _desc_str + 1, 32);
-    break;
+      chr_count = strcpy_utf16(_desc_str_arr[index], _desc_str + 1, 32);
+      break;
   }
 
   // first byte is length (including header), second byte is string type
@@ -333,14 +347,14 @@ extern "C" {
 
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
-uint8_t const *tud_descriptor_device_cb(void) {
-  return (uint8_t const *)&TinyUSBDevice._desc_device;
+uint8_t const* tud_descriptor_device_cb(void) {
+  return (uint8_t const*)&TinyUSBDevice._desc_device;
 }
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
 // Application return pointer to descriptor, whose contents must exist long
 // enough for transfer to complete
-uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
+uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
   (void)index;
   return TinyUSBDevice._desc_cfg;
 }
@@ -350,11 +364,11 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
 // enough for transfer to complete Note: the 0xEE index string is a Microsoft
 // OS 1.0 Descriptors.
 // https://docs.microsoft.com/en-us/windows-hardware/drivers/usbcon/microsoft-defined-usb-descriptors
-uint16_t const *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
+uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
   return TinyUSBDevice.descriptor_string_cb(index, langid);
 }
 
-} // extern C
+}  // extern C
 
 //--------------------------------------------------------------------+
 // Helper
@@ -391,12 +405,12 @@ constexpr static inline bool isInvalidUtf8Octet(uint8_t t) {
 // Attempting to decode evilUTF8 will progress to whatever is next to it on the
 // stack. The above should work when optimizations are turned
 //
-static int8_t utf8Codepoint(const uint8_t *utf8, uint32_t *codepointp) {
+static int8_t utf8Codepoint(const uint8_t* utf8, uint32_t* codepointp) {
   const uint32_t CODEPOINT_LOWEST_SURROGATE_HALF = 0xD800;
   const uint32_t CODEPOINT_HIGHEST_SURROGATE_HALF = 0xDFFF;
 
-  *codepointp = 0xFFFD; // always initialize output to known value ... 0xFFFD
-                        // (REPLACEMENT CHARACTER) seems the natural choice
+  *codepointp = 0xFFFD;  // always initialize output to known value ... 0xFFFD
+                         // (REPLACEMENT CHARACTER) seems the natural choice
   uint32_t codepoint;
   int len;
 
@@ -446,9 +460,9 @@ static int8_t utf8Codepoint(const uint8_t *utf8, uint32_t *codepointp) {
       // isInvalidUtf8Octet()
       return -1;
     }
-    codepoint <<= 6; // each continuation byte adds six bits to the codepoint
-    codepoint |= utf8[i] & 0x3f; // mask off the top two continuation bits, and
-                                 // add the six relevant bits
+    codepoint <<= 6;  // each continuation byte adds six bits to the codepoint
+    codepoint |= utf8[i] & 0x3f;  // mask off the top two continuation bits, and
+                                  // add the six relevant bits
   }
 
   // explicit validation to prevent overlong encodings
@@ -477,13 +491,13 @@ static int8_t utf8Codepoint(const uint8_t *utf8, uint32_t *codepointp) {
   return len;
 }
 
-static int strcpy_utf16(const char *s, uint16_t *buf, int bufsize) {
+static int strcpy_utf16(const char* s, uint16_t* buf, int bufsize) {
   int i = 0;
   int buflen = 0;
 
   while (s[i] != 0) {
     uint32_t codepoint;
-    int8_t utf8len = utf8Codepoint((const uint8_t *)s + i, &codepoint);
+    int8_t utf8len = utf8Codepoint((const uint8_t*)s + i, &codepoint);
 
     if (utf8len < 0) {
       // Invalid utf8 sequence, skip it
@@ -520,4 +534,4 @@ void tud_dfu_runtime_reboot_to_dfu_cb(void) {
 }
 #endif
 
-#endif // CFG_TUD_ENABLED
+#endif  // CFG_TUD_ENABLED

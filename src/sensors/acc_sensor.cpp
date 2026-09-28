@@ -284,6 +284,9 @@ void MotionSensor::convert_accell() {
   // filter_map["accY"].process(sensor_dat["accY"].raw_value);
   sensor_dat["accZ"].value = sensor_dat["accZ"].raw_value;
   // filter_map["accZ"].process(sensor_dat["accZ"].raw_value);
+  sensor_dat["AccComb"].value =
+      sqrt(pow(sensor_dat["accX"].value, 2) + pow(sensor_dat["accY"].value, 2) +
+           pow(sensor_dat["accZ"].value, 2));
 }
 
 void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {

@@ -13,6 +13,7 @@
 #include "../engine.h"
 #include "../sensors/sensors.h"
 #include "../osc/osc_handler.h"
+#include "hw_ui.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ class Config {
     general_config["HidMode"] = 2;
     general_config["PipoName"] = "default";
     general_config["BLEEnabled"] = false;
+    general_config["Button_disa"] = false;
   }
   String filename;              // raw config file name (no extension)
   JsonDocument current_config;  // stores all configs (gather)
@@ -41,15 +43,17 @@ class Config {
   bool load_config(String filename, bool addJsonExtension = true);
   void load_config();
   void set(const String& config);
-  void setValue(char input[], int len);
-  void setValues(char input[], int len);
   void save();
   void save(String filename);
-  void save(String filename, String config);
+  void duplicate_config(String source, String target);
   void delete_config(String filename);
   void rename(String old_name, String new_name);
   void new_config(String name);
   String get_list();
+  String get_list_json();
+  int count_configs();
+  static bool validate_config_name(const String& name);
+  static const int MAX_CONFIGS = 8;
 
   JsonDocument get();            // return current_config
   JsonDocument get(string key);  // return current_config[key]
@@ -64,6 +68,8 @@ class Config {
   std::vector<std::string> split(const std::string& str, char delimiter);
   bool validate_config(JsonDocument& config_doc);
   bool restore_from_default(String target_filename);
+  bool atomic_copy_file(const char* sourcePath, const char* targetPath,
+                        const String& logContext);
 
   // bool _should_save = false;
   const char* last_config_path = "/last_config.txt";

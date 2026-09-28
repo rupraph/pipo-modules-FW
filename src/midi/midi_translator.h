@@ -25,7 +25,7 @@ class MidiTranslator
   uint8_t cc_nb = 1;
 
   //notes variables
-  uint8_t tl_mode = 0;  //0=cc, 1 note, 2 both
+  uint8_t tl_mode = 0;  //0=cc, 1 note, 2 pitch bend
 
   string pattern = "scale";  //can be scale, arpegio or interval (note interval
   string scaleType = "major";  // see maps below for keywords
@@ -102,7 +102,23 @@ class MidiTranslator
   uint8_t get_velocity();
   void set_velocity(uint8_t v);
 
+  // Value storage and change detection (for deduplication)
+  uint8_t get_last_cc() const;
+  uint16_t get_last_cc_hires() const;  // For 14-bit CC
+  uint8_t get_last_note() const;
+  uint16_t get_last_pitch_bend() const;
+  bool should_send_cc(uint8_t new_val);
+  bool should_send_cc_hires(uint16_t new_val);  // For 14-bit CC
+  bool should_send_note(uint8_t new_val);
+  bool should_send_pitch_bend(uint16_t new_val);
+
  private:
+  // Cached output values for change detection
+  uint16_t last_sent_cc =
+      65535;  // 65535 = never sent (supports both 7-bit and 14-bit)
+  uint8_t last_sent_note = 255;  // 255 = never sent
+  uint16_t last_sent_pb = 8192;  // 8192 = center (for future pitch bend)
+
   vector<uint8_t> generate_full_scale(int rootNote, int nb_notes,
                                       string pattern, string scaleType);
   vector<uint8_t> generate_base_scale(int rootNote, string pattern,

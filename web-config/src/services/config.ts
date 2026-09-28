@@ -4,6 +4,7 @@ import { schema } from "../schema";
 import { formatNumbers, debounce } from "../utils";
 import type {
   AxisSchema,
+  ConfigMeta,
   InputSettings,
   OutputMode,
   PipoConfig,
@@ -15,8 +16,8 @@ import type {
 export const pipoType = writable<PipoTypes>("unknown");
 export const configValid = writable<boolean>(false);
 
-// New stores for config state management
-export const configNames = writable<string[]>([]);
+// Config state management stores
+export const configMetas = writable<ConfigMeta[]>([]);
 export const activeConfigName = writable<string>("");
 export const currentConfig = writable<PipoConfig<PipoTypes> | null>(null);
 //TODO: derive it from config, and have a global swith in config to switch modes.
@@ -34,12 +35,14 @@ currentConfig.subscribe((config) => {
 export const configsLoading = writable<boolean>(false);
 export const configsError = writable<string | null>(null);
 export const configSaving = writable<boolean>(false);
+export const settingsModalOpen = writable<boolean>(false);
 
 // Change detection stores
 export const originalConfig = writable<PipoConfig<PipoTypes> | null>(null);
 export const hasUnsavedChanges = writable<boolean>(false);
 export const modeWillChange = writable<boolean>(false);
 export const pipoNameWillChange = writable<boolean>(false);
+export const bleWillChange = writable<boolean>(false);
 
 // Helper function to detect if output mode has changed
 function hasOutputModeChanged(
@@ -50,7 +53,7 @@ function hasOutputModeChanged(
   
   const originalMode: OutputMode = original.general.MidiEnabled ? "MIDI" : original.general.OSC_ENA ? "OSC" : "MIDI";
   const currentMode: OutputMode = current.general.MidiEnabled ? "MIDI" : current.general.OSC_ENA ? "OSC" : "MIDI";
-  
+
   return originalMode !== currentMode;
 }
 
@@ -62,6 +65,16 @@ function hasPipoNameChanged(
   if (!original || !current) return false;
   
   return original.general.PipoName !== current.general.PipoName;
+}
+
+// Helper function to detect if BLE state has changed (requires reboot)
+function hasBLEChanged(
+  original: PipoConfig<PipoTypes> | null,
+  current: PipoConfig<PipoTypes> | null
+): boolean {
+  if (!original || !current) return false;
+
+  return original.general.BLEEnabled !== current.general.BLEEnabled;
 }
 
 // Polling interval to check for deep changes in config
@@ -78,6 +91,7 @@ function startChangeDetection() {
       hasUnsavedChanges.set(false);
       modeWillChange.set(false);
       pipoNameWillChange.set(false);
+      bleWillChange.set(false);
       return;
     }
     
@@ -92,6 +106,10 @@ function startChangeDetection() {
     // Check if PipoName has changed
     const nameChanged = hasPipoNameChanged(original, current);
     pipoNameWillChange.set(nameChanged);
+
+    // Check if BLE state has changed
+    const bleChanged = hasBLEChanged(original, current);
+    bleWillChange.set(bleChanged);
   }, 300); // Check every 300ms
 }
 
@@ -112,10 +130,11 @@ class ConfigService {
       configsLoading.set(true);
       configsError.set(null);
 
-      const response = await pipoio.get<string>("/configs");
-      const names = response.data.split(",");
+      const response = await pipoio.get<ConfigMeta[]>("/configs");
+      const metas = response.data;
+      const names = metas.map((m) => m.name);
 
-      configNames.set(names);
+      configMetas.set(metas);
       return names;
     } catch (err) {
       const errorMsg =
@@ -247,6 +266,10 @@ class ConfigService {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
+      // Reset change detection after successful save
+      originalConfig.set(JSON.parse(JSON.stringify(config)));
+      hasUnsavedChanges.set(false);
+
       console.log(`Config saved: ${configName}`);
     } catch (err) {
       const errorMsg =
@@ -363,26 +386,26 @@ class ConfigService {
   }
 
   /**
-   * Copy a config
+   * Duplicate a config on the device (backend file copy)
    */
-  async copyConfig(name: string, config: PipoConfig<PipoTypes>): Promise<void> {
+  async duplicateConfig(source: string, target: string): Promise<void> {
     try {
       configsLoading.set(true);
       configsError.set(null);
 
       await pipoio.request({
         method: "post",
-        url: "/config-copy",
-        params: { name, config: JSON.stringify(config) },
+        url: "/config-duplicate",
+        params: { source, target },
       });
 
       // Refresh config list
       await this.fetchConfigNames();
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : "Failed to copy config";
+        err instanceof Error ? err.message : "Failed to duplicate config";
       configsError.set(errorMsg);
-      console.error("Error copying config:", err);
+      console.error("Error duplicating config:", err);
       throw err;
     } finally {
       configsLoading.set(false);

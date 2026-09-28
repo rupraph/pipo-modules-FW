@@ -16,6 +16,10 @@ const analogMinMax = {
   min: 0,
   max: 1023,
 };
+const accCombMinMax = {
+  min: 0,
+  max: 100,
+};
 export const minMax: InputMinMax = {
   unknown: {
     "": {
@@ -35,6 +39,7 @@ export const minMax: InputMinMax = {
     accX: acceleroMinMax,
     accY: acceleroMinMax,
     accZ: acceleroMinMax,
+    AccComb: accCombMinMax,
     // angles in degrees
     pitch: angleMinMax,
     roll: angleMinMax,

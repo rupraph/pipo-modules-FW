@@ -16,10 +16,6 @@ export type ConfigsDeleteGetParams = {
 export type ConfigNewGetParams = {
   name: string;
 };
-export type ConfigCopyPostParams = {
-  name: string;
-  config: PipoConfig<"motion">;
-};
 export type ConfigRenamePostParams = {
   oldname: string;
   newname: string;

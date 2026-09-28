@@ -37,13 +37,38 @@ struct SensorDat {
       cyclic;  // enables output to be computed on a cyclic range (ie 0-1-0 over range)
 
   // Live attributes
-  float raw_value;       // raw value from sensor (pure reading)
-  float value;           // after sensor-specific filtering
-  float value_offset;    // after offset applied
-  float value_ready;     // final value after neutral filter
-  float value_prev;      // previous value_ready for comparison
-  bool bool_value;       // boolean output when in trigger mode
+  float raw_value;  // raw value from sensor (pure reading)
+  float value;      // after sensor-specific filtering
+  float
+      value_prev_measure;  // .value before last measure_sensor() — for hold_mode
+  float value_offset;      // after offset applied
+  float value_ready;       // final value after neutral filter
+  float value_prev;        // previous value_ready for comparison
+  bool bool_value;         // boolean output when in trigger mode
   bool bool_value_prev;  // previous value of bool_value
+
+  // Engaged state: whether the sensor axis is actively producing usable output that should be processed by the engine.
+  // Composite of debounced(reading_valid) && within_bounds.
+
+  // -- Sensor validity: did the HW produce a meaningful measurement?
+  // Sensors that can lose signal (e.g. ToF) set this to false in measure_sensor().
+  // Always-valid sensors (IMU, ADC) leave it at default true.
+  bool reading_valid = true;
+  bool reading_valid_prev = true;
+  uint8_t invalid_count = 0;  // consecutive frames with reading_valid == false
+
+  // -- Bounds check: is value_ready within [lmin, lmax]?
+  // Computed by base class for ALL axes after filtering — never set by drivers.
+  bool within_bounds = true;
+  bool within_bounds_prev = true;
+
+  // -- Composite: debounced(reading_valid) && within_bounds
+  // This is what triggers/untriggers and the engine use.
+  bool engaged = true;
+  bool engaged_prev = true;
+
+  bool hold_mode =
+      false;  // when true and !reading_valid, hold previous value instead of updating
 
   struct trigger_flag {
     bool osc_trig = false;
@@ -65,6 +90,7 @@ struct SensorDat {
         inverted(false),
         raw_value(0.0),
         value(0.0),  // contains the value over the full range in sensor unit.
+        value_prev_measure(0.0),
         value_offset(0.0),
         value_ready(0.0),
         value_prev(0.0),
@@ -74,6 +100,13 @@ struct SensorDat {
         th_mode(false),
         bool_value(false),
         bool_value_prev(false),
+        reading_valid(true),
+        reading_valid_prev(true),
+        invalid_count(0),
+        within_bounds(true),
+        within_bounds_prev(true),
+        engaged(true),
+        engaged_prev(true),
         NeutralFilter(0) {}
 };
 
@@ -102,9 +135,8 @@ class Sensor {
   virtual JsonDocument get_sensor_config(bool debug = false) = 0;
 
   // bool test_outside_deadband(const std::string& axis);
-  bool is_within_range(const std::string& axis);
-  bool is_prev_within_range(const std::string& axis);
-  bool process_sensor_triggers();        //return true if any flags were toggled
+  bool is_engaged(const std::string& axis);
+  bool was_engaged(const std::string& axis);
   bool process_sensor_neutral_filter();  //return true if data changed
   float clip(float value, float min, float max);
 
@@ -126,7 +158,7 @@ class Sensor {
   void set_input_config(JsonObject config, bool debug = false);
 
   //Getter setters
-  unordered_map<string, SensorDat> get_sensor_dat_map();
+  const unordered_map<string, SensorDat>& get_sensor_dat_map() const;
 
   bool get_inverted(const std::string& axis);
   void set_inverted(const std::string& axis, bool value);

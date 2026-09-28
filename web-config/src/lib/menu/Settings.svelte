@@ -4,12 +4,24 @@
   import { SettingsIcon } from "lucide-svelte";
   import InfoModal from "../InfoModal.svelte";
   import Text from "../form/Text.svelte";
-  import { currentConfig } from "../../services";
+  import {
+    currentConfig,
+    settingsModalOpen,
+    hasUnsavedChanges,
+    modeWillChange,
+    pipoNameWillChange,
+    bleWillChange,
+    pipoType,
+    pipoInfo,
+  } from "../../services";
+  import { getDefaultDeadband } from "../../defaults";
   import Switch from "../form/Switch.svelte";
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
   import { pipoio } from "../../pipoio";
   import { addToast } from "../toast";
+  import { uiState } from "../ui-state";
+  import { saveConfig, savingStatus } from "../../services/config-saver";
 
   $: config = $currentConfig;
   $: mode = config?.general.MidiEnabled
@@ -20,6 +32,8 @@
 
   let open = false;
 
+  // Sync modal state with store
+  $: settingsModalOpen.set(open);
   function setMode(newMode: "osc" | "midi") {
     if (!config) return;
 
@@ -29,6 +43,14 @@
     // Disable BLE when switching to OSC mode
     if (newMode === "osc") {
       config.general.BLEEnabled = false;
+    }
+    // Restore default deadbands when switching to MIDI (filter is OSC-only UI)
+    if (newMode === "midi") {
+      const type = $pipoType;
+      for (const channel of Object.keys(config.inputs)) {
+        config.inputs[channel].deadband = getDefaultDeadband(type, channel);
+      }
+      config.general.BLEEnabled = true;
     }
   }
 
@@ -111,8 +133,19 @@
         <span class="label">Ouput mode</span>
         <InfoModal>
           <p>
-            Select the general output mode of the Pipo: MIDI or OSC. MIDI can
-            only be sent over USB or BLE, OSC can only be sent over Wifi.
+            Select the general data output mode of the Pipo: MIDI or OSC.<br />
+            <br />
+            MIDI: sends Midi data as a USB controller, or wirelessly using BLE (Bluetooth
+            Low Energy). Midi is easier to setup with music software but has a lower
+            resolution format. Also, when using BLE, connection must be manually
+            established each time.
+            <br />
+            <br />
+            OSC: sends data wirelessly over Wifi. It allows for connecting multiple
+            devices, use high resolution data, and is more flexible and convenient
+            for advanced users (allows for auto-reconnection, device swapping, etc...).
+            However, initial setup requires some network configuration, which is
+            less straightforward than MIDI.
           </p>
           <p>This requires reboot after saving.</p>
         </InfoModal>
@@ -218,9 +251,15 @@
         <InfoModal>
           <p>
             The Pipo Name is used to identify your device. It is used for the
-            WiFi name, access URL (pipo-xxx.local), and OSC address prefix.
-            Choose a unique name without spaces or special characters. Please
-            power cycle after saving the changes.
+            WiFi name, config access URL (pipo-xxx.local), and OSC address
+            prefix.<br /><br />
+            Choose a unique name without spaces or special characters. Please power
+            cycle after saving the change.<br /><br />
+            Note: After changing the name, your computer might take a while to display
+            the new wifi name due to caching (you can try enabling/disabling your
+            PC wifi to force a refresh, or search in "other networks"). When connected
+            again, make sure to use the new address to access this configuration
+            page.
           </p>
         </InfoModal>
         <div class="text-input-wrapper">
@@ -231,6 +270,14 @@
           />
         </div>
       </div>
+      <div class="row">
+        <span class="label">Lock buttons</span>
+        <InfoModal>
+          <p>This option disables all physical buttons on the device</p>
+        </InfoModal>
+        <PillSwitch label="" bind:value={config.general.Button_disa} />
+      </div>
+
       <div class="row">
         <span class="label">
           <a
@@ -247,6 +294,51 @@
           >Reboot</button
         >
       </div>
+      <div class="info-section">
+        <div class="info-col">
+          <span class="info-label">Firmware</span>
+          <span class="info-value">{$pipoInfo?.version ?? "—"}</span>
+        </div>
+        <div class="info-col">
+          <span class="info-label">Board Rev</span>
+          <span class="info-value"
+            >{$pipoInfo?.hw_rev
+              ? $pipoInfo.hw_rev[0] + "." + $pipoInfo.hw_rev[1]
+              : "—"}</span
+          >
+        </div>
+        <div class="info-col">
+          <span class="info-label">Battery type</span>
+          <span class="info-value">{$pipoInfo?.batt_type ?? "—"}</span>
+        </div>
+      </div>
+
+      <!-- Save Button (shown when there are unsaved changes) -->
+      {#if $hasUnsavedChanges}
+        <div class="save-button-container">
+          <button
+            class="save-btn"
+            class:loading={$savingStatus === "loading"}
+            class:success={$savingStatus === "success"}
+            class:error={$savingStatus === "error"}
+            on:click={() => config && saveConfig(config)}
+            disabled={$savingStatus === "loading"}
+          >
+            {#if $savingStatus === "loading"}
+              <span class="spinner"></span>
+              Saving...
+            {:else if $savingStatus === "success"}
+              ✓ Saved!
+            {:else if $savingStatus === "error"}
+              ✗ Error
+            {:else if $modeWillChange || $pipoNameWillChange || $bleWillChange}
+              Save and Reboot
+            {:else}
+              Save Changes
+            {/if}
+          </button>
+        </div>
+      {/if}
     </div>
   {/if}
 </Modal>
@@ -301,6 +393,78 @@
     justify-self: end;
   }
 
+  /* Save Button Styles */
+  .save-button-container {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bg-secondary);
+    display: flex;
+    justify-content: center;
+  }
+
+  .save-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background-color: var(--main);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  .save-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: var(--main-lighter);
+  }
+
+  .save-btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .save-btn:disabled {
+    cursor: wait;
+    opacity: 0.8;
+  }
+
+  .save-btn.success {
+    background-color: var(--green);
+    color: white;
+  }
+
+  .save-btn.error {
+    background-color: var(--red);
+    color: white;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--bg-primary);
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
   /* .content :global(a.manual-button) {
     display: inline-flex;
     align-items: center;
@@ -322,4 +486,32 @@
     background-color: var(--main);
     color: var(--bg-secondary);
   } */
+
+  .info-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 6px;
+    /* padding: 8px; */
+    /* background-color: var(--bg-secondary); */
+    border-radius: 8px;
+  }
+
+  .info-col {
+    display: flex;
+    /* justify-content: space-between; */
+    gap: 4px;
+    align-items: center;
+  }
+
+  .info-label {
+    font-size: 10px;
+    color: var(--text-secondary, #888);
+  }
+
+  .info-value {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
 </style>

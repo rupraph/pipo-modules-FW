@@ -23,6 +23,7 @@ class MotionSensor : public Sensor {
     sensor_dat["gyroX"] = SensorDat();
     sensor_dat["gyroY"] = SensorDat();
     sensor_dat["gyroZ"] = SensorDat();
+    sensor_dat["AccComb"] = SensorDat();
   };
 
   void init() override;

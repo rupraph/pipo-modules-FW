@@ -1,11 +1,18 @@
-This repo contains the code for Pipo _motion_, _analog_, and _range_ with the UI.
+# Overview
+
+This repo contains the firmware of the 3 modules: **Pipo Motion**, **Pipo Analog**, and **Pipo Range**
+
+[Pipo Interfaces website](https://pipointerfaces.com/)
+
+Discord Server invite: ZMVstP7zh9
+
+If you only want to get and install the latest stable firmware release, go to [the update page](https://pipointerfaces.com/update/)
+
+# Development setup guide (linux/mac)
 
 > [!IMPORTANT]
 > The last stable and tested version of the code is in branch `main`. Ongoing developements in `develop`
 >
-Discord Server: ZMVstP7zh9
-
-# Minimal Quick Start guide (linux/mac)
 
 ## Embedded software
 
@@ -29,9 +36,9 @@ The web UI is built with svelte.
 - From the `web-config` directory, install the dependencies: `npm install`
 - Run development or build commands (see `package.json`)
 
-## Example
+## Build example
 
-Compilation/upload Steps for "motion":
+Compilation/upload Steps for module "motion":
 
 - [optional] Rebuild UI web page files: `npm run build:web`
 - Build module filesystem: `npm run build:fs:motion_rev1_1`

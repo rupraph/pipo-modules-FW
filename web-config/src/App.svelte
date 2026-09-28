@@ -16,7 +16,9 @@
     currentConfig,
     hasUnsavedChanges,
     originalConfig,
+    settingsModalOpen,
   } from "./services/config";
+  import { savingStatus } from "./services/config-saver";
   import { uiState } from "./lib/ui-state";
   import Presets from "./lib/presets.svelte";
   import PillSwitch from "./lib/form/PillSwitch.svelte";
@@ -45,17 +47,9 @@
 
         // Provide a more user-friendly error message
         throw new Error(
-          "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected."
+          "Unable to connect to Pipo. Please check if the device is powered on and WiFi is connected.",
         );
       });
-  }
-
-  function handleSaveSuccess() {
-    // Reset the original config to the current config after successful save
-    if ($currentConfig) {
-      originalConfig.set(JSON.parse(JSON.stringify($currentConfig)));
-      hasUnsavedChanges.set(false);
-    }
   }
 
   async function fetchRelativeModeState() {
@@ -195,23 +189,20 @@
         <!-- <Collapse title="Info" collapseId="info">
           <Pipoinfo info={resp} />
         </Collapse> -->
-        <div class="row" style="color: var(--bg-secondary);">
-          <div class="left">
-            <p>SW:</p>
-            <span>{resp.version}</span>
-          </div>
-        </div>
       </section>
       <!-- <article class="content section-borders">
         <Logs />
       </article> -->
     </div>
 
-    <!-- Floating Save Button -->
+    <!-- Floating Save Button (hidden when Settings modal is open).
+         Also kept visible while a save is in-progress/success so the
+         status label stays on screen, but never when the modal is open
+         (the modal has its own inline save feedback). -->
     <FloatingSaveButton
       config={$currentConfig}
-      show={$hasUnsavedChanges}
-      onSaveSuccess={handleSaveSuccess}
+      show={($hasUnsavedChanges || $savingStatus !== "none") &&
+        !$settingsModalOpen}
     />
   {:catch e}
     <article>

@@ -164,6 +164,15 @@ class State<T extends PipoTypes = "analog"> {
   getConfigs() {
     return this.configs;
   }
+  getConfigMetas() {
+    return Object.entries(this.configs).map(([name, cfg]) => ({
+      name,
+      active: name === this.activeConfig,
+    }));
+  }
+  validateConfigName(name: string): boolean {
+    return /^[a-zA-Z0-9_-]{1,12}$/.test(name);
+  }
   deleteConfig(name: string) {
     delete this.configs[name];
     if (!Object.keys(this.configs).length) {
@@ -185,8 +194,9 @@ class State<T extends PipoTypes = "analog"> {
       defaultAnalog;
     this.configs[name] = JSON.parse(JSON.stringify(defaultConfig));
   }
-  copyConfig(name: string, config: PipoConfig<T>) {
-    this.configs[name] = config;
+  duplicateConfig(source: string, target: string) {
+    if (!this.configs[source]) throw new Error(`Config not found: ${source}`);
+    this.configs[target] = JSON.parse(JSON.stringify(this.configs[source]));
   }
   renameConfig(oldname: string, newname: string) {
     this.configs[newname] = this.configs[oldname];

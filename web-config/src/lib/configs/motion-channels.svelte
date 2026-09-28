@@ -49,14 +49,14 @@
 
   // Filter channel types based on mode - hide quaternion in MIDI mode
   $: availableChannelTypes = channelTypes.filter(
-    (type) => !(mode === "MIDI" && type.value === "quaternion")
+    (type) => !(mode === "MIDI" && type.value === "quaternion"),
   );
 
   $: keys =
     currentType === "euler"
       ? (["yaw", "pitch", "roll"] as Keys[])
       : currentType === "linear_acceleration"
-        ? (["accX", "accY", "accZ"] as Keys[])
+        ? (["accX", "accY", "accZ", "AccComb"] as Keys[])
         : currentType === "magnitude"
           ? (["magX", "magY", "magZ"] as Keys[])
           : currentType === "angular_acceleration"
@@ -83,7 +83,7 @@
             acc[key] = config.engine[engineKey][key].enabled ?? false;
             return acc;
           },
-          {} as Record<Keys, boolean>
+          {} as Record<Keys, boolean>,
         )
       : ({} as Record<Keys, boolean>);
 
@@ -101,7 +101,7 @@
       categoryValue === "euler"
         ? (["yaw", "pitch", "roll"] as Keys[])
         : categoryValue === "linear_acceleration"
-          ? (["accX", "accY", "accZ"] as Keys[])
+          ? (["accX", "accY", "accZ", "AccComb"] as Keys[])
           : categoryValue === "magnitude"
             ? (["magX", "magY", "magZ"] as Keys[])
             : categoryValue === "angular_acceleration"
@@ -109,7 +109,7 @@
               : [];
 
     return categoryKeys.some(
-      (key) => config.engine[engineKey][key]?.enabled ?? false
+      (key) => config.engine[engineKey][key]?.enabled ?? false,
     );
   }
 
@@ -121,7 +121,7 @@
             acc[type.value] = isCategoryEnabled(type.value);
             return acc;
           },
-          {} as Record<string, boolean>
+          {} as Record<string, boolean>,
         )
       : {};
 
@@ -156,8 +156,10 @@
       subject to gimbal lock)
     </p>
     <p>
-      <u>Linear Accelleration:</u> is the change of velocity along the three principal
-      axes (X, Y, Z) excluding the effect of gravity.
+      <u>Linear Accelleration:</u> the change of velocity along the three principal
+      axes (X, Y, Z) excluding the effect of gravity. The sub channel "AccComb" is
+      the norm of the acceleration vector, representing the total acceleration magnitude
+      regardless of direction. This can be used as an activity indicator.
     </p>
     <p>
       <u>Magnetometer readings:</u> represent the magnetic field strength along the
@@ -256,7 +258,13 @@
     font-weight: 00;
     font-size: 14px;
     cursor: pointer;
-    padding: 0;
+    padding: 4px 6px;
+    box-sizing: border-box;
+  }
+  .channels > button:last-child:nth-child(4) {
+    grid-column: 1 / -1;
+    width: 85px;
+    margin: 0 auto;
   }
   .channels > button.enabled {
     /* background-color: var(--main); */
