@@ -1,4 +1,5 @@
 #include "server/server.h"
+#include "utils/board_identity.h"
 
 PipoServer server;
 
@@ -123,7 +124,7 @@ void PipoServer::setup_requests() {
     info += WiFi.macAddress();
     info += "\",";
     info += "\"hw_rev\":\"";
-    info += String(HW_REV);
+    info += g_board_rev_str;
     info += "\",";
     info += "\"batt_type\":\"";
     info += String(BATT_TYPE);

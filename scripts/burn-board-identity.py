@@ -15,7 +15,7 @@ Usage:
   # Batch/non-interactive:
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model range --revision 2.1 --yes
 
-  # With serial (future):
+  # With serial:
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model analog --revision 2.0 --serial 072026-001
 
   # Preview without burning:
@@ -28,7 +28,7 @@ BLOCK3 Layout (32 bytes, 256 bits):
   Byte 0:     board_model (uint8)  — 256 possible board types
   Byte 1:     hw_rev_major (uint8) — major revision number
   Byte 2:     hw_rev_minor (uint8) — minor revision number
-  Bytes 3-18: serial (16 bytes)    — ASCII, null-padded (reserved for future)
+  Bytes 3-18: serial (16 bytes)    — ASCII, null-padded (blank = permanent; one-shot)
   Bytes 19-31: reserved (13 bytes) — zeros
 
 ⚠️  BLOCK3 uses RS coding — the ENTIRE block is burned in ONE shot.
@@ -37,6 +37,7 @@ BLOCK3 Layout (32 bytes, 256 bits):
 
 import sys
 import argparse
+import re
 import subprocess
 import tempfile
 import os
@@ -168,7 +169,7 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
             "--chip", "esp32s3",
             "--port", port,
             "--do-not-confirm",
-            "burn-block-data",
+            "burn_block_data",
             "BLOCK3",
             tmp_path,
         ]
@@ -178,6 +179,7 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
             result["stdout"] = f"DRY RUN: {' '.join(cmd)}"
             return result
 
+        print(f"Running command: {' '.join(cmd)}")
         proc = subprocess.run(cmd, check=True, capture_output=True, text=True)
         result["success"] = True
         result["stdout"] = proc.stdout
@@ -186,6 +188,8 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
     except subprocess.CalledProcessError as e:
         result["stdout"] = e.stdout or ""
         result["stderr"] = e.stderr or ""
+    except FileNotFoundError as e:
+        result["stderr"] = f"espefuse.py not found in PATH: {e}"
     finally:
         os.unlink(tmp_path)
 
@@ -198,34 +202,38 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
 
 def read_block3_raw(port: str) -> bytes | None:
     """
-    Read current raw BLOCK3 contents via 'espefuse.py dump'.
+    Read current raw BLOCK3 contents via 'espefuse.py summary'.
     Returns 32 bytes of raw data, or None on failure.
     """
     try:
         proc = subprocess.run(
             ["espefuse.py", "--chip", "esp32s3", "--port", port,
-             "--do-not-confirm", "dump"],
+             "--do-not-confirm", "summary"],
             check=True, capture_output=True, text=True
         )
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+    except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 
-    # Parse dump output: "BLOCK3          = 00 00 00 00 ... 00 00 00 00"
-    for line in proc.stdout.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("BLOCK3") and "=" in stripped:
-            try:
-                hex_part = stripped.split("=", 1)[1].strip()
-                # Remove any trailing commentary after the hex bytes
-                hex_tokens = hex_part.split()
-                hex_bytes = [t for t in hex_tokens if len(t) == 2 and
-                             all(c in "0123456789ABCDEFabcdef" for c in t)]
-                raw = bytes(int(b, 16) for b in hex_bytes)
-                if len(raw) == 32:
-                    return raw
-            except (ValueError, IndexError):
-                pass
-    return None
+    # summary prints the user-data block as:
+    #   BLOCK_USR_DATA (BLOCK3)   User data
+    #      = 00 00 00 ... (32 bytes) ... 00 R/W
+    # The value may wrap onto a continuation line, so capture the first run
+    # of 32 space-separated two-digit hex bytes after the label.
+    match = re.search(
+        r"BLOCK_USR_DATA\b.*?([0-9a-fA-F]{2}(?:\s+[0-9a-fA-F]{2}){31})",
+        proc.stdout,
+        re.DOTALL,
+    )
+    if not match:
+        return None
+
+    hex_bytes = re.findall(r"[0-9a-fA-F]{2}", match.group(1))
+    if len(hex_bytes) != 32:
+        return None
+    try:
+        return bytes(int(b, 16) for b in hex_bytes)
+    except ValueError:
+        return None
 
 
 def is_block3_empty(raw: bytes) -> bool:
@@ -269,7 +277,7 @@ Examples:
     parser.add_argument(
         "--serial", "-s", type=validate_serial, default="",
         help=f"Serial number (max {SERIAL_MAX} ASCII chars, e.g., '072026-001'). "
-             "Omit to leave serial area blank (zeros)."
+             "Omit to leave serial area blank (permanent — cannot be added later)."
     )
     parser.add_argument(
         "--yes", "-y", action="store_true",
@@ -302,7 +310,7 @@ Examples:
         args.serial = prompt_serial()
 
     # ── Preview ───────────────────────────────────────────────
-    serial_display = args.serial if args.serial else "(blank — reserved for future)"
+    serial_display = args.serial if args.serial else "(blank — permanent)"
     espefuse_port = args.port
 
     if not args.json:
@@ -352,7 +360,7 @@ Examples:
         print(f"     Data:      {data.hex(' ')}")
         print(f"     Model:     {args.model} (id=0x{model_id:02X})")
         print(f"     Revision:  {rev_major}.{rev_minor} (0x{rev_major:02X}.{rev_minor:02X})")
-        print(f"     Serial:    {args.serial or '(blank — reserved for future)'}")
+        print(f"     Serial:    {args.serial or '(blank — permanent)'}")
         print()
         try:
             input("   Press Enter to burn, or Ctrl+C to abort: ")
