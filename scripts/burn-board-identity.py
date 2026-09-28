@@ -9,6 +9,9 @@ Usage:
   # Interactive (prompts for confirmation):
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model motion --revision 1.2
 
+  # Using DEFAULT_MODEL / DEFAULT_REVISION constants + serial prompt:
+  python3 scripts/burn-board-identity.py --port /dev/ttyUSB0
+
   # Batch/non-interactive:
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model range --revision 2.1 --yes
 
@@ -51,6 +54,10 @@ MODEL_MAP = {
 }
 
 MODEL_NAMES = {v: k for k, v in MODEL_MAP.items()}
+
+# ── Defaults — set these constants for your production line ──
+DEFAULT_MODEL = "motion"
+DEFAULT_REVISION = "1.3"    # "major.minor"
 
 BLOCK_SIZE = 32      # BLOCK3 = 256 bits = 32 bytes
 SERIAL_MAX = 16      # Max serial characters
@@ -96,6 +103,26 @@ def validate_serial(serial: str):
             "Serial must contain only printable ASCII characters."
         )
     return serial
+
+
+def prompt_serial() -> str:
+    """Interactively prompt for a serial number (blank = leave empty)."""
+    print()
+    print(f"Serial number (max {SERIAL_MAX} printable ASCII chars, e.g. '072026-001').")
+    print("Press Enter to leave blank:")
+    while True:
+        try:
+            value = input("  Serial: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\n  No serial provided.")
+            return ""
+        if value == "":
+            return ""
+        try:
+            return validate_serial(value)
+        except argparse.ArgumentTypeError as e:
+            print(f"  ⚠️  {e}")
+            print("  Try again or press Enter to leave blank:")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -228,14 +255,16 @@ Examples:
         help="Serial port (e.g., /dev/ttyUSB0, COM3)"
     )
     parser.add_argument(
-        "--model", "-m", required=True,
+        "--model", "-m",
         choices=list(MODEL_MAP.keys()),
-        help="Board model"
+        default=DEFAULT_MODEL,
+        help=f"Board model (default: {DEFAULT_MODEL})"
     )
     parser.add_argument(
-        "--revision", "-r", required=True,
+        "--revision", "-r",
         type=parse_revision,
-        help="Hardware revision as major.minor (e.g., '1.2')"
+        default=None,
+        help=f"Hardware revision as major.minor (default: {DEFAULT_REVISION})"
     )
     parser.add_argument(
         "--serial", "-s", type=validate_serial, default="",
@@ -261,8 +290,16 @@ Examples:
     )
 
     args = parser.parse_args()
-    rev_major, rev_minor = args.revision
+    if args.revision is None:
+        rev_major, rev_minor = parse_revision(DEFAULT_REVISION)
+    else:
+        rev_major, rev_minor = args.revision
     model_id = MODEL_MAP[args.model]
+
+    # ── Serial prompt (interactive only) ─────────────────────
+    if (not args.serial and not args.yes and not args.json
+            and not args.dry_run and sys.stdin.isatty()):
+        args.serial = prompt_serial()
 
     # ── Preview ───────────────────────────────────────────────
     serial_display = args.serial if args.serial else "(blank — reserved for future)"
@@ -308,18 +345,19 @@ Examples:
         return 0
 
     # ── Confirmation ──────────────────────────────────────────
-    if not args.yes:
-        print("\n⚠️  WARNING: This will PERMANENTLY burn BLOCK3.")
-        print("   This operation CANNOT be undone.")
-        print("   The block can never be written to again (RS coding).")
+    if not args.yes and not args.json:
+        print("\n⚠️  About to PERMANENTLY burn BLOCK3 (one-shot, cannot be undone).")
+        print()
+        print("   The following 32 bytes will be written to BLOCK3:")
+        print(f"     Data:      {data.hex(' ')}")
+        print(f"     Model:     {args.model} (id=0x{model_id:02X})")
+        print(f"     Revision:  {rev_major}.{rev_minor} (0x{rev_major:02X}.{rev_minor:02X})")
+        print(f"     Serial:    {args.serial or '(blank — reserved for future)'}")
         print()
         try:
-            response = input("   Type 'BURN' to confirm: ")
+            input("   Press Enter to burn, or Ctrl+C to abort: ")
         except (EOFError, KeyboardInterrupt):
             print("\n   Aborted.")
-            return 1
-        if response.strip() != "BURN":
-            print("   Aborted.")
             return 1
 
     # ── Pre-burn safety check ──────────────────────────────────

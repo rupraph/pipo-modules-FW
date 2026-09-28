@@ -20,9 +20,9 @@
 
 enum class BoardModel : uint8_t {
   UNKNOWN = 0x00,
-  MOTION = 0x01,
-  RANGE = 0x02,
-  ANALOG = 0x03,
+  PIPOMOTION = 0x01,
+  PIPORANGE = 0x02,
+  PIPOANALOG = 0x03,
   // Future: MOTION_V2 = 0x04, RANGE_V2 = 0x05, ANALOG_V2 = 0x06, ...
 };
 
@@ -38,11 +38,11 @@ struct BoardIdentity {
   /// Human-readable model name
   const char* model_str() const {
     switch (model) {
-      case BoardModel::MOTION:
+      case BoardModel::PIPOMOTION:
         return "motion";
-      case BoardModel::RANGE:
+      case BoardModel::PIPORANGE:
         return "range";
-      case BoardModel::ANALOG:
+      case BoardModel::PIPOANALOG:
         return "analog";
       default:
         return "unknown";
