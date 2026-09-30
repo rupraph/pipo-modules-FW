@@ -155,7 +155,7 @@ def pack_block(model_id: int, rev_major: int, rev_minor: int, batch: str) -> byt
 def burn_block3(port: str, data: bytes, dry_run: bool = False,
                 quiet: bool = False) -> dict:
     """
-    Burn data to BLOCK3 via espefuse.py burn_block_data.
+    Burn data to BLOCK3 via espefuse (python -m espefuse) burn_block_data.
     Returns a result dict with 'success', 'stdout', 'stderr'.
     """
     result = {"success": False, "stdout": "", "stderr": ""}
@@ -166,7 +166,7 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False,
 
     try:
         cmd = [
-            "espefuse.py",
+            sys.executable, "-m", "espefuse",
             "--chip", "esp32s3",
             "--port", port,
             "--do-not-confirm",
@@ -191,7 +191,7 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False,
         result["stdout"] = e.stdout or ""
         result["stderr"] = e.stderr or ""
     except FileNotFoundError as e:
-        result["stderr"] = f"espefuse.py not found in PATH: {e}"
+        result["stderr"] = f"Python interpreter not found: {e}"
     finally:
         os.unlink(tmp_path)
 
@@ -204,20 +204,20 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False,
 
 def read_block3_raw(port: str) -> tuple[bytes | None, str]:
     """
-    Read current raw BLOCK3 contents via 'espefuse.py summary'.
+    Read current raw BLOCK3 contents via 'espefuse summary' (python -m espefuse).
     Returns (32 bytes or None, error message).
     """
     try:
         proc = subprocess.run(
-            ["espefuse.py", "--chip", "esp32s3", "--port", port,
-             "--do-not-confirm", "summary"],
+            [sys.executable, "-m", "espefuse", "--chip", "esp32s3",
+             "--port", port, "--do-not-confirm", "summary"],
             check=True, capture_output=True, text=True
         )
     except FileNotFoundError:
-        return None, "espefuse.py not found in PATH (install esptool: pip install esptool)"
+        return None, "Python interpreter not found"
     except subprocess.CalledProcessError as e:
         err = (e.stderr or e.stdout or "").strip()
-        return None, f"espefuse.py summary failed: {err}"
+        return None, f"espefuse summary failed: {err}"
 
     # summary prints the user-data block as:
     #   BLOCK_USR_DATA (BLOCK3)   User data
@@ -454,7 +454,7 @@ Examples:
 
         if not args.json:
             print("✅ Board identity burned successfully.")
-            print(f"   Verify: espefuse.py --port {espefuse_port} summary")
+            print(f"   Verify: python -m espefuse --port {espefuse_port} summary")
         return 0
     else:
         if not args.json:
