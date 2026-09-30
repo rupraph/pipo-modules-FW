@@ -2,21 +2,21 @@
 """
 burn-board-identity.py — Manufacturing: burn Pipo board identity into ESP32-S3 eFuse BLOCK3.
 
-Burns board model, hardware revision, and reserved serial space into BLOCK3 (USER_DATA).
+Burns board model, hardware revision, and batch number into BLOCK3 (USER_DATA).
 Designed to be called from batch flashing scripts — non-interactive with --yes.
 
 Usage:
   # Interactive (prompts for confirmation):
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model motion --revision 1.2
 
-  # Using DEFAULT_MODEL / DEFAULT_REVISION constants + serial prompt:
+  # Manual mode (uses DEFAULT_MODEL / DEFAULT_REVISION, prompts for batch number):
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0
 
   # Batch/non-interactive:
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model range --revision 2.1 --yes
 
-  # With serial:
-  python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model analog --revision 2.0 --serial 072026-001
+  # With batch number:
+  python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model analog --revision 2.0 --batch 072026
 
   # Preview without burning:
   python3 scripts/burn-board-identity.py --port /dev/ttyUSB0 --model motion --revision 1.2 --dry-run
@@ -28,7 +28,7 @@ BLOCK3 Layout (32 bytes, 256 bits):
   Byte 0:     board_model (uint8)  — 256 possible board types
   Byte 1:     hw_rev_major (uint8) — major revision number
   Byte 2:     hw_rev_minor (uint8) — minor revision number
-  Bytes 3-18: serial (16 bytes)    — ASCII, null-padded (blank = permanent; one-shot)
+  Bytes 3-18: batch (16 bytes)     — ASCII, null-padded (blank = permanent; one-shot)
   Bytes 19-31: reserved (13 bytes) — zeros
 
 ⚠️  BLOCK3 uses RS coding — the ENTIRE block is burned in ONE shot.
@@ -61,14 +61,14 @@ DEFAULT_MODEL = "motion"
 DEFAULT_REVISION = "1.3"    # "major.minor"
 
 BLOCK_SIZE = 32      # BLOCK3 = 256 bits = 32 bytes
-SERIAL_MAX = 16      # Max serial characters
+BATCH_MAX = 16       # Max batch number characters
 
 # ── Layout offsets (keep in sync with src/utils/board_identity.h) ──
 OFFSET_MODEL      = 0
 OFFSET_REV_MAJOR  = 1
 OFFSET_REV_MINOR  = 2
-OFFSET_SERIAL     = 3
-OFFSET_SERIAL_END = 19   # exclusive
+OFFSET_BATCH      = 3
+OFFSET_BATCH_END  = 19   # exclusive
 OFFSET_RESERVED   = 19
 
 
@@ -93,34 +93,34 @@ def parse_revision(rev_str: str):
     return (major, minor)
 
 
-def validate_serial(serial: str):
-    """Validate serial: printable ASCII, max 16 chars."""
-    if len(serial) > SERIAL_MAX:
+def validate_batch(batch: str):
+    """Validate batch number: printable ASCII, max 16 chars."""
+    if len(batch) > BATCH_MAX:
         raise argparse.ArgumentTypeError(
-            f"Serial '{serial}' is {len(serial)} chars. Max {SERIAL_MAX} chars."
+            f"Batch '{batch}' is {len(batch)} chars. Max {BATCH_MAX} chars."
         )
-    if not all(0x20 <= ord(c) <= 0x7E for c in serial):
+    if not all(0x20 <= ord(c) <= 0x7E for c in batch):
         raise argparse.ArgumentTypeError(
-            "Serial must contain only printable ASCII characters."
+            "Batch number must contain only printable ASCII characters."
         )
-    return serial
+    return batch
 
 
-def prompt_serial() -> str:
-    """Interactively prompt for a serial number (blank = leave empty)."""
+def prompt_batch() -> str:
+    """Interactively prompt for a batch number (blank = leave empty)."""
     print()
-    print(f"Serial number (max {SERIAL_MAX} printable ASCII chars, e.g. '072026-001').")
+    print(f"Batch number (max {BATCH_MAX} printable ASCII chars, e.g. '072026').")
     print("Press Enter to leave blank:")
     while True:
         try:
-            value = input("  Serial: ").strip()
+            value = input("  Batch: ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n  No serial provided.")
+            print("\n  No batch number provided.")
             return ""
         if value == "":
             return ""
         try:
-            return validate_serial(value)
+            return validate_batch(value)
         except argparse.ArgumentTypeError as e:
             print(f"  ⚠️  {e}")
             print("  Try again or press Enter to leave blank:")
@@ -130,7 +130,7 @@ def prompt_serial() -> str:
 # Packing
 # ═══════════════════════════════════════════════════════════════
 
-def pack_block(model_id: int, rev_major: int, rev_minor: int, serial: str) -> bytes:
+def pack_block(model_id: int, rev_major: int, rev_minor: int, batch: str) -> bytes:
     """Pack identity into a 32-byte BLOCK3 payload."""
     data = bytearray(BLOCK_SIZE)
 
@@ -139,11 +139,11 @@ def pack_block(model_id: int, rev_major: int, rev_minor: int, serial: str) -> by
     data[OFFSET_REV_MAJOR] = rev_major
     data[OFFSET_REV_MINOR] = rev_minor
 
-    # Serial (ASCII, null-padded)
-    serial_bytes = serial.encode("ascii")
-    serial_len = min(len(serial_bytes), SERIAL_MAX)
-    data[OFFSET_SERIAL:OFFSET_SERIAL + serial_len] = serial_bytes[:serial_len]
-    # Remaining serial bytes + reserved are already zero from bytearray()
+    # Batch number (ASCII, null-padded)
+    batch_bytes = batch.encode("ascii")
+    batch_len = min(len(batch_bytes), BATCH_MAX)
+    data[OFFSET_BATCH:OFFSET_BATCH + batch_len] = batch_bytes[:batch_len]
+    # Remaining batch bytes + reserved are already zero from bytearray()
 
     return bytes(data)
 
@@ -253,7 +253,7 @@ def main():
 Examples:
   %(prog)s --port /dev/ttyUSB0 --model motion --revision 1.2
   %(prog)s --port COM3 --model range --revision 2.1 --yes
-  %(prog)s --port /dev/ttyUSB0 --model analog --revision 2.0 --serial 072026-001 --yes
+  %(prog)s --port /dev/ttyUSB0 --model analog --revision 2.0 --batch 072026 --yes
   %(prog)s --port /dev/ttyUSB0 --model motion --revision 1.2 --dry-run
         """,
     )
@@ -275,9 +275,9 @@ Examples:
         help=f"Hardware revision as major.minor (default: {DEFAULT_REVISION})"
     )
     parser.add_argument(
-        "--serial", "-s", type=validate_serial, default="",
-        help=f"Serial number (max {SERIAL_MAX} ASCII chars, e.g., '072026-001'). "
-             "Omit to leave serial area blank (permanent — cannot be added later)."
+        "--batch", "-b", type=validate_batch, default="",
+        help=f"Batch number (max {BATCH_MAX} ASCII chars, e.g., '072026'). "
+             "Omit to leave batch area blank (permanent — cannot be added later)."
     )
     parser.add_argument(
         "--yes", "-y", action="store_true",
@@ -304,13 +304,13 @@ Examples:
         rev_major, rev_minor = args.revision
     model_id = MODEL_MAP[args.model]
 
-    # ── Serial prompt (interactive only) ─────────────────────
-    if (not args.serial and not args.yes and not args.json
+    # ── Batch prompt (interactive / manual mode only) ────────
+    if (not args.batch and not args.yes and not args.json
             and not args.dry_run and sys.stdin.isatty()):
-        args.serial = prompt_serial()
+        args.batch = prompt_batch()
 
     # ── Preview ───────────────────────────────────────────────
-    serial_display = args.serial if args.serial else "(blank — permanent)"
+    batch_display = args.batch if args.batch else "(blank — permanent)"
     espefuse_port = args.port
 
     if not args.json:
@@ -320,13 +320,13 @@ Examples:
         print(f"║ Port:      {espefuse_port}")
         print(f"║ Model:     {args.model} (id=0x{model_id:02X})")
         print(f"║ Revision:  {rev_major}.{rev_minor}")
-        print(f"║ Serial:    {serial_display}")
+        print(f"║ Batch:     {batch_display}")
         print(f"║ Target:    BLOCK3 (USER_DATA)")
         print(f"║ ⚠️  RS coding: one-shot, cannot re-burn")
         print("╚══════════════════════════════════════════╝")
 
     # ── Pack data ─────────────────────────────────────────────
-    data = pack_block(model_id, rev_major, rev_minor, args.serial)
+    data = pack_block(model_id, rev_major, rev_minor, args.batch)
 
     if args.dry_run:
         if args.json:
@@ -335,7 +335,7 @@ Examples:
                 "model": args.model,
                 "model_id": model_id,
                 "revision": f"{rev_major}.{rev_minor}",
-                "serial": args.serial or None,
+                "batch": args.batch or None,
                 "block": "BLOCK3",
                 "data_hex": data.hex(),
                 "data_bytes": list(data),
@@ -347,8 +347,8 @@ Examples:
             print(f"     [{OFFSET_MODEL}] model     = 0x{data[OFFSET_MODEL]:02X} ({args.model})")
             print(f"     [{OFFSET_REV_MAJOR}] rev_major = 0x{data[OFFSET_REV_MAJOR]:02X} ({rev_major})")
             print(f"     [{OFFSET_REV_MINOR}] rev_minor = 0x{data[OFFSET_REV_MINOR]:02X} ({rev_minor})")
-            serial_bytes = data[OFFSET_SERIAL:OFFSET_SERIAL_END]
-            print(f"     [{OFFSET_SERIAL}-{OFFSET_SERIAL_END-1}] serial    = {serial_bytes.hex(' ')} ({serial_bytes.decode('ascii').rstrip(chr(0)) or '(empty)'})")
+            batch_bytes = data[OFFSET_BATCH:OFFSET_BATCH_END]
+            print(f"     [{OFFSET_BATCH}-{OFFSET_BATCH_END-1}] batch     = {batch_bytes.hex(' ')} ({batch_bytes.decode('ascii').rstrip(chr(0)) or '(empty)'})")
             print(f"     [{OFFSET_RESERVED}-31] reserved  = zeros")
         return 0
 
@@ -360,7 +360,7 @@ Examples:
         print(f"     Data:      {data.hex(' ')}")
         print(f"     Model:     {args.model} (id=0x{model_id:02X})")
         print(f"     Revision:  {rev_major}.{rev_minor} (0x{rev_major:02X}.{rev_minor:02X})")
-        print(f"     Serial:    {args.serial or '(blank — permanent)'}")
+        print(f"     Batch:     {args.batch or '(blank — permanent)'}")
         print()
         try:
             input("   Press Enter to burn, or Ctrl+C to abort: ")
@@ -406,7 +406,7 @@ Examples:
             "model": args.model,
             "model_id": model_id,
             "revision": f"{rev_major}.{rev_minor}",
-            "serial": args.serial or None,
+            "batch": args.batch or None,
             "block": "BLOCK3",
             "data_hex": data.hex(),
         }

@@ -6,7 +6,7 @@
  *   Byte 0:     board_model   (uint8) — 256 possible board types
  *   Byte 1:     hw_rev_major  (uint8) — major revision
  *   Byte 2:     hw_rev_minor  (uint8) — minor revision
- *   Bytes 3-18: serial        (16 bytes, ASCII, null-padded)
+ *   Bytes 3-18: batch         (16 bytes, ASCII, null-padded)
  *   Bytes 19-31: reserved     (13 bytes, zeros)
  */
 
@@ -32,7 +32,7 @@ struct BoardIdentity {
   BoardModel model;
   uint8_t rev_major;  // e.g., 1 for v1.x
   uint8_t rev_minor;  // e.g., 2 for v1.2
-  char serial[17];    // null-terminated, max 16 chars
+  char batch[17];     // null-terminated batch number, max 16 chars
   bool programmed;    // false if BLOCK3 is unprogrammed (all 0x00)
 
   /// Human-readable model name
@@ -56,15 +56,15 @@ struct BoardIdentity {
     return buf;
   }
 
-  /// Full identity string for logging: "motion rev1.2 s/n:072026-001"
+  /// Full identity string for logging: "motion rev1.2 batch:072026"
   const char* to_string() const {
     static char buf[64];
     if (!programmed) {
       return "unprogrammed";
     }
-    if (serial[0] != '\0' && serial[0] != 0xFF) {
-      snprintf(buf, sizeof(buf), "%s rev%s s/n:%s", model_str(), rev_str(),
-               serial);
+    if (batch[0] != '\0' && batch[0] != 0xFF) {
+      snprintf(buf, sizeof(buf), "%s rev%s batch:%s", model_str(), rev_str(),
+               batch);
     } else {
       snprintf(buf, sizeof(buf), "%s rev%s", model_str(), rev_str());
     }
@@ -118,8 +118,8 @@ inline BoardIdentity read_board_identity() {
   id.model = static_cast<BoardModel>(raw[0]);
   id.rev_major = raw[1];
   id.rev_minor = raw[2];
-  memcpy(id.serial, &raw[3], 16);
-  id.serial[16] = '\0';
+  memcpy(id.batch, &raw[3], 16);
+  id.batch[16] = '\0';
   id.programmed = true;
 
   return id;
