@@ -152,7 +152,8 @@ def pack_block(model_id: int, rev_major: int, rev_minor: int, batch: str) -> byt
 # eFuse burning
 # ═══════════════════════════════════════════════════════════════
 
-def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
+def burn_block3(port: str, data: bytes, dry_run: bool = False,
+                quiet: bool = False) -> dict:
     """
     Burn data to BLOCK3 via espefuse.py burn_block_data.
     Returns a result dict with 'success', 'stdout', 'stderr'.
@@ -179,7 +180,8 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
             result["stdout"] = f"DRY RUN: {' '.join(cmd)}"
             return result
 
-        print(f"Running command: {' '.join(cmd)}")
+        if not quiet:
+            print(f"Running command: {' '.join(cmd)}")
         proc = subprocess.run(cmd, check=True, capture_output=True, text=True)
         result["success"] = True
         result["stdout"] = proc.stdout
@@ -200,10 +202,10 @@ def burn_block3(port: str, data: bytes, dry_run: bool = False) -> dict:
 # Pre-burn / Post-burn verification
 # ═══════════════════════════════════════════════════════════════
 
-def read_block3_raw(port: str) -> bytes | None:
+def read_block3_raw(port: str) -> tuple[bytes | None, str]:
     """
     Read current raw BLOCK3 contents via 'espefuse.py summary'.
-    Returns 32 bytes of raw data, or None on failure.
+    Returns (32 bytes or None, error message).
     """
     try:
         proc = subprocess.run(
@@ -211,8 +213,11 @@ def read_block3_raw(port: str) -> bytes | None:
              "--do-not-confirm", "summary"],
             check=True, capture_output=True, text=True
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return None
+    except FileNotFoundError:
+        return None, "espefuse.py not found in PATH (install esptool: pip install esptool)"
+    except subprocess.CalledProcessError as e:
+        err = (e.stderr or e.stdout or "").strip()
+        return None, f"espefuse.py summary failed: {err}"
 
     # summary prints the user-data block as:
     #   BLOCK_USR_DATA (BLOCK3)   User data
@@ -225,15 +230,15 @@ def read_block3_raw(port: str) -> bytes | None:
         re.DOTALL,
     )
     if not match:
-        return None
+        return None, "could not parse BLOCK_USR_DATA from espefuse summary output"
 
     hex_bytes = re.findall(r"[0-9a-fA-F]{2}", match.group(1))
     if len(hex_bytes) != 32:
-        return None
+        return None, "unexpected block size in espefuse summary output"
     try:
-        return bytes(int(b, 16) for b in hex_bytes)
+        return bytes(int(b, 16) for b in hex_bytes), ""
     except ValueError:
-        return None
+        return None, "invalid hex in espefuse summary output"
 
 
 def is_block3_empty(raw: bytes) -> bool:
@@ -372,9 +377,9 @@ Examples:
     if not args.dry_run and not args.force:
         if not args.json:
             print("\n🔍 Reading current BLOCK3 state...")
-        existing = read_block3_raw(espefuse_port)
+        existing, read_err = read_block3_raw(espefuse_port)
         if existing is None:
-            msg = "Failed to read BLOCK3. Check connection and that espefuse.py is in PATH."
+            msg = f"Failed to read BLOCK3: {read_err}"
             if args.json:
                 print(json.dumps({"status": "error", "error": msg}))
             else:
@@ -397,8 +402,9 @@ Examples:
             print("   ✅ BLOCK3 is empty — safe to proceed.")
 
     # ── Burn ──────────────────────────────────────────────────
-    print(f"\n🔥 Burning BLOCK3...")
-    result = burn_block3(espefuse_port, data)
+    if not args.json:
+        print(f"\n🔥 Burning BLOCK3...")
+    result = burn_block3(espefuse_port, data, quiet=args.json)
 
     if args.json:
         output = {
@@ -425,7 +431,7 @@ Examples:
         if not args.dry_run:
             if not args.json:
                 print("\n🔍 Verifying burned data...")
-            burned = read_block3_raw(espefuse_port)
+            burned, _ = read_block3_raw(espefuse_port)
             if burned is None:
                 if not args.json:
                     print("⚠️  Could not read back BLOCK3 for verification.", file=sys.stderr)
