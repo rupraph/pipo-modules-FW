@@ -12,6 +12,6 @@ void MidiUSBsendHiResCC(int value);
 void MidiUSBsendNoteOn(int note, int velocity, int channel);
 void MidiUSBsendNoteOff(int note, int velocity, int channel);
 
-void MidiUSBsendPitchBend(int value, int channel);
+void MidiUSBsendPitchBend(float value, int channel);
 
 #endif  //MIDIUSB_H

@@ -62,6 +62,6 @@ void MidiUSBsendNoteOff(int note, int velocity, int channel) {
   usb_midi.noteOff(note, velocity, channel);
 }
 
-void MidiUSBsendPitchBend(int value, int channel) {
-  usb_midi.sendPitchBend(value, channel);
+void MidiUSBsendPitchBend(float value, int channel) {
+  usb_midi.pitchBend(value, channel);
 }
