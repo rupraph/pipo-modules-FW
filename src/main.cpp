@@ -31,6 +31,8 @@ extern "C" void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
   // Empty - Host mode disabled in config
 }
 
+SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+
 void setup() {  // by default on core 1
 
   //Pulldown all pins (avoid floating)
