@@ -68,6 +68,11 @@ void PipoServer::setup() {
   log_i("Starting HTTP server");
 
   presets.setup();
+  // Any HTTP request counts as config page activity (keeps the AP alive)
+  server.addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+    wifiPower.notifyActivity();
+    next();
+  });
   setup_requests();
 
   // Serve static files from LittleFS with automatic gzip support

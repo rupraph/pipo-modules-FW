@@ -5,6 +5,12 @@ export const schema: Schema = {
     min: 4,
     max: 10,
   },
+  wifiPower: {
+    Wifi_ap_boot_s: { min: 10, max: 600, step: 10, default: 60 },
+    Wifi_ap_idle_s: { min: 30, max: 1800, step: 30, default: 120 },
+    Wifi_sta_lost_s: { min: 5, max: 120, step: 5, default: 15 },
+    Wifi_ap_btn_ms: { min: 500, max: 5000, step: 250, default: 2000 },
+  },
   motion: {
     accX: {
       label: "X-axis acceleration",

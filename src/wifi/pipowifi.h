@@ -9,6 +9,7 @@
 #include <string>
 #include "utils/config.h"
 #include "shared_flags.h"
+#include "wifi/wifi_power.h"
 #include "esp_task_wdt.h"
 
 // Forward declarations for WiFi event handlers
@@ -147,6 +148,13 @@ class PipoWifi {
    * @brief Disconnects from the current network intentionally
    */
   void disconnect();
+
+  // Incremental mode switches used by the power-save policy (wifi_power.cpp).
+  // They keep the STA association, unlike the full reset done in step().
+  void enableAP();
+  void disableAP();
+  void radioOn();
+  void radioOff();
 };
 
 extern PipoWifi wifi;

@@ -58,9 +58,11 @@ class Button {
   bool is_pressed = false;
   bool long_press_triggered = false;
   PressType last_press_type = PRESS_NONE;
+  unsigned long long_press_ms = LONG_PRESS_TIME;
 
  public:
   void setup_button(int pin);
+  void set_long_press_ms(unsigned long ms) { long_press_ms = ms; }
   int read_debounce();
   int get_button();
   void reset_button() {
@@ -195,6 +197,7 @@ class HwUi {
   bool prev_staConnected = false;
   bool prev_apConnected = false;
   bool prev_BTconnected = false;
+  bool prev_wifiRadioOff = false;
 };
 
 extern HwUi hwui;

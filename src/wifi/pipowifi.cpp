@@ -28,10 +28,14 @@ void wifiTask(void* pvParameters) {
 
     // Resume server if:
     // 1. AP is started (even if not fully configured yet), OR
-    // 2. Server has been paused for more than timeout (failsafe)
+    // 2. STA is connected (AP may be off in power-save mode), OR
+    // 3. Server has been paused for more than timeout (failsafe)
+    // Never while the radio is off in power-save mode.
     bool shouldResume =
-        apStarted || (serverPausedTime > 0 &&
-                      (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
+        !wifiRadioOff &&
+        (apStarted || staConnected ||
+         (serverPausedTime > 0 &&
+          (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT));
 
     if (shouldResume && !server.isRunning()) {
       log_i("Resuming server (apStarted=%d, timeout=%d)", apStarted,
@@ -90,6 +94,7 @@ void PipoWifi::setup() {
   scanning = true;
   log_i("WiFi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
+  wifiPower.begin();
   log_i("WiFi scan complete, setup done");
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup pipowifi");
@@ -198,6 +203,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
+  wifiPower.onStaDown();
   osc.stop();  // STA disconnected, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -217,6 +223,7 @@ void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
+  wifiPower.onStaUp();
   osc.start();               // Network ready, start UDP
   wifi.stateChanged = true;  // Signal state machine to run
 }
@@ -231,6 +238,7 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_w("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
+  wifiPower.onStaDown();
   osc.stop();  // Network lost, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -255,7 +263,11 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_STOP");
   apStarted = false;
   apConfigured = false;
-  osc.stop();                // AP stopped, stop UDP
+  apConnected = false;
+  // Keep UDP running when the AP is dropped but STA still carries OSC
+  if (!staConnected) {
+    osc.stop();  // AP stopped, stop UDP
+  }
   wifi.stateChanged = true;  // Signal state machine to run
 }
 
@@ -522,6 +534,8 @@ void PipoWifi::refresh() {
     step();
   }
 
+  wifiPower.tick();
+
   wifi_mode_t prevMode = WiFi.getMode();
 
   if (next.shouldScan) {
@@ -567,6 +581,49 @@ void PipoWifi::disconnect() {
 
   intentionalDisconnect = true;
   WiFi.disconnect();
+}
+
+void PipoWifi::enableAP() {
+  log_i("Enabling AP (APSTA)");
+  next.mode = WIFI_MODE_APSTA;  // keep step() from doing a full mode reset
+  apConfigured = false;
+  WiFi.enableAP(true);
+  configureAP();
+}
+
+void PipoWifi::disableAP() {
+  log_i("Disabling AP (STA only, modem sleep)");
+  next.mode = WIFI_MODE_STA;  // keep step() from doing a full mode reset
+  WiFi.softAPdisconnect(true);
+  // Modem sleep is only effective without the AP
+  WiFi.setSleep(WIFI_PS_MIN_MODEM);
+}
+
+void PipoWifi::radioOff() {
+  log_i("Turning WiFi radio off");
+  wifiRadioOff = true;
+  osc.stop();
+  server.pause();
+  next.mode = WIFI_MODE_NULL;
+  if (staConnected) {
+    intentionalDisconnect = true;
+  }
+  status = DISCONNECTED;
+  WiFi.mode(WIFI_OFF);
+  staStarted = false;
+  staConnected = false;
+  apStarted = false;
+  apConfigured = false;
+  apConnected = false;
+}
+
+void PipoWifi::radioOn() {
+  log_i("Turning WiFi radio on (APSTA)");
+  next.mode = WIFI_MODE_APSTA;
+  WiFi.mode(WIFI_MODE_APSTA);
+  wifiRadioOff = false;  // lets wifiTask resume the server once AP starts
+  // Fresh scan so step() can auto-connect to a saved STA
+  requestScan();
 }
 
 PipoWifi wifi;

@@ -23,6 +23,7 @@ class PipoSocket {
   void start(AsyncWebSocket* ws);
   void pause();
   void resume();
+  bool hasClient() { return ws != nullptr && !paused && ws->count() > 0; }
 
  private:
   void onMessage(AsyncWebSocketClient* client);

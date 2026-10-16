@@ -241,6 +241,19 @@ void HwUi::monitor_wifiBT_flags() {
   bool curSta = staConnected;
   bool curAp = apConnected;
   bool curBT = BTconnected;
+  bool curRadioOff = wifiRadioOff;
+
+  // Radio off (power-save) -> WiFi LED off; back on -> waiting blink
+  if (curRadioOff != prev_wifiRadioOff) {
+    stop_pulse(WIFI_LED);
+    if (curRadioOff) {
+      stop_blink(WIFI_LED);
+      set_led(WIFI_LED, 0);
+    } else {
+      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+    }
+    prev_wifiRadioOff = curRadioOff;
+  }
 
   // STA connected -> give steady pulse (slower, to indicate stable connection)
   if (curSta != prev_staConnected) {
@@ -619,7 +632,7 @@ int Button::read_debounce() {
 
         if (!long_press_triggered) {
           // Only register short press if long press wasn't already triggered
-          if (press_duration < LONG_PRESS_TIME) {
+          if (press_duration < long_press_ms) {
             last_press_type = PRESS_SHORT;
           } else {
             last_press_type = PRESS_LONG;
@@ -632,7 +645,7 @@ int Button::read_debounce() {
 
   // Check for long press while button is held
   if (is_pressed && !long_press_triggered) {
-    if (current_time - press_start_time >= LONG_PRESS_TIME) {
+    if (current_time - press_start_time >= long_press_ms) {
       long_press_triggered = true;
       last_press_type = PRESS_LONG;
       flag = true;  // trigger long press immediately

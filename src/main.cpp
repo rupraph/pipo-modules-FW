@@ -128,6 +128,9 @@ void setup() {  // by default on core 1
     pipoDebugHeap("End setup sensor");
 
     // Register button callbacks for sensor-specific actions
+  // Long press on play/pause re-opens the WiFi AP (power-save mode)
+  hwui.set_pause_long_press_callback([]() { wifiPower.requestAP(); });
+
 #ifdef PIPO_MOTION
   hwui.set_mode_short_press_callback(
       []() { input_sensor.set_new_reference_orientation(); });
