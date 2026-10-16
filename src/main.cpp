@@ -12,6 +12,7 @@
 #include "utils/debug.h"
 #include "utils/system_monitor.h"
 #include "utils/crash_diagnostics.h"
+#include "utils/board_identity.h"
 #include "esp_task_wdt.h"
 #include <set>
 #if defined(PIPO_ANALOG)
@@ -23,15 +24,22 @@
 // core 1: sensor, midi, osc
 
 void init_filesystem();
-
-// In a .cpp file (like main.cpp or create stubs.cpp)
-extern "C" void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance,
-                                           uint8_t const* report,
-                                           uint16_t len) {
-  // Empty - Host mode disabled in config
-}
-
 SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+
+// Cached board identity — read once at boot, shared with the web server.
+BoardIdentity g_board_id;
+char g_board_rev_str[16];
+
+void init_board_identity() {
+  g_board_id = read_board_identity();
+  if (g_board_id.programmed) {
+    // Encode "major.minor" as the compact HW_REV-style value (1.3 → "13")
+    snprintf(g_board_rev_str, sizeof(g_board_rev_str), "%u",
+             g_board_id.rev_major * 10 + g_board_id.rev_minor);
+  } else {
+    snprintf(g_board_rev_str, sizeof(g_board_rev_str), "%d", HW_REV);
+  }
+}
 
 void setup() {  // by default on core 1
 
@@ -59,6 +67,20 @@ void setup() {  // by default on core 1
 #endif
 
   log_i("\n=== Pipo Setup Start ===");
+
+  // Read immutable board identity from eFuse BLOCK3 once at boot.
+  // The resolved revision is cached (g_board_rev_str) for the web server.
+  init_board_identity();
+  if (g_board_id.programmed) {
+    log_i("Board identity: %s", g_board_id.to_string());
+    if (String(g_board_id.model_str()) != PIPO_TYPE) {
+      log_w("Board identity model (%s) does not match firmware type (%s)",
+            g_board_id.model_str(), PIPO_TYPE);
+    }
+  } else {
+    log_w("Board identity: NOT PROGRAMMED — eFuse BLOCK3 is empty");
+    log_i("Using compile-time HW_REV: %d", HW_REV);
+  }
 
   // setCpuFrequencyMhz(80);  // set to 160MHz for better performance
 
