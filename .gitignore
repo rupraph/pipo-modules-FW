@@ -6,6 +6,7 @@
 node_modules/
 .DS_Store
 */.DS_Store
+/managed_components
 
 **/.DS_Store
 data/*
@@ -29,7 +30,3 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
-/components/arduino_tinyusb/tinyusb/
-
-# TinyUSB library (cloned dependency for hybrid compile mode)
-/components/arduino_tinyusb/tinyusb/
