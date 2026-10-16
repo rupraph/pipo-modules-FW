@@ -1,20 +1,107 @@
 #include "sensors/input_sensor.h"
 
+// Number of consecutive invalid-reading frames before acting.
+static constexpr uint8_t READING_VALID_DEBOUNCE_FRAMES = 5;
+
 bool Sensor::update() {
   store_previous_values();
   bool newdata = measure_sensor();
   bool data_changed = false;
+
+  // No new sample from HW (e.g. IMU not ready yet) — skip processing entirely
   if (!newdata)
     return false;
+
   if (measure_offset_flag) {
     measure_offset_iter();
   } else {
-    apply_offset();
+    // --- Group A: value revert + offset (single pass) ---
+    // Revert .value when reading is invalid (debounce window or hold_mode),
+    // then compute value_offset in the same traversal.
+    for (auto& pair : sensor_dat) {
+      SensorDat& d = pair.second;
+      if (!d.reading_valid) {
+        bool in_debounce =
+            (d.invalid_count + 1) < READING_VALID_DEBOUNCE_FRAMES;
+        if (d.hold_mode || in_debounce) {
+          d.value = d.value_prev_measure;
+        }
+      }
+      d.value_offset = d.value - d.offset;
+    }
+
+    // --- Neutral filter (ordering boundary: produces value_ready) ---
     data_changed = process_sensor_neutral_filter();
-    bool triggers_changed = process_sensor_triggers();
-    data_changed =
-        data_changed ||
-        triggers_changed;  // data changed if either filter or triggers changed
+
+    // --- Group B: bounds + debounce + engaged + triggers + transition (single pass) ---
+    bool triggers_changed = false;
+    bool engagement_changed = false;
+    for (auto& pair : sensor_dat) {
+      SensorDat& d = pair.second;
+
+      // 1. Bounds check
+      d.within_bounds = (d.value_ready >= d.lmin && d.value_ready <= d.lmax);
+
+      // 2. Debounce reading_valid
+      bool debounced_valid;
+      if (d.reading_valid) {
+        d.invalid_count = 0;
+        debounced_valid = true;
+      } else {
+        d.invalid_count =
+            min((int)d.invalid_count + 1, (int)READING_VALID_DEBOUNCE_FRAMES);
+        debounced_valid = (d.invalid_count < READING_VALID_DEBOUNCE_FRAMES);
+      }
+
+      // 3. Composite engaged state
+      d.engaged = debounced_valid && d.within_bounds;
+
+      // 4. Trigger processing (inlined — avoids hash lookups from set_all_trigger/untrigger)
+      d.bool_value_prev = d.bool_value;
+
+      if (d.mode == 0) {
+        // Continuous mode: trigger on engaged transitions
+        if (!d.engaged && d.engaged_prev) {
+          d.untrigger_flags.osc_trig = true;
+          d.untrigger_flags.midi_trig = true;
+          d.untrigger_flags.hid_trig = true;
+          triggers_changed = true;
+        }
+        if (d.engaged && !d.engaged_prev) {
+          d.trigger_flags.osc_trig = true;
+          d.trigger_flags.midi_trig = true;
+          d.trigger_flags.hid_trig = true;
+          triggers_changed = true;
+        }
+      } else if (d.mode == 1) {
+        // Threshold mode
+        if (d.th_mode == 0) {
+          d.bool_value = d.value_ready > d.lmin;
+        } else if (d.th_mode == 1) {
+          d.bool_value = d.value_ready > d.lmin && d.value_ready < d.lmax;
+        }
+        if (d.bool_value && !d.bool_value_prev) {
+          d.trigger_flags.osc_trig = true;
+          d.trigger_flags.midi_trig = true;
+          d.trigger_flags.hid_trig = true;
+          triggers_changed = true;
+        }
+        if (!d.bool_value && d.bool_value_prev) {
+          d.untrigger_flags.osc_trig = true;
+          d.untrigger_flags.midi_trig = true;
+          d.untrigger_flags.hid_trig = true;
+          triggers_changed = true;
+        }
+      }
+
+      // 5. Track engagement transitions
+      if (d.engaged != d.engaged_prev ||
+          d.within_bounds != d.within_bounds_prev) {
+        engagement_changed = true;
+      }
+    }
+
+    data_changed = data_changed || triggers_changed || engagement_changed;
   }
   return data_changed;
 }
@@ -147,9 +234,9 @@ vector<string> Sensor::parse_channel_list(const string& channel_list) {
 }
 
 void Sensor::apply_offset() {
-  for (auto const& pair : sensor_dat) {
-    sensor_dat[pair.first].value_offset =
-        sensor_dat[pair.first].value - sensor_dat[pair.first].offset;
+  for (auto& pair : sensor_dat) {
+    SensorDat& d = pair.second;
+    d.value_offset = d.value - d.offset;
   }
 }
 
@@ -173,31 +260,25 @@ void Sensor::reset_all_offset() {
 void Sensor::store_previous_values() {
   for (auto& dat : sensor_dat) {
     dat.second.value_prev = dat.second.value_ready;
+    dat.second.value_prev_measure = dat.second.value;
+    dat.second.reading_valid_prev = dat.second.reading_valid;
+    dat.second.within_bounds_prev = dat.second.within_bounds;
+    dat.second.engaged_prev = dat.second.engaged;
   }
 }
 
-bool Sensor::is_within_range(const std::string& axis) {
+bool Sensor::is_engaged(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value_ready > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value_ready < sensor_dat[axis].lmax) {
-      return true;
-    } else {
-      return false;
-    }
+    return sensor_dat[axis].engaged;
   } else {
     Serial.println("error: Axis not found");
     return false;
   }
 }
 
-bool Sensor::is_prev_within_range(const std::string& axis) {
+bool Sensor::was_engaged(const std::string& axis) {
   if (sensor_dat.find(axis) != sensor_dat.end()) {
-    if (sensor_dat[axis].value_prev > sensor_dat[axis].lmin &&
-        sensor_dat[axis].value_prev < sensor_dat[axis].lmax) {
-      return true;
-    } else {
-      return false;
-    }
+    return sensor_dat[axis].engaged_prev;
   } else {
     Serial.println("error: Axis not found");
     return false;
@@ -208,54 +289,6 @@ float Sensor::clip(float value, float min, float max) {
   return std::max(min, std::min(value, max));
 }
 
-bool Sensor::process_sensor_triggers() {
-  bool flags_changed = false;
-  for (auto& dat : sensor_dat) {
-    string axis = dat.first;
-    // warning if reference modifies correctly the value
-    SensorDat& axis_data = dat.second;
-
-    axis_data.bool_value_prev = axis_data.bool_value;
-
-    // flags for continuous mode
-    if (axis_data.mode == 0) {
-      if (is_within_range(axis) == false &&
-          is_prev_within_range(axis) == true) {
-        set_all_untrigger(axis, true);
-        flags_changed = true;
-      }
-      if (is_within_range(axis) == true &&
-          is_prev_within_range(axis) == false) {
-        set_all_trigger(axis, true);
-        flags_changed = true;
-      }
-    }
-
-    // flags and bool value for thresh modes
-    else if (axis_data.mode == 1) {
-
-      //simple threshold mode
-      if (axis_data.th_mode == 0) {
-        axis_data.bool_value = axis_data.value_ready > axis_data.lmin;
-      } else {
-        if (axis_data.th_mode == 1) {
-          axis_data.bool_value = axis_data.value_ready > axis_data.lmin &&
-                                 axis_data.value_ready < axis_data.lmax;
-        }
-      }
-      // trigger flags for trigger mode
-      if (axis_data.bool_value && !axis_data.bool_value_prev) {
-        set_all_trigger(axis, true);
-        flags_changed = true;
-      }
-      if (!axis_data.bool_value && axis_data.bool_value_prev) {
-        set_all_untrigger(axis, true);
-        flags_changed = true;
-      }
-    }
-  }
-  return flags_changed;
-}
 /**
  * @brief This applies the dynamic dead band filter to the sensor data
  * returns true if data changed after filtering
@@ -263,12 +296,11 @@ bool Sensor::process_sensor_triggers() {
 bool Sensor::process_sensor_neutral_filter() {
   bool data_changed = false;
   for (auto& dat : sensor_dat) {
-    string axis = dat.first;
-    SensorDat& axis_data = dat.second;
-    float new_value = axis_data.NeutralFilter.process(axis_data.value_offset);
-    if (new_value != axis_data.value_prev) {
+    SensorDat& d = dat.second;
+    float new_value = d.NeutralFilter.process(d.value_offset);
+    if (new_value != d.value_prev) {
       data_changed = true;
-      axis_data.value_ready = new_value;
+      d.value_ready = new_value;
     }
   }
   return data_changed;
@@ -373,7 +405,7 @@ void Sensor::monitor_axis(const std::string& axis) {
 
 //getter / setters
 
-unordered_map<string, SensorDat> Sensor::get_sensor_dat_map() {
+const unordered_map<string, SensorDat>& Sensor::get_sensor_dat_map() const {
   return sensor_dat;
 }
 
@@ -706,6 +738,7 @@ void Sensor::clear_completion_flag() {
   channels_to_measure.clear();
 }
 
+#ifndef UNIT_TEST
 void Sensor::get_measured_offsets(String& output) {
   JsonDocument result;
 
@@ -732,3 +765,4 @@ void Sensor::get_measured_offsets(String& output) {
   output.clear();
   serializeJson(result, output);
 }
+#endif

@@ -57,3 +57,25 @@ void OscTranslator::set_from_json(const JsonDocument& j) {
 bool OscTranslator::is_enabled() {
   return enabled;
 }
+
+void OscTranslator::set_enabled(bool value) {
+  enabled = value;
+}
+
+void OscTranslator::set_mode_raw(bool value) {
+  mode_raw = value;
+}
+
+// Value storage and change detection methods
+float OscTranslator::get_last_value() const {
+  return last_sent_value;
+}
+
+bool OscTranslator::should_send(float new_val) {
+  // Use NAN check for first send
+  if (isnan(last_sent_value) || new_val != last_sent_value) {
+    last_sent_value = new_val;
+    return true;
+  }
+  return false;
+}

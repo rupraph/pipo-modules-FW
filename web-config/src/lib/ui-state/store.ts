@@ -222,6 +222,8 @@ function createUIStateStore() {
     clearAll: (): void => {
       set({});
     },
+
+
   };
 }
 

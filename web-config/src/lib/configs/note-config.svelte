@@ -294,6 +294,11 @@
     justify-self: end;
   }
 
+  .nb-input-container :global(.input.number-input-container .input-wrapper) {
+    width: auto;
+    grid-template-columns: 27px 52px 27px;
+  }
+
   .select-input-container :global(.input-wrapper) {
     width: 165px;
     max-width: 180px;

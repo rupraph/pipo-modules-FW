@@ -5,6 +5,8 @@
   import Number from "../form/Number.svelte";
   import InfoModal from "../InfoModal.svelte";
   import { TriangleAlert } from "lucide-svelte";
+  import OutputValueDisplay from "./output-value-display.svelte";
+  import { pipoio } from "../../pipoio";
 
   const OSC_ADDRESS_MAX_LENGTH = 32;
 
@@ -67,6 +69,14 @@
       }
     }
   }
+
+  // Listen for output values from the device
+  let outputValue: number | undefined = undefined;
+
+  pipoio.on("sensor", ({ axis, outputValue: outVal }) => {
+    if (axis !== selectedChannel) return;
+    outputValue = outVal;
+  });
 </script>
 
 {#if config && selectedChannel && oscConfig}
@@ -142,6 +152,9 @@
         </div>
       </div>
     {/if}
+
+    <!-- Output Value Display -->
+    <OutputValueDisplay value={outputValue} type="osc" label="OSC Value" />
   </div>
 {/if}
 

@@ -6,6 +6,7 @@
   import Settings from "./Settings.svelte";
   import Wifi from "./Wifi.svelte";
   import PlayPause from "./PlayPause.svelte";
+  import ConfigManagerButton from "./ConfigManagerButton.svelte";
 
   let wifiOpen = false;
 
@@ -30,6 +31,7 @@
     <div class="row">
       <img src={imageDataUrl} alt="Pipo Logo" class="logo-image" />
       <div class="centered">
+        <ConfigManagerButton />
         <Settings />
         <Wifi />
         <PlayPause />

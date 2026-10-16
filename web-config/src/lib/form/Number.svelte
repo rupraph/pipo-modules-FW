@@ -64,9 +64,16 @@
       if (value > max) value = max;
     }
   }
+  // Compute input width based on the widest possible value (max digits or min digits if negative)
+  $: inputChars = Math.max(String(max).length, String(min).length, 2);
 </script>
 
-<Input class={"number-input-container "} {label} {id}>
+<Input
+  class={"number-input-container "}
+  {label}
+  {id}
+  --input-chars={inputChars}
+>
   <button
     class:disabled={value <= min}
     on:click={() => {
@@ -114,10 +121,10 @@
     border-radius: 20px;
     padding: 0;
     overflow: hidden;
-    width: 92px;
+    width: fit-content;
     height: 29px;
     display: grid;
-    grid-template-columns: 27px 32px 27px;
+    grid-template-columns: 27px calc(var(--input-chars, 3) * 1ch + 8px) 27px;
     gap: 2px;
   }
   input.number-input {
@@ -127,7 +134,7 @@
     background-color: var(--grey);
     text-align: center;
     margin: 0;
-    padding: 0;
+    padding: 0 2px;
     border-radius: 0;
   }
   input::-webkit-outer-spin-button,

@@ -37,7 +37,7 @@
 
 <style>
   .modal {
-    z-index: 21;
+    z-index: calc(var(--modal-z, 20) + 1);
     width: calc(100vw - 8px);
     max-width: 400px;
     max-height: calc(100vh - 2em);
@@ -75,10 +75,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 20;
+    z-index: var(--modal-z, 20);
     position: fixed;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(7px);
+    background: var(--modal-overlay-bg, rgba(0, 0, 0, 0.5));
+    backdrop-filter: var(--modal-overlay-blur, blur(7px));
   }
 </style>

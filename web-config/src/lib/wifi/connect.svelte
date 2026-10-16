@@ -420,12 +420,11 @@
     flex-direction: column;
     gap: 0.2em;
     max-width: 100%;
-    overflow: hidden;
   }
   .ssid {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
     max-width: 100%;
   }
   .sta-ip {

@@ -171,6 +171,18 @@
   .input-group label {
     white-space: nowrap;
   }
+  label.min {
+    color: var(--main);
+  }
+  input.min {
+    color: var(--main);
+  }
+  label.max {
+    color: var(--main);
+  }
+  input.max {
+    color: var(--main);
+  }
   .input-group input {
     flex: 1;
     min-width: 80px;

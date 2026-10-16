@@ -180,6 +180,21 @@
         "scaleType": "major",
         "tl_mode": 0,
         "velocity": 100
+      },
+      "AccComb": {
+        "cc_nb": 16,
+        "channel": 1,
+        "enabled": false,
+        "hires": false,
+        "cc_max": 127,
+        "cc_min": 0,
+        "nbOfNotes": 25,
+        "sustain": 0.8,
+        "rootNote": 45,
+        "pattern": "scale",
+        "scaleType": "major",
+        "tl_mode": 0,
+        "velocity": 100
       }
     },
     "engine-osc": {
@@ -266,6 +281,13 @@
         "osc_max": 1,
         "osc_min": 0,
         "osc_addr": "gyroZ"
+      },
+      "AccComb": {
+        "enabled": false,
+        "mode_raw": true,
+        "osc_max": 1,
+        "osc_min": 0,
+        "osc_addr": "AccComb"
       }
     },
     "engine-special": {
@@ -407,6 +429,17 @@
       "th_mode": false,
       "cyclic": false,
       "over_out": false
+    },
+    "AccComb": {
+      "deadband": 0.05,
+      "offset": 0.0,
+      "inverted": false,
+      "lmax": 30,
+      "lmin": 0,
+      "mode": false,
+      "th_mode": false,
+      "cyclic": false,
+      "over_out": false
     }
   },
   "general": {
@@ -419,7 +452,8 @@
     "HidEnabled": false,
     "HidMode": 2,
     "PipoName": "motion",
-    "BLEEnabled": false
+    "BLEEnabled": false,
+    "Button_disa": false
   },
   "sensorconf": {
     "relative_mode": true

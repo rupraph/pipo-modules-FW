@@ -27,7 +27,13 @@ class OscTranslator {
   JsonDocument get_json() const;
   void set_from_json(const JsonDocument& j);
 
+  // Value storage and change detection (for deduplication)
+  float get_last_value() const;
+  bool should_send(float new_val);
+
  private:
+  // Cached output value for change detection
+  float last_sent_value = NAN;  // NAN = never sent
   bool enabled = false;
   bool mode_raw = true;  // sends raw sensor data.
 

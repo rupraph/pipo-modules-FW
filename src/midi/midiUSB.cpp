@@ -3,6 +3,7 @@
 USBMIDI usb_midi;
 
 void MidiUSBSetup() {
+  // TOBE CHECKED ON ARDUINO 3 and compile mode how this should be dealt with
   USB.manufacturerName("Pipo-Interfaces");
   USB.productName("PipoUSB");
   USB.begin();
@@ -10,6 +11,28 @@ void MidiUSBSetup() {
 
   // Wait for USB to initialize
   delay(100);
+
+  // FROM BEFORE ARDUINO 3
+  // // Note: On ESP32, USB descriptors are set at compile time via -DUSB_MANUFACTURER and
+  // // -DUSB_PRODUCT in platformio.ini. These runtime calls are kept as fallback for non-ESP32.
+  // // TinyUSBDevice.setManufacturerDescriptor("Pipo-Interfaces");
+  // // TinyUSBDevice.setProductDescriptor("PipoUSB");
+
+  // // Disconnect from host before registering MIDI interface.
+  // // The ESP32 USB task starts before setup() runs, so the host may have
+  // // already enumerated CDC-only by the time we reach this call.
+  // // detach() forces a clean disconnect; the host re-enumerates after attach()
+  // // and sees the complete CDC+MIDI descriptor.
+  // TinyUSBDevice.detach();
+  // delay(
+  //     50);  // ~50ms: enough for host to register disconnect (USB spec min: 2ms)
+  // MidiUsb.begin(MIDI_CHANNEL_OMNI);  // registers MIDI interface in descriptor
+  // TinyUSBDevice.attach();
+
+  // uint32_t timeout = millis() + 3000;
+  // while (!TinyUSBDevice.mounted() && millis() < timeout) {
+  //   delay(1);
+  // }
 
   log_i("MIDI USB setup complete");
   if (DEBUG_HEAP)
@@ -37,4 +60,8 @@ void MidiUSBsendNoteOn(int note, int velocity, int channel) {
 
 void MidiUSBsendNoteOff(int note, int velocity, int channel) {
   usb_midi.noteOff(note, velocity, channel);
+}
+
+void MidiUSBsendPitchBend(int value, int channel) {
+  usb_midi.sendPitchBend(value, channel);
 }
