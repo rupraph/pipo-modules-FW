@@ -1,5 +1,6 @@
 #include <wifi/pipowifi.h>
 #include <osc/osc_handler.h>
+#include "server/pipo_socket.h"
 
 //TODO: Should move content from callback (only put flags)
 
@@ -94,7 +95,8 @@ void PipoWifi::setup() {
   scanning = true;
   log_i("WiFi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
-  wifiPower.begin();
+  bootTs = millis();
+  lastPowerSwitchTs = bootTs;
   log_i("WiFi scan complete, setup done");
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup pipowifi");
@@ -203,7 +205,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
-  wifiPower.onStaDown();
+  wifi.markStaDown();
   osc.stop();  // STA disconnected, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -223,7 +225,7 @@ void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
-  wifiPower.onStaUp();
+  wifi.markStaUp();
   osc.start();               // Network ready, start UDP
   wifi.stateChanged = true;  // Signal state machine to run
 }
@@ -238,7 +240,7 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_w("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
-  wifiPower.onStaDown();
+  wifi.markStaDown();
   osc.stop();  // Network lost, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -480,6 +482,7 @@ void PipoWifi::step() {
     WiFi.mode(WIFI_MODE_NULL);
     // vTaskDelay(pdMS_TO_TICKS(100));
     WiFi.mode(next.mode);
+    wifiStaOnly = next.mode == WIFI_MODE_STA;
     apStarted = false;
     apConfigured = false;
     staStarted = false;
@@ -534,7 +537,7 @@ void PipoWifi::refresh() {
     step();
   }
 
-  wifiPower.tick();
+  powerTick();
 
   wifi_mode_t prevMode = WiFi.getMode();
 
@@ -583,9 +586,110 @@ void PipoWifi::disconnect() {
   WiFi.disconnect();
 }
 
+// ---------------------------------------------------------------------------
+// Battery-saving mode
+// decideWifiTarget() (wifi_policy.h) picks APSTA / STA_ONLY / OFF; the methods
+// below apply it. Mode changes only happen here, from refresh() in wifiTask.
+// ---------------------------------------------------------------------------
+
+void PipoWifi::markStaUp() {
+  staUpSinceTs = millis();
+  staLostSinceTs = 0;
+}
+
+void PipoWifi::markStaDown() {
+  if (staUpSinceTs != 0 || staLostSinceTs == 0) {
+    staLostSinceTs = millis();
+  }
+  staUpSinceTs = 0;
+}
+
+WifiTarget PipoWifi::powerState() {
+  if (wifiRadioOff) {
+    return WifiTarget::OFF;
+  }
+  return next.mode == WIFI_MODE_STA ? WifiTarget::STA_ONLY : WifiTarget::APSTA;
+}
+
+void PipoWifi::powerTick() {
+  uint32_t now = millis();
+  JsonDocument& g = config.general_config;
+  WifiTarget current = powerState();
+
+  if (apRequested) {
+    apRequested = false;
+    log_i("WiFi power: AP requested by button");
+    apOpenTs = now;
+    lastPowerSwitchTs = 0;  // user action: skip dwell
+  }
+
+  // Keys may be missing from older configs / presets: fall back to defaults
+  if (!(g["Wifi_ps_ena"] | false)) {
+    // Turning the feature off restores APSTA once, then leaves the mode alone
+    if (powerSaveWasEnabled && current != WifiTarget::APSTA) {
+      setPowerTarget(current, WifiTarget::APSTA);
+    }
+    powerSaveWasEnabled = false;
+    return;
+  }
+  powerSaveWasEnabled = true;
+
+  WifiPolicyIn in;
+  in.enabled = true;
+  in.oscEnabled = g["OSC_ENA"] | false;
+  in.bootWindowMs = (uint32_t)(g["Wifi_ap_boot_s"] | 60) * 1000;
+  in.idleMs = (uint32_t)(g["Wifi_ap_idle_s"] | 120) * 1000;
+  in.staLostMs = (uint32_t)(g["Wifi_sta_lost_s"] | 15) * 1000;
+  in.wsClient = pipoSocket.hasClient();
+  in.apStation = apStarted && WiFi.softAPgetStationNum() > 0;
+  in.current = current;
+  in.now = now;
+  in.bootTs = bootTs;
+  in.lastActivityTs = lastActivityTs;
+  in.apOpenTs = apOpenTs;
+  in.staUpSinceTs = staUpSinceTs;
+  in.staLostSinceTs = staLostSinceTs;
+
+  WifiTarget target = decideWifiTarget(in);
+  if (target == current ||
+      (uint32_t)(now - lastPowerSwitchTs) < POWER_MIN_DWELL_MS) {
+    return;
+  }
+  // Don't switch while a config upload / user mode change paused the server
+  if (current != WifiTarget::OFF && !server.isRunning()) {
+    return;
+  }
+  setPowerTarget(current, target);
+}
+
+void PipoWifi::setPowerTarget(WifiTarget from, WifiTarget to) {
+  log_i("WiFi power: %s -> %s", wifiTargetName(from), wifiTargetName(to));
+  uint32_t now = millis();
+
+  if (from == WifiTarget::OFF) {
+    radioOn();
+  }
+  switch (to) {
+    case WifiTarget::APSTA:
+      if (from == WifiTarget::STA_ONLY) {
+        enableAP();
+      }
+      apOpenTs = now;  // a re-opened AP gets a full idle window
+      break;
+    case WifiTarget::STA_ONLY:
+      disableAP();
+      break;
+    case WifiTarget::OFF:
+      radioOff();
+      break;
+  }
+  lastPowerSwitchTs = now;
+}
+
 void PipoWifi::enableAP() {
   log_i("Enabling AP (APSTA)");
   next.mode = WIFI_MODE_APSTA;  // keep step() from doing a full mode reset
+  wifiStaOnly = false;
   apConfigured = false;
   WiFi.enableAP(true);
   configureAP();
@@ -594,6 +698,7 @@ void PipoWifi::enableAP() {
 void PipoWifi::disableAP() {
   log_i("Disabling AP (STA only, modem sleep)");
   next.mode = WIFI_MODE_STA;  // keep step() from doing a full mode reset
+  wifiStaOnly = true;
   WiFi.softAPdisconnect(true);
   // Modem sleep is only effective without the AP
   WiFi.setSleep(WIFI_PS_MIN_MODEM);
@@ -602,6 +707,7 @@ void PipoWifi::disableAP() {
 void PipoWifi::radioOff() {
   log_i("Turning WiFi radio off");
   wifiRadioOff = true;
+  wifiStaOnly = false;
   osc.stop();
   server.pause();
   next.mode = WIFI_MODE_NULL;
@@ -615,6 +721,8 @@ void PipoWifi::radioOff() {
   apStarted = false;
   apConfigured = false;
   apConnected = false;
+  staUpSinceTs = 0;
+  staLostSinceTs = 0;
 }
 
 void PipoWifi::radioOn() {

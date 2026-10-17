@@ -9,7 +9,7 @@
 #include <string>
 #include "utils/config.h"
 #include "shared_flags.h"
-#include "wifi/wifi_power.h"
+#include "wifi/wifi_policy.h"
 #include "esp_task_wdt.h"
 
 // Forward declarations for WiFi event handlers
@@ -149,8 +149,28 @@ class PipoWifi {
    */
   void disconnect();
 
-  // Incremental mode switches used by the power-save policy (wifi_power.cpp).
-  // They keep the STA association, unlike the full reset done in step().
+  // Battery-saving mode (decisions in wifi_policy.h). Safe from any context.
+  void notifyActivity() { lastActivityTs = millis(); }  // HTTP / WS activity
+  void requestAP() { apRequested = true; }              // button long press
+  void markStaUp();    // STA event handlers
+  void markStaDown();  // STA event handlers
+
+ private:
+  // Battery-saving mode state
+  static const uint32_t POWER_MIN_DWELL_MS = 3000;  // min time between switches
+  uint32_t bootTs = 0;
+  uint32_t apOpenTs = 0;
+  uint32_t lastPowerSwitchTs = 0;
+  bool powerSaveWasEnabled = false;
+  volatile uint32_t lastActivityTs = 0;
+  volatile uint32_t staUpSinceTs = 0;
+  volatile uint32_t staLostSinceTs = 0;
+  volatile bool apRequested = false;
+
+  WifiTarget powerState();
+  void powerTick();
+  void setPowerTarget(WifiTarget from, WifiTarget to);
+  // Incremental switches: keep the STA association, unlike step()'s reset
   void enableAP();
   void disableAP();
   void radioOn();

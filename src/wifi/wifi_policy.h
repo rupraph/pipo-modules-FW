@@ -33,11 +33,13 @@ inline bool wifiPolicyWithin(uint32_t now, uint32_t ts, uint32_t windowMs) {
 }
 
 // True while something needs the AP: boot window, recent page activity,
-// recent AP (re)open (button / fallback), or an open config page.
+// recent AP (re)open (button / fallback), an open config page, or any device
+// associated to the AP (never cut a client's connection).
 inline bool wifiPolicyApNeeded(const WifiPolicyIn& in) {
   return wifiPolicyWithin(in.now, in.bootTs, in.bootWindowMs) ||
          wifiPolicyWithin(in.now, in.lastActivityTs, in.idleMs) ||
-         wifiPolicyWithin(in.now, in.apOpenTs, in.idleMs) || in.wsClient;
+         wifiPolicyWithin(in.now, in.apOpenTs, in.idleMs) || in.wsClient ||
+         in.apStation;
 }
 
 inline WifiTarget decideWifiTarget(const WifiPolicyIn& in) {
@@ -46,10 +48,6 @@ inline WifiTarget decideWifiTarget(const WifiPolicyIn& in) {
   }
 
   bool apNeeded = wifiPolicyApNeeded(in);
-  // In OSC mode an associated device may be receiving OSC over the AP
-  if (in.oscEnabled && in.apStation) {
-    apNeeded = true;
-  }
 
   if (in.staUpSinceTs != 0) {
     // STA has an IP

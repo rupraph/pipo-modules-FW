@@ -7,6 +7,7 @@ volatile bool apConfigured = false;
 volatile bool staConnected = false;
 volatile bool apConnected = false;
 volatile bool wifiRadioOff = false;
+volatile bool wifiStaOnly = false;
 volatile bool BTconnected = false;
 volatile bool battery_plugged = false;
 volatile bool battery_low_level = false;

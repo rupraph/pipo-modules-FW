@@ -194,10 +194,15 @@ class HwUi {
   int bat_sampling_index = 0;
   int bat_voltage = 0;
   // previous-state tracking for flag transitions
-  bool prev_staConnected = false;
-  bool prev_apConnected = false;
+  enum WifiLedPattern {
+    WIFI_LED_OFF,        // radio off (power-save)
+    WIFI_LED_SEARCHING,  // no connection: blink
+    WIFI_LED_AP_CLIENT,  // device on AP, no STA: fast pulse
+    WIFI_LED_STA,        // STA connected, AP on: slow pulse
+    WIFI_LED_STA_ONLY,   // STA connected, AP off: short flash
+  };
+  WifiLedPattern prev_wifi_pattern = WIFI_LED_SEARCHING;  // set in setup()
   bool prev_BTconnected = false;
-  bool prev_wifiRadioOff = false;
 };
 
 extern HwUi hwui;

@@ -237,56 +237,43 @@ void HwUi::update() {
 }
 
 void HwUi::monitor_wifiBT_flags() {
-  // Read shared flags (volatile) to detect transitions
+  // Read shared flags (volatile) and derive the WiFi LED pattern
   bool curSta = staConnected;
-  bool curAp = apConnected;
   bool curBT = BTconnected;
-  bool curRadioOff = wifiRadioOff;
 
-  // Radio off (power-save) -> WiFi LED off; back on -> waiting blink
-  if (curRadioOff != prev_wifiRadioOff) {
-    stop_pulse(WIFI_LED);
-    if (curRadioOff) {
-      stop_blink(WIFI_LED);
-      set_led(WIFI_LED, 0);
-    } else {
-      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
-    }
-    prev_wifiRadioOff = curRadioOff;
+  WifiLedPattern pattern = WIFI_LED_SEARCHING;
+  if (wifiRadioOff) {
+    pattern = WIFI_LED_OFF;
+  } else if (curSta && wifiStaOnly) {
+    pattern = WIFI_LED_STA_ONLY;
+  } else if (curSta) {
+    pattern = WIFI_LED_STA;  // STA takes priority over AP clients
+  } else if (apConnected) {
+    pattern = WIFI_LED_AP_CLIENT;
   }
 
-  // STA connected -> give steady pulse (slower, to indicate stable connection)
-  if (curSta != prev_staConnected) {
-    if (curSta) {
-      // STA takes priority
-      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
-                  WIFI_PULSE_BRIGHTNESS);
-    } else {
-      stop_pulse(WIFI_LED);
-      //wait wifi
-      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
-      // If STA disconnects but AP is still active, start AP pattern
-      if (curAp) {
+  if (pattern != prev_wifi_pattern) {
+    stop_pulse(WIFI_LED);
+    stop_blink(WIFI_LED);
+    switch (pattern) {
+      case WIFI_LED_OFF:
+        break;
+      case WIFI_LED_SEARCHING:
+        start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+        break;
+      case WIFI_LED_AP_CLIENT:
         start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
                     WIFI_PULSE_BRIGHTNESS);
-      }
+        break;
+      case WIFI_LED_STA:
+        start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
+        break;
+      case WIFI_LED_STA_ONLY:
+        start_blink(WIFI_LED, WIFI_STA_ONLY_BLINK_TIME, WIFI_STA_ONLY_DUTY);
+        break;
     }
-    prev_staConnected = curSta;
-  }
-
-  // AP connected -> faster pulse to indicate AP mode (only if STA not connected)
-  if (curAp != prev_apConnected) {
-    if (curAp && !curSta) {
-      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
-                  WIFI_PULSE_BRIGHTNESS);
-    } else if (!curAp && !curSta) {
-      // AP stopped and no STA, turn off LED
-      stop_pulse(WIFI_LED);
-      //wait wifi
-      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
-    }
-    // If STA is present, it takes priority (handled in STA logic above)
-    prev_apConnected = curAp;
+    prev_wifi_pattern = pattern;
   }
 
   // BT connected -> steady medium brightness
@@ -307,6 +294,8 @@ void HwUi::update_switches() {
   if (config.general_config["Button_disa"] == true) {
     return;  // Button disabled in config, skip processing
   }
+  // Pause long press re-opens the WiFi AP (battery-saving mode)
+  pause_sw.set_long_press_ms(config.general_config["Wifi_ap_btn_ms"] | 2000);
   // PAUSE has a pullup
   pause_sw.read_debounce();
   if (pause_sw.get_flag()) {

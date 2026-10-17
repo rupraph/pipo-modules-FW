@@ -70,7 +70,7 @@ void PipoServer::setup() {
   presets.setup();
   // Any HTTP request counts as config page activity (keeps the AP alive)
   server.addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
-    wifiPower.notifyActivity();
+    wifi.notifyActivity();
     next();
   });
   setup_requests();

@@ -8,6 +8,7 @@ extern volatile bool apConfigured;
 extern volatile bool staConnected;
 extern volatile bool apConnected;
 extern volatile bool wifiRadioOff;
+extern volatile bool wifiStaOnly;  // STA only, AP off (power-save)
 extern volatile bool BTconnected;
 extern volatile bool battery_plugged;
 extern volatile bool battery_low_level;

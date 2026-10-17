@@ -58,14 +58,18 @@ TEST_CASE("Connected config page blocks AP drop") {
   CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
 }
 
-TEST_CASE("OSC keeps the AP while a device is associated to it") {
+TEST_CASE("A device associated to the AP always keeps the AP") {
   WifiPolicyIn in = base(1000 * S);
-  in.staUpSinceTs = 5 * S;
   in.apStation = true;
+  in.staUpSinceTs = 5 * S;  // stable STA: would otherwise drop to STA_ONLY
   in.oscEnabled = true;
   CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
-  in.oscEnabled = false;  // MIDI: associated device alone doesn't keep AP
-  CHECK(decideWifiTarget(in) == WifiTarget::STA_ONLY);
+  in.oscEnabled = false;
+  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
+  in.staUpSinceTs = 0;  // MIDI, no STA: would otherwise turn the radio off
+  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
+  in.apStation = false;
+  CHECK(decideWifiTarget(in) == WifiTarget::OFF);
 }
 
 TEST_CASE("OSC without STA keeps the AP indefinitely") {

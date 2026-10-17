@@ -76,7 +76,7 @@ void PipoSocket::setup() {
         return;
       }
 
-      wifiPower.notifyActivity();
+      wifi.notifyActivity();
       log_i("WebSocket client connected: ID=%u IP=%s", client->id(),
             client->remoteIP().toString().c_str());
       enforceOneClient(client);
@@ -93,7 +93,7 @@ void PipoSocket::setup() {
       log_w("WebSocket error: ID=%u code=%u", client->id(), errorCode);
     } else if (type == WS_EVT_PONG) {
     } else if (type == WS_EVT_DATA) {
-      wifiPower.notifyActivity();
+      wifi.notifyActivity();
       if (DEBUG_HEAP)
         pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;

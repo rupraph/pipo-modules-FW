@@ -129,7 +129,7 @@ void setup() {  // by default on core 1
 
     // Register button callbacks for sensor-specific actions
   // Long press on play/pause re-opens the WiFi AP (power-save mode)
-  hwui.set_pause_long_press_callback([]() { wifiPower.requestAP(); });
+  hwui.set_pause_long_press_callback([]() { wifi.requestAP(); });
 
 #ifdef PIPO_MOTION
   hwui.set_mode_short_press_callback(
