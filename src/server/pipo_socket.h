@@ -23,7 +23,12 @@ class PipoSocket {
   void start(AsyncWebSocket* ws);
   void pause();
   void resume();
-  bool hasClient() { return ws != nullptr && !paused && ws->count() > 0; }
+  // A client counts only while it answers pings: a device that left the
+  // network stays WS_CONNECTED until TCP times out (minutes)
+  bool hasClient() {
+    return ws != nullptr && !paused && ws->count() > 0 &&
+           millis() - lastAliveTs < CLIENT_TIMEOUT;
+  }
 
  private:
   void onMessage(AsyncWebSocketClient* client);
@@ -39,11 +44,13 @@ class PipoSocket {
   unsigned long CLEANUP_INTERVAL =
       1000;  // Cleanup every 1 second instead of every loop
   unsigned long lastPingTime = 0;
+  volatile unsigned long lastAliveTs = 0;  // last pong / inbound frame
+  static const unsigned long CLIENT_TIMEOUT = 10000;
   unsigned long lastConnectionTime = 0;
   IPAddress lastClientIP = IPAddress(0, 0, 0, 0);
   unsigned long MIN_CONNECTION_INTERVAL =
       500;  // Minimum 500ms between connections
-  unsigned long PING_INTERVAL = 1000;
+  unsigned long PING_INTERVAL = 3000;
   unsigned long iterations = 0;
   const int inMaxLen = 512;
   int inMsgL = 0;

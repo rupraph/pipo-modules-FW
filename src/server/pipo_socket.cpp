@@ -77,6 +77,7 @@ void PipoSocket::setup() {
       }
 
       wifi.notifyActivity();
+      lastAliveTs = millis();
       log_i("WebSocket client connected: ID=%u IP=%s", client->id(),
             client->remoteIP().toString().c_str());
       enforceOneClient(client);
@@ -92,7 +93,9 @@ void PipoSocket::setup() {
       uint16_t errorCode = *((uint16_t*)arg);
       log_w("WebSocket error: ID=%u code=%u", client->id(), errorCode);
     } else if (type == WS_EVT_PONG) {
+      lastAliveTs = millis();
     } else if (type == WS_EVT_DATA) {
+      lastAliveTs = millis();
       wifi.notifyActivity();
       if (DEBUG_HEAP)
         pipoDebugHeap("WS: Data");
@@ -327,6 +330,8 @@ void PipoSocket::loop() {
   // Handle low memory case
   if (ESP.getFreeHeap() < 30000) {
     log_w("⚠️ Low Memory: Skipping WebSocket Messages");
+    // Pings are skipped too: don't let that look like a dead client
+    lastAliveTs = millis();
     return;
   }
 
@@ -336,6 +341,24 @@ void PipoSocket::loop() {
   if (now - lastCleanTime > CLEANUP_INTERVAL) {
     cleanupDeadClients();
     lastCleanTime = now;
+  }
+
+  // Liveness: browsers answer pings automatically. Close a client that
+  // stopped answering so it frees its slot and stops holding the AP up.
+  if (ws->count() > 0 && now - lastPingTime > PING_INTERVAL) {
+    lastPingTime = now;
+    if (now - lastAliveTs > CLIENT_TIMEOUT) {
+      log_w("WebSocket client not answering pings, closing");
+      for (auto& c : ws->getClients()) {
+        if (closingClients.find(c.id()) == closingClients.end()) {
+          c.close();
+          closingClients.insert(c.id());
+        }
+      }
+    } else {
+      const uint8_t payload[] = {'p'};
+      ws->pingAll(payload, sizeof(payload));
+    }
   }
 
   auto& clients = ws->getClients();
