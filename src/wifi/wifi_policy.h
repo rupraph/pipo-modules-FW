@@ -12,13 +12,12 @@ static const uint32_t WIFI_STA_STABLE_MS = 5000;
 struct WifiPolicyIn {
   bool enabled = false;     // power-save mode enabled in config
   bool oscEnabled = false;  // OSC output enabled (AP is a data path)
-  bool wsClient = false;    // a config page WebSocket client is connected
-  bool apStation = false;   // a device is associated to the AP
+  bool oscTargetOnAp = false;  // OSC_IP is a device connected to the AP
   WifiTarget current = WifiTarget::APSTA;
 
   uint32_t now = 0;
   uint32_t bootTs = 0;          // when WiFi started at boot
-  uint32_t lastActivityTs = 0;  // last HTTP / WS activity
+  uint32_t lastActivityTs = 0;  // last page use (visible heartbeat, edits)
   uint32_t apOpenTs = 0;        // last time the AP was (re)opened
   uint32_t staUpSinceTs = 0;    // STA got IP at, 0 if STA has no IP
   uint32_t staLostSinceTs = 0;  // STA lost at, 0 if not lost
@@ -32,14 +31,58 @@ inline bool wifiPolicyWithin(uint32_t now, uint32_t ts, uint32_t windowMs) {
   return ts != 0 && (uint32_t)(now - ts) < windowMs;
 }
 
-// True while something needs the AP: boot window, recent page activity,
-// recent AP (re)open (button / fallback), an open config page, or any device
-// associated to the AP (never cut a client's connection).
-inline bool wifiPolicyApNeeded(const WifiPolicyIn& in) {
-  return wifiPolicyWithin(in.now, in.bootTs, in.bootWindowMs) ||
-         wifiPolicyWithin(in.now, in.lastActivityTs, in.idleMs) ||
-         wifiPolicyWithin(in.now, in.apOpenTs, in.idleMs) || in.wsClient ||
-         in.apStation;
+// What currently needs the AP. A device merely associated to the AP does not
+// count: a phone left on the AP after configuring gets disconnected once the
+// idle time is over.
+enum class WifiApHold : uint8_t {
+  NONE,
+  BOOT,        // boot window
+  PAGE,        // recent page use (a visible page sends a heartbeat)
+  REOPEN,      // AP recently (re)opened (button / fallback)
+  OSC_TARGET,  // the OSC target is a device on the AP: AP is the data path
+};
+
+// Returns the hold with the most time left (msLeft = 0 for untimed holds)
+inline WifiApHold wifiPolicyApHold(const WifiPolicyIn& in,
+                                   uint32_t* msLeft = nullptr) {
+  WifiApHold hold = WifiApHold::NONE;
+  uint32_t left = 0;
+  if (in.oscEnabled && in.oscTargetOnAp) {
+    hold = WifiApHold::OSC_TARGET;
+  } else {
+    auto consider = [&](uint32_t ts, uint32_t windowMs, WifiApHold h) {
+      if (wifiPolicyWithin(in.now, ts, windowMs)) {
+        uint32_t l = windowMs - (uint32_t)(in.now - ts);
+        if (l > left) {
+          left = l;
+          hold = h;
+        }
+      }
+    };
+    consider(in.bootTs, in.bootWindowMs, WifiApHold::BOOT);
+    consider(in.lastActivityTs, in.idleMs, WifiApHold::PAGE);
+    consider(in.apOpenTs, in.idleMs, WifiApHold::REOPEN);
+  }
+  if (msLeft) {
+    *msLeft = left;
+  }
+  return hold;
+}
+
+inline const char* wifiApHoldName(WifiApHold h) {
+  switch (h) {
+    case WifiApHold::NONE:
+      return "nothing";
+    case WifiApHold::BOOT:
+      return "boot window";
+    case WifiApHold::PAGE:
+      return "config page use";
+    case WifiApHold::REOPEN:
+      return "AP reopen";
+    case WifiApHold::OSC_TARGET:
+      return "OSC target connected to AP";
+  }
+  return "?";
 }
 
 inline WifiTarget decideWifiTarget(const WifiPolicyIn& in) {
@@ -47,7 +90,7 @@ inline WifiTarget decideWifiTarget(const WifiPolicyIn& in) {
     return WifiTarget::APSTA;
   }
 
-  bool apNeeded = wifiPolicyApNeeded(in);
+  bool apNeeded = wifiPolicyApHold(in) != WifiApHold::NONE;
 
   if (in.staUpSinceTs != 0) {
     // STA has an IP

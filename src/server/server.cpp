@@ -68,9 +68,14 @@ void PipoServer::setup() {
   log_i("Starting HTTP server");
 
   presets.setup();
-  // Any HTTP request counts as config page activity (keeps the AP alive)
+  // HTTP requests count as page use (keeps the AP alive), except status
+  // polls an open-but-unused page keeps sending in the background
   server.addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
-    wifi.notifyActivity();
+    const String& url = request->url();
+    if (url != "/battlevel" && url != "/ping" && url != "/wifi-state" &&
+        url != "/wifi-networks" && url != "/offsetcal-status") {
+      wifi.notifyActivity();
+    }
     next();
   });
   setup_requests();

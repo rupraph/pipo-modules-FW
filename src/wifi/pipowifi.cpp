@@ -1,6 +1,8 @@
 #include <wifi/pipowifi.h>
 #include <osc/osc_handler.h>
-#include "server/pipo_socket.h"
+#include "server/server.h"
+#include <esp_wifi.h>
+#include <esp_netif.h>
 
 //TODO: Should move content from callback (only put flags)
 
@@ -274,13 +276,15 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  log_d("[Event] AP_STACONNECTED - apConnected: false -> true");
+  log_i("[Event] AP client connected (%d connected)",
+        WiFi.softAPgetStationNum());
   apConnected = true;
 }
 
 void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  log_d("[Event] AP_STADISCONNECTED - apConnected: true -> false");
-  apConnected = false;
+  int remaining = WiFi.softAPgetStationNum();
+  log_i("[Event] AP client disconnected (%d connected)", remaining);
+  apConnected = remaining > 0;
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -604,6 +608,38 @@ void PipoWifi::markStaDown() {
   staUpSinceTs = 0;
 }
 
+// True if the OSC target is a device currently connected to the AP (its
+// DHCP lease matches OSC_IP). Being on the AP subnet is not enough: the
+// default OSC_IP is on it, which would otherwise hold the AP forever.
+bool PipoWifi::oscTargetOnAp() {
+  IPAddress target;
+  if (!apStarted ||
+      !target.fromString(config.general_config["OSC_IP"] | "")) {
+    return false;
+  }
+  wifi_sta_list_t stations;
+  if (esp_wifi_ap_get_sta_list(&stations) != ESP_OK || stations.num == 0) {
+    return false;
+  }
+  esp_netif_pair_mac_ip_t pairs[ESP_WIFI_MAX_CONN_NUM];
+  for (int i = 0; i < stations.num; i++) {
+    memcpy(pairs[i].mac, stations.sta[i].mac, 6);
+    pairs[i].ip.addr = 0;
+  }
+  esp_netif_t* apNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+  if (apNetif == nullptr ||
+      esp_netif_dhcps_get_clients_by_mac(apNetif, stations.num, pairs) !=
+          ESP_OK) {
+    return false;
+  }
+  for (int i = 0; i < stations.num; i++) {
+    if (pairs[i].ip.addr == (uint32_t)target) {
+      return true;
+    }
+  }
+  return false;
+}
+
 WifiTarget PipoWifi::powerState() {
   if (wifiRadioOff) {
     return WifiTarget::OFF;
@@ -626,11 +662,18 @@ void PipoWifi::powerTick() {
   // Keys may be missing from older configs / presets: fall back to defaults
   if (!(g["Wifi_ps_ena"] | false)) {
     // Turning the feature off restores APSTA once, then leaves the mode alone
-    if (powerSaveWasEnabled && current != WifiTarget::APSTA) {
-      setPowerTarget(current, WifiTarget::APSTA);
+    if (powerSaveWasEnabled) {
+      log_i("WiFi power: battery saving disabled");
+      if (current != WifiTarget::APSTA) {
+        setPowerTarget(current, WifiTarget::APSTA);
+      }
     }
     powerSaveWasEnabled = false;
     return;
+  }
+  if (!powerSaveWasEnabled) {
+    log_i("WiFi power: battery saving enabled (boot %ds, idle %ds)",
+          (int)(g["Wifi_ap_boot_s"] | 60), (int)(g["Wifi_ap_idle_s"] | 120));
   }
   powerSaveWasEnabled = true;
 
@@ -640,8 +683,7 @@ void PipoWifi::powerTick() {
   in.bootWindowMs = (uint32_t)(g["Wifi_ap_boot_s"] | 60) * 1000;
   in.idleMs = (uint32_t)(g["Wifi_ap_idle_s"] | 120) * 1000;
   in.staLostMs = (uint32_t)(g["Wifi_sta_lost_s"] | 15) * 1000;
-  in.wsClient = pipoSocket.hasClient();
-  in.apStation = apStarted && WiFi.softAPgetStationNum() > 0;
+  in.oscTargetOnAp = oscTargetOnAp();
   in.current = current;
   in.now = now;
   in.bootTs = bootTs;
@@ -649,6 +691,8 @@ void PipoWifi::powerTick() {
   in.apOpenTs = apOpenTs;
   in.staUpSinceTs = staUpSinceTs;
   in.staLostSinceTs = staLostSinceTs;
+
+  logPowerHold(in);
 
   WifiTarget target = decideWifiTarget(in);
   if (target == current ||
@@ -660,6 +704,37 @@ void PipoWifi::powerTick() {
     return;
   }
   setPowerTarget(current, target);
+}
+
+// Logs what keeps the AP on whenever it changes, so the countdown to the AP
+// turning off can be followed on the serial monitor
+void PipoWifi::logPowerHold(const WifiPolicyIn& in) {
+  // Page counts as in use while heartbeats keep arriving (sent every 10 s)
+  bool pageActive = wifiPolicyWithin(in.now, in.lastActivityTs, 25000);
+  if (pageActive != pageWasActive) {
+    if (pageActive) {
+      log_i("WiFi power: config page in use");
+    } else {
+      log_i("WiFi power: config page idle");
+    }
+    pageWasActive = pageActive;
+  }
+
+  uint32_t msLeft = 0;
+  WifiApHold hold = wifiPolicyApHold(in, &msLeft);
+  const char* why = wifiApHoldName(hold);
+  if (hold == WifiApHold::NONE && in.oscEnabled && in.staUpSinceTs == 0) {
+    why = "OSC with no known network";
+  }
+  if (why != lastHoldReason) {
+    if (msLeft > 0) {
+      log_i("WiFi power: AP held by %s (%us left)", why,
+            (unsigned)(msLeft / 1000));
+    } else {
+      log_i("WiFi power: AP held by %s", why);
+    }
+    lastHoldReason = why;
+  }
 }
 
 void PipoWifi::setPowerTarget(WifiTarget from, WifiTarget to) {

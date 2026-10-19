@@ -311,6 +311,8 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
       input_sensor.monitor_axis(inMsg + offset + 1);
+    } else if (strcmp("alive", command) == 0) {
+      // Visible-page heartbeat: activity already recorded on WS_EVT_DATA
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -327,20 +329,20 @@ void PipoSocket::loop() {
   if (ws == nullptr || paused)
     return;
 
-  // Handle low memory case
-  if (ESP.getFreeHeap() < 30000) {
-    log_w("⚠️ Low Memory: Skipping WebSocket Messages");
-    // Pings are skipped too: don't let that look like a dead client
-    lastAliveTs = millis();
-    return;
-  }
-
   unsigned long now = millis();
 
   // Cleanup dead clients periodically (not every loop iteration)
   if (now - lastCleanTime > CLEANUP_INTERVAL) {
     cleanupDeadClients();
     lastCleanTime = now;
+  }
+
+  // Handle low memory case
+  if (ESP.getFreeHeap() < 30000) {
+    log_w("⚠️ Low Memory: Skipping WebSocket Messages");
+    // Pings are skipped too: don't let that look like a dead client
+    lastAliveTs = millis();
+    return;
   }
 
   // Liveness: browsers answer pings automatically. Close a client that
@@ -423,8 +425,7 @@ void PipoSocket::loop() {
           }
         } else if (midi.tl_mode == 2) {  // Pitch Bend mode
           uint16_t last_pb = midi.get_last_pitch_bend();
-          if (last_pb !=
-              8192) {  // Check if value has changed from center
+          if (last_pb != 8192) {  // Check if value has changed from center
             output_val = (float)last_pb;
             has_output = true;
           }

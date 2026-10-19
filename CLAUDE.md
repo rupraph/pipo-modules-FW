@@ -154,6 +154,7 @@ Single-client enforced. TEXT frames only. Custom protocol:
 - `configs:key:val\nkey:val` — batch edit
 - `save:` — persist to flash
 - `monitor:axis_name` — subscribe to axis telemetry
+- `alive:1` — visible-page heartbeat (10s); keeps the AP on in WiFi battery-saving mode
 
 **Outbound** (256B buffer, adaptive rate):
 ```

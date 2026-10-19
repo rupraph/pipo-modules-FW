@@ -24,7 +24,7 @@
 // core 1: sensor, midi, osc
 
 void init_filesystem();
-SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+SET_LOOP_TASK_STACK_SIZE(8 * 1024);
 
 // Cached board identity — read once at boot, shared with the web server.
 BoardIdentity g_board_id;
@@ -127,7 +127,7 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
 
-    // Register button callbacks for sensor-specific actions
+  // Register button callbacks for sensor-specific actions
   // Long press on play/pause re-opens the WiFi AP (power-save mode)
   hwui.set_pause_long_press_callback([]() { wifi.requestAP(); });
 

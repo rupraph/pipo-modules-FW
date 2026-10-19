@@ -150,7 +150,7 @@ class PipoWifi {
   void disconnect();
 
   // Battery-saving mode (decisions in wifi_policy.h). Safe from any context.
-  void notifyActivity() { lastActivityTs = millis(); }  // HTTP / WS activity
+  void notifyActivity() { lastActivityTs = millis(); }  // page in use
   void requestAP() { apRequested = true; }              // button long press
   void markStaUp();    // STA event handlers
   void markStaDown();  // STA event handlers
@@ -162,12 +162,16 @@ class PipoWifi {
   uint32_t apOpenTs = 0;
   uint32_t lastPowerSwitchTs = 0;
   bool powerSaveWasEnabled = false;
+  bool pageWasActive = false;
+  const char* lastHoldReason = nullptr;
   volatile uint32_t lastActivityTs = 0;
   volatile uint32_t staUpSinceTs = 0;
   volatile uint32_t staLostSinceTs = 0;
   volatile bool apRequested = false;
 
   WifiTarget powerState();
+  bool oscTargetOnAp();
+  void logPowerHold(const WifiPolicyIn& in);
   void powerTick();
   void setPowerTarget(WifiTarget from, WifiTarget to);
   // Incremental switches: keep the STA association, unlike step()'s reset

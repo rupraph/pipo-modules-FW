@@ -296,13 +296,16 @@
           <p>
             Turns the Pipo WiFi access point off when it is not needed, so the
             radio can sleep and save battery.<br /><br />
-            The access point is on for a while after boot. If the Pipo connects
-            to a known WiFi network, the access point then stops (only once no
-            device is connected to it) and this page stays reachable at
-            pipo-{config.general.PipoName}.local. In OSC mode
-            without a known network, the access point stays on. In MIDI mode
-            without a known network, WiFi turns off completely when this page
-            has not been used for a while (BLE MIDI keeps working).<br /><br />
+            The access point is on for a while after boot, and as long as this
+            page is open on screen. Once the page is closed or hidden (screen
+            locked, other app) for the set time, the access point stops, and a
+            phone still connected to it is disconnected.<br /><br />
+            If the Pipo is connected to a known WiFi network, this page stays
+            reachable there at pipo-{config.general.PipoName}.local. In OSC mode,
+            the access point stays on if there is no known network, or if the
+            OSC target is a device on the access point. In MIDI mode without a
+            known network, WiFi turns off completely (BLE MIDI keeps working).<br
+            /><br />
             Hold the play/pause button to turn the access point back on. If
             buttons are locked, reboot the Pipo instead.
           </p>

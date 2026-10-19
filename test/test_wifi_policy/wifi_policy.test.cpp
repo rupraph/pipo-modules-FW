@@ -51,25 +51,31 @@ TEST_CASE("Page activity keeps the AP for the idle window") {
   CHECK(decideWifiTarget(in) == WifiTarget::STA_ONLY);
 }
 
-TEST_CASE("Connected config page blocks AP drop") {
-  WifiPolicyIn in = base(1000 * S);
-  in.staUpSinceTs = 5 * S;
-  in.wsClient = true;
-  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
+TEST_CASE("AP hold reports the reason with the most time left") {
+  WifiPolicyIn in = base(50 * S);  // boot window ends at 61 s
+  in.lastActivityTs = 40 * S;      // page use ends at 160 s
+  uint32_t left = 0;
+  CHECK(wifiPolicyApHold(in, &left) == WifiApHold::PAGE);
+  CHECK(left == 110 * S);
+  in.lastActivityTs = 0;
+  CHECK(wifiPolicyApHold(in, &left) == WifiApHold::BOOT);
+  CHECK(left == 11 * S);
+  in.now = 200 * S;
+  CHECK(wifiPolicyApHold(in, &left) == WifiApHold::NONE);
+  CHECK(left == 0);
+  in.oscEnabled = true;
+  in.oscTargetOnAp = true;
+  CHECK(wifiPolicyApHold(in, &left) == WifiApHold::OSC_TARGET);
 }
 
-TEST_CASE("A device associated to the AP always keeps the AP") {
+TEST_CASE("OSC target on the AP keeps the AP even with a stable STA") {
   WifiPolicyIn in = base(1000 * S);
-  in.apStation = true;
-  in.staUpSinceTs = 5 * S;  // stable STA: would otherwise drop to STA_ONLY
+  in.staUpSinceTs = 5 * S;
+  in.oscTargetOnAp = true;
   in.oscEnabled = true;
   CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
-  in.oscEnabled = false;
-  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
-  in.staUpSinceTs = 0;  // MIDI, no STA: would otherwise turn the radio off
-  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
-  in.apStation = false;
-  CHECK(decideWifiTarget(in) == WifiTarget::OFF);
+  in.oscEnabled = false;  // MIDI: OSC target is irrelevant
+  CHECK(decideWifiTarget(in) == WifiTarget::STA_ONLY);
 }
 
 TEST_CASE("OSC without STA keeps the AP indefinitely") {
