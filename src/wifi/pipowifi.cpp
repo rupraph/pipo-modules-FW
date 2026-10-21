@@ -285,6 +285,9 @@ void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   int remaining = WiFi.softAPgetStationNum();
   log_i("[Event] AP client disconnected (%d connected)", remaining);
   apConnected = remaining > 0;
+  if (remaining == 0) {
+    wifi.markApClientLeft();  // give the user time to reconnect
+  }
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -640,6 +643,14 @@ bool PipoWifi::oscTargetOnAp() {
   return false;
 }
 
+void PipoWifi::markApClientLeft() {
+  // Ignore clients kicked by our own AP shutdown (disableAP / radioOff set
+  // the new state before stopping the AP), or the AP would reopen at once
+  if (powerState() == WifiTarget::APSTA) {
+    apClientLeftTs = millis();
+  }
+}
+
 WifiTarget PipoWifi::powerState() {
   if (wifiRadioOff) {
     return WifiTarget::OFF;
@@ -689,6 +700,7 @@ void PipoWifi::powerTick() {
   in.bootTs = bootTs;
   in.lastActivityTs = lastActivityTs;
   in.apOpenTs = apOpenTs;
+  in.apClientLeftTs = apClientLeftTs;
   in.staUpSinceTs = staUpSinceTs;
   in.staLostSinceTs = staLostSinceTs;
 

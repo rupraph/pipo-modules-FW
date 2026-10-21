@@ -26,8 +26,9 @@ The AP stays on while **any** of these is true:
    - loading the page;
    - editing a setting, saving, changing WiFi settings, or starting a calibration.
 3. **The AP was just reopened.** For `Wifi_ap_idle_s` after the AP comes back, whether from a button long press or the network-lost fallback.
-4. **OSC mode with no known network.** The AP is the only network the OSC data can go out on, so it stays on indefinitely.
-5. **OSC mode where the OSC target is a device on the AP.** The OSC target IP (`OSC_IP`) is on the AP's subnet (for example the default `192.168.10.x`), so the AP carries the OSC data. This doesn't apply if the known network uses the same address range, because the target is then assumed to be on the known network.
+4. **The last device just left the AP.** For `Wifi_ap_idle_s` after the last connected device disconnects, so the user can reconnect. Devices disconnected by the Pipo itself when it turns the AP off don't count.
+5. **OSC mode with no known network.** The AP is the only network the OSC data can go out on, so it stays on indefinitely.
+6. **OSC mode where the OSC target is a device connected to the AP.** The OSC target IP (`OSC_IP`) is the address the AP gave to a device that is currently connected, so the AP carries the OSC data. Being on the AP's subnet alone isn't enough, since the default `OSC_IP` is on it.
 
 These things do **not** keep the AP on:
 - **A phone or computer that is merely connected to the AP.** A user who configured the Pipo and forgot to disconnect their phone is disconnected once the idle time is over.
@@ -42,7 +43,7 @@ The AP turns off only when **none** of the conditions above holds, and then:
 |---|---|
 | Known network connected for at least 5 s | **STA only.** A phone still on the AP is disconnected. The page stays reachable at `pipo-<name>.local` on the known network. |
 | MIDI mode, no known network | **Off.** WiFi is fully off and BLE MIDI keeps working if enabled. |
-| OSC mode, no known network | Never; see condition 4. |
+| OSC mode, no known network | Never; see condition 5. |
 
 In practice, after the boot window:
 - **OSC user with a known network:** the AP turns off about 2 minutes after they close or lock the config page.

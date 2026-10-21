@@ -19,6 +19,7 @@ struct WifiPolicyIn {
   uint32_t bootTs = 0;          // when WiFi started at boot
   uint32_t lastActivityTs = 0;  // last page use (visible heartbeat, edits)
   uint32_t apOpenTs = 0;        // last time the AP was (re)opened
+  uint32_t apClientLeftTs = 0;  // last time the AP's last client left
   uint32_t staUpSinceTs = 0;    // STA got IP at, 0 if STA has no IP
   uint32_t staLostSinceTs = 0;  // STA lost at, 0 if not lost
 
@@ -39,6 +40,7 @@ enum class WifiApHold : uint8_t {
   BOOT,        // boot window
   PAGE,        // recent page use (a visible page sends a heartbeat)
   REOPEN,      // AP recently (re)opened (button / fallback)
+  CLIENT_LEFT,  // last AP client recently left: time to reconnect
   OSC_TARGET,  // the OSC target is a device on the AP: AP is the data path
 };
 
@@ -62,6 +64,7 @@ inline WifiApHold wifiPolicyApHold(const WifiPolicyIn& in,
     consider(in.bootTs, in.bootWindowMs, WifiApHold::BOOT);
     consider(in.lastActivityTs, in.idleMs, WifiApHold::PAGE);
     consider(in.apOpenTs, in.idleMs, WifiApHold::REOPEN);
+    consider(in.apClientLeftTs, in.idleMs, WifiApHold::CLIENT_LEFT);
   }
   if (msLeft) {
     *msLeft = left;
@@ -79,6 +82,8 @@ inline const char* wifiApHoldName(WifiApHold h) {
       return "config page use";
     case WifiApHold::REOPEN:
       return "AP reopen";
+    case WifiApHold::CLIENT_LEFT:
+      return "AP client left";
     case WifiApHold::OSC_TARGET:
       return "OSC target connected to AP";
   }

@@ -154,6 +154,7 @@ class PipoWifi {
   void requestAP() { apRequested = true; }              // button long press
   void markStaUp();    // STA event handlers
   void markStaDown();  // STA event handlers
+  void markApClientLeft();  // AP event handler
 
  private:
   // Battery-saving mode state
@@ -166,6 +167,7 @@ class PipoWifi {
   const char* lastHoldReason = nullptr;
   volatile uint32_t lastActivityTs = 0;
   volatile uint32_t staUpSinceTs = 0;
+  volatile uint32_t apClientLeftTs = 0;
   volatile uint32_t staLostSinceTs = 0;
   volatile bool apRequested = false;
 

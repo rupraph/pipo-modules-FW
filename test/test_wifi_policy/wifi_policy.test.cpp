@@ -51,6 +51,15 @@ TEST_CASE("Page activity keeps the AP for the idle window") {
   CHECK(decideWifiTarget(in) == WifiTarget::STA_ONLY);
 }
 
+TEST_CASE("Last AP client leaving keeps the AP for the idle time") {
+  WifiPolicyIn in = base(1000 * S);
+  in.staUpSinceTs = 5 * S;
+  in.apClientLeftTs = 990 * S;
+  CHECK(decideWifiTarget(in) == WifiTarget::APSTA);
+  in.now = (990 + 120) * S;  // idle time over
+  CHECK(decideWifiTarget(in) == WifiTarget::STA_ONLY);
+}
+
 TEST_CASE("AP hold reports the reason with the most time left") {
   WifiPolicyIn in = base(50 * S);  // boot window ends at 61 s
   in.lastActivityTs = 40 * S;      // page use ends at 160 s
