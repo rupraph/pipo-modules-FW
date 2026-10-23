@@ -21,7 +21,7 @@ The mode is off by default. Enable it in **Settings → WiFi battery saving** (`
 The AP stays on while **any** of these is true:
 
 1. **Boot window.** For `Wifi_ap_boot_s` (default 60 s) after power-on.
-2. **The config page is in use.** The page counts as in use for `Wifi_ap_idle_s` (default 120 s) after the last sign of use. A sign of use is any of:
+2. **The config page is in use through the AP.** The page counts as in use for `Wifi_ap_idle_s` (default 120 s) after the last sign of use. Only use through the AP counts: a page opened through the known network (`pipo-<name>.local`) doesn't need the AP, so it never keeps the AP on or reopens it. A sign of use is any of:
    - the page being visible on screen (it sends a heartbeat every 10 s while visible, and again when it comes back on screen);
    - loading the page;
    - editing a setting, saving, changing WiFi settings, or starting a calibration.

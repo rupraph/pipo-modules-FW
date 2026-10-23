@@ -76,7 +76,9 @@ void PipoSocket::setup() {
         return;
       }
 
-      wifi.notifyActivity();
+      if (client->client()) {
+        wifi.notifyActivity(client->client()->localIP());
+      }
       lastAliveTs = millis();
       log_i("WebSocket client connected: ID=%u IP=%s", client->id(),
             client->remoteIP().toString().c_str());
@@ -96,7 +98,9 @@ void PipoSocket::setup() {
       lastAliveTs = millis();
     } else if (type == WS_EVT_DATA) {
       lastAliveTs = millis();
-      wifi.notifyActivity();
+      if (client->client()) {
+        wifi.notifyActivity(client->client()->localIP());
+      }
       if (DEBUG_HEAP)
         pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;

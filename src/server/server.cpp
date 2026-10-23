@@ -74,7 +74,7 @@ void PipoServer::setup() {
     const String& url = request->url();
     if (url != "/battlevel" && url != "/ping" && url != "/wifi-state" &&
         url != "/wifi-networks" && url != "/offsetcal-status") {
-      wifi.notifyActivity();
+      wifi.notifyActivity(request->client()->localIP());
     }
     next();
   });

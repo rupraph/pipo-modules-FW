@@ -150,7 +150,13 @@ class PipoWifi {
   void disconnect();
 
   // Battery-saving mode (decisions in wifi_policy.h). Safe from any context.
-  void notifyActivity() { lastActivityTs = millis(); }  // page in use
+  // Page in use. `via` is the local IP the request arrived on: only use
+  // through the AP needs the AP (a page reached via STA must not reopen it)
+  void notifyActivity(const IPAddress& via) {
+    if (via == apIP) {
+      lastActivityTs = millis();
+    }
+  }
   void requestAP() { apRequested = true; }              // button long press
   void markStaUp();    // STA event handlers
   void markStaDown();  // STA event handlers
