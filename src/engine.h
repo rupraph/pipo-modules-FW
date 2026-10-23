@@ -7,17 +7,17 @@
 #include "midi/midi_translator.h"
 // #include "hid/usb_hid.h"
 #include "hid/hid_translator.h"
+#include "osc/osc_translators.h"
 #include "midi/midi_io.h"
 #include <ArduinoJson.h>
 #include "utils/fs_tools.h"
 #include "sensors/sensors.h"
 // #include "hw_ui.h"
 #include "osc/osc_handler.h"
-#include "osc/osc_translators.h"
 #include "shared_flags.h"
 
 #ifdef PIPO_ANALOG
-#include "sensors/analog_out.h"
+// #include "sensors/analog_out.h"
 #endif
 
 using namespace std;

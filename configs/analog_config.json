@@ -414,7 +414,12 @@
     "HidMode": 1,
     "PipoName": "analog",
     "BLEEnabled": false,
-    "Button_disa": false
+    "Button_disa": false,
+    "Wifi_ps_ena": false,
+    "Wifi_ap_boot_s": 60,
+    "Wifi_ap_idle_s": 120,
+    "Wifi_sta_lost_s": 15,
+    "Wifi_ap_btn_ms": 2000
   },
   "sensorconf": {
     "analogout": {

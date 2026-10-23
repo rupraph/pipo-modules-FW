@@ -5,13 +5,12 @@ OSC_handler osc;
 
 #ifdef PIPO_ANALOG
 void oscreceiveTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // OSC receive task is non-critical - don't subscribe to watchdog
   for (;;) {
     // Check if network is available: STA connected OR AP configured
     if ((staConnected || apConfigured) && osc.is_enabled()) {
       osc.receive();
     }
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(10));  // 10ms polling - reasonable for OSC receive
   }
 }
@@ -123,7 +122,7 @@ void send_to_analog(OSCMessage& msg, int addrOffset) {
     }
   }
 #ifdef PIPO_ANALOG
-  analog_out.set_value(deststring.c_str(), msg.getFloat(0));
+  // analog_out.set_value(deststring.c_str(), msg.getFloat(0));
 #endif
 }
 

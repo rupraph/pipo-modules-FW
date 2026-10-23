@@ -16,6 +16,8 @@
   } from "../../services";
   import { getDefaultDeadband } from "../../defaults";
   import Switch from "../form/Switch.svelte";
+  import NumberInput from "../form/Number.svelte";
+  import type { WifiPowerKey } from "../../types";
   import PillSwitch from "../form/PillSwitch.svelte";
   import { schema } from "../../schema";
   import { pipoio } from "../../pipoio";
@@ -109,6 +111,17 @@
     }
 
     config.general.OSC_PORT = parseInt(filtered) || 0;
+  }
+
+  const wifiPowerKeys = Object.keys(schema.wifiPower) as WifiPowerKey[];
+
+  // Older configs lack the power-save keys: fill defaults when enabling
+  $: if (config?.general.Wifi_ps_ena) {
+    for (const key of wifiPowerKeys) {
+      if (config.general[key] === undefined) {
+        config.general[key] = schema.wifiPower[key].default;
+      }
+    }
   }
 
   function reboot() {
@@ -277,6 +290,74 @@
         </InfoModal>
         <PillSwitch label="" bind:value={config.general.Button_disa} />
       </div>
+      <div class="row">
+        <span class="label">WiFi battery saving</span>
+        <InfoModal>
+          <p>
+            Turns the Pipo WiFi access point off when it is not needed, so the
+            radio can sleep and save battery.<br /><br />
+            The access point is on for a while after boot, and as long as this
+            page is open on screen. Once the page is closed or hidden (screen
+            locked, other app) for the set time, the access point stops, and a
+            phone still connected to it is disconnected.<br /><br />
+            If the Pipo is connected to a known WiFi network, this page stays
+            reachable there at pipo-{config.general.PipoName}.local. In OSC mode,
+            the access point stays on if there is no known network, or if the
+            OSC target is a device on the access point. In MIDI mode without a
+            known network, WiFi turns off completely (BLE MIDI keeps working).<br
+            /><br />
+            Hold the play/pause button to turn the access point back on. If
+            buttons are locked, reboot the Pipo instead.
+          </p>
+        </InfoModal>
+        <PillSwitch label="" bind:value={config.general.Wifi_ps_ena} />
+      </div>
+      {#if config.general.Wifi_ps_ena}
+        <div class="row">
+          <span class="label">AP time after boot (s)</span>
+          <div></div>
+          <NumberInput
+            label=""
+            min={schema.wifiPower.Wifi_ap_boot_s.min}
+            max={schema.wifiPower.Wifi_ap_boot_s.max}
+            step={schema.wifiPower.Wifi_ap_boot_s.step}
+            bind:value={config.general.Wifi_ap_boot_s}
+          />
+        </div>
+        <div class="row">
+          <span class="label">AP time after last page use (s)</span>
+          <div></div>
+          <NumberInput
+            label=""
+            min={schema.wifiPower.Wifi_ap_idle_s.min}
+            max={schema.wifiPower.Wifi_ap_idle_s.max}
+            step={schema.wifiPower.Wifi_ap_idle_s.step}
+            bind:value={config.general.Wifi_ap_idle_s}
+          />
+        </div>
+        <div class="row">
+          <span class="label">WiFi lost, AP back after (s)</span>
+          <div></div>
+          <NumberInput
+            label=""
+            min={schema.wifiPower.Wifi_sta_lost_s.min}
+            max={schema.wifiPower.Wifi_sta_lost_s.max}
+            step={schema.wifiPower.Wifi_sta_lost_s.step}
+            bind:value={config.general.Wifi_sta_lost_s}
+          />
+        </div>
+        <div class="row">
+          <span class="label">Button hold to open AP (ms)</span>
+          <div></div>
+          <NumberInput
+            label=""
+            min={schema.wifiPower.Wifi_ap_btn_ms.min}
+            max={schema.wifiPower.Wifi_ap_btn_ms.max}
+            step={schema.wifiPower.Wifi_ap_btn_ms.step}
+            bind:value={config.general.Wifi_ap_btn_ms}
+          />
+        </div>
+      {/if}
 
       <div class="row">
         <span class="label">
@@ -395,9 +476,13 @@
 
   /* Save Button Styles */
   .save-button-container {
+    /* Stays visible at the bottom of the scrolling modal */
+    position: sticky;
+    bottom: -16px; /* cancel .content bottom padding */
     margin-top: 8px;
-    padding-top: 16px;
+    padding: 16px 0;
     border-top: 1px solid var(--bg-secondary);
+    background-color: var(--bg-network);
     display: flex;
     justify-content: center;
   }

@@ -9,6 +9,7 @@
 #include <string>
 #include "utils/config.h"
 #include "shared_flags.h"
+#include "wifi/wifi_policy.h"
 #include "esp_task_wdt.h"
 
 // Forward declarations for WiFi event handlers
@@ -147,6 +148,45 @@ class PipoWifi {
    * @brief Disconnects from the current network intentionally
    */
   void disconnect();
+
+  // Battery-saving mode (decisions in wifi_policy.h). Safe from any context.
+  // Page in use. `via` is the local IP the request arrived on: only use
+  // through the AP needs the AP (a page reached via STA must not reopen it)
+  void notifyActivity(const IPAddress& via) {
+    if (via == apIP) {
+      lastActivityTs = millis();
+    }
+  }
+  void requestAP() { apRequested = true; }              // button long press
+  void markStaUp();    // STA event handlers
+  void markStaDown();  // STA event handlers
+  void markApClientLeft();  // AP event handler
+
+ private:
+  // Battery-saving mode state
+  static const uint32_t POWER_MIN_DWELL_MS = 3000;  // min time between switches
+  uint32_t bootTs = 0;
+  uint32_t apOpenTs = 0;
+  uint32_t lastPowerSwitchTs = 0;
+  bool powerSaveWasEnabled = false;
+  bool pageWasActive = false;
+  const char* lastHoldReason = nullptr;
+  volatile uint32_t lastActivityTs = 0;
+  volatile uint32_t staUpSinceTs = 0;
+  volatile uint32_t apClientLeftTs = 0;
+  volatile uint32_t staLostSinceTs = 0;
+  volatile bool apRequested = false;
+
+  WifiTarget powerState();
+  bool oscTargetOnAp();
+  void logPowerHold(const WifiPolicyIn& in);
+  void powerTick();
+  void setPowerTarget(WifiTarget from, WifiTarget to);
+  // Incremental switches: keep the STA association, unlike step()'s reset
+  void enableAP();
+  void disableAP();
+  void radioOn();
+  void radioOff();
 };
 
 extern PipoWifi wifi;

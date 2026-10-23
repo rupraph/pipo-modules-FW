@@ -40,10 +40,9 @@ void shutdown_esp32() {
 }
 
 void hwuiTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // HWUI task is non-critical - don't subscribe to watchdog
   for (;;) {
     hwui.update();
-    esp_task_wdt_reset();
 #if defined(PIPO_ANALOG) && HW_REV >= 20
     vTaskDelay(pdMS_TO_TICKS(20));
 #else
@@ -53,16 +52,15 @@ void hwuiTask(void* pvParameters) {
 }
 
 void buttonTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Button task is non-critical - don't subscribe to watchdog
   for (;;) {
     hwui.update_switches();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(5));
   }
 }
 
 void battmonitorTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Battery monitor is non-critical - don't subscribe to watchdog
   static int prev_bat_percentage = -1;
   static bool prev_plugged_state = false;
   static bool prev_low_battery_state = false;
@@ -73,7 +71,7 @@ void battmonitorTask(void* pvParameters) {
       10;  // Require 10 consecutive low readings (5 seconds)
 
   for (;;) {
-    hwui.measure_battery_step();
+    // hwui.measure_battery_step();
 
     // Update the shared state flags
     battery_plugged = hwui.is_plugged();
@@ -149,9 +147,6 @@ void HwUi::init() {
   pinMode(BAT_VOLTAGE, INPUT);
   pinMode(PP_SW, INPUT);
 
-  led_channel_map = {
-      {WIFI_LED, 0}, {BT_LED, 1}, {SEND_LED, 2}, {LOW_BAT_LED, 3}};
-
   led_blink_table = {{WIFI_LED, {false, 500, 0.5, 0, 0, false, 30}},
                      {BT_LED, {false, 500, 0.5, 0, 0, false, 30}},
                      {SEND_LED, {false, 500, 0.5, 0, 0, false, 100}},
@@ -164,15 +159,11 @@ void HwUi::init() {
 
 void HwUi::setup() {
 #if !defined(PIPO_ANALOG)
-  // led setup
-  ledcSetup(0, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(WIFI_LED, led_channel_map[WIFI_LED]);
-  ledcSetup(1, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(BT_LED, led_channel_map[BT_LED]);
-  ledcSetup(2, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(SEND_LED, led_channel_map[SEND_LED]);
-  ledcSetup(3, PWM_FREQ, PWM_Resolution);
-  ledcAttachPin(LOW_BAT_LED, led_channel_map[LOW_BAT_LED]);
+  // led setup - Arduino 3.x: ledcAttach(pin, freq, resolution)
+  ledcAttach(WIFI_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(BT_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(SEND_LED, PWM_FREQ, PWM_Resolution);
+  ledcAttach(LOW_BAT_LED, PWM_FREQ, PWM_Resolution);
   mode_sw.setup_button(MODE_SW);
 #endif
 #if defined(PIPO_ANALOG) && HW_REV >= 20
@@ -246,43 +237,43 @@ void HwUi::update() {
 }
 
 void HwUi::monitor_wifiBT_flags() {
-  // Read shared flags (volatile) to detect transitions
+  // Read shared flags (volatile) and derive the WiFi LED pattern
   bool curSta = staConnected;
-  bool curAp = apConnected;
   bool curBT = BTconnected;
 
-  // STA connected -> give steady pulse (slower, to indicate stable connection)
-  if (curSta != prev_staConnected) {
-    if (curSta) {
-      // STA takes priority
-      start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
-                  WIFI_PULSE_BRIGHTNESS);
-    } else {
-      stop_pulse(WIFI_LED);
-      //wait wifi
-      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
-      // If STA disconnects but AP is still active, start AP pattern
-      if (curAp) {
-        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
-                    WIFI_PULSE_BRIGHTNESS);
-      }
-    }
-    prev_staConnected = curSta;
+  WifiLedPattern pattern = WIFI_LED_SEARCHING;
+  if (wifiRadioOff) {
+    pattern = WIFI_LED_OFF;
+  } else if (curSta && wifiStaOnly) {
+    pattern = WIFI_LED_STA_ONLY;
+  } else if (curSta) {
+    pattern = WIFI_LED_STA;  // STA takes priority over AP clients
+  } else if (apConnected) {
+    pattern = WIFI_LED_AP_CLIENT;
   }
 
-  // AP connected -> faster pulse to indicate AP mode (only if STA not connected)
-  if (curAp != prev_apConnected) {
-    if (curAp && !curSta) {
-      start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
-                  WIFI_PULSE_BRIGHTNESS);
-    } else if (!curAp && !curSta) {
-      // AP stopped and no STA, turn off LED
-      stop_pulse(WIFI_LED);
-      //wait wifi
-      start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+  if (pattern != prev_wifi_pattern) {
+    stop_pulse(WIFI_LED);
+    stop_blink(WIFI_LED);
+    switch (pattern) {
+      case WIFI_LED_OFF:
+        break;
+      case WIFI_LED_SEARCHING:
+        start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
+        break;
+      case WIFI_LED_AP_CLIENT:
+        start_pulse(WIFI_LED, WIFI_AP_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
+        break;
+      case WIFI_LED_STA:
+        start_pulse(WIFI_LED, WIFI_STA_PULSE_TIME, WIFI_PULSE_MIN_BRIGHTNESS,
+                    WIFI_PULSE_BRIGHTNESS);
+        break;
+      case WIFI_LED_STA_ONLY:
+        start_blink(WIFI_LED, WIFI_STA_ONLY_BLINK_TIME, WIFI_STA_ONLY_DUTY);
+        break;
     }
-    // If STA is present, it takes priority (handled in STA logic above)
-    prev_apConnected = curAp;
+    prev_wifi_pattern = pattern;
   }
 
   // BT connected -> steady medium brightness
@@ -303,6 +294,8 @@ void HwUi::update_switches() {
   if (config.general_config["Button_disa"] == true) {
     return;  // Button disabled in config, skip processing
   }
+  // Pause long press re-opens the WiFi AP (battery-saving mode)
+  pause_sw.set_long_press_ms(config.general_config["Wifi_ap_btn_ms"] | 2000);
   // PAUSE has a pullup
   pause_sw.read_debounce();
   if (pause_sw.get_flag()) {
@@ -350,7 +343,7 @@ void HwUi::update_switches() {
  */
 void HwUi::set_led(int led_name, int value) {
 #if defined(PIPO_MOTION) || defined(PIPO_RANGE)
-  ledcWrite(led_channel_map[led_name], value);
+  ledcWrite(led_name, value);  // Arduino 3.x: ledcWrite takes pin directly
 #elif defined(PIPO_ANALOG) && HW_REV == 10
   soft_pwm_table[led_name].brightness = value;
 #elif defined(PIPO_ANALOG) && HW_REV >= 20
@@ -492,21 +485,21 @@ void HwUi::pulse() {
 }
 
 void HwUi::init_blink_once(int led_name, int blink_time, int brightness) {
-  // carfull led_pos used for index in blink_once but comes from channel number
-  int led_pos = led_channel_map[led_name];
-  // set_led(led_name, brightness);
-  blink_once[led_pos] = millis() + blink_time;
+  blink_once[led_name] = millis() + blink_time;
 }
 
 void HwUi::single_blink() {
-  for (auto& pair : led_channel_map) {
-    int i = pair.second;
-    if (blink_once[i] != 0) {
-      set_led(pair.first, blink_once_brightness);
-    }
-    if (millis() > blink_once[i] && blink_once[i] != 0) {
-      set_led(pair.first, 0);
-      blink_once[i] = 0;
+  for (auto& pair : blink_once) {
+    int led_pin = pair.first;
+    unsigned long end_time = pair.second;
+
+    if (end_time != 0) {
+      if (millis() < end_time) {
+        set_led(led_pin, blink_once_brightness);
+      } else {
+        set_led(led_pin, 0);
+        blink_once[led_pin] = 0;
+      }
     }
   }
 }
@@ -628,7 +621,7 @@ int Button::read_debounce() {
 
         if (!long_press_triggered) {
           // Only register short press if long press wasn't already triggered
-          if (press_duration < LONG_PRESS_TIME) {
+          if (press_duration < long_press_ms) {
             last_press_type = PRESS_SHORT;
           } else {
             last_press_type = PRESS_LONG;
@@ -641,7 +634,7 @@ int Button::read_debounce() {
 
   // Check for long press while button is held
   if (is_pressed && !long_press_triggered) {
-    if (current_time - press_start_time >= LONG_PRESS_TIME) {
+    if (current_time - press_start_time >= long_press_ms) {
       long_press_triggered = true;
       last_press_type = PRESS_LONG;
       flag = true;  // trigger long press immediately

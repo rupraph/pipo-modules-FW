@@ -66,12 +66,24 @@ void PipoServer::setup() {
     MDNS.addService("http", "tcp", 80);
   }
   log_i("Starting HTTP server");
-  //Todo: check lib exemple. can be improved
-  fileServer = new PipoFileServer("/", LittleFS, "/webpage");
 
   presets.setup();
+  // HTTP requests count as page use (keeps the AP alive), except status
+  // polls an open-but-unused page keeps sending in the background
+  server.addMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+    const String& url = request->url();
+    if (url != "/battlevel" && url != "/ping" && url != "/wifi-state" &&
+        url != "/wifi-networks" && url != "/offsetcal-status") {
+      wifi.notifyActivity(request->client()->localIP());
+    }
+    next();
+  });
   setup_requests();
-  // server.serveStatic("/", LittleFS, "/webpage/").setDefaultFile("index.html");
+
+  // Serve static files from LittleFS with automatic gzip support
+  server.serveStatic("/", LittleFS, "/webpage/")
+      .setDefaultFile("index.html")
+      .setCacheControl("max-age=600");
   // captivePortal.start(&server);
   // Add a custom 404 handler
   server.onNotFound([&](AsyncWebServerRequest* request) {
@@ -617,10 +629,6 @@ void PipoServer::setup_requests() {
 
   // Add preset routes
   presets.addRoutes(&server);
-
-  // Solution by using Chunk Hanlder
-  fileServer->setDefaultFile("index.html");
-  server.addHandler(fileServer);
 }
 
 //TODO should use shared flag

@@ -65,5 +65,6 @@
     "a11y-click-events-have-key-events": "ignore",
     "a11y-no-static-element-interactions": "ignore",
     "a11y-no-noninteractive-element-interactions": "ignore"
-  }
+  },
+  "cmake.sourceDirectory": "/Users/rup/Documents/GitHub/pipo-single/.dummy"
 }
