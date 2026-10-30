@@ -22,29 +22,18 @@
         ] as OscConfig)
       : null;
 
+  $: quatConfig = config?.engine?.["engine-special"]?.quat ?? null;
+
   // Create a reactive variable for mode_raw so the UI updates when it changes
   $: modeRaw = oscConfig?.mode_raw ?? false;
 
   $: isChannelEnabled = oscConfig?.enabled ?? false;
 
-  // Single source of truth: display prefix for both reactive display and handler
+  // Display-only prefix: shown next to the input, never part of the editable value
   $: oscDisplayPrefix =
     "/" +
     (config?.general.PipoName || "") +
     (config?.general.PipoName ? "/" : "");
-
-  // Reactive display values for OSC address
-  let oscAddressDisplay = "";
-  let quatOscAddressDisplay = "";
-
-  $: if (oscConfig) {
-    oscAddressDisplay = oscDisplayPrefix + (oscConfig.osc_addr || "");
-  }
-
-  $: if (config?.engine?.["engine-special"]?.quat) {
-    quatOscAddressDisplay =
-      oscDisplayPrefix + (config.engine["engine-special"].quat.osc_addr || "");
-  }
 
   function toggleEnabled() {
     if (!oscConfig) return;
@@ -52,37 +41,23 @@
     currentConfig.set(config);
   }
 
-  function onOscAddressInput(event: Event) {
+  function validateOscAddress(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!config) return;
 
-    const prefix = oscDisplayPrefix;
-    let raw = input.value;
-
-    // Strip the known display prefix to get the user-editable address part.
-    // Three cases:
-    //  1. raw starts with full prefix → strip it exactly, get the address
-    //  2. raw is a prefix of prefix (user backspaced into the display-only part) → empty address
-    //  3. otherwise → treat whole raw value as address (e.g., pasted text)
-    let cleaned: string;
-    if (raw.startsWith(prefix)) {
-      cleaned = raw.substring(prefix.length);
-    } else if (prefix.startsWith(raw)) {
-      cleaned = "";
-    } else {
-      cleaned = raw;
-    }
-
-    // Remove spaces and special characters
-    cleaned = cleaned.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
+    // Remove spaces and special characters, keep only alphanumeric, slash, hyphen, underscore, and dot
+    let cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
 
     // Apply max length limit
-    cleaned = cleaned.slice(0, OSC_ADDRESS_MAX_LENGTH);
+    if (cleaned.length > OSC_ADDRESS_MAX_LENGTH) {
+      cleaned = cleaned.slice(0, OSC_ADDRESS_MAX_LENGTH);
+    }
 
-    // Rebuild display using the same prefix (single source of truth)
-    input.value = prefix + cleaned;
+    if (cleaned !== input.value) {
+      input.value = cleaned;
+    }
 
-    // Update the correct config property (store only the address, no prefix)
+    // Store only the address — the /PipoName/ prefix is added by the firmware
     if (channelType === "quaternion") {
       const quat = config.engine?.["engine-special"]?.quat;
       if (quat) {
@@ -143,23 +118,25 @@
         </p>
       </InfoModal>
       <div class="input-container">
-        <!-- <span> /{config.general.PipoName}/</span> -->
-        {#if channelType === "quaternion"}
+        <span class="osc-prefix">{oscDisplayPrefix}</span>
+        {#if channelType === "quaternion" && quatConfig}
           <input
             type="text"
-            value={quatOscAddressDisplay}
+            value={quatConfig.osc_addr}
+            maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
             placeholder="address"
-            on:input={onOscAddressInput}
+            on:input={validateOscAddress}
             on:keydown={handleOscAddressKeydown}
           />
-        {:else}
+        {:else if oscConfig}
           <input
             type="text"
-            value={oscAddressDisplay}
+            value={oscConfig.osc_addr}
+            maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
             placeholder="address"
-            on:input={onOscAddressInput}
+            on:input={validateOscAddress}
             on:keydown={handleOscAddressKeydown}
           />
         {/if}
@@ -246,6 +223,15 @@
   /* Input Container */
   .input-container {
     justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .osc-prefix {
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    user-select: none;
   }
 
   .input-container :global(.input) {
@@ -266,8 +252,7 @@
 
   /* Text Input */
   .text-input {
-    /* width: 150px; */
-    /* height: 32px; */
+    width: 120px;
     padding: 0 12px;
     border: 2px solid var(--main);
     border-radius: 6px;
