@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PipoKeys } from "../../types";
+  import type { PipoKeys, SensorSettings } from "../../types";
   type Keys = PipoKeys["motion"];
   import { currentConfig, currentMode } from "../../services/config";
   import { uiState } from "../ui-state";
@@ -42,6 +42,9 @@
   }
 
   $: config = $currentConfig;
+  $: sensorconf = $currentConfig?.sensorconf as
+    | SensorSettings["motion"]
+    | undefined;
   $: mode = $currentMode;
   $: engineKey = (mode === "MIDI" ? "engine-midi" : "engine-osc") as
     | "engine-midi"
@@ -188,7 +191,7 @@
       </button>
     {/each}
   </div>
-  {#if currentType === "linear_acceleration" && $currentConfig?.sensorconf}
+  {#if currentType === "linear_acceleration" && sensorconf}
     <div
       class="row"
       style="border-bottom: 1px dashed var(--bg-secondary); padding-bottom: 6px; margin-top: 8px;"
@@ -211,7 +214,7 @@
         </InfoModal>
       </div>
       <select
-        bind:value={$currentConfig.sensorconf.acc_fsr}
+        bind:value={sensorconf.acc_fsr}
         style="padding: 4px 8px; border-radius: 4px;"
       >
         <option value={2}>±2g</option>
