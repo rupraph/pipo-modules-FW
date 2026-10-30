@@ -97,9 +97,15 @@ void PipoWifi::setup() {
 };
 void PipoWifi::saveScanResult() {
   signals.clear();
-  log_d("Saving scan results: %d networks found", WiFi.scanComplete());
-  for (int i = 0; i < WiFi.scanComplete(); i++) {
+  memset(apCountPerChannel, 0, sizeof(apCountPerChannel));
+  int n = WiFi.scanComplete();
+  log_d("Saving scan results: %d networks found", n);
+  for (int i = 0; i < n; i++) {
     signals[WiFi.SSID(i)] = WiFi.RSSI(i);
+    int ch = WiFi.channel(i);
+    if (ch >= 1 && ch <= 13) {
+      apCountPerChannel[ch]++;
+    }
   }
   WiFi.scanDelete();
   lastScan = millis();
@@ -334,14 +340,56 @@ bool PipoWifi::connect(String ssid, String password) {
   return true;
 };
 
+// Pick the least congested 2.4GHz channel from {1, 6, 11}.
+// Uses PipoName hash as tiebreaker for deterministic distribution
+// when multiple devices boot simultaneously (all see same scan).
+int PipoWifi::pickChannel() {
+  const uint8_t candidates[] = {1, 6, 11};
+  const uint8_t numCandidates = sizeof(candidates);
+
+  // Find minimum AP count among candidate channels
+  uint8_t bestCount = 255;
+  for (uint8_t i = 0; i < numCandidates; i++) {
+    uint8_t ch = candidates[i];
+    if (apCountPerChannel[ch] < bestCount) {
+      bestCount = apCountPerChannel[ch];
+    }
+  }
+
+  // Collect all channels tied for best (lowest congestion)
+  uint8_t tied[numCandidates];
+  uint8_t tiedCount = 0;
+  for (uint8_t i = 0; i < numCandidates; i++) {
+    uint8_t ch = candidates[i];
+    if (apCountPerChannel[ch] == bestCount) {
+      tied[tiedCount++] = ch;
+    }
+  }
+
+  // Deterministic tiebreaker: hash PipoName to distribute evenly
+  string name = config.general_config["PipoName"].as<string>();
+  uint8_t hash = 0;
+  for (char c : name) {
+    hash += static_cast<uint8_t>(c);
+  }
+
+  uint8_t chosen = tied[hash % tiedCount];
+  log_i(
+      "Channel selection: picked %d (best count=%d, %d tied channels, "
+      "from %d APs seen)",
+      chosen, bestCount, tiedCount, signals.size());
+  return chosen;
+}
+
 //Todo: context issue. leds cannot be started from there
 bool PipoWifi::configureAP() {
   getFreeSubNet();
   apIP = IPAddress(192, 168, subnetBase, 1);
   WiFi.softAPConfig(apIP, apIP, apMask);
   string apName = "Pipo-" + config.general_config["PipoName"].as<string>();
-  log_i("Starting AP: %s", apName.c_str());
-  apStarted = WiFi.softAP(apName.c_str(), "pipo1234", 6, false, 6);
+  int channel = pickChannel();
+  log_i("Starting AP: %s on channel %d", apName.c_str(), channel);
+  apStarted = WiFi.softAP(apName.c_str(), "pipo1234", channel, false, 6);
   if (apStarted) {
     log_i("AP started successfully");
     apConfigured = true;

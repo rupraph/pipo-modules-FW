@@ -58,6 +58,7 @@ class PipoWifi {
   unsigned long lastScan = 0;
 
   void getFreeSubNet();
+  int pickChannel();  // Select least-congested channel for AP
 
  public:
   // Public state accessible by event handlers - embedded systems pragmatic approach
@@ -70,6 +71,7 @@ class PipoWifi {
   PipoWState next;
   PipoPWManager pwm;
   std::map<String, int> signals;
+  uint8_t apCountPerChannel[14] = {0};  // AP count per 2.4GHz channel (1-13)
   int8_t rssi;
   uint8_t reconnectAttempts = 0;
   unsigned long lastReconnectAttempt = 0;
