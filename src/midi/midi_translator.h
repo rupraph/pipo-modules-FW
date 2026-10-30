@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
-#include <MIDI.h>
 #include <ArduinoJson.h>
 
 using namespace std;

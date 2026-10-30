@@ -10,11 +10,13 @@
 #include "utils/logs.h"
 #include "wifi/pipowifi.h"
 #include "utils/debug.h"
+#include "utils/system_monitor.h"
+#include "utils/crash_diagnostics.h"
 #include "utils/board_identity.h"
 #include "esp_task_wdt.h"
 #include <set>
 #if defined(PIPO_ANALOG)
-#include "sensors/analog_out.h"
+// #include "sensors/analog_out.h"
 #endif
 
 // FREERTOS core tasks distribution
@@ -22,6 +24,7 @@
 // core 1: sensor, midi, osc
 
 void init_filesystem();
+SET_LOOP_TASK_STACK_SIZE(8 * 1024);
 
 // Cached board identity — read once at boot, shared with the web server.
 BoardIdentity g_board_id;
@@ -50,6 +53,9 @@ void setup() {  // by default on core 1
 
   Serial.begin(115200);
   Serial.setDebugOutput(true);
+
+  // Initialize crash diagnostics early to catch any issues
+  initCrashDiagnostics();
 
 #if defined(DISABLE_USB_COMM)
   // Wait press to start setup
@@ -121,7 +127,10 @@ void setup() {  // by default on core 1
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup sensor");
 
-    // Register button callbacks for sensor-specific actions
+  // Register button callbacks for sensor-specific actions
+  // Long press on play/pause re-opens the WiFi AP (power-save mode)
+  hwui.set_pause_long_press_callback([]() { wifi.requestAP(); });
+
 #ifdef PIPO_MOTION
   hwui.set_mode_short_press_callback(
       []() { input_sensor.set_new_reference_orientation(); });
@@ -160,12 +169,19 @@ void setup() {  // by default on core 1
 
   log_i("Starting tasks");
 
+  // Arduino 3.x auto-initializes the task watchdog - use the default configuration
+  // Only the main loop task will subscribe to watchdog for critical path monitoring
 #ifdef DEBUG_WATCHDOG
-  esp_task_wdt_init(1000, false);  // 1 second timeout in debug mode
-  log_w("DEBUG_WATCHDOG enabled: 1000ms timeout");
-#else
-  esp_task_wdt_init(2000, false);  // 2 seconds timeout in production
+  log_w(
+      "DEBUG_WATCHDOG: Using Arduino 3.x default task watchdog configuration");
 #endif
+
+  // Verify IDLE stack configuration
+  log_i("CONFIG_FREERTOS_IDLE_TASK_STACKSIZE: %d",
+        CONFIG_FREERTOS_IDLE_TASK_STACKSIZE);
+
+  log_i("Creating tasks - monitoring heap and stack health...");
+  size_t heapBefore = ESP.getFreeHeap();
 
   // We are using the main loop instead of a dedicated Sensor task to optimize ram usage due to arduino framework
 
@@ -185,9 +201,9 @@ void setup() {  // by default on core 1
       delay(1000);
     }
   }
-  // Go as low as 580 bytes remaining on range
-  if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 2048, NULL, 1,
-                              &battmonitorTaskHandle, 0) != pdPASS) {
+
+  if (xTaskCreatePinnedToCore(battmonitorTask, "battmonitorTask", 4096, NULL, 1,
+                              &battmonitorTaskHandle, 1) != pdPASS) {
     log_e("FATAL: Failed to create battmonitorTask - halting");
     while (1) {
       delay(1000);
@@ -221,6 +237,25 @@ void setup() {  // by default on core 1
   // xTaskCreatePinnedToCore(
   //     debug_monitor, "debug_monitor", 4096, NULL, 1, &debugMonitorTaskHandle,
   //     1);  // for using debugheap, being on core 0 or stack 2048 causes crashes...
+
+  size_t heapAfter = ESP.getFreeHeap();
+  log_i("All tasks created. Heap used for tasks: %d bytes",
+        heapBefore - heapAfter);
+
+  // Check stack health immediately
+  log_i("\n=== Task Stack Status After Creation ===");
+  dumpAllTaskStacks();
+
+#ifdef ENABLE_SYSTEM_MONITOR
+  // Start comprehensive system monitoring (reports every 10s)
+  // Includes: heap stats, task CPU usage, stack health, core utilization
+  systemMonitor.start(1, 1);  // Run on core 1, priority 1
+  log_i("System monitor enabled - reports every 10s");
+#endif
+
+  // Generate initial system report
+  log_i("\n=== Initial System State ===");
+  SystemMonitor::report();
 
   log_i("Setup complete");
 }
@@ -257,7 +292,7 @@ void loop() {
   engine.update();
 
 #if defined(PIPO_ANALOG) && defined(BETA_OUT)
-  analog_out.update();
+  // analog_out.update();
 #endif
 
 #ifdef DEBUG_WATCHDOG

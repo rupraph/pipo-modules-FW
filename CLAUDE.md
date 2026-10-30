@@ -45,7 +45,8 @@ src/
     pipo_range_sensor.h — PipoRangeSensor (ToF, 1 axis)
   midi/
     midi_io.cpp/h       — MIDI output: CC/Note modes, sustain manager
-    midiBLE.cpp/h       — BLE MIDI (NimBLE)
+    midiBLE.cpp/h       — BLE MIDI transport on NimBLE-Arduino 2.x (docs/ble-midi.md)
+    ble_midi_codec.h    — BLE-MIDI packet encode/parse + coalescing out queue (pure, tested)
     midiUSB.cpp/h       — USB MIDI (TinyUSB)
     midi_translator.h   — Per-axis MIDI mapping config
   osc/
@@ -100,6 +101,7 @@ mock-server/             — Express mock for frontend dev (port 3000)
 | hwuiTask | 2KB | 1 | 0 | 10-20ms | LED patterns |
 | battmonitorTask | 2KB | 1 | 0 | 500ms | Battery sampling |
 | buttonTask | 2KB | 1 | 0 | 5ms | Debounce + press |
+| bleMidiTask | 3KB | 2 | 0 | BLE connection interval | BLE MIDI send (only when BLEEnabled) |
 
 All tasks register with ESP32 watchdog (2s timeout).
 
@@ -154,6 +156,7 @@ Single-client enforced. TEXT frames only. Custom protocol:
 - `configs:key:val\nkey:val` — batch edit
 - `save:` — persist to flash
 - `monitor:axis_name` — subscribe to axis telemetry
+- `alive:1` — visible-page heartbeat (10s); keeps the AP on in WiFi battery-saving mode
 
 **Outbound** (256B buffer, adaptive rate):
 ```

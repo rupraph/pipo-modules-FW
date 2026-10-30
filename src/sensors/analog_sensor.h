@@ -7,7 +7,7 @@
 #include "utils/debug.h"
 
 #ifdef PIPO_ANALOG
-#include "sensors/analog_out.h"
+// #include "sensors/analog_out.h"
 #endif
 
 using namespace std;

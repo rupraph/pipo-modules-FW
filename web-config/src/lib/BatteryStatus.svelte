@@ -14,6 +14,7 @@
   let intervalId: number;
 
   async function fetchBatteryLevel() {
+    if (document.hidden) return; // no need to poll while the page is hidden
     try {
       const { data } = await pipoio.get("/battlevel", { timeout: 2000 });
       const value = parseInt(data);

@@ -58,9 +58,11 @@ class Button {
   bool is_pressed = false;
   bool long_press_triggered = false;
   PressType last_press_type = PRESS_NONE;
+  unsigned long long_press_ms = LONG_PRESS_TIME;
 
  public:
   void setup_button(int pin);
+  void set_long_press_ms(unsigned long ms) { long_press_ms = ms; }
   int read_debounce();
   int get_button();
   void reset_button() {
@@ -83,7 +85,6 @@ class HwUi {
 
   int PWM_Resolution = 8;
   int PWM_FREQ = 5000;
-  std::unordered_map<int, int> led_channel_map;
 
   unsigned long soft_pwm_prediod_micros = 5000;
 
@@ -114,8 +115,6 @@ class HwUi {
     int brightness;
   };
 
-  static const int NUM_LEDS = 4;
-
   //Todo: avoid assigning both blink and pulse to same led
 
   std::unordered_map<int, led_blink>
@@ -124,8 +123,8 @@ class HwUi {
       led_pulse_table;  // position is led_name (ie pin)
   std::unordered_map<int, soft_pwm> soft_pwm_table;
 
-  unsigned long blink_once
-      [NUM_LEDS];  // register blink start time // the position in table are the channel nb.
+  std::unordered_map<int, unsigned long>
+      blink_once;                   // Maps pin -> blink end time
   int blink_once_brightness = 100;  // brightness for blink_once led
   void init();
   void setup();
@@ -184,7 +183,7 @@ class HwUi {
   ButtonCallback pause_long_press_cb = nullptr;
   ButtonCallback mode_short_press_cb = nullptr;
   ButtonCallback mode_long_press_cb = nullptr;
-#ifdef PIPO_ANALOG&& HW_REV >= 20
+#if defined(PIPO_ANALOG) && HW_REV >= 20
   CRGB leds[NB_RGB_LEDS];
   CRGB leds_base_color[NB_RGB_LEDS];
 
@@ -195,8 +194,14 @@ class HwUi {
   int bat_sampling_index = 0;
   int bat_voltage = 0;
   // previous-state tracking for flag transitions
-  bool prev_staConnected = false;
-  bool prev_apConnected = false;
+  enum WifiLedPattern {
+    WIFI_LED_OFF,        // radio off (power-save)
+    WIFI_LED_SEARCHING,  // no connection: blink
+    WIFI_LED_AP_CLIENT,  // device on AP, no STA: fast pulse
+    WIFI_LED_STA,        // STA connected, AP on: slow pulse
+    WIFI_LED_STA_ONLY,   // STA connected, AP off: short flash
+  };
+  WifiLedPattern prev_wifi_pattern = WIFI_LED_SEARCHING;  // set in setup()
   bool prev_BTconnected = false;
 };
 

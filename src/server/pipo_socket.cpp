@@ -2,7 +2,7 @@
 
 // takes 2-3 ms for motion
 void websocketTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
+  // Websocket task is non-critical - don't subscribe to watchdog
   for (;;) {
     if (!pipoNetworkReady()) {
       vTaskDelay(pdMS_TO_TICKS(500));
@@ -34,7 +34,6 @@ void websocketTask(void* pvParameters) {
     }
 
     pipoSocket.loop();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(taskDelay));
   }
 }
@@ -77,6 +76,10 @@ void PipoSocket::setup() {
         return;
       }
 
+      if (client->client()) {
+        wifi.notifyActivity(client->client()->localIP());
+      }
+      lastAliveTs = millis();
       log_i("WebSocket client connected: ID=%u IP=%s", client->id(),
             client->remoteIP().toString().c_str());
       enforceOneClient(client);
@@ -92,7 +95,12 @@ void PipoSocket::setup() {
       uint16_t errorCode = *((uint16_t*)arg);
       log_w("WebSocket error: ID=%u code=%u", client->id(), errorCode);
     } else if (type == WS_EVT_PONG) {
+      lastAliveTs = millis();
     } else if (type == WS_EVT_DATA) {
+      lastAliveTs = millis();
+      if (client->client()) {
+        wifi.notifyActivity(client->client()->localIP());
+      }
       if (DEBUG_HEAP)
         pipoDebugHeap("WS: Data");
       AwsFrameInfo* info = (AwsFrameInfo*)arg;
@@ -189,12 +197,12 @@ void PipoSocket::cleanupDeadClients() {
   if (ws == nullptr)
     return;
 
-  auto clients = ws->getClients();
+  auto& clients = ws->getClients();
 
   // Clean up tracking set - remove IDs that are no longer in the clients list
   std::set<uint32_t> currentClientIds;
-  for (AsyncWebSocketClient* c : clients) {
-    currentClientIds.insert(c->id());
+  for (auto& c : clients) {
+    currentClientIds.insert(c.id());
   }
 
   // Remove IDs from closingClients that are no longer in the actual client list
@@ -210,8 +218,8 @@ void PipoSocket::cleanupDeadClients() {
   }
 
   // Now close dead clients, but only if we haven't already asked them to close
-  for (AsyncWebSocketClient* c : clients) {
-    uint32_t clientId = c->id();
+  for (auto& c : clients) {
+    uint32_t clientId = c.id();
 
     // Skip if we've already asked this client to close
     if (closingClients.find(clientId) != closingClients.end()) {
@@ -219,10 +227,10 @@ void PipoSocket::cleanupDeadClients() {
     }
 
     // Check if client is dead
-    if (c->status() != WS_CONNECTED || c->client() == nullptr) {
+    if (c.status() != WS_CONNECTED || c.client() == nullptr) {
       log_i("Removing dead WebSocket client: ID=%u status=%u", clientId,
-            c->status());
-      c->close();
+            c.status());
+      c.close();
       closingClients.insert(clientId);  // Track that we've closed this client
     }
   }
@@ -267,14 +275,14 @@ void PipoSocket::enforceOneClient(AsyncWebSocketClient* newClient) {
   if (ws == nullptr)
     return;
 
-  auto clients = ws->getClients();
-  for (AsyncWebSocketClient* c : clients) {
+  auto& clients = ws->getClients();
+  for (auto& c : clients) {
     // Close all existing clients except the new one
-    if (c->id() != newClient->id()) {
+    if (c.id() != newClient->id()) {
       log_i(
           "Closing old WebSocket client ID=%u to enforce single-client policy",
-          c->id());
-      c->close();
+          c.id());
+      c.close();
     }
   }
 }
@@ -307,6 +315,8 @@ void PipoSocket::onMessage(AsyncWebSocketClient* client) {
       config.save();
     } else if (strcmp("monitor", command) == 0) {
       input_sensor.monitor_axis(inMsg + offset + 1);
+    } else if (strcmp("alive", command) == 0) {
+      // Visible-page heartbeat: activity already recorded on WS_EVT_DATA
     }
   } catch (const std::exception& e) {
     logs.writeError("error on message" + String(e.what()));
@@ -323,12 +333,6 @@ void PipoSocket::loop() {
   if (ws == nullptr || paused)
     return;
 
-  // Handle low memory case
-  if (ESP.getFreeHeap() < 30000) {
-    log_w("⚠️ Low Memory: Skipping WebSocket Messages");
-    return;
-  }
-
   unsigned long now = millis();
 
   // Cleanup dead clients periodically (not every loop iteration)
@@ -337,8 +341,34 @@ void PipoSocket::loop() {
     lastCleanTime = now;
   }
 
-  auto clients = ws->getClients();
-  if (clients.length() == 0)
+  // Handle low memory case
+  if (ESP.getFreeHeap() < 30000) {
+    log_w("⚠️ Low Memory: Skipping WebSocket Messages");
+    // Pings are skipped too: don't let that look like a dead client
+    lastAliveTs = millis();
+    return;
+  }
+
+  // Liveness: browsers answer pings automatically. Close a client that
+  // stopped answering so it frees its slot and stops holding the AP up.
+  if (ws->count() > 0 && now - lastPingTime > PING_INTERVAL) {
+    lastPingTime = now;
+    if (now - lastAliveTs > CLIENT_TIMEOUT) {
+      log_w("WebSocket client not answering pings, closing");
+      for (auto& c : ws->getClients()) {
+        if (closingClients.find(c.id()) == closingClients.end()) {
+          c.close();
+          closingClients.insert(c.id());
+        }
+      }
+    } else {
+      const uint8_t payload[] = {'p'};
+      ws->pingAll(payload, sizeof(payload));
+    }
+  }
+
+  auto& clients = ws->getClients();
+  if (clients.size() == 0)
     return;
 
   outMsg[0] = 0;
@@ -399,8 +429,7 @@ void PipoSocket::loop() {
           }
         } else if (midi.tl_mode == 2) {  // Pitch Bend mode
           uint16_t last_pb = midi.get_last_pitch_bend();
-          if (last_pb !=
-              8192) {  // Check if value has changed from center
+          if (last_pb != 8192) {  // Check if value has changed from center
             output_val = (float)last_pb;
             has_output = true;
           }
@@ -446,32 +475,32 @@ void PipoSocket::loop() {
   }
 
   // Send to connected clients with defensive checks
-  for (AsyncWebSocketClient* c : clients) {
+  for (auto& c : clients) {
     // Verify client is in a valid state before sending
-    if (c == nullptr || c->client() == nullptr) {
+    if (c.client() == nullptr) {
       continue;
     }
 
-    if (c->status() != WS_CONNECTED) {
+    if (c.status() != WS_CONNECTED) {
       continue;
     }
 
-    if (!c->canSend()) {
+    if (!c.canSend()) {
       continue;  // Queue is full, skip silently (will retry next iteration)
     }
-    if (c->queueIsFull()) {
+    if (c.queueIsFull()) {
       continue;
     }
 
 // Extra safety: when BLE active, skip if TCP layer also struggling
 // This prevents radio conflicts from causing protocol errors
 #ifdef INCLUDE_BLE
-    if (BTconnected && c->client() && c->client()->space() < 512) {
+    if (BTconnected && c.client() && c.client()->space() < 512) {
       continue;  // Give BLE priority, will retry next iteration
     }
 #endif
 
-    c->text(outMsg);
+    c.text(outMsg);
   }
 }
 

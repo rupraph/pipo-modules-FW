@@ -32,7 +32,11 @@
       <div class="close" on:click={() => (open = false)}>
         <CircleX size={28} />
       </div>
-      <slot></slot>
+      <!-- Scroll inside a body wrapper, not .modal itself: nested modals
+         (InfoModal) are positioned against .modal and must not scroll away -->
+      <div class="modal-body">
+        <slot></slot>
+      </div>
     </div>
   </div>
 {/if}
@@ -43,6 +47,10 @@
     width: calc(100vw - 8px);
     max-width: 400px;
     max-height: calc(100vh - 2em);
+    /* Mobile: 100vh includes the area behind the browser toolbar */
+    max-height: calc(100dvh - 2em);
+    display: flex;
+    flex-direction: column;
     background-color: var(--modal-bg, var(--bg-network));
     position: fixed;
     overflow: hidden;
@@ -57,6 +65,12 @@
     bottom: 1em;
     margin: auto 0;
     height: fit-content;
+  }
+  .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .modal :global(p) {
     text-align: left;

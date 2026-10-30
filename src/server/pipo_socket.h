@@ -38,11 +38,15 @@ class PipoSocket {
   unsigned long CLEANUP_INTERVAL =
       1000;  // Cleanup every 1 second instead of every loop
   unsigned long lastPingTime = 0;
+  // Last pong / inbound frame: a device that left the network stays
+  // WS_CONNECTED until TCP times out (minutes), so close it on ping timeout
+  volatile unsigned long lastAliveTs = 0;
+  static const unsigned long CLIENT_TIMEOUT = 10000;
   unsigned long lastConnectionTime = 0;
   IPAddress lastClientIP = IPAddress(0, 0, 0, 0);
   unsigned long MIN_CONNECTION_INTERVAL =
       500;  // Minimum 500ms between connections
-  unsigned long PING_INTERVAL = 1000;
+  unsigned long PING_INTERVAL = 3000;
   unsigned long iterations = 0;
   const int inMaxLen = 512;
   int inMsgL = 0;

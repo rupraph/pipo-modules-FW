@@ -27,9 +27,16 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
   private reconnectTimeout = 0;
   private readonly maxReconnectDelay = 5000; // Max 5 seconds
   private readonly baseReconnectDelay = 500; // Start at 500ms
+  // Tells the Pipo the page is on screen, so battery-saving mode keeps the
+  // WiFi access point on. Well below the minimum Wifi_ap_idle_s (30 s) so a
+  // skipped beat (socket busy) can't let the AP drop.
+  private readonly aliveInterval = 10000;
   constructor() {
     super();
     this.connect();
+
+    setInterval(() => this.sendAlive(), this.aliveInterval);
+    document.addEventListener("visibilitychange", () => this.sendAlive());
     
     // Check for dead connections every 3 seconds
     // If no messages received in that period, close socket and emit disconnect
@@ -210,6 +217,12 @@ export class PipoIO<T extends PipoTypes = "unknown"> extends EventEmitter<
         .map(({ path, value }) => `${path}:${formatNumbers(value, 4)}`)
         .join("\n")}`
     );
+  }
+
+  sendAlive() {
+    if (document.visibilityState !== "visible") return;
+    if (!this.canSendWSMessage()) return;
+    this.socket!.send("alive:1");
   }
 
   requestRSSI() {

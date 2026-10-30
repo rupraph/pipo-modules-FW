@@ -34,6 +34,11 @@ class Config {
     general_config["PipoName"] = "default";
     general_config["BLEEnabled"] = false;
     general_config["Button_disa"] = false;
+    general_config["Wifi_ps_ena"] = false;  // WiFi battery-saving mode
+    general_config["Wifi_ap_boot_s"] = 60;   // AP window after boot
+    general_config["Wifi_ap_idle_s"] = 120;  // AP kept after last page activity
+    general_config["Wifi_sta_lost_s"] = 15;  // STA loss grace before AP returns
+    general_config["Wifi_ap_btn_ms"] = 2000;  // pause long press to open AP
   }
   String filename;              // raw config file name (no extension)
   JsonDocument current_config;  // stores all configs (gather)

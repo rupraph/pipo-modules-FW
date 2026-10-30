@@ -82,6 +82,8 @@ export const setupWebSocket = (server: HttpServer) => {
           updateConfig(path, value);
         });
         console.log(`Setting configs: ${arg}`);
+      } else if (command === "alive") {
+        // visible-page heartbeat (battery-saving mode), nothing to do
       } else if (command === "save") {
         console.log("Saving config");
       } else if (command === "monitor") {

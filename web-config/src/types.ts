@@ -70,6 +70,12 @@ export type GeneralConfig = {
   PipoName: string;
   BLEEnabled: boolean;
   Button_disa: boolean;
+  // WiFi battery-saving mode (absent in older configs)
+  Wifi_ps_ena: boolean; // undefined on older configs (treated as off)
+  Wifi_ap_boot_s?: number;
+  Wifi_ap_idle_s?: number;
+  Wifi_sta_lost_s?: number;
+  Wifi_ap_btn_ms?: number;
 };
 
 // export type HidConfig = {
@@ -131,12 +137,24 @@ export type StringSchema = {
   min: number;
   max: number;
 };
+export type NumberSchema = {
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+};
+export type WifiPowerKey =
+  | "Wifi_ap_boot_s"
+  | "Wifi_ap_idle_s"
+  | "Wifi_sta_lost_s"
+  | "Wifi_ap_btn_ms";
 export type Schema = {
   [T in PipoTypes]: {
     [Key in PipoKeys[T]]: AxisSchema;
   };
 } & {
   name: StringSchema;
+  wifiPower: Record<WifiPowerKey, NumberSchema>;
 };
 
 export type SensorSettings = {

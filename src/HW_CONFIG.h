@@ -76,6 +76,9 @@
 #define WIFI_AP_PULSE_TIME 1000
 #define WIFI_PULSE_BRIGHTNESS 50
 #define WIFI_PULSE_MIN_BRIGHTNESS 30
+// STA only (power-save): short flash, LED dark otherwise to save battery
+#define WIFI_STA_ONLY_BLINK_TIME 3000
+#define WIFI_STA_ONLY_DUTY 0.03  // ~90 ms on per 3 s
 #define BT_PULSE_TIME 3000
 #define BT_PULSE_BRIGHTNESS 50
 #define BT_PULSE_MIN_BRIGHTNESS 20

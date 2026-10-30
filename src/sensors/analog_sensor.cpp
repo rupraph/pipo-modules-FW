@@ -25,13 +25,13 @@ bool AnalogSensor::measure_sensor() {
   //WARNING ADC2 pins are not fully usable when wifi is on
 
   for (auto const& pair : analog_map) {
-    if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
-      sensor_dat[pair.first].raw_value = std::min(
-          std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
-      sensor_dat[pair.first].value =
-          filter_map[pair.first].process(sensor_dat[pair.first].raw_value);
-      ;  // * 0.000806f;
-    }
+    // if (analog_out.get_pin_dir(pair.first) == PinMode::IN) {
+    sensor_dat[pair.first].raw_value = std::min(
+        std::max(analogReadMilliVolts(pair.second) / 1000.0f, 0.0f), 3.1f);
+    sensor_dat[pair.first].value =
+        filter_map[pair.first].process(sensor_dat[pair.first].raw_value);
+    ;  // * 0.000806f;
+    // }
   }
 
   for (auto const& pair : touch_map) {
@@ -51,7 +51,7 @@ void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
     log_d("set_sensor_config");
   }
   if (config["analogout"].is<JsonObject>()) {
-    analog_out.set_config(config["analogout"]);
+    // analog_out.set_config(config["analogout"]);
     log_i("analog_out config set");
   } else {
     log_w("no analog_out config found");
@@ -61,7 +61,7 @@ void AnalogSensor::set_sensor_config(JsonObject config, bool debug) {
 JsonDocument AnalogSensor::get_sensor_config(bool debug) {
   JsonDocument config;
   // only analog out to be configured for now
-  config["analogout"] = analog_out.get_config();
+  // config["analogout"] = analog_out.get_config();
   return config;
 }
 

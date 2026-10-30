@@ -1,17 +1,19 @@
 #include <wifi/pipowifi.h>
 #include <osc/osc_handler.h>
+#include "server/server.h"
+#include <esp_wifi.h>
+#include <esp_netif.h>
 
 //TODO: Should move content from callback (only put flags)
 
 void wifiTask(void* pvParameters) {
-  esp_task_wdt_add(NULL);
-  // unsigned long lastStackCheck = 0;
+  // WiFi task is non-critical - don't subscribe to watchdog
+  // unsigned long lastStackCheck = 0;k
   unsigned long serverPausedTime = 0;
   const unsigned long SERVER_PAUSE_TIMEOUT = 10000;  // 10 seconds max pause
 
   for (;;) {
     wifi.refresh();
-    esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(500));
 
     // // Monitor stack usage every 30 seconds
@@ -29,10 +31,14 @@ void wifiTask(void* pvParameters) {
 
     // Resume server if:
     // 1. AP is started (even if not fully configured yet), OR
-    // 2. Server has been paused for more than timeout (failsafe)
+    // 2. STA is connected (AP may be off in power-save mode), OR
+    // 3. Server has been paused for more than timeout (failsafe)
+    // Never while the radio is off in power-save mode.
     bool shouldResume =
-        apStarted || (serverPausedTime > 0 &&
-                      (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT);
+        !wifiRadioOff &&
+        (apStarted || staConnected ||
+         (serverPausedTime > 0 &&
+          (millis() - serverPausedTime) > SERVER_PAUSE_TIMEOUT));
 
     if (shouldResume && !server.isRunning()) {
       log_i("Resuming server (apStarted=%d, timeout=%d)", apStarted,
@@ -91,6 +97,8 @@ void PipoWifi::setup() {
   scanning = true;
   log_i("WiFi scan network initiated");
   int num = WiFi.scanNetworks(true, false, false, 300U);
+  bootTs = millis();
+  lastPowerSwitchTs = bootTs;
   log_i("WiFi scan complete, setup done");
   if (DEBUG_HEAP)
     pipoDebugHeap("End setup pipowifi");
@@ -199,6 +207,7 @@ void onSTADisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 
   wifi.status = PipoWifi::DISCONNECTED;
   staConnected = false;
+  wifi.markStaDown();
   osc.stop();  // STA disconnected, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -218,6 +227,7 @@ void onSTAAuthModeChangeHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTAGotIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_i("[Event] STA_GOT_IP - IP: %s", WiFi.localIP().toString().c_str());
   wifi.status = PipoWifi::CONNECTED;
+  wifi.markStaUp();
   osc.start();               // Network ready, start UDP
   wifi.stateChanged = true;  // Signal state machine to run
 }
@@ -232,6 +242,7 @@ void onSTAGotIP6Handler(WiFiEvent_t event, WiFiEventInfo_t info) {
 void onSTALostIPHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_w("[Event] STA_LOST_IP");
   wifi.status = PipoWifi::DISCONNECTED;
+  wifi.markStaDown();
   osc.stop();  // Network lost, stop UDP
 
   // If in APSTA mode and AP is configured, restart UDP for AP interface
@@ -256,18 +267,27 @@ void onAPStopHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
   log_d("[Event] AP_STOP");
   apStarted = false;
   apConfigured = false;
-  osc.stop();                // AP stopped, stop UDP
+  apConnected = false;
+  // Keep UDP running when the AP is dropped but STA still carries OSC
+  if (!staConnected) {
+    osc.stop();  // AP stopped, stop UDP
+  }
   wifi.stateChanged = true;  // Signal state machine to run
 }
 
 void onAPStationConnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  log_d("[Event] AP_STACONNECTED - apConnected: false -> true");
+  log_i("[Event] AP client connected (%d connected)",
+        WiFi.softAPgetStationNum());
   apConnected = true;
 }
 
 void onAPStationDisconnectedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
-  log_d("[Event] AP_STADISCONNECTED - apConnected: true -> false");
-  apConnected = false;
+  int remaining = WiFi.softAPgetStationNum();
+  log_i("[Event] AP client disconnected (%d connected)", remaining);
+  apConnected = remaining > 0;
+  if (remaining == 0) {
+    wifi.markApClientLeft();  // give the user time to reconnect
+  }
 }
 
 void onAPStationIPAssignedHandler(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -346,7 +366,7 @@ bool PipoWifi::configureAP() {
     log_i("AP started successfully");
     apConfigured = true;
     // AP has IP address now, start UDP for communication
-    osc.start();
+    // osc.start();
     //hwui.start_blink(WIFI_LED, WIFI_AP_PULSE_TIME, 0.2);
   } else {
     log_e("Failed to start AP");
@@ -467,8 +487,9 @@ void PipoWifi::step() {
     intentionalDisconnect = true;
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_MODE_NULL);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    // vTaskDelay(pdMS_TO_TICKS(100));
     WiFi.mode(next.mode);
+    wifiStaOnly = next.mode == WIFI_MODE_STA;
     apStarted = false;
     apConfigured = false;
     staStarted = false;
@@ -523,6 +544,8 @@ void PipoWifi::refresh() {
     step();
   }
 
+  powerTick();
+
   wifi_mode_t prevMode = WiFi.getMode();
 
   if (next.shouldScan) {
@@ -568,6 +591,234 @@ void PipoWifi::disconnect() {
 
   intentionalDisconnect = true;
   WiFi.disconnect();
+}
+
+// ---------------------------------------------------------------------------
+// Battery-saving mode
+// decideWifiTarget() (wifi_policy.h) picks APSTA / STA_ONLY / OFF; the methods
+// below apply it. Mode changes only happen here, from refresh() in wifiTask.
+// ---------------------------------------------------------------------------
+
+void PipoWifi::markStaUp() {
+  staUpSinceTs = millis();
+  staLostSinceTs = 0;
+}
+
+void PipoWifi::markStaDown() {
+  if (staUpSinceTs != 0 || staLostSinceTs == 0) {
+    staLostSinceTs = millis();
+  }
+  staUpSinceTs = 0;
+}
+
+// True if the OSC target is a device currently connected to the AP (its
+// DHCP lease matches OSC_IP). Being on the AP subnet is not enough: the
+// default OSC_IP is on it, which would otherwise hold the AP forever.
+bool PipoWifi::oscTargetOnAp() {
+  IPAddress target;
+  if (!apStarted ||
+      !target.fromString(config.general_config["OSC_IP"] | "")) {
+    return false;
+  }
+  wifi_sta_list_t stations;
+  if (esp_wifi_ap_get_sta_list(&stations) != ESP_OK || stations.num == 0) {
+    return false;
+  }
+  esp_netif_pair_mac_ip_t pairs[ESP_WIFI_MAX_CONN_NUM];
+  for (int i = 0; i < stations.num; i++) {
+    memcpy(pairs[i].mac, stations.sta[i].mac, 6);
+    pairs[i].ip.addr = 0;
+  }
+  esp_netif_t* apNetif = esp_netif_get_handle_from_ifkey("WIFI_AP_DEF");
+  if (apNetif == nullptr ||
+      esp_netif_dhcps_get_clients_by_mac(apNetif, stations.num, pairs) !=
+          ESP_OK) {
+    return false;
+  }
+  for (int i = 0; i < stations.num; i++) {
+    if (pairs[i].ip.addr == (uint32_t)target) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void PipoWifi::markApClientLeft() {
+  // Ignore clients kicked by our own AP shutdown (disableAP / radioOff set
+  // the new state before stopping the AP), or the AP would reopen at once
+  if (powerState() == WifiTarget::APSTA) {
+    apClientLeftTs = millis();
+  }
+}
+
+WifiTarget PipoWifi::powerState() {
+  if (wifiRadioOff) {
+    return WifiTarget::OFF;
+  }
+  return next.mode == WIFI_MODE_STA ? WifiTarget::STA_ONLY : WifiTarget::APSTA;
+}
+
+void PipoWifi::powerTick() {
+  uint32_t now = millis();
+  JsonDocument& g = config.general_config;
+  WifiTarget current = powerState();
+
+  if (apRequested) {
+    apRequested = false;
+    log_i("WiFi power: AP requested by button");
+    apOpenTs = now;
+    lastPowerSwitchTs = 0;  // user action: skip dwell
+  }
+
+  // Keys may be missing from older configs / presets: fall back to defaults
+  if (!(g["Wifi_ps_ena"] | false)) {
+    // Turning the feature off restores APSTA once, then leaves the mode alone
+    if (powerSaveWasEnabled) {
+      log_i("WiFi power: battery saving disabled");
+      if (current != WifiTarget::APSTA) {
+        setPowerTarget(current, WifiTarget::APSTA);
+      }
+    }
+    powerSaveWasEnabled = false;
+    return;
+  }
+  if (!powerSaveWasEnabled) {
+    log_i("WiFi power: battery saving enabled (boot %ds, idle %ds)",
+          (int)(g["Wifi_ap_boot_s"] | 60), (int)(g["Wifi_ap_idle_s"] | 120));
+  }
+  powerSaveWasEnabled = true;
+
+  WifiPolicyIn in;
+  in.enabled = true;
+  in.oscEnabled = g["OSC_ENA"] | false;
+  in.bootWindowMs = (uint32_t)(g["Wifi_ap_boot_s"] | 60) * 1000;
+  in.idleMs = (uint32_t)(g["Wifi_ap_idle_s"] | 120) * 1000;
+  in.staLostMs = (uint32_t)(g["Wifi_sta_lost_s"] | 15) * 1000;
+  in.oscTargetOnAp = oscTargetOnAp();
+  in.current = current;
+  in.now = now;
+  in.bootTs = bootTs;
+  in.lastActivityTs = lastActivityTs;
+  in.apOpenTs = apOpenTs;
+  in.apClientLeftTs = apClientLeftTs;
+  in.staUpSinceTs = staUpSinceTs;
+  in.staLostSinceTs = staLostSinceTs;
+
+  logPowerHold(in);
+
+  WifiTarget target = decideWifiTarget(in);
+  if (target == current ||
+      (uint32_t)(now - lastPowerSwitchTs) < POWER_MIN_DWELL_MS) {
+    return;
+  }
+  // Don't switch while a config upload / user mode change paused the server
+  if (current != WifiTarget::OFF && !server.isRunning()) {
+    return;
+  }
+  setPowerTarget(current, target);
+}
+
+// Logs what keeps the AP on whenever it changes, so the countdown to the AP
+// turning off can be followed on the serial monitor
+void PipoWifi::logPowerHold(const WifiPolicyIn& in) {
+  // Page counts as in use while heartbeats keep arriving (sent every 10 s)
+  bool pageActive = wifiPolicyWithin(in.now, in.lastActivityTs, 25000);
+  if (pageActive != pageWasActive) {
+    if (pageActive) {
+      log_i("WiFi power: config page in use");
+    } else {
+      log_i("WiFi power: config page idle");
+    }
+    pageWasActive = pageActive;
+  }
+
+  uint32_t msLeft = 0;
+  WifiApHold hold = wifiPolicyApHold(in, &msLeft);
+  const char* why = wifiApHoldName(hold);
+  if (hold == WifiApHold::NONE && in.oscEnabled && in.staUpSinceTs == 0) {
+    why = "OSC with no known network";
+  }
+  if (why != lastHoldReason) {
+    if (msLeft > 0) {
+      log_i("WiFi power: AP held by %s (%us left)", why,
+            (unsigned)(msLeft / 1000));
+    } else {
+      log_i("WiFi power: AP held by %s", why);
+    }
+    lastHoldReason = why;
+  }
+}
+
+void PipoWifi::setPowerTarget(WifiTarget from, WifiTarget to) {
+  log_i("WiFi power: %s -> %s", wifiTargetName(from), wifiTargetName(to));
+  uint32_t now = millis();
+
+  if (from == WifiTarget::OFF) {
+    radioOn();
+  }
+  switch (to) {
+    case WifiTarget::APSTA:
+      if (from == WifiTarget::STA_ONLY) {
+        enableAP();
+      }
+      apOpenTs = now;  // a re-opened AP gets a full idle window
+      break;
+    case WifiTarget::STA_ONLY:
+      disableAP();
+      break;
+    case WifiTarget::OFF:
+      radioOff();
+      break;
+  }
+  lastPowerSwitchTs = now;
+}
+
+void PipoWifi::enableAP() {
+  log_i("Enabling AP (APSTA)");
+  next.mode = WIFI_MODE_APSTA;  // keep step() from doing a full mode reset
+  wifiStaOnly = false;
+  apConfigured = false;
+  WiFi.enableAP(true);
+  configureAP();
+}
+
+void PipoWifi::disableAP() {
+  log_i("Disabling AP (STA only, modem sleep)");
+  next.mode = WIFI_MODE_STA;  // keep step() from doing a full mode reset
+  wifiStaOnly = true;
+  WiFi.softAPdisconnect(true);
+  // Modem sleep is only effective without the AP
+  WiFi.setSleep(WIFI_PS_MIN_MODEM);
+}
+
+void PipoWifi::radioOff() {
+  log_i("Turning WiFi radio off");
+  wifiRadioOff = true;
+  wifiStaOnly = false;
+  osc.stop();
+  server.pause();
+  next.mode = WIFI_MODE_NULL;
+  if (staConnected) {
+    intentionalDisconnect = true;
+  }
+  status = DISCONNECTED;
+  WiFi.mode(WIFI_OFF);
+  staStarted = false;
+  staConnected = false;
+  apStarted = false;
+  apConfigured = false;
+  apConnected = false;
+  staUpSinceTs = 0;
+  staLostSinceTs = 0;
+}
+
+void PipoWifi::radioOn() {
+  log_i("Turning WiFi radio on (APSTA)");
+  next.mode = WIFI_MODE_APSTA;
+  WiFi.mode(WIFI_MODE_APSTA);
+  wifiRadioOff = false;  // lets wifiTask resume the server once AP starts
+  // Fresh scan so step() can auto-connect to a saved STA
+  requestScan();
 }
 
 PipoWifi wifi;
