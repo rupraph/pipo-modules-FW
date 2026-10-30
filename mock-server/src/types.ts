@@ -64,6 +64,7 @@ export type Info = {
   type: string;
   ip: string;
   mac: string;
+  batch: string;
 };
 
 export type Sensor = {

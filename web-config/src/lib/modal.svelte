@@ -15,26 +15,28 @@
 </script>
 
 {#if open}
-  <div
-    class="overlay"
-    on:click={() => (open = false)}
-    on:keyup={close}
-    tabindex="0"
-  ></div>
-  <div
-    class="modal modal-style"
-    transition:scale={{
-      duration: 300,
-      easing: cubicOut,
-    }}
-  >
-    <div class="close" on:click={() => (open = false)}>
-      <CircleX size={28} />
-    </div>
-    <!-- Scroll inside a body wrapper, not .modal itself: nested modals
+  <div class="wrapper">
+    <div
+      class="overlay"
+      on:click={() => (open = false)}
+      on:keyup={close}
+      tabindex="0"
+    ></div>
+    <div
+      class="modal modal-style"
+      transition:scale={{
+        duration: 300,
+        easing: cubicOut,
+      }}
+    >
+      <div class="close" on:click={() => (open = false)}>
+        <CircleX size={28} />
+      </div>
+      <!-- Scroll inside a body wrapper, not .modal itself: nested modals
          (InfoModal) are positioned against .modal and must not scroll away -->
-    <div class="modal-body">
-      <slot></slot>
+      <div class="modal-body">
+        <slot></slot>
+      </div>
     </div>
   </div>
 {/if}
@@ -49,7 +51,7 @@
     max-height: calc(100dvh - 2em);
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-network);
+    background-color: var(--modal-bg, var(--bg-network));
     position: fixed;
     overflow: hidden;
     padding: 0 8px 8px 8px;
