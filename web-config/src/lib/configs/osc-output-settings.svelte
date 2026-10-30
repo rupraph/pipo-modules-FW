@@ -22,10 +22,18 @@
         ] as OscConfig)
       : null;
 
+  $: quatConfig = config?.engine?.["engine-special"]?.quat ?? null;
+
   // Create a reactive variable for mode_raw so the UI updates when it changes
   $: modeRaw = oscConfig?.mode_raw ?? false;
 
   $: isChannelEnabled = oscConfig?.enabled ?? false;
+
+  // Display-only prefix: shown next to the input, never part of the editable value
+  $: oscDisplayPrefix =
+    "/" +
+    (config?.general.PipoName || "") +
+    (config?.general.PipoName ? "/" : "");
 
   function toggleEnabled() {
     if (!oscConfig) return;
@@ -35,6 +43,8 @@
 
   function validateOscAddress(event: Event) {
     const input = event.target as HTMLInputElement;
+    if (!config) return;
+
     // Remove spaces and special characters, keep only alphanumeric, slash, hyphen, underscore, and dot
     let cleaned = input.value.replace(/[^a-zA-Z0-9/_\-\.]/g, "");
 
@@ -45,11 +55,18 @@
 
     if (cleaned !== input.value) {
       input.value = cleaned;
-      if (oscConfig) {
-        oscConfig.osc_addr = cleaned;
-        currentConfig.set(config);
-      }
     }
+
+    // Store only the address — the /PipoName/ prefix is added by the firmware
+    if (channelType === "quaternion") {
+      const quat = config.engine?.["engine-special"]?.quat;
+      if (quat) {
+        quat.osc_addr = cleaned;
+      }
+    } else if (oscConfig) {
+      oscConfig.osc_addr = cleaned;
+    }
+    currentConfig.set(config);
   }
 
   function handleOscAddressKeydown(event: KeyboardEvent) {
@@ -95,29 +112,30 @@
       <span class="output-label">OSC Address</span>
       <InfoModal>
         <p>
-          Define the OSC address for this channel. It is prefixed by the Pipo
-          Name (in settings pannel). No spaces or special characters are
+          Defines the OSC address for this channel. It is always prefixed by the
+          Pipo Name (in settings pannel). No spaces or special characters are
           allowed.
         </p>
       </InfoModal>
       <div class="input-container">
-        {#if channelType === "quaternion"}
+        <span class="osc-prefix">{oscDisplayPrefix}</span>
+        {#if channelType === "quaternion" && quatConfig}
           <input
             type="text"
-            bind:value={config.engine["engine-special"]["quat"].osc_addr}
+            value={quatConfig.osc_addr}
             maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
-            placeholder="/address"
+            placeholder="address"
             on:input={validateOscAddress}
             on:keydown={handleOscAddressKeydown}
           />
-        {:else}
+        {:else if oscConfig}
           <input
             type="text"
-            bind:value={oscConfig.osc_addr}
+            value={oscConfig.osc_addr}
             maxlength={OSC_ADDRESS_MAX_LENGTH}
             class="text-input"
-            placeholder="/address"
+            placeholder="address"
             on:input={validateOscAddress}
             on:keydown={handleOscAddressKeydown}
           />
@@ -205,6 +223,15 @@
   /* Input Container */
   .input-container {
     justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .osc-prefix {
+    color: var(--text-color-secondary);
+    white-space: nowrap;
+    user-select: none;
   }
 
   .input-container :global(.input) {
@@ -225,8 +252,7 @@
 
   /* Text Input */
   .text-input {
-    width: 150px;
-    /* height: 32px; */
+    width: 120px;
     padding: 0 12px;
     border: 2px solid var(--main);
     border-radius: 6px;
