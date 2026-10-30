@@ -10,6 +10,11 @@
 
 using namespace std;
 
+// Fraction of one note slot width that the input must move past a boundary
+// before committing to the new note. 0.0 = no hysteresis (original behaviour).
+// 0.2 = must travel 20% into the neighbouring slot before switching.
+constexpr float NOTE_BOUNDARY_HYSTERESIS = 0.15f;
+
 //This class is used to convert sensor value to usable midi messages
 
 class MidiTranslator
@@ -113,6 +118,9 @@ class MidiTranslator
   bool should_send_pitch_bend(uint16_t new_val);
 
  private:
+  // Hysteresis state for get_note(). -1 = uninitialised.
+  int last_note_index = -1;
+
   // Cached output values for change detection
   uint16_t last_sent_cc =
       65535;  // 65535 = never sent (supports both 7-bit and 14-bit)
