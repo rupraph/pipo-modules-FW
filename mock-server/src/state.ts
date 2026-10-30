@@ -45,6 +45,7 @@ class State<T extends PipoTypes = "analog"> {
       type: this.type,
       ip: global.ip,
       mac: global.mac,
+      batch: "072026",
     };
     
     const defaultConfig = 
@@ -152,6 +153,7 @@ class State<T extends PipoTypes = "analog"> {
       // the ip of the server
       ip: global.ip,
       mac: global.mac,
+      batch: "072026",
     };
   }
 

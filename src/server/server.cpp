@@ -128,6 +128,12 @@ void PipoServer::setup_requests() {
     info += "\",";
     info += "\"batt_type\":\"";
     info += String(BATT_TYPE);
+    info += "\",";
+    info += "\"batch\":\"";
+    if (g_board_id.programmed && g_board_id.batch[0] != '\0' &&
+        static_cast<uint8_t>(g_board_id.batch[0]) != 0xFF) {
+      info += g_board_id.batch;
+    }
     info += "\"}";
     if (DEBUG_HEAP)
       pipoDebugHeap("end info request");

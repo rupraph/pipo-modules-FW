@@ -322,6 +322,10 @@
           <span class="info-label">Battery type</span>
           <span class="info-value">{$pipoInfo?.batt_type ?? "—"}</span>
         </div>
+        <div class="info-col">
+          <span class="info-label">Batch number</span>
+          <span class="info-value">{$pipoInfo?.batch || "—"}</span>
+        </div>
       </div>
 
       <!-- Save Button (shown when there are unsaved changes) -->
@@ -546,9 +550,10 @@
 
   .info-col {
     display: flex;
-    /* justify-content: space-between; */
-    gap: 4px;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 2px;
   }
 
   .info-label {
