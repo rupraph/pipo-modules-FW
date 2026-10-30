@@ -12,6 +12,10 @@ void MotionSensor::init() {
 
   log_i("init motion sensor");
   icm20948.init(icmSettings);
+
+  // Apply stored acc_fsr from config (overrides the default set in icm20948.init)
+  sensor_initialized = true;
+  applyAccelFSR();
 }
 
 void MotionSensor::setup() {
@@ -301,6 +305,15 @@ void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
       reference_set = false;
     }
   }
+  if (config["acc_fsr"].is<int>()) {
+    int new_fsr = config["acc_fsr"];
+    if (new_fsr == 2 || new_fsr == 4 || new_fsr == 8 || new_fsr == 16) {
+      acc_fsr = new_fsr;
+      if (sensor_initialized) {
+        applyAccelFSR();
+      }
+    }
+  }
   if (debug) {
     Serial.println(relative_mode);
     Serial.println("set_sensor_config_end");
@@ -310,6 +323,7 @@ void MotionSensor::set_sensor_config(JsonObject config, bool debug = false) {
 JsonDocument MotionSensor::get_sensor_config(bool debug = false) {
   JsonDocument config;
   config["relative_mode"] = relative_mode;
+  config["acc_fsr"] = acc_fsr;
   return config;
 }
 
@@ -327,6 +341,11 @@ void MotionSensor::normalize_quaternion(float& w, float& x, float& y,
     y /= norm;
     z /= norm;
   }
+}
+
+void MotionSensor::applyAccelFSR() {
+  icm20948.setAccelFSR(acc_fsr);
+  log_i("Accelerometer FSR set to ±%dg", (int)acc_fsr);
 }
 
 //   // Normalize current quaternion

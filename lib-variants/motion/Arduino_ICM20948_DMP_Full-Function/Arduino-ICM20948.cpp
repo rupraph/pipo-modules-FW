@@ -816,3 +816,16 @@ void ArduinoICM20948::readStepsData(unsigned long* step_count)
     *step_count = steps;
     steps_data_ready = false;
 }
+
+void ArduinoICM20948::setAccelFSR(int32_t fsr)
+{
+  if (fsr != 2 && fsr != 4 && fsr != 8 && fsr != 16) return;
+
+  cfg_acc_fsr = fsr;
+
+  // Apply to both raw and calibrated accelerometer sensors
+  inv_icm20948_set_fsr(&icm_device, INV_ICM20948_SENSOR_RAW_ACCELEROMETER,
+                       (const void *)&cfg_acc_fsr);
+  inv_icm20948_set_fsr(&icm_device, INV_ICM20948_SENSOR_ACCELEROMETER,
+                       (const void *)&cfg_acc_fsr);
+}

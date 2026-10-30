@@ -142,6 +142,7 @@ export type Schema = {
 export type SensorSettings = {
   motion: {
     relative_mode: boolean;
+    acc_fsr: number;  // accelerometer full-scale range: 2, 4, 8, or 16 g
   };
   range: {
     hold_mode: boolean;

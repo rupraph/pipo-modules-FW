@@ -456,6 +456,7 @@
     "Button_disa": false
   },
   "sensorconf": {
-    "relative_mode": true
+    "relative_mode": true,
+    "acc_fsr": 4
   }
 }
