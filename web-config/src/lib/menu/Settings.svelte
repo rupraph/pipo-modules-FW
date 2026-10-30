@@ -31,6 +31,7 @@
       : "osc";
 
   let open = false;
+  let showNameWarning = false;
 
   // Sync modal state with store
   $: settingsModalOpen.set(open);
@@ -119,6 +120,16 @@
       timeout: 8000,
     });
     pipoio.get("/reboot").then(() => console.log("Rebooting..."));
+  }
+
+  function handleSave() {
+    if (!config) return;
+    // Show name-change warning popup before saving
+    if ($pipoNameWillChange) {
+      showNameWarning = true;
+      return;
+    }
+    saveConfig(config);
   }
 </script>
 
@@ -321,7 +332,7 @@
             class:loading={$savingStatus === "loading"}
             class:success={$savingStatus === "success"}
             class:error={$savingStatus === "error"}
-            on:click={() => config && saveConfig(config)}
+            on:click={handleSave}
             disabled={$savingStatus === "loading"}
           >
             {#if $savingStatus === "loading"}
@@ -341,6 +352,42 @@
       {/if}
     </div>
   {/if}
+</Modal>
+
+<!-- Name change warning popup -->
+<Modal bind:open={showNameWarning} --modal-bg="#464646">
+  <p style="text-align: left; margin: 1em; line-height: 1.5;">
+    This changes the Wifi name, Pipo page address (e.g., "pipo-<new-name
+      >.local"), and OSC address prefix.
+    </new-name>
+  </p>
+  <p style="text-align: left; margin: 1em; line-height: 1.5;">
+    After changing the name, your computer might take a while to display the new
+    WiFi name due to caching (you can try enabling/disabling your PC WiFi to
+    force a refresh, or search it in "other networks").
+  </p>
+
+  <div
+    style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
+  >
+    <button
+      class="secondary"
+      on:click={() => {
+        showNameWarning = false;
+      }}
+    >
+      Cancel
+    </button>
+    <button
+      class="primary"
+      on:click={() => {
+        showNameWarning = false;
+        config && saveConfig(config);
+      }}
+    >
+      Save and Reboot
+    </button>
+  </div>
 </Modal>
 
 <style scoped>

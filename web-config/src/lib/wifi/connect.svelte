@@ -6,7 +6,7 @@
   import { addToast, type Toast } from "../toast";
   import Modal from "../modal.svelte";
   import { pipoio } from "../../pipoio";
-  import { pipoInfo } from "../../services";
+  import { pipoInfo, currentMode } from "../../services";
   import { setLastScan, wifiState } from "./store";
   import Spinner from "../spinner.svelte";
   import type { Network } from "./types";
@@ -21,6 +21,8 @@
   let wifiMode = "";
   let mounted = false;
   let showConnectedWarning = false;
+  let showIpWarning = false;
+  let pendingSsid = "";
 
   const WIFI_PASSWORD_MAX_LENGTH = 63; // WPA/WPA2 standard max length
 
@@ -28,6 +30,7 @@
   $: networks = $wifiState.networks;
   $: apIP = $wifiState.apIP;
   $: staIP = $wifiState.staIP;
+  $: hasStoredNetworks = networks.some((n) => n.known);
   $: if (mounted) onShow();
 
   onMount(() => {
@@ -101,7 +104,14 @@
 
     if (known) {
       password = undefined;
-      return onConnect(ssid);
+      // Only warn about OSC IP change on first-time setup (no stored
+      // networks) and only when the device outputs OSC
+      if (hasStoredNetworks || get(currentMode) !== "OSC") {
+        return onConnect(ssid);
+      }
+      pendingSsid = ssid;
+      showIpWarning = true;
+      return;
     }
     password = "";
     editing = ssid;
@@ -199,6 +209,16 @@
   async function onConnect(ssid: string) {
     if (waiting) return;
     waiting = true;
+
+    // Warn that IP will change after connecting (OSC output only)
+    if (get(currentMode) === "OSC") {
+      addToast({
+        type: "info",
+        message: `Please check the destination OSC IP adress after connecting to a router`,
+        timeout: 6000,
+      });
+    }
+
     let toast: Toast = {
       type: "info",
       message: `Connecting to ${ssid}...`,
@@ -326,8 +346,16 @@
                 {/if}
               </button>
 
-              <button class="connect" on:click={() => onConnect(editing)}
-                >connect</button
+              <button
+                class="connect"
+                on:click={() => {
+                  if (hasStoredNetworks) {
+                    onConnect(editing);
+                  } else {
+                    pendingSsid = editing;
+                    showIpWarning = true;
+                  }
+                }}>connect</button
               >
             </div>
           {/if}
@@ -362,6 +390,39 @@
     You are already connected to a network. Please disconnect first before
     connecting to another network.
   </p>
+</Modal>
+
+<Modal bind:open={showIpWarning}>
+  <h3 style="text-align: center;">Mind the OSC destination IP !</h3>
+  <p style="text-align: center; margin: 0.5em 1em 1em 1em;">
+    If you are switching from "receiving OSC from a direct wifi connection with
+    Pipo" to "receiving through a wifi router", please make sure to update the
+    OSC IP destination address accordingly. When the receiving computer changes
+    wifi, it also gets a different IP address. As well, some receiving software
+    might need to be restarted after you switched wifi on your computer.
+  </p>
+  <div
+    style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
+  >
+    <button
+      class="secondary"
+      on:click={() => {
+        showIpWarning = false;
+        pendingSsid = "";
+      }}
+    >
+      Cancel
+    </button>
+    <button
+      class="primary"
+      on:click={() => {
+        showIpWarning = false;
+        onConnect(pendingSsid);
+      }}
+    >
+      Connect
+    </button>
+  </div>
 </Modal>
 
 <style scoped>
