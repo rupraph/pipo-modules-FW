@@ -355,19 +355,18 @@
 </Modal>
 
 <!-- Name change warning popup -->
-<Modal bind:open={showNameWarning}>
-  <h3 style="text-align: center;">Pipo Name Changed</h3>
+<Modal bind:open={showNameWarning} --modal-bg="#464646">
+  <p style="text-align: left; margin: 1em; line-height: 1.5;">
+    This changes the Wifi name, Pipo page address (e.g., "pipo-<new-name
+      >.local"), and OSC address prefix.
+    </new-name>
+  </p>
   <p style="text-align: left; margin: 1em; line-height: 1.5;">
     After changing the name, your computer might take a while to display the new
     WiFi name due to caching (you can try enabling/disabling your PC WiFi to
-    force a refresh, or search in "other networks").
+    force a refresh, or search it in "other networks").
   </p>
-  <p style="text-align: left; margin: 1em; line-height: 1.5;">
-    When trying to access the page, make sure to use the new address: "pipo-<new-name
-      >.local" to access this configuration page. The OSC address prefix will
-      also change to the new name.
-    </new-name>
-  </p>
+
   <div
     style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
   >

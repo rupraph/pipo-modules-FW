@@ -6,7 +6,7 @@
   import { addToast, type Toast } from "../toast";
   import Modal from "../modal.svelte";
   import { pipoio } from "../../pipoio";
-  import { pipoInfo } from "../../services";
+  import { pipoInfo, currentMode } from "../../services";
   import { setLastScan, wifiState } from "./store";
   import Spinner from "../spinner.svelte";
   import type { Network } from "./types";
@@ -104,8 +104,9 @@
 
     if (known) {
       password = undefined;
-      // Only warn about IP change on first-time setup (no stored networks)
-      if (hasStoredNetworks) {
+      // Only warn about OSC IP change on first-time setup (no stored
+      // networks) and only when the device outputs OSC
+      if (hasStoredNetworks || get(currentMode) !== "OSC") {
         return onConnect(ssid);
       }
       pendingSsid = ssid;
@@ -209,12 +210,14 @@
     if (waiting) return;
     waiting = true;
 
-    // Warn that IP will change after connecting
-    addToast({
-      type: "info",
-      message: `Please check the destination OSC IP adress after connecting to a router`,
-      timeout: 6000,
-    });
+    // Warn that IP will change after connecting (OSC output only)
+    if (get(currentMode) === "OSC") {
+      addToast({
+        type: "info",
+        message: `Please check the destination OSC IP adress after connecting to a router`,
+        timeout: 6000,
+      });
+    }
 
     let toast: Toast = {
       type: "info",
@@ -390,12 +393,13 @@
 </Modal>
 
 <Modal bind:open={showIpWarning}>
-  <h3 style="text-align: center;">IP Address Will Change</h3>
+  <h3 style="text-align: center;">Mind the OSC destination IP !</h3>
   <p style="text-align: center; margin: 0.5em 1em 1em 1em;">
-    The destination PC IP address will change when switching its connection from
-    Pipo to a router. Make sure you update the OSC destination IP address set in
-    Pipo after the switch. Do note some software might need to be restarted
-    after a connection change.
+    If you are switching from "receiving OSC from a direct wifi connection with
+    Pipo" to "receiving through a wifi router", please make sure to update the
+    OSC IP destination address accordingly. When the receiving computer changes
+    wifi, it also gets a different IP address. As well, some receiving software
+    might need to be restarted after you switched wifi on your computer.
   </p>
   <div
     style="display: flex; gap: 8px; justify-content: center; margin-top: 1em;"
